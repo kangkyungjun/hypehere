@@ -345,12 +345,13 @@ class OpenChatRoomListCreateAPIView(generics.ListCreateAPIView):
         if country:
             queryset = queryset.filter(country_code=country)
 
-        # 필터링: 카테고리 (DEFAULT 방은 카테고리 필터링에서 제외)
+        # 필터링: 카테고리 (카테고리 선택 시 USER_CREATED 방만 필터링, DEFAULT 방 제외)
         category = self.request.query_params.get("category")
         if category:
+            # 카테고리가 선택되면 USER_CREATED 방만 해당 카테고리로 필터링
             queryset = queryset.filter(
-                Q(room_type=OpenChatRoom.RoomType.USER_CREATED, category=category) |
-                Q(room_type=OpenChatRoom.RoomType.DEFAULT)
+                room_type=OpenChatRoom.RoomType.USER_CREATED,
+                category=category
             )
 
         # 필터링: 방 타입
@@ -367,26 +368,61 @@ class OpenChatRoomListCreateAPIView(generics.ListCreateAPIView):
                 | Q(tags__icontains=search)
             )
 
-        # 정렬: DEFAULT 방을 최상단에, 그 다음 USER_CREATED 방을 최신순으로
-        queryset = queryset.order_by(
-            Case(
-                When(room_type='default', then=Value(0)),
-                When(room_type='user_created', then=Value(1)),
-                output_field=IntegerField(),
-            ),
-            '-created_at'
-        )
+        # 필터링: 사용자 기준 필터
+        user_filter = self.request.query_params.get("user_filter")
+        if user_filter == "joined":
+            # 내가 참여한 채팅방만
+            queryset = queryset.filter(
+                participants__user=self.request.user
+            ).distinct()
+        elif user_filter == "created":
+            # 내가 만든 채팅방만
+            queryset = queryset.filter(creator=self.request.user)
+
+        # 정렬
+        ordering = self.request.query_params.get("ordering", "recent")
+
+        if ordering == "popular":
+            # 추천: USER_CREATED만, 참여자 많은 순
+            queryset = queryset.filter(
+                room_type=OpenChatRoom.RoomType.USER_CREATED
+            ).order_by('-participant_count', '-created_at')
+        else:
+            # 기본: USER_CREATED 방을 최상단에(최신순), 그 다음 DEFAULT 방을 최신순으로
+            queryset = queryset.order_by(
+                Case(
+                    When(room_type='user_created', then=Value(0)),
+                    When(room_type='default', then=Value(1)),
+                    output_field=IntegerField(),
+                ),
+                '-created_at'
+            )
 
         return queryset
 
     def perform_create(self, serializer):
+        user = self.request.user
+
+        # 일반 사용자(USER)는 USER_CREATED 방을 1개만 생성 가능
+        if user.role == User.Role.USER:
+            existing_room_count = OpenChatRoom.objects.filter(
+                creator=user,
+                room_type=OpenChatRoom.RoomType.USER_CREATED,
+                is_active=True
+            ).count()
+
+            if existing_room_count > 0:
+                raise serializers.ValidationError({
+                    "detail": "이미 오픈 채팅방을 생성하셨습니다. 일반 사용자는 1개만 생성할 수 있습니다."
+                })
+
         # 사용자 생성 채팅방으로 저장
         room = serializer.save(
-            creator=self.request.user, room_type=OpenChatRoom.RoomType.USER_CREATED
+            creator=user, room_type=OpenChatRoom.RoomType.USER_CREATED
         )
 
         # 생성자를 자동으로 참여자로 추가
-        OpenChatParticipant.objects.create(room=room, user=self.request.user)
+        OpenChatParticipant.objects.create(room=room, user=user)
 
         # 참여자 수 증가
         room.increment_participant_count()
@@ -396,7 +432,7 @@ class OpenChatRoomListCreateAPIView(generics.ListCreateAPIView):
             room=room,
             sender=None,
             message_type=OpenChatMessage.MessageType.JOIN,
-            content=f"{self.request.user.nickname}님이 채팅방을 개설했습니다.",
+            content=f"{user.nickname}님이 채팅방을 개설했습니다.",
         )
 
 
@@ -455,6 +491,15 @@ class OpenChatRoomJoinAPIView(APIView):
 
         # 채팅방 확인
         room = get_object_or_404(OpenChatRoom, pk=pk, is_active=True)
+
+        # 비공개 방 비밀번호 확인
+        if not room.is_public:
+            password = request.data.get("password", "")
+            if not password or password != room.password:
+                return Response(
+                    {"error": "비밀번호가 올바르지 않습니다."},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
 
         # 이미 참여 중인지 확인
         if OpenChatParticipant.objects.filter(room=room, user=user).exists():

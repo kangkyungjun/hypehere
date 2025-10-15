@@ -215,6 +215,18 @@ class OpenChatRoom(models.Model):
         help_text="최대 참여자 수 (0이면 무제한)"
     )
 
+    # 공개 설정
+    is_public = models.BooleanField(
+        default=True,
+        help_text="공개 채팅방 여부"
+    )
+    password = models.CharField(
+        max_length=50,
+        blank=True,
+        default="",
+        help_text="비공개 채팅방 비밀번호"
+    )
+
     # 상태
     is_active = models.BooleanField(default=True)
 

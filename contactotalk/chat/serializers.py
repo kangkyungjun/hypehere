@@ -161,7 +161,6 @@ class OpenChatRoomSerializer(serializers.ModelSerializer):
     tags_list = serializers.SerializerMethodField()
     is_joined = serializers.SerializerMethodField()
     is_full = serializers.SerializerMethodField()
-    is_public = serializers.SerializerMethodField()
     can_delete = serializers.SerializerMethodField()
 
     class Meta:
@@ -218,10 +217,6 @@ class OpenChatRoomSerializer(serializers.ModelSerializer):
         """채팅방이 가득 찼는지"""
         return obj.is_full()
 
-    def get_is_public(self, obj):
-        """공개 채팅방인지 (기본적으로 모든 방은 공개)"""
-        return True
-
     def get_can_delete(self, obj):
         """현재 사용자가 채팅방을 삭제할 수 있는지"""
         from accounts.models import User
@@ -255,7 +250,12 @@ class OpenChatRoomCreateSerializer(serializers.ModelSerializer):
             "category",
             "tags",
             "max_participants",
+            "is_public",
+            "password",
         ]
+        extra_kwargs = {
+            "password": {"write_only": True}
+        }
 
     def validate_title(self, value):
         """제목 검증"""
@@ -303,6 +303,22 @@ class OpenChatRoomCreateSerializer(serializers.ModelSerializer):
                     raise serializers.ValidationError(
                         "이미 생성한 채팅방이 있습니다. 일반 사용자는 1개의 채팅방만 생성할 수 있습니다."
                     )
+
+        # 비공개 방 비밀번호 검증
+        is_public = attrs.get('is_public', True)
+        password = attrs.get('password', '')
+
+        if not is_public:
+            # 비공개 방인 경우 비밀번호 필수
+            if not password or len(password.strip()) == 0:
+                raise serializers.ValidationError({
+                    "password": "비공개 채팅방은 비밀번호가 필요합니다."
+                })
+            # 비밀번호 최소 길이 검증
+            if len(password) < 4:
+                raise serializers.ValidationError({
+                    "password": "비밀번호는 최소 4자 이상이어야 합니다."
+                })
 
         return attrs
 
