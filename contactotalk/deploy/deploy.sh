@@ -35,7 +35,7 @@ cd /home/ubuntu/contactotalk
 
 echo "📥 코드 가져오기..."
 git fetch --all
-git reset --hard origin/master || git reset --hard master
+git reset --hard origin/main || git reset --hard main
 
 echo "🔄 가상환경 활성화..."
 source venv/bin/activate
