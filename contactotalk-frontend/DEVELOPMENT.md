@@ -1,5 +1,28 @@
 # Contactotalk 프론트엔드 개발 가이드
 
+## 🌍 환경 선택 (중요!)
+
+Contact otalk는 두 가지 개발 환경을 지원합니다:
+
+- **🏠 로컬 개발 (권장)**: 로컬 Django + 로컬 Next.js
+- **☁️ AWS 연결**: AWS Django + 로컬 Next.js
+
+**현재 환경 확인**:
+```bash
+cat .env.local
+# localhost → 로컬 개발
+# 43.200.129.55 → AWS 연결
+```
+
+**환경 전환 시 반드시 재시작**:
+```bash
+./restart-dev.sh  # 필수!
+```
+
+**자세한 설명**: [ENVIRONMENTS.md](./ENVIRONMENTS.md) 참고
+
+---
+
 ## 🚀 빠른 시작
 
 ### 개발 서버 시작
