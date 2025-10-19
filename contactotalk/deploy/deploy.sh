@@ -28,6 +28,35 @@ git status
 git commit -m "$COMMIT_MSG" || echo "변경사항이 없거나 이미 커밋됨"
 echo -e "${GREEN}✓ Git commit 완료${NC}"
 
+echo -e "${BLUE}🔍 환경 설정 검증...${NC}"
+ssh -i ~/Downloads/contactotalk-key.pem ubuntu@43.200.129.55 << 'ENVCHECK'
+set -e
+
+# 프론트엔드 환경변수 검증
+echo "📋 프론트엔드 환경변수 확인..."
+cd /home/ubuntu/contactotalk-frontend
+if [ ! -f .env.production ]; then
+    echo "❌ 에러: .env.production 파일이 없습니다!"
+    echo "다음 명령어로 생성하세요:"
+    echo "cat > .env.production << 'EOF'"
+    echo "NEXT_PUBLIC_API_URL=http://43.200.129.55:8000/api"
+    echo "NEXT_PUBLIC_WS_URL=ws://43.200.129.55:8001/ws"
+    echo "EOF"
+    exit 1
+fi
+
+# API URL 검증
+API_URL=$(grep NEXT_PUBLIC_API_URL .env.production | cut -d '=' -f2)
+if [[ "$API_URL" != *"43.200.129.55:8000"* ]]; then
+    echo "❌ 에러: API URL이 올바르지 않습니다!"
+    echo "현재 설정: $API_URL"
+    echo "필요 설정: http://43.200.129.55:8000/api"
+    exit 1
+fi
+
+echo "✅ 환경변수 검증 완료!"
+ENVCHECK
+
 echo -e "${BLUE}🌐 AWS 서버 배포 시작...${NC}"
 ssh -i ~/Downloads/contactotalk-key.pem ubuntu@43.200.129.55 << 'ENDSSH'
 set -e

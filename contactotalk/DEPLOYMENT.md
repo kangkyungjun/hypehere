@@ -17,6 +17,11 @@
 - [ ] 로컬에서 모든 기능 테스트 완료
 - [ ] `python manage.py check` 통과
 - [ ] Migration 파일 생성 및 적용 확인 (`python manage.py makemigrations`)
+- [ ] **환경변수 설정 확인** (⚠️ 중요!)
+  - [ ] 로컬 `.env.local`에 AWS 서버 URL 설정 확인
+  - [ ] AWS 서버 `.env.production` 파일 존재 및 설정 확인
+  - [ ] API URL: `http://43.200.129.55:8000/api`
+  - [ ] WebSocket URL: `ws://43.200.129.55:8001/ws`
 - [ ] 커밋 메시지 작성
 - [ ] 중요 변경사항이면 팀에 공지
 
@@ -119,6 +124,34 @@ ssh ubuntu@43.200.129.55 "cd /home/ubuntu/contactotalk && cp db.sqlite3 db.sqlit
 ### 관심사가 안 보여요
 1. Migration 적용 확인: `python manage.py showmigrations accounts`
 2. DB 데이터 확인: `python manage.py shell` → `from accounts.models import Interest; Interest.objects.count()`
+
+## 🚨 환경변수 관리 (재발 방지)
+
+### 문제 이력
+**2025-10-19**: 로컬 환경변수가 AWS 프로덕션 환경에 배포되어 로그인 401 에러 발생
+
+### 환경별 설정 파일
+```
+로컬 개발: contactotalk-frontend/.env.local
+  - NEXT_PUBLIC_API_URL=http://43.200.129.55:8000/api
+  - NEXT_PUBLIC_WS_URL=ws://43.200.129.55:8001/ws
+
+AWS 프로덕션: /home/ubuntu/contactotalk-frontend/.env.production
+  - NEXT_PUBLIC_API_URL=http://43.200.129.55:8000/api
+  - NEXT_PUBLIC_WS_URL=ws://43.200.129.55:8001/ws
+```
+
+### 자동 검증
+배포 스크립트(`deploy/deploy.sh`)가 자동으로 다음을 검증합니다:
+1. AWS 서버에 `.env.production` 파일 존재 여부
+2. API URL이 올바른 AWS 주소를 가리키는지
+3. 검증 실패 시 배포 중단 및 에러 메시지 출력
+
+### 수동 검증
+AWS 서버 환경변수 확인:
+```bash
+ssh ubuntu@43.200.129.55 "cat /home/ubuntu/contactotalk-frontend/.env.production"
+```
 
 ## 📞 지원
 
