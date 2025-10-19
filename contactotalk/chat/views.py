@@ -93,6 +93,26 @@ class MatchingStatusAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
+        from django.utils import timezone
+        from datetime import timedelta
+
+        # 1. 먼저 최근 생성된 ChatRoom 확인 (5초 이내)
+        recent_room = ChatRoom.objects.filter(
+            Q(user1=request.user) | Q(user2=request.user),
+            is_active=True,
+            created_at__gte=timezone.now() - timedelta(seconds=5)
+        ).order_by('-created_at').first()
+
+        if recent_room:
+            return Response(
+                {
+                    "is_matching": False,
+                    "matched_room": recent_room.id,
+                },
+                status=status.HTTP_200_OK,
+            )
+
+        # 2. MatchingQueue 확인
         try:
             queue = MatchingQueue.objects.get(user=request.user)
             position = MatchingService.get_queue_position(request.user)
