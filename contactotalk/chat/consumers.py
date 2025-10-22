@@ -143,12 +143,21 @@ class ChatConsumer(AsyncWebsocketConsumer):
             text_data=json.dumps(
                 {
                     "type": "message",
-                    "message_id": event["message_id"],
-                    "content": event["content"],
-                    "sender_id": event["sender_id"],
-                    "sender_nickname": event["sender_nickname"],
-                    "created_at": event["created_at"],
-                    "is_mine": event["sender_id"] == self.user.id,
+                    "message": {
+                        "id": event["message_id"],
+                        "room": int(self.room_id),
+                        "sender": {
+                            "id": event["sender_id"],
+                            "nickname": event["sender_nickname"],
+                            "username": "",
+                            "email": "",
+                            "country_code": ""
+                        },
+                        "message_type": "text",
+                        "content": event["content"],
+                        "is_read": False,
+                        "created_at": event["created_at"]
+                    }
                 }
             )
         )

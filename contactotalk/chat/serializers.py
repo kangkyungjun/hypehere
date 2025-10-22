@@ -70,6 +70,7 @@ class MessageSerializer(serializers.ModelSerializer):
 
     sender = UserSerializer(read_only=True)
     is_mine = serializers.SerializerMethodField()
+    message_type = serializers.CharField(default='text', read_only=True)
 
     class Meta:
         model = Message
@@ -77,6 +78,7 @@ class MessageSerializer(serializers.ModelSerializer):
             "id",
             "room",
             "sender",
+            "message_type",
             "content",
             "is_read",
             "is_mine",
