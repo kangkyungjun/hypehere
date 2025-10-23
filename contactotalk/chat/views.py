@@ -42,10 +42,11 @@ class StartMatchingAPIView(APIView):
         serializer.is_valid(raise_exception=True)
 
         country_preference = serializer.validated_data.get("country_preference")
+        gender_preference = serializer.validated_data.get("gender_preference")
 
         # 매칭 처리
         success, room, message = MatchingService.process_matching(
-            request.user, country_preference
+            request.user, country_preference, gender_preference
         )
 
         if success:

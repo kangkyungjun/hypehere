@@ -119,7 +119,15 @@ class MatchingRequestSerializer(serializers.Serializer):
         max_length=3,
         required=False,
         allow_null=True,
+        allow_blank=True,
         help_text="선호 국가 코드 (ISO 3166-1 alpha-3)"
+    )
+    gender_preference = serializers.CharField(
+        max_length=10,
+        required=False,
+        allow_null=True,
+        allow_blank=True,
+        help_text="선호 성별 (male, female, 또는 빈 문자열)"
     )
 
 

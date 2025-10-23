@@ -59,20 +59,22 @@ class MatchingAlgorithm:
         ).exists()
 
     @classmethod
-    def find_match(cls, user, country_preference=None):
+    def find_match(cls, user, country_preference=None, gender_preference=None):
         """
         사용자에게 맞는 상대를 찾습니다.
 
         매칭 우선순위:
         1. 차단된 사용자 제외
-        2. 이미 활성 채팅방이 있는 사용자 제외
-        3. 국가 선호도 (있으면 해당 국가 우선)
-        4. 매칭 점수가 높은 순
-        5. 대기열 선입선출 (FIFO)
+        2. 이미 활성 채팅방이 있는 사용자 제외 (단, 본인이 나간 방은 제외)
+        3. 국가 필터링 (선택 시 해당 국가만)
+        4. 성별 필터링 (선택 시 해당 성별만)
+        5. 매칭 점수가 높은 순
+        6. 대기열 선입선출 (FIFO)
 
         Args:
             user: 매칭을 원하는 사용자
             country_preference: 선호 국가 코드 (optional)
+            gender_preference: 선호 성별 (optional, male/female)
 
         Returns:
             매칭된 사용자 또는 None
@@ -89,17 +91,24 @@ class MatchingAlgorithm:
             blocked_user_ids.add(blocked_id)
             blocked_user_ids.add(user_id)
 
-        # 이미 활성 채팅방이 있는 사용자 목록
-        active_room_user_ids = set(
-            ChatRoom.objects.filter(
-                Q(user1=user) | Q(user2=user),
-                is_active=True,
-            ).values_list("user1_id", "user2_id")
+        # 이미 활성 채팅방이 있는 사용자 목록 (본인이 나가지 않은 방만)
+        active_rooms = ChatRoom.objects.filter(
+            Q(user1=user) | Q(user2=user),
+            is_active=True,
         )
+
         active_user_ids = set()
-        for user1_id, user2_id in active_room_user_ids:
-            active_user_ids.add(user1_id)
-            active_user_ids.add(user2_id)
+        for room in active_rooms:
+            # 본인이 user1인 경우
+            if room.user1 == user:
+                # user1_left가 False인 경우에만 상대방(user2)을 제외
+                if not room.user1_left:
+                    active_user_ids.add(room.user2_id)
+            # 본인이 user2인 경우
+            elif room.user2 == user:
+                # user2_left가 False인 경우에만 상대방(user1)을 제외
+                if not room.user2_left:
+                    active_user_ids.add(room.user1_id)
 
         # 제외할 사용자 ID 목록
         excluded_ids = blocked_user_ids.union(active_user_ids)
@@ -110,17 +119,13 @@ class MatchingAlgorithm:
             user_id__in=excluded_ids
         ).select_related("user")
 
-        # 국가 선호도 적용
+        # 국가 필터링 (선택 시 해당 국가만)
         if country_preference:
-            # 선호 국가 사용자 우선
-            preferred_candidates = candidates.filter(
-                Q(user__country_code=country_preference) |
-                Q(country_preference=country_preference) |
-                Q(country_preference__isnull=True)  # 국가 무관 사용자
-            )
+            candidates = candidates.filter(user__country_code=country_preference)
 
-            if preferred_candidates.exists():
-                candidates = preferred_candidates
+        # 성별 필터링 (선택 시 해당 성별만)
+        if gender_preference:
+            candidates = candidates.filter(user__gender=gender_preference)
 
         # 매칭 점수 계산 및 정렬
         scored_candidates = []
@@ -232,7 +237,7 @@ class MatchingService:
 
     @classmethod
     @transaction.atomic
-    def process_matching(cls, user, country_preference=None):
+    def process_matching(cls, user, country_preference=None, gender_preference=None):
         """
         매칭 프로세스를 처리합니다.
 
@@ -243,6 +248,7 @@ class MatchingService:
         Args:
             user: 매칭을 원하는 사용자
             country_preference: 선호 국가 코드 (optional)
+            gender_preference: 선호 성별 (optional, male/female)
 
         Returns:
             (success: bool, room: ChatRoom or None, message: str)
@@ -260,7 +266,7 @@ class MatchingService:
         cls.add_to_queue(user, country_preference)
 
         # 3. 즉시 매칭 시도
-        matched_user = MatchingAlgorithm.find_match(user, country_preference)
+        matched_user = MatchingAlgorithm.find_match(user, country_preference, gender_preference)
 
         if matched_user:
             # 매칭 성공 - 채팅방 생성
