@@ -241,9 +241,11 @@ class MatchingService:
         """
         매칭 프로세스를 처리합니다.
 
-        1. 대기열에 추가
-        2. 즉시 매칭 시도
-        3. 매칭 성공 시 채팅방 생성, 실패 시 대기
+        1. 기존 활성 채팅방 확인 (안전장치)
+        2. 기존 매칭 큐 정리
+        3. 대기열에 추가
+        4. 즉시 매칭 시도
+        5. 매칭 성공 시 채팅방 생성, 실패 시 대기
 
         Args:
             user: 매칭을 원하는 사용자
@@ -262,10 +264,23 @@ class MatchingService:
                 "오늘의 매칭 횟수를 모두 사용했습니다. 프리미엄으로 업그레이드하세요.",
             )
 
-        # 2. 대기열에 추가
+        # 2. 기존 활성 채팅방 확인 (방어 로직)
+        existing_room = ChatRoom.objects.filter(
+            Q(user1=user) | Q(user2=user),
+            is_active=True
+        ).first()
+
+        if existing_room:
+            # 이미 활성 채팅방이 있으면 해당 방으로 리다이렉트
+            return (True, existing_room, "이미 활성 채팅방이 있습니다.")
+
+        # 3. 기존 매칭 큐 확인 및 정리 (중복 방지)
+        MatchingQueue.objects.filter(user=user).delete()
+
+        # 4. 대기열에 추가
         cls.add_to_queue(user, country_preference)
 
-        # 3. 즉시 매칭 시도
+        # 5. 즉시 매칭 시도
         matched_user = MatchingAlgorithm.find_match(user, country_preference, gender_preference)
 
         if matched_user:

@@ -206,6 +206,42 @@ class UserStatsAPIView(APIView):
         )
 
 
+class LogoutAPIView(APIView):
+    """로그아웃 API - 매칭 큐 및 채팅방 정리"""
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        from django.db import transaction
+        from chat.models import MatchingQueue, ChatRoom
+
+        user = request.user
+
+        # 트랜잭션으로 안전하게 처리
+        with transaction.atomic():
+            # 1. 매칭 큐에서 제거
+            MatchingQueue.objects.filter(user=user).delete()
+
+            # 2. 참여 중인 모든 1:1 채팅방 정리
+            user_rooms = ChatRoom.objects.filter(
+                Q(user1=user) | Q(user2=user),
+                is_active=True
+            )
+
+            for room in user_rooms:
+                # 상대방도 매칭 큐에서 제거
+                other_user = room.user1 if room.user2 == user else room.user2
+                MatchingQueue.objects.filter(user=other_user).delete()
+
+                # 채팅방 삭제
+                room.delete()
+
+        return Response(
+            {"message": "로그아웃되었습니다."},
+            status=status.HTTP_200_OK,
+        )
+
+
 @api_view(["GET"])
 @permission_classes([permissions.AllowAny])
 def health_check(request):

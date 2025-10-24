@@ -167,13 +167,21 @@ class LeaveChatRoomAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated, IsUser]
 
     def post(self, request, room_id):
+        from django.db import transaction
+
         room = get_object_or_404(
             ChatRoom,
             Q(id=room_id) & (Q(user1=request.user) | Q(user2=request.user)),
         )
 
-        # 사용자가 나감 처리
-        room.mark_user_left(request.user)
+        # 트랜잭션으로 안전하게 처리
+        with transaction.atomic():
+            # 1. 양쪽 사용자 매칭 큐에서 제거
+            MatchingService.remove_from_queue(room.user1)
+            MatchingService.remove_from_queue(room.user2)
+
+            # 2. 채팅방 삭제 (메시지도 CASCADE 삭제)
+            room.delete()
 
         return Response(
             {"message": "채팅방을 나갔습니다."},
