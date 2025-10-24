@@ -11,7 +11,10 @@ export interface Country {
 export interface Interest {
   id: number;
   name: string;
+  name_ko: string;
+  name_en: string;
   category: string;
+  icon?: string;
 }
 
 export interface User {
