@@ -57,8 +57,29 @@ class ChatConsumer(AsyncWebsocketConsumer):
             )
         )
 
+        # 상대방에게 입장 알림 전송
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                "type": "user_joined_notification",
+                "user_id": self.user.id,
+                "user_nickname": self.user.nickname,
+            }
+        )
+
     async def disconnect(self, close_code):
         """WebSocket 연결 종료 시 호출"""
+
+        # 상대방에게 퇴장 알림 전송
+        if hasattr(self, 'room_group_name') and hasattr(self, 'user'):
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    "type": "user_left_notification",
+                    "user_id": self.user.id,
+                    "user_nickname": self.user.nickname,
+                }
+            )
 
         # 그룹에서 나가기
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
@@ -162,6 +183,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             )
         )
 
+
     async def typing_indicator(self, event):
         """타이핑 상태를 클라이언트에게 전송"""
 
@@ -189,6 +211,37 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 }
             )
         )
+
+
+    async def user_joined_notification(self, event):
+        """사용자 입장 알림을 클라이언트에게 전송"""
+
+        # 본인에게는 입장 알림을 보내지 않음
+        if event["user_id"] != self.user.id:
+            await self.send(
+                text_data=json.dumps(
+                    {
+                        "type": "user_joined",
+                        "user_nickname": event["user_nickname"],
+                        "message": f"{event['user_nickname']}님이 입장했습니다.",
+                    }
+                )
+            )
+
+    async def user_left_notification(self, event):
+        """사용자 퇴장 알림을 클라이언트에게 전송"""
+
+        # 본인에게는 퇴장 알림을 보내지 않음
+        if event["user_id"] != self.user.id:
+            await self.send(
+                text_data=json.dumps(
+                    {
+                        "type": "user_left",
+                        "user_nickname": event["user_nickname"],
+                        "message": f"{event['user_nickname']}님이 퇴장했습니다.",
+                    }
+                )
+            )
 
     @database_sync_to_async
     def check_room_membership(self):
@@ -294,6 +347,17 @@ class OpenChatConsumer(AsyncWebsocketConsumer):
     async def disconnect(self, close_code):
         """WebSocket 연결 종료 시 호출"""
 
+        # 상대방에게 퇴장 알림 전송
+        if hasattr(self, 'room_group_name') and hasattr(self, 'user'):
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    "type": "user_left_notification",
+                    "user_id": self.user.id,
+                    "user_nickname": self.user.nickname,
+                }
+            )
+
         # 그룹에서 나가기
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
 
@@ -384,13 +448,22 @@ class OpenChatConsumer(AsyncWebsocketConsumer):
 
             return {
                 "id": message.id,
+                "room": message.room.id,
                 "content": message.content,
                 "message_type": message.message_type,
                 "sender": {
                     "id": message.sender.id,
                     "nickname": message.sender.nickname,
+                    "username": message.sender.username,
+                    "email": message.sender.email,
                     "country_code": message.sender.country_code,
+                    "bio": message.sender.bio,
+                    "gender": message.sender.gender,
+                    "role": message.sender.role,
+                    "is_premium": False,
+                    "interests": []
                 } if message.sender else None,
+                "is_mine": False,
                 "created_at": message.created_at.isoformat(),
             }
 
