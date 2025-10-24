@@ -3,9 +3,10 @@ import type { Message } from '@/types';
 const WS_BASE_URL = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000/ws';
 
 interface ChatWebSocketMessage {
-  type: 'message' | 'read' | 'typing' | 'error';
+  type: 'message' | 'read' | 'typing' | 'error' | 'user_left' | 'user_joined';
   message?: Message;
   user?: string;
+  user_nickname?: string;
   error?: string;
 }
 

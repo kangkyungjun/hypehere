@@ -24,6 +24,7 @@ function ChatRoomContent() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [otherUserLeft, setOtherUserLeft] = useState(false);
 
   const wsRef = useRef<ChatWebSocket | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -47,6 +48,10 @@ function ChatRoomContent() {
         if (data.type === 'message' && data.message) {
           setMessages((prev) => [...prev, data.message!]);
           scrollToBottom();
+        } else if (data.type === 'user_left') {
+          // 상대방이 나간 경우
+          setOtherUserLeft(true);
+          alert(`${data.user_nickname || '상대방'}님이 채팅방을 나갔습니다.`);
         }
       });
 
@@ -257,29 +262,43 @@ function ChatRoomContent() {
 
       {/* Input */}
       <div className="bg-white border-t border-gray-200 px-4 py-3 sticky bottom-0">
-        <form onSubmit={handleSendMessage} className="flex items-center gap-2">
-          <input
-            type="text"
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            placeholder="메시지를 입력하세요..."
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            disabled={isSending}
-          />
-          <button
-            type="submit"
-            disabled={!newMessage.trim() || isSending}
-            className="flex-shrink-0 w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            {isSending ? (
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-            ) : (
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-              </svg>
-            )}
-          </button>
-        </form>
+        {otherUserLeft ? (
+          <div className="flex flex-col gap-3">
+            <div className="text-center text-sm text-gray-500 py-2">
+              상대방이 채팅방을 나갔습니다
+            </div>
+            <Button
+              onClick={() => router.push('/matching')}
+              className="w-full bg-blue-600 text-white hover:bg-blue-700 py-3 rounded-lg font-semibold"
+            >
+              새로운 매칭 시작하기
+            </Button>
+          </div>
+        ) : (
+          <form onSubmit={handleSendMessage} className="flex items-center gap-2">
+            <input
+              type="text"
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              placeholder="메시지를 입력하세요..."
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              disabled={isSending}
+            />
+            <button
+              type="submit"
+              disabled={!newMessage.trim() || isSending}
+              className="flex-shrink-0 w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {isSending ? (
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+              ) : (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                </svg>
+              )}
+            </button>
+          </form>
+        )}
       </div>
     </div>
   );
