@@ -95,10 +95,15 @@ class RegisterSerializer(serializers.ModelSerializer):
                 {"password": "비밀번호가 일치하지 않습니다."}
             )
 
-        # 관심사 최소 3개 검증
-        if len(attrs.get("interest_ids", [])) < 3:
+        # 관심사 최소 3개, 최대 10개 검증
+        interest_count = len(attrs.get("interest_ids", []))
+        if interest_count < 3:
             raise serializers.ValidationError(
                 {"interest_ids": "최소 3개의 관심사를 선택해주세요."}
+            )
+        if interest_count > 10:
+            raise serializers.ValidationError(
+                {"interest_ids": "최대 10개의 관심사만 선택할 수 있습니다."}
             )
 
         return attrs
