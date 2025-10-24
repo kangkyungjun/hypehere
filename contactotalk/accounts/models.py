@@ -113,27 +113,9 @@ class User(AbstractUser):
         return False
 
     def can_match_today(self):
-        """매칭 가능 여부 (2시간당 10회 제한)"""
-        # 프리미엄 이상 권한은 무제한
-        if self.role in [
-            self.Role.PREMIUM_USER,
-            self.Role.MANAGER,
-            self.Role.PRIME,
-            self.Role.OWNER,
-        ]:
-            return True
-
-        # 2시간이 지났으면 카운트 리셋
-        now = timezone.now()
-        if self.last_match_reset:
-            time_diff = (now - self.last_match_reset).total_seconds()
-            if time_diff >= 7200:  # 2시간 = 7200초
-                self.daily_match_count = 0
-                self.last_match_reset = now
-                self.save(update_fields=["daily_match_count", "last_match_reset"])
-
-        # 일반 사용자는 2시간당 10회 제한
-        return self.daily_match_count < 10
+        """매칭 가능 여부 (무제한)"""
+        # 모든 사용자 무제한
+        return True
 
     def increment_match_count(self):
         """매칭 카운트 증가"""

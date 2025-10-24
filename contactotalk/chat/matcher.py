@@ -120,11 +120,11 @@ class MatchingAlgorithm:
         ).select_related("user")
 
         # 국가 필터링 (선택 시 해당 국가만)
-        if country_preference:
+        if country_preference and country_preference.strip():
             candidates = candidates.filter(user__country_code=country_preference)
 
         # 성별 필터링 (선택 시 해당 성별만)
-        if gender_preference:
+        if gender_preference and gender_preference.strip():
             candidates = candidates.filter(user__gender=gender_preference)
 
         # 매칭 점수 계산 및 정렬
