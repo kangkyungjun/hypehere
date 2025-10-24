@@ -103,6 +103,10 @@ class ChatRoom(models.Model):
 class Message(models.Model):
     """채팅 메시지"""
 
+    class MessageType(models.TextChoices):
+        TEXT = 'text', '일반 텍스트'
+        SYSTEM = 'system', '시스템 메시지'
+
     room = models.ForeignKey(
         ChatRoom,
         on_delete=models.CASCADE,
@@ -112,6 +116,11 @@ class Message(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="sent_messages"
+    )
+    message_type = models.CharField(
+        max_length=20,
+        choices=MessageType.choices,
+        default=MessageType.TEXT
     )
     content = models.TextField(max_length=1000)
     is_read = models.BooleanField(default=False)
