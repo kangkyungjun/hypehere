@@ -206,7 +206,10 @@ function ProfileContent() {
               </div>
 
               {/* Open Chat Stats */}
-              <div className="relative overflow-hidden rounded-xl p-6 bg-gradient-to-br from-green-500 to-emerald-600 text-white transform transition-transform hover:scale-105">
+              <div
+                onClick={() => router.push('/profile/open-chats')}
+                className="relative overflow-hidden rounded-xl p-6 bg-gradient-to-br from-green-500 to-emerald-600 text-white transform transition-transform hover:scale-105 cursor-pointer"
+              >
                 <div className="relative z-10">
                   <div className="flex items-center justify-center w-12 h-12 bg-white/20 rounded-lg mb-3 backdrop-blur-sm">
                     <svg
