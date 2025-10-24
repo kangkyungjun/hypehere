@@ -1,0 +1,16 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Allow: /
+
+# Disallow private routes
+Disallow: /api/
+Disallow: /chat/
+Disallow: /open-chat/
+Disallow: /matching/
+Disallow: /profile/
+
+# Allow public routes
+Allow: /login
+Allow: /register
+
+Sitemap: https://contactotalk.com/sitemap.xml
