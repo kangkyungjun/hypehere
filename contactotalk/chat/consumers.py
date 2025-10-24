@@ -72,6 +72,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         # 상대방에게 퇴장 알림 전송
         if hasattr(self, 'room_group_name') and hasattr(self, 'user'):
+            # DB에 사용자 퇴장 상태 기록
+            await self.mark_user_as_left()
+
             await self.channel_layer.group_send(
                 self.room_group_name,
                 {
@@ -294,6 +297,16 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 sender=self.user
             ).update(is_read=True)
 
+        except ChatRoom.DoesNotExist:
+            pass
+
+    @database_sync_to_async
+    def mark_user_as_left(self):
+        """사용자 퇴장 상태 DB에 기록"""
+
+        try:
+            room = ChatRoom.objects.get(id=self.room_id)
+            room.mark_user_left(self.user)
         except ChatRoom.DoesNotExist:
             pass
 

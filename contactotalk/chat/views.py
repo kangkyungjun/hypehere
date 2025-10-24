@@ -176,12 +176,17 @@ class LeaveChatRoomAPIView(APIView):
 
         # 트랜잭션으로 안전하게 처리
         with transaction.atomic():
-            # 1. 양쪽 사용자 매칭 큐에서 제거
-            MatchingService.remove_from_queue(room.user1)
-            MatchingService.remove_from_queue(room.user2)
+            # 1. 사용자 퇴장 상태 기록
+            room.mark_user_left(request.user)
 
-            # 2. 채팅방 삭제 (메시지도 CASCADE 삭제)
-            room.delete()
+            # 2. 양쪽 모두 나간 경우에만 채팅방 삭제
+            if room.is_both_left():
+                # 매칭 큐에서 제거
+                MatchingService.remove_from_queue(room.user1)
+                MatchingService.remove_from_queue(room.user2)
+
+                # 채팅방 삭제 (메시지도 CASCADE 삭제)
+                room.delete()
 
         return Response(
             {"message": "채팅방을 나갔습니다."},
