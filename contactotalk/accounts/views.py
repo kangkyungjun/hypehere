@@ -193,8 +193,7 @@ class UserStatsAPIView(APIView):
 
         # 참여 중인 오픈 채팅방 개수
         open_chat_count = OpenChatParticipant.objects.filter(
-            user=user,
-            is_active=True
+            user=user
         ).count()
 
         return Response(
