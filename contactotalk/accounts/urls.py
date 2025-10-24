@@ -9,6 +9,7 @@ from .views import (
     ChangePasswordAPIView,
     InterestListAPIView,
     UserDetailAPIView,
+    UserStatsAPIView,
     check_match_limit,
     health_check,
 )
@@ -31,6 +32,9 @@ urlpatterns = [
 
     # 사용자
     path("users/<int:id>/", UserDetailAPIView.as_view(), name="user_detail"),
+
+    # 통계
+    path("stats/", UserStatsAPIView.as_view(), name="user_stats"),
 
     # 관심사
     path("interests/", InterestListAPIView.as_view(), name="interest_list"),

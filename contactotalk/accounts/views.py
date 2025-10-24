@@ -4,6 +4,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import login
+from django.utils import timezone
+from django.db.models import Q
 
 from .models import User, Interest
 from .serializers import (
@@ -169,6 +171,39 @@ def check_match_limit(request):
         },
         status=status.HTTP_200_OK,
     )
+
+
+class UserStatsAPIView(APIView):
+    """사용자 활동 통계 조회 API"""
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        """사용자의 활동 통계 반환"""
+        from chat.models import ChatRoom, OpenChatParticipant
+
+        user = request.user
+        today = timezone.now().date()
+
+        # 오늘의 1:1 매칭 횟수 (오늘 생성된 ChatRoom 중 user가 참여한 것)
+        today_match_count = ChatRoom.objects.filter(
+            Q(user1=user) | Q(user2=user),
+            created_at__date=today
+        ).count()
+
+        # 참여 중인 오픈 채팅방 개수
+        open_chat_count = OpenChatParticipant.objects.filter(
+            user=user,
+            is_active=True
+        ).count()
+
+        return Response(
+            {
+                "today_match_count": today_match_count,
+                "open_chat_count": open_chat_count,
+            },
+            status=status.HTTP_200_OK,
+        )
 
 
 @api_view(["GET"])
