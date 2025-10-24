@@ -30,28 +30,12 @@ export const register = async (data: RegisterRequest): Promise<{ user: User; tok
 // 로그아웃
 export const logout = async (): Promise<void> => {
   try {
-    // 1. 먼저 활성 채팅방 조회
-    try {
-      const rooms = await apiClient.get('/chat/rooms/');
-
-      // 2. 모든 활성 방에서 나가기
-      if (rooms.data && Array.isArray(rooms.data)) {
-        await Promise.allSettled(
-          rooms.data.map((room: any) =>
-            apiClient.post(`/chat/rooms/${room.id}/leave/`).catch(err => {
-              console.warn(`Failed to leave room ${room.id}:`, err);
-            })
-          )
-        );
-      }
-    } catch (error) {
-      console.warn('Failed to leave chat rooms during logout:', error);
-    }
-
-    // 3. 로그아웃 API 호출
+    // 로그아웃 API 호출 (백엔드에서 매칭 큐 및 채팅방 정리)
     await apiClient.post('/accounts/logout/');
+  } catch (error) {
+    console.warn('Logout API call failed:', error);
   } finally {
-    // 4. 토큰 삭제
+    // 토큰 삭제
     if (typeof window !== 'undefined') {
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
