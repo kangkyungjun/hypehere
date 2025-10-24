@@ -181,7 +181,10 @@ function ProfileContent() {
             <h2 className="text-lg font-bold text-gray-900 mb-4">활동 통계</h2>
             <div className="grid grid-cols-2 gap-4">
               {/* 1:1 Matching Stats */}
-              <div className="relative overflow-hidden rounded-xl p-6 bg-gradient-to-br from-blue-500 to-indigo-600 text-white transform transition-transform hover:scale-105">
+              <div
+                onClick={() => router.push('/profile/matches')}
+                className="relative overflow-hidden rounded-xl p-6 bg-gradient-to-br from-blue-500 to-indigo-600 text-white transform transition-transform hover:scale-105 cursor-pointer"
+              >
                 <div className="relative z-10">
                   <div className="flex items-center justify-center w-12 h-12 bg-white/20 rounded-lg mb-3 backdrop-blur-sm">
                     <svg
@@ -199,7 +202,7 @@ function ProfileContent() {
                     </svg>
                   </div>
                   <div className="text-3xl font-bold mb-1">{stats.today_match_count}</div>
-                  <div className="text-sm font-medium opacity-90">오늘의 매칭</div>
+                  <div className="text-sm font-medium opacity-90">최근 매칭</div>
                 </div>
                 <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
                 <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full -ml-12 -mb-12"></div>
