@@ -731,8 +731,8 @@ class MatchHistoryListAPIView(generics.ListAPIView):
         user = self.request.user
         five_days_ago = timezone.now() - timedelta(days=5)
 
+        # 차단된 사용자도 포함하여 조회 (프론트에서 회색 표시용)
         return MatchHistory.objects.filter(
             user=user,
             matched_at__gte=five_days_ago,
-            is_blocked=False  # 차단한 사용자 제외
         ).select_related('matched_user')
