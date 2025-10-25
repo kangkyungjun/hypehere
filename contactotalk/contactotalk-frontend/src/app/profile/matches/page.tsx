@@ -32,7 +32,7 @@ function RecentMatchesContent() {
 
       const recentMatches = (Array.isArray(data) ? data : []).filter((room) => {
         const createdAt = new Date(room.created_at);
-        return createdAt >= fiveDaysAgo && room.is_active;
+        return createdAt >= fiveDaysAgo;
       });
 
       setMatches(recentMatches);
