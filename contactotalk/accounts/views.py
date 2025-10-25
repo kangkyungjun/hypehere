@@ -180,15 +180,15 @@ class UserStatsAPIView(APIView):
 
     def get(self, request):
         """사용자의 활동 통계 반환"""
-        from chat.models import ChatRoom, OpenChatParticipant
+        from chat.models import ChatRoom, OpenChatParticipant, MatchHistory
 
         user = request.user
         today = timezone.now().date()
 
-        # 오늘의 1:1 매칭 횟수 (오늘 생성된 ChatRoom 중 user가 참여한 것)
-        today_match_count = ChatRoom.objects.filter(
-            Q(user1=user) | Q(user2=user),
-            created_at__date=today
+        # 오늘의 1:1 매칭 횟수 (나간 방 포함)
+        today_match_count = MatchHistory.objects.filter(
+            user=user,
+            matched_at__date=today
         ).count()
 
         # 참여 중인 오픈 채팅방 개수
