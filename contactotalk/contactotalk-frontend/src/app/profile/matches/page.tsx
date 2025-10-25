@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth';
-import { getMatchHistory } from '@/lib/api/chat';
+import { getMatchHistory, blockUser } from '@/lib/api/chat';
 import { formatRelativeTime } from '@/lib/utils';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import Button from '@/components/ui/Button';
@@ -31,6 +31,22 @@ function RecentMatchesContent() {
       setError('최근 매칭 목록을 불러오는데 실패했습니다.');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleBlockUser = async (userId: number, nickname: string) => {
+    if (!confirm(`${nickname}님을 차단하시겠습니까?\n\n차단하면:\n- 1:1 매칭이 되지 않습니다\n- 서로 메시지를 주고받을 수 없습니다\n- 차단 당시의 대화 내용은 영구적으로 숨겨집니다`)) {
+      return;
+    }
+
+    try {
+      await blockUser(userId, '매칭 목록에서 차단');
+      alert(`${nickname}님을 차단했습니다.`);
+      // 목록 새로고침
+      loadRecentMatches();
+    } catch (error) {
+      console.error('차단 실패:', error);
+      alert('차단에 실패했습니다. 다시 시도해주세요.');
     }
   };
 
@@ -126,18 +142,26 @@ function RecentMatchesContent() {
                         {matchedUser.country_code}
                       </span>
                     </div>
-                    {history.last_message_preview && (
-                      <p className="text-sm text-gray-600 truncate">
-                        {history.last_message_preview}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Time */}
-                  <div className="flex-shrink-0">
+                    {/* 시간 표시 */}
                     <span className="text-xs text-gray-500">
                       {formatRelativeTime(history.matched_at)}
                     </span>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex-shrink-0 flex gap-2">
+                    <button
+                      onClick={() => alert(`${matchedUser.nickname}님과 새 대화 시작 (기능 구현 예정)`)}
+                      className="px-3 py-1.5 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
+                    >
+                      메시지
+                    </button>
+                    <button
+                      onClick={() => handleBlockUser(matchedUser.id, matchedUser.nickname)}
+                      className="px-3 py-1.5 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
+                    >
+                      차단
+                    </button>
                   </div>
                 </div>
               );

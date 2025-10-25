@@ -335,8 +335,7 @@ function OpenChatRoomContent() {
           <div className="flex-1 min-w-0">
             <h2 className="font-semibold text-gray-900 truncate">{room.title}</h2>
             <p className="text-xs text-gray-500">
-              참여자 {room.participant_count}
-              {room.max_participants && `/${room.max_participants}`}명
+              참여자 {room.participant_count}/{room.max_participants === 0 ? '∞' : room.max_participants}
             </p>
           </div>
         </div>

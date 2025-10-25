@@ -102,6 +102,14 @@ export interface MatchHistory {
   matched_user: User;
   matched_at: string;
   last_message_preview?: string;
+  is_blocked: boolean;
+}
+
+export interface BlockedUser {
+  id: number;
+  blocked_user: User;
+  reason?: string;
+  created_at: string;
 }
 
 export interface OpenChatRoom {

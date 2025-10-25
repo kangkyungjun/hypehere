@@ -109,8 +109,8 @@ export const getUserPosts = async (
   userId: number,
   params?: { page?: number }
 ): Promise<PaginatedResponse<Post>> => {
-  const response = await apiClient.get(`/social/users/${userId}/posts/`, {
-    params,
+  const response = await apiClient.get(`/social/posts/`, {
+    params: { ...params, user_id: userId },
   });
   return response.data;
 };

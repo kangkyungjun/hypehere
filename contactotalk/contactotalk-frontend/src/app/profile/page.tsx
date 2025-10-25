@@ -180,60 +180,28 @@ function ProfileContent() {
           <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
             <h2 className="text-lg font-bold text-gray-900 mb-4">활동 통계</h2>
             <div className="grid grid-cols-2 gap-4">
-              {/* 1:1 Matching Stats */}
               <div
                 onClick={() => router.push('/profile/matches')}
-                className="relative overflow-hidden rounded-xl p-6 bg-gradient-to-br from-blue-500 to-indigo-600 text-white transform transition-transform hover:scale-105 cursor-pointer"
+                className="rounded-xl p-4 bg-blue-50 hover:bg-blue-100 transition-colors cursor-pointer text-center"
               >
-                <div className="relative z-10">
-                  <div className="flex items-center justify-center w-12 h-12 bg-white/20 rounded-lg mb-3 backdrop-blur-sm">
-                    <svg
-                      className="w-7 h-7"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
-                      />
-                    </svg>
-                  </div>
-                  <div className="text-3xl font-bold mb-1">{stats.today_match_count}</div>
-                  <div className="text-sm font-medium opacity-90">최근 매칭</div>
-                </div>
-                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
-                <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full -ml-12 -mb-12"></div>
+                <div className="text-sm text-gray-600 mb-2">최근 매칭</div>
+                <div className="text-3xl font-bold text-blue-600">{stats.today_match_count}</div>
               </div>
 
-              {/* Open Chat Stats */}
               <div
                 onClick={() => router.push('/profile/open-chats')}
-                className="relative overflow-hidden rounded-xl p-6 bg-gradient-to-br from-green-500 to-emerald-600 text-white transform transition-transform hover:scale-105 cursor-pointer"
+                className="rounded-xl p-4 bg-green-50 hover:bg-green-100 transition-colors cursor-pointer text-center"
               >
-                <div className="relative z-10">
-                  <div className="flex items-center justify-center w-12 h-12 bg-white/20 rounded-lg mb-3 backdrop-blur-sm">
-                    <svg
-                      className="w-7 h-7"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-                      />
-                    </svg>
-                  </div>
-                  <div className="text-3xl font-bold mb-1">{stats.open_chat_count}</div>
-                  <div className="text-sm font-medium opacity-90">참여 중인 오픈채팅</div>
-                </div>
-                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
-                <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full -ml-12 -mb-12"></div>
+                <div className="text-sm text-gray-600 mb-2">참여 중인 오픈채팅</div>
+                <div className="text-3xl font-bold text-green-600">{stats.open_chat_count}</div>
+              </div>
+
+              <div
+                onClick={() => router.push('/profile/blocked-users')}
+                className="rounded-xl p-4 bg-red-50 hover:bg-red-100 transition-colors cursor-pointer text-center col-span-2"
+              >
+                <div className="text-sm text-gray-600 mb-2">차단 목록</div>
+                <div className="text-lg font-semibold text-red-600">차단한 사용자 관리</div>
               </div>
             </div>
           </div>

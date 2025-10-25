@@ -1,5 +1,5 @@
 import apiClient from './client';
-import type { ChatRoom, Message, PaginatedResponse, MatchHistory } from '@/types';
+import type { ChatRoom, Message, PaginatedResponse, MatchHistory, BlockedUser } from '@/types';
 
 // 매칭 시작
 export const startMatching = async (
@@ -62,5 +62,26 @@ export const leaveChatRoom = async (roomId: number): Promise<void> => {
 // 매칭 이력 조회 (최근 5일)
 export const getMatchHistory = async (): Promise<MatchHistory[]> => {
   const response = await apiClient.get('/chat/match-history/');
-  return response.data;
+  // DRF pagination: {count, next, previous, results}
+  return response.data.results || response.data;
+};
+
+// 사용자 차단
+export const blockUser = async (userId: number, reason?: string): Promise<void> => {
+  await apiClient.post('/chat/block/', {
+    user_id: userId,
+    reason: reason || '',
+  });
+};
+
+// 차단 해제
+export const unblockUser = async (userId: number): Promise<void> => {
+  await apiClient.post(`/chat/unblock/${userId}/`);
+};
+
+// 차단 목록 조회
+export const getBlockedUsers = async (): Promise<BlockedUser[]> => {
+  const response = await apiClient.get('/chat/blocked/');
+  // DRF pagination: {count, next, previous, results}
+  return response.data.results || response.data;
 };
