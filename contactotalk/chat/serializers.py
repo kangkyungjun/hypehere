@@ -400,7 +400,6 @@ class MatchHistorySerializer(serializers.ModelSerializer):
     """매칭 이력 Serializer"""
 
     matched_user = UserSerializer(read_only=True)
-    is_blocked = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = MatchHistory
@@ -409,5 +408,4 @@ class MatchHistorySerializer(serializers.ModelSerializer):
             "matched_user",
             "matched_at",
             "last_message_preview",
-            "is_blocked",
         ]
