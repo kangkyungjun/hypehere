@@ -176,6 +176,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     "http://43.200.129.55:3000",  # AWS 프론트엔드
+    "http://43.200.129.55",       # AWS Nginx 프록시
 ]
 CORS_ALLOW_CREDENTIALS = True
 
