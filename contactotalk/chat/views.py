@@ -181,7 +181,11 @@ class LeaveChatRoomAPIView(APIView):
             # 1. 사용자 퇴장 상태 기록
             room.mark_user_left(request.user)
 
-            # 2. 양쪽 모두 나간 경우에만 채팅방 삭제
+            # 2. 한 명이라도 나가면 즉시 비활성화
+            room.is_active = False
+            room.save(update_fields=['is_active', 'updated_at'])
+
+            # 3. 양쪽 모두 나간 경우 채팅방 삭제
             if room.is_both_left():
                 # 매칭 큐에서 제거
                 MatchingService.remove_from_queue(room.user1)

@@ -347,6 +347,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
         try:
             room = ChatRoom.objects.get(id=self.room_id)
             room.mark_user_left(self.user)
+
+            # 한 명이라도 나가면 즉시 비활성화
+            room.is_active = False
+            room.save(update_fields=['is_active', 'updated_at'])
+
         except ChatRoom.DoesNotExist:
             pass
 
