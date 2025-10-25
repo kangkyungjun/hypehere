@@ -143,9 +143,9 @@ class ChatRoomListAPIView(generics.ListAPIView):
     def get_queryset(self):
         user = self.request.user
 
-        # 본인이 참여한 채팅방
+        # 본인이 참여한 채팅방 중 나가지 않은 채팅방만
         return ChatRoom.objects.filter(
-            Q(user1=user) | Q(user2=user),
+            (Q(user1=user, user1_left=False) | Q(user2=user, user2_left=False)),
             is_active=True,
         ).select_related("user1", "user2").prefetch_related("messages")
 
