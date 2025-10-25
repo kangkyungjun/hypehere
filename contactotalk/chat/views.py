@@ -73,7 +73,7 @@ class StartMatchingAPIView(APIView):
 class CancelMatchingAPIView(APIView):
     """매칭 취소 API"""
 
-    permission_classes = [permissions.IsAuthenticated, IsUser]
+    permission_classes = [permissions.IsAuthenticated]  # IsUser 제거 - 매칭 취소는 모든 인증된 사용자 허용
 
     def post(self, request):
         deleted_count = MatchingService.remove_from_queue(request.user)
