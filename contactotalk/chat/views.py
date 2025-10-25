@@ -15,6 +15,7 @@ from .models import (
     OpenChatRoom,
     OpenChatParticipant,
     OpenChatMessage,
+    MatchHistory,
 )
 from .serializers import (
     ChatRoomSerializer,
@@ -28,6 +29,7 @@ from .serializers import (
     OpenChatParticipantSerializer,
     OpenChatMessageSerializer,
     OpenChatMessageCreateSerializer,
+    MatchHistorySerializer,
 )
 from .matcher import MatchingService
 
@@ -714,3 +716,23 @@ class OpenChatMessageCreateAPIView(generics.CreateAPIView):
 
         # 마지막 읽은 시간 업데이트
         participant.update_last_read()
+
+
+class MatchHistoryListAPIView(generics.ListAPIView):
+    """매칭 이력 조회 API - 최근 5일"""
+
+    serializer_class = MatchHistorySerializer
+    permission_classes = [permissions.IsAuthenticated, IsUser]
+
+    def get_queryset(self):
+        from django.utils import timezone
+        from datetime import timedelta
+
+        user = self.request.user
+        five_days_ago = timezone.now() - timedelta(days=5)
+
+        return MatchHistory.objects.filter(
+            user=user,
+            matched_at__gte=five_days_ago,
+            is_blocked=False  # 차단한 사용자 제외
+        ).select_related('matched_user')

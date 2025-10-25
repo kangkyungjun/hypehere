@@ -21,6 +21,8 @@ from .views import (
     OpenChatRoomParticipantsAPIView,
     OpenChatMessageListAPIView,
     OpenChatMessageCreateAPIView,
+    # 매칭 이력
+    MatchHistoryListAPIView,
 )
 
 app_name = "chat"
@@ -45,6 +47,9 @@ urlpatterns = [
     path("block/", BlockUserAPIView.as_view(), name="block_user"),
     path("unblock/<int:user_id>/", UnblockUserAPIView.as_view(), name="unblock_user"),
     path("blocked/", BlockedUserListAPIView.as_view(), name="blocked_list"),
+
+    # 매칭 이력
+    path("match-history/", MatchHistoryListAPIView.as_view(), name="match_history"),
 
     # 오픈 채팅방
     path("open/rooms/", OpenChatRoomListCreateAPIView.as_view(), name="open_room_list_create"),

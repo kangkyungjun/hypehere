@@ -377,3 +377,50 @@ class OpenChatMessage(models.Model):
     def __str__(self):
         sender_name = self.sender.nickname if self.sender else "System"
         return f"[{self.room.title}] {sender_name}: {self.content[:30]}"
+
+
+class MatchHistory(models.Model):
+    """1:1 매칭 이력 - 삭제된 채팅방 이력도 보관"""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='match_histories',
+        help_text="이력을 소유한 사용자"
+    )
+    matched_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='matched_by',
+        help_text="매칭된 상대방"
+    )
+    chat_room = models.ForeignKey(
+        ChatRoom,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='histories',
+        help_text="채팅방 (삭제되면 null)"
+    )
+    matched_at = models.DateTimeField(auto_now_add=True, help_text="매칭된 시각")
+
+    # 향후 기능을 위한 필드
+    is_blocked = models.BooleanField(default=False, help_text="차단 여부")
+    last_message_preview = models.TextField(
+        max_length=100,
+        blank=True,
+        help_text="마지막 메시지 미리보기"
+    )
+
+    class Meta:
+        db_table = 'match_history'
+        verbose_name = "매칭 이력"
+        verbose_name_plural = "매칭 이력 목록"
+        ordering = ['-matched_at']
+        indexes = [
+            models.Index(fields=['user', '-matched_at']),
+            models.Index(fields=['matched_user', '-matched_at']),
+        ]
+
+    def __str__(self):
+        return f"{self.user.username} ↔ {self.matched_user.username} ({self.matched_at.strftime('%Y-%m-%d %H:%M')})"

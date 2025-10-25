@@ -97,6 +97,13 @@ export interface Message {
   created_at: string;
 }
 
+export interface MatchHistory {
+  id: number;
+  matched_user: User;
+  matched_at: string;
+  last_message_preview?: string;
+}
+
 export interface OpenChatRoom {
   id: number;
   room_type: 'default' | 'user_created';

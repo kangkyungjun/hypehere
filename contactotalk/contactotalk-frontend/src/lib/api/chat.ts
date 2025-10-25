@@ -1,5 +1,5 @@
 import apiClient from './client';
-import type { ChatRoom, Message, PaginatedResponse } from '@/types';
+import type { ChatRoom, Message, PaginatedResponse, MatchHistory } from '@/types';
 
 // 매칭 시작
 export const startMatching = async (
@@ -57,4 +57,10 @@ export const markMessagesAsRead = async (roomId: number): Promise<void> => {
 // 채팅방 나가기
 export const leaveChatRoom = async (roomId: number): Promise<void> => {
   await apiClient.post(`/chat/rooms/${roomId}/leave/`);
+};
+
+// 매칭 이력 조회 (최근 5일)
+export const getMatchHistory = async (): Promise<MatchHistory[]> => {
+  const response = await apiClient.get('/chat/match-history/');
+  return response.data;
 };

@@ -7,6 +7,7 @@ from .models import (
     OpenChatRoom,
     OpenChatParticipant,
     OpenChatMessage,
+    MatchHistory,
 )
 
 
@@ -393,3 +394,18 @@ class OpenChatMessageCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("메시지는 최대 1000자까지 입력 가능합니다.")
 
         return value
+
+
+class MatchHistorySerializer(serializers.ModelSerializer):
+    """매칭 이력 Serializer"""
+
+    matched_user = UserSerializer(read_only=True)
+
+    class Meta:
+        model = MatchHistory
+        fields = [
+            "id",
+            "matched_user",
+            "matched_at",
+            "last_message_preview",
+        ]

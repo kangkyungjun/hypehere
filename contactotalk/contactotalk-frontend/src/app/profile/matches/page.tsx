@@ -3,17 +3,17 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth';
-import { getChatRooms } from '@/lib/api/chat';
+import { getMatchHistory } from '@/lib/api/chat';
 import { formatRelativeTime } from '@/lib/utils';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import Button from '@/components/ui/Button';
-import type { ChatRoom } from '@/types';
+import type { MatchHistory } from '@/types';
 
 function RecentMatchesContent() {
   const router = useRouter();
   const { user } = useAuthStore();
 
-  const [matches, setMatches] = useState<ChatRoom[]>([]);
+  const [matches, setMatches] = useState<MatchHistory[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -24,29 +24,14 @@ function RecentMatchesContent() {
   const loadRecentMatches = async () => {
     try {
       setIsLoading(true);
-      const data = await getChatRooms();
-
-      // 최근 5일 이내 매칭만 필터링
-      const fiveDaysAgo = new Date();
-      fiveDaysAgo.setDate(fiveDaysAgo.getDate() - 5);
-
-      const recentMatches = (Array.isArray(data) ? data : []).filter((room) => {
-        const createdAt = new Date(room.created_at);
-        return createdAt >= fiveDaysAgo;
-      });
-
-      setMatches(recentMatches);
+      const data = await getMatchHistory();  // 백엔드에서 이미 5일 필터링됨
+      setMatches(Array.isArray(data) ? data : []);
     } catch (error) {
-      console.error('Failed to load recent matches:', error);
+      console.error('Failed to load match history:', error);
       setError('최근 매칭 목록을 불러오는데 실패했습니다.');
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const getOtherUser = (room: ChatRoom) => {
-    if (!user) return null;
-    return room.user1.id === user.id ? room.user2 : room.user1;
   };
 
   if (isLoading) {
@@ -116,52 +101,43 @@ function RecentMatchesContent() {
           </div>
         ) : (
           <div className="bg-white">
-            {matches.map((room) => {
-              const otherUser = getOtherUser(room);
-              if (!otherUser) return null;
+            {matches.map((history) => {
+              const matchedUser = history.matched_user;
+              if (!matchedUser) return null;
 
               return (
                 <div
-                  key={room.id}
-                  onClick={() => router.push(`/chat/${room.id}`)}
-                  className="flex items-center gap-4 px-4 py-4 hover:bg-gray-50 cursor-pointer transition-colors border-b border-gray-100 last:border-b-0"
+                  key={history.id}
+                  className="flex items-center gap-4 px-4 py-4 border-b border-gray-100 last:border-b-0"
                 >
                   {/* Avatar */}
                   <div className="flex-shrink-0 w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                    {otherUser.nickname[0].toUpperCase()}
+                    {matchedUser.nickname[0].toUpperCase()}
                   </div>
 
                   {/* Info */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="font-semibold text-gray-900 truncate">
-                        {otherUser.nickname}
+                        {matchedUser.nickname}
                       </span>
                       <span className="text-sm text-gray-500">·</span>
                       <span className="text-sm text-gray-500 flex-shrink-0">
-                        {otherUser.country_code}
+                        {matchedUser.country_code}
                       </span>
                     </div>
-                    {room.last_message && (
+                    {history.last_message_preview && (
                       <p className="text-sm text-gray-600 truncate">
-                        {room.last_message.content}
+                        {history.last_message_preview}
                       </p>
                     )}
                   </div>
 
-                  {/* Time & Arrow */}
-                  <div className="flex-shrink-0 flex flex-col items-end gap-2">
+                  {/* Time */}
+                  <div className="flex-shrink-0">
                     <span className="text-xs text-gray-500">
-                      {formatRelativeTime(room.created_at)}
+                      {formatRelativeTime(history.matched_at)}
                     </span>
-                    <svg
-                      className="w-5 h-5 text-gray-400"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
                   </div>
                 </div>
               );
