@@ -11,7 +11,10 @@ export interface Country {
 export interface Interest {
   id: number;
   name: string;
+  name_ko: string;
+  name_en: string;
   category: string;
+  icon?: string;
 }
 
 export interface User {
@@ -92,6 +95,13 @@ export interface Message {
   file?: string;
   is_read: boolean;
   created_at: string;
+}
+
+export interface MatchHistory {
+  id: number;
+  matched_user: User;
+  matched_at: string;
+  last_message_preview?: string;
 }
 
 export interface OpenChatRoom {
