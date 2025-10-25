@@ -104,6 +104,13 @@ export interface MatchHistory {
   last_message_preview?: string;
 }
 
+export interface BlockedUser {
+  id: number;
+  blocked_user: User;
+  reason?: string;
+  created_at: string;
+}
+
 export interface OpenChatRoom {
   id: number;
   room_type: 'default' | 'user_created';
