@@ -125,6 +125,16 @@ class Message(models.Model):
     content = models.TextField(max_length=1000)
     is_read = models.BooleanField(default=False)
 
+    # 차단된 상태에서 보낸 메시지 표시
+    blocked_for_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="hidden_messages",
+        help_text="이 메시지를 볼 수 없는 사용자 (차단 당시 메시지)"
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

@@ -110,18 +110,44 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 message = await self.save_message(content)
 
                 if message:
-                    # 그룹의 모든 클라이언트에게 메시지 브로드캐스트
-                    await self.channel_layer.group_send(
-                        self.room_group_name,
-                        {
-                            "type": "chat_message",
-                            "message_id": message["id"],
-                            "content": message["content"],
-                            "sender_id": message["sender_id"],
-                            "sender_nickname": message["sender_nickname"],
-                            "created_at": message["created_at"],
-                        },
-                    )
+                    # 고스트 메시지 처리
+                    if message.get("is_ghost", False):
+                        # 차단 당한 경우: 본인에게만 전송 (상대방에게 전송 안 됨)
+                        await self.send(
+                            text_data=json.dumps(
+                                {
+                                    "type": "message",
+                                    "message": {
+                                        "id": message["id"],
+                                        "room": int(self.room_id),
+                                        "sender": {
+                                            "id": message["sender_id"],
+                                            "nickname": message["sender_nickname"],
+                                            "username": "",
+                                            "email": "",
+                                            "country_code": ""
+                                        },
+                                        "message_type": "text",
+                                        "content": message["content"],
+                                        "is_read": False,
+                                        "created_at": message["created_at"]
+                                    }
+                                }
+                            )
+                        )
+                    else:
+                        # 정상 메시지: 그룹 전체에 브로드캐스트
+                        await self.channel_layer.group_send(
+                            self.room_group_name,
+                            {
+                                "type": "chat_message",
+                                "message_id": message["id"],
+                                "content": message["content"],
+                                "sender_id": message["sender_id"],
+                                "sender_nickname": message["sender_nickname"],
+                                "created_at": message["created_at"],
+                            },
+                        )
 
             elif message_type == "typing":
                 # 타이핑 상태 전달
@@ -259,6 +285,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def save_message(self, content):
         """메시지 DB에 저장"""
+        from .models import BlockedUser
 
         try:
             room = ChatRoom.objects.get(id=self.room_id)
@@ -269,9 +296,21 @@ class ChatConsumer(AsyncWebsocketConsumer):
             ):
                 return None
 
-            # 메시지 생성
+            # 상대방 확인
+            other_user = room.user2 if room.user1 == self.user else room.user1
+
+            # 상대방이 나를 차단했는지 확인
+            is_blocked_by_other = BlockedUser.objects.filter(
+                user=other_user,
+                blocked_user=self.user
+            ).exists()
+
+            # 메시지 생성 (차단 당한 경우 blocked_for_user 설정)
             message = Message.objects.create(
-                room=room, sender=self.user, content=content
+                room=room,
+                sender=self.user,
+                content=content,
+                blocked_for_user=other_user if is_blocked_by_other else None
             )
 
             return {
@@ -280,6 +319,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 "sender_id": message.sender.id,
                 "sender_nickname": message.sender.nickname,
                 "created_at": message.created_at.isoformat(),
+                "is_ghost": is_blocked_by_other  # 고스트 메시지 플래그
             }
 
         except ChatRoom.DoesNotExist:

@@ -212,8 +212,11 @@ class MessageListAPIView(generics.ListAPIView):
             Q(id=room_id) & (Q(user1=user) | Q(user2=user)),
         )
 
-        # 메시지 조회
-        return Message.objects.filter(room=room).select_related("sender")
+        # 메시지 조회 (차단된 메시지 제외)
+        # blocked_for_user가 본인인 메시지는 제외 (차단 당한 사용자가 보낸 메시지)
+        return Message.objects.filter(room=room).exclude(
+            blocked_for_user=user
+        ).select_related("sender")
 
 
 class MessageCreateAPIView(generics.CreateAPIView):
