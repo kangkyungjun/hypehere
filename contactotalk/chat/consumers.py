@@ -406,7 +406,7 @@ class OpenChatConsumer(AsyncWebsocketConsumer):
         """WebSocket 연결 종료 시 호출"""
 
         # 상대방에게 퇴장 알림 전송
-        if hasattr(self, 'room_group_name') and hasattr(self, 'user'):
+        if hasattr(self, 'room_group_name') and hasattr(self, 'user') and self.user.is_authenticated:
             await self.channel_layer.group_send(
                 self.room_group_name,
                 {
@@ -417,7 +417,8 @@ class OpenChatConsumer(AsyncWebsocketConsumer):
             )
 
         # 그룹에서 나가기
-        await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
+        if hasattr(self, 'room_group_name'):
+            await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
 
     async def receive(self, text_data):
         """클라이언트로부터 메시지 수신 시 호출"""
