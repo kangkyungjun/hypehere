@@ -25,7 +25,7 @@ SECRET_KEY = "django-insecure-+!!zz)w-ne^zw(qg$cawl0&q*gv)pqch=5nufk$9dzid28lmm8
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['43.200.129.55', 'localhost', '127.0.0.1', '*']
 
 
 # Application definition
@@ -175,6 +175,8 @@ SIMPLE_JWT = {
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "http://43.200.129.55:3000",  # AWS 프론트엔드
+    "http://43.200.129.55",       # AWS Nginx 프록시
 ]
 CORS_ALLOW_CREDENTIALS = True
 
