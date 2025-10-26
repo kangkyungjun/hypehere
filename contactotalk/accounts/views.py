@@ -67,8 +67,10 @@ class LoginAPIView(APIView):
             {
                 "message": "로그인되었습니다.",
                 "user": UserSerializer(user).data,
-                "refresh": str(refresh),
-                "access": str(refresh.access_token),
+                "tokens": {
+                    "refresh": str(refresh),
+                    "access": str(refresh.access_token),
+                },
             },
             status=status.HTTP_200_OK,
         )
