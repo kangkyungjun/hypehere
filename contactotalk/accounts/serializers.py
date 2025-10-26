@@ -33,6 +33,7 @@ class UserSerializer(serializers.ModelSerializer):
             "daily_match_count",
             "is_banned",
             "created_at",
+            "updated_at",  # Added for Flutter User model compatibility
             "interests",
         ]
         read_only_fields = [
