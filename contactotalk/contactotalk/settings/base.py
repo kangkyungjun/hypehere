@@ -171,12 +171,13 @@ SIMPLE_JWT = {
     "AUTH_HEADER_TYPES": ("Bearer",),
 }
 
-# CORS Settings
+# CORS Settings - 개발 환경 (Flutter 웹의 모든 포트 허용)
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^http://localhost:\d+$",      # 모든 localhost 포트 (Flutter web, Next.js 등)
+    r"^http://127\.0\.0\.1:\d+$",   # 모든 127.0.0.1 포트
+]
+
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    "http://localhost:8080",      # Flutter 웹
-    "http://127.0.0.1:8080",      # Flutter 웹
     "http://43.200.129.55:3000",  # AWS 프론트엔드
     "http://43.200.129.55",       # AWS Nginx 프록시
 ]
