@@ -364,6 +364,114 @@ nohup gunicorn --config deploy/gunicorn.conf.py contactotalk.wsgi:application > 
 nohup daphne -b 0.0.0.0 -p 8001 contactotalk.asgi:application > /dev/null 2>&1 &
 ```
 
+### WebSocket Connection Troubleshooting
+
+#### Environment Configuration
+
+**Local Development**:
+- Frontend connects directly: `ws://localhost:8000/ws`
+- Daphne binds to: `127.0.0.1:8001` or `0.0.0.0:8001`
+- No Nginx proxy needed
+
+**AWS Production**:
+- Frontend connects via Nginx: `ws://43.200.129.55/ws` or `wss://domain.com/ws`
+- Nginx proxies to Daphne: `127.0.0.1:8001`
+- **IMPORTANT**: Do NOT use `ws://43.200.129.55:8001/ws` (port 8001 not exposed to public)
+
+#### Environment Variables
+
+**Correct Frontend Configuration (.env.production)**:
+```bash
+# Use Nginx proxy path (port 80/443)
+NEXT_PUBLIC_WS_URL=ws://43.200.129.55/ws
+```
+
+**Incorrect Configuration** ❌:
+```bash
+# Direct Daphne access won't work (port 8001 not exposed)
+NEXT_PUBLIC_WS_URL=ws://43.200.129.55:8001/ws
+```
+
+#### Common Issues and Solutions
+
+**1. Connection Refused**
+- **Symptom**: WebSocket connection fails immediately
+- **Check**: `ps aux | grep daphne` (verify Daphne is running)
+- **Solution**: Restart Daphne service
+  ```bash
+  ssh ubuntu@43.200.129.55
+  sudo systemctl restart daphne
+  sudo systemctl status daphne
+  ```
+
+**2. 401 Unauthorized**
+- **Symptom**: WebSocket connection rejected with 401 error
+- **Cause**: Invalid or expired JWT token
+- **Solution**: Check token in query parameter, refresh token if expired
+  ```javascript
+  // Correct token passing in frontend
+  const wsUrl = `${WS_BASE_URL}/chat/${roomId}/?token=${validJwtToken}`;
+  ```
+
+**3. Origin Not Allowed**
+- **Symptom**: WebSocket connection rejected during handshake
+- **Cause**: Frontend URL not in Django `ALLOWED_HOSTS`
+- **Solution**: Add frontend URL to `ALLOWED_HOSTS` in `settings/production.py`
+  ```python
+  # .env.production
+  ALLOWED_HOSTS=43.200.129.55,localhost,127.0.0.1
+  ```
+
+**4. No Messages in Chat**
+- **Symptom**: Connection established but messages don't appear
+- **Check**: Browser DevTools Console for WebSocket connection logs
+- **Verify**:
+  ```javascript
+  // Should see this in console
+  console.log('WebSocket connected')
+  ```
+- **Debug**: Check Daphne logs
+  ```bash
+  sudo journalctl -u daphne -f
+  ```
+
+**5. Connection Drops Frequently**
+- **Symptom**: WebSocket connection closes unexpectedly
+- **Cause**: Nginx timeout settings too short
+- **Solution**: Verify Nginx proxy timeout (deploy/nginx.conf:108-110)
+  ```nginx
+  proxy_connect_timeout 7d;
+  proxy_send_timeout 7d;
+  proxy_read_timeout 7d;
+  ```
+
+#### Verification Checklist
+
+- [ ] Daphne service running: `sudo systemctl status daphne`
+- [ ] Nginx `/ws/` proxy configured correctly
+- [ ] Frontend uses Nginx proxy URL (not direct port 8001)
+- [ ] JWT token valid and included in WebSocket URL
+- [ ] Frontend origin in Django `ALLOWED_HOSTS`
+- [ ] CORS settings include frontend URL
+- [ ] Browser DevTools shows "WebSocket connected" message
+
+#### Debug Commands
+
+```bash
+# Check Daphne process and binding
+ps aux | grep daphne
+# Should show: daphne -b 0.0.0.0 -p 8001
+
+# Test WebSocket endpoint (from server)
+curl -i -N -H "Connection: Upgrade" -H "Upgrade: websocket" http://localhost:8001/ws/chat/1/
+
+# Monitor Daphne logs
+sudo journalctl -u daphne -f
+
+# Check Nginx access logs for WebSocket requests
+tail -f /var/log/nginx/access.log | grep "/ws/"
+```
+
 ## Project Phases
 
 - ✅ **Phase 1**: Authentication and permissions (100%)
