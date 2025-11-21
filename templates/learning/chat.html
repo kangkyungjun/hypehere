@@ -1,0 +1,187 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "오픈채팅 - HypeHere" %}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/open-chat.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="open-chat-container">
+    <!-- Search Header (Sticky) -->
+    <div class="chat-search-header">
+        <div class="search-input-wrapper">
+            <svg class="search-icon" viewBox="0 0 24 24">
+                <circle cx="11" cy="11" r="8"/>
+                <path d="m21 21-4.35-4.35"/>
+            </svg>
+            <input
+                type="text"
+                id="search-input"
+                class="search-input"
+                placeholder="채팅방 검색..."
+                autocomplete="off"
+            >
+            <button type="button" id="clear-search" class="btn-clear hidden" aria-label="검색어 지우기">
+                <svg viewBox="0 0 24 24">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Filters Section -->
+    <div class="chat-filters">
+        <button id="favorites-filter" class="btn-filter-favorites" aria-label="즐겨찾기만 보기" title="즐겨찾기만 보기">
+            <svg class="star-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+            </svg>
+        </button>
+        <div class="filter-item">
+            <div id="country-filter-selector" class="country-selector"></div>
+        </div>
+        <div class="filter-item">
+            <div id="category-filter-selector" class="country-selector"></div>
+        </div>
+    </div>
+
+    <!-- Room Grid -->
+    <div id="room-grid" class="chat-room-grid">
+        <!-- Room cards will be inserted here by JavaScript -->
+    </div>
+
+    <!-- Empty State -->
+    <div id="empty-state" class="empty-state hidden">
+        <div class="empty-icon">
+            <svg viewBox="0 0 24 24">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+        </div>
+        <h3>검색 결과가 없습니다</h3>
+        <p>다른 검색어나 필터를 사용해보세요</p>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loading-state" class="loading-state">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <!-- Floating Action Button -->
+    <button id="create-room-fab" class="fab" aria-label="채팅방 만들기">
+        <svg viewBox="0 0 24 24">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+    </button>
+
+    <!-- Create Room Modal -->
+    <div id="create-room-modal" class="modal hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <h3>새 채팅방 만들기</h3>
+            <form id="create-room-form">
+                <!-- Title Input with Floating Label -->
+                <div class="form-group-floating">
+                    <input
+                        type="text"
+                        id="room-name"
+                        name="name"
+                        class="form-input-floating"
+                        placeholder=" "
+                        required
+                        maxlength="200"
+                    >
+                    <label for="room-name" class="form-label-floating">채팅방 이름</label>
+                </div>
+
+                <!-- Category Dropdown with Custom Select -->
+                <div class="form-group-floating">
+                    <div class="custom-select-wrapper" id="category-select">
+                        <input
+                            type="text"
+                            id="category-display"
+                            class="custom-select-input"
+                            placeholder=" "
+                            readonly
+                            required
+                        >
+                        <label for="category-display" class="form-label-floating">{% trans "카테고리" %}</label>
+                        <svg class="custom-select-arrow" viewBox="0 0 24 24">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+
+                        <div class="custom-select-dropdown" id="category-options-dropdown">
+                            <!-- Dynamically populated by JavaScript -->
+                        </div>
+
+                        <input type="hidden" name="category" id="room-category" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>{% trans "방 공개 설정" %}</label>
+                    <div class="radio-group">
+                        <label class="radio-label">
+                            <input type="radio" name="is_public" value="true" checked>
+                            <span>{% trans "공개방" %}</span>
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="is_public" value="false">
+                            <span>{% trans "비밀방" %}</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div id="password-field" class="form-group-floating hidden">
+                    <input
+                        type="password"
+                        id="room-password"
+                        name="password"
+                        class="form-input-floating"
+                        placeholder=" "
+                        maxlength="50"
+                    >
+                    <label for="room-password" class="form-label-floating">{% trans "비밀번호" %}</label>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" id="cancel-create" class="btn btn-secondary">{% trans "취소" %}</button>
+                    <button type="submit" class="btn btn-primary">{% trans "만들기" %}</button>
+                </div>
+            </form>
+            <script>
+                // Toggle password field visibility based on is_public selection
+                document.addEventListener('DOMContentLoaded', function() {
+                    const publicRadios = document.querySelectorAll('input[name="is_public"]');
+                    const passwordField = document.getElementById('password-field');
+                    const passwordInput = document.getElementById('room-password');
+
+                    publicRadios.forEach(radio => {
+                        radio.addEventListener('change', function() {
+                            if (this.value === 'false') {
+                                passwordField.classList.remove('hidden');
+                                passwordInput.required = true;
+                            } else {
+                                passwordField.classList.add('hidden');
+                                passwordInput.required = false;
+                                passwordInput.value = '';
+                            }
+                        });
+                    });
+                });
+            </script>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/countries.js' %}"></script>
+<script src="{% static 'js/country-selector.js' %}"></script>
+<script src="{% static 'js/categories.js' %}"></script>
+<script src="{% static 'js/category-selector.js' %}"></script>
+<script src="{% static 'js/open-chat.js' %}"></script>
+{% endblock %}

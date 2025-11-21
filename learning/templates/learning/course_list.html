@@ -1,0 +1,315 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}코스 목록 - Learning{% endblock %}
+
+{% block content %}
+<div class="course-list-container">
+    <!-- Header -->
+    <div class="course-list-header">
+        <h1>학습 코스</h1>
+    </div>
+
+    <!-- Filters and Search -->
+    <div class="filters-section">
+        <form method="get" class="filter-form">
+            <!-- Search -->
+            <div class="search-box">
+                <input type="text" name="search" placeholder="코스 검색..." value="{{ current_search }}">
+                <button type="submit">검색</button>
+            </div>
+
+            <!-- Level Filter -->
+            <div class="filter-group">
+                <label>레벨</label>
+                <select name="level" onchange="this.form.submit()">
+                    <option value="">전체</option>
+                    {% for value, label in level_choices %}
+                    <option value="{{ value }}" {% if current_level == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Category Filter -->
+            <div class="filter-group">
+                <label>카테고리</label>
+                <select name="category" onchange="this.form.submit()">
+                    <option value="">전체</option>
+                    {% for value, label in category_choices %}
+                    <option value="{{ value }}" {% if current_category == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Sort -->
+            <div class="filter-group">
+                <label>정렬</label>
+                <select name="sort" onchange="this.form.submit()">
+                    <option value="-last_activity" {% if current_sort == '-last_activity' %}selected{% endif %}>최근 활동</option>
+                    <option value="-created_at" {% if current_sort == '-created_at' %}selected{% endif %}>최신 생성</option>
+                    <option value="-view_count" {% if current_sort == '-view_count' %}selected{% endif %}>조회수</option>
+                    <option value="title" {% if current_sort == 'title' %}selected{% endif %}>제목순</option>
+                </select>
+            </div>
+        </form>
+    </div>
+
+    <!-- Course Grid -->
+    {% if courses %}
+    <div class="course-grid">
+        {% for course in courses %}
+        <a href="{% url 'learning:course_detail' course.slug %}" class="course-card">
+            <div class="course-header">
+                <span class="course-level level-{{ course.level }}">{{ course.get_level_display }}</span>
+                <span class="course-category">{{ course.get_category_display }}</span>
+            </div>
+            <h3 class="course-title">{{ course.title }}</h3>
+            <p class="course-description">{{ course.description|truncatewords:20 }}</p>
+            <div class="course-meta">
+                <span>📚 {{ course.lessons.count }}개 레슨</span>
+                <span>👁️ {{ course.view_count }}</span>
+                <span>👥 {{ course.contributor_count }}</span>
+            </div>
+            {% if course.is_system_content %}
+            <div class="system-badge">공식 콘텐츠</div>
+            {% endif %}
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <p>검색 결과가 없습니다.</p>
+    </div>
+    {% endif %}
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <div class="pagination">
+        {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}&level={{ current_level }}&category={{ current_category }}&search={{ current_search }}&sort={{ current_sort }}">&laquo; 이전</a>
+        {% endif %}
+
+        <span class="current-page">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}&level={{ current_level }}&category={{ current_category }}&search={{ current_search }}&sort={{ current_sort }}">다음 &raquo;</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Container */
+.course-list-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--space-xl) var(--space-md);
+}
+
+/* Header */
+.course-list-header {
+    text-align: center;
+    margin-bottom: var(--space-2xl);
+}
+
+.course-list-header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--color-text);
+    margin-bottom: var(--space-sm);
+}
+
+.course-list-header .subtitle {
+    font-size: 1.125rem;
+    color: var(--color-text-light);
+}
+
+/* Filters */
+.filters-section {
+    background: var(--color-surface);
+    padding: var(--space-lg);
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--space-xl);
+    box-shadow: var(--shadow-sm);
+}
+
+.filter-form {
+    display: grid;
+    grid-template-columns: 2fr repeat(3, 1fr);
+    gap: var(--space-md);
+}
+
+.search-box {
+    display: flex;
+    gap: var(--space-xs);
+}
+
+.search-box input {
+    flex: 1;
+    padding: var(--space-sm) var(--space-md);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+}
+
+.search-box button {
+    padding: var(--space-sm) var(--space-lg);
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+.filter-group label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-text-light);
+}
+
+.filter-group select {
+    padding: var(--space-sm);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    background: var(--color-bg);
+}
+
+/* Course Grid */
+.course-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--space-lg);
+}
+
+.course-card {
+    background: var(--color-surface);
+    padding: var(--space-lg);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.course-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+.course-header {
+    display: flex;
+    gap: var(--space-xs);
+    margin-bottom: var(--space-md);
+}
+
+.course-level {
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.level-beginner { background: #e0f2fe; color: #0369a1; }
+.level-elementary { background: #dcfce7; color: #16a34a; }
+.level-intermediate { background: #fed7aa; color: #ea580c; }
+.level-advanced { background: #fecaca; color: #dc2626; }
+
+.course-category {
+    padding: var(--space-xs) var(--space-sm);
+    background: var(--color-hover);
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.course-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--color-text);
+    margin-bottom: var(--space-sm);
+}
+
+.course-description {
+    font-size: 0.938rem;
+    color: var(--color-text-light);
+    line-height: 1.6;
+    flex: 1;
+    margin-bottom: var(--space-md);
+}
+
+.course-meta {
+    display: flex;
+    gap: var(--space-md);
+    font-size: 0.875rem;
+    color: var(--color-text-light);
+}
+
+.system-badge {
+    position: absolute;
+    top: var(--space-sm);
+    right: var(--space-sm);
+    padding: var(--space-xs) var(--space-sm);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: var(--space-2xl);
+    color: var(--color-text-light);
+}
+
+/* Pagination */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--space-md);
+    margin-top: var(--space-xl);
+}
+
+.pagination a {
+    padding: var(--space-sm) var(--space-md);
+    background: var(--color-surface);
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    color: var(--color-text);
+}
+
+.pagination a:hover {
+    background: var(--color-hover);
+}
+
+.current-page {
+    font-weight: 600;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .filter-form {
+        grid-template-columns: 1fr;
+    }
+
+    .course-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}

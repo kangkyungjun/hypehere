@@ -1,0 +1,131 @@
+/* ==========================================
+   HypeHere - CSS Variables
+   Design System Tokens
+   ========================================== */
+
+:root {
+  /* ===== Brand Colors ===== */
+  --color-primary: #4F46E5;        /* Indigo - Main brand color */
+  --color-primary-light: #818CF8;
+  --color-primary-dark: #3730A3;
+  --color-secondary: #10B981;      /* Green - Success, learning */
+  --color-secondary-light: #34D399;
+  --color-secondary-dark: #059669;
+  --color-accent: #F59E0B;         /* Amber - Highlights, badges */
+  --color-accent-light: #FCD34D;
+  --color-accent-dark: #D97706;
+
+  /* ===== Neutral Colors ===== */
+  --color-text: #1F2937;           /* Gray-800 - Primary text */
+  --color-text-light: #6B7280;     /* Gray-500 - Secondary text */
+  --color-text-lighter: #9CA3AF;   /* Gray-400 - Tertiary text */
+  --color-bg: #FFFFFF;             /* White - Background */
+  --color-bg-secondary: #F9FAFB;   /* Gray-50 - Secondary bg */
+  --color-bg-tertiary: #F3F4F6;    /* Gray-100 - Tertiary bg */
+  --color-bg-hover: #F3F4F6;       /* Gray-100 - Hover background */
+  --color-border: #E5E7EB;         /* Gray-200 - Borders */
+  --color-border-light: #F3F4F6;   /* Gray-100 - Light borders */
+
+  /* ===== Semantic Colors ===== */
+  --color-success: #10B981;        /* Green */
+  --color-success-light: #D1FAE5;
+  --color-error: #EF4444;          /* Red */
+  --color-error-light: #FEE2E2;
+  --color-danger: #EF4444;         /* Red - Danger/Critical actions */
+  --color-warning: #F59E0B;        /* Amber */
+  --color-warning-light: #FEF3C7;
+  --color-info: #3B82F6;           /* Blue */
+  --color-info-light: #DBEAFE;
+
+  /* ===== Spacing (Responsive with rem) ===== */
+  --space-xs: 0.25rem;    /* 4px base, scales with screen size */
+  --space-sm: 0.5rem;     /* 8px base, scales with screen size */
+  --space-md: 1rem;       /* 16px base, scales with screen size */
+  --space-lg: 1.5rem;     /* 24px base, scales with screen size */
+  --space-xl: 2rem;       /* 32px base, scales with screen size */
+  --space-2xl: 3rem;      /* 48px base, scales with screen size */
+  --space-3xl: 4rem;      /* 64px base, scales with screen size */
+
+  /* ===== Typography ===== */
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, monospace;
+
+  /* Fixed font sizes (scales with html font-size) */
+  --font-size-xs: 0.75rem;      /* 12px base → scales 10.5px(mobile) to 13.5px(desktop) */
+  --font-size-sm: 0.875rem;     /* 14px base → scales 12.25px(mobile) to 15.75px(desktop) */
+  --font-size-base: 1rem;       /* 16px base → scales 14px(mobile) to 18px(desktop) */
+  --font-size-lg: 1.125rem;     /* 18px base → scales 15.75px(mobile) to 20.25px(desktop) */
+  --font-size-xl: 1.25rem;      /* 20px base → scales 17.5px(mobile) to 22.5px(desktop) */
+  --font-size-2xl: 1.5rem;      /* 24px base → scales 21px(mobile) to 27px(desktop) */
+  --font-size-3xl: 1.875rem;    /* 30px base → scales 26.25px(mobile) to 33.75px(desktop) */
+  --font-size-4xl: 2.25rem;     /* 36px base → scales 31.5px(mobile) to 40.5px(desktop) */
+
+  /* Fluid font sizes (for headers and hero sections) */
+  --font-size-fluid-sm: clamp(0.875rem, 1.5vw, 1rem);
+  --font-size-fluid-base: clamp(1rem, 2vw, 1.25rem);
+  --font-size-fluid-lg: clamp(1.125rem, 2.5vw, 1.5rem);
+  --font-size-fluid-xl: clamp(1.25rem, 3vw, 2rem);
+  --font-size-fluid-2xl: clamp(1.5rem, 4vw, 2.5rem);
+  --font-size-fluid-3xl: clamp(1.875rem, 5vw, 3rem);
+  --font-size-fluid-4xl: clamp(2.25rem, 6vw, 4rem);
+
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+
+  /* ===== Layout (Responsive with rem) ===== */
+  --container-max-width: 80rem;           /* 1280px base, scales with screen */
+  --container-padding: var(--space-lg);
+  --sidebar-width: 17.5rem;               /* 280px base → scales 245px(mobile) to 315px(desktop) */
+  --sidebar-collapsed-width: 4rem;        /* 64px base → scales 56px(mobile) to 72px(desktop) */
+  --header-height: 4rem;                  /* 64px base → scales 56px(mobile) to 72px(desktop) */
+  --footer-height: 5rem;                  /* 80px base → scales 70px(mobile) to 90px(desktop) */
+  --mobile-nav-height: 3.75rem;           /* 60px base → scales 52.5px(mobile) to 67.5px(desktop) */
+
+  /* ===== Border Radius (Responsive with rem) ===== */
+  --radius-sm: 0.25rem;                   /* 4px base, scales with screen size */
+  --radius-md: 0.5rem;                    /* 8px base, scales with screen size */
+  --radius-lg: 0.75rem;                   /* 12px base, scales with screen size */
+  --radius-xl: 1rem;                      /* 16px base, scales with screen size */
+  --radius-full: 9999px;
+
+  /* ===== Shadows ===== */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+  /* ===== Transitions ===== */
+  --transition-fast: 150ms ease-in-out;
+  --transition-base: 300ms ease-in-out;
+  --transition-slow: 500ms ease-in-out;
+
+  /* ===== Z-Index ===== */
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-fixed: 1030;
+  --z-modal-backdrop: 1040;
+  --z-modal: 1050;
+  --z-popover: 1060;
+  --z-tooltip: 1070;
+}
+
+/* ===== Dark Mode (Future) ===== */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-text: #F9FAFB;
+    --color-text-light: #D1D5DB;
+    --color-text-lighter: #9CA3AF;
+    --color-bg: #111827;
+    --color-bg-secondary: #1F2937;
+    --color-bg-tertiary: #374151;
+    --color-bg-hover: #374151;
+    --color-border: #374151;
+    --color-border-light: #4B5563;
+  }
+}

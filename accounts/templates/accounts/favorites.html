@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}즐겨찾기 - HypeHere{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/favorites.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="favorites-container">
+    <!-- 헤더 -->
+    <div class="favorites-header">
+        <a href="{% url 'accounts:settings' %}" class="btn-back">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="19" y1="12" x2="5" y2="12"/>
+                <polyline points="12 19 5 12 12 5"/>
+            </svg>
+        </a>
+        <h1 class="favorites-title">즐겨찾기</h1>
+    </div>
+
+    <!-- 탭 네비게이션 -->
+    <div class="favorites-tabs">
+        <button class="tab-button active" data-tab="chat-rooms">
+            채팅방
+            <span class="tab-count" id="chat-count">0</span>
+        </button>
+        <button class="tab-button" data-tab="posts">
+            게시물
+            <span class="tab-count" id="posts-count">0</span>
+        </button>
+    </div>
+
+    <!-- 채팅방 탭 컨텐츠 -->
+    <div class="tab-content active" id="chat-rooms-tab">
+        <div class="loading-state" id="chat-loading">
+            <div class="loading-spinner"></div>
+        </div>
+
+        <div class="favorites-grid hidden" id="chat-grid">
+            <!-- Chat room cards will be inserted here by JavaScript -->
+        </div>
+
+        <div class="empty-state hidden" id="chat-empty">
+            <div class="empty-icon">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                </svg>
+            </div>
+            <h3>즐겨찾기한 채팅방이 없습니다</h3>
+            <p>채팅방을 즐겨찾기에 추가해보세요</p>
+            <a href="/learning/chat/" class="btn btn-primary">채팅방 둘러보기</a>
+        </div>
+    </div>
+
+    <!-- 게시물 탭 컨텐츠 -->
+    <div class="tab-content" id="posts-tab">
+        <div class="empty-state">
+            <div class="empty-icon">
+                <svg viewBox="0 0 24 24">
+                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                    <polyline points="17 21 17 13 7 13 7 21"/>
+                    <polyline points="7 3 7 8 15 8"/>
+                </svg>
+            </div>
+            <h3>게시물 즐겨찾기 준비 중</h3>
+            <p>곧 게시물 즐겨찾기 기능이 추가됩니다</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/favorites.js' %}"></script>
+{% endblock %}

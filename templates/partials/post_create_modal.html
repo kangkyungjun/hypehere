@@ -1,0 +1,87 @@
+{% load static %}
+{% load i18n %}
+
+<!-- Post Creation Modal -->
+<div id="post-modal" class="modal-overlay hidden" data-mode="create">
+    <div class="modal-container">
+        <div class="modal-header">
+            <h2 id="post-modal-title">{% trans "새 게시물" %}</h2>
+            <button type="button" class="modal-close" id="close-modal">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+
+        <div class="modal-body">
+            <!-- Error Alert (Hidden by default) -->
+            <div id="post-error-alert" class="alert alert-error hidden" style="margin-bottom: var(--space-md);">
+                <span id="post-error-message"></span>
+            </div>
+
+            <form id="post-form">
+                <input type="hidden" id="edit-post-id" value="">
+                <!-- Content Textarea -->
+                <div class="form-group">
+                    <textarea
+                        id="post-content"
+                        name="content"
+                        class="form-control"
+                        rows="6"
+                        maxlength="1000"
+                        placeholder="{% trans '무슨 일이 일어나고 있나요?&#10;&#10;해시태그를 사용하려면 #을 앞에 붙이세요 (예: #한국어학습)' %}"
+                        required
+                    ></textarea>
+                    <div class="flex" style="justify-content: space-between; align-items: center; margin-top: var(--space-xs);">
+                        <span class="form-text" id="char-counter">{% trans "0 / 1000자" %}</span>
+                        <span class="form-text" style="font-size: var(--font-size-xs); color: var(--color-text-lighter);">
+                            {% trans "팁: #해시태그를 사용하여 게시물을 분류하세요" %}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Language Selection -->
+                <div class="flex gap-sm" style="margin-top: var(--space-md);">
+                    <div class="form-group" style="flex: 1;">
+                        <label for="native-language" class="form-label">{% trans "모국어" %}</label>
+                        <div id="native-language-selector"></div>
+                        <select id="native-language" name="native_language" class="hidden">
+                            <option value="">{% trans "선택 안함" %}</option>
+                            <option value="EN">🇺🇸 English</option>
+                            <option value="KO">🇰🇷 한국어</option>
+                            <option value="JA">🇯🇵 日本語</option>
+                            <option value="ZH">🇨🇳 中文</option>
+                            <option value="ES">🇪🇸 Español</option>
+                            <option value="FR">🇫🇷 Français</option>
+                            <option value="DE">🇩🇪 Deutsch</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" style="flex: 1;">
+                        <label for="target-language" class="form-label">{% trans "학습 언어" %}</label>
+                        <div id="target-language-selector"></div>
+                        <select id="target-language" name="target_language" class="hidden">
+                            <option value="">{% trans "선택 안함" %}</option>
+                            <option value="EN">🇺🇸 English</option>
+                            <option value="KO">🇰🇷 한국어</option>
+                            <option value="JA">🇯🇵 日本語</option>
+                            <option value="ZH">🇨🇳 中문</option>
+                            <option value="ES">🇪🇸 Español</option>
+                            <option value="FR">🇫🇷 Français</option>
+                            <option value="DE">🇩🇪 Deutsch</option>
+                        </select>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="cancel-post">{% trans "취소" %}</button>
+            <button type="submit" form="post-form" class="btn btn-primary" id="submit-post">
+                <span id="submit-post-text">{% trans "게시하기" %}</span>
+                <span id="submit-post-loading" class="spinner spinner-primary hidden"></span>
+            </button>
+        </div>
+    </div>
+</div>

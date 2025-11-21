@@ -1,0 +1,265 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block body_class %}chat-room-page{% endblock %}
+
+{% block title %}{{ room.name }} - HypeHere{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/open-chat-room.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="chat-room-container">
+    <!-- Header -->
+    <div class="chat-room-header">
+        <button id="back-button" class="btn-back" aria-label="{% trans '뒤로 가기' %}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="19" y1="12" x2="5" y2="12"/>
+                <polyline points="12 19 5 12 12 5"/>
+            </svg>
+        </button>
+        <div class="header-info">
+            <h1 class="room-name">{{ room.name }}</h1>
+            <p class="room-stats">
+                <span id="participant-count">0</span> {% trans '명 참여 중' %}
+                <span id="creator-badge" class="creator-badge hidden"></span>
+            </p>
+        </div>
+        <div class="header-actions">
+            <button id="favorite-button" class="btn-icon" aria-label="{% trans '즐겨찾기' %}" title="{% trans '즐겨찾기' %}">
+                <svg id="favorite-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                </svg>
+            </button>
+            <button id="view-kicked-users-button" class="btn-icon hidden" aria-label="{% trans '강퇴된 사용자' %}" title="{% trans '강퇴된 사용자 목록' %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="8.5" cy="7" r="4"/>
+                    <line x1="18" y1="8" x2="23" y2="13"/>
+                    <line x1="23" y1="8" x2="18" y2="13"/>
+                </svg>
+            </button>
+            <button id="toggle-participants" class="btn-icon" aria-label="{% trans '참여자 목록' %}" title="{% trans '참여자 목록' %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+            </button>
+            <button id="leave-room-button" class="btn-icon" aria-label="{% trans '나가기' %}" title="{% trans '나가기' %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                    <polyline points="16 17 21 12 16 7"/>
+                    <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Participant List Sidebar -->
+    <div class="participant-sidebar">
+        <div class="sidebar-header">
+            <h3>{% trans '참여자 목록' %}</h3>
+            <button id="close-sidebar" class="btn-icon" aria-label="{% trans '닫기' %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+        <div id="participant-list" class="participant-list">
+            <!-- Participants will be inserted here by JavaScript -->
+        </div>
+    </div>
+
+    <!-- Messages Container -->
+    <div id="messages-container" class="messages-container">
+        <div id="messages-list" class="messages-list">
+            <!-- Messages will be inserted here by JavaScript -->
+        </div>
+
+        <!-- Typing indicator -->
+        <div id="typing-indicator" class="typing-indicator hidden">
+            <div class="typing-dots">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <span id="typing-user"></span>
+        </div>
+    </div>
+
+    <!-- Message Input -->
+    <div class="message-input-container">
+        <form id="message-form" class="message-form">
+            <input
+                type="text"
+                id="message-input"
+                class="message-input"
+                placeholder="{% trans '메시지를 입력하세요...' %}"
+                autocomplete="off"
+                maxlength="500"
+            >
+            <button type="submit" class="btn-send" aria-label="{% trans '전송' %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="22" y1="2" x2="11" y2="13"/>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                </svg>
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Kick Modal -->
+<div id="kick-modal" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>{% trans '사용자 강퇴' %}</h3>
+            <button id="close-kick-modal" class="btn-icon" aria-label="{% trans '닫기' %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <p id="kick-target-name" class="kick-target"></p>
+
+            <div class="form-group">
+                <label for="kick-reason">{% trans '강퇴 사유 (선택사항)' %}</label>
+                <textarea id="kick-reason" class="form-input" rows="3" placeholder="{% trans '강퇴 사유를 입력하세요...' %}"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="ban-duration">{% trans '차단 기간' %}</label>
+                <select id="ban-duration" class="form-select">
+                    <option value="permanent">{% trans '영구 차단' %}</option>
+                    <option value="1h">{% trans '1시간' %}</option>
+                    <option value="1d">{% trans '1일' %}</option>
+                    <option value="1w">{% trans '1주일' %}</option>
+                    <option value="1m">{% trans '1개월' %}</option>
+                </select>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button id="confirm-kick" class="btn btn-danger">{% trans '강퇴하기' %}</button>
+            <button id="cancel-kick" class="btn btn-secondary">{% trans '취소' %}</button>
+        </div>
+    </div>
+</div>
+
+<!-- Kicked Users Modal -->
+<div id="kicked-users-modal" class="modal hidden">
+    <div class="modal-content large">
+        <div class="modal-header">
+            <h3>{% trans '강퇴된 사용자 목록' %}</h3>
+            <button id="close-kicked-users-modal" class="btn-icon" aria-label="{% trans '닫기' %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div id="kicked-users-list" class="kicked-users-list">
+                <!-- Kicked users will be inserted here by JavaScript -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Leave Room Modal -->
+<div id="leave-modal" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>{% trans '채팅방 나가기' %}</h3>
+            <button id="close-leave-modal" class="btn-icon" aria-label="{% trans '닫기' %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <p style="text-align: center; margin: 1rem 0; font-size: 1rem;">
+                {% trans '정말로 채팅방을 나가시겠습니까?' %}
+            </p>
+        </div>
+        <div class="modal-footer">
+            <button id="confirm-leave" class="btn btn-danger">{% trans '나가기' %}</button>
+            <button id="cancel-leave" class="btn btn-secondary">{% trans '취소' %}</button>
+        </div>
+    </div>
+</div>
+
+<!-- Report Modal -->
+<div id="report-modal" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>{% trans '사용자 신고' %}</h3>
+            <button id="close-report-modal" class="btn-icon" aria-label="{% trans '닫기' %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <p id="report-target-name" class="report-target"></p>
+
+            <div class="form-group">
+                <label for="report-reason">{% trans '신고 사유' %}</label>
+                <textarea id="report-reason" class="form-input" rows="4" placeholder="{% trans '신고 사유를 입력하세요...' %}"></textarea>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button id="confirm-report" class="btn btn-danger">{% trans '신고하기' %}</button>
+            <button id="cancel-report" class="btn btn-secondary">{% trans '취소' %}</button>
+        </div>
+    </div>
+</div>
+
+<!-- Block User Modal -->
+<div id="block-user-modal-chat" class="modal hidden" style="background-color: rgba(0, 0, 0, 0.5);">
+    <div class="modal-content" style="background-color: #ffffff; border-radius: 12px; padding: 1.5rem; max-width: 400px; margin: auto; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+        <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid #e5e7eb; padding-bottom: 1rem;">
+            <h3 style="margin: 0; font-size: 1.25rem; font-weight: 600;">{% trans '사용자 차단' %}</h3>
+            <button id="close-block-user-modal-chat" class="btn-icon" aria-label="{% trans '닫기' %}" style="background: none; border: none; cursor: pointer; padding: 0.25rem;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body" style="margin-bottom: 1.5rem;">
+            <p id="block-user-name-chat" style="text-align: center; margin: 1rem 0; font-size: 1rem; font-weight: 600;">
+            </p>
+            <p style="text-align: center; margin: 0.5rem 0; font-size: 0.875rem; color: #6b7280;">
+                {% trans '차단하면 이 사용자의 게시물과 댓글이 보이지 않게 됩니다.' %}
+            </p>
+        </div>
+        <div class="modal-footer" style="display: flex; gap: 0.75rem; justify-content: flex-end;">
+            <button id="cancel-block-user-chat" class="btn btn-secondary" style="padding: 0.5rem 1rem; border-radius: 6px;">{% trans '취소' %}</button>
+            <button id="confirm-block-user-chat" class="btn btn-danger" style="padding: 0.5rem 1rem; border-radius: 6px;">{% trans '차단' %}</button>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden data for JavaScript -->
+<div id="room-data"
+     data-room-id="{{ room_id }}"
+     data-user-id="{{ user.id }}"
+     data-user-nickname="{{ user.nickname }}"
+     data-is-favorited="false"
+     data-is-admin="false"
+     data-creator-id=""
+     class="hidden">
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/open-chat-room.js' %}"></script>
+{% endblock %}

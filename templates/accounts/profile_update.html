@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "프로필 수정 - HypeHere" %}{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 480px; margin: 0 auto; padding: var(--space-lg);">
+    <!-- Profile Update Form Card -->
+    <div class="card">
+        <div class="card-body">
+            <!-- Error Alert (Hidden by default) -->
+            <div id="error-alert" class="alert alert-error hidden" style="margin-bottom: var(--space-md);">
+                <span id="error-message"></span>
+            </div>
+
+            <!-- Success Alert (Hidden by default) -->
+            <div id="success-alert" class="alert alert-success hidden" style="margin-bottom: var(--space-md);">
+                <span id="success-message">{% trans "프로필 수정 성공!" %}</span>
+            </div>
+
+            <form id="profile-update-form" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <!-- Email (Read-only) -->
+                <div class="form-group">
+                    <label for="email" class="form-label">{% trans "이메일 (로그인 ID)" %}</label>
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        class="form-control"
+                        value="{{ user.email }}"
+                        readonly
+                        disabled
+                        style="background-color: var(--color-bg-secondary); cursor: not-allowed;"
+                    >
+                    <span class="form-text">{% trans "이메일은 보안상 변경할 수 없습니다." %}</span>
+                </div>
+
+                <!-- Nickname (Display Name) -->
+                <div class="form-group">
+                    <label for="nickname" class="form-label">{% trans "닉네임 (표시 이름) *" %}</label>
+                    <input
+                        type="text"
+                        id="nickname"
+                        name="nickname"
+                        class="form-control"
+                        placeholder="{% trans "홍길동" %}"
+                        value="{{ user.nickname }}"
+                        required
+                        maxlength="50"
+                    >
+                    <span class="form-text">{% trans "다른 사용자에게 표시될 이름입니다." %}</span>
+                    <span class="form-error" id="nickname-error"></span>
+                </div>
+
+                <!-- Date of Birth -->
+                <div class="form-group">
+                    <label for="date_of_birth" class="form-label">{% trans "생년월일" %}</label>
+                    <input
+                        type="date"
+                        id="date_of_birth"
+                        name="date_of_birth"
+                        class="form-control"
+                        value="{{ user.date_of_birth|date:'Y-m-d' }}"
+                    >
+                    <span class="form-error" id="date_of_birth-error"></span>
+                </div>
+
+                <!-- Bio -->
+                <div class="form-group">
+                    <label for="bio" class="form-label">{% trans "자기소개" %}</label>
+                    <textarea
+                        id="bio"
+                        name="bio"
+                        class="form-control"
+                        rows="4"
+                        maxlength="200"
+                        placeholder="{% trans "자신을 소개해주세요..." %}"
+                    >{{ user.bio }}</textarea>
+                    <span class="form-text" id="bio-counter">0 / 200{% trans "자" %}</span>
+                    <span class="form-error" id="bio-error"></span>
+                </div>
+
+                <!-- Country -->
+                <div class="form-group">
+                    <label for="country" class="form-label">{% trans "국가" %}</label>
+                    <div class="country-selector" id="country-selector"></div>
+                    <input type="hidden" id="country" name="country" value="{{ user.country }}">
+                    <span class="form-error" id="country-error"></span>
+                </div>
+
+                <!-- City -->
+                <div class="form-group">
+                    <label for="city" class="form-label">{% trans "도시" %}</label>
+                    <input
+                        type="text"
+                        id="city"
+                        name="city"
+                        class="form-control"
+                        placeholder="{% trans "서울" %}"
+                        value="{{ user.city }}"
+                        maxlength="100"
+                    >
+                    <span class="form-error" id="city-error"></span>
+                </div>
+
+                <!-- Action Buttons -->
+                <div style="display: flex; gap: var(--space-sm); margin-top: var(--space-lg);">
+                    <button type="submit" class="btn btn-primary" id="submit-btn" style="flex: 1;">
+                        <span id="submit-text">{% trans "저장하기" %}</span>
+                        <span id="submit-loading" class="spinner spinner-primary" class="hidden"></span>
+                    </button>
+                    <a href="{% url 'accounts:profile' %}" class="btn btn-secondary" style="flex: 1; text-align: center; text-decoration: none;">
+                        {% trans "취소" %}
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript for AJAX Profile Update -->
+<script>
+    // i18n for auth.js
+    window.AUTH_I18N = {
+        charCounter: "{% trans "자" %}",
+        errorImageOnly: "{% trans "이미지 파일만 업로드 가능합니다." %}",
+        errorFileSize: "{% trans "파일 크기는 5MB 이하여야 합니다." %}",
+        errorNicknameRequired: "{% trans "닉네임을 입력해주세요." %}",
+        errorCheckInput: "{% trans "입력 정보를 확인해주세요." %}",
+        errorNicknameLength: "{% trans "닉네임은 최대 50자까지 가능합니다." %}",
+        errorBioLength: "{% trans "자기소개는 최대 200자까지 가능합니다." %}",
+        successUpdate: "{% trans "프로필이 성공적으로 수정되었습니다!" %}",
+        errorUpdateFailed: "{% trans "프로필 수정 중 오류가 발생했습니다." %}",
+        errorNetwork: "{% trans "네트워크 오류가 발생했습니다. 다시 시도해주세요." %}",
+        placeholderSelect: "{% trans "선택하세요" %}",
+        placeholderSearchCountry: "{% trans "🔍 국가 검색..." %}",
+        emptySearchResult: "{% trans "검색 결과가 없습니다" %}"
+    };
+</script>
+<script src="{% static 'js/countries.js' %}"></script>
+<script src="{% static 'js/country-selector.js' %}"></script>
+<script src="{% static 'js/auth.js' %}"></script>
+<script>
+// Initialize country selector
+document.addEventListener('DOMContentLoaded', function() {
+    const currentCountry = '{{ user.country }}' || '';
+
+    const countrySelector = new CountrySelector('country-selector', {
+        countries: COUNTRIES,
+        placeholder: window.AUTH_I18N.placeholderSelect,
+        searchPlaceholder: window.AUTH_I18N.placeholderSearchCountry,
+        emptyText: window.AUTH_I18N.emptySearchResult,
+        initialValue: currentCountry,
+        onChange: function(country) {
+            // Value is automatically updated in hidden input
+            console.log('Selected country:', country);
+        }
+    });
+});
+</script>
+{% endblock %}

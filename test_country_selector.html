@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Country Selector Test</title>
+    <link rel="stylesheet" href="static/css/components.css">
+    <style>
+        body { padding: 20px; font-family: system-ui; }
+        .test-container { max-width: 400px; margin: 0 auto; }
+        .debug-info { 
+            margin-top: 20px; 
+            padding: 10px; 
+            background: #f0f0f0; 
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .debug-log { 
+            max-height: 200px; 
+            overflow-y: auto; 
+            background: white; 
+            padding: 10px; 
+            border: 1px solid #ccc;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h2>Country Selector Test</h2>
+        <div class="form-group">
+            <label>Select Country:</label>
+            <div class="country-selector" id="country-selector"></div>
+            <input type="hidden" id="country" name="country" value="">
+        </div>
+        
+        <div class="debug-info">
+            <strong>Debug Info:</strong>
+            <div>isOpen: <span id="debug-isopen">false</span></div>
+            <div>Element ID: <span id="debug-element">-</span></div>
+            <div class="debug-log" id="debug-log"></div>
+        </div>
+    </div>
+
+    <script src="static/js/countries.js"></script>
+    <script src="static/js/country-selector.js"></script>
+    <script>
+        // Enhanced CountrySelector with debug logging
+        const originalCountrySelector = CountrySelector;
+        
+        CountrySelector = function(elementId, options) {
+            const instance = new originalCountrySelector(elementId, options);
+            const debugLog = document.getElementById('debug-log');
+            const debugIsOpen = document.getElementById('debug-isopen');
+            const debugElement = document.getElementById('debug-element');
+            
+            function log(message) {
+                const time = new Date().toLocaleTimeString();
+                debugLog.innerHTML += `[${time}] ${message}<br>`;
+                debugLog.scrollTop = debugLog.scrollHeight;
+            }
+            
+            // Override methods to add logging
+            const originalToggle = instance.toggleDropdown.bind(instance);
+            const originalOpen = instance.openDropdown.bind(instance);
+            const originalClose = instance.closeDropdown.bind(instance);
+            
+            instance.toggleDropdown = function() {
+                log('toggleDropdown called, current isOpen: ' + instance.isOpen);
+                originalToggle();
+                debugIsOpen.textContent = instance.isOpen;
+            };
+            
+            instance.openDropdown = function() {
+                log('openDropdown called');
+                originalOpen();
+                debugIsOpen.textContent = instance.isOpen;
+            };
+            
+            instance.closeDropdown = function() {
+                log('closeDropdown called');
+                originalClose();
+                debugIsOpen.textContent = instance.isOpen;
+            };
+            
+            // Log outside click handler
+            log('CountrySelector initialized');
+            log('Element ID: ' + elementId);
+            debugElement.textContent = elementId;
+            
+            // Intercept outsideClickHandler
+            const originalHandler = instance.outsideClickHandler;
+            instance.outsideClickHandler = function(e) {
+                const isOpen = instance.isOpen;
+                const contains = instance.element.contains(e.target);
+                log(`Outside click: isOpen=${isOpen}, contains=${contains}, target=${e.target.className}`);
+                originalHandler(e);
+            };
+            
+            return instance;
+        };
+        
+        // Initialize
+        const selector = new CountrySelector('country-selector', {
+            countries: COUNTRIES,
+            placeholder: 'Select a country...',
+            initialValue: ''
+        });
+        
+        // Add click listener to document to log all clicks
+        document.addEventListener('click', function(e) {
+            const log = document.getElementById('debug-log');
+            log.innerHTML += `[GLOBAL CLICK] target: ${e.target.className || e.target.tagName}<br>`;
+        });
+    </script>
+</body>
+</html>

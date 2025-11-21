@@ -1,0 +1,994 @@
+/**
+ * Anonymous Chat Matching System
+ * Handles matching preferences, WebSocket connections, and chat functionality
+ */
+
+const MatchingSystem = {
+    // State
+    currentScreen: 'preferences',
+    matchingWebSocket: null,
+    chatWebSocket: null,
+    conversationId: null,
+    otherUserId: null,
+    isConnected: false,
+    countrySelector: null,
+
+    // WebRTC State
+    webrtcClient: null,
+    isVideoMode: false,
+
+    // Connection Request State
+    currentRequestId: null,
+    isFollowing: false,
+
+    // UI State
+    isMobile: false,
+
+    /**
+     * Initialize matching system
+     */
+    init() {
+        this.showPreferencesScreen(); // Explicitly set initial state
+        this.checkMobile();
+        this.initCountrySelector();
+        this.attachEventListeners();
+        this.loadSavedPreferences();
+
+        // Initialize WebRTC client
+        if (WebRTCClient && WebRTCClient.isSupported()) {
+            this.webrtcClient = new WebRTCClient();
+            if (window.DEBUG) console.log('[Matching] WebRTC client initialized');
+        } else {
+            console.warn('[Matching] WebRTC not supported in this browser');
+        }
+    },
+
+    /**
+     * Initialize CountrySelector component
+     */
+    initCountrySelector() {
+        if (typeof COUNTRIES === 'undefined' || typeof CountrySelector === 'undefined') {
+            console.error('CountrySelector or COUNTRIES not loaded');
+            return;
+        }
+
+        const savedCountry = localStorage.getItem('matching_preferred_country') || '';
+
+        this.countrySelector = new CountrySelector('preferred-country-selector', {
+            countries: COUNTRIES,
+            placeholder: window.MATCHING_I18N?.countryPlaceholder || 'All Countries',
+            searchPlaceholder: window.MATCHING_I18N?.countrySearchPlaceholder || 'Search countries...',
+            modalTitle: window.MATCHING_I18N?.countryModalTitle || 'Select Country',
+            initialValue: savedCountry,
+            onChange: (value) => {
+                // Auto-save on change
+                localStorage.setItem('matching_preferred_country', value);
+            }
+        });
+    },
+
+    /**
+     * Load saved preferences from localStorage
+     */
+    loadSavedPreferences() {
+        const savedGender = localStorage.getItem('matching_preferred_gender') || 'any';
+        const savedChatMode = localStorage.getItem('matching_chat_mode');
+
+        // Update gender selection
+        if (savedGender) {
+            this.updateGenderSelection(savedGender);
+        }
+
+        if (savedChatMode) {
+            const chatModeRadio = document.querySelector(`input[name="chat_mode"][value="${savedChatMode}"]`);
+            if (chatModeRadio) {
+                chatModeRadio.checked = true;
+            }
+        }
+        // Country is handled by CountrySelector's initialValue
+    },
+
+    /**
+     * Save preferences to localStorage
+     */
+    savePreferences(gender, country, chatMode) {
+        localStorage.setItem('matching_preferred_gender', gender);
+        localStorage.setItem('matching_preferred_country', country);
+        localStorage.setItem('matching_chat_mode', chatMode);
+    },
+
+    /**
+     * Attach event listeners
+     */
+    attachEventListeners() {
+        // Matching form submission
+        document.getElementById('matching-form')?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.startMatching();
+        });
+
+        // Cancel matching
+        document.getElementById('cancel-matching-btn')?.addEventListener('click', () => {
+            this.stopMatching();
+        });
+
+        // Chat input form
+        document.getElementById('chat-input-form')?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.sendMessage();
+        });
+
+        // Leave chat button
+        document.getElementById('leave-chat-btn')?.addEventListener('click', () => {
+            this.showLeaveModal();
+        });
+
+        // Leave modal actions
+        document.getElementById('cancel-leave-btn')?.addEventListener('click', () => {
+            this.hideLeaveModal();
+        });
+
+        document.getElementById('confirm-leave-btn')?.addEventListener('click', () => {
+            this.leaveChat();
+        });
+
+        // Follow button
+        document.getElementById('follow-btn')?.addEventListener('click', () => {
+            this.followUser();
+        });
+
+        // Report button
+        document.getElementById('report-btn')?.addEventListener('click', () => {
+            this.showReportModal();
+        });
+
+        document.getElementById('cancel-report-btn')?.addEventListener('click', () => {
+            this.hideReportModal();
+        });
+
+        document.getElementById('report-form')?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.submitReport();
+        });
+
+        // Connection request buttons
+        document.getElementById('accept-connection-btn')?.addEventListener('click', () => {
+            this.acceptConnection();
+        });
+
+        document.getElementById('reject-connection-btn')?.addEventListener('click', () => {
+            this.rejectConnection();
+        });
+
+        // Block button
+        document.getElementById('block-btn')?.addEventListener('click', () => {
+            this.blockUser();
+        });
+
+        // Gender selector button
+        document.getElementById('gender-selector-btn')?.addEventListener('click', () => {
+            this.showGenderModal();
+        });
+
+        // Gender option buttons
+        document.querySelectorAll('.gender-option').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                this.selectGender(e.currentTarget.dataset.value);
+            });
+        });
+
+        // Gender modal close button
+        document.querySelector('.gender-modal-close')?.addEventListener('click', () => {
+            this.hideGenderModal();
+        });
+
+        // Camera toggle
+        document.getElementById('camera-toggle')?.addEventListener('click', () => {
+            this.toggleCamera();
+        });
+
+        // Mic toggle
+        document.getElementById('mic-toggle')?.addEventListener('click', () => {
+            this.toggleMic();
+        });
+
+        // Close modals when clicking overlay
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    this.hideLeaveModal();
+                    this.hideReportModal();
+                    this.hideGenderModal();
+                }
+            });
+        });
+
+        // Window resize for mobile detection
+        window.addEventListener('resize', () => {
+            this.checkMobile();
+        });
+    },
+
+    /**
+     * Start matching process
+     */
+    async startMatching() {
+        const preferredGender = document.getElementById('preferred-gender').value;
+        const preferredCountry = this.countrySelector ? this.countrySelector.getValue() : '';
+        const chatMode = document.querySelector('input[name="chat_mode"]:checked')?.value || 'text';
+
+        // Save preferences
+        this.savePreferences(preferredGender, preferredCountry, chatMode);
+
+        try {
+            // Start matching via API
+            const response = await fetch('/messages/api/matching/start/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': this.getCSRFToken()
+                },
+                body: JSON.stringify({
+                    preferred_gender: preferredGender,
+                    preferred_country: preferredCountry,
+                    chat_mode: chatMode
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.status === 'matched') {
+                // Match found immediately
+                this.conversationId = data.conversation_id;
+                this.connectToChat();
+            } else if (data.status === 'queued') {
+                // Added to queue - show waiting screen
+                this.showWaitingScreen();
+                this.updateQueueInfo(data.position, data.queue_size);
+                this.connectToMatchingWebSocket();
+            }
+        } catch (error) {
+            console.error('Error starting matching:', error);
+            alert('매칭 시작 중 오류가 발생했습니다.');
+        }
+    },
+
+    /**
+     * Stop matching process
+     */
+    async stopMatching() {
+        try {
+            await fetch('/messages/api/matching/stop/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': this.getCSRFToken()
+                }
+            });
+
+            // Disconnect WebSocket
+            if (this.matchingWebSocket) {
+                this.matchingWebSocket.close();
+                this.matchingWebSocket = null;
+            }
+
+            // Reset state
+            this.isFollowing = false;
+
+            // Show preferences screen
+            this.showPreferencesScreen();
+        } catch (error) {
+            console.error('Error stopping matching:', error);
+        }
+    },
+
+    /**
+     * Connect to matching WebSocket for real-time updates
+     */
+    connectToMatchingWebSocket() {
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const wsUrl = `${protocol}//${window.location.host}/ws/matching/`;
+
+        this.matchingWebSocket = new WebSocket(wsUrl);
+
+        this.matchingWebSocket.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+
+            if (data.type === 'match_found') {
+                // Match found!
+                this.conversationId = data.conversation_id;
+                this.matchingWebSocket.close();
+                this.matchingWebSocket = null;
+                this.connectToChat();
+            } else if (data.type === 'queue_update') {
+                // Queue position updated
+                this.updateQueueInfo(data.position, data.queue_size);
+            }
+        };
+
+        this.matchingWebSocket.onerror = (error) => {
+            console.error('Matching WebSocket error:', error);
+        };
+
+        this.matchingWebSocket.onclose = () => {
+            console.log('Matching WebSocket closed');
+        };
+    },
+
+    /**
+     * Connect to anonymous chat WebSocket
+     */
+    connectToChat() {
+        this.showChatScreen();
+
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const wsUrl = `${protocol}//${window.location.host}/ws/anonymous-chat/${this.conversationId}/`;
+
+        this.chatWebSocket = new WebSocket(wsUrl);
+
+        this.chatWebSocket.onopen = () => {
+            this.isConnected = true;
+            this.updateChatStatus('연결됨');
+
+            // Initialize WebRTC client with WebSocket connection
+            if (this.webrtcClient) {
+                const localVideo = document.getElementById('local-video');
+                const remoteVideo = document.getElementById('remote-video');
+                this.webrtcClient.init(this.chatWebSocket, localVideo, remoteVideo);
+
+                // Setup error callback
+                this.webrtcClient.onError((message) => {
+                    alert(message);
+                });
+
+                // Auto-start video if chat mode is video
+                const savedChatMode = localStorage.getItem('matching_chat_mode');
+                if (savedChatMode === 'video') {
+                    // Delay to ensure partner is also connected
+                    setTimeout(() => {
+                        this.startVideo();
+                    }, 1000);
+                }
+            }
+        };
+
+        this.chatWebSocket.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+
+            if (data.type === 'message') {
+                this.displayMessage(data);
+            } else if (data.type === 'partner_connected') {
+                this.addSystemMessage(data.message);
+                this.updateChatStatus('연결됨');
+            } else if (data.type === 'partner_left') {
+                this.addSystemMessage(data.message);
+                this.updateChatStatus('상대방이 나갔습니다', true);
+                this.showRematchButton();
+                // Stop video if active
+                if (this.isVideoMode) {
+                    this.stopVideo();
+                }
+            }
+            // WebRTC signal handling
+            else if (data.type === 'video_offer' || data.type === 'video_answer' ||
+                     data.type === 'ice_candidate' || data.type === 'video_toggle') {
+                if (this.webrtcClient) {
+                    this.webrtcClient.handleSignal(data);
+                }
+            }
+            // Connection request handling
+            else if (data.type === 'connection_request') {
+                this.handleConnectionRequest(data.request_id);
+            } else if (data.type === 'connection_accepted') {
+                this.isFollowing = true;
+                const followBtn = document.getElementById('follow-btn');
+                if (followBtn) {
+                    followBtn.disabled = false;
+                    followBtn.style.opacity = '1';
+                }
+                alert('상대방이 팔로우 요청을 수락했습니다.');
+            } else if (data.type === 'connection_rejected') {
+                const followBtn = document.getElementById('follow-btn');
+                if (followBtn) {
+                    followBtn.disabled = false;
+                    followBtn.style.opacity = '1';
+                }
+                alert('상대방이 팔로우를 거부하셨습니다.');
+            }
+        };
+
+        this.chatWebSocket.onerror = (error) => {
+            console.error('Chat WebSocket error:', error);
+            this.updateChatStatus('연결 오류', true);
+        };
+
+        this.chatWebSocket.onclose = () => {
+            this.isConnected = false;
+            console.log('Chat WebSocket closed');
+        };
+    },
+
+    /**
+     * Send chat message
+     */
+    sendMessage() {
+        const input = document.getElementById('chat-input');
+        const content = input.value.trim();
+
+        if (!content || !this.chatWebSocket || !this.isConnected) return;
+
+        this.chatWebSocket.send(JSON.stringify({
+            type: 'message',
+            content: content
+        }));
+
+        input.value = '';
+    },
+
+    /**
+     * Display received message
+     */
+    displayMessage(data) {
+        const messagesContainer = document.getElementById('chat-messages');
+        const currentUserId = this.getCurrentUserId();
+
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${data.sender_id === currentUserId ? 'sent' : 'received'}`;
+
+        const bubble = document.createElement('div');
+        bubble.className = 'message-bubble';
+        bubble.textContent = data.content;
+
+        const time = document.createElement('span');
+        time.className = 'message-time';
+        time.textContent = this.formatTime(data.created_at);
+
+        messageDiv.appendChild(bubble);
+        messageDiv.appendChild(time);
+        messagesContainer.appendChild(messageDiv);
+
+        // Scroll to bottom
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    },
+
+    /**
+     * Add system message
+     */
+    addSystemMessage(message) {
+        const messagesContainer = document.getElementById('chat-messages');
+
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'system-message';
+        messageDiv.textContent = message;
+
+        messagesContainer.appendChild(messageDiv);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    },
+
+    /**
+     * Show rematch button when partner leaves
+     */
+    showRematchButton() {
+        const messagesContainer = document.getElementById('chat-messages');
+
+        const rematchDiv = document.createElement('div');
+        rematchDiv.className = 'system-message';
+        rematchDiv.innerHTML = `
+            <button type="button" class="btn btn-primary" onclick="MatchingSystem.rematch()">
+                1:1 매칭하기
+            </button>
+        `;
+
+        messagesContainer.appendChild(rematchDiv);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    },
+
+    /**
+     * Rematch - go back to preferences
+     */
+    rematch() {
+        if (this.chatWebSocket) {
+            this.chatWebSocket.close();
+            this.chatWebSocket = null;
+        }
+        this.conversationId = null;
+        this.otherUserId = null;
+        this.showPreferencesScreen();
+    },
+
+    /**
+     * Leave chat
+     */
+    async leaveChat() {
+        this.hideLeaveModal();
+
+        if (this.chatWebSocket) {
+            this.chatWebSocket.close();
+            this.chatWebSocket = null;
+        }
+
+        if (this.conversationId) {
+            // Leave conversation via API
+            try {
+                await fetch(`/messages/api/conversations/${this.conversationId}/leave/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': this.getCSRFToken()
+                    }
+                });
+            } catch (error) {
+                console.error('Error leaving conversation:', error);
+            }
+        }
+
+        this.conversationId = null;
+        this.otherUserId = null;
+        this.isFollowing = false; // Reset follow state
+        this.showPreferencesScreen();
+    },
+
+    /**
+     * Follow user from anonymous chat
+     */
+    async followUser() {
+        if (!this.conversationId) return;
+
+        // Check if already following
+        if (this.isFollowing) {
+            alert('이미 팔로우 되어있는 상대입니다.');
+            return;
+        }
+
+        const followBtn = document.getElementById('follow-btn');
+
+        try {
+            // Disable button while waiting for response
+            followBtn.disabled = true;
+            followBtn.style.opacity = '0.5';
+
+            const response = await fetch('/messages/api/anonymous/connection-request/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': this.getCSRFToken()
+                },
+                body: JSON.stringify({
+                    conversation_id: this.conversationId
+                })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                alert('팔로우 요청을 보냈습니다. 상대방의 응답을 기다리고 있습니다.');
+                // Keep button disabled until response
+            } else {
+                alert(data.error || '팔로우 요청 중 오류가 발생했습니다.');
+                // Re-enable button on error
+                followBtn.disabled = false;
+                followBtn.style.opacity = '1';
+            }
+        } catch (error) {
+            console.error('Error sending connection request:', error);
+            alert('팔로우 요청 중 오류가 발생했습니다.');
+            // Re-enable button on error
+            followBtn.disabled = false;
+            followBtn.style.opacity = '1';
+        }
+    },
+
+    /**
+     * Handle connection request received
+     */
+    handleConnectionRequest(requestId) {
+        this.currentRequestId = requestId;
+        this.showModal('connection-request-modal');
+    },
+
+    /**
+     * Accept connection request
+     */
+    async acceptConnection() {
+        if (!this.currentRequestId) return;
+
+        try {
+            const response = await fetch('/messages/api/anonymous/connection-respond/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': this.getCSRFToken()
+                },
+                body: JSON.stringify({
+                    request_id: this.currentRequestId,
+                    accept: true
+                })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                this.hideModal('connection-request-modal');
+                alert('연결 요청을 수락했습니다.');
+            } else {
+                alert(data.error || '오류가 발생했습니다.');
+            }
+        } catch (error) {
+            console.error('Error accepting connection:', error);
+            alert('오류가 발생했습니다.');
+        }
+
+        this.currentRequestId = null;
+    },
+
+    /**
+     * Reject connection request
+     */
+    async rejectConnection() {
+        if (!this.currentRequestId) return;
+
+        try {
+            const response = await fetch('/messages/api/anonymous/connection-respond/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': this.getCSRFToken()
+                },
+                body: JSON.stringify({
+                    request_id: this.currentRequestId,
+                    accept: false
+                })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                this.hideModal('connection-request-modal');
+                alert('연결 요청을 거절했습니다.');
+            } else {
+                alert(data.error || '오류가 발생했습니다.');
+            }
+        } catch (error) {
+            console.error('Error rejecting connection:', error);
+            alert('오류가 발생했습니다.');
+        }
+
+        this.currentRequestId = null;
+    },
+
+    /**
+     * Submit report
+     */
+    async submitReport() {
+        const reportType = document.getElementById('report-type').value;
+        const description = document.getElementById('report-description').value;
+
+        if (!reportType) return;
+
+        try {
+            const response = await fetch('/messages/api/report/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': this.getCSRFToken()
+                },
+                body: JSON.stringify({
+                    reported_user: this.otherUserId,
+                    conversation: this.conversationId,
+                    report_type: reportType,
+                    description: description
+                })
+            });
+
+            if (response.ok) {
+                alert('신고가 접수되었습니다.');
+                this.hideReportModal();
+                document.getElementById('report-form').reset();
+            }
+        } catch (error) {
+            console.error('Error submitting report:', error);
+            alert('신고 중 오류가 발생했습니다.');
+        }
+    },
+
+    /**
+     * Block user (placeholder - implement block API)
+     */
+    async blockUser() {
+        if (!confirm('이 사용자를 차단하시겠습니까?')) return;
+
+        // TODO: Implement block API call
+        alert('차단 기능이 구현 중입니다.');
+    },
+
+    /**
+     * WebRTC Video Chat Functions
+     */
+
+    /**
+     * Start video chat - 50:50 split layout
+     */
+    async startVideo() {
+        try {
+            if (window.DEBUG) console.log('[Matching] Starting video...');
+
+            // Determine if we are initiator (randomly for P2P)
+            const isInitiator = Math.random() < 0.5;
+
+            await this.webrtcClient.startVideo(isInitiator);
+
+            this.isVideoMode = true;
+
+            // Update UI - Show video container and minimize chat
+            const videoContainer = document.getElementById('video-container');
+            const chatMessages = document.getElementById('chat-messages');
+
+            if (videoContainer) videoContainer.classList.remove('hidden');
+            if (chatMessages) chatMessages.classList.add('minimized');
+
+            if (window.DEBUG) console.log('[Matching] Video started - 50:50 split layout');
+        } catch (error) {
+            console.error('[Matching] Failed to start video:', error);
+            this.isVideoMode = false;
+        }
+    },
+
+    /**
+     * Stop video chat
+     */
+    stopVideo() {
+        if (window.DEBUG) console.log('[Matching] Stopping video...');
+
+        if (this.webrtcClient) {
+            this.webrtcClient.stopVideo();
+        }
+
+        this.isVideoMode = false;
+
+        // Update UI - Hide video container and restore chat
+        const videoContainer = document.getElementById('video-container');
+        const chatMessages = document.getElementById('chat-messages');
+
+        if (videoContainer) videoContainer.classList.add('hidden');
+        if (chatMessages) chatMessages.classList.remove('minimized');
+
+        if (window.DEBUG) console.log('[Matching] Video stopped');
+    },
+
+    /**
+     * Toggle camera on/off
+     */
+    toggleCamera() {
+        if (!this.webrtcClient || !this.isVideoMode) return;
+
+        const enabled = this.webrtcClient.toggleVideo();
+        const cameraBtn = document.getElementById('camera-toggle');
+
+        if (cameraBtn) {
+            if (enabled) {
+                cameraBtn.classList.remove('off');
+                cameraBtn.title = '카메라 끄기';
+            } else {
+                cameraBtn.classList.add('off');
+                cameraBtn.title = '카메라 켜기';
+            }
+        }
+    },
+
+    /**
+     * Toggle microphone on/off
+     */
+    toggleMic() {
+        if (!this.webrtcClient || !this.isVideoMode) return;
+
+        const enabled = this.webrtcClient.toggleAudio();
+        const micBtn = document.getElementById('mic-toggle');
+
+        if (micBtn) {
+            if (enabled) {
+                micBtn.classList.remove('off');
+                micBtn.title = '마이크 끄기';
+            } else {
+                micBtn.classList.add('off');
+                micBtn.title = '마이크 켜기';
+            }
+        }
+    },
+
+    /**
+     * UI Screen Management
+     */
+    showPreferencesScreen() {
+        this.hideAllScreens();
+        document.getElementById('preferences-screen').classList.remove('hidden');
+        this.currentScreen = 'preferences';
+    },
+
+    showWaitingScreen() {
+        this.hideAllScreens();
+        document.getElementById('waiting-screen').classList.remove('hidden');
+        this.currentScreen = 'waiting';
+    },
+
+    showChatScreen() {
+        this.hideAllScreens();
+        document.getElementById('chat-screen').classList.remove('hidden');
+        this.currentScreen = 'chat';
+    },
+
+    hideAllScreens() {
+        document.querySelectorAll('.matching-screen').forEach(screen => {
+            screen.classList.add('hidden');
+        });
+    },
+
+    /**
+     * Modal Management
+     */
+    showLeaveModal() {
+        document.getElementById('leave-modal').classList.remove('hidden');
+    },
+
+    hideLeaveModal() {
+        document.getElementById('leave-modal').classList.add('hidden');
+    },
+
+    showReportModal() {
+        document.getElementById('report-modal').classList.remove('hidden');
+    },
+
+    hideReportModal() {
+        document.getElementById('report-modal').classList.add('hidden');
+    },
+
+    /**
+     * Check if device is mobile
+     */
+    checkMobile() {
+        this.isMobile = window.innerWidth < 768;
+    },
+
+    /**
+     * Show gender selection modal
+     */
+    showGenderModal() {
+        const modal = document.getElementById('gender-modal');
+        modal.classList.remove('hidden');
+
+        // 모바일일 때 Bottom Sheet 애니메이션
+        if (this.isMobile) {
+            modal.classList.add('gender-modal-mobile');
+            document.body.style.overflow = 'hidden'; // 배경 스크롤 방지
+        }
+    },
+
+    /**
+     * Hide gender selection modal
+     */
+    hideGenderModal() {
+        const modal = document.getElementById('gender-modal');
+
+        if (this.isMobile) {
+            modal.classList.remove('gender-modal-mobile');
+            document.body.style.overflow = ''; // 스크롤 복원
+        }
+
+        modal.classList.add('hidden');
+    },
+
+    /**
+     * Select gender and update UI
+     */
+    selectGender(value) {
+        this.updateGenderSelection(value);
+        localStorage.setItem('matching_preferred_gender', value);
+        this.hideGenderModal();
+    },
+
+    /**
+     * Update gender selection UI
+     */
+    updateGenderSelection(value) {
+        // Read translated labels from data attributes
+        const genderButton = document.getElementById('gender-selector-btn');
+        const genderLabels = {
+            'any': genderButton?.dataset.labelAll || 'All',
+            'male': genderButton?.dataset.labelMale || 'Male',
+            'female': genderButton?.dataset.labelFemale || 'Female',
+            'other': genderButton?.dataset.labelOther || 'Other'
+        };
+
+        // Update button text
+        const textElement = document.getElementById('selected-gender-text');
+        if (textElement) {
+            textElement.textContent = genderLabels[value] || genderLabels['any'];
+        }
+
+        // Update hidden input
+        const hiddenInput = document.getElementById('preferred-gender');
+        if (hiddenInput) {
+            hiddenInput.value = value;
+        }
+
+        // Update active class on modal buttons
+        document.querySelectorAll('.gender-option').forEach(btn => {
+            if (btn.dataset.value === value) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+    },
+
+    /**
+     * Show modal helper
+     */
+    showModal(modalId) {
+        document.getElementById(modalId)?.classList.remove('hidden');
+    },
+
+    /**
+     * Hide modal helper
+     */
+    hideModal(modalId) {
+        document.getElementById(modalId)?.classList.add('hidden');
+    },
+
+    /**
+     * Update queue information
+     */
+    updateQueueInfo(position, size) {
+        document.getElementById('queue-position').textContent = position || '-';
+        document.getElementById('queue-size').textContent = size || '-';
+    },
+
+    /**
+     * Update chat status
+     */
+    updateChatStatus(status, disconnected = false) {
+        const statusEl = document.getElementById('chat-status');
+        if (statusEl) {
+            statusEl.textContent = status;
+            if (disconnected) {
+                statusEl.classList.add('disconnected');
+            } else {
+                statusEl.classList.remove('disconnected');
+            }
+        }
+    },
+
+    /**
+     * Utility Functions
+     */
+    getCSRFToken() {
+        return document.querySelector('[name=csrfmiddlewaretoken]')?.value ||
+               document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '';
+    },
+
+    getCurrentUserId() {
+        // Get from meta tag or global variable
+        return window.currentUserId || null;
+    },
+
+    formatTime(timestamp) {
+        const date = new Date(timestamp);
+        return date.toLocaleTimeString('ko-KR', {
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    }
+};
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    MatchingSystem.init();
+});
+
+// Cleanup on page unload
+window.addEventListener('beforeunload', () => {
+    if (MatchingSystem.matchingWebSocket) {
+        MatchingSystem.matchingWebSocket.close();
+    }
+    if (MatchingSystem.chatWebSocket) {
+        MatchingSystem.chatWebSocket.close();
+    }
+});

@@ -1,0 +1,28 @@
+{% load static %}
+
+<!-- Generic Alert/Notification Modal -->
+<div id="alert-modal" class="modal-overlay alert-modal-overlay hidden">
+    <div class="modal-container alert-modal-container">
+        <!-- Header -->
+        <div class="modal-header alert-modal-header">
+            <div class="alert-icon" id="alert-icon">
+                <!-- Icon will be injected by JavaScript -->
+            </div>
+            <h3 class="alert-modal-title" id="alert-modal-title">Notification</h3>
+        </div>
+
+        <!-- Body -->
+        <div class="modal-body alert-modal-body">
+            <p class="alert-message" id="alert-message">
+                <!-- Message will be injected by JavaScript -->
+            </p>
+        </div>
+
+        <!-- Footer -->
+        <div class="modal-footer alert-modal-footer">
+            <button type="button" class="btn btn-primary" id="alert-ok-btn">
+                OK
+            </button>
+        </div>
+    </div>
+</div>

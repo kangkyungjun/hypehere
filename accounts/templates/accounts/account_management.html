@@ -1,0 +1,394 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}계정 관리 - HypeHere{% endblock %}
+
+{% block content %}
+<div class="privacy-settings-container">
+    <div class="privacy-settings-card">
+        <!-- 헤더 -->
+        <div class="privacy-settings-header">
+            <a href="{% url 'accounts:settings' %}" class="back-button">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="m15 18-6-6 6-6"/>
+                </svg>
+            </a>
+            <h1 class="privacy-settings-title">계정 관리</h1>
+        </div>
+
+        <!-- 삭제 예약 알림 -->
+        <div id="deletion-alert" class="deletion-alert hidden">
+            <div class="alert-content">
+                <svg class="alert-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                    <line x1="12" y1="9" x2="12" y2="13"/>
+                    <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+                <div class="alert-text">
+                    <h3>계정 삭제 예약됨</h3>
+                    <p><span id="days-remaining"></span>일 후 영구 삭제됩니다.</p>
+                </div>
+            </div>
+            <button id="btn-cancel-deletion" class="btn-cancel-deletion">삭제 취소</button>
+        </div>
+
+        <!-- 계정 관리 섹션 그리드 -->
+        <div class="account-sections-grid">
+            <!-- 비활성화 섹션 -->
+            <div class="privacy-settings-section">
+                <h2 class="privacy-settings-section-title">계정 비활성화</h2>
+                <div class="privacy-setting-item" style="flex-direction: column; align-items: flex-start;">
+                    <div class="privacy-setting-content" style="width: 100%; margin-bottom: var(--space-md);">
+                        <div class="privacy-setting-text">
+                            <div class="privacy-setting-label">계정 일시 정지</div>
+                            <div class="privacy-setting-description">
+                                프로필이 숨겨지지만 언제든지 다시 로그인하여 복구할 수 있습니다
+                            </div>
+                        </div>
+                    </div>
+                    <button id="btn-deactivate" class="btn-deactivate">비활성화</button>
+                </div>
+            </div>
+
+            <!-- 삭제 섹션 -->
+            <div class="privacy-settings-section danger-section">
+                <h2 class="privacy-settings-section-title">계정 영구 삭제</h2>
+                <div class="privacy-setting-item" style="flex-direction: column; align-items: flex-start;">
+                    <div class="privacy-setting-content" style="width: 100%; margin-bottom: var(--space-md);">
+                        <div class="privacy-setting-text">
+                            <div class="privacy-setting-label">계정 삭제</div>
+                            <div class="privacy-setting-description">
+                                30일 후 계정과 모든 데이터가 영구적으로 삭제됩니다. 이 작업은 되돌릴 수 없습니다.
+                            </div>
+                        </div>
+                    </div>
+                    <button id="btn-delete" class="btn-delete">삭제 요청</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 비활성화 확인 모달 -->
+<div id="deactivate-modal" class="modal hidden">
+    <div class="modal-overlay" data-action="close-modal" data-modal-id="deactivate-modal"></div>
+    <div class="modal-content">
+        <h2>계정을 비활성화하시겠습니까?</h2>
+        <p>프로필과 게시글이 숨겨지지만 언제든 다시 로그인하여 복구할 수 있습니다.</p>
+        <div class="modal-actions">
+            <button class="btn-cancel" data-action="close-modal" data-modal-id="deactivate-modal">취소</button>
+            <button class="btn-confirm" id="confirm-deactivate">비활성화</button>
+        </div>
+    </div>
+</div>
+
+<!-- 삭제 확인 모달 Step 1 -->
+<div id="delete-modal-step1" class="modal hidden">
+    <div class="modal-overlay" data-action="close-modal" data-modal-id="delete-modal-step1"></div>
+    <div class="modal-content">
+        <h2>정말로 계정을 삭제하시겠습니까?</h2>
+        <p>30일 후 다음 항목이 영구적으로 삭제됩니다:</p>
+        <ul style="text-align: left; margin: var(--space-md) 0;">
+            <li>프로필 정보</li>
+            <li>모든 게시글 및 댓글</li>
+            <li>팔로워 및 팔로잉 관계</li>
+            <li>모든 활동 기록</li>
+        </ul>
+        <div class="modal-actions">
+            <button class="btn-cancel" data-action="close-modal" data-modal-id="delete-modal-step1">취소</button>
+            <button class="btn-next" id="next-step2">다음</button>
+        </div>
+    </div>
+</div>
+
+<!-- 삭제 확인 모달 Step 2 -->
+<div id="delete-modal-step2" class="modal hidden">
+    <div class="modal-overlay" data-action="close-modal" data-modal-id="delete-modal-step2"></div>
+    <div class="modal-content">
+        <h2>계정 삭제 확인</h2>
+        <p>계속하려면 "<strong>영구삭제</strong>"를 입력하세요:</p>
+        <input type="text" id="delete-confirm-text" placeholder="영구삭제" style="width: 100%; padding: var(--space-sm); border: 1px solid var(--color-border); border-radius: var(--radius-md); margin: var(--space-md) 0;"/>
+        <div class="modal-actions">
+            <button class="btn-cancel" data-action="close-modal" data-modal-id="delete-modal-step2">취소</button>
+            <button class="btn-danger" id="confirm-delete" disabled>삭제 요청</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+/* 기본 스타일은 privacy_settings.html에서 상속 */
+
+/* 헤더 레이아웃 수정 - 가로 배열 */
+.privacy-settings-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    margin-bottom: var(--space-xl);
+}
+
+.back-button {
+    position: absolute;
+    left: 0;
+}
+
+.privacy-settings-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-text);
+}
+
+/* 계정 섹션 그리드 레이아웃 */
+.account-sections-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-xl);
+    margin-bottom: var(--space-xl);
+}
+
+/* 현대적 카드 스타일 */
+.privacy-settings-section {
+    background: white;
+    border-radius: 16px;
+    padding: var(--space-xl);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: none;
+}
+
+.privacy-settings-section:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+/* 타이틀 단색 */
+.privacy-settings-section-title {
+    font-size: 1.5rem !important;
+    font-weight: 700 !important;
+    margin-bottom: var(--space-lg) !important;
+    color: #667eea;
+}
+
+.danger-section .privacy-settings-section-title {
+    color: #f5576c !important;
+}
+
+/* 아이콘 제거 - SVG가 없으므로 스타일 불필요 */
+
+/* 레이블 스타일 */
+.privacy-setting-label {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.privacy-setting-description {
+    color: var(--color-text-light);
+    line-height: 1.6;
+}
+
+/* 모바일 반응형 */
+@media (max-width: 767px) {
+    .account-sections-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-lg);
+    }
+
+    .privacy-settings-section {
+        padding: var(--space-lg);
+    }
+
+    .privacy-settings-section-title {
+        font-size: 1.25rem !important;
+    }
+
+    .privacy-setting-content svg {
+        width: 40px !important;
+        height: 40px !important;
+        padding: 10px;
+    }
+}
+
+/* 알림 박스 */
+.deletion-alert {
+    background: #fff3cd;
+    border: 1px solid #ffc107;
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    margin-bottom: var(--space-lg);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.alert-content {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+}
+
+.alert-icon {
+    flex-shrink: 0;
+    color: #856404;
+}
+
+.alert-text h3 {
+    margin: 0 0 var(--space-xs) 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #856404;
+}
+
+.alert-text p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: #856404;
+}
+
+.btn-cancel-deletion {
+    background: #ffc107;
+    color: #856404;
+    border: none;
+    padding: var(--space-xs) var(--space-md);
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* 버튼 현대화 */
+.btn-deactivate,
+.btn-delete {
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    width: 100%;
+}
+
+.btn-deactivate {
+    background: #667eea;
+    color: white;
+}
+
+.btn-deactivate:hover {
+    background: #5568d3;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
+}
+
+.btn-delete {
+    background: #f5576c;
+    color: white;
+}
+
+.btn-delete:hover {
+    background: #e03e53;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(245, 87, 108, 0.4);
+}
+
+.btn-delete:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* 모달 */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: var(--z-modal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: var(--z-modal-backdrop);
+}
+
+.modal-content {
+    position: relative;
+    background: var(--color-bg);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+    max-width: 500px;
+    width: 90%;
+    text-align: center;
+    box-shadow: var(--shadow-lg);
+    z-index: var(--z-modal);
+}
+
+.modal-content h2 {
+    margin: 0 0 var(--space-md) 0;
+    font-size: 1.25rem;
+    color: var(--color-text);
+}
+
+.modal-content p {
+    margin: 0 0 var(--space-md) 0;
+    color: var(--color-text-light);
+}
+
+.modal-actions {
+    display: flex;
+    gap: var(--space-md);
+    justify-content: center;
+    margin-top: var(--space-lg);
+}
+
+.btn-cancel,
+.btn-confirm,
+.btn-next,
+.btn-danger {
+    padding: var(--space-sm) var(--space-lg);
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+}
+
+.btn-cancel {
+    background: var(--color-hover);
+    color: var(--color-text);
+}
+
+.btn-confirm,
+.btn-next {
+    background: var(--color-primary);
+    color: white;
+}
+
+.btn-danger {
+    background: var(--color-danger);
+    color: white;
+}
+
+.btn-danger:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/account_management.js' %}"></script>
+{% endblock %}

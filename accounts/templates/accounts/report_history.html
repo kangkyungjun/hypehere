@@ -1,0 +1,1019 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}신고 내역 - HypeHere{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/report-history.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="report-history-container">
+    <!-- 헤더 -->
+    <div class="report-header">
+        <a href="{% url 'accounts:settings' %}" class="btn-back">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="19" y1="12" x2="5" y2="12"/>
+                <polyline points="12 19 5 12 12 5"/>
+            </svg>
+        </a>
+        <h1 class="report-title">신고 내역</h1>
+        <button class="btn-filter" data-action="open-filter-modal">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="4" y1="21" x2="4" y2="14"></line>
+                <line x1="4" y1="10" x2="4" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12" y2="3"></line>
+                <line x1="20" y1="21" x2="20" y2="16"></line>
+                <line x1="20" y1="12" x2="20" y2="3"></line>
+                <line x1="1" y1="14" x2="7" y2="14"></line>
+                <line x1="9" y1="8" x2="15" y2="8"></line>
+                <line x1="17" y1="16" x2="23" y2="16"></line>
+            </svg>
+            <span>필터</span>
+        </button>
+    </div>
+
+    <!-- 활성화된 필터 태그 -->
+    <div id="active-filters" class="active-filters-container" class="hidden"></div>
+
+    <!-- 탭 네비게이션 -->
+    <div class="report-tabs">
+        <button class="tab-button active" data-tab="post-reports">
+            게시물 신고
+            <span class="tab-count">{{ post_reports.count }}</span>
+        </button>
+        <button class="tab-button" data-tab="comment-reports">
+            댓글 신고
+            <span class="tab-count">{{ comment_reports.count }}</span>
+        </button>
+        <button class="tab-button" data-tab="chat-reports">
+            채팅 신고
+            <span class="tab-count">{{ chat_reports.count }}</span>
+        </button>
+    </div>
+
+    <!-- 게시물 신고 탭 -->
+    <div class="tab-content active" id="post-reports-tab">
+        {% if post_reports %}
+            {% for report in post_reports %}
+            <div class="report-card">
+                <div class="report-card-header">
+                    <span class="report-type-badge badge-{{ report.report_type }}">
+                        {{ report.get_report_type_display }}
+                    </span>
+                    <span class="status-badge status-{{ report.status }}">
+                        {{ report.get_status_display }}
+                    </span>
+                </div>
+
+                <div class="report-meta">
+                    <div class="reported-user">
+                        <div class="user-avatar">
+                            {{ report.reported_user.nickname|slice:":1"|upper }}
+                        </div>
+                        <div>
+                            <div class="user-name">{{ report.reported_user.nickname }}</div>
+                            <div class="report-time">{{ report.created_at|timesince }} 전</div>
+                        </div>
+                    </div>
+                </div>
+
+                {% if report.post %}
+                <div class="report-section">
+                    <div style="background: var(--color-bg-secondary); padding: var(--space-md); border-radius: var(--radius-md); border-left: 3px solid var(--color-primary);">
+                        <p style="margin: 0; color: var(--color-text);">{{ report.post.content|truncatewords:30 }}</p>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if report.description %}
+                <div class="report-description">
+                    "{{ report.description }}"
+                </div>
+                {% endif %}
+
+                <!-- 관리자 전용 액션 버튼 -->
+                {% if request.user.is_staff %}
+                <div class="report-actions" style="display: flex; gap: var(--space-sm); margin-top: var(--space-md); flex-wrap: wrap;">
+                    {% if report.post %}
+                    <a href="/?postId={{ report.post.id }}" class="btn btn-secondary btn-sm">
+                        게시물 보기
+                    </a>
+                    {% endif %}
+                    <button class="btn btn-danger btn-sm" data-action="open-delete-modal" data-report-id="{{ report.id }}" data-report-type="post">
+                        삭제 처리
+                    </button>
+                    <button class="btn btn-ghost btn-sm" data-action="open-dismiss-modal" data-report-id="{{ report.id }}" data-report-type="post">
+                        신고 기각
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <svg viewBox="0 0 24 24">
+                    <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                <h3>게시물 신고 내역이 없습니다</h3>
+                <p>아직 신고한 게시물이 없습니다</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- 댓글 신고 탭 -->
+    <div class="tab-content" id="comment-reports-tab">
+        {% if comment_reports %}
+            {% for report in comment_reports %}
+            <div class="report-card">
+                <div class="report-card-header">
+                    <span class="report-type-badge badge-{{ report.report_type }}">
+                        {{ report.get_report_type_display }}
+                    </span>
+                    <span class="status-badge status-{{ report.status }}">
+                        {{ report.get_status_display }}
+                    </span>
+                </div>
+
+                <div class="report-meta">
+                    <div class="reported-user">
+                        <div class="user-avatar">
+                            {{ report.reported_user.nickname|slice:":1"|upper }}
+                        </div>
+                        <div>
+                            <div class="user-name">{{ report.reported_user.nickname }}</div>
+                            <div class="report-time">{{ report.created_at|timesince }} 전</div>
+                        </div>
+                    </div>
+                </div>
+
+                {% if report.comment %}
+                <div class="report-section">
+                    <div style="background: var(--color-bg-secondary); padding: var(--space-md); border-radius: var(--radius-md); border-left: 3px solid var(--color-accent);">
+                        <p style="margin: 0; color: var(--color-text);">{{ report.comment.content|truncatewords:30 }}</p>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if report.description %}
+                <div class="report-description">
+                    "{{ report.description }}"
+                </div>
+                {% endif %}
+
+                <!-- 관리자 전용 액션 버튼 -->
+                {% if request.user.is_staff %}
+                <div class="report-actions" style="display: flex; gap: var(--space-sm); margin-top: var(--space-md); flex-wrap: wrap;">
+                    {% if report.comment.post %}
+                    <a href="/?postId={{ report.comment.post.id }}" class="btn btn-secondary btn-sm">
+                        게시물 보기
+                    </a>
+                    {% endif %}
+                    <button class="btn btn-danger btn-sm" data-action="open-delete-modal" data-report-id="{{ report.id }}" data-report-type="comment">
+                        삭제 처리
+                    </button>
+                    <button class="btn btn-ghost btn-sm" data-action="open-dismiss-modal" data-report-id="{{ report.id }}" data-report-type="comment">
+                        신고 기각
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <svg viewBox="0 0 24 24">
+                    <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                <h3>댓글 신고 내역이 없습니다</h3>
+                <p>아직 신고한 댓글이 없습니다</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- 채팅 신고 탭 -->
+    <div class="tab-content" id="chat-reports-tab">
+        {% if chat_reports %}
+            {% for report in chat_reports %}
+            <div class="report-card">
+                <div class="report-card-header">
+                    <span class="report-type-badge badge-{{ report.report_type }}">
+                        {{ report.get_report_type_display }}
+                    </span>
+                    <span class="status-badge status-{{ report.status }}">
+                        {{ report.get_status_display }}
+                    </span>
+                </div>
+
+                <div class="report-meta">
+                    <div class="reported-user">
+                        <div class="user-avatar">
+                            {{ report.reported_user.nickname|slice:":1"|upper }}
+                        </div>
+                        <div>
+                            <div class="user-name">{{ report.reported_user.nickname }}</div>
+                            <div class="report-time">{{ report.created_at|timesince }} 전</div>
+                        </div>
+                    </div>
+                </div>
+
+                {% if report.description %}
+                <div class="report-description">
+                    "{{ report.description }}"
+                </div>
+                {% endif %}
+
+                <!-- 관리자 전용 액션 버튼 (채팅 신고) -->
+                {% if request.user.is_staff %}
+                <div class="report-actions" style="display: flex; gap: var(--space-sm); margin-top: var(--space-md); flex-wrap: wrap;">
+                    <button class="btn btn-danger btn-sm" data-action="open-delete-modal" data-report-id="{{ report.id }}" data-report-type="chat" disabled>
+                        삭제 처리 (준비중)
+                    </button>
+                    <button class="btn btn-ghost btn-sm" data-action="open-dismiss-modal" data-report-id="{{ report.id }}" data-report-type="chat" disabled>
+                        신고 기각 (준비중)
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <svg viewBox="0 0 24 24">
+                    <path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                </svg>
+                <h3>채팅 신고 내역이 없습니다</h3>
+                <p>아직 신고한 채팅이 없습니다</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- 삭제 확인 모달 -->
+    <div class="admin-modal-overlay" id="admin-delete-modal">
+        <div class="admin-modal-container">
+            <div class="admin-modal-header">
+                <h3 class="admin-modal-title">게시물 삭제 확인</h3>
+                <button class="admin-modal-close" data-action="close-admin-modal" data-modal-id="admin-delete-modal" aria-label="닫기">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="admin-modal-body">
+                <div class="modal-content-wrapper">
+                    <div class="modal-warning-icon danger">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                            <line x1="12" y1="9" x2="12" y2="13"/>
+                            <line x1="12" y1="17" x2="12.01" y2="17"/>
+                        </svg>
+                    </div>
+                    <p class="modal-message">정말로 이 게시물을 삭제하시겠습니까?</p>
+                    <p class="modal-description">이 작업은 다음을 수행합니다:</p>
+                    <ul class="modal-consequence-list">
+                        <li>게시물 내용을 "신고로 삭제됨" 메시지로 변경</li>
+                        <li>신고 상태를 "처리완료"로 변경</li>
+                        <li>사용자의 신고 누적 횟수 증가</li>
+                        <li>작성자와 신고자에게 알림 전송</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="admin-modal-footer">
+                <button class="btn btn-danger" id="confirm-delete-btn">삭제 처리</button>
+                <button class="btn btn-secondary" data-action="close-admin-modal" data-modal-id="admin-delete-modal">취소</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 기각 확인 모달 -->
+    <div class="admin-modal-overlay" id="admin-dismiss-modal">
+        <div class="admin-modal-container">
+            <div class="admin-modal-header">
+                <h3 class="admin-modal-title">신고 기각 확인</h3>
+                <button class="admin-modal-close" data-action="close-admin-modal" data-modal-id="admin-dismiss-modal" aria-label="닫기">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="admin-modal-body">
+                <div class="modal-content-wrapper">
+                    <div class="modal-warning-icon info">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="16" x2="12" y2="12"/>
+                            <line x1="12" y1="8" x2="12.01" y2="8"/>
+                        </svg>
+                    </div>
+                    <p class="modal-message">이 신고를 기각하시겠습니까?</p>
+                    <p class="modal-description">이 작업은 다음을 수행합니다:</p>
+                    <ul class="modal-consequence-list">
+                        <li>신고 상태를 "기각"으로 변경</li>
+                        <li>필요시 사용자의 신고 누적 횟수 감소</li>
+                        <li>작성자와 신고자에게 알림 전송</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="admin-modal-footer">
+                <button class="btn btn-ghost" id="confirm-dismiss-btn">신고 기각</button>
+                <button class="btn btn-secondary" data-action="close-admin-modal" data-modal-id="admin-dismiss-modal">취소</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 필터 모달 -->
+    <div class="filter-modal-overlay" id="filter-modal">
+        <div class="filter-modal-container">
+            <div class="filter-modal-header">
+                <h3 class="filter-modal-title">필터 및 검색</h3>
+                <button class="filter-modal-close" data-action="close-filter-modal">×</button>
+            </div>
+            <div class="filter-modal-body">
+                <!-- 검색 -->
+                <div class="filter-section">
+                    <h4 class="filter-section-title">검색</h4>
+                    <input type="text" id="search-input" class="filter-input" placeholder="사용자 닉네임, 내용으로 검색...">
+                </div>
+
+                <!-- 상태 필터 -->
+                <div class="filter-section">
+                    <h4 class="filter-section-title">상태</h4>
+                    <div class="filter-options">
+                        <div class="filter-option">
+                            <input type="radio" name="status" id="status-all" value="" checked>
+                            <label for="status-all">전체</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="radio" name="status" id="status-pending" value="pending">
+                            <label for="status-pending">대기 중</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="radio" name="status" id="status-reviewing" value="reviewing">
+                            <label for="status-reviewing">검토 중</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="radio" name="status" id="status-resolved" value="resolved">
+                            <label for="status-resolved">처리 완료</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="radio" name="status" id="status-dismissed" value="dismissed">
+                            <label for="status-dismissed">기각</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 신고 타입 필터 -->
+                <div class="filter-section">
+                    <h4 class="filter-section-title">신고 유형</h4>
+                    <div class="filter-options">
+                        <div class="filter-option">
+                            <input type="radio" name="type" id="type-all" value="" checked>
+                            <label for="type-all">전체</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="radio" name="type" id="type-abuse" value="abuse">
+                            <label for="type-abuse">욕설/비방</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="radio" name="type" id="type-spam" value="spam">
+                            <label for="type-spam">스팸/광고</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="radio" name="type" id="type-inappropriate" value="inappropriate">
+                            <label for="type-inappropriate">부적절한 내용</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="radio" name="type" id="type-harassment" value="harassment">
+                            <label for="type-harassment">성희롱</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="radio" name="type" id="type-other" value="other">
+                            <label for="type-other">기타</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 날짜 필터 -->
+                <div class="filter-section">
+                    <h4 class="filter-section-title">기간</h4>
+                    <div class="filter-options">
+                        <div class="filter-option">
+                            <input type="radio" name="date" id="date-all" value="" checked>
+                            <label for="date-all">전체</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="radio" name="date" id="date-today" value="today">
+                            <label for="date-today">오늘</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="radio" name="date" id="date-week" value="week">
+                            <label for="date-week">최근 7일</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="radio" name="date" id="date-month" value="month">
+                            <label for="date-month">최근 30일</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="filter-modal-footer">
+                <button class="btn btn-secondary" data-action="reset-filters">초기화</button>
+                <button class="btn btn-primary" data-action="apply-filters">적용</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 로딩 인디케이터 -->
+    <div class="loading-indicator" id="loading-indicator">
+        <div class="loading-spinner"></div>
+        <p>신고 내역을 불러오는 중...</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Global variables for modal state
+let currentReportId = null;
+let currentReportType = null;
+
+// Tab switching
+document.addEventListener('DOMContentLoaded', function() {
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const targetTab = button.getAttribute('data-tab');
+
+            // Remove active class from all buttons and contents
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            tabContents.forEach(content => content.classList.remove('active'));
+
+            // Add active class to clicked button and corresponding content
+            button.classList.add('active');
+            document.getElementById(`${targetTab}-tab`).classList.add('active');
+        });
+    });
+
+    // Setup modal event listeners
+    setupAdminModals();
+});
+
+// CSRF Token helper
+function getCsrfToken() {
+    const cookieMatch = document.cookie.match(/csrftoken=([^;]+)/);
+    return cookieMatch ? cookieMatch[1] : '';
+}
+
+// Setup admin modal event listeners
+function setupAdminModals() {
+    // Delete modal confirm button
+    const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+    if (confirmDeleteBtn) {
+        confirmDeleteBtn.addEventListener('click', () => {
+            if (currentReportId && currentReportType) {
+                handleReportDelete(currentReportId, currentReportType);
+            }
+        });
+    }
+
+    // Dismiss modal confirm button
+    const confirmDismissBtn = document.getElementById('confirm-dismiss-btn');
+    if (confirmDismissBtn) {
+        confirmDismissBtn.addEventListener('click', () => {
+            if (currentReportId && currentReportType) {
+                handleReportDismiss(currentReportId, currentReportType);
+            }
+        });
+    }
+
+    // Close modals on overlay click
+    const deleteModal = document.getElementById('admin-delete-modal');
+    const dismissModal = document.getElementById('admin-dismiss-modal');
+
+    if (deleteModal) {
+        deleteModal.addEventListener('click', (e) => {
+            if (e.target === deleteModal) {
+                closeAdminModal('admin-delete-modal');
+            }
+        });
+    }
+
+    if (dismissModal) {
+        dismissModal.addEventListener('click', (e) => {
+            if (e.target === dismissModal) {
+                closeAdminModal('admin-dismiss-modal');
+            }
+        });
+    }
+
+    // ESC key to close modals
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            closeAdminModal('admin-delete-modal');
+            closeAdminModal('admin-dismiss-modal');
+        }
+    });
+}
+
+// Open delete confirmation modal
+function openDeleteModal(reportId, reportType) {
+    currentReportId = reportId;
+    currentReportType = reportType;
+    const modal = document.getElementById('admin-delete-modal');
+    if (modal) {
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+// Open dismiss confirmation modal
+function openDismissModal(reportId, reportType) {
+    currentReportId = reportId;
+    currentReportType = reportType;
+    const modal = document.getElementById('admin-dismiss-modal');
+    if (modal) {
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+// Close admin modal
+function closeAdminModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+        // Reset current report info
+        currentReportId = null;
+        currentReportType = null;
+    }
+}
+
+// Handle report delete (admin only) - called from modal
+async function handleReportDelete(reportId, reportType) {
+    try {
+        const response = await fetch(`/accounts/api/reports/${reportId}/delete/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrfToken(),
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify({ report_type: reportType })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            closeAdminModal('admin-delete-modal');
+            alert(data.message);
+            location.reload(); // Reload to show updated status
+        } else {
+            alert(`처리 실패: ${data.message}`);
+        }
+    } catch (error) {
+        console.error('Error deleting report:', error);
+        alert('오류가 발생했습니다. 다시 시도해주세요.');
+    }
+}
+
+// Handle report dismiss (admin only) - called from modal
+async function handleReportDismiss(reportId, reportType) {
+    try {
+        const response = await fetch(`/accounts/api/reports/${reportId}/dismiss/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrfToken(),
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify({ report_type: reportType })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            closeAdminModal('admin-dismiss-modal');
+            alert(data.message);
+            location.reload(); // Reload to show updated status
+        } else {
+            alert(`처리 실패: ${data.message}`);
+        }
+    } catch (error) {
+        console.error('Error dismissing report:', error);
+        alert('오류가 발생했습니다. 다시 시도해주세요.');
+    }
+}
+
+// Filter modal functions
+let currentFilters = {
+    status: '',
+    type: '',
+    date: '',
+    query: ''
+};
+
+let currentPage = {
+    post: 1,
+    comment: 1,
+    chat: 1
+};
+
+let hasNextPage = {
+    post: true,
+    comment: true,
+    chat: true
+};
+
+let isLoading = false;
+
+function openFilterModal() {
+    const modal = document.getElementById('filter-modal');
+    if (modal) {
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+function closeFilterModal() {
+    const modal = document.getElementById('filter-modal');
+    if (modal) {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+}
+
+function resetFilters() {
+    // Reset all radio buttons to default
+    document.getElementById('status-all').checked = true;
+    document.getElementById('type-all').checked = true;
+    document.getElementById('date-all').checked = true;
+    document.getElementById('search-input').value = '';
+}
+
+function applyFilters() {
+    // Get filter values
+    currentFilters.status = document.querySelector('input[name="status"]:checked').value;
+    currentFilters.type = document.querySelector('input[name="type"]:checked').value;
+    currentFilters.date = document.querySelector('input[name="date"]:checked').value;
+    currentFilters.query = document.getElementById('search-input').value.trim();
+
+    // Reset pages
+    currentPage.post = 1;
+    currentPage.chat = 1;
+    hasNextPage.post = true;
+    hasNextPage.chat = true;
+
+    // Clear current reports
+    const postTab = document.getElementById('post-reports-tab');
+    const chatTab = document.getElementById('chat-reports-tab');
+
+    const postCards = postTab.querySelectorAll('.report-card');
+    const chatCards = chatTab.querySelectorAll('.report-card');
+
+    postCards.forEach(card => card.remove());
+    chatCards.forEach(card => card.remove());
+
+    // Load filtered results
+    loadReports('post');
+    loadReports('chat');
+
+    // Update active filters display
+    updateActiveFilters();
+
+    // Close modal
+    closeFilterModal();
+}
+
+function updateActiveFilters() {
+    const container = document.getElementById('active-filters');
+    const filters = [];
+
+    const statusLabels = {
+        'pending': '대기 중',
+        'reviewing': '검토 중',
+        'resolved': '처리 완료',
+        'dismissed': '기각'
+    };
+
+    const typeLabels = {
+        'abuse': '욕설/비방',
+        'spam': '스팸/광고',
+        'inappropriate': '부적절한 내용',
+        'harassment': '성희롱',
+        'other': '기타'
+    };
+
+    const dateLabels = {
+        'today': '오늘',
+        'week': '최근 7일',
+        'month': '최근 30일'
+    };
+
+    if (currentFilters.status) {
+        filters.push({ key: 'status', label: `상태: ${statusLabels[currentFilters.status]}` });
+    }
+
+    if (currentFilters.type) {
+        filters.push({ key: 'type', label: `유형: ${typeLabels[currentFilters.type]}` });
+    }
+
+    if (currentFilters.date) {
+        filters.push({ key: 'date', label: `기간: ${dateLabels[currentFilters.date]}` });
+    }
+
+    if (currentFilters.query) {
+        filters.push({ key: 'query', label: `검색: ${currentFilters.query}` });
+    }
+
+    if (filters.length > 0) {
+        container.style.display = 'flex';
+        container.innerHTML = filters.map(filter => `
+            <div class="filter-tag">
+                <span>${filter.label}</span>
+                <button data-action="remove-filter" data-filter-key="${filter.key}">×</button>
+            </div>
+        `).join('');
+    } else {
+        container.style.display = 'none';
+        container.innerHTML = '';
+    }
+}
+
+function removeFilter(key) {
+    if (key === 'status') {
+        currentFilters.status = '';
+        document.getElementById('status-all').checked = true;
+    } else if (key === 'type') {
+        currentFilters.type = '';
+        document.getElementById('type-all').checked = true;
+    } else if (key === 'date') {
+        currentFilters.date = '';
+        document.getElementById('date-all').checked = true;
+    } else if (key === 'query') {
+        currentFilters.query = '';
+        document.getElementById('search-input').value = '';
+    }
+
+    applyFilters();
+}
+
+// Load reports with AJAX
+async function loadReports(reportType) {
+    if (isLoading || !hasNextPage[reportType]) return;
+
+    isLoading = true;
+    const loadingIndicator = document.getElementById('loading-indicator');
+    loadingIndicator.classList.add('active');
+
+    try {
+        const params = new URLSearchParams({
+            report_type: reportType,
+            page: currentPage[reportType],
+            status: currentFilters.status,
+            type: currentFilters.type,
+            date: currentFilters.date,
+            q: currentFilters.query
+        });
+
+        const response = await fetch(`/accounts/api/reports/list/?${params}`, {
+            method: 'GET',
+            headers: {
+                'X-CSRFToken': getCsrfToken(),
+            },
+            credentials: 'same-origin'
+        });
+
+        const data = await response.json();
+
+        if (data.reports && data.reports.length > 0) {
+            const tab = document.getElementById(`${reportType}-reports-tab`);
+            const emptyState = tab.querySelector('.empty-state');
+            if (emptyState) emptyState.remove();
+
+            data.reports.forEach(report => {
+                const card = createReportCard(report, reportType);
+                tab.appendChild(card);
+            });
+
+            hasNextPage[reportType] = data.has_next;
+            currentPage[reportType]++;
+        } else if (currentPage[reportType] === 1) {
+            // No results on first page
+            const tab = document.getElementById(`${reportType}-reports-tab`);
+            tab.innerHTML = '<div class="empty-state"><p>신고 내역이 없습니다.</p></div>';
+        }
+    } catch (error) {
+        console.error('Error loading reports:', error);
+        alert('신고 내역을 불러오는 중 오류가 발생했습니다.');
+    } finally {
+        isLoading = false;
+        loadingIndicator.classList.remove('active');
+    }
+}
+
+function createReportCard(report, reportType) {
+    const card = document.createElement('div');
+    card.className = 'report-card';
+
+    const statusClass = `status-${report.status}`;
+    const typeClass = `badge-${report.report_type}`;
+
+    const createdAt = new Date(report.created_at);
+    const now = new Date();
+    const diffMs = now - createdAt;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    let timeAgo;
+    if (diffMins < 1) timeAgo = '방금 전';
+    else if (diffMins < 60) timeAgo = `${diffMins}분 전`;
+    else if (diffHours < 24) timeAgo = `${diffHours}시간 전`;
+    else timeAgo = `${diffDays}일 전`;
+
+    let postSection = '';
+    if (reportType === 'post' && report.post_id) {
+        postSection = `
+            <div class="report-section">
+                <div style="background: var(--color-bg-secondary); padding: var(--space-md); border-radius: var(--radius-md); border-left: 3px solid var(--color-primary);">
+                    <p style="margin: 0; color: var(--color-text);">${report.post_content || '내용 없음'}</p>
+                </div>
+            </div>
+        `;
+    }
+
+    let adminActions = '';
+    const isStaff = {% if request.user.is_staff %}true{% else %}false{% endif %};
+    if (isStaff) {
+        const postViewBtn = reportType === 'post' && report.post_id ?
+            `<a href="/?postId=${report.post_id}" class="btn btn-secondary btn-sm">게시물 보기</a>` : '';
+
+        adminActions = `
+            <div class="report-actions" style="display: flex; gap: var(--space-sm); margin-top: var(--space-md); flex-wrap: wrap;">
+                ${postViewBtn}
+                <button class="btn btn-danger btn-sm" data-action="open-delete-modal" data-report-id="${report.id}" data-report-type="${reportType}">삭제 처리</button>
+                <button class="btn btn-ghost btn-sm" data-action="open-dismiss-modal" data-report-id="${report.id}" data-report-type="${reportType}">신고 기각</button>
+            </div>
+        `;
+    }
+
+    card.innerHTML = `
+        <div class="report-card-header">
+            <span class="report-type-badge ${typeClass}">${report.report_type_display}</span>
+            <span class="status-badge ${statusClass}">${report.status_display}</span>
+        </div>
+        <div class="report-meta">
+            <div class="reported-user">
+                <div class="user-avatar">${report.reported_user_nickname.charAt(0).toUpperCase()}</div>
+                <div>
+                    <div class="user-name">${report.reported_user_nickname}</div>
+                    <div class="report-time">${timeAgo}</div>
+                </div>
+            </div>
+        </div>
+        ${postSection}
+        <div class="report-section">
+            <strong class="report-label">신고 내용:</strong>
+            <p class="report-description">${report.description || '설명 없음'}</p>
+        </div>
+        ${adminActions}
+    `;
+
+    return card;
+}
+
+// Setup infinite scroll
+function setupInfiniteScroll() {
+    const postTab = document.getElementById('post-reports-tab');
+    const commentTab = document.getElementById('comment-reports-tab');
+    const chatTab = document.getElementById('chat-reports-tab');
+
+    const observerOptions = {
+        root: null,
+        rootMargin: '100px',
+        threshold: 0.1
+    };
+
+    const postObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting && !isLoading && hasNextPage.post) {
+                const activeTab = document.querySelector('.tab-button.active');
+                if (activeTab && activeTab.getAttribute('data-tab') === 'post-reports') {
+                    loadReports('post');
+                }
+            }
+        });
+    }, observerOptions);
+
+    const commentObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting && !isLoading && hasNextPage.comment) {
+                const activeTab = document.querySelector('.tab-button.active');
+                if (activeTab && activeTab.getAttribute('data-tab') === 'comment-reports') {
+                    loadReports('comment');
+                }
+            }
+        });
+    }, observerOptions);
+
+    const chatObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting && !isLoading && hasNextPage.chat) {
+                const activeTab = document.querySelector('.tab-button.active');
+                if (activeTab && activeTab.getAttribute('data-tab') === 'chat-reports') {
+                    loadReports('chat');
+                }
+            }
+        });
+    }, observerOptions);
+
+    // Observe the last report card
+    const updateObservers = () => {
+        const postCards = postTab.querySelectorAll('.report-card');
+        const commentCards = commentTab.querySelectorAll('.report-card');
+        const chatCards = chatTab.querySelectorAll('.report-card');
+
+        if (postCards.length > 0) {
+            postObserver.observe(postCards[postCards.length - 1]);
+        }
+
+        if (commentCards.length > 0) {
+            commentObserver.observe(commentCards[commentCards.length - 1]);
+        }
+
+        if (chatCards.length > 0) {
+            chatObserver.observe(chatCards[chatCards.length - 1]);
+        }
+    };
+
+    // Initial observation
+    updateObservers();
+
+    // Re-observe when new cards are added
+    setInterval(updateObservers, 1000);
+}
+
+// Initialize filter modal
+document.addEventListener('DOMContentLoaded', function() {
+    const filterModal = document.getElementById('filter-modal');
+
+    // Close on overlay click
+    if (filterModal) {
+        filterModal.addEventListener('click', (e) => {
+            if (e.target === filterModal) {
+                closeFilterModal();
+            }
+        });
+    }
+
+    // ESC key to close filter modal
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            closeFilterModal();
+        }
+    });
+
+    // Setup infinite scroll
+    setupInfiniteScroll();
+
+    // Event delegation for all button actions
+    document.addEventListener('click', function(e) {
+        const target = e.target.closest('[data-action]');
+        if (!target) return;
+
+        const action = target.dataset.action;
+
+        switch(action) {
+            case 'open-filter-modal':
+                openFilterModal();
+                break;
+            case 'close-filter-modal':
+                closeFilterModal();
+                break;
+            case 'open-delete-modal':
+                openDeleteModal(target.dataset.reportId, target.dataset.reportType);
+                break;
+            case 'open-dismiss-modal':
+                openDismissModal(target.dataset.reportId, target.dataset.reportType);
+                break;
+            case 'close-admin-modal':
+                closeAdminModal(target.dataset.modalId);
+                break;
+            case 'reset-filters':
+                resetFilters();
+                break;
+            case 'apply-filters':
+                applyFilters();
+                break;
+            case 'remove-filter':
+                removeFilter(target.dataset.filterKey);
+                break;
+        }
+    });
+});
+</script>
+{% endblock %}

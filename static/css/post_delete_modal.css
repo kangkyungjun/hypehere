@@ -1,0 +1,158 @@
+/**
+ * Post Delete Confirmation Modal Styles
+ * Custom modal for confirming post deletion with warning emphasis
+ */
+
+/* Modal Overlay */
+.delete-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 1070; /* Above report modal (1060) */
+    display: flex;
+    align-items: flex-end; /* Mobile bottom sheet */
+    justify-content: center;
+    animation: fadeIn 0.2s ease;
+}
+
+.delete-modal-overlay.hidden {
+    display: none;
+}
+
+/* Modal Container - Mobile Bottom Sheet */
+.delete-modal-container {
+    background: var(--color-bg);
+    width: 100%;
+    max-width: 100%;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+    animation: slideUpFromBottom 0.3s ease;
+    overflow: hidden;
+}
+
+/* Header */
+.delete-modal-header {
+    padding: var(--space-lg);
+    text-align: center;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-bg);
+}
+
+.delete-modal-title {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text);
+    margin: 0;
+    text-align: center;
+}
+
+/* Body */
+.delete-modal-body {
+    padding: var(--space-lg);
+    text-align: center;
+    background: var(--color-bg);
+}
+
+.delete-warning-text {
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text);
+    margin: 0 0 var(--space-sm) 0;
+    line-height: 1.5;
+}
+
+.delete-warning-subtext {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-light);
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* Footer */
+.delete-modal-footer {
+    padding: var(--space-lg);
+    border-top: 1px solid var(--color-border);
+    display: flex;
+    gap: var(--space-sm);
+    background: var(--color-bg);
+}
+
+.delete-modal-footer .btn {
+    flex: 1;
+    padding: var(--space-md);
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* Button Styles */
+.delete-modal-footer .btn-secondary {
+    background: var(--color-bg-secondary, #f3f4f6);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+}
+
+.delete-modal-footer .btn-secondary:hover {
+    background: var(--color-bg-tertiary, #e5e7eb);
+}
+
+.delete-modal-footer .btn-danger {
+    background-color: var(--color-danger, #ef4444);
+    color: white;
+    border: none;
+}
+
+.delete-modal-footer .btn-danger:hover {
+    background-color: #dc2626;
+}
+
+/* Desktop: Centered Modal */
+@media (min-width: 769px) {
+    .delete-modal-overlay {
+        align-items: center;
+    }
+
+    .delete-modal-container {
+        max-width: 400px;
+        border-radius: var(--radius-lg);
+        animation: slideUpCentered 0.3s ease;
+    }
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUpFromBottom {
+    from {
+        transform: translateY(100%);
+    }
+    to {
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideUpCentered {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Prevent body scroll when modal open */
+body.delete-modal-open {
+    overflow: hidden;
+}

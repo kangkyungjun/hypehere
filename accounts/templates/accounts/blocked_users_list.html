@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "차단 목록" %} - HypeHere{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/explore.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="explore-container">
+    <!-- Header -->
+    <div class="explore-header" style="padding: var(--space-md) var(--space-lg); border-bottom: 1px solid var(--color-border); margin-bottom: var(--space-lg);">
+        <button type="button" class="btn-back" onclick="window.location.href='{% url 'accounts:privacy_settings' %}'" aria-label="{% trans '뒤로가기' %}">
+            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="15 18 9 12 15 6"/>
+            </svg>
+        </button>
+        <h2 style="margin: 0; font-size: 1.25rem; font-weight: 600; flex: 1; text-align: center; margin-right: 40px;">{% trans "차단 목록" %}</h2>
+    </div>
+
+    <!-- Content -->
+    <div class="search-results" id="search-results">
+        <!-- Loading State -->
+        <div class="loading-state" id="loading-state">
+            <div class="spinner"></div>
+            <p>{% trans "불러오는 중..." %}</p>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" id="empty-state" class="hidden">
+            <h3>{% trans "차단한 사용자가 없습니다" %}</h3>
+        </div>
+
+        <!-- Users Section -->
+        <div class="users-section" id="users-section" class="hidden">
+            <div class="users-container" id="users-container">
+                <!-- User cards will be inserted here by JavaScript -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/blocked_users_list.js' %}"></script>
+<script>
+    // Initialize the blocked users list manager
+    document.addEventListener('DOMContentLoaded', () => {
+        new BlockedUsersListManager();
+    });
+</script>
+{% endblock %}

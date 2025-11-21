@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}학습 모드 - HypeHere{% endblock %}
+
+{% block content %}
+<div class="learning-home-container">
+    <!-- Placeholder Content -->
+    <div class="placeholder-content">
+        <div class="placeholder-icon">
+            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+            </svg>
+        </div>
+        <h1>학습 모드</h1>
+        <p class="subtitle">언어 학습을 위한 새로운 공간입니다</p>
+        <div class="placeholder-description">
+            <p>여기에 학습 관련 기능과 콘텐츠가 추가될 예정입니다:</p>
+            <ul>
+                <li>📚 학습 자료 및 레슨</li>
+                <li>💬 언어 교환 파트너 매칭</li>
+                <li>✍️ 작문 연습 및 첨삭</li>
+                <li>🎯 학습 목표 및 진도 관리</li>
+                <li>📊 학습 통계 및 분석</li>
+            </ul>
+        </div>
+        <div class="placeholder-action">
+            <a href="/" class="btn btn-primary">소셜 모드로 돌아가기</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.learning-home-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--space-xl);
+    min-height: calc(100vh - var(--header-height) - var(--mobile-nav-height));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.placeholder-content {
+    text-align: center;
+    padding: var(--space-3xl) var(--space-xl);
+    background: var(--color-surface);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    max-width: 600px;
+    width: 100%;
+}
+
+.placeholder-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 120px;
+    height: 120px;
+    margin: 0 auto var(--space-lg);
+    background: var(--color-bg-secondary);
+    border-radius: var(--radius-full);
+}
+
+.placeholder-icon svg {
+    color: var(--color-primary);
+}
+
+.placeholder-content h1 {
+    font-size: 2rem;
+    margin-bottom: var(--space-sm);
+    color: var(--color-text);
+    font-weight: var(--font-weight-bold);
+}
+
+.subtitle {
+    font-size: 1.125rem;
+    color: var(--color-text-light);
+    margin-bottom: var(--space-xl);
+}
+
+.placeholder-description {
+    text-align: left;
+    margin: var(--space-xl) auto;
+    max-width: 400px;
+}
+
+.placeholder-description p {
+    font-size: 1rem;
+    color: var(--color-text);
+    margin-bottom: var(--space-md);
+    font-weight: var(--font-weight-medium);
+}
+
+.placeholder-description ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.placeholder-description li {
+    padding: var(--space-sm) 0;
+    color: var(--color-text-light);
+    font-size: 0.9375rem;
+    border-bottom: 1px solid var(--color-border-light);
+}
+
+.placeholder-description li:last-child {
+    border-bottom: none;
+}
+
+.placeholder-action {
+    margin-top: var(--space-xl);
+}
+
+/* Mobile optimization */
+@media (max-width: 767px) {
+    .learning-home-container {
+        padding: var(--space-lg) var(--space-md);
+    }
+
+    .placeholder-content {
+        padding: var(--space-xl) var(--space-lg);
+    }
+
+    .placeholder-content h1 {
+        font-size: 1.5rem;
+    }
+
+    .subtitle {
+        font-size: 1rem;
+    }
+
+    .placeholder-icon {
+        width: 100px;
+        height: 100px;
+    }
+
+    .placeholder-icon svg {
+        width: 64px;
+        height: 64px;
+    }
+}
+</style>
+{% endblock %}

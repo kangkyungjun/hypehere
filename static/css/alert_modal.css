@@ -1,0 +1,154 @@
+/**
+ * Generic Alert/Notification Modal Styles
+ * Reusable modal for displaying alerts, confirmations, and notifications
+ */
+
+/* Modal Overlay */
+.alert-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 1080; /* Above other modals */
+    display: flex;
+    align-items: flex-end; /* Mobile bottom sheet */
+    justify-content: center;
+    animation: fadeIn 0.2s ease;
+}
+
+.alert-modal-overlay.hidden {
+    display: none;
+}
+
+/* Modal Container - Mobile Bottom Sheet */
+.alert-modal-container {
+    background: var(--color-bg);
+    width: 100%;
+    max-width: 100%;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+    animation: slideUpFromBottom 0.3s ease;
+    overflow: hidden;
+}
+
+/* Header */
+.alert-modal-header {
+    padding: var(--space-lg);
+    text-align: center;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-bg);
+}
+
+.alert-icon {
+    display: inline-block;
+    font-size: 48px;
+    margin-bottom: var(--space-sm);
+    line-height: 1;
+}
+
+/* Alert type colors */
+.alert-modal-overlay.alert-success .alert-icon {
+    color: #10b981; /* Green */
+}
+
+.alert-modal-overlay.alert-error .alert-icon {
+    color: #ef4444; /* Red */
+}
+
+.alert-modal-overlay.alert-warning .alert-icon {
+    color: #f59e0b; /* Orange */
+}
+
+.alert-modal-overlay.alert-info .alert-icon {
+    color: #3b82f6; /* Blue */
+}
+
+.alert-modal-title {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text);
+    margin: 0;
+    text-align: center;
+}
+
+/* Body */
+.alert-modal-body {
+    padding: var(--space-lg);
+    text-align: center;
+    background: var(--color-bg);
+}
+
+.alert-message {
+    font-size: var(--font-size-base);
+    color: var(--color-text);
+    margin: 0;
+    line-height: 1.5;
+    white-space: pre-wrap; /* Preserve line breaks */
+}
+
+/* Footer */
+.alert-modal-footer {
+    padding: var(--space-lg);
+    border-top: 1px solid var(--color-border);
+    display: flex;
+    justify-content: center;
+    background: var(--color-bg);
+}
+
+.alert-modal-footer .btn {
+    min-width: 120px;
+    padding: var(--space-md);
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* Desktop: Centered Modal */
+@media (min-width: 769px) {
+    .alert-modal-overlay {
+        align-items: center;
+    }
+
+    .alert-modal-container {
+        max-width: 400px;
+        border-radius: var(--radius-lg);
+        animation: slideUpCentered 0.3s ease;
+    }
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUpFromBottom {
+    from {
+        transform: translateY(100%);
+    }
+    to {
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideUpCentered {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Prevent body scroll when modal open */
+body.alert-modal-open {
+    overflow: hidden;
+}

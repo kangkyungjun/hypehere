@@ -1,0 +1,421 @@
+/* ==========================================
+   HypeHere - Post Viewer Modal
+   Instagram-style post viewer with navigation
+   ========================================== */
+
+/* ===== Post Viewer Modal ===== */
+.post-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  animation: fadeIn 0.3s ease;
+}
+
+.post-modal-container {
+  position: relative;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  background: var(--color-bg);
+  border-radius: var(--radius-xl);
+  overflow-y: auto;
+  animation: slideUp 0.3s ease;
+  box-shadow: var(--shadow-2xl);
+
+  /* 콘텐츠 세로 중앙 정렬 */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* 닫기 버튼 */
+.post-modal-close {
+  position: fixed;
+  top: var(--space-lg);
+  right: var(--space-lg);
+  z-index: 2001;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-full);
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: black;
+  filter: drop-shadow(0 0 3px white);
+}
+
+.post-modal-close:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(1.1);
+}
+
+.post-modal-close:active {
+  transform: scale(0.95);
+}
+
+/* 네비게이션 버튼 (데스크톱) */
+.post-nav-button {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2001;
+  background: rgba(0, 0, 0, 0.5);
+  border: none;
+  border-radius: var(--radius-full);
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: white;
+}
+
+.post-nav-prev {
+  left: var(--space-lg);
+}
+
+.post-nav-next {
+  right: var(--space-lg);
+}
+
+.post-nav-button:hover {
+  background: rgba(0, 0, 0, 0.8);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.post-nav-button:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+.post-nav-button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.post-nav-button:disabled:hover {
+  transform: translateY(-50%) scale(1);
+  background: rgba(0, 0, 0, 0.5);
+}
+
+/* 포스트 콘텐츠 */
+.post-modal-content {
+  padding: var(--space-xl);
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.post-modal-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+  padding-bottom: var(--space-md);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.post-modal-author-info {
+  flex: 1;
+}
+
+.post-modal-body {
+  margin-bottom: var(--space-lg);
+  line-height: var(--line-height-relaxed);
+  font-size: var(--font-size-lg);
+}
+
+.post-modal-body p {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.post-modal-actions {
+  display: flex;
+  gap: var(--space-xl);
+  padding-top: var(--space-lg);
+  border-top: 1px solid var(--color-border);
+}
+
+/* 스와이프 인디케이터 (모바일) */
+.swipe-indicator {
+  position: sticky;
+  bottom: var(--space-md);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  text-align: center;
+  width: fit-content;
+  margin: var(--space-md) auto 0;
+  display: none;
+}
+
+/* ===== 모바일 최적화 ===== */
+@media (max-width: 767px) {
+  .post-modal-container {
+    width: 100%;
+    max-width: 100%;
+    height: 100vh;
+    max-height: 100vh;
+    border-radius: 0;
+    overflow-y: auto;
+  }
+
+  .post-modal-content {
+    padding: var(--space-lg);
+    padding-bottom: calc(var(--space-lg) + 60px); /* 스와이프 인디케이터 공간 */
+  }
+
+  /* 데스크톱 네비게이션 버튼 숨김 */
+  .post-nav-button {
+    display: none;
+  }
+
+  .post-modal-close {
+    top: var(--space-md);
+    right: var(--space-md);
+    width: 40px;
+    height: 40px;
+  }
+
+  .post-modal-body {
+    font-size: var(--font-size-base);
+  }
+
+  .post-modal-actions {
+    gap: var(--space-md);
+  }
+
+  /* 모바일에서 스와이프 인디케이터 표시 */
+  .swipe-indicator {
+    display: block;
+  }
+}
+
+/* 애니메이션 */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 스크롤바 스타일 */
+.post-modal-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.post-modal-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.post-modal-container::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: var(--radius-full);
+}
+
+.post-modal-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+/* ===== Like & Comment Actions ===== */
+.post-action-btn {
+  background: transparent;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  transition: all 0.2s ease;
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+}
+
+.post-action-btn:hover {
+  background: var(--color-bg-secondary);
+  color: var(--color-primary);
+}
+
+.post-action-btn.liked {
+  color: #ef4444;
+}
+
+.post-action-btn.liked .like-icon {
+  fill: currentColor;
+}
+
+.post-action-btn.favorited {
+  color: #f59e0b;
+}
+
+.post-action-btn.favorited .favorite-icon {
+  fill: currentColor;
+}
+
+.like-count,
+.comment-count {
+  font-weight: var(--font-weight-semibold);
+  min-width: 20px;
+  text-align: center;
+}
+
+/* ===== Comments Section ===== */
+.post-modal-comments {
+  margin-top: 0.84rem;
+  padding-top: 0.84rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.comments-list {
+  max-height: 400px;
+  overflow-y: auto;
+  margin-bottom: 0.56rem;
+}
+
+.comment-item {
+  padding: 0.56rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.comment-item:last-child {
+  border-bottom: none;
+}
+
+.comment-header {
+  display: flex;
+  align-items: center;
+  gap: 0.28rem;
+  margin-bottom: 0.14rem;
+}
+
+.comment-info {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.14rem;
+}
+
+.comment-author {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  text-decoration: none;
+}
+
+.comment-author:hover {
+  text-decoration: underline;
+}
+
+.comment-time {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.comment-body p {
+  margin: 0;
+  line-height: var(--line-height-relaxed);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.no-comments {
+  text-align: center;
+  color: var(--color-text-secondary);
+  padding: 1.12rem;
+  font-style: italic;
+}
+
+/* Comment Form */
+.comment-form {
+  display: flex;
+  gap: 0.28rem;
+  align-items: flex-end;
+}
+
+.comment-form textarea {
+  flex: 1;
+  padding: 0.28rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  resize: vertical;
+  min-height: 36px;
+  font-family: inherit;
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+  color: var(--color-text-primary);
+  background-color: var(--color-bg);
+}
+
+.comment-form textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.comment-form button {
+  padding: var(--space-sm) var(--space-lg);
+  white-space: nowrap;
+}
+
+/* Avatar Sizes */
+.avatar-sm {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.avatar-sm img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Mobile Optimization */
+@media (max-width: 767px) {
+  .post-action-btn {
+    font-size: var(--font-size-sm);
+    padding: var(--space-xs);
+  }
+
+  .comments-list {
+    max-height: 300px;
+  }
+
+  .comment-form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .comment-form button {
+    width: 100%;
+  }
+}

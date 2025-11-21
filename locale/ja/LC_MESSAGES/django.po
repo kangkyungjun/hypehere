@@ -1,0 +1,319 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-11-17 10:49+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+#: accounts/templates/accounts/login.html:5
+msgid "로그인 - HypeHere"
+msgstr ""
+
+#: accounts/templates/accounts/login.html:12
+#: accounts/templates/accounts/login.html:58
+#: accounts/templates/accounts/register.html:151
+#: templates/partials/header.html:74
+msgid "로그인"
+msgstr ""
+
+#: accounts/templates/accounts/login.html:13
+msgid "HypeHere 계정으로 로그인하세요"
+msgstr ""
+
+#: accounts/templates/accounts/login.html:18
+msgid "사용자명 또는 비밀번호가 올바르지 않습니다."
+msgstr ""
+
+#: accounts/templates/accounts/login.html:26
+#: accounts/templates/accounts/register.html:85
+msgid "사용자명"
+msgstr ""
+
+#: accounts/templates/accounts/login.html:32
+#: accounts/templates/accounts/register.html:91
+msgid "사용자명을 입력하세요"
+msgstr ""
+
+#: accounts/templates/accounts/login.html:39
+#: accounts/templates/accounts/register.html:111
+msgid "비밀번호"
+msgstr ""
+
+#: accounts/templates/accounts/login.html:45
+#: accounts/templates/accounts/register.html:117
+msgid "비밀번호를 입력하세요"
+msgstr ""
+
+#: accounts/templates/accounts/login.html:53
+msgid "로그인 상태 유지"
+msgstr ""
+
+#: accounts/templates/accounts/login.html:64
+msgid "비밀번호를 잊으셨나요?"
+msgstr ""
+
+#: accounts/templates/accounts/login.html:67
+msgid "계정이 없으신가요?"
+msgstr ""
+
+#: accounts/templates/accounts/login.html:68
+#: accounts/templates/accounts/register.html:60
+#: templates/partials/header.html:75
+msgid "회원가입"
+msgstr ""
+
+#: accounts/templates/accounts/profile.html:5
+msgid "내 프로필 - HypeHere"
+msgstr ""
+
+#: accounts/templates/accounts/profile.html:76
+#: accounts/templates/accounts/profile.html:77
+msgid "프로필 편집"
+msgstr ""
+
+#: accounts/templates/accounts/profile.html:78
+msgid "편집"
+msgstr ""
+
+#: accounts/templates/accounts/profile.html:112
+#: templates/partials/sidebar.html:25
+msgid "팔로워"
+msgstr ""
+
+#: accounts/templates/accounts/profile.html:116
+#: templates/partials/sidebar.html:29
+msgid "팔로잉"
+msgstr ""
+
+#: accounts/templates/accounts/profile.html:120
+#: templates/partials/sidebar.html:33
+msgid "포스트"
+msgstr ""
+
+#: accounts/templates/accounts/profile.html:234
+#: templates/partials/sidebar.html:136 templates/partials/sidebar.html:149
+msgid "팔로우"
+msgstr ""
+
+#: accounts/templates/accounts/profile.html:239
+#: templates/partials/header.html:58 templates/partials/sidebar.html:69
+msgid "메시지"
+msgstr ""
+
+#: accounts/templates/accounts/register.html:5
+msgid "회원가입 - HypeHere"
+msgstr ""
+
+#: accounts/templates/accounts/register.html:61
+msgid "HypeHere에 가입하여 언어 교환을 시작하세요"
+msgstr ""
+
+#: accounts/templates/accounts/register.html:68
+msgid "기본 정보"
+msgstr ""
+
+#: accounts/templates/accounts/register.html:72
+msgid "언어 설정"
+msgstr ""
+
+#: accounts/templates/accounts/register.html:76
+msgid "관심사"
+msgstr ""
+
+#: accounts/templates/accounts/register.html:95
+msgid "4-20자의 영문, 숫자, 언더스코어만 사용 가능합니다."
+msgstr ""
+
+#: accounts/templates/accounts/register.html:99
+msgid "이메일"
+msgstr ""
+
+#: accounts/templates/accounts/register.html:105
+msgid "이메일을 입력하세요"
+msgstr ""
+
+#: accounts/templates/accounts/register.html:120
+msgid "최소 8자 이상, 영문과 숫자를 포함해야 합니다."
+msgstr ""
+
+#: accounts/templates/accounts/register.html:124
+msgid "비밀번호 확인"
+msgstr ""
+
+#: accounts/templates/accounts/register.html:130
+msgid "비밀번호를 다시 입력하세요"
+msgstr ""
+
+#: accounts/templates/accounts/register.html:138
+msgid "이용약관"
+msgstr ""
+
+#: accounts/templates/accounts/register.html:138
+msgid "및"
+msgstr ""
+
+#: accounts/templates/accounts/register.html:139
+msgid "개인정보처리방침"
+msgstr ""
+
+#: accounts/templates/accounts/register.html:139
+msgid "에 동의합니다"
+msgstr ""
+
+#: accounts/templates/accounts/register.html:144
+msgid "다음 단계"
+msgstr ""
+
+#: accounts/templates/accounts/register.html:150
+msgid "이미 계정이 있으신가요?"
+msgstr ""
+
+#: hypehere/settings.py:125
+msgid "English"
+msgstr ""
+
+#: hypehere/settings.py:126
+msgid "日本語"
+msgstr ""
+
+#: hypehere/settings.py:127
+msgid "Español"
+msgstr ""
+
+#: templates/base.html:8
+msgid "HypeHere - 친구를 사귀며 언어를 공부하는 SNS형 언어교환 플랫폼"
+msgstr ""
+
+#: templates/base.html:9
+msgid "언어교환, 언어학습, SNS, 친구만들기, Language Exchange"
+msgstr ""
+
+#: templates/base.html:10 templates/home.html:5
+msgid "HypeHere - 언어교환 플랫폼"
+msgstr ""
+
+#: templates/base.html:65 templates/partials/header.html:31
+msgid "홈"
+msgstr ""
+
+#: templates/base.html:74
+msgid "1:1매칭"
+msgstr ""
+
+#: templates/base.html:90
+msgid "오픈채팅"
+msgstr ""
+
+#: templates/base.html:97
+msgid "프로필"
+msgstr ""
+
+#: templates/home.html:24
+msgid "사용자 및 게시물 검색..."
+msgstr ""
+
+#: templates/home.html:116
+msgid "댓글을 입력하세요..."
+msgstr ""
+
+#: templates/home.html:122
+msgid "댓글 달기"
+msgstr ""
+
+#: templates/home.html:131
+msgid "아직 게시물이 없습니다"
+msgstr ""
+
+#: templates/home.html:132
+msgid "첫 번째 게시물을 작성해보세요!"
+msgstr ""
+
+#: templates/home.html:146
+msgid ""
+"HypeHere는 전 세계 사람들과 언어를 교환하며<br>\n"
+"                진정한 친구 관계를 만드는 SNS형 플랫폼입니다."
+msgstr ""
+
+#: templates/home.html:153
+msgid "지금 바로 시작하세요!"
+msgstr ""
+
+#: templates/home.html:154
+msgid "가입하고 첫 번째 언어 교환 친구를 만나보세요."
+msgstr ""
+
+#: templates/home.html:156
+msgid "무료 회원가입"
+msgstr ""
+
+#: templates/partials/header.html:19
+msgid "검색..."
+msgstr ""
+
+#: templates/partials/header.html:38 templates/partials/sidebar.html:53
+msgid "탐색"
+msgstr ""
+
+#: templates/partials/header.html:49
+msgid "알림"
+msgstr ""
+
+#: templates/partials/header.html:66
+msgid "설정"
+msgstr ""
+
+#: templates/partials/sidebar.html:40
+msgid "메뉴"
+msgstr ""
+
+#: templates/partials/sidebar.html:46
+msgid "홈 피드"
+msgstr ""
+
+#: templates/partials/sidebar.html:62
+msgid "매칭"
+msgstr ""
+
+#: templates/partials/sidebar.html:63
+msgid "New"
+msgstr ""
+
+#: templates/partials/sidebar.html:76
+msgid "챌린지"
+msgstr ""
+
+#: templates/partials/sidebar.html:83
+msgid "내 프로필"
+msgstr ""
+
+#: templates/partials/sidebar.html:90
+msgid "학습 중인 언어"
+msgstr ""
+
+#: templates/partials/sidebar.html:95
+msgid "한국어"
+msgstr ""
+
+#: templates/partials/sidebar.html:97
+msgid "원어민"
+msgstr ""
+
+#: templates/partials/sidebar.html:111
+msgid "트렌딩 태그"
+msgstr ""
+
+#: templates/partials/sidebar.html:123
+msgid "추천 사용자"
+msgstr ""

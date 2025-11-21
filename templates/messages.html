@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "메시지 - HypeHere" %}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/messages.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="messages-list-container">
+    <!-- Conversation List -->
+    <div class="conversations-list" id="conversations-list">
+        <!-- 대화 리스트가 JavaScript로 동적으로 로드됨 -->
+        <div class="empty-state">
+            <svg width="100" height="100" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M85 25H15C10 25 5 30 5 35V65C5 70 10 75 15 75H25L35 85V75H85C90 75 95 70 95 65V35C95 30 90 25 85 25Z"/>
+                <circle cx="30" cy="45" r="3"/>
+                <circle cx="50" cy="45" r="3"/>
+                <circle cx="70" cy="45" r="3"/>
+            </svg>
+            <p>{% trans "메시지가 없습니다" %}</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/messages.js' %}"></script>
+{% endblock %}

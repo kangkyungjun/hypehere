@@ -1,0 +1,348 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ ticket.title }} - 고객지원{% endblock %}
+
+{% block content %}
+<div class="support-detail-container">
+    <div class="support-detail-header">
+        <a href="{% url 'accounts:support_list' %}" class="btn-back">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+            목록으로
+        </a>
+        <h1>문의 상세</h1>
+    </div>
+
+    <!-- Ticket Information -->
+    <div class="ticket-detail-card">
+        <div class="ticket-header">
+            <div class="ticket-header-left">
+                <span class="ticket-category">[{{ ticket.get_category_display }}]</span>
+                {% if ticket.status == 'pending' %}
+                    <span class="status-badge status-pending">🟡 대기중</span>
+                {% elif ticket.status == 'answered' %}
+                    <span class="status-badge status-answered">🟢 답변완료</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <h2 class="ticket-title">{{ ticket.title }}</h2>
+
+        <div class="ticket-meta">
+            <div class="meta-item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                작성: {{ ticket.created_at|date:"Y-m-d H:i" }}
+            </div>
+            {% if is_staff %}
+                <div class="meta-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    작성자: {{ ticket.user.nickname }}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="ticket-content">
+            {{ ticket.content|linebreaks }}
+        </div>
+    </div>
+
+    <!-- Admin Response -->
+    {% if ticket.admin_response %}
+        <div class="response-card">
+            <div class="response-header">
+                <h3>📝 관리자 답변</h3>
+                <div class="response-meta">
+                    <span>답변자: {{ ticket.responded_by.nickname }}</span>
+                    <span class="meta-separator">•</span>
+                    <span>{{ ticket.responded_at|date:"Y-m-d H:i" }}</span>
+                </div>
+            </div>
+            <div class="response-content">
+                {{ ticket.admin_response|linebreaks }}
+            </div>
+        </div>
+    {% elif is_staff %}
+        <!-- Admin Response Form -->
+        <div class="response-form-card">
+            <form method="post" action="{% url 'accounts:support_respond' ticket.pk %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="admin_response">답변 내용 <span class="required">*</span></label>
+                    <textarea name="admin_response" id="admin_response" rows="8" required placeholder="답변을 입력하세요"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-submit">답변 등록</button>
+                </div>
+            </form>
+        </div>
+    {% else %}
+        <div class="waiting-response">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            <p>관리자 답변을 기다리고 있습니다.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.support-detail-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: var(--space-xl);
+}
+
+.support-detail-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    margin-bottom: var(--space-2xl);
+}
+
+.btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-sm) var(--space-md);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text);
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.btn-back:hover {
+    background: var(--color-bg-secondary);
+    border-color: var(--color-primary);
+}
+
+.support-detail-header h1 {
+    font-size: 1.5rem;
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text);
+}
+
+.ticket-detail-card,
+.response-card,
+.response-form-card {
+    background: var(--color-surface);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-2xl);
+    margin-bottom: var(--space-xl);
+}
+
+.ticket-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-md);
+}
+
+.ticket-header-left {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+}
+
+.ticket-category {
+    font-size: 0.875rem;
+    color: var(--color-text-light);
+    font-weight: var(--font-weight-medium);
+}
+
+.status-badge {
+    display: inline-block;
+    padding: var(--space-xs) var(--space-md);
+    border-radius: var(--radius-full);
+    font-size: 0.875rem;
+    font-weight: var(--font-weight-medium);
+    background: var(--color-bg-secondary);
+}
+
+.ticket-title {
+    font-size: 1.25rem;
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text);
+    margin-bottom: var(--space-md);
+}
+
+.ticket-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-md);
+    margin-bottom: var(--space-xl);
+    padding-bottom: var(--space-md);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    font-size: 0.875rem;
+    color: var(--color-text-light);
+}
+
+.meta-item svg {
+    flex-shrink: 0;
+}
+
+.meta-separator {
+    color: var(--color-border);
+}
+
+.ticket-content {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--color-text);
+    white-space: pre-wrap;
+}
+
+.response-card {
+    background: var(--color-bg-secondary);
+    border-color: var(--color-primary);
+}
+
+.response-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-md);
+    padding-bottom: var(--space-md);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.response-header h3 {
+    font-size: 1.125rem;
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text);
+}
+
+.response-meta {
+    font-size: 0.875rem;
+    color: var(--color-text-light);
+}
+
+.response-content {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--color-text);
+    white-space: pre-wrap;
+}
+
+.form-group {
+    margin-bottom: var(--space-lg);
+}
+
+.form-group label {
+    display: block;
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text);
+    margin-bottom: var(--space-sm);
+}
+
+.required {
+    color: var(--color-danger);
+}
+
+.form-group textarea {
+    width: 100%;
+    padding: var(--space-md);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    font-family: inherit;
+    resize: vertical;
+    min-height: 150px;
+    transition: all 0.2s;
+}
+
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.btn-submit {
+    padding: var(--space-md) var(--space-xl);
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: var(--font-weight-bold);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-submit:hover {
+    background: var(--color-primary-dark);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-submit:active {
+    transform: translateY(0);
+}
+
+.waiting-response {
+    text-align: center;
+    padding: var(--space-3xl);
+    background: var(--color-surface);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-lg);
+}
+
+.waiting-response svg {
+    color: var(--color-text-light);
+    margin-bottom: var(--space-lg);
+}
+
+.waiting-response p {
+    font-size: 1rem;
+    color: var(--color-text-light);
+}
+
+/* Mobile optimization */
+@media (max-width: 767px) {
+    .support-detail-container {
+        padding: var(--space-lg) var(--space-md);
+    }
+
+    .ticket-detail-card,
+    .response-card,
+    .response-form-card {
+        padding: var(--space-lg);
+    }
+
+    .response-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-sm);
+    }
+
+    .ticket-meta {
+        flex-direction: column;
+        gap: var(--space-sm);
+    }
+}
+</style>
+{% endblock %}

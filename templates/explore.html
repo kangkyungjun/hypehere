@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "탐색 - HypeHere" %}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/explore.css' %}">
+<link rel="stylesheet" href="{% static 'css/post_view_modal.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="explore-container">
+    <!-- Search Header -->
+    <div class="explore-header">
+        <button type="button" class="btn-back" onclick="history.back()" aria-label="{% trans '뒤로가기' %}">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="15 18 9 12 15 6"/>
+            </svg>
+        </button>
+        <div class="search-input-wrapper">
+            <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/>
+                <path d="m21 21-4.35-4.35"/>
+            </svg>
+            <input
+                type="text"
+                id="search-input"
+                class="search-input"
+                placeholder="{% trans '사용자 및 게시물 검색...' %}"
+                autocomplete="off"
+            >
+            <button type="button" id="clear-search" class="btn-clear hidden" aria-label="{% trans '검색어 지우기' %}">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Search Results -->
+    <div class="search-results" id="search-results">
+        <!-- Empty State (Initial) -->
+        <div class="empty-state" id="empty-state-initial">
+            <h3>{% trans "게시물 검색" %}</h3>
+            <p class="text-light">{% trans "관심 있는 주제나 해시태그를 검색해보세요" %}</p>
+        </div>
+
+        <!-- Loading State -->
+        <div class="loading-state hidden" id="loading-state">
+            <div class="spinner"></div>
+            <p>{% trans "검색 중..." %}</p>
+        </div>
+
+        <!-- No Results State -->
+        <div class="empty-state hidden" id="empty-state-no-results">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin: 0 auto 1rem; color: var(--color-text-lighter);">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+            </svg>
+            <h3>{% trans "검색 결과 없음" %}</h3>
+            <p class="text-light">{% trans "다른 검색어로 시도해보세요" %}</p>
+        </div>
+
+        <!-- Users Section -->
+        <div class="users-section hidden" id="users-section">
+            <h3 class="section-header">{% trans "사용자" %}</h3>
+            <div class="users-container" id="users-container">
+                <!-- User cards will be inserted here -->
+            </div>
+        </div>
+
+        <!-- Posts Section -->
+        <div class="posts-section hidden" id="posts-section">
+            <h3 class="section-header">{% trans "게시물" %}</h3>
+            <div class="results-container" id="results-container">
+                <!-- Posts will be inserted here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Include Post View Modal -->
+{% include 'partials/post_view_modal.html' %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/post_modal_viewer.js' %}"></script>
+<script src="{% static 'js/explore.js' %}"></script>
+{% endblock %}

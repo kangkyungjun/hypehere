@@ -1,0 +1,1211 @@
+/**
+ * Situation-Based Learning Styles
+ * Beautiful, modern UI for situation learning pages
+ */
+
+/* ============================================================================
+   Container & Layout
+   ============================================================================ */
+
+.situation-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: var(--space-lg) var(--space-md);
+}
+
+@media (max-width: 767px) {
+    .situation-container {
+        padding: var(--space-sm) var(--space-xs);
+    }
+}
+
+/* ============================================================================
+   Header Section
+   ============================================================================ */
+
+.situation-header {
+    margin-bottom: var(--space-lg);
+    text-align: center;
+    position: relative;
+}
+
+.back-btn {
+    position: absolute;
+    left: 0;
+    top: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    background: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+    transition: var(--transition-base);
+    border: 1px solid var(--color-border);
+}
+
+.back-btn:hover {
+    background: var(--color-primary);
+    color: white;
+    transform: translateX(-2px);
+}
+
+.situation-title {
+    font-size: var(--font-size-3xl);
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin-bottom: var(--space-sm);
+}
+
+.situation-subtitle {
+    font-size: var(--font-size-lg);
+    color: var(--color-text-secondary);
+}
+
+@media (max-width: 767px) {
+    .situation-title {
+        font-size: var(--font-size-2xl);
+        margin-top: var(--space-xl);
+    }
+
+    .situation-subtitle {
+        font-size: var(--font-size-base);
+    }
+}
+
+/* ============================================================================
+   Category Grid (Page 1)
+   ============================================================================ */
+
+.category-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-lg);
+}
+
+@media (max-width: 767px) {
+    .category-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-md);
+    }
+}
+
+.category-card {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    padding: var(--space-xl);
+    background: white;
+    border: 2px solid var(--color-border);
+    border-radius: 12px;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition-base);
+    text-decoration: none;
+    color: inherit;
+    position: relative;
+    overflow: hidden;
+}
+
+.category-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--color-primary);
+    transform: scaleY(0);
+    transform-origin: bottom;
+    transition: var(--transition-base);
+}
+
+.category-card:hover::before {
+    transform: scaleY(1);
+}
+
+.category-card:hover {
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+}
+
+.category-icon {
+    font-size: 48px;
+    flex-shrink: 0;
+}
+
+.category-info {
+    flex: 1;
+}
+
+.category-name-ko {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin-bottom: var(--space-xs);
+}
+
+.category-name-en {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-sm);
+}
+
+.category-meta {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-tertiary);
+}
+
+.lesson-count {
+    padding: var(--space-xs) var(--space-sm);
+    background: var(--color-bg-tertiary);
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+.category-arrow {
+    color: var(--color-text-tertiary);
+    flex-shrink: 0;
+    transition: var(--transition-fast);
+}
+
+.category-card:hover .category-arrow {
+    color: var(--color-primary);
+    transform: translateX(4px);
+}
+
+/* ============================================================================
+   Lesson List (Page 2)
+   ============================================================================ */
+
+.lesson-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+.lesson-card {
+    display: flex;
+    align-items: center;
+    gap: var(--space-lg);
+    padding: var(--space-lg);
+    background: white;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition-base);
+    text-decoration: none;
+    color: inherit;
+}
+
+.lesson-card:hover {
+    background: var(--color-bg-secondary);
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-md);
+    transform: translateX(4px);
+}
+
+.lesson-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    color: white;
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    border-radius: 8px;
+    flex-shrink: 0;
+}
+
+.lesson-info {
+    flex: 1;
+}
+
+.lesson-title-ko {
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin-bottom: var(--space-xs);
+}
+
+.lesson-title-en {
+    font-size: var(--font-size-base);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-sm);
+}
+
+.lesson-meta {
+    display: flex;
+    gap: var(--space-md);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-tertiary);
+}
+
+.expression-count,
+.view-count {
+    padding: var(--space-xs) var(--space-sm);
+    background: var(--color-bg-tertiary);
+    border-radius: 4px;
+}
+
+.lesson-arrow {
+    color: var(--color-text-tertiary);
+    flex-shrink: 0;
+    transition: var(--transition-fast);
+}
+
+.lesson-card:hover .lesson-arrow {
+    color: var(--color-primary);
+    transform: translateX(4px);
+}
+
+/* ============================================================================
+   Lesson Detail Header (Page 3)
+   ============================================================================ */
+
+.lesson-header-info {
+    margin-top: var(--space-xl);
+}
+
+.lesson-breadcrumb {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-tertiary);
+    margin-bottom: var(--space-sm);
+}
+
+.lesson-detail-title-ko {
+    font-size: var(--font-size-3xl);
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin-bottom: var(--space-xs);
+}
+
+.lesson-detail-title-en {
+    font-size: var(--font-size-xl);
+    color: var(--color-text-secondary);
+}
+
+@media (max-width: 767px) {
+    .lesson-detail-title-ko {
+        font-size: var(--font-size-2xl);
+    }
+
+    .lesson-detail-title-en {
+        font-size: var(--font-size-lg);
+    }
+}
+
+/* ============================================================================
+   Expressions Slider (Page 3)
+   ============================================================================ */
+
+/* Slider Wrapper */
+.expression-slider-wrapper {
+    position: relative;
+    width: 100%;
+    margin-top: var(--space-lg);
+}
+
+/* Horizontal Scroll Container */
+.expressions-section {
+    display: flex;
+    overflow-x: scroll;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 0;
+    padding: 0 var(--space-md);
+}
+
+.expressions-section::-webkit-scrollbar {
+    display: none;
+}
+
+/* Navigation Buttons (Desktop Only) */
+.slider-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border: 2px solid var(--color-border);
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow-md);
+    color: var(--color-text-primary);
+}
+
+.slider-nav:hover {
+    background: var(--color-primary);
+    color: white;
+    border-color: var(--color-primary);
+    transform: translateY(-50%) scale(1.1);
+}
+
+.slider-nav:active {
+    transform: translateY(-50%) scale(0.95);
+}
+
+.slider-nav-prev {
+    left: 16px;
+}
+
+.slider-nav-next {
+    right: 16px;
+}
+
+@media (max-width: 767px) {
+    .slider-nav {
+        display: none;
+    }
+}
+
+/* Expression Card */
+.expression-card {
+    flex: 0 0 100%;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    min-width: calc(100% - var(--space-md) * 2);
+    max-width: 900px;
+    margin: 0 auto;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+    border: 2px solid var(--color-border);
+    border-radius: 16px;
+    padding: var(--space-lg);
+    box-shadow: var(--shadow-md);
+    transition: var(--transition-base);
+    position: relative;
+}
+
+.expression-card:hover {
+    box-shadow: var(--shadow-xl);
+}
+
+/* Bookmark Button */
+.bookmark-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--color-text-tertiary);
+    transition: all 0.2s ease;
+    padding: var(--space-xs);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.bookmark-btn:hover {
+    background: rgba(255, 215, 0, 0.1);
+    color: var(--color-warning);
+    transform: scale(1.1);
+}
+
+.bookmark-btn.bookmarked {
+    color: var(--color-warning);
+}
+
+.bookmark-btn.bookmarked svg {
+    fill: var(--color-warning);
+}
+
+.section-title {
+    text-align: center;
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin-bottom: var(--space-lg);
+    letter-spacing: 2px;
+}
+
+/* Expression Pagination Indicator */
+.expression-pagination {
+    position: fixed;
+    bottom: var(--mobile-nav-height, 60px);
+    left: 0;
+    right: 0;
+    text-align: center;
+    padding: var(--space-xs) 0;
+    background: transparent;
+    backdrop-filter: none;
+    border: none;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    z-index: 1025;
+    box-shadow: none;
+    pointer-events: none;
+}
+
+.expression-pagination .current-expression {
+    font-weight: 700;
+    color: var(--color-primary);
+    font-size: var(--font-size-base);
+}
+
+.expression-pagination .total-expressions {
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+@media (min-width: 768px) {
+    .expression-pagination {
+        bottom: 0;
+    }
+}
+
+/* Main Expression */
+.expression-main {
+    text-align: center;
+    margin-bottom: var(--space-md);
+    padding-bottom: var(--space-md);
+    border-bottom: 2px dashed var(--color-border);
+}
+
+.expression-korean {
+    font-size: var(--font-size-2xl);
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin-bottom: var(--space-xs);
+}
+
+.expression-translation {
+    font-size: var(--font-size-xl);
+    color: var(--color-primary);
+    font-weight: 600;
+    margin-bottom: var(--space-xs);
+}
+
+.expression-pronunciation {
+    font-size: var(--font-size-base);
+    color: var(--color-text-tertiary);
+    font-style: italic;
+}
+
+@media (max-width: 767px) {
+    .expression-korean {
+        font-size: var(--font-size-xl);
+    }
+
+    .expression-translation {
+        font-size: var(--font-size-lg);
+    }
+}
+
+/* Context Section */
+.expression-context {
+    display: flex;
+    gap: var(--space-sm);
+    align-items: flex-start;
+    background: rgba(79, 70, 229, 0.05);
+    padding: var(--space-md);
+    border-radius: 8px;
+    margin-bottom: var(--space-md);
+    border-left: 4px solid var(--color-primary);
+}
+
+.context-icon {
+    font-size: 24px;
+    flex-shrink: 0;
+}
+
+.context-text {
+    font-size: var(--font-size-base);
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+}
+
+.context-text strong {
+    color: var(--color-text-primary);
+    font-weight: 600;
+}
+
+/* Vocabulary Section */
+.vocabulary-section {
+    background: rgba(16, 185, 129, 0.05);
+    padding: var(--space-md);
+    border-radius: 8px;
+    border-left: 4px solid var(--color-secondary);
+}
+
+.vocab-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-md);
+}
+
+.vocab-icon {
+    font-size: 20px;
+}
+
+.vocab-title {
+    font-weight: 700;
+    color: var(--color-text-primary);
+    font-size: var(--font-size-lg);
+}
+
+.vocab-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.vocab-item {
+    padding: var(--space-sm) 0;
+    border-bottom: 1px solid var(--color-border);
+    line-height: 1.8;
+}
+
+.vocab-item:last-child {
+    border-bottom: none;
+}
+
+.vocab-word {
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin-right: var(--space-xs);
+}
+
+.vocab-pronunciation {
+    color: var(--color-text-tertiary);
+    font-size: var(--font-size-sm);
+    margin-right: var(--space-xs);
+}
+
+.vocab-meaning {
+    color: var(--color-text-secondary);
+}
+
+.vocab-example {
+    margin-top: var(--space-xs);
+    padding-left: var(--space-md);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-tertiary);
+    font-style: italic;
+}
+
+/* ============================================================================
+   Lesson Summary
+   ============================================================================ */
+
+.lesson-summary {
+    text-align: center;
+    padding: var(--space-2xl);
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    color: white;
+    border-radius: 12px;
+    margin-top: var(--space-3xl);
+    box-shadow: var(--shadow-lg);
+}
+
+.lesson-summary p {
+    font-size: var(--font-size-xl);
+    margin: 0;
+}
+
+.lesson-summary strong {
+    font-size: var(--font-size-2xl);
+    font-weight: 700;
+}
+
+/* ============================================================================
+   Empty State
+   ============================================================================ */
+
+.empty-state {
+    text-align: center;
+    padding: var(--space-3xl) var(--space-lg);
+    color: var(--color-text-tertiary);
+}
+
+.empty-icon {
+    font-size: 64px;
+    margin-bottom: var(--space-lg);
+}
+
+.empty-state h3 {
+    font-size: var(--font-size-xl);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-sm);
+}
+
+.empty-state p {
+    font-size: var(--font-size-base);
+    color: var(--color-text-tertiary);
+}
+
+/* ============================================================================
+   Animations
+   ============================================================================ */
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.expression-card {
+    animation: fadeInUp 0.5s ease-out;
+    animation-fill-mode: both;
+}
+
+.expression-card:nth-child(1) { animation-delay: 0.1s; }
+.expression-card:nth-child(2) { animation-delay: 0.2s; }
+.expression-card:nth-child(3) { animation-delay: 0.3s; }
+.expression-card:nth-child(4) { animation-delay: 0.4s; }
+.expression-card:nth-child(5) { animation-delay: 0.5s; }
+
+@media (prefers-reduced-motion: reduce) {
+    .expression-card {
+        animation: none;
+    }
+}
+
+/* ============================================================================
+   Bookmarks Modal
+   ============================================================================ */
+
+/* Modal Container */
+.modal {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1;
+}
+
+.modal-content {
+    position: relative;
+    width: 90%;
+    max-width: 800px;
+    max-height: 85vh;
+    background: white;
+    border-radius: 16px;
+    box-shadow: var(--shadow-xl);
+    display: flex;
+    flex-direction: column;
+    z-index: 2;
+}
+
+/* Modal Header */
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-lg);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.modal-header h2 {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    color: var(--color-text);
+    margin: 0;
+}
+
+.modal-close {
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: var(--color-bg-secondary);
+    border-radius: 50%;
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+    color: var(--color-text-light);
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-close:hover {
+    background: var(--color-error);
+    color: white;
+    transform: scale(1.1);
+}
+
+/* Modal Body */
+.modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--space-lg);
+}
+
+#bookmarks-loading {
+    text-align: center;
+    padding: var(--space-3xl);
+    color: var(--color-text-light);
+}
+
+/* Bookmark Item Card */
+.bookmark-item {
+    position: relative;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+    border: 2px solid var(--color-border);
+    border-radius: 12px;
+    padding: var(--space-lg);
+    margin-bottom: var(--space-md);
+    transition: all 0.2s;
+}
+
+.bookmark-item:hover {
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-md);
+    transform: translateX(4px);
+}
+
+.bookmark-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: var(--space-md);
+    padding-right: 60px;
+}
+
+.category-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-xs) var(--space-sm);
+    background: var(--color-bg-tertiary);
+    border-radius: 6px;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--color-text-secondary);
+}
+
+.remove-bookmark-btn {
+    /* 위치: 오른쪽 상단 절대 위치 */
+    position: absolute;
+    top: 12px;
+    right: 12px;
+
+    /* 크기: 더 작게 */
+    padding: 4px 10px;
+    font-size: 0.75rem;
+    font-weight: 500;
+
+    /* 색상: 빨간색 */
+    background: var(--color-error);
+    color: white;
+    border: none;
+    border-radius: 4px;
+
+    /* 효과 */
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.remove-bookmark-btn:hover {
+    background: #DC2626;
+    transform: scale(1.05);
+}
+
+.expression-content h3 {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin-bottom: var(--space-xs);
+}
+
+.expression-content .translation {
+    font-size: var(--font-size-lg);
+    color: var(--color-primary);
+    font-weight: 600;
+    margin-bottom: var(--space-xs);
+}
+
+.expression-content .pronunciation {
+    font-size: var(--font-size-base);
+    color: var(--color-text-tertiary);
+    font-style: italic;
+    margin-bottom: var(--space-sm);
+}
+
+.expression-content .context {
+    font-size: var(--font-size-base);
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+    margin-bottom: var(--space-md);
+}
+
+.view-lesson-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-sm) var(--space-md);
+    background: var(--color-primary);
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.view-lesson-btn:hover {
+    background: var(--color-secondary);
+    transform: translateX(4px);
+}
+
+.empty-state {
+    text-align: center;
+    padding: var(--space-3xl);
+    color: var(--color-text-tertiary);
+}
+
+.empty-state p {
+    font-size: var(--font-size-lg);
+    margin-bottom: var(--space-sm);
+}
+
+.empty-hint {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+}
+
+/* Mobile Styles */
+@media (max-width: 767px) {
+    .modal-content {
+        width: 100%;
+        max-width: 100%;
+        max-height: 100vh;
+        border-radius: 0;
+    }
+
+    .modal-header h2 {
+        font-size: var(--font-size-lg);
+    }
+
+    .modal-body {
+        padding: var(--space-md);
+    }
+
+    .bookmark-item {
+        padding: var(--space-md);
+    }
+
+    .bookmark-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-sm);
+    }
+}
+
+/* ============================================================================
+   Admin Expression Management (Staff Only)
+   ============================================================================ */
+
+/* Expression Actions Container */
+.expression-actions {
+    position: absolute;
+    top: var(--space-md);
+    right: var(--space-md);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-xs);
+    z-index: 10;
+}
+
+/* Admin Edit & Delete Buttons */
+.admin-edit-btn,
+.admin-delete-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: var(--space-xs);
+    background: rgba(255, 255, 255, 0.95);
+    border: 2px solid var(--color-border);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--color-text-secondary);
+}
+
+.admin-edit-btn:hover {
+    background: var(--color-primary);
+    color: white;
+    border-color: var(--color-primary);
+    transform: scale(1.1);
+}
+
+.admin-delete-btn:hover {
+    background: #EF4444;
+    color: white;
+    border-color: #EF4444;
+    transform: scale(1.1);
+}
+
+.admin-edit-btn:active,
+.admin-delete-btn:active {
+    transform: scale(0.95);
+}
+
+/* Admin Add Expression Button (Floating) */
+.admin-add-btn {
+    position: fixed;
+    bottom: calc(var(--mobile-nav-height, 60px) + var(--space-lg));
+    right: var(--space-lg);
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    color: white;
+    border: none;
+    border-radius: 50%;
+    box-shadow: var(--shadow-xl);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.admin-add-btn:hover {
+    transform: scale(1.1) rotate(90deg);
+    box-shadow: 0 8px 24px rgba(79, 70, 229, 0.4);
+}
+
+.admin-add-btn:active {
+    transform: scale(0.95) rotate(90deg);
+}
+
+@media (min-width: 768px) {
+    .admin-add-btn {
+        bottom: var(--space-lg);
+    }
+}
+
+/* Admin Modal */
+.admin-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.admin-modal .modal-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 1;
+}
+
+.modal-container {
+    position: relative;
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    background: white;
+    border-radius: 16px;
+    box-shadow: var(--shadow-xl);
+    display: flex;
+    flex-direction: column;
+    z-index: 2;
+    overflow: hidden;
+}
+
+/* Modal Header */
+.admin-modal .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-lg);
+    border-bottom: 2px solid var(--color-border);
+    background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
+}
+
+.admin-modal .modal-header h2 {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin: 0;
+}
+
+.modal-close-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: none;
+    background: var(--color-bg-secondary);
+    border-radius: 50%;
+    cursor: pointer;
+    color: var(--color-text-secondary);
+    transition: all 0.2s ease;
+}
+
+.modal-close-btn:hover {
+    background: #EF4444;
+    color: white;
+    transform: scale(1.1);
+}
+
+/* Modal Form */
+.modal-form {
+    padding: var(--space-lg);
+    overflow-y: auto;
+    max-height: calc(90vh - 120px);
+}
+
+.form-group {
+    margin-bottom: var(--space-lg);
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    font-size: var(--font-size-base);
+    color: var(--color-text-primary);
+    margin-bottom: var(--space-sm);
+}
+
+.required {
+    color: #EF4444;
+    font-weight: 700;
+}
+
+.form-group input[type="text"],
+.form-group input[type="number"],
+.form-group textarea {
+    width: 100%;
+    padding: var(--space-sm) var(--space-md);
+    font-size: var(--font-size-base);
+    font-family: inherit;
+    color: var(--color-text-primary);
+    background: var(--color-bg-secondary);
+    border: 2px solid var(--color-border);
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.form-group input[type="text"]:focus,
+.form-group input[type="number"]:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    background: white;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.form-help {
+    display: block;
+    margin-top: var(--space-xs);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-tertiary);
+    font-style: italic;
+}
+
+/* Modal Actions */
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-md);
+    padding-top: var(--space-lg);
+    margin-top: var(--space-lg);
+    border-top: 2px solid var(--color-border);
+}
+
+.btn-cancel,
+.btn-submit {
+    padding: var(--space-sm) var(--space-xl);
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-cancel {
+    background: var(--color-bg-secondary);
+    color: var(--color-text-secondary);
+    border: 2px solid var(--color-border);
+}
+
+.btn-cancel:hover {
+    background: var(--color-bg-tertiary);
+    border-color: var(--color-text-tertiary);
+    transform: translateY(-2px);
+}
+
+.btn-submit {
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    color: white;
+    box-shadow: var(--shadow-md);
+}
+
+.btn-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.btn-submit:active,
+.btn-cancel:active {
+    transform: translateY(0);
+}
+
+/* Mobile Styles for Admin Modal */
+@media (max-width: 767px) {
+    .modal-container {
+        width: 100%;
+        max-width: 100%;
+        max-height: 100vh;
+        border-radius: 0;
+    }
+
+    .modal-form {
+        max-height: calc(100vh - 120px);
+    }
+
+    .admin-modal .modal-header h2 {
+        font-size: var(--font-size-lg);
+    }
+
+    .modal-actions {
+        flex-direction: column;
+        gap: var(--space-sm);
+    }
+
+    .btn-cancel,
+    .btn-submit {
+        width: 100%;
+    }
+}

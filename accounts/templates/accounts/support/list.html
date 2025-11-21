@@ -1,0 +1,609 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}고객지원 - HypeHere{% endblock %}
+
+{% block content %}
+<div class="support-container">
+    <div class="support-header">
+        <h1>{% if is_staff %}전체 문의 목록{% else %}내 문의 목록{% endif %}</h1>
+        <a href="{% url 'accounts:support_create' %}" class="btn-create-ticket">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            문의 작성
+        </a>
+    </div>
+
+    <!-- Filter and Search Bar -->
+    <div class="filter-search-bar">
+        <!-- Status Filter -->
+        <div class="filter-section">
+            <div class="filter-buttons">
+                <a href="{% url 'accounts:support_list' %}"
+                   class="filter-btn {% if not request.GET.status %}active{% endif %}">
+                    <span class="filter-label">전체</span>
+                    <span class="filter-count">{{ total_count }}</span>
+                </a>
+                <a href="?status=pending{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}"
+                   class="filter-btn {% if request.GET.status == 'pending' %}active{% endif %}">
+                    <span class="filter-label">🟡 대기중</span>
+                    <span class="filter-count">{{ pending_count }}</span>
+                </a>
+                <a href="?status=answered{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}"
+                   class="filter-btn {% if request.GET.status == 'answered' %}active{% endif %}">
+                    <span class="filter-label">🟢 답변완료</span>
+                    <span class="filter-count">{{ answered_count }}</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Search Section -->
+        <div class="search-section">
+            <form method="get" class="search-form">
+                {% if request.GET.status %}
+                    <input type="hidden" name="status" value="{{ request.GET.status }}">
+                {% endif %}
+                <div class="search-input-wrapper">
+                    <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                    <input type="text" name="search" class="search-input"
+                           placeholder="제목으로 검색..."
+                           value="{{ request.GET.search|default:'' }}">
+                </div>
+                <button type="submit" class="search-btn">검색</button>
+            </form>
+        </div>
+
+        <!-- Active Filters Display -->
+        {% if request.GET.status or request.GET.search %}
+        <div class="active-filters">
+            <span class="active-filters-label">필터:</span>
+
+            {% if request.GET.status %}
+            <span class="filter-chip">
+                {% if request.GET.status == 'pending' %}🟡 대기중
+                {% elif request.GET.status == 'answered' %}🟢 답변완료
+                {% endif %}
+                <a href="?{% if request.GET.search %}search={{ request.GET.search }}{% endif %}" class="filter-chip-remove">×</a>
+            </span>
+            {% endif %}
+
+            {% if request.GET.search %}
+            <span class="filter-chip">
+                검색: "{{ request.GET.search }}"
+                <a href="?{% if request.GET.status %}status={{ request.GET.status }}{% endif %}" class="filter-chip-remove">×</a>
+            </span>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    {% if tickets %}
+        <div class="ticket-list">
+            {% for ticket in tickets %}
+                <a href="{% url 'accounts:support_detail' ticket.pk %}" class="ticket-item">
+                    <div class="ticket-header">
+                        <div class="ticket-status">
+                            {% if ticket.status == 'pending' %}
+                                <span class="status-badge status-pending">🟡 대기중</span>
+                            {% elif ticket.status == 'answered' %}
+                                <span class="status-badge status-answered">🟢 답변완료</span>
+                            {% endif %}
+                            <span class="ticket-category">[{{ ticket.get_category_display }}]</span>
+                        </div>
+                        <div class="ticket-arrow">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ticket-content">
+                        <h3 class="ticket-title">{{ ticket.title }}</h3>
+                        <div class="ticket-meta">
+                            {% if is_staff %}
+                                <span class="ticket-author">작성자: {{ ticket.user.nickname }}</span>
+                                <span class="ticket-separator">•</span>
+                            {% endif %}
+                            <span class="ticket-date">{{ ticket.created_at|date:"Y-m-d H:i" }}</span>
+                            {% if ticket.has_response %}
+                                <span class="ticket-separator">•</span>
+                                <span class="ticket-responded">답변: ✓</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if is_paginated %}
+            <div class="pagination">
+                {% if page_obj.has_previous %}
+                    <a href="?page=1{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="page-link">처음</a>
+                    <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="page-link">이전</a>
+                {% endif %}
+
+                <span class="page-current">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="page-link">다음</a>
+                    <a href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="page-link">마지막</a>
+                {% endif %}
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="empty-state">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <p>아직 문의 내역이 없습니다.</p>
+            <a href="{% url 'accounts:support_create' %}" class="btn-empty-action">첫 문의 작성하기</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.support-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: var(--space-xl);
+}
+
+.support-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-2xl);
+}
+
+.support-header h1 {
+    font-size: 1.5rem;
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text);
+}
+
+.btn-create-ticket {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-md) var(--space-lg);
+    background: var(--color-primary);
+    color: white;
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    font-weight: var(--font-weight-bold);
+    transition: all 0.2s;
+}
+
+.btn-create-ticket:hover {
+    background: var(--color-primary-dark);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.ticket-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+.ticket-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-sm);
+    padding: var(--space-md);
+    background: var(--color-surface);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.ticket-item:hover {
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-md);
+    transform: translateX(4px);
+}
+
+.ticket-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.ticket-status {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    flex-shrink: 0;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-full);
+    font-size: 0.875rem;
+    font-weight: var(--font-weight-medium);
+    background: var(--color-bg-secondary);
+}
+
+.ticket-content {
+    width: 100%;
+}
+
+.ticket-category {
+    display: inline-block;
+    font-size: 0.875rem;
+    color: var(--color-text-light);
+    font-weight: var(--font-weight-medium);
+    margin-bottom: 0;
+}
+
+.ticket-title {
+    font-size: 1rem;
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text);
+    margin-bottom: var(--space-xs);
+}
+
+.ticket-meta {
+    font-size: 0.875rem;
+    color: var(--color-text-light);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.ticket-separator {
+    color: var(--color-border);
+}
+
+.ticket-arrow {
+    flex-shrink: 0;
+    color: var(--color-text-light);
+}
+
+.empty-state {
+    text-align: center;
+    padding: var(--space-3xl);
+}
+
+.empty-state svg {
+    color: var(--color-text-light);
+    margin-bottom: var(--space-lg);
+}
+
+.empty-state p {
+    font-size: 1rem;
+    color: var(--color-text-light);
+    margin-bottom: var(--space-xl);
+}
+
+.btn-empty-action {
+    display: inline-block;
+    padding: var(--space-md) var(--space-xl);
+    background: var(--color-primary);
+    color: white;
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    font-weight: var(--font-weight-bold);
+    transition: all 0.2s;
+}
+
+.btn-empty-action:hover {
+    background: var(--color-primary-dark);
+    transform: translateY(-2px);
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--space-md);
+    margin-top: var(--space-2xl);
+}
+
+.page-link {
+    padding: var(--space-sm) var(--space-md);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    color: var(--color-text);
+    transition: all 0.2s;
+}
+
+.page-link:hover {
+    background: var(--color-bg-secondary);
+    border-color: var(--color-primary);
+}
+
+.page-current {
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text);
+}
+
+/* Filter and Search Bar Styles */
+.filter-search-bar {
+    background: var(--color-surface);
+    border-radius: var(--radius-lg);
+    padding: var(--space-sm);
+    margin-bottom: var(--space-xl);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.filter-section {
+    margin-bottom: var(--space-sm);
+}
+
+.filter-buttons {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 4px;
+}
+
+.filter-btn {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    flex: 1 1 0;
+    min-width: 0;
+    gap: 2px;
+    padding: var(--space-xs) 4px;
+    background: var(--color-bg-secondary);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    transition: all 0.2s;
+    min-height: 36px;
+}
+
+.filter-btn:hover {
+    background: var(--color-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.filter-btn.active {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: white;
+}
+
+.filter-label {
+    font-size: 0.75rem;
+    font-weight: var(--font-weight-medium);
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.filter-btn.active .filter-label {
+    color: white;
+}
+
+.filter-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: var(--radius-full);
+    font-size: 0.65rem;
+    font-weight: var(--font-weight-bold);
+    flex-shrink: 0;
+}
+
+.filter-btn.active .filter-count {
+    background: rgba(255, 255, 255, 0.25);
+    color: white;
+}
+
+.search-section {
+    margin-bottom: 0;
+}
+
+.search-form {
+    display: flex;
+    gap: var(--space-xs);
+    width: 100%;
+}
+
+.search-input-wrapper {
+    position: relative;
+    flex: 1;
+}
+
+.search-icon {
+    position: absolute;
+    left: var(--space-sm);
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--color-text-light);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.search-input {
+    width: 100%;
+    padding: var(--space-sm) var(--space-sm) var(--space-sm) 40px;
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    font-size: 1rem;
+    background: white;
+    transition: all 0.2s;
+    height: 36px;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.search-input::placeholder {
+    color: var(--color-text-light);
+}
+
+.search-btn {
+    padding: var(--space-sm) var(--space-lg);
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius-lg);
+    font-size: 1rem;
+    font-weight: var(--font-weight-bold);
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    height: 36px;
+}
+
+.search-btn:hover {
+    background: var(--color-primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.search-btn:active {
+    transform: translateY(0);
+}
+
+.active-filters {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-md);
+    background: var(--color-bg-secondary);
+    border-radius: var(--radius-md);
+}
+
+.active-filters-label {
+    font-size: 0.875rem;
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-light);
+}
+
+.filter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-xs) var(--space-md);
+    background: white;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-full);
+    font-size: 0.875rem;
+}
+
+.filter-chip-remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    background: var(--color-danger);
+    color: white;
+    border-radius: 50%;
+    text-decoration: none;
+    font-size: 0.875rem;
+    line-height: 1;
+    transition: all 0.2s;
+}
+
+.filter-chip-remove:hover {
+    background: #dc2626;
+    transform: scale(1.1);
+}
+
+/* Mobile optimization */
+@media (max-width: 767px) {
+    .support-container {
+        padding: var(--space-lg) var(--space-md);
+    }
+
+    .support-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--space-md);
+    }
+
+    .btn-create-ticket {
+        justify-content: center;
+    }
+
+    .ticket-arrow {
+        display: none;
+    }
+
+    .filter-search-bar {
+        padding: var(--space-sm) var(--space-md);
+    }
+
+    .filter-buttons {
+        gap: 3px;
+    }
+
+    .filter-btn {
+        min-height: 36px;
+        padding: var(--space-xs) 3px;
+    }
+
+    .filter-label {
+        font-size: 0.7rem;
+    }
+
+    .filter-count {
+        font-size: 0.625rem;
+        min-width: 14px;
+        height: 14px;
+        padding: 0 3px;
+    }
+
+    .search-form {
+        gap: var(--space-xs);
+    }
+
+    .search-btn {
+        width: auto;
+        padding: var(--space-sm) var(--space-md);
+        height: 36px;
+        font-size: 0.875rem;
+        flex-shrink: 0;
+    }
+
+    .search-input-wrapper {
+        min-width: 0;
+    }
+
+    .search-input {
+        font-size: 16px; /* Prevents zoom on iOS */
+    }
+
+    .active-filters {
+        gap: var(--space-xs);
+        padding: var(--space-xs) var(--space-sm);
+    }
+
+    .active-filters-label {
+        font-size: 0.8rem;
+    }
+
+    .filter-chip {
+        font-size: 0.8rem;
+        padding: 4px var(--space-sm);
+    }
+}
+</style>
+{% endblock %}

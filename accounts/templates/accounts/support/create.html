@@ -1,0 +1,206 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}문의 작성 - HypeHere{% endblock %}
+
+{% block content %}
+<div class="support-create-container">
+    <div class="support-create-header">
+        <a href="{% url 'accounts:support_list' %}" class="btn-back">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+            뒤로
+        </a>
+        <h1>문의 작성</h1>
+    </div>
+
+    <form method="post" class="support-form">
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label for="id_category">카테고리 <span class="required">*</span></label>
+            <select name="category" id="id_category" required>
+                <option value="">카테고리를 선택하세요</option>
+                <option value="account">계정 관련</option>
+                <option value="payment">결제 문의</option>
+                <option value="technical">기술 지원</option>
+                <option value="feature">기능 제안</option>
+                <option value="other">기타</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="id_title">제목 <span class="required">*</span></label>
+            <input type="text" name="title" id="id_title" maxlength="200" required placeholder="문의 제목을 입력하세요">
+        </div>
+
+        <div class="form-group">
+            <label for="id_content">내용 <span class="required">*</span></label>
+            <textarea name="content" id="id_content" rows="10" required placeholder="문의 내용을 자세히 입력해주세요"></textarea>
+        </div>
+
+        <div class="form-actions">
+            <a href="{% url 'accounts:support_list' %}" class="btn-cancel">취소</a>
+            <button type="submit" class="btn-submit">작성 완료</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.support-create-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: var(--space-xl);
+}
+
+.support-create-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    margin-bottom: var(--space-2xl);
+}
+
+.btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-sm) var(--space-md);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text);
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.btn-back:hover {
+    background: var(--color-bg-secondary);
+    border-color: var(--color-primary);
+}
+
+.support-create-header h1 {
+    font-size: 1.5rem;
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text);
+}
+
+.support-form {
+    background: var(--color-surface);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-2xl);
+}
+
+.form-group {
+    margin-bottom: var(--space-xl);
+}
+
+.form-group:last-of-type {
+    margin-bottom: var(--space-2xl);
+}
+
+.form-group label {
+    display: block;
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text);
+    margin-bottom: var(--space-sm);
+}
+
+.required {
+    color: var(--color-danger);
+}
+
+.form-group select,
+.form-group input[type="text"],
+.form-group textarea {
+    width: 100%;
+    padding: var(--space-md);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    font-family: inherit;
+    transition: all 0.2s;
+}
+
+.form-group select:focus,
+.form-group input[type="text"]:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 200px;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-md);
+}
+
+.btn-cancel,
+.btn-submit {
+    padding: var(--space-md) var(--space-xl);
+    border-radius: var(--radius-md);
+    font-weight: var(--font-weight-bold);
+    font-size: 1rem;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-cancel {
+    background: var(--color-surface);
+    color: var(--color-text);
+    border: 2px solid var(--color-border);
+}
+
+.btn-cancel:hover {
+    background: var(--color-bg-secondary);
+    border-color: var(--color-text-light);
+}
+
+.btn-submit {
+    background: var(--color-primary);
+    color: white;
+    border: none;
+}
+
+.btn-submit:hover {
+    background: var(--color-primary-dark);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-submit:active {
+    transform: translateY(0);
+}
+
+/* Mobile optimization */
+@media (max-width: 767px) {
+    .support-create-container {
+        padding: var(--space-lg) var(--space-md);
+    }
+
+    .support-form {
+        padding: var(--space-lg);
+    }
+
+    .form-actions {
+        flex-direction: column-reverse;
+    }
+
+    .btn-cancel,
+    .btn-submit {
+        width: 100%;
+        text-align: center;
+    }
+}
+</style>
+{% endblock %}

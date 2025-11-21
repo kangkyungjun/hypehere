@@ -1,0 +1,153 @@
+{% load static %}
+{% load i18n %}
+<aside class="sidebar">
+    <!-- User Card -->
+    <div class="sidebar-user-card">
+        <div class="sidebar-user-info">
+            <div class="avatar">
+                {% if user.profile_picture %}
+                    <img src="{{ user.profile_picture.url }}" alt="{{ user.username }}">
+                {% else %}
+                    <svg viewBox="0 0 100 100" fill="currentColor" style="color: var(--color-primary);">
+                        <circle cx="50" cy="35" r="20"/>
+                        <path d="M15 85 Q15 55 50 55 Q85 55 85 85 Z"/>
+                    </svg>
+                {% endif %}
+            </div>
+            <div>
+                <div class="sidebar-user-name">{{ user.username }}</div>
+                <div class="text-sm text-light">{{ user.email }}</div>
+            </div>
+        </div>
+        <div class="sidebar-user-stats">
+            <div class="sidebar-user-stat">
+                <div class="sidebar-user-stat-value">{{ user.get_follower_count }}</div>
+                <div class="sidebar-user-stat-label">{% trans "팔로워" %}</div>
+            </div>
+            <div class="sidebar-user-stat">
+                <div class="sidebar-user-stat-value">{{ user.get_following_count }}</div>
+                <div class="sidebar-user-stat-label">{% trans "팔로잉" %}</div>
+            </div>
+            <div class="sidebar-user-stat">
+                <div class="sidebar-user-stat-value">{{ user.posts.count }}</div>
+                <div class="sidebar-user-stat-label">{% trans "포스트" %}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Navigation -->
+    <div class="sidebar-section">
+        <div class="sidebar-title">{% trans "메뉴" %}</div>
+        <nav class="sidebar-nav">
+            <a href="{% url 'home' %}" class="sidebar-nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                </svg>
+                <span>{% trans "홈 피드" %}</span>
+            </a>
+            <a href="#" class="sidebar-nav-link">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/>
+                    <path d="m21 21-4.35-4.35"/>
+                </svg>
+                <span>{% trans "탐색" %}</span>
+            </a>
+            <a href="#" class="sidebar-nav-link">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+                <span>{% trans "매칭" %}</span>
+                <span class="badge badge-accent ml-auto">{% trans "New" %}</span>
+            </a>
+            <a href="{% url 'chat:messages' %}" class="sidebar-nav-link">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+                <span>{% trans "메시지" %}</span>
+            </a>
+            <a href="#" class="sidebar-nav-link">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                    <polyline points="22 4 12 14.01 9 11.01"/>
+                </svg>
+                <span>{% trans "챌린지" %}</span>
+            </a>
+            <a href="{% url 'accounts:profile' %}" class="sidebar-nav-link">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                </svg>
+                <span>{% trans "내 프로필" %}</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Learning Section -->
+    <div class="sidebar-section">
+        <div class="sidebar-title">{% trans "학습 중인 언어" %}</div>
+        <div class="flex flex-col gap-sm">
+            <div class="flex items-center justify-between p-sm" style="background-color: var(--color-bg-secondary); border-radius: var(--radius-md);">
+                <div class="flex items-center gap-sm">
+                    <span style="font-size: 24px;">🇰🇷</span>
+                    <span class="font-medium">{% trans "한국어" %}</span>
+                </div>
+                <span class="badge badge-primary">{% trans "원어민" %}</span>
+            </div>
+            <div class="flex items-center justify-between p-sm" style="background-color: var(--color-bg-secondary); border-radius: var(--radius-md);">
+                <div class="flex items-center gap-sm">
+                    <span style="font-size: 24px;">🇺🇸</span>
+                    <span class="font-medium">English</span>
+                </div>
+                <span class="badge badge-secondary">B2</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trending Tags -->
+    <div class="sidebar-section">
+        <div class="sidebar-title">{% trans "트렌딩 태그" %}</div>
+        <div class="flex flex-col gap-xs">
+            <a href="#" class="text-sm text-primary">#KoreanCulture</a>
+            <a href="#" class="text-sm text-primary">#TOPIK준비</a>
+            <a href="#" class="text-sm text-primary">#LanguageExchange</a>
+            <a href="#" class="text-sm text-primary">#서울_밋업</a>
+            <a href="#" class="text-sm text-primary">#K-Drama</a>
+        </div>
+    </div>
+
+    <!-- Suggested Users -->
+    <div class="sidebar-section">
+        <div class="sidebar-title">{% trans "추천 사용자" %}</div>
+        <div class="flex flex-col gap-md">
+            <div class="flex items-center gap-sm">
+                <div class="avatar avatar-sm">
+                    <svg viewBox="0 0 100 100" fill="currentColor" style="color: var(--color-secondary);">
+                        <circle cx="50" cy="35" r="20"/>
+                        <path d="M15 85 Q15 55 50 55 Q85 55 85 85 Z"/>
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <div class="font-medium text-sm">Sarah Kim</div>
+                    <div class="text-xs text-light">🇺🇸 → 🇰🇷</div>
+                </div>
+                <button class="btn btn-sm btn-outline">{% trans "팔로우" %}</button>
+            </div>
+            <div class="flex items-center gap-sm">
+                <div class="avatar avatar-sm">
+                    <svg viewBox="0 0 100 100" fill="currentColor" style="color: var(--color-accent);">
+                        <circle cx="50" cy="35" r="20"/>
+                        <path d="M15 85 Q15 55 50 55 Q85 55 85 85 Z"/>
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <div class="font-medium text-sm">田中太郎</div>
+                    <div class="text-xs text-light">🇯🇵 → 🇰🇷</div>
+                </div>
+                <button class="btn btn-sm btn-outline">{% trans "팔로우" %}</button>
+            </div>
+        </div>
+    </div>
+</aside>

@@ -1,0 +1,345 @@
+{% load static %}
+{% load i18n %}
+{% get_current_language as LANGUAGE_CODE %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{% trans 'HypeHere - 친구를 사귀며 언어를 공부하는 SNS형 언어교환 플랫폼' %}">
+    <meta name="keywords" content="{% trans '언어교환, 언어학습, SNS, 친구만들기, Language Exchange' %}">
+    <title>{% block title %}{% trans 'HypeHere - 언어교환 플랫폼' %}{% endblock %}</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="{% static 'css/variables.css' %}">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/components.css' %}">
+    <link rel="stylesheet" href="{% static 'css/layouts.css' %}">
+    <link rel="stylesheet" href="{% static 'css/post_modal.css' %}">
+    <link rel="stylesheet" href="{% static 'css/post_action_modal.css' %}">
+    <link rel="stylesheet" href="{% static 'css/post_delete_modal.css' %}">
+    <link rel="stylesheet" href="{% static 'css/alert_modal.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}"{% if user.is_authenticated %} data-user-id="{{ user.id }}"{% endif %}>
+    <!-- Header -->
+    {% include 'partials/header.html' %}
+
+    <!-- Main Layout -->
+    <div class="layout">
+        <!-- Sidebar (only for authenticated users) -->
+        {% if user.is_authenticated %}
+            {% include 'partials/sidebar.html' %}
+        {% endif %}
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Messages -->
+            {% if messages %}
+                <div class="messages-container">
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <!-- Page Content -->
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <!-- Post Creation Modal -->
+    {% if user.is_authenticated %}
+        {% include 'partials/post_create_modal.html' %}
+        {% include 'partials/post_view_modal.html' %}
+        {% include 'partials/post_action_modal.html' %}
+        {% include 'partials/post_report_modal.html' %}
+        {% include 'partials/comment_report_modal.html' %}
+        {% include 'partials/post_delete_modal.html' %}
+        {% include 'partials/alert_modal.html' %}
+    {% endif %}
+
+    <!-- Block User Modal (always loaded for JavaScript) -->
+    {% include 'partials/block_user_modal.html' %}
+
+    <!-- Mobile Navigation -->
+    <nav class="mobile-nav">
+        <a href="{% url 'home' %}" class="mobile-nav-link">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            </svg>
+            <span>{% trans "홈" %}</span>
+        </a>
+        <a href="{% url 'learning_matching' %}" class="mobile-nav-link">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+            <span>{% trans "1:1매칭" %}</span>
+        </a>
+        <a href="#" class="mobile-nav-create">
+            <div class="create-button">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"/>
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+            </div>
+        </a>
+        <a href="{% url 'learning_chat' %}" class="mobile-nav-link">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                <path d="M13 8H7"/>
+                <path d="M17 12H7"/>
+            </svg>
+            <span>{% trans "오픈채팅" %}</span>
+        </a>
+        <a href="{% if user.is_authenticated %}{% url 'accounts:profile' %}{% else %}{% url 'accounts:login' %}{% endif %}" class="mobile-nav-link">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+            </svg>
+            <span>{% trans "프로필" %}</span>
+        </a>
+    </nav>
+
+    <!-- JavaScript -->
+    {% if user.is_authenticated %}
+        <script src="{% url 'javascript-catalog' %}"></script>
+        <script>
+        // Global i18n object for all JavaScript files
+        window.APP_I18N = {
+            // Time strings
+            timeJustNow: gettext('방금 전'),
+            timeSecondsAgo: gettext('초 전'),
+            timeMinutesAgo: gettext('분 전'),
+            timeHoursAgo: gettext('시간 전'),
+            timeDaysAgo: gettext('일 전'),
+            timeWeeksAgo: gettext('주 전'),
+            timeMonthsAgo: gettext('개월 전'),
+            timeYearsAgo: gettext('년 전'),
+
+            // Time units
+            year: gettext('년'),
+            month: gettext('개월'),
+            week: gettext('주'),
+            day: gettext('일'),
+            hour: gettext('시간'),
+            minute: gettext('분'),
+
+            // Common UI
+            login: gettext('로그인'),
+            loginRequired: gettext('로그인이 필요합니다.'),
+            error: gettext('오류가 발생했습니다. 다시 시도해주세요.'),
+            processing: gettext('처리 중...'),
+            confirm: gettext('확인'),
+            cancel: gettext('취소'),
+            close: gettext('닫기'),
+            sending: gettext('전송 중...'),
+
+            // Comments
+            noComments: gettext('아직 댓글이 없습니다. 첫 번째 댓글을 작성해보세요!'),
+            noCommentsShort: gettext('댓글이 없습니다.'),
+            loadCommentsFailed: gettext('댓글을 불러오는 중 오류가 발생했습니다.'),
+            commentPlaceholder: gettext('댓글 내용을 입력해주세요.'),
+            deleteCommentConfirm: gettext('댓글을 삭제하시겠습니까?'),
+            commentDeleteFailed: gettext('댓글 삭제 중 오류가 발생했습니다.'),
+            commentPostFailed: gettext('댓글 작성 중 오류가 발생했습니다.'),
+            loadMoreComments: gettext('댓글 더보기'),
+
+            // Likes/Favorites
+            like: gettext('좋아요'),
+            unlike: gettext('좋아요 취소'),
+            likeFailed: gettext('좋아요 처리 중 오류가 발생했습니다.'),
+            favorite: gettext('즐겨찾기'),
+            unfavorite: gettext('즐겨찾기 해제'),
+            favoriteFailed: gettext('즐겨찾기 처리 중 오류가 발생했습니다.'),
+            unfavoriteConfirm: gettext('즐겨찾기를 해제하시겠습니까?'),
+            unfavoriteFailed: gettext('즐겨찾기 해제에 실패했습니다.'),
+
+            // Follow
+            follow: gettext('팔로우'),
+            following: gettext('팔로잉'),
+            followers: gettext('팔로워'),
+            posts: gettext('게시물'),
+            message: gettext('메시지'),
+
+            // Messages
+            noMessages: gettext('메시지가 없습니다'),
+            startConversation: gettext('대화를 시작하세요'),
+
+            // Explore
+            enterRoom: gettext('입장하기'),
+
+            // Room categories
+            categoryLanguageExchange: gettext('언어교환'),
+            categoryStudy: gettext('스터디'),
+            categoryCulture: gettext('문화교류'),
+            categoryQA: gettext('질문답변'),
+            categoryFreeChat: gettext('자유대화'),
+            categoryCountry: gettext('국가'),
+
+            // Language
+            korean: gettext('한국어'),
+
+            // Privacy settings
+            privacyEveryone: gettext('전체 공개'),
+            privacyFollowers: gettext('팔로워만'),
+            privacyNobody: gettext('비공개'),
+            privacyFollowerListTitle: gettext('팔로워 목록 공개 범위'),
+            privacyFollowingListTitle: gettext('팔로잉 목록 공개 범위'),
+            privacySelectRange: gettext('공개 범위 선택'),
+            privacySaveFailed: gettext('설정 저장에 실패했습니다.'),
+
+            // Country selector
+            selectCountry: gettext('선택하세요'),
+            searchCountry: gettext('🔍 국가 검색...'),
+            noCountryResults: gettext('검색 결과가 없습니다'),
+            selectCountryTitle: gettext('국가 선택'),
+
+            // Blocked users
+            unblock: gettext('차단 해제'),
+            unblockFailed: gettext('차단 해제에 실패했습니다.'),
+
+            // Matching
+            connected: gettext('연결됨'),
+            partnerLeft: gettext('상대방이 나갔습니다'),
+            connectionError: gettext('연결 오류'),
+            matchingStartFailed: gettext('매칭 시작 중 오류가 발생했습니다.'),
+            followRequestAccepted: gettext('상대방이 팔로우 요청을 수락했습니다.'),
+            followRequestRejected: gettext('상대방이 팔로우를 거부하셨습니다.'),
+            startMatching: gettext('1:1 매칭하기'),
+            alreadyFollowing: gettext('이미 팔로우 되어있는 상대입니다.'),
+            blockConfirm: gettext('이 사용자를 차단하시겠습니까?'),
+            blockNotImplemented: gettext('차단 기능이 구현 중입니다.'),
+
+            // Video controls
+            cameraOff: gettext('카메라 끄기'),
+            cameraOn: gettext('카메라 켜기'),
+            micOff: gettext('마이크 끄기'),
+            micOn: gettext('마이크 켜기'),
+
+            // WebRTC errors
+            signalError: gettext('시그널 처리 중 오류가 발생했습니다.'),
+            permissionDenied: gettext('카메라/마이크 권한이 필요합니다.\\n브라우저 설정에서 권한을 허용해주세요.'),
+            deviceNotFound: gettext('카메라 또는 마이크를 찾을 수 없습니다.'),
+            deviceInUse: gettext('카메라/마이크가 다른 앱에서 사용 중입니다.'),
+            videoChatFailed: gettext('영상 채팅을 시작할 수 없습니다.'),
+
+            // Report history
+            noReportedComments: gettext('아직 신고한 댓글이 없습니다'),
+
+            // Open chat room
+            participantsCount: gettext('명 참여 중'),
+            roomJoined: gettext('채팅방에 입장했습니다'),
+            enterMessage: gettext('메시지를 입력하세요...'),
+            send: gettext('전송'),
+            backButton: gettext('뒤로 가기'),
+            participantsList: gettext('참여자 목록'),
+            kickedUsersList: gettext('강퇴된 사용자'),
+            kickedUsersListTitle: gettext('강퇴된 사용자 목록'),
+
+            // User actions
+            userJoined: gettext('님이 입장했습니다'),
+            userLeft: gettext('님이 퇴장했습니다'),
+            typing: gettext('님이 입력 중'),
+
+            // Leave room
+            leaveRoom: gettext('채팅방 나가기'),
+            leaveRoomConfirm: gettext('정말로 채팅방을 나가시겠습니까?'),
+            leaveRoomFailed: gettext('채팅방 나가기에 실패했습니다.'),
+
+            // Kick system
+            kickUser: gettext('사용자 강퇴'),
+            kickReason: gettext('강퇴 사유 (선택사항)'),
+            kickReasonPlaceholder: gettext('강퇴 사유를 입력하세요...'),
+            banDuration: gettext('차단 기간'),
+            permanentBan: gettext('영구 차단'),
+            oneHour: gettext('1시간'),
+            oneDay: gettext('1일'),
+            oneWeek: gettext('1주일'),
+            oneMonth: gettext('1개월'),
+            confirmKickButton: gettext('강퇴하기'),
+            kickConfirm: gettext('님을 강퇴하시겠습니까?'),
+            kickedWithReason: gettext('님에 의해 강퇴되었습니다.\\n사유: '),
+            kickedWithoutReason: gettext('님에 의해 강퇴되었습니다.'),
+            userKickedWithReason: gettext('님이 강퇴되었습니다 (사유: '),
+            userKickedWithoutReason: gettext('님이 강퇴되었습니다'),
+            kickSuccess: gettext('님이 강퇴되었습니다'),
+            kickFailed: gettext('강퇴에 실패했습니다'),
+            kickedBy: gettext('강퇴자: '),
+            kickReasonLabel: gettext('사유: '),
+            banUntil: gettext('차단 ('),
+            banUntilEnd: gettext('까지)'),
+            banLifted: gettext('차단 해제됨'),
+            unbanButton: gettext('차단 해제'),
+            unbanConfirm: gettext('님의 차단을 해제하시겠습니까?'),
+            unbanSuccess: gettext('님의 차단이 해제되었습니다'),
+            unbanFailed: gettext('차단 해제에 실패했습니다'),
+            noKickedUsers: gettext('강퇴된 사용자가 없습니다'),
+            loadKickedUsersFailed: gettext('강퇴 목록을 불러오는데 실패했습니다'),
+
+            // Admin system
+            grantAdminConfirm: gettext('님에게 관리자 권한을 부여하시겠습니까?'),
+            revokeAdminConfirm: gettext('님의 관리자 권한을 해제하시겠습니까?'),
+            adminGranted: gettext('님이 관리자로 지정되었습니다'),
+            adminRevoked: gettext('님의 관리자 권한이 해제되었습니다'),
+            grantAdminFailed: gettext('관리자 권한 부여에 실패했습니다'),
+            revokeAdminFailed: gettext('관리자 권한 해제에 실패했습니다'),
+            adminGrantedBy: gettext('님이 관리자로 지정되었습니다 (by '),
+            adminRevokedBy: gettext('님의 관리자 권한이 해제되었습니다 (by '),
+
+            // Favorites
+            addedToFavorites: gettext('즐겨찾기에 추가되었습니다'),
+            removedFromFavorites: gettext('즐겨찾기에서 제거되었습니다'),
+
+            // Report/Block
+            reportReason: gettext('님을 신고하는 이유를 입력하세요:'),
+            reportSubmitted: gettext('신고가 접수되었습니다'),
+            reportFailed: gettext('신고 접수에 실패했습니다'),
+            blockConfirmMessage: gettext('님을 차단하시겠습니까? 차단된 사용자의 메시지와 게시물이 보이지 않게 됩니다.'),
+            userBlocked: gettext('님을 차단했습니다'),
+            blockFailed: gettext('차단에 실패했습니다'),
+
+            // Connection
+            connectionLost: gettext('연결이 끊어졌습니다. 페이지를 새로고침해주세요.'),
+            loadMessagesFailed: gettext('메시지를 불러오는데 실패했습니다.'),
+
+            // Room list
+            allCountries: gettext('모든 국가'),
+            loadRoomsFailed: gettext('채팅방을 불러오는데 실패했습니다.'),
+            cannotEnterRoom: gettext('채팅방에 입장할 수 없습니다.'),
+            enterRoomError: gettext('채팅방 입장 중 오류가 발생했습니다.'),
+            passwordRequired: gettext('비밀방은 비밀번호가 필요합니다.'),
+            createRoomFailed: gettext('채팅방 생성에 실패했습니다.'),
+            errorTitle: gettext('오류'),
+            countryCategory: gettext('국가')
+        };
+        </script>
+    {% endif %}
+    <script src="{% static 'js/main.js' %}"></script>
+    <script src="{% static 'js/utils.js' %}"></script>
+    <script src="{% static 'js/follow.js' %}"></script>
+    {% if user.is_authenticated %}
+        <script src="{% static 'js/header_badge.js' %}"></script>
+        <script src="{% static 'js/languages.js' %}"></script>
+        <script src="{% static 'js/language-selector.js' %}"></script>
+        <script src="{% static 'js/alert_modal.js' %}"></script>
+        <script src="{% static 'js/post_modal.js' %}"></script>
+        <script src="{% static 'js/post_modal_viewer.js' %}"></script>
+        <script src="{% static 'js/post_actions.js' %}"></script>
+        <script src="{% static 'js/comment_actions.js' %}"></script>
+        {% if request.resolver_match.url_name == 'home' %}
+            <script src="{% static 'js/home_feed.js' %}"></script>
+            <script src="{% static 'js/home_search.js' %}"></script>
+        {% endif %}
+        {% if 'profile' in request.path %}
+            <script src="{% static 'js/infinite_scroll.js' %}"></script>
+        {% endif %}
+    {% endif %}
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
