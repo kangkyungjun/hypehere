@@ -16,6 +16,20 @@ class ConversationApp {
         this.messageInput = document.getElementById('message-input');
         this.sendButton = document.getElementById('send-button');
 
+        // Action modal, report modal, and block modal elements
+        this.actionModal = document.getElementById('message-action-modal');
+        this.reportModal = document.getElementById('message-report-modal');
+        this.blockModal = document.getElementById('block-user-modal');
+        this.currentReportedUserId = null;
+        this.currentReportedUsername = null;
+        this.selectedReportType = null;
+
+        // Leave conversation modal elements
+        this.leaveModal = document.getElementById('leave-conversation-modal');
+        this.confirmLeaveBtn = document.getElementById('confirm-leave-conversation');
+        this.cancelLeaveBtn = document.getElementById('cancel-leave-conversation');
+        this.closeLeaveModalBtn = document.getElementById('close-leave-conversation-modal');
+
         this.init();
     }
 
@@ -24,6 +38,10 @@ class ConversationApp {
         await this.loadConversationDetails();
         this.setupEventListeners();
         this.setupAutoResize();
+        this.setupActionModal();
+        this.setupReportModal();
+        this.setupBlockModal();
+        this.setupLeaveModal();
         this.connectWebSocket();
         console.log('[Conversation] Initialization complete');
     }
@@ -51,6 +69,15 @@ class ConversationApp {
                 this.sendMessage();
             }
         });
+
+        // Leave conversation button
+        const leaveBtn = document.querySelector('.leave-room-btn');
+        if (leaveBtn) {
+            leaveBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.openLeaveModal();
+            });
+        }
     }
 
     setupAutoResize() {
@@ -92,7 +119,7 @@ class ConversationApp {
     }
 
     createMessageHTML(message, currentUserId) {
-        const isSent = message.sender === currentUserId;
+        const isSent = message.sender_id === currentUserId;
         const avatarSrc = message.sender_profile_picture || this.getDefaultAvatar();
         const timeStr = this.formatTime(message.created_at);
 
@@ -152,7 +179,7 @@ class ConversationApp {
     addNewMessage(messageData) {
         const currentUserId = this.getCurrentUserId();
         const messageHTML = this.createMessageHTML({
-            sender: messageData.sender_id,
+            sender_id: messageData.sender_id,
             sender_nickname: messageData.sender_nickname,
             sender_profile_picture: null,
             content: messageData.content,
@@ -250,13 +277,15 @@ class ConversationApp {
         const diffHour = Math.floor(diffMin / 60);
         const diffDay = Math.floor(diffHour / 24);
 
-        if (diffSec < 60) return '방금 전';
-        if (diffMin < 60) return `${diffMin}분 전`;
-        if (diffHour < 24) return `${diffHour}시간 전`;
-        if (diffDay < 7) return `${diffDay}일 전`;
+        if (diffSec < 60) return window.APP_I18N.timeJustNow;
+        if (diffMin < 60) return `${diffMin}${window.APP_I18N.timeMinutesAgo}`;
+        if (diffHour < 24) return `${diffHour}${window.APP_I18N.timeHoursAgo}`;
+        if (diffDay < 7) return `${diffDay}${window.APP_I18N.timeDaysAgo}`;
 
         // Format as date
-        return date.toLocaleDateString('ko-KR', {
+        const currentLang = document.documentElement.lang || 'ko';
+        const locale = currentLang === 'ko' ? 'ko-KR' : currentLang === 'ja' ? 'ja-JP' : 'en-US';
+        return date.toLocaleDateString(locale, {
             month: 'short',
             day: 'numeric'
         });
@@ -279,6 +308,478 @@ class ConversationApp {
 
     showError(message) {
         alert(message);
+    }
+
+    // ===== Action Modal Methods =====
+
+    setupActionModal() {
+        if (!this.actionModal) return;
+
+        // Three-dot button opens action modal
+        const chatActionsBtn = document.getElementById('chat-actions-btn');
+        if (chatActionsBtn) {
+            chatActionsBtn.addEventListener('click', () => {
+                const userId = parseInt(chatActionsBtn.dataset.userId);
+                const username = chatActionsBtn.dataset.username;
+                this.openActionModal(userId, username);
+            });
+        }
+
+        // Close button
+        document.getElementById('close-message-action-modal')?.addEventListener('click', () => {
+            this.closeActionModal();
+        });
+
+        // Action buttons (Block, Report)
+        this.actionModal.addEventListener('click', (e) => {
+            const actionBtn = e.target.closest('[data-action]');
+            if (actionBtn) {
+                const action = actionBtn.dataset.action;
+                this.handleActionSelect(action);
+            }
+        });
+
+        // Close on overlay click
+        this.actionModal.addEventListener('click', (e) => {
+            if (e.target === this.actionModal) {
+                this.closeActionModal();
+            }
+        });
+
+        // Close on ESC key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !this.actionModal.classList.contains('hidden')) {
+                this.closeActionModal();
+            }
+        });
+    }
+
+    openActionModal(userId, username) {
+        // Prevent self-actions
+        const currentUserId = parseInt(document.body.dataset.userId);
+        if (userId === currentUserId) {
+            const lang = document.documentElement.lang || 'ko';
+            const message = lang === 'en'
+                ? 'You cannot perform actions on yourself'
+                : '자기 자신에게는 작업을 수행할 수 없습니다';
+            if (window.showAlert) {
+                window.showAlert(message, 'error');
+            } else {
+                alert(message);
+            }
+            return;
+        }
+
+        this.currentReportedUserId = userId;
+        this.currentReportedUsername = username;
+
+        // Show modal
+        this.actionModal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+
+    closeActionModal() {
+        this.actionModal.classList.add('hidden');
+        document.body.style.overflow = '';
+    }
+
+    handleActionSelect(action) {
+        this.closeActionModal();
+
+        if (action === 'report') {
+            this.openReportModal();
+        } else if (action === 'block') {
+            this.handleBlockUser();
+        }
+    }
+
+    // ===== Report Modal Methods =====
+
+    setupReportModal() {
+        if (!this.reportModal) return;
+
+        // Report type buttons
+        document.querySelectorAll('#message-report-modal .report-type-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const type = btn.dataset.type;
+                this.handleReportTypeSelect(type);
+            });
+        });
+
+        // Close buttons
+        document.getElementById('close-message-report-modal')?.addEventListener('click', () => {
+            this.closeReportModal();
+        });
+
+        document.getElementById('cancel-message-report-btn')?.addEventListener('click', () => {
+            this.closeReportModal();
+        });
+
+        // Form submit
+        document.getElementById('message-report-form')?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.submitReport();
+        });
+
+        // Close on overlay click
+        this.reportModal.addEventListener('click', (e) => {
+            if (e.target === this.reportModal) {
+                this.closeReportModal();
+            }
+        });
+
+        // Close on ESC key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !this.reportModal.classList.contains('hidden')) {
+                this.closeReportModal();
+            }
+        });
+    }
+
+    openReportModal() {
+        // Reset form
+        document.getElementById('message-report-form')?.reset();
+        document.getElementById('message-report-type').value = '';
+        this.selectedReportType = null;
+        document.querySelectorAll('#message-report-modal .report-type-btn').forEach(btn => {
+            btn.classList.remove('selected');
+        });
+
+        // Show modal
+        this.reportModal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+
+    closeReportModal() {
+        this.reportModal.classList.add('hidden');
+        document.body.style.overflow = '';
+        this.currentReportedUserId = null;
+        this.currentReportedUsername = null;
+        this.selectedReportType = null;
+    }
+
+    handleReportTypeSelect(type) {
+        this.selectedReportType = type;
+
+        // Update visual state
+        document.querySelectorAll('#message-report-modal .report-type-btn').forEach(btn => {
+            if (btn.dataset.type === type) {
+                btn.classList.add('selected');
+            } else {
+                btn.classList.remove('selected');
+            }
+        });
+
+        // Set hidden input value
+        document.getElementById('message-report-type').value = type;
+    }
+
+    async submitReport() {
+        const reportType = document.getElementById('message-report-type').value;
+        const description = document.getElementById('message-report-description').value;
+
+        if (!reportType) {
+            const lang = document.documentElement.lang || 'ko';
+            const message = lang === 'en'
+                ? 'Please select a report type'
+                : '신고 유형을 선택해주세요';
+            if (window.showAlert) {
+                window.showAlert(message, 'error');
+            } else {
+                alert(message);
+            }
+            return;
+        }
+
+        if (!this.currentReportedUserId) {
+            console.error('No user ID set for reporting');
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/chat/report/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': this.getCsrfToken()
+                },
+                body: JSON.stringify({
+                    reported_user: this.currentReportedUserId,
+                    report_type: reportType,
+                    description: description || '',
+                    conversation: this.conversationId
+                })
+            });
+
+            if (response.ok) {
+                const lang = document.documentElement.lang || 'ko';
+                const message = lang === 'en'
+                    ? 'Report submitted successfully'
+                    : '신고가 접수되었습니다';
+                if (window.showAlert) {
+                    window.showAlert(message, 'success');
+                } else {
+                    alert(message);
+                }
+                this.closeReportModal();
+            } else {
+                const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+                const lang = document.documentElement.lang || 'ko';
+                const message = lang === 'en'
+                    ? `Report failed: ${error.error || 'Server error occurred'}`
+                    : `신고 실패: ${error.error || '서버 오류가 발생했습니다'}`;
+                if (window.showAlert) {
+                    window.showAlert(message, 'error');
+                } else {
+                    alert(message);
+                }
+            }
+        } catch (error) {
+            console.error('Report submission error:', error);
+            const lang = document.documentElement.lang || 'ko';
+            const message = lang === 'en'
+                ? 'Network error occurred. Please try again.'
+                : '네트워크 오류가 발생했습니다. 다시 시도해주세요.';
+            if (window.showAlert) {
+                window.showAlert(message, 'error');
+            } else {
+                alert(message);
+            }
+        }
+    }
+
+    getCsrfToken() {
+        // Try to get from cookie first
+        const cookieValue = document.cookie
+            .split('; ')
+            .find(row => row.startsWith('csrftoken='))
+            ?.split('=')[1];
+
+        if (cookieValue) {
+            return cookieValue;
+        }
+
+        // Fallback to hidden input
+        return document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+    }
+
+    // ===== Block User Methods =====
+
+    setupBlockModal() {
+        if (!this.blockModal) return;
+
+        // Close button
+        document.getElementById('close-block-user-modal')?.addEventListener('click', () => {
+            this.closeBlockModal();
+        });
+
+        // Cancel button
+        document.getElementById('cancel-block-user')?.addEventListener('click', () => {
+            this.closeBlockModal();
+        });
+
+        // Confirm button
+        document.getElementById('confirm-block-user')?.addEventListener('click', () => {
+            this.confirmBlockUser();
+        });
+
+        // Close on overlay click
+        this.blockModal.addEventListener('click', (e) => {
+            if (e.target === this.blockModal) {
+                this.closeBlockModal();
+            }
+        });
+
+        // Close on ESC key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !this.blockModal.classList.contains('hidden')) {
+                this.closeBlockModal();
+            }
+        });
+    }
+
+    handleBlockUser() {
+        if (!this.currentReportedUserId) {
+            console.error('No user ID set for blocking');
+            return;
+        }
+        this.openBlockModal();
+    }
+
+    openBlockModal() {
+        // Set username in modal
+        const blockUserName = document.getElementById('block-user-name');
+        const lang = document.documentElement.lang || 'ko';
+        if (blockUserName) {
+            blockUserName.textContent = lang === 'en'
+                ? `Block ${this.currentReportedUsername}?`
+                : `${this.currentReportedUsername}님을 차단하시겠습니까?`;
+        }
+
+        // Show modal
+        this.blockModal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+
+    closeBlockModal() {
+        this.blockModal.classList.add('hidden');
+        document.body.style.overflow = '';
+    }
+
+    async confirmBlockUser() {
+        this.closeBlockModal();
+
+        if (!this.currentReportedUsername) {
+            console.error('No username set for blocking');
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/accounts/${this.currentReportedUsername}/block/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': this.getCsrfToken()
+                }
+            });
+
+            const lang = document.documentElement.lang || 'ko';
+            if (response.ok) {
+                const message = lang === 'en'
+                    ? `${this.currentReportedUsername} has been blocked`
+                    : `${this.currentReportedUsername}님을 차단했습니다`;
+                if (window.showAlert) {
+                    window.showAlert(message, 'success');
+                } else {
+                    alert(message);
+                }
+                window.location.href = '/messages/';
+            } else {
+                const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+                const message = lang === 'en'
+                    ? `Block failed: ${error.error || 'Server error occurred'}`
+                    : `차단 실패: ${error.error || '서버 오류가 발생했습니다'}`;
+                if (window.showAlert) {
+                    window.showAlert(message, 'error');
+                } else {
+                    alert(message);
+                }
+            }
+        } catch (error) {
+            console.error('Block user error:', error);
+            const lang = document.documentElement.lang || 'ko';
+            const message = lang === 'en'
+                ? 'Network error occurred. Please try again.'
+                : '네트워크 오류가 발생했습니다. 다시 시도해주세요.';
+            if (window.showAlert) {
+                window.showAlert(message, 'error');
+            } else {
+                alert(message);
+            }
+        }
+    }
+
+    // ==================== Leave Conversation Modal Methods ====================
+
+    setupLeaveModal() {
+        if (!this.leaveModal) return;
+
+        // Close button
+        if (this.closeLeaveModalBtn) {
+            this.closeLeaveModalBtn.addEventListener('click', () => {
+                this.closeLeaveModal();
+            });
+        }
+
+        // Cancel button
+        if (this.cancelLeaveBtn) {
+            this.cancelLeaveBtn.addEventListener('click', () => {
+                this.closeLeaveModal();
+            });
+        }
+
+        // Confirm button
+        if (this.confirmLeaveBtn) {
+            this.confirmLeaveBtn.addEventListener('click', () => {
+                this.confirmLeave();
+            });
+        }
+
+        // Close on overlay click
+        this.leaveModal.addEventListener('click', (e) => {
+            if (e.target === this.leaveModal) {
+                this.closeLeaveModal();
+            }
+        });
+
+        // Close on ESC key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !this.leaveModal.classList.contains('hidden')) {
+                this.closeLeaveModal();
+            }
+        });
+    }
+
+    openLeaveModal() {
+        if (!this.leaveModal) return;
+
+        this.leaveModal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+
+    closeLeaveModal() {
+        if (!this.leaveModal) return;
+
+        this.leaveModal.classList.add('hidden');
+        document.body.style.overflow = '';
+    }
+
+    async confirmLeave() {
+        this.closeLeaveModal();
+
+        try {
+            const response = await fetch(`/messages/api/conversations/${this.conversationId}/leave/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': this.getCsrfToken()
+                },
+                credentials: 'same-origin'
+            });
+
+            const lang = document.documentElement.lang || 'ko';
+            if (response.ok) {
+                const message = lang === 'en'
+                    ? 'You have left the conversation'
+                    : '대화방을 나갔습니다';
+                if (window.showAlert) {
+                    window.showAlert(message, 'success');
+                }
+                // Redirect to conversations list
+                window.location.href = '/messages/';
+            } else {
+                const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+                const message = lang === 'en'
+                    ? `Failed to leave: ${error.error || 'Server error occurred'}`
+                    : `나가기 실패: ${error.error || '서버 오류가 발생했습니다'}`;
+                if (window.showAlert) {
+                    window.showAlert(message, 'error');
+                } else {
+                    alert(message);
+                }
+            }
+        } catch (error) {
+            console.error('Leave conversation error:', error);
+            const lang = document.documentElement.lang || 'ko';
+            const message = lang === 'en'
+                ? 'Network error occurred. Please try again.'
+                : '네트워크 오류가 발생했습니다. 다시 시도해주세요.';
+            if (window.showAlert) {
+                window.showAlert(message, 'error');
+            } else {
+                alert(message);
+            }
+        }
     }
 }
 

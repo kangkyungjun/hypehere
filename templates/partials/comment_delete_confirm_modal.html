@@ -1,0 +1,28 @@
+{% load i18n %}
+<!-- Comment Delete Confirmation Modal -->
+<div id="comment-delete-confirm-modal" class="modal-overlay hidden">
+    <div class="modal-container" style="max-width: 400px;">
+        <div class="modal-header">
+            <h3>{% trans "댓글 삭제" %}</h3>
+            <button type="button" class="modal-close" id="close-comment-delete-confirm" aria-label="{% trans '닫기' %}">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+
+        <div class="modal-body">
+            <p style="margin-bottom: 1.5rem;">{% trans "댓글을 삭제하시겠습니까?" %}</p>
+
+            <div class="modal-actions">
+                <button type="button" class="btn btn-ghost" id="cancel-comment-delete">
+                    {% trans "취소" %}
+                </button>
+                <button type="button" class="btn btn-danger" id="confirm-comment-delete">
+                    {% trans "삭제" %}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

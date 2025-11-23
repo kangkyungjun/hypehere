@@ -307,8 +307,9 @@
 }
 
 .message-item.sent .message-bubble {
-    background-color: var(--color-primary);
-    color: white;
+    background-color: #E8F5E9;
+    color: var(--color-text);
+    border: 1px solid #A5D6A7;
     border-bottom-right-radius: var(--radius-xs);
 }
 

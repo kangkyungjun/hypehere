@@ -57,15 +57,16 @@ const PrivacySettings = {
 
     // 버튼 텍스트 업데이트
     updateButtonText(button, value) {
+        const i18n = window.APP_I18N || {};
         const textMap = {
-            'everyone': '전체 공개',
-            'followers': '팔로워만',
-            'nobody': '비공개'
+            'everyone': i18n.everyone || '전체 공개',
+            'followers': i18n.followersOnly || '팔로워만',
+            'nobody': i18n.nobody || '비공개'
         };
 
         const selectedValueEl = button.querySelector('.selected-value');
         if (selectedValueEl) {
-            selectedValueEl.textContent = textMap[value] || '전체 공개';
+            selectedValueEl.textContent = textMap[value] || (i18n.everyone || '전체 공개');
         }
     },
 
@@ -136,9 +137,10 @@ const PrivacySettings = {
         const options = document.querySelectorAll('.privacy-option');
 
         // 모달 제목 설정
+        const i18n = window.APP_I18N || {};
         const titleMap = {
-            'followers': '팔로워 목록 공개 범위',
-            'following': '팔로잉 목록 공개 범위'
+            'followers': i18n.followersListVisibility || '팔로워 목록 공개 범위',
+            'following': i18n.followingListVisibility || '팔로잉 목록 공개 범위'
         };
         if (title) {
             title.textContent = titleMap[settingType] || '공개 범위 선택';

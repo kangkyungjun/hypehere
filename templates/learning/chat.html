@@ -9,6 +9,23 @@
 {% endblock %}
 
 {% block content %}
+{% if user.is_deactivated %}
+    <!-- 비활성화된 유저용 안내 화면 -->
+    <div class="card" style="text-align: center; padding: var(--space-2xl); margin: var(--space-lg) auto; max-width: 600px;">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin: 0 auto var(--space-lg); color: var(--color-warning);">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <h3 style="margin-bottom: var(--space-md);">{% trans "계정이 비활성화되었습니다" %}</h3>
+        <p class="text-light" style="margin-bottom: var(--space-lg);">
+            {% trans "계정을 재활성화하면 모든 기능을 다시 사용할 수 있습니다." %}
+        </p>
+        <a href="{% url 'accounts:account_management' %}" class="btn btn-primary">
+            {% trans "재활성화 하기" %}
+        </a>
+    </div>
+{% else %}
 <div class="open-chat-container">
     <!-- Search Header (Sticky) -->
     <div class="chat-search-header">
@@ -81,7 +98,7 @@
     <div id="create-room-modal" class="modal hidden">
         <div class="modal-overlay"></div>
         <div class="modal-content">
-            <h3>새 채팅방 만들기</h3>
+            <h3>{% trans "새 채팅방 만들기" %}</h3>
             <form id="create-room-form">
                 <!-- Title Input with Floating Label -->
                 <div class="form-group-floating">
@@ -94,7 +111,7 @@
                         required
                         maxlength="200"
                     >
-                    <label for="room-name" class="form-label-floating">채팅방 이름</label>
+                    <label for="room-name" class="form-label-floating">{% trans "채팅방 이름" %}</label>
                 </div>
 
                 <!-- Category Dropdown with Custom Select -->
@@ -176,6 +193,7 @@
         </div>
     </div>
 </div>
+{% endif %}
 {% endblock %}
 
 {% block extra_js %}

@@ -1,4 +1,5 @@
 from django.views.generic import TemplateView, RedirectView
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Count, Exists, OuterRef
 from posts.models import Post, Like, PostFavorite
 
@@ -53,7 +54,7 @@ class ExploreView(TemplateView):
     template_name = 'explore.html'
 
 
-class LearningMatchingView(TemplateView):
+class LearningMatchingView(LoginRequiredMixin, TemplateView):
     """
     1:1 language exchange matching page view
     Displays language partner matching interface
@@ -61,7 +62,7 @@ class LearningMatchingView(TemplateView):
     template_name = 'learning/matching.html'
 
 
-class LearningChatView(TemplateView):
+class LearningChatView(LoginRequiredMixin, TemplateView):
     """
     Learning open chat page view
     Displays group learning chat rooms

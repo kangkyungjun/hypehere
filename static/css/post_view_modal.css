@@ -131,6 +131,42 @@
   flex: 1;
 }
 
+/* 게시물 옵션 버튼 (점 3개) */
+.post-options-btn {
+  position: relative;
+  z-index: 10;
+  background: rgba(0, 0, 0, 0.05);
+  border: none;
+  padding: var(--space-xs);
+  color: var(--color-text);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  min-width: 36px;
+  min-height: 36px;
+}
+
+.post-options-btn:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+  transform: scale(1.05);
+}
+
+.post-options-btn:active {
+  transform: scale(0.95);
+}
+
+.post-options-btn.hidden {
+  display: none;
+}
+
+.post-options-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
 .post-modal-body {
   margin-bottom: var(--space-lg);
   line-height: var(--line-height-relaxed);

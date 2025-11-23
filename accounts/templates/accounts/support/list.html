@@ -1,18 +1,19 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load i18n %}
 
-{% block title %}고객지원 - HypeHere{% endblock %}
+{% block title %}{% trans "고객지원 - HypeHere" %}{% endblock %}
 
 {% block content %}
 <div class="support-container">
     <div class="support-header">
-        <h1>{% if is_staff %}전체 문의 목록{% else %}내 문의 목록{% endif %}</h1>
+        <h1>{% if is_staff %}{% trans "전체 문의 목록" %}{% else %}{% trans "내 문의 목록" %}{% endif %}</h1>
         <a href="{% url 'accounts:support_create' %}" class="btn-create-ticket">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <line x1="12" y1="5" x2="12" y2="19"></line>
                 <line x1="5" y1="12" x2="19" y2="12"></line>
             </svg>
-            문의 작성
+            {% trans "문의 작성" %}
         </a>
     </div>
 
@@ -23,17 +24,17 @@
             <div class="filter-buttons">
                 <a href="{% url 'accounts:support_list' %}"
                    class="filter-btn {% if not request.GET.status %}active{% endif %}">
-                    <span class="filter-label">전체</span>
+                    <span class="filter-label">{% trans "전체" %}</span>
                     <span class="filter-count">{{ total_count }}</span>
                 </a>
                 <a href="?status=pending{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}"
                    class="filter-btn {% if request.GET.status == 'pending' %}active{% endif %}">
-                    <span class="filter-label">🟡 대기중</span>
+                    <span class="filter-label">🟡 {% trans "대기중" %}</span>
                     <span class="filter-count">{{ pending_count }}</span>
                 </a>
                 <a href="?status=answered{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}"
                    class="filter-btn {% if request.GET.status == 'answered' %}active{% endif %}">
-                    <span class="filter-label">🟢 답변완료</span>
+                    <span class="filter-label">🟢 {% trans "답변완료" %}</span>
                     <span class="filter-count">{{ answered_count }}</span>
                 </a>
             </div>
@@ -51,22 +52,22 @@
                         <path d="m21 21-4.35-4.35"></path>
                     </svg>
                     <input type="text" name="search" class="search-input"
-                           placeholder="제목으로 검색..."
+                           placeholder="{% trans '제목으로 검색...' %}"
                            value="{{ request.GET.search|default:'' }}">
                 </div>
-                <button type="submit" class="search-btn">검색</button>
+                <button type="submit" class="search-btn">{% trans "검색" %}</button>
             </form>
         </div>
 
         <!-- Active Filters Display -->
         {% if request.GET.status or request.GET.search %}
         <div class="active-filters">
-            <span class="active-filters-label">필터:</span>
+            <span class="active-filters-label">{% trans "필터:" %}</span>
 
             {% if request.GET.status %}
             <span class="filter-chip">
-                {% if request.GET.status == 'pending' %}🟡 대기중
-                {% elif request.GET.status == 'answered' %}🟢 답변완료
+                {% if request.GET.status == 'pending' %}🟡 {% trans "대기중" %}
+                {% elif request.GET.status == 'answered' %}🟢 {% trans "답변완료" %}
                 {% endif %}
                 <a href="?{% if request.GET.search %}search={{ request.GET.search }}{% endif %}" class="filter-chip-remove">×</a>
             </span>
@@ -74,7 +75,7 @@
 
             {% if request.GET.search %}
             <span class="filter-chip">
-                검색: "{{ request.GET.search }}"
+                {% trans "검색:" %} "{{ request.GET.search }}"
                 <a href="?{% if request.GET.status %}status={{ request.GET.status }}{% endif %}" class="filter-chip-remove">×</a>
             </span>
             {% endif %}
@@ -89,9 +90,9 @@
                     <div class="ticket-header">
                         <div class="ticket-status">
                             {% if ticket.status == 'pending' %}
-                                <span class="status-badge status-pending">🟡 대기중</span>
+                                <span class="status-badge status-pending">🟡 {% trans "대기중" %}</span>
                             {% elif ticket.status == 'answered' %}
-                                <span class="status-badge status-answered">🟢 답변완료</span>
+                                <span class="status-badge status-answered">🟢 {% trans "답변완료" %}</span>
                             {% endif %}
                             <span class="ticket-category">[{{ ticket.get_category_display }}]</span>
                         </div>
@@ -105,13 +106,13 @@
                         <h3 class="ticket-title">{{ ticket.title }}</h3>
                         <div class="ticket-meta">
                             {% if is_staff %}
-                                <span class="ticket-author">작성자: {{ ticket.user.nickname }}</span>
+                                <span class="ticket-author">{% trans "작성자:" %} {{ ticket.user.nickname }}</span>
                                 <span class="ticket-separator">•</span>
                             {% endif %}
                             <span class="ticket-date">{{ ticket.created_at|date:"Y-m-d H:i" }}</span>
                             {% if ticket.has_response %}
                                 <span class="ticket-separator">•</span>
-                                <span class="ticket-responded">답변: ✓</span>
+                                <span class="ticket-responded">{% trans "답변" %}: ✓</span>
                             {% endif %}
                         </div>
                     </div>
@@ -123,15 +124,15 @@
         {% if is_paginated %}
             <div class="pagination">
                 {% if page_obj.has_previous %}
-                    <a href="?page=1{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="page-link">처음</a>
-                    <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="page-link">이전</a>
+                    <a href="?page=1{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="page-link">{% trans "처음" %}</a>
+                    <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="page-link">{% trans "이전" %}</a>
                 {% endif %}
 
                 <span class="page-current">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
 
                 {% if page_obj.has_next %}
-                    <a href="?page={{ page_obj.next_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="page-link">다음</a>
-                    <a href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="page-link">마지막</a>
+                    <a href="?page={{ page_obj.next_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="page-link">{% trans "다음" %}</a>
+                    <a href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="page-link">{% trans "마지막" %}</a>
                 {% endif %}
             </div>
         {% endif %}
@@ -140,8 +141,8 @@
             <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
             </svg>
-            <p>아직 문의 내역이 없습니다.</p>
-            <a href="{% url 'accounts:support_create' %}" class="btn-empty-action">첫 문의 작성하기</a>
+            <p>{% trans "아직 문의 내역이 없습니다." %}</p>
+            <a href="{% url 'accounts:support_create' %}" class="btn-empty-action">{% trans "첫 문의 작성하기" %}</a>
         </div>
     {% endif %}
 </div>

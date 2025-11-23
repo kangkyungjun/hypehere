@@ -343,7 +343,7 @@ class OpenChatManager {
             <path d="M23 21v-2a4 4 0 0 0-3-3.87" stroke-linecap="round" stroke-linejoin="round"/>
             <path d="M16 3.13a4 4 0 0 1 0 7.75" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
-          <span>${participantCount}${this.i18n.people || '명'}</span>
+          <span>${participantCount}</span>
         </div>
       </div>
       <p class="room-activity">${lastActivity}</p>
@@ -379,10 +379,10 @@ class OpenChatManager {
     const diffHours = Math.floor(diffMins / 60);
     const diffDays = Math.floor(diffHours / 24);
 
-    if (diffMins < 1) return this.i18n.timeJustNow || '방금 전';
-    if (diffMins < 60) return `${diffMins}${this.i18n.timeMinutesAgo || '분 전'}`;
-    if (diffHours < 24) return `${diffHours}${this.i18n.timeHoursAgo || '시간 전'}`;
-    if (diffDays < 7) return `${diffDays}${this.i18n.timeDaysAgo || '일 전'}`;
+    if (diffMins < 1) return this.i18n.timeJustNow || 'Just now';
+    if (diffMins < 60) return `${diffMins}${this.i18n.timeMinutesAgo || ' min ago'}`;
+    if (diffHours < 24) return `${diffHours}${this.i18n.timeHoursAgo || ' hours ago'}`;
+    if (diffDays < 7) return `${diffDays}${this.i18n.timeDaysAgo || ' days ago'}`;
 
     // Get current language from HTML or cookie
     const lang = document.documentElement.lang || 'ko';

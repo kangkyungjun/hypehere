@@ -32,8 +32,9 @@ const AccountManagement = {
 
             // 삭제 버튼 비활성화
             const deleteBtn = document.getElementById('btn-delete');
+            const i18n = window.APP_I18N || {};
             deleteBtn.disabled = true;
-            deleteBtn.textContent = '삭제 예약됨';
+            deleteBtn.textContent = i18n.deletionScheduled || '삭제 예약됨';
             deleteBtn.style.opacity = '0.5';
         }
     },
@@ -55,6 +56,14 @@ const AccountManagement = {
         if (deactivateBtn) {
             deactivateBtn.addEventListener('click', () => {
                 this.showModal('deactivate-modal');
+            });
+        }
+
+        // 재활성화 버튼
+        const reactivateBtn = document.getElementById('btn-reactivate');
+        if (reactivateBtn) {
+            reactivateBtn.addEventListener('click', () => {
+                this.showModal('reactivate-modal');
             });
         }
 
@@ -91,8 +100,9 @@ const AccountManagement = {
         const deleteConfirmText = document.getElementById('delete-confirm-text');
         if (deleteConfirmText) {
             deleteConfirmText.addEventListener('input', (e) => {
+                const i18n = window.APP_I18N || {};
                 const confirmBtn = document.getElementById('confirm-delete');
-                confirmBtn.disabled = e.target.value !== '영구삭제';
+                confirmBtn.disabled = e.target.value !== (i18n.confirmDeleteText || '영구삭제');
             });
         }
 
@@ -101,9 +111,32 @@ const AccountManagement = {
         if (confirmDeleteBtn) {
             confirmDeleteBtn.addEventListener('click', () => this.requestDeletion());
         }
+
+        // 비활성화 성공 모달 확인 버튼
+        const deactivateSuccessOk = document.getElementById('deactivate-success-ok');
+        if (deactivateSuccessOk) {
+            deactivateSuccessOk.addEventListener('click', () => {
+                window.location.reload();
+            });
+        }
+
+        // 재활성화 확인
+        const confirmReactivateBtn = document.getElementById('confirm-reactivate');
+        if (confirmReactivateBtn) {
+            confirmReactivateBtn.addEventListener('click', () => this.reactivateAccount());
+        }
+
+        // 재활성화 성공 모달 확인 버튼
+        const reactivateSuccessOk = document.getElementById('reactivate-success-ok');
+        if (reactivateSuccessOk) {
+            reactivateSuccessOk.addEventListener('click', () => {
+                window.location.reload();
+            });
+        }
     },
 
     async deactivateAccount() {
+        const i18n = window.APP_I18N || {};
         try {
             const response = await fetch('/api/accounts/deactivate/', {
                 method: 'POST',
@@ -114,18 +147,44 @@ const AccountManagement = {
             });
 
             if (response.ok) {
-                alert('계정이 비활성화되었습니다. 다시 로그인하면 복구할 수 있습니다.');
-                window.location.href = '/accounts/login/';
+                this.hideModal('deactivate-modal');
+                this.showModal('deactivate-success-modal');
             } else {
-                alert('비활성화에 실패했습니다.');
+                alert(i18n.deactivateFailed || '비활성화에 실패했습니다.');
             }
         } catch (error) {
             console.error('Error deactivating account:', error);
-            alert('비활성화 중 오류가 발생했습니다.');
+            alert(i18n.deactivateError || '비활성화 중 오류가 발생했습니다.');
+        }
+    },
+
+    async reactivateAccount() {
+        const i18n = window.APP_I18N || {};
+        try {
+            const response = await fetch('/api/accounts/reactivate/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': this.getCookie('csrftoken'),
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'same-origin'
+            });
+
+            if (response.ok) {
+                this.hideModal('reactivate-modal');
+                this.showModal('reactivate-success-modal');
+            } else {
+                const data = await response.json();
+                alert(data.error || i18n.reactivateFailed || '재활성화에 실패했습니다.');
+            }
+        } catch (error) {
+            console.error('Error reactivating account:', error);
+            alert(i18n.reactivateError || '재활성화 중 오류가 발생했습니다.');
         }
     },
 
     async requestDeletion() {
+        const i18n = window.APP_I18N || {};
         try {
             const response = await fetch('/api/accounts/request-deletion/', {
                 method: 'POST',
@@ -141,16 +200,17 @@ const AccountManagement = {
                 window.location.reload();
             } else {
                 const data = await response.json();
-                alert(data.error || '삭제 요청에 실패했습니다.');
+                alert(data.error || i18n.deletionRequestFailed || '삭제 요청에 실패했습니다.');
             }
         } catch (error) {
             console.error('Error requesting deletion:', error);
-            alert('삭제 요청 중 오류가 발생했습니다.');
+            alert(i18n.deletionRequestError || '삭제 요청 중 오류가 발생했습니다.');
         }
     },
 
     async cancelDeletion() {
-        if (!confirm('정말로 삭제를 취소하시겠습니까?')) {
+        const i18n = window.APP_I18N || {};
+        if (!confirm(i18n.cancelDeletionConfirm || '정말로 삭제를 취소하시겠습니까?')) {
             return;
         }
 
@@ -164,15 +224,15 @@ const AccountManagement = {
             });
 
             if (response.ok) {
-                alert('계정 삭제가 취소되었습니다.');
+                alert(i18n.cancelDeletionSuccess || '계정 삭제가 취소되었습니다.');
                 window.location.reload();
             } else {
                 const data = await response.json();
-                alert(data.error || '취소에 실패했습니다.');
+                alert(data.error || i18n.cancelDeletionFailed || '취소에 실패했습니다.');
             }
         } catch (error) {
             console.error('Error cancelling deletion:', error);
-            alert('취소 중 오류가 발생했습니다.');
+            alert(i18n.cancelDeletionError || '취소 중 오류가 발생했습니다.');
         }
     },
 

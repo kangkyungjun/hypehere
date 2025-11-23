@@ -72,6 +72,30 @@ class OpenChatRoom {
     this.cancelLeaveBtn = document.getElementById('cancel-leave');
     this.closeLeaveModalBtn = document.getElementById('close-leave-modal');
 
+    // Grant Admin modal elements
+    this.grantAdminModal = document.getElementById('grant-admin-modal');
+    this.grantAdminTargetName = document.getElementById('grant-admin-target-name');
+    this.confirmGrantAdminBtn = document.getElementById('confirm-grant-admin');
+    this.cancelGrantAdminBtn = document.getElementById('cancel-grant-admin');
+    this.closeGrantAdminModalBtn = document.getElementById('close-grant-admin-modal');
+    this.currentGrantAdminTarget = null; // {userId, nickname}
+
+    // Revoke Admin modal elements
+    this.revokeAdminModal = document.getElementById('revoke-admin-modal');
+    this.revokeAdminTargetName = document.getElementById('revoke-admin-target-name');
+    this.confirmRevokeAdminBtn = document.getElementById('confirm-revoke-admin');
+    this.cancelRevokeAdminBtn = document.getElementById('cancel-revoke-admin');
+    this.closeRevokeAdminModalBtn = document.getElementById('close-revoke-admin-modal');
+    this.currentRevokeAdminTarget = null; // {userId, nickname}
+
+    // Unban User modal elements
+    this.unbanUserModal = document.getElementById('unban-user-modal');
+    this.unbanUserTargetName = document.getElementById('unban-user-target-name');
+    this.confirmUnbanUserBtn = document.getElementById('confirm-unban-user');
+    this.cancelUnbanUserBtn = document.getElementById('cancel-unban-user');
+    this.closeUnbanUserModalBtn = document.getElementById('close-unban-user-modal');
+    this.currentUnbanTarget = null; // {userId, nickname}
+
     // Note: Report and Block modals are now handled by post_actions.js
 
     this.init();
@@ -234,6 +258,10 @@ class OpenChatRoom {
 
       case 'typing':
         this.showTypingIndicator(data.user_nickname);
+        break;
+
+      case 'room_closed':
+        this.handleRoomClosed(data);
         break;
 
       default:
@@ -402,6 +430,63 @@ class OpenChatRoom {
       });
     }
 
+    // Grant Admin modal event listeners
+    if (this.confirmGrantAdminBtn) {
+      this.confirmGrantAdminBtn.addEventListener('click', () => {
+        this.confirmGrantAdmin();
+      });
+    }
+
+    if (this.cancelGrantAdminBtn) {
+      this.cancelGrantAdminBtn.addEventListener('click', () => {
+        this.closeGrantAdminModal();
+      });
+    }
+
+    if (this.closeGrantAdminModalBtn) {
+      this.closeGrantAdminModalBtn.addEventListener('click', () => {
+        this.closeGrantAdminModal();
+      });
+    }
+
+    // Revoke Admin modal event listeners
+    if (this.confirmRevokeAdminBtn) {
+      this.confirmRevokeAdminBtn.addEventListener('click', () => {
+        this.confirmRevokeAdmin();
+      });
+    }
+
+    if (this.cancelRevokeAdminBtn) {
+      this.cancelRevokeAdminBtn.addEventListener('click', () => {
+        this.closeRevokeAdminModal();
+      });
+    }
+
+    if (this.closeRevokeAdminModalBtn) {
+      this.closeRevokeAdminModalBtn.addEventListener('click', () => {
+        this.closeRevokeAdminModal();
+      });
+    }
+
+    // Unban User modal event listeners
+    if (this.confirmUnbanUserBtn) {
+      this.confirmUnbanUserBtn.addEventListener('click', () => {
+        this.confirmUnbanUser();
+      });
+    }
+
+    if (this.cancelUnbanUserBtn) {
+      this.cancelUnbanUserBtn.addEventListener('click', () => {
+        this.closeUnbanUserModal();
+      });
+    }
+
+    if (this.closeUnbanUserModalBtn) {
+      this.closeUnbanUserModalBtn.addEventListener('click', () => {
+        this.closeUnbanUserModal();
+      });
+    }
+
     // Note: Report and Block modals are now handled by post_actions.js
 
     // Close modals on backdrop click
@@ -441,6 +526,30 @@ class OpenChatRoom {
       this.blockUserModal.addEventListener('click', (e) => {
         if (e.target === this.blockUserModal) {
           this.closeBlockUserModal();
+        }
+      });
+    }
+
+    if (this.grantAdminModal) {
+      this.grantAdminModal.addEventListener('click', (e) => {
+        if (e.target === this.grantAdminModal) {
+          this.closeGrantAdminModal();
+        }
+      });
+    }
+
+    if (this.revokeAdminModal) {
+      this.revokeAdminModal.addEventListener('click', (e) => {
+        if (e.target === this.revokeAdminModal) {
+          this.closeRevokeAdminModal();
+        }
+      });
+    }
+
+    if (this.unbanUserModal) {
+      this.unbanUserModal.addEventListener('click', (e) => {
+        if (e.target === this.unbanUserModal) {
+          this.closeUnbanUserModal();
         }
       });
     }
@@ -633,22 +742,42 @@ class OpenChatRoom {
     this.closeLeaveModal();
 
     try {
+      // First request - check if confirmation needed
       const response = await fetch(`/api/chat/api/open-rooms/${this.roomId}/leave/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'X-CSRFToken': this.getCSRFToken()
-        }
+        },
+        body: JSON.stringify({})
       });
 
-      if (response.ok) {
-        // Close WebSocket
-        if (this.socket) {
-          this.socket.close();
-        }
+      const data = await response.json();
 
-        // Redirect to chat list
-        window.location.href = '/learning/chat/';
+      // If creator needs confirmation
+      if (data.requires_confirmation) {
+        this.showCreatorLeaveConfirmation(data.message);
+        return;
+      }
+
+      // Regular user or confirmed creator leave
+      if (response.ok) {
+        if (data.room_deleted) {
+          this.showAlert('warning', this.i18n.roomDeleted || '방 삭제 완료', data.message);
+          setTimeout(() => {
+            if (this.socket) {
+              this.socket.close();
+            }
+            window.location.href = '/learning/chat/';
+          }, 2000);
+        } else {
+          // Close WebSocket
+          if (this.socket) {
+            this.socket.close();
+          }
+          // Redirect to chat list
+          window.location.href = '/learning/chat/';
+        }
       } else {
         alert(this.i18n.leaveRoomFailed || '채팅방 나가기에 실패했습니다.');
       }
@@ -656,6 +785,111 @@ class OpenChatRoom {
       console.error('Error leaving room:', error);
       alert(this.i18n.errorOccurred || '오류가 발생했습니다.');
     }
+  }
+
+  showCreatorLeaveConfirmation(message) {
+    const modal = document.createElement('div');
+    modal.className = 'alert-modal-overlay alert-warning';
+    modal.id = 'creator-leave-confirm-modal';
+    modal.innerHTML = `
+      <div class="alert-modal-container">
+        <div class="alert-modal-header">
+          <div class="alert-icon">⚠️</div>
+          <h3 class="alert-modal-title">${this.i18n.leaveConfirmTitle || '방 나가기 확인'}</h3>
+        </div>
+        <div class="alert-modal-body">
+          <p class="alert-message">${message}</p>
+        </div>
+        <div class="alert-modal-footer" style="display: flex; gap: var(--space-sm); justify-content: center;">
+          <button class="btn btn-secondary" id="cancel-creator-leave">${this.i18n.cancel || '취소'}</button>
+          <button class="btn btn-danger" id="confirm-creator-leave">${this.i18n.leave || '나가기'}</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    document.body.classList.add('alert-modal-open');
+
+    // Event listeners
+    document.getElementById('cancel-creator-leave').addEventListener('click', () => {
+      this.closeCreatorLeaveConfirmation();
+    });
+    document.getElementById('confirm-creator-leave').addEventListener('click', () => {
+      this.confirmCreatorLeave();
+    });
+  }
+
+  closeCreatorLeaveConfirmation() {
+    const modal = document.getElementById('creator-leave-confirm-modal');
+    if (modal) {
+      modal.remove();
+      document.body.classList.remove('alert-modal-open');
+    }
+  }
+
+  async confirmCreatorLeave() {
+    this.closeCreatorLeaveConfirmation();
+
+    try {
+      const response = await fetch(`/api/chat/api/open-rooms/${this.roomId}/leave/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': this.getCSRFToken()
+        },
+        body: JSON.stringify({ confirmed: true })
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.room_deleted) {
+        this.showAlert('success', this.i18n.roomDeleted || '방 삭제 완료', data.message);
+        setTimeout(() => {
+          if (this.socket) {
+            this.socket.close();
+          }
+          window.location.href = '/learning/chat/';
+        }, 2000);
+      } else if (!response.ok) {
+        alert(this.i18n.leaveRoomFailed || '채팅방 나가기에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('Error confirming creator leave:', error);
+      alert(this.i18n.errorOccurred || '오류가 발생했습니다.');
+    }
+  }
+
+  showAlert(type, title, message) {
+    const icons = {
+      success: '✅',
+      error: '❌',
+      warning: '⚠️',
+      info: 'ℹ️'
+    };
+
+    const modal = document.createElement('div');
+    modal.className = `alert-modal-overlay alert-${type}`;
+    modal.innerHTML = `
+      <div class="alert-modal-container">
+        <div class="alert-modal-header">
+          <div class="alert-icon">${icons[type] || '💬'}</div>
+          <h3 class="alert-modal-title">${title}</h3>
+        </div>
+        <div class="alert-modal-body">
+          <p class="alert-message">${message}</p>
+        </div>
+        <div class="alert-modal-footer">
+          <button class="btn btn-primary">${this.i18n.confirm || '확인'}</button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+    document.body.classList.add('alert-modal-open');
+
+    modal.querySelector('.btn').addEventListener('click', () => {
+      modal.remove();
+      document.body.classList.remove('alert-modal-open');
+    });
   }
 
   async toggleFavorite() {
@@ -741,11 +975,18 @@ class OpenChatRoom {
       name.className = 'participant-name';
       name.textContent = participant.nickname;
 
-      if (participant.isAdmin) {
+      // Show creator badge or admin badge
+      if (participant.id === this.creatorId) {
+        const badge = document.createElement('span');
+        badge.className = 'admin-badge creator';
+        badge.textContent = '👑';
+        badge.title = gettext('방 개설자') || 'Room Creator';
+        name.appendChild(badge);
+      } else if (participant.isAdmin) {
         const badge = document.createElement('span');
         badge.className = 'admin-badge';
-        badge.textContent = '👑';
-        badge.title = 'Admin';
+        badge.textContent = '⭐';
+        badge.title = gettext('관리자') || 'Admin';
         name.appendChild(badge);
       }
 
@@ -770,8 +1011,8 @@ class OpenChatRoom {
         // Follow button
         const followBtn = document.createElement('button');
         followBtn.className = 'btn-follow';
-        followBtn.textContent = this.i18n.follow || 'Follow';
-        followBtn.title = `${this.i18n.follow || 'Follow'} ${participant.nickname}`;
+        followBtn.textContent = gettext('팔로우');
+        followBtn.title = `${gettext('팔로우')} ${participant.nickname}`;
         followBtn.addEventListener('click', (e) => {
           e.stopPropagation();
           this.toggleFollow(participant.username, participant.nickname);
@@ -781,8 +1022,8 @@ class OpenChatRoom {
         // Message button
         const messageBtn = document.createElement('button');
         messageBtn.className = 'btn-message';
-        messageBtn.textContent = this.i18n.message || 'Message';
-        messageBtn.title = `${this.i18n.sendMessageTo || 'Send message to'} ${participant.nickname}`;
+        messageBtn.textContent = gettext('메시지');
+        messageBtn.title = `${gettext('메시지 보내기')} ${participant.nickname}`;
         messageBtn.addEventListener('click', (e) => {
           e.stopPropagation();
           this.sendDirectMessage(participant.id, participant.nickname);
@@ -835,8 +1076,10 @@ class OpenChatRoom {
    * @param {Object} participant - Participant object with id, nickname, etc.
    */
   showParticipantActionModal(participant) {
-    const isAdmin = this.roomData?.admins?.includes(this.userId);
-    const isTargetAdmin = this.roomData?.admins?.includes(participant.id);
+    const isAdmin = this.isAdmin;
+    const isTargetAdmin = participant.isAdmin;
+    const isCreator = this.userId === this.creatorId;
+    const isTargetCreator = participant.id === this.creatorId;
 
     // Create modal HTML
     const modalHtml = `
@@ -1069,7 +1312,7 @@ class OpenChatRoom {
     this.currentKickTarget = { userId, nickname };
 
     // Update modal content
-    this.kickTargetName.textContent = `${nickname}${this.i18n.kickConfirm || '님을 강퇴하시겠습니까?'}`;
+    this.kickTargetName.textContent = `${this.i18n.kickConfirm || '님을 강퇴하시겠습니까?'} (${nickname})`;
     this.kickReason.value = '';
     this.banDuration.value = 'permanent';
 
@@ -1157,7 +1400,23 @@ class OpenChatRoom {
   }
 
   async grantAdmin(userId, nickname) {
-    if (!confirm(`${nickname}${this.i18n.grantAdminConfirm || '님에게 관리자 권한을 부여하시겠습니까?'}`)) return;
+    // Open modal instead of confirm()
+    this.currentGrantAdminTarget = { userId, nickname };
+    this.grantAdminTargetName.textContent = `${this.i18n.grantAdminConfirm || '님에게 관리자 권한을 부여하시겠습니까?'} (${nickname})`;
+    this.grantAdminModal.classList.remove('hidden');
+  }
+
+  closeGrantAdminModal() {
+    if (this.grantAdminModal) {
+      this.grantAdminModal.classList.add('hidden');
+      this.currentGrantAdminTarget = null;
+    }
+  }
+
+  async confirmGrantAdmin() {
+    if (!this.currentGrantAdminTarget) return;
+
+    const { userId, nickname } = this.currentGrantAdminTarget;
 
     try {
       const response = await fetch(`/api/chat/api/open-rooms/${this.roomId}/grant_admin/`, {
@@ -1174,6 +1433,7 @@ class OpenChatRoom {
       if (response.ok) {
         const data = await response.json();
         this.showSystemMessage(data.message || `${nickname}${this.i18n.adminGranted || '님이 관리자로 지정되었습니다'}`);
+        this.closeGrantAdminModal();
         // WebSocket will handle the rest
       } else {
         const error = await response.json();
@@ -1186,7 +1446,23 @@ class OpenChatRoom {
   }
 
   async revokeAdmin(userId, nickname) {
-    if (!confirm(`${nickname}${this.i18n.revokeAdminConfirm || '님의 관리자 권한을 해제하시겠습니까?'}`)) return;
+    // Open modal instead of confirm()
+    this.currentRevokeAdminTarget = { userId, nickname };
+    this.revokeAdminTargetName.textContent = `${this.i18n.revokeAdminConfirm || '님의 관리자 권한을 해제하시겠습니까?'} (${nickname})`;
+    this.revokeAdminModal.classList.remove('hidden');
+  }
+
+  closeRevokeAdminModal() {
+    if (this.revokeAdminModal) {
+      this.revokeAdminModal.classList.add('hidden');
+      this.currentRevokeAdminTarget = null;
+    }
+  }
+
+  async confirmRevokeAdmin() {
+    if (!this.currentRevokeAdminTarget) return;
+
+    const { userId, nickname } = this.currentRevokeAdminTarget;
 
     try {
       const response = await fetch(`/api/chat/api/open-rooms/${this.roomId}/revoke_admin/`, {
@@ -1203,6 +1479,7 @@ class OpenChatRoom {
       if (response.ok) {
         const data = await response.json();
         this.showSystemMessage(data.message || `${nickname}${this.i18n.adminRevoked || '님의 관리자 권한이 해제되었습니다'}`);
+        this.closeRevokeAdminModal();
         // WebSocket will handle the rest
       } else {
         const error = await response.json();
@@ -1347,7 +1624,23 @@ class OpenChatRoom {
   }
 
   async unbanUser(userId, nickname) {
-    if (!confirm(`${nickname}${this.i18n.unbanConfirm || '님의 차단을 해제하시겠습니까?'}`)) return;
+    // Open modal instead of confirm()
+    this.currentUnbanTarget = { userId, nickname };
+    this.unbanUserTargetName.textContent = `${this.i18n.unbanConfirm || '님의 차단을 해제하시겠습니까?'} (${nickname})`;
+    this.unbanUserModal.classList.remove('hidden');
+  }
+
+  closeUnbanUserModal() {
+    if (this.unbanUserModal) {
+      this.unbanUserModal.classList.add('hidden');
+      this.currentUnbanTarget = null;
+    }
+  }
+
+  async confirmUnbanUser() {
+    if (!this.currentUnbanTarget) return;
+
+    const { userId, nickname } = this.currentUnbanTarget;
 
     try {
       const response = await fetch(`/api/chat/api/open-rooms/${this.roomId}/unban_user/`, {
@@ -1363,7 +1656,8 @@ class OpenChatRoom {
 
       if (response.ok) {
         const data = await response.json();
-        alert(data.message || `${nickname}${this.i18n.unbanned || '님의 차단이 해제되었습니다'}`);
+        this.closeUnbanUserModal();
+        this.showSystemMessage(data.message || `${nickname}${this.i18n.unbanned || '님의 차단이 해제되었습니다'}`);
         // Refresh the kicked users list
         this.openKickedUsersModal();
       } else {
@@ -1374,6 +1668,19 @@ class OpenChatRoom {
       console.error('Error unbanning user:', error);
       alert(this.i18n.errorOccurred || '오류가 발생했습니다');
     }
+  }
+
+  handleRoomClosed(data) {
+    // Show room closed notification
+    this.showAlert('warning', this.i18n.roomClosed || '채팅방 폐쇄', data.message);
+
+    // Redirect to chat list after 3 seconds
+    setTimeout(() => {
+      if (this.socket) {
+        this.socket.close();
+      }
+      window.location.href = '/learning/chat/';
+    }, 3000);
   }
 
   getCSRFToken() {

@@ -1,0 +1,195 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-11-23 04:00+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: static/js/favorites.js:120
+msgid "즐겨찾기를 불러오는데 실패했습니다."
+msgstr ""
+
+#: static/js/favorites.js:167 static/js/favorites.js:293
+msgid "즐겨찾기 해제"
+msgstr ""
+
+#: static/js/favorites.js:182
+msgid "명"
+msgstr ""
+
+#: static/js/favorites.js:187
+msgid "입장하기"
+msgstr ""
+
+#: static/js/favorites.js:209
+msgid "언어교환"
+msgstr ""
+
+#: static/js/favorites.js:210
+msgid "스터디"
+msgstr ""
+
+#: static/js/favorites.js:211
+msgid "문화교류"
+msgstr ""
+
+#: static/js/favorites.js:212
+msgid "질문답변"
+msgstr ""
+
+#: static/js/favorites.js:213
+msgid "자유대화"
+msgstr ""
+
+#: static/js/favorites.js:214
+msgid "국가"
+msgstr ""
+
+#: static/js/favorites.js:310 static/js/favorites.js:404
+msgid "좋아요 취소"
+msgstr ""
+
+#: static/js/favorites.js:310 static/js/favorites.js:408
+msgid "좋아요"
+msgstr ""
+
+#: static/js/favorites.js:317
+msgid "댓글"
+msgstr ""
+
+#: static/js/favorites.js:329
+msgid "한국어"
+msgstr ""
+
+#: static/js/favorites.js:330
+msgid "English"
+msgstr ""
+
+#: static/js/favorites.js:331
+msgid "日本語"
+msgstr ""
+
+#: static/js/favorites.js:332
+msgid "中文"
+msgstr ""
+
+#: static/js/favorites.js:333
+msgid "Español"
+msgstr ""
+
+#: static/js/favorites.js:334
+msgid "Français"
+msgstr ""
+
+#: static/js/favorites.js:335
+msgid "Deutsch"
+msgstr ""
+
+#: static/js/favorites.js:336
+msgid "Italiano"
+msgstr ""
+
+#: static/js/favorites.js:337
+msgid "Português"
+msgstr ""
+
+#: static/js/favorites.js:338
+msgid "Русский"
+msgstr ""
+
+#: static/js/favorites.js:347
+msgid "년"
+msgstr ""
+
+#: static/js/favorites.js:348
+msgid "개월"
+msgstr ""
+
+#: static/js/favorites.js:349
+msgid "주"
+msgstr ""
+
+#: static/js/favorites.js:350
+msgid "일"
+msgstr ""
+
+#: static/js/favorites.js:351
+msgid "시간"
+msgstr ""
+
+#: static/js/favorites.js:352
+msgid "분"
+msgstr ""
+
+#: static/js/favorites.js:358
+msgid "전"
+msgstr ""
+
+#: static/js/favorites.js:361
+msgid "방금 전"
+msgstr ""
+
+#: static/js/favorites.js:379
+msgid "로그인이 필요합니다."
+msgstr ""
+
+#: static/js/favorites.js:390
+msgid "좋아요 처리 중 오류가 발생했습니다."
+msgstr ""
+
+#: static/js/favorites.js:416 static/js/favorites.js:447
+msgid "즐겨찾기를 해제하시겠습니까?"
+msgstr ""
+
+#: static/js/favorites.js:442 static/js/favorites.js:475
+msgid "즐겨찾기 해제에 실패했습니다."
+msgstr ""
+
+#: static/js/open-chat-room.js:854
+msgid "방 개설자"
+msgstr ""
+
+#: static/js/open-chat-room.js:860
+msgid "관리자"
+msgstr ""
+
+#: static/js/open-chat-room.js:885 static/js/open-chat-room.js:886
+msgid "팔로우"
+msgstr "팔로우"
+
+#: static/js/open-chat-room.js:896
+msgid "메시지"
+msgstr "메시지"
+
+#: static/js/open-chat-room.js:897
+msgid "메시지 보내기"
+msgstr "메시지 보내기"
+
+#: static/js/post_modal.js:59
+msgid "새 게시물"
+msgstr "새 게시물"
+
+#: static/js/post_modal.js:62
+msgid "게시하기"
+msgstr "게시하기"
+
+#: static/js/post_modal.js:103
+msgid "게시물 수정"
+msgstr "게시물 수정"
+
+#: static/js/post_modal.js:106
+msgid "수정하기"
+msgstr "수정하기"

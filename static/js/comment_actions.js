@@ -83,10 +83,51 @@ class CommentActionsManager {
             return;
         }
 
-        if (!confirm('이 사용자를 차단하시겠습니까?\n\n차단한 사용자의 게시물과 댓글이 보이지 않습니다.')) {
+        this.showBlockConfirmModal();
+    }
+
+    showBlockConfirmModal() {
+        const modal = document.getElementById('block-user-modal');
+        const confirmBtn = document.getElementById('confirm-block-user');
+        const cancelBtn = document.getElementById('cancel-block-user');
+        const closeBtn = document.getElementById('close-block-user-modal');
+
+        if (!modal || !confirmBtn || !cancelBtn) {
+            console.error('[BlockModal] Block user modal elements not found');
             return;
         }
 
+        modal.classList.remove('hidden');
+
+        // Remove existing event listeners by cloning
+        const newConfirmBtn = confirmBtn.cloneNode(true);
+        const newCancelBtn = cancelBtn.cloneNode(true);
+        const newCloseBtn = closeBtn ? closeBtn.cloneNode(true) : null;
+
+        confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+        cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+        if (closeBtn && newCloseBtn) {
+            closeBtn.parentNode.replaceChild(newCloseBtn, closeBtn);
+        }
+
+        // Add event listeners
+        newConfirmBtn.addEventListener('click', () => {
+            modal.classList.add('hidden');
+            this.executeBlock();
+        });
+
+        newCancelBtn.addEventListener('click', () => {
+            modal.classList.add('hidden');
+        });
+
+        if (newCloseBtn) {
+            newCloseBtn.addEventListener('click', () => {
+                modal.classList.add('hidden');
+            });
+        }
+    }
+
+    async executeBlock() {
         try {
             const response = await fetch(`/api/accounts/block/${this.currentAuthor}/`, {
                 method: 'POST',
@@ -98,15 +139,28 @@ class CommentActionsManager {
             });
 
             if (response.ok) {
-                alert('사용자를 차단했습니다.');
-                location.reload();
+                if (window.showAlert) {
+                    window.showAlert('사용자를 차단했습니다.', 'success');
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    alert('사용자를 차단했습니다.');
+                    location.reload();
+                }
             } else {
                 const data = await response.json();
-                alert(data.error || '차단에 실패했습니다.');
+                if (window.showAlert) {
+                    window.showAlert(data.error || '차단에 실패했습니다.', 'error');
+                } else {
+                    alert(data.error || '차단에 실패했습니다.');
+                }
             }
         } catch (error) {
             console.error('Block error:', error);
-            alert('오류가 발생했습니다. 다시 시도해주세요.');
+            if (window.showAlert) {
+                window.showAlert('오류가 발생했습니다. 다시 시도해주세요.', 'error');
+            } else {
+                alert('오류가 발생했습니다. 다시 시도해주세요.');
+            }
         }
     }
 

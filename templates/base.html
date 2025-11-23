@@ -57,6 +57,9 @@
         {% include 'partials/post_action_modal.html' %}
         {% include 'partials/post_report_modal.html' %}
         {% include 'partials/comment_report_modal.html' %}
+        {% include 'partials/comment_owner_action_modal.html' %}
+        {% include 'partials/comment_edit_modal.html' %}
+        {% include 'partials/comment_delete_confirm_modal.html' %}
         {% include 'partials/post_delete_modal.html' %}
         {% include 'partials/alert_modal.html' %}
     {% endif %}
@@ -107,20 +110,19 @@
     </nav>
 
     <!-- JavaScript -->
-    {% if user.is_authenticated %}
-        <script src="{% url 'javascript-catalog' %}"></script>
-        <script>
-        // Global i18n object for all JavaScript files
-        window.APP_I18N = {
+    <script src="{% url 'javascript-catalog' %}"></script>
+    <script>
+    // Global i18n object for all JavaScript files
+    window.APP_I18N = {
             // Time strings
-            timeJustNow: gettext('방금 전'),
-            timeSecondsAgo: gettext('초 전'),
-            timeMinutesAgo: gettext('분 전'),
-            timeHoursAgo: gettext('시간 전'),
-            timeDaysAgo: gettext('일 전'),
-            timeWeeksAgo: gettext('주 전'),
-            timeMonthsAgo: gettext('개월 전'),
-            timeYearsAgo: gettext('년 전'),
+            timeJustNow: document.documentElement.lang === 'en' ? 'Just now' : '방금 전',
+            timeSecondsAgo: document.documentElement.lang === 'en' ? ' sec ago' : '초 전',
+            timeMinutesAgo: document.documentElement.lang === 'en' ? ' min ago' : '분 전',
+            timeHoursAgo: document.documentElement.lang === 'en' ? ' hours ago' : '시간 전',
+            timeDaysAgo: document.documentElement.lang === 'en' ? ' days ago' : '일 전',
+            timeWeeksAgo: document.documentElement.lang === 'en' ? ' weeks ago' : '주 전',
+            timeMonthsAgo: document.documentElement.lang === 'en' ? ' months ago' : '개월 전',
+            timeYearsAgo: document.documentElement.lang === 'en' ? ' years ago' : '년 전',
 
             // Time units
             year: gettext('년'),
@@ -133,12 +135,14 @@
             // Common UI
             login: gettext('로그인'),
             loginRequired: gettext('로그인이 필요합니다.'),
-            error: gettext('오류가 발생했습니다. 다시 시도해주세요.'),
+            error: gettext('오류 발생'),
+            errorLoadingData: gettext('데이터를 불러오는 중 오류가 발생했습니다'),
             processing: gettext('처리 중...'),
             confirm: gettext('확인'),
             cancel: gettext('취소'),
             close: gettext('닫기'),
             sending: gettext('전송 중...'),
+            me: gettext('나'),
 
             // Comments
             noComments: gettext('아직 댓글이 없습니다. 첫 번째 댓글을 작성해보세요!'),
@@ -163,9 +167,14 @@
             // Follow
             follow: gettext('팔로우'),
             following: gettext('팔로잉'),
+            mutualFollow: gettext('맞팔로우'),
             followers: gettext('팔로워'),
             posts: gettext('게시물'),
             message: gettext('메시지'),
+            csrfError: gettext('CSRF 토큰 오류. 페이지를 새로고침해주세요.'),
+            userNotFound: gettext('사용자를 찾을 수 없거나 API 오류가 발생했습니다.'),
+            networkError: gettext('네트워크 오류가 발생했습니다'),
+            conversationCreateFailed: gettext('대화를 시작할 수 없습니다.'),
 
             // Messages
             noMessages: gettext('메시지가 없습니다'),
@@ -234,7 +243,7 @@
 
             // Open chat room
             participantsCount: gettext('명 참여 중'),
-            roomJoined: gettext('채팅방에 입장했습니다'),
+            roomJoined: document.documentElement.lang === 'en' ? 'You have entered the chat room' : '채팅방에 입장했습니다',
             enterMessage: gettext('메시지를 입력하세요...'),
             send: gettext('전송'),
             backButton: gettext('뒤로 가기'),
@@ -251,6 +260,8 @@
             leaveRoom: gettext('채팅방 나가기'),
             leaveRoomConfirm: gettext('정말로 채팅방을 나가시겠습니까?'),
             leaveRoomFailed: gettext('채팅방 나가기에 실패했습니다.'),
+            leaveConfirmTitle: gettext('방 나가기 확인'),
+            leave: gettext('나가기'),
 
             // Kick system
             kickUser: gettext('사용자 강퇴'),
@@ -316,10 +327,66 @@
             passwordRequired: gettext('비밀방은 비밀번호가 필요합니다.'),
             createRoomFailed: gettext('채팅방 생성에 실패했습니다.'),
             errorTitle: gettext('오류'),
-            countryCategory: gettext('국가')
+            countryCategory: gettext('국가'),
+
+            // Account Management
+            deletionScheduled: gettext('삭제 예약됨'),
+            confirmDeleteText: gettext('영구삭제'),
+            reactivateConfirm: gettext('계정을 재활성화하시겠습니까?'),
+            reactivateSuccess: gettext('계정이 재활성화되었습니다.'),
+            reactivateFailed: gettext('재활성화에 실패했습니다.'),
+            reactivateError: gettext('재활성화 중 오류가 발생했습니다.'),
+            deactivateSuccess: gettext('계정이 비활성화되었습니다. 다시 로그인하면 복구할 수 있습니다.'),
+            deactivateFailed: gettext('비활성화에 실패했습니다.'),
+            deactivateError: gettext('비활성화 중 오류가 발생했습니다.'),
+            deletionRequestFailed: gettext('삭제 요청에 실패했습니다.'),
+            deletionRequestError: gettext('삭제 요청 중 오류가 발생했습니다.'),
+            cancelDeletionConfirm: gettext('정말로 삭제를 취소하시겠습니까?'),
+            cancelDeletionSuccess: gettext('계정 삭제가 취소되었습니다.'),
+            cancelDeletionFailed: gettext('취소에 실패했습니다.'),
+            cancelDeletionError: gettext('취소 중 오류가 발생했습니다.'),
+
+            // Privacy Settings
+            everyone: document.documentElement.lang === 'en' ? 'Everyone' : '전체 공개',
+            followersOnly: document.documentElement.lang === 'en' ? 'Followers Only' : '팔로워만',
+            nobody: document.documentElement.lang === 'en' ? 'Private' : '비공개',
+            followersListVisibility: gettext('팔로워 목록 공개 범위'),
+            followingListVisibility: gettext('팔로잉 목록 공개 범위'),
+
+            // Report History
+            loadingReports: gettext('신고 내역을 불러오는 중...'),
+            processingFailed: gettext('처리 실패'),
+            errorTryAgain: gettext('오류가 발생했습니다. 다시 시도해주세요.'),
+            noReports: gettext('신고 내역이 없습니다.'),
+            errorLoadingReports: gettext('신고 내역을 불러오는 중 오류가 발생했습니다.'),
+            statusPending: gettext('대기 중'),
+            statusReviewing: gettext('검토 중'),
+            statusResolved: gettext('처리 완료'),
+            statusDismissed: gettext('기각'),
+            reportTypeAbuse: gettext('욕설/비방'),
+            reportTypeSpam: gettext('스팸/광고'),
+            reportTypeInappropriate: gettext('부적절한 내용'),
+            reportTypeHarassment: gettext('성희롱'),
+            reportTypeOther: gettext('기타'),
+            periodToday: gettext('오늘'),
+            periodLast7Days: gettext('최근 7일'),
+            periodLast30Days: gettext('최근 30일'),
+            timeJustNow: document.documentElement.lang === 'en' ? 'Just now' : '방금 전',
+            timeMinutesAgo: document.documentElement.lang === 'en' ? ' min ago' : '분 전',
+            timeHoursAgo: document.documentElement.lang === 'en' ? ' hours ago' : '시간 전',
+            timeDaysAgo: document.documentElement.lang === 'en' ? ' days ago' : '일 전',
+            noContent: gettext('내용 없음'),
+            noDescription: gettext('설명 없음'),
+            reportContentLabel: gettext('신고 내용:'),
+            filterStatus: gettext('상태:'),
+            filterType: gettext('유형:'),
+            filterPeriod: gettext('기간:'),
+            filterSearch: gettext('검색:'),
+            viewPost: gettext('게시물 보기'),
+            deleteAction: gettext('삭제 처리'),
+            dismissReport: gettext('신고 기각')
         };
-        </script>
-    {% endif %}
+    </script>
     <script src="{% static 'js/main.js' %}"></script>
     <script src="{% static 'js/utils.js' %}"></script>
     <script src="{% static 'js/follow.js' %}"></script>
@@ -328,10 +395,13 @@
         <script src="{% static 'js/languages.js' %}"></script>
         <script src="{% static 'js/language-selector.js' %}"></script>
         <script src="{% static 'js/alert_modal.js' %}"></script>
-        <script src="{% static 'js/post_modal.js' %}"></script>
-        <script src="{% static 'js/post_modal_viewer.js' %}"></script>
-        <script src="{% static 'js/post_actions.js' %}"></script>
-        <script src="{% static 'js/comment_actions.js' %}"></script>
+        {% if '/messages/' not in request.path %}
+            <script src="{% static 'js/post_modal.js' %}"></script>
+            <script src="{% static 'js/post_modal_viewer.js' %}"></script>
+            <script src="{% static 'js/post_actions.js' %}"></script>
+            <script src="{% static 'js/comment_actions.js' %}"></script>
+            <script src="{% static 'js/comment_owner_actions.js' %}"></script>
+        {% endif %}
         {% if request.resolver_match.url_name == 'home' %}
             <script src="{% static 'js/home_feed.js' %}"></script>
             <script src="{% static 'js/home_search.js' %}"></script>

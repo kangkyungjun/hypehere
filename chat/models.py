@@ -405,6 +405,40 @@ class OpenChatRoom(models.Model):
             return latest_kick.is_ban_active()
         return False
 
+    def is_country_room(self):
+        """Check if this is a country chat room (creator is None)"""
+        return self.creator is None
+
+    def should_delete_on_creator_leave(self):
+        """Check if room should be deleted when creator leaves"""
+        return not self.is_country_room()
+
+    def deactivate_room(self):
+        """Deactivate room and notify all participants"""
+        from django.utils import timezone
+        from notifications.models import Notification
+
+        # 1. Deactivate room
+        self.is_active = False
+        self.save()
+
+        # 2. Notify all active participants (except creator)
+        active_participants = self.participant_relations.filter(
+            is_active=True
+        ).exclude(user=self.creator)
+
+        for participant_relation in active_participants:
+            # Create system notification
+            Notification.create_room_closed_notification(
+                recipient=participant_relation.user,
+                room=self
+            )
+
+            # Update participant status
+            participant_relation.is_active = False
+            participant_relation.left_at = timezone.now()
+            participant_relation.save()
+
 
 class OpenChatParticipant(models.Model):
     """

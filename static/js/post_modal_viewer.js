@@ -14,6 +14,8 @@ class PostModalViewer {
         this.currentComments = [];  // 현재 댓글 목록
         this.touchStartY = 0;
         this.touchEndY = 0;
+        this.currentUser = window.CURRENT_USER;  // 현재 로그인한 사용자
+        this.currentAuthorUsername = null;  // 현재 게시물 작성자
 
         this.init();
     }
@@ -83,7 +85,7 @@ class PostModalViewer {
             }
         }
 
-        this.currentIndex = index;
+        this.currentIndex = parseInt(index);
         this.modal.classList.remove('hidden');
         document.body.style.overflow = 'hidden';  // 배경 스크롤 방지
 
@@ -96,7 +98,7 @@ class PostModalViewer {
         // 현재 인덱스 표시
         const currentIndexEl = document.getElementById('current-post-index');
         if (currentIndexEl) {
-            currentIndexEl.textContent = index + 1;
+            currentIndexEl.textContent = parseInt(index) + 1;
         }
     }
 
@@ -195,8 +197,32 @@ class PostModalViewer {
             hashtagsContainer.classList.add('hidden');
         }
 
-        // 현재 포스트 ID 저장
+        // 현재 포스트 ID 및 작성자 정보 저장
         this.currentPostId = post.id;
+        this.currentAuthorUsername = post.author.username;
+
+        // 게시물 옵션 버튼 표시/숨김 (본인 글인지 확인)
+        const optionsBtn = document.getElementById('modal-post-options-btn');
+        if (optionsBtn) {
+            optionsBtn.dataset.postId = post.id;
+            optionsBtn.dataset.authorUsername = post.author.username;
+
+            // 디버깅 로그
+            console.log('[PostModalViewer] Current user:', this.currentUser);
+            console.log('[PostModalViewer] Post author:', this.currentAuthorUsername);
+            console.log('[PostModalViewer] Is own post:', this.isOwnPost());
+            console.log('[PostModalViewer] Options button element:', optionsBtn);
+
+            if (this.isOwnPost()) {
+                optionsBtn.classList.remove('hidden');
+                console.log('[PostModalViewer] Button shown');
+            } else {
+                optionsBtn.classList.add('hidden');
+                console.log('[PostModalViewer] Button hidden');
+            }
+        } else {
+            console.error('[PostModalViewer] Options button not found!');
+        }
 
         // 좋아요 버튼 상태 및 카운트 업데이트
         this.updateLikeButton(post.is_liked, post.like_count, post.id);
@@ -298,7 +324,7 @@ class PostModalViewer {
 
         // 키보드 네비게이션
         document.addEventListener('keydown', (e) => {
-            if (this.modal && this.modal.style.display === 'flex') {
+            if (this.modal && !this.modal.classList.contains('hidden')) {
                 switch(e.key) {
                     case 'Escape':
                         this.closeModal();
@@ -368,6 +394,16 @@ class PostModalViewer {
                 if (e.ctrlKey && e.key === 'Enter') {
                     this.submitComment();
                 }
+            });
+        }
+
+        // 게시물 옵션 버튼 (점 3개)
+        const postOptionsBtn = document.getElementById('modal-post-options-btn');
+        if (postOptionsBtn) {
+            postOptionsBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.openPostOptions();
             });
         }
     }
@@ -610,7 +646,8 @@ class PostModalViewer {
         const content = commentInput.value.trim();
 
         if (!content) {
-            alert('댓글 내용을 입력해주세요.');
+            const i18n = window.APP_I18N || {};
+            alert(i18n.commentPlaceholder || '댓글 내용을 입력해주세요.');
             return;
         }
 
@@ -626,7 +663,8 @@ class PostModalViewer {
 
             if (!response.ok) {
                 if (response.status === 401) {
-                    alert('로그인이 필요합니다.');
+                    const i18n = window.APP_I18N || {};
+                    alert(i18n.loginRequired || '로그인이 필요합니다.');
                     return;
                 }
                 throw new Error('Failed to post comment');
@@ -637,10 +675,13 @@ class PostModalViewer {
             // Clear input
             commentInput.value = '';
 
-            // Ensure comments section is visible
+            // Ensure comments section is visible (강화된 표시 로직)
             const commentsSection = document.getElementById('modal-comments-section');
-            if (commentsSection.classList.contains('hidden')) {
+            if (commentsSection) {
                 commentsSection.classList.remove('hidden');
+                commentsSection.style.display = 'block';  // 강제로 block 설정
+                commentsSection.style.visibility = 'visible';  // 추가 안전장치
+                console.log('[PostModalViewer] Comments section forced visible');
             }
 
             // Add new comment to the beginning of the list
@@ -649,14 +690,26 @@ class PostModalViewer {
             // Re-render comments with new comment included
             this.renderComments(this.currentComments);
 
-            // Update comment count
+            // Update comment count in modal header
             const commentCountEl = document.querySelector('.comment-count');
-            const currentCount = parseInt(commentCountEl.textContent) || 0;
-            commentCountEl.textContent = currentCount + 1;
+            if (commentCountEl) {
+                const currentCount = parseInt(commentCountEl.textContent) || 0;
+                commentCountEl.textContent = currentCount + 1;
+            }
+
+            // Also update comment count in feed (if visible)
+            const feedCommentCount = document.querySelector(`.feed-comment-btn[data-post-id="${this.currentPostId}"] .comment-count`);
+            if (feedCommentCount) {
+                const feedCurrentCount = parseInt(feedCommentCount.textContent) || 0;
+                feedCommentCount.textContent = feedCurrentCount + 1;
+            }
+
+            console.log('[PostModalViewer] Comment added successfully:', comment);
 
         } catch (error) {
             console.error('Error posting comment:', error);
-            alert('댓글 작성 중 오류가 발생했습니다.');
+            const i18n = window.APP_I18N || {};
+            alert(i18n.commentPostFailed || '댓글 작성 중 오류가 발생했습니다.');
         }
     }
 
@@ -712,6 +765,25 @@ class PostModalViewer {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
+    }
+
+    /**
+     * 본인 게시물인지 확인
+     */
+    isOwnPost() {
+        return this.currentAuthorUsername === this.currentUser;
+    }
+
+    /**
+     * 게시물 옵션 모달 열기
+     */
+    openPostOptions() {
+        if (window.postActionsManager && this.currentPostId) {
+            // PostActionsManager에 현재 게시물 정보 전달
+            window.postActionsManager.currentPostId = this.currentPostId;
+            window.postActionsManager.currentAuthorUsername = this.currentAuthorUsername;
+            window.postActionsManager.openModal();
+        }
     }
 }
 

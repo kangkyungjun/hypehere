@@ -252,8 +252,9 @@
 }
 
 .message.own-message .message-bubble {
-  background-color: var(--color-primary);
-  color: white;
+  background-color: #E8F5E9;
+  color: var(--color-text);
+  border: 1px solid #A5D6A7;
 }
 
 .message.own-message .message-header {
@@ -1171,4 +1172,221 @@ textarea.form-input {
 .chat-room-page #post-modal .modal-container {
   position: relative;
   margin: auto;
+}
+
+/* ==========================================
+   Admin UI Styles
+   ========================================== */
+
+/* Admin badge styling */
+.admin-badge {
+  display: inline-block;
+  margin-left: 0.25rem;
+  font-size: 0.875rem;
+  vertical-align: middle;
+}
+
+.admin-badge.creator {
+  color: var(--color-primary, #007bff);
+  font-size: 1rem;
+}
+
+/* Participant action modal */
+.participant-action-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.participant-action-modal.active {
+  display: flex;
+}
+
+.participant-action-content {
+  background: var(--color-bg, #ffffff);
+  border-radius: 12px;
+  padding: 1.5rem;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.participant-action-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
+}
+
+.participant-action-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.participant-action-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.action-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  text-align: left;
+  font-size: 0.95rem;
+}
+
+.action-item:hover {
+  background-color: var(--color-hover, #f3f4f6);
+}
+
+.action-item.danger {
+  color: var(--color-danger, #dc2626);
+}
+
+.action-item.danger:hover {
+  background-color: rgba(220, 38, 38, 0.1);
+}
+
+.action-item svg {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+}
+
+/* Participant actions inline buttons */
+.participant-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-left: auto;
+}
+
+.participant-actions .btn-follow,
+.participant-actions .btn-message,
+.participant-actions .btn-more {
+  padding: 0.25rem 0.75rem;
+  font-size: 0.875rem;
+  border-radius: 6px;
+  border: 1px solid var(--color-border, #e5e7eb);
+  background: var(--color-bg, #ffffff);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.participant-actions .btn-follow:hover,
+.participant-actions .btn-message:hover {
+  background: var(--color-primary, #007bff);
+  color: white;
+  border-color: var(--color-primary, #007bff);
+}
+
+.participant-actions .btn-more {
+  padding: 0.25rem 0.5rem;
+  border: none;
+}
+
+.participant-actions .btn-more:hover {
+  background: var(--color-hover, #f3f4f6);
+}
+
+/* Kicked users list */
+.kicked-users-list {
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.kicked-user-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
+}
+
+.kicked-user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--color-primary-light, #e0e7ff);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  color: var(--color-primary, #007bff);
+  flex-shrink: 0;
+}
+
+.kicked-user-avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.kicked-user-info {
+  flex: 1;
+}
+
+.kicked-user-name {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.kicked-user-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+  color: var(--color-text-light, #6b7280);
+}
+
+.ban-status {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.ban-status.active {
+  background: rgba(220, 38, 38, 0.1);
+  color: var(--color-danger, #dc2626);
+}
+
+.ban-status.expired {
+  background: rgba(22, 163, 74, 0.1);
+  color: var(--color-success, #16a34a);
+}
+
+.btn-unban {
+  padding: 0.5rem 1rem;
+  background: var(--color-primary, #007bff);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: opacity 0.2s;
+}
+
+.btn-unban:hover {
+  opacity: 0.9;
 }

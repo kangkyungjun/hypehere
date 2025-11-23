@@ -5,6 +5,23 @@
 {% block title %}{% trans "1:1 랜덤 채팅 - HypeHere" %}{% endblock %}
 
 {% block content %}
+{% if user.is_deactivated %}
+    <!-- 비활성화된 유저용 안내 화면 -->
+    <div class="card" style="text-align: center; padding: var(--space-2xl); margin: var(--space-lg) auto; max-width: 600px;">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin: 0 auto var(--space-lg); color: var(--color-warning);">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <h3 style="margin-bottom: var(--space-md);">{% trans "계정이 비활성화되었습니다" %}</h3>
+        <p class="text-light" style="margin-bottom: var(--space-lg);">
+            {% trans "계정을 재활성화하면 모든 기능을 다시 사용할 수 있습니다." %}
+        </p>
+        <a href="{% url 'accounts:account_management' %}" class="btn btn-primary">
+            {% trans "재활성화 하기" %}
+        </a>
+    </div>
+{% else %}
 <div class="matching-container">
     <!-- Matching Preferences Screen -->
     <div class="matching-screen" id="preferences-screen">
@@ -281,23 +298,92 @@
         </div>
     </div>
 </div>
+
+<!-- Alert/Notification Modal -->
+<div class="modal hidden" id="alert-modal">
+    <div class="modal-overlay"></div>
+    <div class="modal-content">
+        <h3 id="alert-modal-title"></h3>
+        <p id="alert-modal-message"></p>
+        <div class="modal-actions">
+            <button type="button" class="btn btn-primary" id="alert-modal-confirm-btn">{% trans "확인" %}</button>
+        </div>
+    </div>
+</div>
+
+<!-- Block Confirm Modal -->
+<div class="modal hidden" id="block-confirm-modal">
+    <div class="modal-overlay"></div>
+    <div class="modal-content">
+        <h3>{% trans "사용자 차단" %}</h3>
+        <p id="block-confirm-message">{% trans "이 사용자를 차단하시겠습니까?" %}</p>
+        <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" id="block-cancel-btn">{% trans "아니오" %}</button>
+            <button type="button" class="btn btn-primary" id="block-confirm-btn">{% trans "예" %}</button>
+        </div>
+    </div>
+</div>
+{% endif %}
 {% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/matching.css' %}">
+<link rel="stylesheet" href="{% static 'css/matching.css' %}?v=3">
 {% endblock %}
 
 {% block extra_js %}
 <script>
+    // Set current user ID for message alignment
+    window.currentUserId = {{ user.id }};
+
     // i18n translations for JavaScript
     window.MATCHING_I18N = {
         countryPlaceholder: "{% trans '전체 국가' %}",
         countrySearchPlaceholder: "{% trans '국가 검색...' %}",
-        countryModalTitle: "{% trans '국가 선택' %}"
+        countryModalTitle: "{% trans '국가 선택' %}",
+        chatConnected: "{% trans '연결됨' %}",
+        partnerConnected: "{% trans '상대방이 연결되었습니다' %}",
+        partnerLeft: "{% trans '상대방이 나갔습니다' %}",
+
+        // Connection status
+        connected: "{% trans '연결됨' %}",
+        connectionError: "{% trans '연결 오류' %}",
+
+        // Button text
+        startMatching: "{% trans '1:1 매칭하기' %}",
+        cameraOff: "{% trans '카메라 끄기' %}",
+        cameraOn: "{% trans '카메라 켜기' %}",
+        micOff: "{% trans '마이크 끄기' %}",
+        micOn: "{% trans '마이크 켜기' %}",
+
+        // Modal titles
+        error: "{% trans '오류' %}",
+        success: "{% trans '성공' %}",
+        notification: "{% trans '알림' %}",
+
+        // Error messages
+        matchingStartError: "{% trans '매칭 시작 중 오류가 발생했습니다.' %}",
+        connectionRequestError: "{% trans '팔로우 요청 중 오류가 발생했습니다.' %}",
+        genericError: "{% trans '오류가 발생했습니다.' %}",
+        reportError: "{% trans '신고 중 오류가 발생했습니다.' %}",
+        blockUserNotFound: "{% trans '차단할 사용자 정보를 찾을 수 없습니다.' %}",
+        blockFailed: "{% trans '차단에 실패했습니다.' %}",
+        blockError: "{% trans '차단 중 오류가 발생했습니다.' %}",
+
+        // Success messages
+        connectionAccepted: "{% trans '상대방이 팔로우 요청을 수락했습니다.' %}",
+        connectionRequestSent: "{% trans '팔로우 요청을 보냈습니다. 상대방의 응답을 기다리고 있습니다.' %}",
+        acceptConnectionSuccess: "{% trans '연결 요청을 수락했습니다.' %}",
+        reportSubmitted: "{% trans '신고가 접수되었습니다.' %}",
+        blockSuccess: "{% trans '사용자를 차단했습니다.' %}",
+
+        // Notification messages
+        alreadyFollowing: "{% trans '이미 팔로우 되어있는 상대입니다.' %}",
+        connectionRejected: "{% trans '상대방이 팔로우를 거부하셨습니다.' %}",
+        rejectConnectionNotice: "{% trans '연결 요청을 거절했습니다.' %}"
     };
 </script>
 <script src="{% static 'js/countries.js' %}"></script>
 <script src="{% static 'js/country-selector.js' %}"></script>
 <script src="{% static 'js/webrtc-client.js' %}"></script>
-<script src="{% static 'js/matching.js' %}"></script>
+<script src="{% static 'js/matching.js' %}?v=3"></script>
 {% endblock %}

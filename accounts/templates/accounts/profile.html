@@ -273,12 +273,27 @@
                 <!-- 3-Column Grid -->
                 <div class="posts-grid" id="posts-grid">
                     {% for post in initial_posts %}
-                    <div class="post-grid-item"
+                    <div class="post-grid-item post-card"
                          data-post-id="{{ post.id }}"
                          data-post-index="{{ forloop.counter0 }}"
-                         onclick="openPostModal({{ post.id }}, {{ forloop.counter0 }})">
+                         data-author-username="{{ post.author.username }}">
                         <!-- Thumbnail Container -->
                         <div class="post-thumbnail">
+                            {% if is_own_profile %}
+                            <!-- 게시물 옵션 버튼 (본인 프로필에서만 표시) -->
+                            <button type="button"
+                                    class="post-grid-options-btn dropdown-toggle"
+                                    data-post-id="{{ post.id }}"
+                                    data-author-username="{{ post.author.username }}"
+                                    aria-label="{% trans '게시물 옵션' %}">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                    <circle cx="12" cy="5" r="2"/>
+                                    <circle cx="12" cy="12" r="2"/>
+                                    <circle cx="12" cy="19" r="2"/>
+                                </svg>
+                            </button>
+                            {% endif %}
+
                             <!-- Text Preview -->
                             <div class="post-thumbnail-content">
                                 <p class="post-preview-text">{{ post.content|truncatewords:10 }}</p>
@@ -320,8 +335,43 @@
 <!-- Post Viewer Modal -->
 {% include 'partials/post_view_modal.html' %}
 
+<!-- Post Action Modals -->
+{% include 'partials/post_action_modal.html' %}
+{% include 'partials/post_delete_modal.html' %}
+{% include 'partials/alert_modal.html' %}
+
+<!-- JavaScript for post actions -->
+<script src="{% static 'js/post_actions.js' %}"></script>
+<script src="{% static 'js/post_modal_viewer.js' %}"></script>
+
 <script>
+// 현재 로그인한 사용자 정보
+window.CURRENT_USER = "{{ user.username }}";
+
+// i18n translations for post actions JavaScript
+window.POST_ACTIONS_I18N = {
+    success: "{% trans '성공' %}",
+    error: "{% trans '오류' %}",
+    postDeleted: "{% trans '게시물이 삭제되었습니다.' %}",
+    deleteFailed: "{% trans '삭제 실패' %}",
+    serverError: "{% trans '서버 오류가 발생했습니다' %}",
+    unknownError: "{% trans '알 수 없는 오류' %}",
+    networkError: "{% trans '네트워크 오류가 발생했습니다. 다시 시도해주세요.' %}"
+};
+
 document.addEventListener('DOMContentLoaded', function() {
+    // Post grid card click handler (event delegation)
+    document.addEventListener('click', function(e) {
+        const postCard = e.target.closest('.post-grid-item');
+        if (postCard && !e.target.closest('.dropdown-toggle')) {
+            const postId = postCard.dataset.postId;
+            const postIndex = postCard.dataset.postIndex;
+            if (postId && postIndex !== undefined) {
+                openPostModal(postId, postIndex);
+            }
+        }
+    });
+
     {% if is_own_profile %}
     const avatar = document.getElementById('profile-avatar');
     const fileInput = document.getElementById('profile-picture-input');

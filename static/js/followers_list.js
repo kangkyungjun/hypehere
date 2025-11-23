@@ -92,15 +92,15 @@ class FollowersListManager {
                         <div class="user-stats">
                             <span class="stat-item">
                                 <span class="stat-value">${user.posts_count || 0}</span>
-                                <span class="stat-label">게시물</span>
+                                <span class="stat-label">${window.APP_I18N.posts}</span>
                             </span>
                             <span class="stat-item">
                                 <span class="stat-value follower-count">${user.follower_count || 0}</span>
-                                <span class="stat-label">팔로워</span>
+                                <span class="stat-label">${window.APP_I18N.followers}</span>
                             </span>
                             <span class="stat-item">
                                 <span class="stat-value">${user.following_count || 0}</span>
-                                <span class="stat-label">팔로잉</span>
+                                <span class="stat-label">${window.APP_I18N.following}</span>
                             </span>
                         </div>
                     </div>
@@ -111,19 +111,19 @@ class FollowersListManager {
                                 data-user-id="${user.id}"
                                 data-username="${user.username}"
                                 onclick="event.stopPropagation(); toggleFollow('${user.username}', this)">
-                            팔로우
+                            ${window.APP_I18N.follow}
                         </button>
                         <button class="btn btn-sm btn-ghost" onclick="event.stopPropagation(); messageUser(${user.id})">
-                            메시지
+                            ${window.APP_I18N.message}
                         </button>
                     ` : isOwnProfile ? `
                         <button class="btn btn-sm btn-ghost" disabled>
-                            나
+                            ${window.APP_I18N.me}
                         </button>
                     ` : `
                         <button class="btn btn-sm btn-ghost"
                                 onclick="event.stopPropagation(); window.location.href='/accounts/login/'">
-                            로그인
+                            ${window.APP_I18N.login}
                         </button>
                     `}
                 </div>
@@ -163,17 +163,17 @@ class FollowersListManager {
         if (button) {
             if (isFollowing && isFollower) {
                 // Mutual follow
-                button.textContent = '맞팔로우';
+                button.textContent = window.APP_I18N.mutualFollow;
                 button.classList.remove('btn-primary');
                 button.classList.add('btn-ghost');
             } else if (isFollowing) {
                 // You follow them
-                button.textContent = '팔로잉';
+                button.textContent = window.APP_I18N.following;
                 button.classList.remove('btn-primary');
                 button.classList.add('btn-ghost');
             } else {
                 // You don't follow them
-                button.textContent = '팔로우';
+                button.textContent = window.APP_I18N.follow;
                 button.classList.remove('btn-ghost');
                 button.classList.add('btn-primary');
             }
@@ -195,8 +195,8 @@ class FollowersListManager {
 
     showError() {
         this.hideAllStates();
-        this.emptyState.querySelector('h3').textContent = '오류 발생';
-        this.emptyState.querySelector('p').textContent = '데이터를 불러오는 중 오류가 발생했습니다';
+        this.emptyState.querySelector('h3').textContent = window.APP_I18N.error;
+        this.emptyState.querySelector('p').textContent = window.APP_I18N.errorLoadingData;
         this.emptyState.classList.remove('hidden');
     }
 

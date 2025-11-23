@@ -6,6 +6,7 @@ from threading import Lock
 from typing import Optional, Dict, List
 from datetime import datetime
 from django.contrib.auth import get_user_model
+from django.db.models import Q
 import uuid
 
 User = get_user_model()
@@ -82,6 +83,17 @@ class AnonymousMatchingQueue:
                     except User.DoesNotExist:
                         # Remove invalid user from queue
                         self._queue.pop(i)
+                        continue
+
+                    # Check if users have blocked each other
+                    from accounts.models import Block
+                    is_blocked = Block.objects.filter(
+                        Q(blocker=user, blocked=partner) |
+                        Q(blocker=partner, blocked=user)
+                    ).exists()
+
+                    if is_blocked:
+                        # Skip this user if blocked
                         continue
 
                     # Check if current user meets waiting user's preferences

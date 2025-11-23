@@ -17,6 +17,7 @@ class Notification(models.Model):
         ('COMMENT', '게시글에 댓글'),        # Phase 2
         ('LIKE', '게시글에 좋아요'),         # Phase 2
         ('REPORT', '신고 접수'),            # Admin notification
+        ('ROOM_CLOSED', '채팅방 폐쇄'),      # Room closure notification
     ]
 
     # 핵심 필드
@@ -180,6 +181,26 @@ class Notification(models.Model):
             sender=sender,
             notification_type='LIKE',
             content_object=like
+        )
+
+    @classmethod
+    def create_room_closed_notification(cls, recipient, room):
+        """
+        오픈채팅방 폐쇄 알림 생성
+
+        Args:
+            recipient: 알림 받을 사용자 (참여자)
+            room: 폐쇄된 OpenChatRoom 객체
+
+        Returns:
+            생성된 Notification 객체
+        """
+        return cls.objects.create(
+            recipient=recipient,
+            sender=None,  # System notification, no sender
+            notification_type='ROOM_CLOSED',
+            content_object=room,
+            message=f'참여 중이던 "{room.name}" 오픈 채팅방이 삭제되었습니다.'
         )
 
     @classmethod

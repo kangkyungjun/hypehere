@@ -11,6 +11,7 @@ from django.contrib import messages
 from django.shortcuts import get_object_or_404, redirect
 from django.db.models import Q, Count, Prefetch
 from django.utils import timezone
+from django.utils.translation import gettext as _
 from datetime import timedelta
 from .utils import format_timedelta
 from .serializers import (
@@ -917,10 +918,6 @@ class DeactivateAccountView(APIView):
         user.deactivated_at = timezone.now()
         user.save()
 
-        # Logout user
-        from django.contrib.auth import logout
-        logout(request)
-
         return Response({
             'message': '계정이 비활성화되었습니다'
         })
@@ -1117,7 +1114,7 @@ class SupportTicketCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.user = self.request.user
-        messages.success(self.request, '문의가 성공적으로 등록되었습니다.')
+        messages.success(self.request, _('문의가 성공적으로 등록되었습니다.'))
         return super().form_valid(form)
 
 
@@ -1161,7 +1158,7 @@ class SupportTicketRespondView(LoginRequiredMixin, UserPassesTestMixin, View):
         admin_response = request.POST.get('admin_response', '').strip()
 
         if not admin_response:
-            messages.error(request, '답변 내용을 입력해주세요.')
+            messages.error(request, _('답변 내용을 입력해주세요.'))
             return redirect('accounts:support_detail', pk=pk)
 
         # Save response
@@ -1171,7 +1168,7 @@ class SupportTicketRespondView(LoginRequiredMixin, UserPassesTestMixin, View):
         ticket.status = 'answered'
         ticket.save()
 
-        messages.success(request, '답변이 성공적으로 등록되었습니다.')
+        messages.success(request, _('답변이 성공적으로 등록되었습니다.'))
         return redirect('accounts:support_detail', pk=pk)
 
 

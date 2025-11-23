@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load i18n %}
 
-{% block title %}신고 내역 - HypeHere{% endblock %}
+{% block title %}{% trans "신고 내역 - HypeHere" %}{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/report-history.css' %}">
@@ -17,7 +18,7 @@
                 <polyline points="12 19 5 12 12 5"/>
             </svg>
         </a>
-        <h1 class="report-title">신고 내역</h1>
+        <h1 class="report-title">{% trans "신고 내역" %}</h1>
         <button class="btn-filter" data-action="open-filter-modal">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <line x1="4" y1="21" x2="4" y2="14"></line>
@@ -30,7 +31,7 @@
                 <line x1="9" y1="8" x2="15" y2="8"></line>
                 <line x1="17" y1="16" x2="23" y2="16"></line>
             </svg>
-            <span>필터</span>
+            <span>{% trans "필터" %}</span>
         </button>
     </div>
 
@@ -40,15 +41,15 @@
     <!-- 탭 네비게이션 -->
     <div class="report-tabs">
         <button class="tab-button active" data-tab="post-reports">
-            게시물 신고
+            {% trans "게시물 신고" %}
             <span class="tab-count">{{ post_reports.count }}</span>
         </button>
         <button class="tab-button" data-tab="comment-reports">
-            댓글 신고
+            {% trans "댓글 신고" %}
             <span class="tab-count">{{ comment_reports.count }}</span>
         </button>
         <button class="tab-button" data-tab="chat-reports">
-            채팅 신고
+            {% trans "채팅 신고" %}
             <span class="tab-count">{{ chat_reports.count }}</span>
         </button>
     </div>
@@ -74,7 +75,7 @@
                         </div>
                         <div>
                             <div class="user-name">{{ report.reported_user.nickname }}</div>
-                            <div class="report-time">{{ report.created_at|timesince }} 전</div>
+                            <div class="report-time">{{ report.created_at|timesince }}{% trans " 전" %}</div>
                         </div>
                     </div>
                 </div>
@@ -98,14 +99,14 @@
                 <div class="report-actions" style="display: flex; gap: var(--space-sm); margin-top: var(--space-md); flex-wrap: wrap;">
                     {% if report.post %}
                     <a href="/?postId={{ report.post.id }}" class="btn btn-secondary btn-sm">
-                        게시물 보기
+                        {% trans "게시물 보기" %}
                     </a>
                     {% endif %}
                     <button class="btn btn-danger btn-sm" data-action="open-delete-modal" data-report-id="{{ report.id }}" data-report-type="post">
-                        삭제 처리
+                        {% trans "삭제 처리" %}
                     </button>
                     <button class="btn btn-ghost btn-sm" data-action="open-dismiss-modal" data-report-id="{{ report.id }}" data-report-type="post">
-                        신고 기각
+                        {% trans "신고 기각" %}
                     </button>
                 </div>
                 {% endif %}
@@ -116,8 +117,8 @@
                 <svg viewBox="0 0 24 24">
                     <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                 </svg>
-                <h3>게시물 신고 내역이 없습니다</h3>
-                <p>아직 신고한 게시물이 없습니다</p>
+                <h3>{% trans "게시물 신고 내역이 없습니다" %}</h3>
+                <p>{% trans "아직 신고한 게시물이 없습니다" %}</p>
             </div>
         {% endif %}
     </div>
@@ -143,7 +144,7 @@
                         </div>
                         <div>
                             <div class="user-name">{{ report.reported_user.nickname }}</div>
-                            <div class="report-time">{{ report.created_at|timesince }} 전</div>
+                            <div class="report-time">{{ report.created_at|timesince }}{% trans " 전" %}</div>
                         </div>
                     </div>
                 </div>
@@ -167,14 +168,14 @@
                 <div class="report-actions" style="display: flex; gap: var(--space-sm); margin-top: var(--space-md); flex-wrap: wrap;">
                     {% if report.comment.post %}
                     <a href="/?postId={{ report.comment.post.id }}" class="btn btn-secondary btn-sm">
-                        게시물 보기
+                        {% trans "게시물 보기" %}
                     </a>
                     {% endif %}
                     <button class="btn btn-danger btn-sm" data-action="open-delete-modal" data-report-id="{{ report.id }}" data-report-type="comment">
-                        삭제 처리
+                        {% trans "삭제 처리" %}
                     </button>
                     <button class="btn btn-ghost btn-sm" data-action="open-dismiss-modal" data-report-id="{{ report.id }}" data-report-type="comment">
-                        신고 기각
+                        {% trans "신고 기각" %}
                     </button>
                 </div>
                 {% endif %}
@@ -185,8 +186,8 @@
                 <svg viewBox="0 0 24 24">
                     <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                 </svg>
-                <h3>댓글 신고 내역이 없습니다</h3>
-                <p>아직 신고한 댓글이 없습니다</p>
+                <h3>{% trans "댓글 신고 내역이 없습니다" %}</h3>
+                <p>{% trans "아직 신고한 댓글이 없습니다" %}</p>
             </div>
         {% endif %}
     </div>
@@ -212,7 +213,7 @@
                         </div>
                         <div>
                             <div class="user-name">{{ report.reported_user.nickname }}</div>
-                            <div class="report-time">{{ report.created_at|timesince }} 전</div>
+                            <div class="report-time">{{ report.created_at|timesince }}{% trans " 전" %}</div>
                         </div>
                     </div>
                 </div>
@@ -227,10 +228,10 @@
                 {% if request.user.is_staff %}
                 <div class="report-actions" style="display: flex; gap: var(--space-sm); margin-top: var(--space-md); flex-wrap: wrap;">
                     <button class="btn btn-danger btn-sm" data-action="open-delete-modal" data-report-id="{{ report.id }}" data-report-type="chat" disabled>
-                        삭제 처리 (준비중)
+                        {% trans "삭제 처리 (준비중)" %}
                     </button>
                     <button class="btn btn-ghost btn-sm" data-action="open-dismiss-modal" data-report-id="{{ report.id }}" data-report-type="chat" disabled>
-                        신고 기각 (준비중)
+                        {% trans "신고 기각 (준비중)" %}
                     </button>
                 </div>
                 {% endif %}
@@ -241,8 +242,8 @@
                 <svg viewBox="0 0 24 24">
                     <path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
                 </svg>
-                <h3>채팅 신고 내역이 없습니다</h3>
-                <p>아직 신고한 채팅이 없습니다</p>
+                <h3>{% trans "채팅 신고 내역이 없습니다" %}</h3>
+                <p>{% trans "아직 신고한 채팅이 없습니다" %}</p>
             </div>
         {% endif %}
     </div>
@@ -251,8 +252,8 @@
     <div class="admin-modal-overlay" id="admin-delete-modal">
         <div class="admin-modal-container">
             <div class="admin-modal-header">
-                <h3 class="admin-modal-title">게시물 삭제 확인</h3>
-                <button class="admin-modal-close" data-action="close-admin-modal" data-modal-id="admin-delete-modal" aria-label="닫기">
+                <h3 class="admin-modal-title">{% trans "게시물 삭제 확인" %}</h3>
+                <button class="admin-modal-close" data-action="close-admin-modal" data-modal-id="admin-delete-modal" aria-label="{% trans "닫기" %}">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="18" y1="6" x2="6" y2="18"/>
                         <line x1="6" y1="6" x2="18" y2="18"/>
@@ -268,19 +269,19 @@
                             <line x1="12" y1="17" x2="12.01" y2="17"/>
                         </svg>
                     </div>
-                    <p class="modal-message">정말로 이 게시물을 삭제하시겠습니까?</p>
-                    <p class="modal-description">이 작업은 다음을 수행합니다:</p>
+                    <p class="modal-message">{% trans "정말로 이 게시물을 삭제하시겠습니까?" %}</p>
+                    <p class="modal-description">{% trans "이 작업은 다음을 수행합니다:" %}</p>
                     <ul class="modal-consequence-list">
-                        <li>게시물 내용을 "신고로 삭제됨" 메시지로 변경</li>
-                        <li>신고 상태를 "처리완료"로 변경</li>
-                        <li>사용자의 신고 누적 횟수 증가</li>
-                        <li>작성자와 신고자에게 알림 전송</li>
+                        <li>{% trans "게시물 내용을 \'신고로 삭제됨\' 메시지로 변경" %}</li>
+                        <li>{% trans "신고 상태를 \'처리완료\'로 변경" %}</li>
+                        <li>{% trans "사용자의 신고 누적 횟수 증가" %}</li>
+                        <li>{% trans "작성자와 신고자에게 알림 전송" %}</li>
                     </ul>
                 </div>
             </div>
             <div class="admin-modal-footer">
-                <button class="btn btn-danger" id="confirm-delete-btn">삭제 처리</button>
-                <button class="btn btn-secondary" data-action="close-admin-modal" data-modal-id="admin-delete-modal">취소</button>
+                <button class="btn btn-danger" id="confirm-delete-btn">\${i18n.deleteAction || "삭제 처리"}</button>
+                <button class="btn btn-secondary" data-action="close-admin-modal" data-modal-id="admin-delete-modal">{% trans "취소" %}</button>
             </div>
         </div>
     </div>
@@ -289,8 +290,8 @@
     <div class="admin-modal-overlay" id="admin-dismiss-modal">
         <div class="admin-modal-container">
             <div class="admin-modal-header">
-                <h3 class="admin-modal-title">신고 기각 확인</h3>
-                <button class="admin-modal-close" data-action="close-admin-modal" data-modal-id="admin-dismiss-modal" aria-label="닫기">
+                <h3 class="admin-modal-title">{% trans "신고 기각 확인" %}</h3>
+                <button class="admin-modal-close" data-action="close-admin-modal" data-modal-id="admin-dismiss-modal" aria-label="{% trans "닫기" %}">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="18" y1="6" x2="6" y2="18"/>
                         <line x1="6" y1="6" x2="18" y2="18"/>
@@ -306,18 +307,18 @@
                             <line x1="12" y1="8" x2="12.01" y2="8"/>
                         </svg>
                     </div>
-                    <p class="modal-message">이 신고를 기각하시겠습니까?</p>
-                    <p class="modal-description">이 작업은 다음을 수행합니다:</p>
+                    <p class="modal-message">{% trans "이 신고를 기각하시겠습니까?" %}</p>
+                    <p class="modal-description">{% trans "이 작업은 다음을 수행합니다:" %}</p>
                     <ul class="modal-consequence-list">
-                        <li>신고 상태를 "기각"으로 변경</li>
-                        <li>필요시 사용자의 신고 누적 횟수 감소</li>
-                        <li>작성자와 신고자에게 알림 전송</li>
+                        <li>{% trans "신고 상태를 \'기각\'으로 변경" %}</li>
+                        <li>{% trans "필요시 사용자의 신고 누적 횟수 감소" %}</li>
+                        <li>{% trans "작성자와 신고자에게 알림 전송" %}</li>
                     </ul>
                 </div>
             </div>
             <div class="admin-modal-footer">
-                <button class="btn btn-ghost" id="confirm-dismiss-btn">신고 기각</button>
-                <button class="btn btn-secondary" data-action="close-admin-modal" data-modal-id="admin-dismiss-modal">취소</button>
+                <button class="btn btn-ghost" id="confirm-dismiss-btn">\${i18n.dismissReport || "신고 기각"}</button>
+                <button class="btn btn-secondary" data-action="close-admin-modal" data-modal-id="admin-dismiss-modal">{% trans "취소" %}</button>
             </div>
         </div>
     </div>
@@ -326,100 +327,100 @@
     <div class="filter-modal-overlay" id="filter-modal">
         <div class="filter-modal-container">
             <div class="filter-modal-header">
-                <h3 class="filter-modal-title">필터 및 검색</h3>
+                <h3 class="filter-modal-title">{% trans "필터 및 검색" %}</h3>
                 <button class="filter-modal-close" data-action="close-filter-modal">×</button>
             </div>
             <div class="filter-modal-body">
                 <!-- 검색 -->
                 <div class="filter-section">
-                    <h4 class="filter-section-title">검색</h4>
-                    <input type="text" id="search-input" class="filter-input" placeholder="사용자 닉네임, 내용으로 검색...">
+                    <h4 class="filter-section-title">{% trans "검색" %}</h4>
+                    <input type="text" id="search-input" class="filter-input" placeholder="{% trans "사용자 닉네임, 내용으로 검색..." %}">
                 </div>
 
                 <!-- 상태 필터 -->
                 <div class="filter-section">
-                    <h4 class="filter-section-title">상태</h4>
+                    <h4 class="filter-section-title">{% trans "상태" %}</h4>
                     <div class="filter-options">
                         <div class="filter-option">
                             <input type="radio" name="status" id="status-all" value="" checked>
-                            <label for="status-all">전체</label>
+                            <label for="status-all">{% trans "전체" %}</label>
                         </div>
                         <div class="filter-option">
                             <input type="radio" name="status" id="status-pending" value="pending">
-                            <label for="status-pending">대기 중</label>
+                            <label for="status-pending">{% trans "대기 중" %}</label>
                         </div>
                         <div class="filter-option">
                             <input type="radio" name="status" id="status-reviewing" value="reviewing">
-                            <label for="status-reviewing">검토 중</label>
+                            <label for="status-reviewing">{% trans "검토 중" %}</label>
                         </div>
                         <div class="filter-option">
                             <input type="radio" name="status" id="status-resolved" value="resolved">
-                            <label for="status-resolved">처리 완료</label>
+                            <label for="status-resolved">{% trans "처리 완료" %}</label>
                         </div>
                         <div class="filter-option">
                             <input type="radio" name="status" id="status-dismissed" value="dismissed">
-                            <label for="status-dismissed">기각</label>
+                            <label for="status-dismissed">{% trans "기각" %}</label>
                         </div>
                     </div>
                 </div>
 
                 <!-- 신고 타입 필터 -->
                 <div class="filter-section">
-                    <h4 class="filter-section-title">신고 유형</h4>
+                    <h4 class="filter-section-title">{% trans "신고 유형" %}</h4>
                     <div class="filter-options">
                         <div class="filter-option">
                             <input type="radio" name="type" id="type-all" value="" checked>
-                            <label for="type-all">전체</label>
+                            <label for="type-all">{% trans "전체" %}</label>
                         </div>
                         <div class="filter-option">
                             <input type="radio" name="type" id="type-abuse" value="abuse">
-                            <label for="type-abuse">욕설/비방</label>
+                            <label for="type-abuse">{% trans "욕설/비방" %}</label>
                         </div>
                         <div class="filter-option">
                             <input type="radio" name="type" id="type-spam" value="spam">
-                            <label for="type-spam">스팸/광고</label>
+                            <label for="type-spam">{% trans "스팸/광고" %}</label>
                         </div>
                         <div class="filter-option">
                             <input type="radio" name="type" id="type-inappropriate" value="inappropriate">
-                            <label for="type-inappropriate">부적절한 내용</label>
+                            <label for="type-inappropriate">{% trans "부적절한 내용" %}</label>
                         </div>
                         <div class="filter-option">
                             <input type="radio" name="type" id="type-harassment" value="harassment">
-                            <label for="type-harassment">성희롱</label>
+                            <label for="type-harassment">{% trans "성희롱" %}</label>
                         </div>
                         <div class="filter-option">
                             <input type="radio" name="type" id="type-other" value="other">
-                            <label for="type-other">기타</label>
+                            <label for="type-other">{% trans "기타" %}</label>
                         </div>
                     </div>
                 </div>
 
                 <!-- 날짜 필터 -->
                 <div class="filter-section">
-                    <h4 class="filter-section-title">기간</h4>
+                    <h4 class="filter-section-title">{% trans "기간" %}</h4>
                     <div class="filter-options">
                         <div class="filter-option">
                             <input type="radio" name="date" id="date-all" value="" checked>
-                            <label for="date-all">전체</label>
+                            <label for="date-all">{% trans "전체" %}</label>
                         </div>
                         <div class="filter-option">
                             <input type="radio" name="date" id="date-today" value="today">
-                            <label for="date-today">오늘</label>
+                            <label for="date-today">{% trans "오늘" %}</label>
                         </div>
                         <div class="filter-option">
                             <input type="radio" name="date" id="date-week" value="week">
-                            <label for="date-week">최근 7일</label>
+                            <label for="date-week">{% trans "최근 7일" %}</label>
                         </div>
                         <div class="filter-option">
                             <input type="radio" name="date" id="date-month" value="month">
-                            <label for="date-month">최근 30일</label>
+                            <label for="date-month">{% trans "최근 30일" %}</label>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="filter-modal-footer">
-                <button class="btn btn-secondary" data-action="reset-filters">초기화</button>
-                <button class="btn btn-primary" data-action="apply-filters">적용</button>
+                <button class="btn btn-secondary" data-action="reset-filters">{% trans "초기화" %}</button>
+                <button class="btn btn-primary" data-action="apply-filters">{% trans "적용" %}</button>
             </div>
         </div>
     </div>
@@ -427,13 +428,15 @@
     <!-- 로딩 인디케이터 -->
     <div class="loading-indicator" id="loading-indicator">
         <div class="loading-spinner"></div>
-        <p>신고 내역을 불러오는 중...</p>
+        <p>{% trans "신고 내역을 불러오는 중..." %}</p>
     </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
+    const i18n = window.APP_I18N || {};
+
 // Global variables for modal state
 let currentReportId = null;
 let currentReportType = null;
@@ -572,11 +575,11 @@ async function handleReportDelete(reportId, reportType) {
             alert(data.message);
             location.reload(); // Reload to show updated status
         } else {
-            alert(`처리 실패: ${data.message}`);
+            alert(`${i18n.processingFailed || '처리 실패'}: ${data.message}`);
         }
     } catch (error) {
         console.error('Error deleting report:', error);
-        alert('오류가 발생했습니다. 다시 시도해주세요.');
+        alert(i18n.errorTryAgain || '오류가 발생했습니다. 다시 시도해주세요.');
     }
 }
 
@@ -600,11 +603,11 @@ async function handleReportDismiss(reportId, reportType) {
             alert(data.message);
             location.reload(); // Reload to show updated status
         } else {
-            alert(`처리 실패: ${data.message}`);
+            alert(`${i18n.processingFailed || '처리 실패'}: ${data.message}`);
         }
     } catch (error) {
         console.error('Error dismissing report:', error);
-        alert('오류가 발생했습니다. 다시 시도해주세요.');
+        alert(i18n.errorTryAgain || '오류가 발생했습니다. 다시 시도해주세요.');
     }
 }
 
@@ -693,40 +696,40 @@ function updateActiveFilters() {
     const filters = [];
 
     const statusLabels = {
-        'pending': '대기 중',
-        'reviewing': '검토 중',
-        'resolved': '처리 완료',
-        'dismissed': '기각'
+        'pending': i18n.statusPending || '대기 중',
+        'reviewing': i18n.statusReviewing || '검토 중',
+        'resolved': i18n.statusResolved || '처리 완료',
+        'dismissed': i18n.statusDismissed || '기각'
     };
 
     const typeLabels = {
-        'abuse': '욕설/비방',
-        'spam': '스팸/광고',
-        'inappropriate': '부적절한 내용',
-        'harassment': '성희롱',
-        'other': '기타'
+        'abuse': i18n.reportTypeAbuse || '욕설/비방',
+        'spam': i18n.reportTypeSpam || '스팸/광고',
+        'inappropriate': i18n.reportTypeInappropriate || '부적절한 내용',
+        'harassment': i18n.reportTypeHarassment || '성희롱',
+        'other': i18n.reportTypeOther || '기타'
     };
 
     const dateLabels = {
-        'today': '오늘',
-        'week': '최근 7일',
-        'month': '최근 30일'
+        'today': i18n.periodToday || '오늘',
+        'week': i18n.periodLast7Days || '최근 7일',
+        'month': i18n.periodLast30Days || '최근 30일'
     };
 
     if (currentFilters.status) {
-        filters.push({ key: 'status', label: `상태: ${statusLabels[currentFilters.status]}` });
+        filters.push({ key: 'status', label: `${i18n.filterStatus || '상태:'} ${statusLabels[currentFilters.status]}` });
     }
 
     if (currentFilters.type) {
-        filters.push({ key: 'type', label: `유형: ${typeLabels[currentFilters.type]}` });
+        filters.push({ key: 'type', label: `${i18n.filterType || '유형:'} ${typeLabels[currentFilters.type]}` });
     }
 
     if (currentFilters.date) {
-        filters.push({ key: 'date', label: `기간: ${dateLabels[currentFilters.date]}` });
+        filters.push({ key: 'date', label: `${i18n.filterPeriod || '기간:'} ${dateLabels[currentFilters.date]}` });
     }
 
     if (currentFilters.query) {
-        filters.push({ key: 'query', label: `검색: ${currentFilters.query}` });
+        filters.push({ key: 'query', label: `${i18n.filterSearch || '검색:'} ${currentFilters.query}` });
     }
 
     if (filters.length > 0) {
@@ -804,7 +807,7 @@ async function loadReports(reportType) {
         } else if (currentPage[reportType] === 1) {
             // No results on first page
             const tab = document.getElementById(`${reportType}-reports-tab`);
-            tab.innerHTML = '<div class="empty-state"><p>신고 내역이 없습니다.</p></div>';
+            tab.innerHTML = `<div class=\"empty-state\"><p>${i18n.noReports || '신고 내역이 없습니다.'}</p></div>`;
         }
     } catch (error) {
         console.error('Error loading reports:', error);
@@ -830,17 +833,17 @@ function createReportCard(report, reportType) {
     const diffDays = Math.floor(diffHours / 24);
 
     let timeAgo;
-    if (diffMins < 1) timeAgo = '방금 전';
-    else if (diffMins < 60) timeAgo = `${diffMins}분 전`;
-    else if (diffHours < 24) timeAgo = `${diffHours}시간 전`;
-    else timeAgo = `${diffDays}일 전`;
+    if (diffMins < 1) timeAgo = i18n.timeJustNow || '방금 전';
+    else if (diffMins < 60) timeAgo = `${diffMins}${i18n.timeMinutesAgo || '분 전'}`;
+    else if (diffHours < 24) timeAgo = `${diffHours}${i18n.timeHoursAgo || '시간 전'}`;
+    else timeAgo = `${diffDays}${i18n.timeDaysAgo || '일 전'}`;
 
     let postSection = '';
     if (reportType === 'post' && report.post_id) {
         postSection = `
             <div class="report-section">
                 <div style="background: var(--color-bg-secondary); padding: var(--space-md); border-radius: var(--radius-md); border-left: 3px solid var(--color-primary);">
-                    <p style="margin: 0; color: var(--color-text);">${report.post_content || '내용 없음'}</p>
+                    <p style="margin: 0; color: var(--color-text);">${report.post_content || i18n.noContent || '내용 없음'}</p>
                 </div>
             </div>
         `;
@@ -850,13 +853,13 @@ function createReportCard(report, reportType) {
     const isStaff = {% if request.user.is_staff %}true{% else %}false{% endif %};
     if (isStaff) {
         const postViewBtn = reportType === 'post' && report.post_id ?
-            `<a href="/?postId=${report.post_id}" class="btn btn-secondary btn-sm">게시물 보기</a>` : '';
+            `<a href="/?postId=${report.post_id}" class="btn btn-secondary btn-sm">\${i18n.viewPost || "게시물 보기"}</a>` : '';
 
         adminActions = `
             <div class="report-actions" style="display: flex; gap: var(--space-sm); margin-top: var(--space-md); flex-wrap: wrap;">
                 ${postViewBtn}
-                <button class="btn btn-danger btn-sm" data-action="open-delete-modal" data-report-id="${report.id}" data-report-type="${reportType}">삭제 처리</button>
-                <button class="btn btn-ghost btn-sm" data-action="open-dismiss-modal" data-report-id="${report.id}" data-report-type="${reportType}">신고 기각</button>
+                <button class="btn btn-danger btn-sm" data-action="open-delete-modal" data-report-id="${report.id}" data-report-type="${reportType}">\${i18n.deleteAction || "삭제 처리"}</button>
+                <button class="btn btn-ghost btn-sm" data-action="open-dismiss-modal" data-report-id="${report.id}" data-report-type="${reportType}">\${i18n.dismissReport || "신고 기각"}</button>
             </div>
         `;
     }
@@ -877,8 +880,8 @@ function createReportCard(report, reportType) {
         </div>
         ${postSection}
         <div class="report-section">
-            <strong class="report-label">신고 내용:</strong>
-            <p class="report-description">${report.description || '설명 없음'}</p>
+            <strong class="report-label">\${i18n.reportContentLabel || "신고 내용:"}</strong>
+            <p class="report-description">${report.description || i18n.noDescription || '설명 없음'}</p>
         </div>
         ${adminActions}
     `;

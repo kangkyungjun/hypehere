@@ -34,7 +34,7 @@ async function toggleFollow(username, buttonElement) {
     // Save original text and disable button
     const originalText = buttonElement.textContent;
     buttonElement.disabled = true;
-    buttonElement.textContent = '처리 중...';
+    buttonElement.textContent = window.APP_I18N?.processing || '처리 중...';
 
     try {
         const response = await fetch(url, {
@@ -57,17 +57,17 @@ async function toggleFollow(username, buttonElement) {
             // Update button state
             if (data.is_following && data.is_follower) {
                 // Mutual follow
-                buttonElement.textContent = '맞팔로우';
+                buttonElement.textContent = window.APP_I18N?.mutualFollow || '맞팔로우';
                 buttonElement.classList.remove('btn-primary');
                 buttonElement.classList.add('btn-ghost');
             } else if (data.is_following) {
                 // You follow them
-                buttonElement.textContent = '팔로잉';
+                buttonElement.textContent = window.APP_I18N?.following || '팔로잉';
                 buttonElement.classList.remove('btn-primary');
                 buttonElement.classList.add('btn-ghost');
             } else {
                 // You don't follow them
-                buttonElement.textContent = '팔로우';
+                buttonElement.textContent = window.APP_I18N?.follow || '팔로우';
                 buttonElement.classList.remove('btn-ghost');
                 buttonElement.classList.add('btn-primary');
             }
@@ -91,17 +91,17 @@ async function toggleFollow(username, buttonElement) {
             if (window.DEBUG) console.log('[Follow] Error response data:', data);
             if (response.status === 401) {
                 console.error('[Follow] Authentication required');
-                alert('로그인이 필요합니다.');
+                alert(window.APP_I18N?.loginRequired || '로그인이 필요합니다.');
                 window.location.href = '/accounts/login/';
             } else if (response.status === 403) {
                 console.error('[Follow] CSRF verification failed');
-                alert('CSRF 토큰 오류. 페이지를 새로고침해주세요.');
+                alert(window.APP_I18N?.csrfError || 'CSRF 토큰 오류. 페이지를 새로고침해주세요.');
             } else if (response.status === 404) {
                 console.error('[Follow] User not found or API endpoint not found');
-                alert('사용자를 찾을 수 없거나 API 오류가 발생했습니다.');
+                alert(window.APP_I18N?.userNotFound || '사용자를 찾을 수 없거나 API 오류가 발생했습니다.');
             } else {
                 console.error('[Follow] Unknown error:', data);
-                alert(data.error || '오류가 발생했습니다.');
+                alert(data.error || window.APP_I18N?.error || '오류가 발생했습니다.');
             }
         }
     } catch (error) {
@@ -109,7 +109,8 @@ async function toggleFollow(username, buttonElement) {
         if (window.DEBUG) console.error('[Follow] Error stack:', error.stack);
         // Restore original text on error
         buttonElement.textContent = originalText;
-        alert('네트워크 오류가 발생했습니다: ' + error.message);
+        const errorMsg = window.APP_I18N?.networkError || '네트워크 오류가 발생했습니다';
+        alert(errorMsg + ': ' + error.message);
     } finally {
         // Re-enable button
         buttonElement.disabled = false;
@@ -141,7 +142,7 @@ async function messageUser(userId) {
         window.location.href = `/messages/${conversation.id}/`;
     } catch (error) {
         console.error('[Follow] Error creating conversation:', error);
-        alert('대화를 시작할 수 없습니다.');
+        alert(window.APP_I18N?.conversationCreateFailed || '대화를 시작할 수 없습니다.');
     }
 }
 

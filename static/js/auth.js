@@ -127,9 +127,9 @@ function setLoadingState(isLoading) {
     if (submitText && submitLoading) {
         if (isLoading) {
             submitText.classList.add('hidden');
-            submitLoading.style.display = 'inline-block';
+            submitLoading.classList.remove('hidden');
         } else {
-            submitText.style.display = 'inline';
+            submitText.classList.remove('hidden');
             submitLoading.classList.add('hidden');
         }
     }
@@ -371,10 +371,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Success - Show message and redirect
                     showAlert('success', window.AUTH_I18N.successUpdate);
 
-                    // Redirect to profile page after 1.5 seconds
+                    // Redirect to profile page after 1 second
                     setTimeout(() => {
                         window.location.href = '/accounts/profile/';
-                    }, 1500);
+                    }, 1000);
 
                 } else {
                     // Error - Display field-specific or general errors
@@ -395,6 +395,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                     if (result.city) {
                         showFieldError('city', Array.isArray(result.city) ? result.city[0] : result.city);
+                    }
+                    if (result.gender) {
+                        showFieldError('gender', Array.isArray(result.gender) ? result.gender[0] : result.gender);
                     }
 
                     // Show general error message

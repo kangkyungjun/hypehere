@@ -21,21 +21,32 @@ function getCookie(name) {
 
 const csrftoken = getCookie('csrftoken');
 
-// Modal Elements
-const modal = document.getElementById('post-modal');
-const modalTitle = document.getElementById('post-modal-title');
-const editPostIdInput = document.getElementById('edit-post-id');
-const openModalBtn = document.querySelector('.mobile-nav-create');
-const closeModalBtn = document.getElementById('close-modal');
-const cancelBtn = document.getElementById('cancel-post');
-const postForm = document.getElementById('post-form');
-const contentTextarea = document.getElementById('post-content');
-const charCounter = document.getElementById('char-counter');
-const submitBtn = document.getElementById('submit-post');
-const submitText = document.getElementById('submit-post-text');
-const submitLoading = document.getElementById('submit-post-loading');
-const errorAlert = document.getElementById('post-error-alert');
-const errorMessage = document.getElementById('post-error-message');
+// Wait for DOM to be fully loaded before initializing
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('[PostModal] DOM loaded, initializing...');
+
+    // Modal Elements
+    const modal = document.getElementById('post-modal');
+    const modalTitle = document.getElementById('post-modal-title');
+    const editPostIdInput = document.getElementById('edit-post-id');
+    const openModalBtn = document.querySelector('.mobile-nav-create');
+    const closeModalBtn = document.getElementById('close-modal');
+    const cancelBtn = document.getElementById('cancel-post');
+    const postForm = document.getElementById('post-form');
+    const contentTextarea = document.getElementById('post-content');
+    const charCounter = document.getElementById('char-counter');
+    const submitBtn = document.getElementById('submit-post');
+    const submitText = document.getElementById('submit-post-text');
+    const submitLoading = document.getElementById('submit-post-loading');
+    const errorAlert = document.getElementById('post-error-alert');
+    const errorMessage = document.getElementById('post-error-message');
+
+    // Debug: Log element status
+    console.log('[PostModal] Elements found:', {
+        modal: !!modal,
+        openModalBtn: !!openModalBtn,
+        postForm: !!postForm
+    });
 
 // Modal Functions
 function openModal() {
@@ -308,5 +319,8 @@ if (postForm) {
     }
 }
 
-// Expose openEditModal to global scope for post_actions.js
-window.openEditModal = openEditModal;
+    // Expose openEditModal to global scope for post_actions.js
+    window.openEditModal = openEditModal;
+
+    console.log('[PostModal] Initialization complete');
+}); // End of DOMContentLoaded

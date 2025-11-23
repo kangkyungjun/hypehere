@@ -137,7 +137,7 @@ class UserUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('nickname', 'date_of_birth', 'bio', 'profile_picture',
-                  'address', 'city', 'country', 'postal_code')
+                  'address', 'city', 'country', 'postal_code', 'gender')
 
     # Email cannot be changed after registration for security reasons
 

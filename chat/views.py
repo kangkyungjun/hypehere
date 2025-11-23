@@ -7,6 +7,7 @@ from django.shortcuts import get_object_or_404, render
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
+from django.utils.translation import gettext as _
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 
@@ -338,9 +339,28 @@ def start_matching_view(request):
         # Match found - create anonymous conversation
         conversation = create_anonymous_conversation(request.user.id, matched_user_id)
 
-        # Stop searching
+        # Notify the waiting user (matched_user_id) via WebSocket
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            f'matching_{matched_user_id}',  # User A's matching group
+            {
+                'type': 'match_found',
+                'conversation_id': conversation.id,
+                'anonymous_room_id': conversation.anonymous_room_id
+            }
+        )
+
+        # Stop searching for both users
         preference.is_searching = False
         preference.save()
+
+        # Also stop searching for the matched user
+        try:
+            matched_preference = AnonymousMatchingPreference.objects.get(user_id=matched_user_id)
+            matched_preference.is_searching = False
+            matched_preference.save()
+        except AnonymousMatchingPreference.DoesNotExist:
+            pass
 
         return Response({
             'status': 'matched',
@@ -411,14 +431,14 @@ def connection_request_view(request):
         )
 
     # Get other user in conversation
-    participants = conversation.participants.exclude(user=request.user)
+    participants = conversation.participants.exclude(id=request.user.id)
     if not participants.exists():
         return Response(
             {'error': '대화 상대를 찾을 수 없습니다'},
             status=status.HTTP_404_NOT_FOUND
         )
 
-    other_user = participants.first().user
+    other_user = participants.first()
 
     # Check if request already exists
     existing_request = ConnectionRequest.objects.filter(
@@ -642,9 +662,11 @@ def open_chat_list_view(request):
 def open_chat_room_view(request, room_id):
     """오픈 채팅방 상세 페이지 렌더링"""
     room = get_object_or_404(OpenChatRoom, id=room_id, is_active=True)
+    is_user_admin = room.is_admin(request.user)
     return render(request, 'learning/chat_room.html', {
         'room_id': room_id,
-        'room': room
+        'room': room,
+        'is_user_admin': is_user_admin
     })
 
 
@@ -778,25 +800,52 @@ class OpenChatRoomViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Update participant status
+        # Get participant
         try:
             participant = OpenChatParticipant.objects.get(
                 user=request.user,
                 room=room,
                 is_active=True
             )
-            participant.is_active = False
-            participant.left_at = timezone.now()
-            participant.save()
-
-            return Response({
-                'message': '채팅방에서 나갔습니다'
-            })
         except OpenChatParticipant.DoesNotExist:
             return Response(
                 {'error': '참가 정보를 찾을 수 없습니다'},
                 status=status.HTTP_404_NOT_FOUND
             )
+
+        # Check if creator leaving (and if room should be deleted)
+        if room.creator == request.user and room.should_delete_on_creator_leave():
+            # Check for confirmation
+            confirmed = request.data.get('confirmed', False)
+
+            if not confirmed:
+                # Require confirmation
+                return Response({
+                    'requires_confirmation': True,
+                    'message': _('방장이 나가면 채팅방이 삭제됩니다. 계속하시겠습니까?')
+                }, status=status.HTTP_200_OK)
+
+            # Confirmed - deactivate room and notify participants
+            room.deactivate_room()
+
+            # Also mark creator as left
+            participant.is_active = False
+            participant.left_at = timezone.now()
+            participant.save()
+
+            return Response({
+                'message': _('방이 삭제되었습니다'),
+                'room_deleted': True
+            })
+
+        # Regular participant leaving
+        participant.is_active = False
+        participant.left_at = timezone.now()
+        participant.save()
+
+        return Response({
+            'message': _('채팅방에서 나갔습니다')
+        })
 
     @action(detail=True, methods=['post'])
     def favorite(self, request, pk=None):
@@ -1108,161 +1157,6 @@ class OpenChatRoomViewSet(viewsets.ModelViewSet):
             'message': f'{user.nickname}님의 강퇴가 해제되었습니다',
             'user_id': user.id,
             'nickname': user.nickname
-        })
-
-    @action(detail=True, methods=['post'])
-    def grant_admin(self, request, pk=None):
-        """Grant admin permission to a user"""
-        room = self.get_object()
-
-        # Check if requester is admin
-        if not room.is_admin(request.user):
-            return Response(
-                {'error': '관리자 권한이 필요합니다'},
-                status=status.HTTP_403_FORBIDDEN
-            )
-
-        # Get target user ID
-        user_id = request.data.get('user_id')
-        if not user_id:
-            return Response(
-                {'error': 'user_id is required'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        try:
-            target_user = User.objects.get(id=user_id)
-        except User.DoesNotExist:
-            return Response(
-                {'error': 'User not found'},
-                status=status.HTTP_404_NOT_FOUND
-            )
-
-        # Check if target user is a participant
-        try:
-            participant = OpenChatParticipant.objects.get(
-                user=target_user,
-                room=room,
-                is_active=True
-            )
-        except OpenChatParticipant.DoesNotExist:
-            return Response(
-                {'error': '채팅방 참가자가 아닙니다'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        # Check if already admin
-        if participant.is_admin:
-            return Response(
-                {'error': '이미 관리자입니다'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        # Grant admin permission
-        participant.is_admin = True
-        participant.admin_granted_at = timezone.now()
-        participant.save()
-
-        # Broadcast admin change event to WebSocket
-        channel_layer = get_channel_layer()
-        room_group_name = f'open_chat_{room.id}'
-        async_to_sync(channel_layer.group_send)(
-            room_group_name,
-            {
-                'type': 'admin_changed',
-                'user_id': target_user.id,
-                'user_nickname': target_user.nickname,
-                'is_admin': True,
-                'granted_by_nickname': request.user.nickname
-            }
-        )
-
-        return Response({
-            'message': f'{target_user.nickname}님이 관리자로 지정되었습니다',
-            'user_id': target_user.id,
-            'nickname': target_user.nickname,
-            'is_admin': True
-        })
-
-    @action(detail=True, methods=['post'])
-    def revoke_admin(self, request, pk=None):
-        """Revoke admin permission from a user"""
-        room = self.get_object()
-
-        # Check if requester is admin
-        if not room.is_admin(request.user):
-            return Response(
-                {'error': '관리자 권한이 필요합니다'},
-                status=status.HTTP_403_FORBIDDEN
-            )
-
-        # Get target user ID
-        user_id = request.data.get('user_id')
-        if not user_id:
-            return Response(
-                {'error': 'user_id is required'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        try:
-            target_user = User.objects.get(id=user_id)
-        except User.DoesNotExist:
-            return Response(
-                {'error': 'User not found'},
-                status=status.HTTP_404_NOT_FOUND
-            )
-
-        # Check if target is the creator (cannot revoke creator's admin)
-        if target_user == room.creator:
-            return Response(
-                {'error': '채팅방 생성자의 관리자 권한은 해제할 수 없습니다'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        # Check if target user is a participant
-        try:
-            participant = OpenChatParticipant.objects.get(
-                user=target_user,
-                room=room,
-                is_active=True
-            )
-        except OpenChatParticipant.DoesNotExist:
-            return Response(
-                {'error': '채팅방 참가자가 아닙니다'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        # Check if not admin
-        if not participant.is_admin:
-            return Response(
-                {'error': '관리자가 아닙니다'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        # Revoke admin permission
-        participant.is_admin = False
-        participant.admin_granted_at = None
-        participant.save()
-
-        # Broadcast admin change event to WebSocket
-        channel_layer = get_channel_layer()
-        room_group_name = f'open_chat_{room.id}'
-        async_to_sync(channel_layer.group_send)(
-            room_group_name,
-            {
-                'type': 'admin_changed',
-                'user_id': target_user.id,
-                'user_nickname': target_user.nickname,
-                'is_admin': False,
-                'revoked_by_nickname': request.user.nickname
-            }
-        )
-
-        return Response({
-            'message': f'{target_user.nickname}님의 관리자 권한이 해제되었습니다',
-            'user_id': target_user.id,
-            'nickname': target_user.nickname,
-            'is_admin': False
         })
 
     @action(detail=True, methods=['get'])

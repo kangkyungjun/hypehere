@@ -31,6 +31,13 @@ class PostActionsManager {
         this.currentBlockUsername = null;
         this.currentReportUserId = null;  // For user reporting in chat rooms
 
+        // Alert modal elements (for success/error messages)
+        this.alertModal = document.getElementById('alert-modal');
+        this.alertMessage = document.getElementById('alert-message');
+        this.alertIcon = document.getElementById('alert-icon');
+        this.alertOkBtn = document.getElementById('alert-ok-btn');
+        this.alertCallback = null;
+
         // Debug: Check if block modal elements are found
         console.log('[PostActions] Block modal elements:', {
             blockUserModal: this.blockUserModal,
@@ -53,6 +60,7 @@ class PostActionsManager {
         this.setupDeleteModal();
         this.setupLeaveConversationModal();
         this.setupBlockUserModal();
+        this.setupAlertModal();
     }
 
     setupEventListeners() {
@@ -61,7 +69,7 @@ class PostActionsManager {
             const toggleBtn = e.target.closest('.dropdown-toggle');
             if (toggleBtn) {
                 e.preventDefault();
-                e.stopPropagation();
+                e.stopPropagation();  // Prevent parent card click handlers
 
                 // Profile page actions (user actions)
                 if (toggleBtn.classList.contains('profile-actions-toggle')) {
@@ -70,7 +78,7 @@ class PostActionsManager {
                 } else if (toggleBtn.classList.contains('chat-actions-toggle')) {
                     this.handleChatDropdownClick(toggleBtn);
                 } else {
-                    // Post actions
+                    // Post actions (including grid cards)
                     this.handleDropdownClick(toggleBtn);
                 }
             }
@@ -392,24 +400,24 @@ class PostActionsManager {
 
             if (response.ok) {
                 const lang = document.documentElement.lang || 'ko';
-                if (lang === 'en') {
-                    alert(`${this.currentBlockUsername} has been blocked`);
-                } else {
-                    alert(`${this.currentBlockUsername}님을 차단했습니다`);
-                }
+                const message = lang === 'en'
+                    ? `${this.currentBlockUsername} has been blocked`
+                    : `${this.currentBlockUsername}님을 차단했습니다`;
+                window.showAlert(message, 'success');
 
                 this.closeBlockUserModal();
 
-                // Reload page to hide blocked user's content
-                window.location.reload();
+                // Remove blocked user's content from DOM immediately
+                this.removeBlockedUserContent(this.currentBlockUsername);
+
+                console.log('[PostActions] Blocked user content removed from UI');
             } else {
                 const error = await response.json().catch(() => ({ error: 'Unknown error' }));
                 const lang = document.documentElement.lang || 'ko';
-                if (lang === 'en') {
-                    alert(`Block failed: ${error.error || 'Server error occurred'}`);
-                } else {
-                    alert(`차단 실패: ${error.error || '서버 오류가 발생했습니다'}`);
-                }
+                const message = lang === 'en'
+                    ? `Block failed: ${error.error || 'Server error occurred'}`
+                    : `차단 실패: ${error.error || '서버 오류가 발생했습니다'}`;
+                window.showAlert(message, 'error');
             }
         } catch (error) {
             console.error('Block user error:', error);
@@ -422,12 +430,116 @@ class PostActionsManager {
         }
     }
 
+    removeBlockedUserContent(username) {
+        console.log('[PostActions] Removing content from blocked user:', username);
+
+        // Remove posts from feed
+        const postCards = document.querySelectorAll('[data-author-username]');
+        let removedCount = 0;
+
+        postCards.forEach(card => {
+            const authorUsername = card.getAttribute('data-author-username');
+            if (authorUsername === username) {
+                console.log('[PostActions] Removing post card:', card);
+                card.style.transition = 'opacity 0.3s ease-out';
+                card.style.opacity = '0';
+                setTimeout(() => {
+                    card.remove();
+                }, 300);
+                removedCount++;
+            }
+        });
+
+        // Remove comments from blocked user
+        const comments = document.querySelectorAll('.comment-item[data-author-username]');
+        comments.forEach(comment => {
+            const authorUsername = comment.getAttribute('data-author-username');
+            if (authorUsername === username) {
+                console.log('[PostActions] Removing comment:', comment);
+                comment.style.transition = 'opacity 0.3s ease-out';
+                comment.style.opacity = '0';
+                setTimeout(() => {
+                    comment.remove();
+                }, 300);
+                removedCount++;
+            }
+        });
+
+        // Remove user cards (explore page)
+        const userCards = document.querySelectorAll('.user-card[data-username]');
+        userCards.forEach(card => {
+            const cardUsername = card.getAttribute('data-username');
+            if (cardUsername === username) {
+                console.log('[PostActions] Removing user card:', card);
+                card.style.transition = 'opacity 0.3s ease-out';
+                card.style.opacity = '0';
+                setTimeout(() => {
+                    card.remove();
+                }, 300);
+                removedCount++;
+            }
+        });
+
+        console.log(`[PostActions] Removed ${removedCount} items from blocked user`);
+    }
+
+    markPostAsReported(postId) {
+        console.log('[PostActions] Marking post as reported:', postId);
+
+        // Find the post card
+        const postCard = document.querySelector(`[data-post-id="${postId}"]`);
+        if (!postCard) {
+            console.warn('[PostActions] Post card not found for ID:', postId);
+            return;
+        }
+
+        // Find the report button within the post actions dropdown
+        const reportBtn = postCard.querySelector('.action-item[data-action="report"]');
+        if (reportBtn) {
+            // Disable the button
+            reportBtn.style.opacity = '0.5';
+            reportBtn.style.pointerEvents = 'none';
+
+            // Change text to indicate it's already reported
+            const textContent = reportBtn.textContent.trim();
+            if (!textContent.includes('✓') && !textContent.includes('신고됨') && !textContent.includes('Reported')) {
+                const lang = document.documentElement.lang || 'ko';
+                reportBtn.textContent = lang === 'en' ? '✓ Reported' : '✓ 신고됨';
+            }
+
+            console.log('[PostActions] Report button disabled for post:', postId);
+        }
+
+        // Optionally add a visual indicator to the post card
+        const existingBadge = postCard.querySelector('.reported-badge');
+        if (!existingBadge) {
+            const badge = document.createElement('div');
+            badge.className = 'reported-badge';
+            badge.style.cssText = 'position: absolute; top: 10px; right: 10px; background: rgba(255, 59, 48, 0.1); color: #ff3b30; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;';
+            const lang = document.documentElement.lang || 'ko';
+            badge.textContent = lang === 'en' ? 'Reported' : '신고됨';
+
+            // Make sure post card has relative positioning
+            if (postCard.style.position !== 'relative' && postCard.style.position !== 'absolute') {
+                postCard.style.position = 'relative';
+            }
+
+            postCard.appendChild(badge);
+            console.log('[PostActions] Added reported badge to post:', postId);
+        }
+    }
+
     setupBlockUserModal() {
         console.log('[PostActions] setupBlockUserModal called');
+        // 이미 설정된 경우 스킵
+        if (this._blockModalSetup) {
+            return;
+        }
         if (!this.blockUserModal) {
             console.warn('[PostActions] Block user modal not found');
             return;
         }
+        this._blockModalSetup = true;
         console.log('[PostActions] Block user modal found, setting up event listeners');
 
         // Confirm block button
@@ -487,10 +599,15 @@ class PostActionsManager {
     }
 
     setupReportModal() {
+        // 이미 설정된 경우 스킵
+        if (this._reportModalSetup) {
+            return;
+        }
         if (!this.reportModal) {
             console.warn('Report modal not found');
             return;
         }
+        this._reportModalSetup = true;
 
         // Close button
         const closeBtn = document.getElementById('close-report-modal');
@@ -557,18 +674,27 @@ class PostActionsManager {
     }
 
     setupDeleteModal() {
+        // 이미 설정된 경우 스킵
+        if (this._deleteModalSetup) {
+            return;
+        }
         if (!this.deleteModal) {
             console.warn('Delete modal not found');
             return;
         }
+        this._deleteModalSetup = true;
 
         // Confirm delete button
         if (this.confirmDeleteBtn) {
             this.confirmDeleteBtn.addEventListener('click', () => {
-                this.closeDeleteModal();
+                // Execute callback BEFORE closing (which sets callback to null)
                 if (this.deleteCallback) {
-                    this.deleteCallback();
+                    const callback = this.deleteCallback;
                     this.deleteCallback = null;
+                    this.closeDeleteModal();
+                    callback();
+                } else {
+                    this.closeDeleteModal();
                 }
             });
         }
@@ -576,6 +702,7 @@ class PostActionsManager {
         // Cancel delete button
         if (this.cancelDeleteBtn) {
             this.cancelDeleteBtn.addEventListener('click', () => {
+                this.deleteCallback = null;
                 this.closeDeleteModal();
             });
         }
@@ -583,6 +710,7 @@ class PostActionsManager {
         // Click outside to close
         this.deleteModal.addEventListener('click', (e) => {
             if (e.target === this.deleteModal) {
+                this.deleteCallback = null;
                 this.closeDeleteModal();
             }
         });
@@ -590,6 +718,7 @@ class PostActionsManager {
         // Escape key to close
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && !this.deleteModal.classList.contains('hidden')) {
+                this.deleteCallback = null;
                 this.closeDeleteModal();
             }
         });
@@ -608,14 +737,19 @@ class PostActionsManager {
 
         this.deleteModal.classList.add('hidden');
         document.body.classList.remove('delete-modal-open');
-        this.deleteCallback = null;
+        // Don't set deleteCallback to null here - it's managed in the confirm handler
     }
 
     setupLeaveConversationModal() {
+        // 이미 설정된 경우 스킵
+        if (this._leaveModalSetup) {
+            return;
+        }
         if (!this.leaveConversationModal) {
             console.warn('Leave conversation modal not found');
             return;
         }
+        this._leaveModalSetup = true;
 
         // Confirm leave button
         if (this.confirmLeaveConversationBtn) {
@@ -772,6 +906,11 @@ class PostActionsManager {
             if (response.ok) {
                 alert(window.POST_ACTIONS_I18N?.reportSubmitted || 'Report submitted successfully. We will review it.');
                 this.hideReportModal();
+
+                // Mark post as reported in UI
+                this.markPostAsReported(this.currentPostId);
+
+                console.log('[PostActions] Post marked as reported:', this.currentPostId);
             } else {
                 const error = await response.json().catch(() => ({ detail: '알 수 없는 오류' }));
                 console.error('Report error:', error);
@@ -828,29 +967,25 @@ class PostActionsManager {
 
             if (response.ok) {
                 console.log('Delete successful!');
-                alert(window.POST_ACTIONS_I18N?.postDeleted || 'Post deleted successfully.');
-
-                // Remove post card from DOM
-                const postCard = document.querySelector(`[data-post-id="${this.currentPostId}"]`);
-                console.log('Post card found:', !!postCard);
-                if (postCard) {
-                    postCard.remove();
-                    console.log('Post card removed from DOM');
-                }
-
                 this.closeModal();
 
-                // Reload page to refresh the list
-                console.log('Reloading page...');
-                window.location.reload();
+                // Show success modal and reload page after user clicks OK
+                this.showSuccessModal(
+                    window.POST_ACTIONS_I18N?.postDeleted || '게시물이 삭제되었습니다.',
+                    () => window.location.reload()
+                );
             } else {
-                const error = await response.json().catch(() => ({ detail: '알 수 없는 오류' }));
-                console.error('Delete failed with error:', error);
-                alert(`삭제 실패: ${error.detail || '서버 오류가 발생했습니다'}`);
+                const error = await response.json().catch(() => ({
+                    detail: window.POST_ACTIONS_I18N?.unknownError || '알 수 없는 오류'
+                }));
+                console.error('[PostActions] Delete failed with error:', error);
+                const errorMsg = window.POST_ACTIONS_I18N?.deleteFailed || '삭제 실패';
+                const serverError = window.POST_ACTIONS_I18N?.serverError || '서버 오류가 발생했습니다';
+                this.showErrorModal(`${errorMsg}: ${error.detail || serverError}`);
             }
             } catch (error) {
                 console.error('Delete error:', error);
-                alert(window.POST_ACTIONS_I18N?.networkError || 'Network error occurred. Please try again.');
+                this.showErrorModal(window.POST_ACTIONS_I18N?.networkError || '네트워크 오류가 발생했습니다. 다시 시도해주세요.');
             }
 
             console.log('=== DELETE DEBUG END ===');
@@ -876,6 +1011,94 @@ class PostActionsManager {
 
         console.warn('CSRF token not found');
         return '';
+    }
+
+    // ==========================================
+    // Alert Modal Functions
+    // ==========================================
+
+    setupAlertModal() {
+        if (!this.alertModal || !this.alertOkBtn) {
+            console.warn('Alert modal elements not found');
+            return;
+        }
+
+        // OK button click handler
+        this.alertOkBtn.addEventListener('click', () => {
+            this.closeAlertModal();
+            if (this.alertCallback) {
+                const callback = this.alertCallback;
+                this.alertCallback = null;
+                callback();
+            }
+        });
+
+        // Click outside to close
+        this.alertModal.addEventListener('click', (e) => {
+            if (e.target === this.alertModal) {
+                this.closeAlertModal();
+                if (this.alertCallback) {
+                    const callback = this.alertCallback;
+                    this.alertCallback = null;
+                    callback();
+                }
+            }
+        });
+
+        // Escape key to close
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && this.alertModal && !this.alertModal.classList.contains('hidden')) {
+                this.closeAlertModal();
+                if (this.alertCallback) {
+                    const callback = this.alertCallback;
+                    this.alertCallback = null;
+                    callback();
+                }
+            }
+        });
+    }
+
+    showSuccessModal(message, callback = null) {
+        if (!this.alertModal) return;
+
+        // Set success icon (checkmark)
+        this.alertIcon.innerHTML = `
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M9 12l2 2 4-4"/>
+            </svg>
+        `;
+
+        this.alertMessage.textContent = message;
+        this.alertCallback = callback;
+
+        this.alertModal.classList.remove('hidden');
+        document.body.classList.add('modal-open');
+    }
+
+    showErrorModal(message, callback = null) {
+        if (!this.alertModal) return;
+
+        // Set error icon (X)
+        this.alertIcon.innerHTML = `
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M15 9l-6 6M9 9l6 6"/>
+            </svg>
+        `;
+
+        this.alertMessage.textContent = message;
+        this.alertCallback = callback;
+
+        this.alertModal.classList.remove('hidden');
+        document.body.classList.add('modal-open');
+    }
+
+    closeAlertModal() {
+        if (!this.alertModal) return;
+
+        this.alertModal.classList.add('hidden');
+        document.body.classList.remove('modal-open');
     }
 }
 

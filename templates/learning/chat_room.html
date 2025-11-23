@@ -23,7 +23,7 @@
         <div class="header-info">
             <h1 class="room-name">{{ room.name }}</h1>
             <p class="room-stats">
-                <span id="participant-count">0</span> {% trans '명 참여 중' %}
+                <span id="participant-count">0</span>
                 <span id="creator-badge" class="creator-badge hidden"></span>
             </p>
         </div>
@@ -248,14 +248,89 @@
     </div>
 </div>
 
+<!-- Grant Admin Modal -->
+<div id="grant-admin-modal" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>{% trans '관리자 권한 부여' %}</h3>
+            <button id="close-grant-admin-modal" class="btn-icon" aria-label="{% trans '닫기' %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <p id="grant-admin-target-name" class="kick-target"></p>
+            <p style="text-align: center; margin: 1rem 0; font-size: 0.875rem; color: #6b7280;">
+                {% trans '관리자는 다른 사용자를 강퇴하거나 관리자 권한을 부여/해제할 수 있습니다.' %}
+            </p>
+        </div>
+        <div class="modal-footer">
+            <button id="confirm-grant-admin" class="btn btn-success">{% trans '부여하기' %}</button>
+            <button id="cancel-grant-admin" class="btn btn-secondary">{% trans '취소' %}</button>
+        </div>
+    </div>
+</div>
+
+<!-- Revoke Admin Modal -->
+<div id="revoke-admin-modal" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>{% trans '관리자 권한 해제' %}</h3>
+            <button id="close-revoke-admin-modal" class="btn-icon" aria-label="{% trans '닫기' %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <p id="revoke-admin-target-name" class="kick-target"></p>
+            <p style="text-align: center; margin: 1rem 0; font-size: 0.875rem; color: #6b7280;">
+                {% trans '관리자 권한을 해제하면 일반 참여자가 됩니다.' %}
+            </p>
+        </div>
+        <div class="modal-footer">
+            <button id="confirm-revoke-admin" class="btn btn-danger">{% trans '해제하기' %}</button>
+            <button id="cancel-revoke-admin" class="btn btn-secondary">{% trans '취소' %}</button>
+        </div>
+    </div>
+</div>
+
+<!-- Unban User Modal -->
+<div id="unban-user-modal" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>{% trans '차단 해제' %}</h3>
+            <button id="close-unban-user-modal" class="btn-icon" aria-label="{% trans '닫기' %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <p id="unban-user-target-name" class="kick-target"></p>
+            <p style="text-align: center; margin: 1rem 0; font-size: 0.875rem; color: #6b7280;">
+                {% trans '차단을 해제하면 이 사용자가 다시 채팅방에 입장할 수 있게 됩니다.' %}
+            </p>
+        </div>
+        <div class="modal-footer">
+            <button id="confirm-unban-user" class="btn btn-success">{% trans '해제하기' %}</button>
+            <button id="cancel-unban-user" class="btn btn-secondary">{% trans '취소' %}</button>
+        </div>
+    </div>
+</div>
+
 <!-- Hidden data for JavaScript -->
 <div id="room-data"
      data-room-id="{{ room_id }}"
      data-user-id="{{ user.id }}"
      data-user-nickname="{{ user.nickname }}"
-     data-is-favorited="false"
-     data-is-admin="false"
-     data-creator-id=""
+     data-is-favorited="{% if room in user.favorite_open_chats.all %}true{% else %}false{% endif %}"
+     data-is-admin="{% if is_user_admin %}true{% else %}false{% endif %}"
+     data-creator-id="{{ room.creator.id }}"
      class="hidden">
 </div>
 {% endblock %}

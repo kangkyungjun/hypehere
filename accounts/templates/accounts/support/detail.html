@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load i18n %}
 
-{% block title %}{{ ticket.title }} - 고객지원{% endblock %}
+{% block title %}{{ ticket.title }} - {% trans "고객지원" %}{% endblock %}
 
 {% block content %}
 <div class="support-detail-container">
@@ -10,9 +11,9 @@
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="15 18 9 12 15 6"></polyline>
             </svg>
-            목록으로
+            {% trans "목록으로" %}
         </a>
-        <h1>문의 상세</h1>
+        <h1>{% trans "문의 상세" %}</h1>
     </div>
 
     <!-- Ticket Information -->
@@ -21,9 +22,9 @@
             <div class="ticket-header-left">
                 <span class="ticket-category">[{{ ticket.get_category_display }}]</span>
                 {% if ticket.status == 'pending' %}
-                    <span class="status-badge status-pending">🟡 대기중</span>
+                    <span class="status-badge status-pending">🟡 {% trans "대기중" %}</span>
                 {% elif ticket.status == 'answered' %}
-                    <span class="status-badge status-answered">🟢 답변완료</span>
+                    <span class="status-badge status-answered">🟢 {% trans "답변완료" %}</span>
                 {% endif %}
             </div>
         </div>
@@ -36,7 +37,7 @@
                     <circle cx="12" cy="12" r="10"></circle>
                     <polyline points="12 6 12 12 16 14"></polyline>
                 </svg>
-                작성: {{ ticket.created_at|date:"Y-m-d H:i" }}
+                {% trans "작성:" %} {{ ticket.created_at|date:"Y-m-d H:i" }}
             </div>
             {% if is_staff %}
                 <div class="meta-item">
@@ -44,7 +45,7 @@
                         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                         <circle cx="12" cy="7" r="4"></circle>
                     </svg>
-                    작성자: {{ ticket.user.nickname }}
+                    {% trans "작성자:" %} {{ ticket.user.nickname }}
                 </div>
             {% endif %}
         </div>
@@ -58,9 +59,9 @@
     {% if ticket.admin_response %}
         <div class="response-card">
             <div class="response-header">
-                <h3>📝 관리자 답변</h3>
+                <h3>📝 {% trans "관리자 답변" %}</h3>
                 <div class="response-meta">
-                    <span>답변자: {{ ticket.responded_by.nickname }}</span>
+                    <span>{% trans "답변자:" %} {{ ticket.responded_by.nickname }}</span>
                     <span class="meta-separator">•</span>
                     <span>{{ ticket.responded_at|date:"Y-m-d H:i" }}</span>
                 </div>
@@ -75,11 +76,11 @@
             <form method="post" action="{% url 'accounts:support_respond' ticket.pk %}">
                 {% csrf_token %}
                 <div class="form-group">
-                    <label for="admin_response">답변 내용 <span class="required">*</span></label>
-                    <textarea name="admin_response" id="admin_response" rows="8" required placeholder="답변을 입력하세요"></textarea>
+                    <label for="admin_response">{% trans "답변 내용" %} <span class="required">*</span></label>
+                    <textarea name="admin_response" id="admin_response" rows="8" required placeholder="{% trans '답변을 입력하세요' %}"></textarea>
                 </div>
                 <div class="form-actions">
-                    <button type="submit" class="btn-submit">답변 등록</button>
+                    <button type="submit" class="btn-submit">{% trans "답변 등록" %}</button>
                 </div>
             </form>
         </div>
@@ -89,7 +90,7 @@
                 <circle cx="12" cy="12" r="10"></circle>
                 <polyline points="12 6 12 12 16 14"></polyline>
             </svg>
-            <p>관리자 답변을 기다리고 있습니다.</p>
+            <p>{% trans "관리자 답변을 기다리고 있습니다." %}</p>
         </div>
     {% endif %}
 </div>

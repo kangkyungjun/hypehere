@@ -152,13 +152,15 @@ class MessagesApp {
         const diffHour = Math.floor(diffMin / 60);
         const diffDay = Math.floor(diffHour / 24);
 
-        if (diffSec < 60) return '방금 전';
-        if (diffMin < 60) return `${diffMin}분 전`;
-        if (diffHour < 24) return `${diffHour}시간 전`;
-        if (diffDay < 7) return `${diffDay}일 전`;
+        if (diffSec < 60) return window.APP_I18N.timeJustNow;
+        if (diffMin < 60) return `${diffMin}${window.APP_I18N.timeMinutesAgo}`;
+        if (diffHour < 24) return `${diffHour}${window.APP_I18N.timeHoursAgo}`;
+        if (diffDay < 7) return `${diffDay}${window.APP_I18N.timeDaysAgo}`;
 
         // Format as date
-        return date.toLocaleDateString('ko-KR', {
+        const currentLang = document.documentElement.lang || 'ko';
+        const locale = currentLang === 'ko' ? 'ko-KR' : currentLang === 'ja' ? 'ja-JP' : 'en-US';
+        return date.toLocaleDateString(locale, {
             month: 'short',
             day: 'numeric'
         });

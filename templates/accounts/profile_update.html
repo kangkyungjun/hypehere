@@ -91,6 +91,15 @@
                     <span class="form-error" id="country-error"></span>
                 </div>
 
+                <!-- Gender -->
+                <div class="form-group">
+                    <label for="gender" class="form-label">{% trans "성별" %}</label>
+                    <div class="gender-selector" id="gender-selector"></div>
+                    <input type="hidden" id="gender" name="gender" value="{{ user.gender }}">
+                    <span class="form-text">{% trans "1:1 랜덤 매칭에 사용됩니다" %}</span>
+                    <span class="form-error" id="gender-error"></span>
+                </div>
+
                 <!-- City -->
                 <div class="form-group">
                     <label for="city" class="form-label">{% trans "도시" %}</label>
@@ -110,7 +119,7 @@
                 <div style="display: flex; gap: var(--space-sm); margin-top: var(--space-lg);">
                     <button type="submit" class="btn btn-primary" id="submit-btn" style="flex: 1;">
                         <span id="submit-text">{% trans "저장하기" %}</span>
-                        <span id="submit-loading" class="spinner spinner-primary" class="hidden"></span>
+                        <span id="submit-loading" class="spinner spinner-primary hidden"></span>
                     </button>
                     <a href="{% url 'accounts:profile' %}" class="btn btn-secondary" style="flex: 1; text-align: center; text-decoration: none;">
                         {% trans "취소" %}
@@ -137,11 +146,16 @@
         errorNetwork: "{% trans "네트워크 오류가 발생했습니다. 다시 시도해주세요." %}",
         placeholderSelect: "{% trans "선택하세요" %}",
         placeholderSearchCountry: "{% trans "🔍 국가 검색..." %}",
-        emptySearchResult: "{% trans "검색 결과가 없습니다" %}"
+        emptySearchResult: "{% trans "검색 결과가 없습니다" %}",
+        placeholderGender: "{% trans "선택 안 함" %}",
+        modalTitleGender: "{% trans "성별 선택" %}",
+        closeButton: "{% trans "닫기" %}"
     };
 </script>
 <script src="{% static 'js/countries.js' %}"></script>
 <script src="{% static 'js/country-selector.js' %}"></script>
+<script src="{% static 'js/genders.js' %}"></script>
+<script src="{% static 'js/gender-selector.js' %}"></script>
 <script src="{% static 'js/auth.js' %}"></script>
 <script>
 // Initialize country selector
@@ -157,6 +171,20 @@ document.addEventListener('DOMContentLoaded', function() {
         onChange: function(country) {
             // Value is automatically updated in hidden input
             console.log('Selected country:', country);
+        }
+    });
+
+    // Initialize gender selector
+    const currentGender = '{{ user.gender }}' || '';
+
+    const genderSelector = new GenderSelector('gender-selector', {
+        genders: GENDERS,
+        placeholder: window.AUTH_I18N.placeholderGender,
+        modalTitle: window.AUTH_I18N.modalTitleGender,
+        initialValue: currentGender,
+        onChange: function(gender) {
+            // Value is automatically updated in hidden input
+            console.log('Selected gender:', gender);
         }
     });
 });

@@ -3,6 +3,7 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from django.contrib.auth import get_user_model
 from django.utils import timezone
+from django.utils.translation import gettext as _
 from .models import (
     Conversation, Message, ConversationParticipant,
     OpenChatRoom, OpenChatParticipant, OpenChatMessage
@@ -218,6 +219,14 @@ class AnonymousChatConsumer(AsyncWebsocketConsumer):
 
         await self.accept()
 
+        # 상대방 정보 전송
+        other_user_info = await self.get_other_user_info()
+        await self.send(text_data=json.dumps({
+            'type': 'init',
+            'other_user_id': other_user_info['id'],
+            'other_user_username': other_user_info['username']
+        }))
+
         # 상대방에게 연결 알림 전송
         await self.channel_layer.group_send(
             self.room_group_name,
@@ -300,7 +309,7 @@ class AnonymousChatConsumer(AsyncWebsocketConsumer):
         if event['user_id'] != self.user.id:
             await self.send(text_data=json.dumps({
                 'type': 'partner_connected',
-                'message': '상대방이 연결되었습니다'
+                'message': 'partnerConnected'
             }))
 
     async def user_left(self, event):
@@ -308,7 +317,7 @@ class AnonymousChatConsumer(AsyncWebsocketConsumer):
         if event['user_id'] != self.user.id:
             await self.send(text_data=json.dumps({
                 'type': 'partner_left',
-                'message': '상대방이 나갔습니다'
+                'message': 'partnerLeft'
             }))
 
     async def webrtc_signal(self, event):
@@ -355,6 +364,21 @@ class AnonymousChatConsumer(AsyncWebsocketConsumer):
             return conversation.participants.filter(id=self.user.id).exists()
         except Conversation.DoesNotExist:
             return False
+
+    @database_sync_to_async
+    def get_other_user_info(self):
+        """익명 대화의 상대방 정보 가져오기"""
+        try:
+            conversation = Conversation.objects.get(id=self.conversation_id)
+            other_user = conversation.participants.exclude(id=self.user.id).first()
+            if other_user:
+                return {
+                    'id': other_user.id,
+                    'username': other_user.username
+                }
+            return {'id': None, 'username': None}
+        except Conversation.DoesNotExist:
+            return {'id': None, 'username': None}
 
     @database_sync_to_async
     def cleanup_anonymous_conversation(self):
@@ -629,3 +653,11 @@ class OpenChatConsumer(AsyncWebsocketConsumer):
         room.save()
 
         return message
+
+    async def room_closed(self, event):
+        """방 폐쇄 이벤트 전송"""
+        await self.send(text_data=json.dumps({
+            'type': 'room_closed',
+            'message': event['message'],
+            'room_name': event.get('room_name', '')
+        }))

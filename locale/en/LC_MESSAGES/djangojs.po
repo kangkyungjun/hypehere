@@ -3,471 +3,257 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: HypeHere 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-19 12:11+0000\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"POT-Creation-Date: 2025-11-23 07:20+0000\n"
+"PO-Revision-Date: 2025-11-23 12:00+0000\n"
+"Last-Translator: HypeHere Team <support@hypehere.com>\n"
+"Language-Team: English <en@hypehere.com>\n"
+"Language: en\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: static/js/post_modal.js:48
+#: static/js/favorites.js:120
+msgid "즐겨찾기를 불러오는데 실패했습니다."
+msgstr "Failed to load favorites."
+
+#: static/js/favorites.js:167 static/js/favorites.js:293
+msgid "즐겨찾기 해제"
+msgstr "Remove from favorites"
+
+#: static/js/favorites.js:182
+msgid "명"
+msgstr " people"
+
+#: static/js/favorites.js:187
+msgid "입장하기"
+msgstr "Enter"
+
+#: static/js/favorites.js:209
+msgid "언어교환"
+msgstr "Language Exchange"
+
+#: static/js/favorites.js:210
+msgid "스터디"
+msgstr "Study"
+
+#: static/js/favorites.js:211
+msgid "문화교류"
+msgstr "Cultural Exchange"
+
+#: static/js/favorites.js:212
+msgid "질문답변"
+msgstr "Q&A"
+
+#: static/js/favorites.js:213
+msgid "자유대화"
+msgstr "Free Talk"
+
+#: static/js/favorites.js:214
+msgid "국가"
+msgstr "Country"
+
+#: static/js/favorites.js:310 static/js/favorites.js:404
+msgid "좋아요 취소"
+msgstr "Unlike"
+
+#: static/js/favorites.js:310 static/js/favorites.js:408
+msgid "좋아요"
+msgstr "Like"
+
+#: static/js/favorites.js:317
+msgid "댓글"
+msgstr "Comment"
+
+#: static/js/favorites.js:329
+msgid "한국어"
+msgstr "Korean"
+
+#: static/js/favorites.js:330
+msgid "English"
+msgstr "English"
+
+#: static/js/favorites.js:331
+msgid "日本語"
+msgstr "Japanese"
+
+#: static/js/favorites.js:332
+msgid "中文"
+msgstr "Chinese"
+
+#: static/js/favorites.js:333
+msgid "Español"
+msgstr "Spanish"
+
+#: static/js/favorites.js:334
+msgid "Français"
+msgstr "French"
+
+#: static/js/favorites.js:335
+msgid "Deutsch"
+msgstr "German"
+
+#: static/js/favorites.js:336
+msgid "Italiano"
+msgstr "Italian"
+
+#: static/js/favorites.js:337
+msgid "Português"
+msgstr "Portuguese"
+
+#: static/js/favorites.js:338
+msgid "Русский"
+msgstr "Russian"
+
+#: static/js/favorites.js:347
+msgid "년"
+msgstr "year"
+
+#: static/js/favorites.js:348
+msgid "개월"
+msgstr "month"
+
+#: static/js/favorites.js:349
+msgid "주"
+msgstr "week"
+
+#: static/js/favorites.js:350
+msgid "일"
+msgstr "day"
+
+#: static/js/favorites.js:351
+msgid "시간"
+msgstr "hour"
+
+#: static/js/favorites.js:352
+msgid "분"
+msgstr "minute"
+
+#: static/js/favorites.js:358
+msgid "전"
+msgstr "ago"
+
+#: static/js/favorites.js:361
+msgid "방금 전"
+msgstr "Just now"
+
+#: static/js/favorites.js:379
+msgid "로그인이 필요합니다."
+msgstr "Login required."
+
+#: static/js/favorites.js:390
+msgid "좋아요 처리 중 오류가 발생했습니다."
+msgstr "An error occurred while processing like."
+
+#: static/js/favorites.js:416 static/js/favorites.js:447
+msgid "즐겨찾기를 해제하시겠습니까?"
+msgstr "Remove from favorites?"
+
+#: static/js/favorites.js:442 static/js/favorites.js:475
+msgid "즐겨찾기 해제에 실패했습니다."
+msgstr "Failed to remove from favorites."
+
+#: static/js/open-chat-room.js:854
+msgid "방 개설자"
+msgstr "Room Creator"
+
+#: static/js/open-chat-room.js:860
+msgid "관리자"
+msgstr "Admin"
+
+#: static/js/open-chat-room.js:885 static/js/open-chat-room.js:886
+msgid "팔로우"
+msgstr "Follow"
+
+#: static/js/open-chat-room.js:896
+msgid "메시지"
+msgstr "Message"
+
+#: static/js/open-chat-room.js:897
+msgid "메시지 보내기"
+msgstr "Send Message"
+
+#: static/js/post_modal.js:59
 msgid "새 게시물"
 msgstr "New Post"
 
-#: static/js/post_modal.js:51
+#: static/js/post_modal.js:62
 msgid "게시하기"
 msgstr "Post"
 
-#: static/js/post_modal.js:92
+#: static/js/post_modal.js:103
 msgid "게시물 수정"
 msgstr "Edit Post"
 
-#: static/js/post_modal.js:95
+#: static/js/post_modal.js:106
 msgid "수정하기"
 msgstr "Edit"
 
 #: templates/base.html
-msgid "방금 전"
-msgstr "Just now"
-
-msgid "초 전"
-msgstr " sec ago"
-
-msgid "분 전"
-msgstr " min ago"
-
-msgid "시간 전"
-msgstr " hours ago"
-
-msgid "일 전"
-msgstr " days ago"
-
-msgid "주 전"
-msgstr " weeks ago"
-
-msgid "개월 전"
-msgstr " months ago"
-
-msgid "년 전"
-msgstr " years ago"
-
-msgid "년"
-msgstr " year"
-
-msgid "개월"
-msgstr " month"
-
-msgid "주"
-msgstr " week"
-
-msgid "일"
-msgstr " day"
-
-msgid "시간"
-msgstr " hour"
-
-msgid "분"
-msgstr " min"
-
-msgid "로그인"
-msgstr "Login"
-
-msgid "로그인이 필요합니다."
-msgstr "Login required."
-
-msgid "오류가 발생했습니다. 다시 시도해주세요."
-msgstr "An error occurred. Please try again."
-
-msgid "처리 중..."
-msgstr "Processing..."
-
-msgid "확인"
-msgstr "Confirm"
-
-msgid "취소"
-msgstr "Cancel"
-
-msgid "닫기"
-msgstr "Close"
-
-msgid "전송 중..."
-msgstr "Sending..."
-
-msgid "아직 댓글이 없습니다. 첫 번째 댓글을 작성해보세요!"
-msgstr "No comments yet. Be the first to comment!"
-
-msgid "댓글이 없습니다."
-msgstr "No comments."
-
-msgid "댓글을 불러오는 중 오류가 발생했습니다."
-msgstr "Failed to load comments."
-
-msgid "댓글 내용을 입력해주세요."
-msgstr "Please enter comment."
-
-msgid "댓글을 삭제하시겠습니까?"
-msgstr "Delete this comment?"
-
-msgid "댓글 삭제 중 오류가 발생했습니다."
-msgstr "Failed to delete comment."
-
-msgid "댓글 작성 중 오류가 발생했습니다."
-msgstr "Failed to post comment."
-
-msgid "댓글 더보기"
-msgstr "Load more comments"
-
-msgid "좋아요"
-msgstr "Like"
-
-msgid "좋아요 취소"
-msgstr "Unlike"
-
-msgid "좋아요 처리 중 오류가 발생했습니다."
-msgstr "Failed to process like."
-
-msgid "즐겨찾기"
-msgstr "Favorite"
-
-msgid "즐겨찾기 해제"
-msgstr "Unfavorite"
-
-msgid "즐겨찾기 처리 중 오류가 발생했습니다."
-msgstr "Failed to process favorite."
-
-msgid "즐겨찾기를 해제하시겠습니까?"
-msgstr "Remove from favorites?"
-
-msgid "즐겨찾기 해제에 실패했습니다."
-msgstr "Failed to unfavorite."
-
-msgid "팔로우"
-msgstr "Follow"
-
-msgid "팔로잉"
-msgstr "Following"
-
-msgid "팔로워"
-msgstr "Followers"
-
 msgid "게시물"
 msgstr "Posts"
 
-msgid "메시지"
-msgstr "Message"
-
-msgid "메시지가 없습니다"
-msgstr "No messages"
-
-msgid "대화를 시작하세요"
-msgstr "Start a conversation"
-
-msgid "입장하기"
-msgstr "Enter"
-
-msgid "언어교환"
-msgstr "Language Exchange"
-
-msgid "스터디"
-msgstr "Study"
-
-msgid "문화교류"
-msgstr "Culture"
-
-msgid "질문답변"
-msgstr "Q&A"
-
-msgid "자유대화"
-msgstr "Free Chat"
-
-msgid "국가"
-msgstr "Country"
-
-msgid "한국어"
-msgstr "Korean"
-
-msgid "전체 공개"
-msgstr "Everyone"
-
-msgid "팔로워만"
-msgstr "Followers only"
-
-msgid "비공개"
-msgstr "Nobody"
-
-msgid "팔로워 목록 공개 범위"
-msgstr "Follower list visibility"
-
-msgid "팔로잉 목록 공개 범위"
-msgstr "Following list visibility"
-
-msgid "공개 범위 선택"
-msgstr "Select visibility"
-
-msgid "설정 저장에 실패했습니다."
-msgstr "Failed to save settings."
-
-msgid "선택하세요"
-msgstr "Select"
-
-msgid "🔍 국가 검색..."
-msgstr "🔍 Search countries..."
-
-msgid "검색 결과가 없습니다"
-msgstr "No results found"
-
-msgid "국가 선택"
-msgstr "Select Country"
-
-msgid "차단 해제"
-msgstr "Unblock"
-
-msgid "차단 해제에 실패했습니다."
-msgstr "Failed to unblock."
-
-msgid "연결됨"
-msgstr "Connected"
-
-msgid "상대방이 나갔습니다"
-msgstr "Partner left"
-
-msgid "연결 오류"
-msgstr "Connection error"
-
-msgid "매칭 시작 중 오류가 발생했습니다."
-msgstr "Failed to start matching."
-
-msgid "상대방이 팔로우 요청을 수락했습니다."
-msgstr "Partner accepted your follow request."
-
-msgid "상대방이 팔로우를 거부하셨습니다."
-msgstr "Partner rejected your follow request."
-
-msgid "1:1 매칭하기"
-msgstr "Start 1:1 Matching"
-
-msgid "이미 팔로우 되어있는 상대입니다."
-msgstr "Already following this user."
-
-msgid "이 사용자를 차단하시겠습니까?"
-msgstr "Block this user?"
-
-msgid "차단 기능이 구현 중입니다."
-msgstr "Block feature is under development."
-
-msgid "카메라 끄기"
-msgstr "Turn off camera"
-
-msgid "카메라 켜기"
-msgstr "Turn on camera"
-
-msgid "마이크 끄기"
-msgstr "Turn off mic"
-
-msgid "마이크 켜기"
-msgstr "Turn on mic"
-
-msgid "시그널 처리 중 오류가 발생했습니다."
-msgstr "Signal processing error occurred."
-
-msgid "카메라/마이크 권한이 필요합니다.\\n브라우저 설정에서 권한을 허용해주세요."
-msgstr "Camera/microphone permission required.\\nPlease allow access in browser settings."
-
-msgid "카메라 또는 마이크를 찾을 수 없습니다."
-msgstr "Camera or microphone not found."
-
-msgid "카메라/마이크가 다른 앱에서 사용 중입니다."
-msgstr "Camera/microphone is in use by another app."
-
-msgid "영상 채팅을 시작할 수 없습니다."
-msgstr "Cannot start video chat."
-
-msgid "아직 신고한 댓글이 없습니다"
-msgstr "No reported comments yet"
-
-# Open Chat Room Translations
-msgid "명 참여 중"
-msgstr " participants"
-
-msgid "채팅방에 입장했습니다"
-msgstr "You joined the chat room"
-
-msgid "메시지를 입력하세요..."
-msgstr "Enter a message..."
-
-msgid "님이 입장했습니다"
-msgstr " joined"
-
-msgid "님이 퇴장했습니다"
-msgstr " left"
-
-msgid "님에 의해 강퇴되었습니다.\n사유: "
-msgstr " kicked you.\nReason: "
-
-msgid "님에 의해 강퇴되었습니다."
-msgstr " kicked you."
-
-msgid "님이 강퇴되었습니다 (사유: "
-msgstr " was kicked (Reason: "
-
-msgid "님이 강퇴되었습니다"
-msgstr " was kicked"
-
-msgid "님이 관리자로 지정되었습니다"
-msgstr " was promoted to admin"
-
-msgid "님의 관리자 권한이 해제되었습니다"
-msgstr " was demoted from admin"
-
-msgid "님이 입력 중"
-msgstr " is typing"
-
-msgid "메시지를 불러오는데 실패했습니다."
-msgstr "Failed to load messages."
-
-msgid "연결이 끊어졌습니다. 페이지를 새로고침해주세요."
-msgstr "Connection lost. Please refresh the page."
-
-msgid "채팅방 나가기에 실패했습니다."
-msgstr "Failed to leave room."
-
-msgid "오류가 발생했습니다."
-msgstr "An error occurred."
-
-msgid "즐겨찾기에 추가되었습니다"
-msgstr "Added to favorites"
-
-msgid "즐겨찾기에서 제거되었습니다"
-msgstr "Removed from favorites"
-
-msgid "님을 신고하는 이유를 입력하세요:"
-msgstr "Enter reason to report "
-
-msgid "신고가 접수되었습니다"
-msgstr "Report submitted"
-
-msgid "신고 접수에 실패했습니다"
-msgstr "Failed to submit report"
-
-msgid "님을 차단하시겠습니까? 차단된 사용자의 메시지와 게시물이 보이지 않게 됩니다."
-msgstr "Block this user? You won't see their messages and posts."
-
-msgid "님을 차단했습니다"
-msgstr " was blocked"
-
-msgid "차단에 실패했습니다"
-msgstr "Failed to block"
-
-msgid "님을 강퇴하시겠습니까?"
-msgstr "Kick this user?"
-
-msgid "강퇴에 실패했습니다"
-msgstr "Failed to kick"
-
-msgid "님에게 관리자 권한을 부여하시겠습니까?"
-msgstr "Grant admin to this user?"
-
-msgid "관리자 권한 부여에 실패했습니다"
-msgstr "Failed to grant admin"
-
-msgid "님의 관리자 권한을 해제하시겠습니까?"
-msgstr "Revoke admin from this user?"
-
-msgid "관리자 권한 해제에 실패했습니다"
-msgstr "Failed to revoke admin"
-
-msgid "강퇴 목록을 불러오는데 실패했습니다"
-msgstr "Failed to load kicked users list"
-
-msgid "강퇴된 사용자가 없습니다"
-msgstr "No kicked users"
-
-msgid "강퇴자:"
-msgstr "Kicked by:"
-
-msgid "사유:"
-msgstr "Reason:"
-
-msgid "영구 차단"
-msgstr "Permanent ban"
-
-msgid "차단"
-msgstr "Banned"
-
-msgid "까지"
-msgstr " until"
-
-msgid "차단 해제됨"
-msgstr "Ban expired"
-
-msgid "님의 차단을 해제하시겠습니까?"
-msgstr "Unban this user?"
-
-msgid "님의 차단이 해제되었습니다"
-msgstr " was unbanned"
-
-msgid "차단 해제에 실패했습니다"
-msgstr "Failed to unban"
-
-msgid "Grant Admin"
-msgstr "Grant Admin"
-
-msgid "Revoke Admin"
-msgstr "Revoke Admin"
-
-msgid "Kick"
-msgstr "Kick"
-
-msgid "Report"
-msgstr "Report"
-
-msgid "Block"
-msgstr "Block"
-
-msgid "Followed"
-msgstr "Followed"
-
-msgid "Failed to follow user"
-msgstr "Failed to follow user"
-
-msgid "Failed to create conversation"
-msgstr "Failed to create conversation"
-
-msgid "An error occurred while creating conversation"
-msgstr "An error occurred while creating conversation"
-
-msgid "More"
-msgstr "More"
-
-msgid "Send message to"
-msgstr "Send message to"
-
-# Open Chat List Translations
-msgid "명"
-msgstr " people"
-
-msgid "채팅방을 불러오는데 실패했습니다."
-msgstr "Failed to load rooms."
-
-msgid "채팅방에 입장할 수 없습니다."
-msgstr "Cannot enter room."
-
-msgid "채팅방 입장 중 오류가 발생했습니다."
-msgstr "Error entering room."
-
-msgid "비밀방은 비밀번호가 필요합니다."
-msgstr "Private rooms require a password."
-
-msgid "채팅방 생성에 실패했습니다."
-msgstr "Failed to create room."
-
-msgid "오류"
+#: templates/base.html
+msgid "팔로워"
+msgstr "Followers"
+
+#: templates/base.html
+msgid "팔로잉"
+msgstr "Following"
+
+#: templates/base.html
+msgid "맞팔로우"
+msgstr "Mutual"
+
+#: templates/base.html
+msgid "나"
+msgstr "Me"
+
+#: templates/base.html
+msgid "로그인"
+msgstr "Login"
+
+#: templates/base.html
+msgid "오류 발생"
 msgstr "Error"
+
+#: templates/base.html
+msgid "데이터를 불러오는 중 오류가 발생했습니다"
+msgstr "An error occurred while loading data"
+
+#~ msgid "님에게 관리자 권한을 부여하시겠습니까?"
+#~ msgstr "Would you like to grant admin privileges to"
+
+#~ msgid "님의 관리자 권한을 해제하시겠습니까?"
+#~ msgstr "Would you like to revoke admin privileges from"
+
+#~ msgid "님의 차단을 해제하시겠습니까?"
+#~ msgstr "Would you like to unban"
+
+#~ msgid "님을 강퇴하시겠습니까?"
+#~ msgstr "Would you like to kick"
+
+#~ msgid "님이 관리자로 지정되었습니다"
+#~ msgstr "has been granted admin privileges"
+
+#~ msgid "님의 관리자 권한이 해제되었습니다"
+#~ msgstr "has had admin privileges revoked"
+
+#~ msgid "님의 차단이 해제되었습니다"
+#~ msgstr "has been unbanned"
+
+#~ msgid "관리자 권한 부여에 실패했습니다"
+#~ msgstr "Failed to grant admin privileges"
+
+#~ msgid "관리자 권한 해제에 실패했습니다"
+#~ msgstr "Failed to revoke admin privileges"
+
+#~ msgid "차단 해제에 실패했습니다"
+#~ msgstr "Failed to unban user"
+
+#~ msgid "차단 해제"
+#~ msgstr "Unblock"

@@ -10,6 +10,7 @@ const MatchingSystem = {
     chatWebSocket: null,
     conversationId: null,
     otherUserId: null,
+    otherUserUsername: null,
     isConnected: false,
     countrySelector: null,
 
@@ -249,7 +250,7 @@ const MatchingSystem = {
             }
         } catch (error) {
             console.error('Error starting matching:', error);
-            alert('매칭 시작 중 오류가 발생했습니다.');
+            showAlertModal(window.MATCHING_I18N.error, window.MATCHING_I18N.matchingStartError);
         }
     },
 
@@ -328,7 +329,7 @@ const MatchingSystem = {
 
         this.chatWebSocket.onopen = () => {
             this.isConnected = true;
-            this.updateChatStatus('연결됨');
+            this.updateChatStatus(window.MATCHING_I18N.connected);
 
             // Initialize WebRTC client with WebSocket connection
             if (this.webrtcClient) {
@@ -338,7 +339,7 @@ const MatchingSystem = {
 
                 // Setup error callback
                 this.webrtcClient.onError((message) => {
-                    alert(message);
+                    showAlertModal(window.MATCHING_I18N.error, message);
                 });
 
                 // Auto-start video if chat mode is video
@@ -355,14 +356,20 @@ const MatchingSystem = {
         this.chatWebSocket.onmessage = (event) => {
             const data = JSON.parse(event.data);
 
-            if (data.type === 'message') {
+            if (data.type === 'init') {
+                // 상대방 정보 저장
+                this.otherUserId = data.other_user_id;
+                this.otherUserUsername = data.other_user_username;
+            } else if (data.type === 'message') {
                 this.displayMessage(data);
             } else if (data.type === 'partner_connected') {
-                this.addSystemMessage(data.message);
-                this.updateChatStatus('연결됨');
+                const translatedMessage = window.MATCHING_I18N[data.message] || data.message;
+                this.addSystemMessage(translatedMessage);
+                this.updateChatStatus(window.MATCHING_I18N.connected);
             } else if (data.type === 'partner_left') {
-                this.addSystemMessage(data.message);
-                this.updateChatStatus('상대방이 나갔습니다', true);
+                const translatedMessage = window.MATCHING_I18N[data.message] || data.message;
+                this.addSystemMessage(translatedMessage);
+                this.updateChatStatus(window.MATCHING_I18N.partnerLeft, true);
                 this.showRematchButton();
                 // Stop video if active
                 if (this.isVideoMode) {
@@ -386,20 +393,20 @@ const MatchingSystem = {
                     followBtn.disabled = false;
                     followBtn.style.opacity = '1';
                 }
-                alert('상대방이 팔로우 요청을 수락했습니다.');
+                showAlertModal(window.MATCHING_I18N.success, window.MATCHING_I18N.connectionAccepted);
             } else if (data.type === 'connection_rejected') {
                 const followBtn = document.getElementById('follow-btn');
                 if (followBtn) {
                     followBtn.disabled = false;
                     followBtn.style.opacity = '1';
                 }
-                alert('상대방이 팔로우를 거부하셨습니다.');
+                showAlertModal(window.MATCHING_I18N.notification, window.MATCHING_I18N.connectionRejected);
             }
         };
 
         this.chatWebSocket.onerror = (error) => {
             console.error('Chat WebSocket error:', error);
-            this.updateChatStatus('연결 오류', true);
+            this.updateChatStatus(window.MATCHING_I18N.connectionError, true);
         };
 
         this.chatWebSocket.onclose = () => {
@@ -475,7 +482,7 @@ const MatchingSystem = {
         rematchDiv.className = 'system-message';
         rematchDiv.innerHTML = `
             <button type="button" class="btn btn-primary" onclick="MatchingSystem.rematch()">
-                1:1 매칭하기
+                ${window.MATCHING_I18N.startMatching}
             </button>
         `;
 
@@ -493,6 +500,7 @@ const MatchingSystem = {
         }
         this.conversationId = null;
         this.otherUserId = null;
+        this.otherUserUsername = null;
         this.showPreferencesScreen();
     },
 
@@ -523,6 +531,7 @@ const MatchingSystem = {
 
         this.conversationId = null;
         this.otherUserId = null;
+        this.otherUserUsername = null;
         this.isFollowing = false; // Reset follow state
         this.showPreferencesScreen();
     },
@@ -535,7 +544,7 @@ const MatchingSystem = {
 
         // Check if already following
         if (this.isFollowing) {
-            alert('이미 팔로우 되어있는 상대입니다.');
+            showAlertModal(window.MATCHING_I18N.notification, window.MATCHING_I18N.alreadyFollowing);
             return;
         }
 
@@ -560,17 +569,17 @@ const MatchingSystem = {
             const data = await response.json();
 
             if (response.ok) {
-                alert('팔로우 요청을 보냈습니다. 상대방의 응답을 기다리고 있습니다.');
+                showAlertModal(window.MATCHING_I18N.success, window.MATCHING_I18N.connectionRequestSent);
                 // Keep button disabled until response
             } else {
-                alert(data.error || '팔로우 요청 중 오류가 발생했습니다.');
+                showAlertModal(window.MATCHING_I18N.error, data.error || window.MATCHING_I18N.connectionRequestError);
                 // Re-enable button on error
                 followBtn.disabled = false;
                 followBtn.style.opacity = '1';
             }
         } catch (error) {
             console.error('Error sending connection request:', error);
-            alert('팔로우 요청 중 오류가 발생했습니다.');
+            showAlertModal(window.MATCHING_I18N.error, window.MATCHING_I18N.connectionRequestError);
             // Re-enable button on error
             followBtn.disabled = false;
             followBtn.style.opacity = '1';
@@ -608,13 +617,13 @@ const MatchingSystem = {
 
             if (response.ok) {
                 this.hideModal('connection-request-modal');
-                alert('연결 요청을 수락했습니다.');
+                showAlertModal(window.MATCHING_I18N.success, window.MATCHING_I18N.acceptConnectionSuccess);
             } else {
-                alert(data.error || '오류가 발생했습니다.');
+                showAlertModal(window.MATCHING_I18N.error, data.error || window.MATCHING_I18N.genericError);
             }
         } catch (error) {
             console.error('Error accepting connection:', error);
-            alert('오류가 발생했습니다.');
+            showAlertModal(window.MATCHING_I18N.error, window.MATCHING_I18N.genericError);
         }
 
         this.currentRequestId = null;
@@ -643,13 +652,13 @@ const MatchingSystem = {
 
             if (response.ok) {
                 this.hideModal('connection-request-modal');
-                alert('연결 요청을 거절했습니다.');
+                showAlertModal(window.MATCHING_I18N.notification, window.MATCHING_I18N.rejectConnectionNotice);
             } else {
-                alert(data.error || '오류가 발생했습니다.');
+                showAlertModal(window.MATCHING_I18N.error, data.error || window.MATCHING_I18N.genericError);
             }
         } catch (error) {
             console.error('Error rejecting connection:', error);
-            alert('오류가 발생했습니다.');
+            showAlertModal(window.MATCHING_I18N.error, window.MATCHING_I18N.genericError);
         }
 
         this.currentRequestId = null;
@@ -680,13 +689,13 @@ const MatchingSystem = {
             });
 
             if (response.ok) {
-                alert('신고가 접수되었습니다.');
+                showAlertModal(window.MATCHING_I18N.success, window.MATCHING_I18N.reportSubmitted);
                 this.hideReportModal();
                 document.getElementById('report-form').reset();
             }
         } catch (error) {
             console.error('Error submitting report:', error);
-            alert('신고 중 오류가 발생했습니다.');
+            showAlertModal(window.MATCHING_I18N.error, window.MATCHING_I18N.reportError);
         }
     },
 
@@ -694,10 +703,79 @@ const MatchingSystem = {
      * Block user (placeholder - implement block API)
      */
     async blockUser() {
-        if (!confirm('이 사용자를 차단하시겠습니까?')) return;
+        this.showBlockConfirmModal();
+    },
 
-        // TODO: Implement block API call
-        alert('차단 기능이 구현 중입니다.');
+    /**
+     * Show block confirmation modal
+     */
+    showBlockConfirmModal() {
+        const modal = document.getElementById('block-confirm-modal');
+        const confirmBtn = document.getElementById('block-confirm-btn');
+        const cancelBtn = document.getElementById('block-cancel-btn');
+
+        if (!modal || !confirmBtn || !cancelBtn) {
+            console.error('[BlockModal] Block modal elements not found');
+            return;
+        }
+
+        if (!this.otherUserUsername) {
+            console.error('[BlockModal] No other user username available');
+            showAlertModal(window.MATCHING_I18N.error, window.MATCHING_I18N.blockUserNotFound);
+            return;
+        }
+
+        modal.classList.remove('hidden');
+
+        // Remove existing event listeners by cloning
+        const newConfirmBtn = confirmBtn.cloneNode(true);
+        const newCancelBtn = cancelBtn.cloneNode(true);
+        confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+        cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+
+        // Add event listeners
+        newConfirmBtn.addEventListener('click', async () => {
+            modal.classList.add('hidden');
+            await this.executeBlock();
+        });
+
+        newCancelBtn.addEventListener('click', () => {
+            modal.classList.add('hidden');
+        });
+    },
+
+    /**
+     * Execute block user
+     */
+    async executeBlock() {
+        if (!this.otherUserUsername) {
+            showAlertModal(window.MATCHING_I18N.error, window.MATCHING_I18N.blockUserNotFound);
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/accounts/${this.otherUserUsername}/block/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': this.getCSRFToken()
+                }
+            });
+
+            if (response.ok) {
+                showAlertModal(window.MATCHING_I18N.success, window.MATCHING_I18N.blockSuccess);
+                // 차단 후 채팅 종료
+                setTimeout(() => {
+                    this.leaveChat();
+                }, 1500);
+            } else {
+                const data = await response.json();
+                showAlertModal(window.MATCHING_I18N.error, data.error || window.MATCHING_I18N.blockFailed);
+            }
+        } catch (error) {
+            console.error('Block error:', error);
+            showAlertModal(window.MATCHING_I18N.error, window.MATCHING_I18N.blockError);
+        }
     },
 
     /**
@@ -766,10 +844,10 @@ const MatchingSystem = {
         if (cameraBtn) {
             if (enabled) {
                 cameraBtn.classList.remove('off');
-                cameraBtn.title = '카메라 끄기';
+                cameraBtn.title = window.MATCHING_I18N.cameraOff;
             } else {
                 cameraBtn.classList.add('off');
-                cameraBtn.title = '카메라 켜기';
+                cameraBtn.title = window.MATCHING_I18N.cameraOn;
             }
         }
     },
@@ -786,10 +864,10 @@ const MatchingSystem = {
         if (micBtn) {
             if (enabled) {
                 micBtn.classList.remove('off');
-                micBtn.title = '마이크 끄기';
+                micBtn.title = window.MATCHING_I18N.micOff;
             } else {
                 micBtn.classList.add('off');
-                micBtn.title = '마이크 켜기';
+                micBtn.title = window.MATCHING_I18N.micOn;
             }
         }
     },
@@ -801,18 +879,27 @@ const MatchingSystem = {
         this.hideAllScreens();
         document.getElementById('preferences-screen').classList.remove('hidden');
         this.currentScreen = 'preferences';
+
+        // Disable fullscreen chat mode
+        document.body.classList.remove('fullscreen-chat');
     },
 
     showWaitingScreen() {
         this.hideAllScreens();
         document.getElementById('waiting-screen').classList.remove('hidden');
         this.currentScreen = 'waiting';
+
+        // Disable fullscreen chat mode
+        document.body.classList.remove('fullscreen-chat');
     },
 
     showChatScreen() {
         this.hideAllScreens();
         document.getElementById('chat-screen').classList.remove('hidden');
         this.currentScreen = 'chat';
+
+        // Enable fullscreen chat mode
+        document.body.classList.add('fullscreen-chat');
     },
 
     hideAllScreens() {
@@ -992,3 +1079,34 @@ window.addEventListener('beforeunload', () => {
         MatchingSystem.chatWebSocket.close();
     }
 });
+
+/**
+ * Show alert modal instead of browser alert
+ * @param {string} title - Modal title
+ * @param {string} message - Modal message
+ */
+function showAlertModal(title, message) {
+    const modal = document.getElementById('alert-modal');
+    const titleEl = document.getElementById('alert-modal-title');
+    const messageEl = document.getElementById('alert-modal-message');
+    const confirmBtn = document.getElementById('alert-modal-confirm-btn');
+
+    if (!modal || !titleEl || !messageEl || !confirmBtn) {
+        console.error('[AlertModal] Modal elements not found');
+        alert(message); // Fallback to browser alert
+        return;
+    }
+
+    titleEl.textContent = title;
+    messageEl.textContent = message;
+    modal.classList.remove('hidden');
+
+    // Remove existing event listeners by cloning
+    const newConfirmBtn = confirmBtn.cloneNode(true);
+    confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+
+    // Add new event listener
+    newConfirmBtn.addEventListener('click', () => {
+        modal.classList.add('hidden');
+    });
+}

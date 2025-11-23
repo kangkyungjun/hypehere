@@ -6,6 +6,7 @@
 class HomeFeedManager {
     constructor() {
         this.commentPagination = {};  // { postId: { nextUrl, isLoading } }
+        this.commentCache = {};  // { postId: [comments array] } - 토글 후에도 댓글 유지
         this.init();
     }
 
@@ -147,9 +148,23 @@ class HomeFeedManager {
         // Toggle visibility
         if (commentsSection.classList.contains('hidden')) {
             commentsSection.classList.remove('hidden');
-            // Reset pagination and load first page
-            delete this.commentPagination[postId];
-            await this.loadComments(postId);
+
+            // 캐시가 있으면 캐시에서 렌더링, 없으면 API 호출
+            if (this.commentCache[postId] && this.commentCache[postId].length > 0) {
+                console.log('[DEBUG] Using cached comments for display:', {
+                    postId,
+                    cacheSize: this.commentCache[postId].length
+                });
+                const commentsList = commentsSection.querySelector('.comments-list');
+                if (commentsList) {
+                    this.renderComments(commentsList, this.commentCache[postId]);
+                }
+            } else {
+                console.log('[DEBUG] No cache found, loading comments from API');
+                // Reset pagination and load first page
+                delete this.commentPagination[postId];
+                await this.loadComments(postId);
+            }
         } else {
             commentsSection.classList.add('hidden');
         }
@@ -212,13 +227,26 @@ class HomeFeedManager {
             this.commentPagination[postId].nextUrl = data.next;
             this.commentPagination[postId].isLoading = false;
 
-            // 댓글 렌더링
+            // 캐시에 댓글 저장
+            if (!this.commentCache[postId]) {
+                this.commentCache[postId] = [];
+            }
+
             if (append) {
-                console.log('[DEBUG] Appending comments');
+                // 더보기: 기존 캐시에 추가
+                this.commentCache[postId].push(...(data.results || []));
+            } else {
+                // 새로 로드: 캐시 교체
+                this.commentCache[postId] = data.results || [];
+            }
+
+            // 캐시에서 댓글 렌더링
+            if (append) {
+                console.log('[DEBUG] Appending comments from cache');
                 this.appendComments(commentsList, data.results || []);
             } else {
-                console.log('[DEBUG] Rendering comments');
-                this.renderComments(commentsList, data.results || []);
+                console.log('[DEBUG] Rendering comments from cache');
+                this.renderComments(commentsList, this.commentCache[postId]);
             }
 
             // 더보기 버튼 업데이트
@@ -473,8 +501,10 @@ class HomeFeedManager {
             if (commentsSection) {
                 // 조건 없이 무조건 hidden 제거 및 display 초기화
                 commentsSection.classList.remove('hidden');
-                commentsSection.style.display = '';  // inline style 초기화
-                console.log('[DEBUG] Forced section visible (removed hidden class + reset inline style)');
+                commentsSection.style.display = 'block';  // 강제로 block 설정 (CSS !important 대응)
+                commentsSection.style.visibility = 'visible';  // 추가 안전장치
+                commentsSection.style.opacity = '1';  // 추가 안전장치
+                console.log('[DEBUG] Forced section visible (removed hidden class + forced display:block)');
             } else {
                 console.error('[DEBUG] Comments section NOT FOUND!', `comments-${postId}`);
             }
@@ -487,11 +517,35 @@ class HomeFeedManager {
             });
 
             // Add new comment directly to DOM (no need to reload)
-            const commentsList = document.querySelector(`.comments-list[data-post-id="${postId}"]`);
+            let commentsList = document.querySelector(`.comments-list[data-post-id="${postId}"]`);
+
+            // Fallback: try alternative selectors if not found
+            if (!commentsList) {
+                console.warn('[DEBUG] Primary selector failed, trying alternatives...');
+                commentsList = document.querySelector(`#comments-${postId} .comments-list`);
+            }
 
             if (commentsList) {
                 console.log('[DEBUG] Adding new comment directly to DOM');
                 this.prependNewComment(commentsList, newComment);
+
+                // 캐시에도 댓글 추가 (중요: 토글 후에도 유지되도록)
+                if (!this.commentCache[postId]) {
+                    this.commentCache[postId] = [];
+                }
+                this.commentCache[postId].unshift(newComment);
+                console.log('[DEBUG] Comment added to cache:', {
+                    postId,
+                    cacheSize: this.commentCache[postId].length
+                });
+
+                // Double-check visibility after adding comment
+                setTimeout(() => {
+                    if (commentsSection && commentsSection.style.display === 'none') {
+                        console.warn('[DEBUG] Section hidden after adding comment, forcing visible again');
+                        commentsSection.style.display = 'block';
+                    }
+                }, 100);
             } else {
                 console.error('[DEBUG] Comments list container NOT FOUND for post:', postId);
                 // Fallback: reload all comments
@@ -502,6 +556,8 @@ class HomeFeedManager {
 
             // Update comment count
             this.updateCommentCount(postId, 1);
+
+            console.log('[DEBUG] Comment submission complete');
 
         } catch (error) {
             console.error('Error submitting comment:', error);
@@ -536,15 +592,33 @@ class HomeFeedManager {
                 throw new Error('Failed to delete comment');
             }
 
+            // 캐시에서 댓글 제거
+            if (this.commentCache[postId]) {
+                this.commentCache[postId] = this.commentCache[postId].filter(
+                    c => c.id !== parseInt(commentId)
+                );
+                console.log('[DEBUG] Comment removed from cache:', {
+                    postId,
+                    commentId,
+                    remainingCount: this.commentCache[postId].length
+                });
+            }
+
             // Show comments section if hidden
             const commentsSection = document.getElementById(`comments-${postId}`);
             if (commentsSection && commentsSection.classList.contains('hidden')) {
                 commentsSection.classList.remove('hidden');
             }
 
-            // Reset pagination and reload comments from first page
-            delete this.commentPagination[postId];
-            await this.loadComments(postId);
+            // 캐시에서 다시 렌더링 (API 호출 없이)
+            const commentsList = document.querySelector(`.comments-list[data-post-id="${postId}"]`);
+            if (commentsList && this.commentCache[postId]) {
+                this.renderComments(commentsList, this.commentCache[postId]);
+            } else {
+                // 캐시가 없으면 API에서 다시 로드
+                delete this.commentPagination[postId];
+                await this.loadComments(postId);
+            }
 
             // Update comment count
             this.updateCommentCount(postId, -1);
@@ -694,10 +768,9 @@ function handleCommentOptions(button, event) {
     const isAuthor = button.dataset.isAuthor === 'true';
 
     if (isAuthor) {
-        // Show delete confirmation for own comment
-        const i18n = window.APP_I18N || {};
-        if (confirm(i18n.deleteCommentConfirm || '댓글을 삭제하시겠습니까?')) {
-            deleteComment(commentId, postId);
+        // Show owner action modal (edit/delete) for own comment
+        if (window.commentOwnerManager) {
+            window.commentOwnerManager.openModal(commentId, postId);
         }
     } else {
         // Show action modal for others' comments (block/report)

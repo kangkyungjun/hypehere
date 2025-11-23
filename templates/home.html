@@ -10,6 +10,23 @@
 
 {% block content %}
 {% if user.is_authenticated %}
+    {% if user.is_deactivated %}
+        <!-- 비활성화된 유저용 안내 화면 -->
+        <div class="card" style="text-align: center; padding: var(--space-2xl); margin: var(--space-lg) auto; max-width: 600px;">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin: 0 auto var(--space-lg); color: var(--color-warning);">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <h3 style="margin-bottom: var(--space-md);">{% trans "계정이 비활성화되었습니다" %}</h3>
+            <p class="text-light" style="margin-bottom: var(--space-lg);">
+                {% trans "계정을 재활성화하면 모든 기능을 다시 사용할 수 있습니다." %}
+            </p>
+            <a href="{% url 'accounts:account_management' %}" class="btn btn-primary">
+                {% trans "재활성화 하기" %}
+            </a>
+        </div>
+    {% else %}
     <!-- Search Section -->
     <div class="home-search-section">
         <div class="home-search-container">
@@ -137,6 +154,7 @@
         </div>
         {% endif %}
     </div>
+    {% endif %}
 
 {% else %}
     <!-- Guest User - Landing Page -->
@@ -173,6 +191,8 @@
         delete: "{% trans '삭제' %}",
         block: "{% trans '차단' %}",
         report: "{% trans '신고' %}",
+        success: "{% trans '성공' %}",
+        error: "{% trans '오류' %}",
         confirmLeaveRoom: "{% trans '정말로 이 대화방을 나가시겠습니까?' %}\n\n{% trans '대화 기록이 모두 삭제됩니다.' %}",
         leftRoom: "{% trans '대화방을 나갔습니다.' %}",
         leaveRoomError: "{% trans '대화방 나가기 중 오류가 발생했습니다.' %}",

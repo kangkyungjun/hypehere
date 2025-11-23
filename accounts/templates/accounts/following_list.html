@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load i18n %}
 
-{% block title %}팔로잉 - HypeHere{% endblock %}
+{% block title %}{% trans "팔로잉" %} - HypeHere{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/explore.css' %}">
@@ -11,12 +12,12 @@
 <div class="explore-container">
     <!-- Header -->
     <div class="explore-header" style="padding: var(--space-md) var(--space-lg); border-bottom: 1px solid var(--color-border); margin-bottom: var(--space-lg);">
-        <button type="button" class="btn-back" onclick="window.location.href='{% url 'accounts:profile_detail' username %}'" aria-label="뒤로가기">
+        <button type="button" class="btn-back" onclick="window.location.href='{% url 'accounts:profile_detail' username %}'" aria-label="{% trans '뒤로가기' %}">
             <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="15 18 9 12 15 6"/>
             </svg>
         </button>
-        <h2 style="margin: 0; font-size: 1.25rem; font-weight: 600; flex: 1; text-align: center; margin-right: 40px;">팔로잉</h2>
+        <h2 style="margin: 0; font-size: 1.25rem; font-weight: 600; flex: 1; text-align: center; margin-right: 40px;">{% trans "팔로잉" %}</h2>
     </div>
 
     <!-- Content -->
@@ -24,13 +25,13 @@
         <!-- Loading State -->
         <div class="loading-state" id="loading-state">
             <div class="spinner"></div>
-            <p>불러오는 중...</p>
+            <p>{% trans "불러오는 중..." %}</p>
         </div>
 
         <!-- Empty State -->
-        <div class="empty-state" id="empty-state" class="hidden">
-            <h3>팔로잉이 없습니다</h3>
-            <p class="text-light">아직 팔로우한 사용자가 없습니다</p>
+        <div class="empty-state hidden" id="empty-state">
+            <h3>{% trans "팔로잉이 없습니다" %}</h3>
+            <p class="text-light">{% trans "아직 팔로우한 사용자가 없습니다" %}</p>
         </div>
 
         <!-- Users Section -->

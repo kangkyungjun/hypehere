@@ -1,0 +1,42 @@
+{% load i18n %}
+<!-- Comment Edit Modal -->
+<div id="comment-edit-modal" class="modal-overlay hidden">
+    <div class="modal-container" style="max-width: 500px;">
+        <div class="modal-header">
+            <h3>{% trans "댓글 수정" %}</h3>
+            <button type="button" class="modal-close" id="close-comment-edit-modal" aria-label="{% trans '닫기' %}">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+
+        <div class="modal-body">
+            <form id="comment-edit-form">
+                <div class="form-group">
+                    <textarea
+                        id="comment-edit-content"
+                        class="form-control"
+                        rows="4"
+                        maxlength="500"
+                        placeholder="{% trans '댓글 내용을 입력하세요' %}"
+                        required
+                    ></textarea>
+                    <div class="char-counter mt-xs">
+                        <span id="comment-edit-char-count">0</span> / 500
+                    </div>
+                </div>
+
+                <div class="modal-actions mt-md">
+                    <button type="button" class="btn btn-ghost" id="cancel-comment-edit">
+                        {% trans "취소" %}
+                    </button>
+                    <button type="submit" class="btn btn-primary" id="save-comment-edit">
+                        {% trans "저장" %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,10 +1,11 @@
+{% load i18n %}
 <!-- Post Report Modal - Modern Design -->
 <div class="modal-overlay report-modal-overlay hidden" id="post-report-modal">
     <div class="modal-container report-modal-container">
         <!-- Header -->
         <div class="modal-header report-modal-header">
-            <h3 class="report-modal-title">게시물 신고</h3>
-            <button type="button" class="modal-close-btn" id="close-report-modal" aria-label="닫기">
+            <h3 class="report-modal-title">{% trans "게시물 신고" %}</h3>
+            <button type="button" class="modal-close-btn" id="close-report-modal" aria-label="{% trans '닫기' %}">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M18 6L6 18M6 6l12 12"/>
                 </svg>
@@ -16,7 +17,7 @@
             <form id="post-report-form">
                 <!-- Report Type Selection (Visual Buttons) -->
                 <div class="report-type-section">
-                    <label class="report-section-label">신고 유형</label>
+                    <label class="report-section-label">{% trans "신고 유형" %}</label>
                     <div class="report-type-grid">
                         <button type="button" class="report-type-btn" data-type="abuse">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -24,14 +25,14 @@
                                 <line x1="12" y1="9" x2="12" y2="13"/>
                                 <line x1="12" y1="17" x2="12.01" y2="17"/>
                             </svg>
-                            <span>욕설/비방</span>
+                            <span>{% trans "욕설/비방" %}</span>
                         </button>
                         <button type="button" class="report-type-btn" data-type="spam">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <circle cx="12" cy="12" r="10"/>
                                 <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
                             </svg>
-                            <span>스팸/광고</span>
+                            <span>{% trans "스팸/광고" %}</span>
                         </button>
                         <button type="button" class="report-type-btn" data-type="inappropriate">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -39,14 +40,14 @@
                                 <line x1="15" y1="9" x2="9" y2="15"/>
                                 <line x1="9" y1="9" x2="15" y2="15"/>
                             </svg>
-                            <span>부적절한 내용</span>
+                            <span>{% trans "부적절한 내용" %}</span>
                         </button>
                         <button type="button" class="report-type-btn" data-type="harassment">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
                                 <line x1="9" y1="12" x2="15" y2="12"/>
                             </svg>
-                            <span>성희롱</span>
+                            <span>{% trans "성희롱" %}</span>
                         </button>
                         <button type="button" class="report-type-btn" data-type="other">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -54,7 +55,7 @@
                                 <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/>
                                 <line x1="12" y1="17" x2="12.01" y2="17"/>
                             </svg>
-                            <span>기타</span>
+                            <span>{% trans "기타" %}</span>
                         </button>
                     </div>
                     <input type="hidden" id="post-report-type" name="report_type" required>
@@ -63,22 +64,22 @@
                 <!-- Description -->
                 <div class="report-description-section">
                     <label for="post-report-description" class="report-section-label">
-                        상세 설명 <span class="optional-label">(선택)</span>
+                        {% trans "상세 설명" %} <span class="optional-label">({% trans "선택" %})</span>
                     </label>
                     <textarea
                         id="post-report-description"
                         name="description"
                         rows="4"
                         class="report-textarea"
-                        placeholder="신고 사유를 상세히 작성해주세요..."></textarea>
+                        placeholder="{% trans '신고 사유를 상세히 작성해주세요...' %}"></textarea>
                 </div>
             </form>
         </div>
 
         <!-- Footer -->
         <div class="modal-footer report-modal-footer">
-            <button type="button" class="btn btn-secondary" id="cancel-post-report-btn">취소</button>
-            <button type="submit" form="post-report-form" class="btn btn-danger" id="submit-post-report-btn">신고하기</button>
+            <button type="button" class="btn btn-secondary" id="cancel-post-report-btn">{% trans "취소" %}</button>
+            <button type="submit" form="post-report-form" class="btn btn-danger" id="submit-post-report-btn">{% trans "신고하기" %}</button>
         </div>
     </div>
 </div>

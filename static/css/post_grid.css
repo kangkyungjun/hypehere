@@ -45,6 +45,42 @@
   overflow: hidden;
 }
 
+/* 게시물 옵션 버튼 (점 3개) */
+.post-grid-options-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 20;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--color-text);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.post-grid-options-btn:hover {
+  background: rgba(255, 255, 255, 1);
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.post-grid-options-btn:active {
+  transform: scale(0.95);
+}
+
+.post-grid-options-btn svg {
+  width: 20px;
+  height: 20px;
+  pointer-events: none;
+}
+
 /* 썸네일 콘텐츠 (텍스트 미리보기) */
 .post-thumbnail-content {
   position: relative;
@@ -123,6 +159,18 @@
     transform: none;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   }
+
+  .post-grid-options-btn {
+    width: 28px;
+    height: 28px;
+    top: 6px;
+    right: 6px;
+  }
+
+  .post-grid-options-btn svg {
+    width: 16px;
+    height: 16px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -143,6 +191,18 @@
 
   .post-stats {
     font-size: 0.625rem;  /* 10px */
+  }
+
+  .post-grid-options-btn {
+    width: 24px;
+    height: 24px;
+    top: 4px;
+    right: 4px;
+  }
+
+  .post-grid-options-btn svg {
+    width: 14px;
+    height: 14px;
   }
 }
 

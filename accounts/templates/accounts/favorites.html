@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load i18n %}
 
-{% block title %}즐겨찾기 - HypeHere{% endblock %}
+{% block title %}{% trans "즐겨찾기 - HypeHere" %}{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/favorites.css' %}">
@@ -17,17 +18,17 @@
                 <polyline points="12 19 5 12 12 5"/>
             </svg>
         </a>
-        <h1 class="favorites-title">즐겨찾기</h1>
+        <h1 class="favorites-title">{% trans "즐겨찾기" %}</h1>
     </div>
 
     <!-- 탭 네비게이션 -->
     <div class="favorites-tabs">
         <button class="tab-button active" data-tab="chat-rooms">
-            채팅방
+            {% trans "채팅방" %}
             <span class="tab-count" id="chat-count">0</span>
         </button>
         <button class="tab-button" data-tab="posts">
-            게시물
+            {% trans "게시물" %}
             <span class="tab-count" id="posts-count">0</span>
         </button>
     </div>
@@ -48,9 +49,9 @@
                     <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
                 </svg>
             </div>
-            <h3>즐겨찾기한 채팅방이 없습니다</h3>
-            <p>채팅방을 즐겨찾기에 추가해보세요</p>
-            <a href="/learning/chat/" class="btn btn-primary">채팅방 둘러보기</a>
+            <h3>{% trans "즐겨찾기한 채팅방이 없습니다" %}</h3>
+            <p>{% trans "채팅방을 즐겨찾기에 추가해보세요" %}</p>
+            <a href="/learning/chat/" class="btn btn-primary">{% trans "채팅방 둘러보기" %}</a>
         </div>
     </div>
 
@@ -64,8 +65,8 @@
                     <polyline points="7 3 7 8 15 8"/>
                 </svg>
             </div>
-            <h3>게시물 즐겨찾기 준비 중</h3>
-            <p>곧 게시물 즐겨찾기 기능이 추가됩니다</p>
+            <h3>{% trans "게시물 즐겨찾기 준비 중" %}</h3>
+            <p>{% trans "곧 게시물 즐겨찾기 기능이 추가됩니다" %}</p>
         </div>
     </div>
 </div>

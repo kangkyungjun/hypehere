@@ -9,7 +9,7 @@
     inset: 0;
     background: rgba(0, 0, 0, 0.6);
     backdrop-filter: blur(4px);
-    z-index: 1080; /* Above other modals */
+    z-index: 2040; /* Above delete/report modals (2030) */
     display: flex;
     align-items: flex-end; /* Mobile bottom sheet */
     justify-content: center;

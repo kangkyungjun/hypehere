@@ -192,7 +192,7 @@ class ExploreManager {
                     // Update button state for this user
                     const button = document.querySelector(`.user-card[data-username="${user.username}"] .follow-btn`);
                     if (button && data.is_following) {
-                        button.textContent = '팔로잉';
+                        button.textContent = window.APP_I18N.following;
                         button.classList.remove('btn-primary');
                         button.classList.add('btn-ghost');
                     }
@@ -225,15 +225,15 @@ class ExploreManager {
                         <div class="user-stats">
                             <span class="stat-item">
                                 <span class="stat-value">${user.posts_count || 0}</span>
-                                <span class="stat-label">게시물</span>
+                                <span class="stat-label">${window.APP_I18N.posts}</span>
                             </span>
                             <span class="stat-item">
                                 <span class="stat-value follower-count">${user.follower_count || 0}</span>
-                                <span class="stat-label">팔로워</span>
+                                <span class="stat-label">${window.APP_I18N.followers}</span>
                             </span>
                             <span class="stat-item">
                                 <span class="stat-value">${user.following_count || 0}</span>
-                                <span class="stat-label">팔로잉</span>
+                                <span class="stat-label">${window.APP_I18N.following}</span>
                             </span>
                         </div>
                     </div>
@@ -244,15 +244,15 @@ class ExploreManager {
                                 data-user-id="${user.id}"
                                 data-username="${user.username}"
                                 onclick="event.stopPropagation(); toggleFollow('${user.username}', this)">
-                            팔로우
+                            ${window.APP_I18N.follow}
                         </button>
                         <button class="btn btn-sm btn-ghost" onclick="event.stopPropagation(); messageUser(${user.id})">
-                            메시지
+                            ${window.APP_I18N.message}
                         </button>
                     ` : `
                         <button class="btn btn-sm btn-ghost"
                                 onclick="event.stopPropagation(); window.location.href='/accounts/login/'">
-                            로그인
+                            ${window.APP_I18N.login}
                         </button>
                     `}
                 </div>

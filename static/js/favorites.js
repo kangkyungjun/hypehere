@@ -117,7 +117,7 @@ class FavoritesManager {
     } catch (error) {
       console.error('Error loading favorites:', error);
       this.hideLoading();
-      this.showError('즐겨찾기를 불러오는데 실패했습니다.');
+      this.showError(gettext('즐겨찾기를 불러오는데 실패했습니다.'));
     }
   }
 
@@ -164,7 +164,7 @@ class FavoritesManager {
     card.innerHTML = `
       <div class="card-header">
         <h3 class="card-title">${this.escapeHtml(room.name)}</h3>
-        <button class="btn-unfavorite" data-favorite-id="${favorite.id}" aria-label="즐겨찾기 해제">
+        <button class="btn-unfavorite" data-favorite-id="${favorite.id}" aria-label="${gettext('즐겨찾기 해제')}">
           <svg viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
           </svg>
@@ -179,12 +179,12 @@ class FavoritesManager {
             <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
             <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
           </svg>
-          <span>${participantCount}명</span>
+          <span>${participantCount}${gettext('명')}</span>
         </div>
       </div>
       <div class="card-actions">
         <button class="btn btn-primary btn-enter" data-room-id="${room.id}">
-          입장하기
+          ${gettext('입장하기')}
         </button>
       </div>
     `;
@@ -206,12 +206,12 @@ class FavoritesManager {
 
   getCategoryDisplay(category) {
     const categories = {
-      'language': '언어교환',
-      'study': '스터디',
-      'culture': '문화교류',
-      'qa': '질문답변',
-      'freetalk': '자유대화',
-      'country': '국가'
+      'language': gettext('언어교환'),
+      'study': gettext('스터디'),
+      'culture': gettext('문화교류'),
+      'qa': gettext('질문답변'),
+      'freetalk': gettext('자유대화'),
+      'country': gettext('국가')
     };
     return categories[category] || category;
   }
@@ -290,7 +290,7 @@ class FavoritesManager {
             <span class="post-time">${timeAgo}</span>
           </div>
         </div>
-        <button class="post-favorite-btn" data-post-id="${post.id}" data-favorite-id="${favorite.id}" title="즐겨찾기 해제">
+        <button class="post-favorite-btn" data-post-id="${post.id}" data-favorite-id="${favorite.id}" title="${gettext('즐겨찾기 해제')}">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2">
             <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
           </svg>
@@ -307,14 +307,14 @@ class FavoritesManager {
           <svg width="20" height="20" viewBox="0 0 24 24" ${post.is_liked ? 'fill="currentColor"' : 'fill="none"'} stroke="currentColor" stroke-width="2" class="like-icon">
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
           </svg>
-          <span class="like-text">${post.is_liked ? '좋아요 취소' : '좋아요'}</span>
+          <span class="like-text">${post.is_liked ? gettext('좋아요 취소') : gettext('좋아요')}</span>
           <span class="like-count">${post.like_count || 0}</span>
         </button>
         <button class="post-action-btn" data-post-id="${post.id}">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
           </svg>
-          <span>댓글</span>
+          <span>${gettext('댓글')}</span>
           <span class="comment-count">${post.comment_count || 0}</span>
         </button>
       </div>
@@ -326,16 +326,16 @@ class FavoritesManager {
   getLanguageDisplay(langCode) {
     // Get first 2 characters of language display
     const languages = {
-      'ko': '한국어',
-      'en': 'English',
-      'ja': '日本語',
-      'zh': '中文',
-      'es': 'Español',
-      'fr': 'Français',
-      'de': 'Deutsch',
-      'it': 'Italiano',
-      'pt': 'Português',
-      'ru': 'Русский'
+      'ko': gettext('한국어'),
+      'en': gettext('English'),
+      'ja': gettext('日本語'),
+      'zh': gettext('中文'),
+      'es': gettext('Español'),
+      'fr': gettext('Français'),
+      'de': gettext('Deutsch'),
+      'it': gettext('Italiano'),
+      'pt': gettext('Português'),
+      'ru': gettext('Русский')
     };
     const fullName = languages[langCode] || langCode;
     return fullName.substring(0, 2);
@@ -344,21 +344,21 @@ class FavoritesManager {
   getTimeAgo(date) {
     const seconds = Math.floor((new Date() - date) / 1000);
     const intervals = {
-      년: 31536000,
-      개월: 2592000,
-      주: 604800,
-      일: 86400,
-      시간: 3600,
-      분: 60
+      [gettext('년')]: 31536000,
+      [gettext('개월')]: 2592000,
+      [gettext('주')]: 604800,
+      [gettext('일')]: 86400,
+      [gettext('시간')]: 3600,
+      [gettext('분')]: 60
     };
 
     for (const [unit, secondsInUnit] of Object.entries(intervals)) {
       const interval = Math.floor(seconds / secondsInUnit);
       if (interval >= 1) {
-        return `${interval}${unit} 전`;
+        return `${interval}${unit} ${gettext('전')}`;
       }
     }
-    return '방금 전';
+    return gettext('방금 전');
   }
 
   async handlePostLike(button) {
@@ -376,7 +376,7 @@ class FavoritesManager {
 
       if (!response.ok) {
         if (response.status === 401) {
-          alert('로그인이 필요합니다.');
+          alert(gettext('로그인이 필요합니다.'));
           return;
         }
         throw new Error('Failed to toggle like');
@@ -387,7 +387,7 @@ class FavoritesManager {
 
     } catch (error) {
       console.error('Error toggling like:', error);
-      alert('좋아요 처리 중 오류가 발생했습니다.');
+      alert(gettext('좋아요 처리 중 오류가 발생했습니다.'));
     }
   }
 
@@ -401,11 +401,11 @@ class FavoritesManager {
     if (isLiked) {
       button.classList.add('liked');
       likeIcon.setAttribute('fill', 'currentColor');
-      likeText.textContent = '좋아요 취소';
+      likeText.textContent = gettext('좋아요 취소');
     } else {
       button.classList.remove('liked');
       likeIcon.setAttribute('fill', 'none');
-      likeText.textContent = '좋아요';
+      likeText.textContent = gettext('좋아요');
     }
   }
 
@@ -413,7 +413,7 @@ class FavoritesManager {
     const postId = button.dataset.postId;
     const favoriteId = button.dataset.favoriteId;
 
-    if (!confirm('즐겨찾기를 해제하시겠습니까?')) {
+    if (!confirm(gettext('즐겨찾기를 해제하시겠습니까?'))) {
       return;
     }
 
@@ -439,12 +439,12 @@ class FavoritesManager {
 
     } catch (error) {
       console.error('Error unfavoriting post:', error);
-      alert('즐겨찾기 해제에 실패했습니다.');
+      alert(gettext('즐겨찾기 해제에 실패했습니다.'));
     }
   }
 
   async unfavoriteRoom(favoriteId, roomId) {
-    if (!confirm('즐겨찾기를 해제하시겠습니까?')) {
+    if (!confirm(gettext('즐겨찾기를 해제하시겠습니까?'))) {
       return;
     }
 
@@ -472,7 +472,7 @@ class FavoritesManager {
 
     } catch (error) {
       console.error('Error unfavoriting room:', error);
-      alert('즐겨찾기 해제에 실패했습니다.');
+      alert(gettext('즐겨찾기 해제에 실패했습니다.'));
     }
   }
 

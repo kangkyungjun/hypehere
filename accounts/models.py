@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser, UserManager as BaseUserManager
 from django.core.validators import MinLengthValidator
 from django.conf import settings
+from django.utils.translation import gettext_lazy as _
 
 
 class UserManager(BaseUserManager):
@@ -397,16 +398,16 @@ class SupportTicket(models.Model):
     """Customer support ticket model for user inquiries"""
 
     CATEGORY_CHOICES = [
-        ('account', '계정 관련'),
-        ('payment', '결제 문의'),
-        ('technical', '기술 지원'),
-        ('feature', '기능 제안'),
-        ('other', '기타'),
+        ('account', _('계정 관련')),
+        ('payment', _('결제 문의')),
+        ('technical', _('기술 지원')),
+        ('feature', _('기능 제안')),
+        ('other', _('기타')),
     ]
 
     STATUS_CHOICES = [
-        ('pending', '대기 중'),
-        ('answered', '답변 완료'),
+        ('pending', _('대기 중')),
+        ('answered', _('답변 완료')),
     ]
 
     # Ticket information
@@ -414,31 +415,31 @@ class SupportTicket(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='support_tickets',
-        verbose_name='작성자'
+        verbose_name=_('작성자')
     )
     category = models.CharField(
         max_length=20,
         choices=CATEGORY_CHOICES,
-        verbose_name='카테고리'
+        verbose_name=_('카테고리')
     )
-    title = models.CharField(max_length=200, verbose_name='제목')
-    content = models.TextField(verbose_name='내용')
+    title = models.CharField(max_length=200, verbose_name=_('제목'))
+    content = models.TextField(verbose_name=_('내용'))
     status = models.CharField(
         max_length=20,
         choices=STATUS_CHOICES,
         default='pending',
-        verbose_name='상태'
+        verbose_name=_('상태')
     )
 
     # Admin response
-    admin_response = models.TextField(blank=True, verbose_name='관리자 답변')
+    admin_response = models.TextField(blank=True, verbose_name=_('관리자 답변'))
     responded_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name='support_responses',
-        verbose_name='답변 관리자'
+        verbose_name=_('답변 관리자')
     )
     responded_at = models.DateTimeField(null=True, blank=True, verbose_name='답변 시간')
 

@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load i18n %}
 
-{% block title %}문의 작성 - HypeHere{% endblock %}
+{% block title %}{% trans "문의 작성 - HypeHere" %}{% endblock %}
 
 {% block content %}
 <div class="support-create-container">
@@ -10,39 +11,39 @@
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="15 18 9 12 15 6"></polyline>
             </svg>
-            뒤로
+            {% trans "뒤로" %}
         </a>
-        <h1>문의 작성</h1>
+        <h1>{% trans "문의 작성" %}</h1>
     </div>
 
     <form method="post" class="support-form">
         {% csrf_token %}
 
         <div class="form-group">
-            <label for="id_category">카테고리 <span class="required">*</span></label>
+            <label for="id_category">{% trans "카테고리" %} <span class="required">*</span></label>
             <select name="category" id="id_category" required>
-                <option value="">카테고리를 선택하세요</option>
-                <option value="account">계정 관련</option>
-                <option value="payment">결제 문의</option>
-                <option value="technical">기술 지원</option>
-                <option value="feature">기능 제안</option>
-                <option value="other">기타</option>
+                <option value="">{% trans "카테고리를 선택하세요" %}</option>
+                <option value="account">{% trans "계정 관련" %}</option>
+                <option value="payment">{% trans "결제 문의" %}</option>
+                <option value="technical">{% trans "기술 지원" %}</option>
+                <option value="feature">{% trans "기능 제안" %}</option>
+                <option value="other">{% trans "기타" %}</option>
             </select>
         </div>
 
         <div class="form-group">
-            <label for="id_title">제목 <span class="required">*</span></label>
-            <input type="text" name="title" id="id_title" maxlength="200" required placeholder="문의 제목을 입력하세요">
+            <label for="id_title">{% trans "제목" %} <span class="required">*</span></label>
+            <input type="text" name="title" id="id_title" maxlength="200" required placeholder="{% trans '문의 제목을 입력하세요' %}">
         </div>
 
         <div class="form-group">
-            <label for="id_content">내용 <span class="required">*</span></label>
-            <textarea name="content" id="id_content" rows="10" required placeholder="문의 내용을 자세히 입력해주세요"></textarea>
+            <label for="id_content">{% trans "내용" %} <span class="required">*</span></label>
+            <textarea name="content" id="id_content" rows="10" required placeholder="{% trans '문의 내용을 자세히 입력해주세요' %}"></textarea>
         </div>
 
         <div class="form-actions">
-            <a href="{% url 'accounts:support_list' %}" class="btn-cancel">취소</a>
-            <button type="submit" class="btn-submit">작성 완료</button>
+            <a href="{% url 'accounts:support_list' %}" class="btn-cancel">{% trans "취소" %}</a>
+            <button type="submit" class="btn-submit">{% trans "작성 완료" %}</button>
         </div>
     </form>
 </div>
