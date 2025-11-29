@@ -1,4 +1,5 @@
 from rest_framework import status, generics, permissions
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
@@ -8,7 +9,7 @@ from django.contrib.auth.views import LoginView as DjangoLoginView, LogoutView a
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy
 from django.contrib import messages
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, redirect, render
 from django.db.models import Q, Count, Prefetch
 from django.utils import timezone
 from django.utils.translation import gettext as _
@@ -514,6 +515,19 @@ class SettingsTemplateView(LoginRequiredMixin, TemplateView):
     """
     template_name = 'accounts/settings.html'
     login_url = reverse_lazy('accounts:login')
+
+
+class AdminPanelView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+    """
+    Admin panel view - only accessible to staff users
+    GET /accounts/admin-panel/
+    """
+    template_name = 'accounts/admin_panel.html'
+    login_url = reverse_lazy('accounts:login')
+
+    def test_func(self):
+        """Check if user is staff"""
+        return self.request.user.is_staff
 
 
 class NotificationSettingsTemplateView(LoginRequiredMixin, TemplateView):
@@ -1350,11 +1364,30 @@ class ReportDeleteAPIView(APIView):
                         'success': False,
                         'message': '이미 처리된 신고입니다.'
                     }, status=status.HTTP_400_BAD_REQUEST)
+            elif report_type == 'chat':
+                from chat.models import Report as ChatReport
+                from chat.admin_actions import handle_chat_report_delete
+
+                report = get_object_or_404(ChatReport, id=report_id)
+                result = handle_chat_report_delete(report, request.user)
+
+                if result['success']:
+                    return Response({
+                        'success': True,
+                        'message': result['message'],
+                        'suspension_result': result.get('suspension_result'),
+                        'report_count': result['report_count'],
+                        'active_report_count': result['active_report_count']
+                    }, status=status.HTTP_200_OK)
+                else:
+                    return Response({
+                        'success': False,
+                        'message': result['message']
+                    }, status=status.HTTP_400_BAD_REQUEST)
             else:
-                # Chat report handling would go here
                 return Response({
                     'success': False,
-                    'message': '채팅 신고 삭제는 아직 지원되지 않습니다.'
+                    'message': '알 수 없는 신고 유형입니다.'
                 }, status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as e:
@@ -1401,11 +1434,29 @@ class ReportDismissAPIView(APIView):
                         'success': False,
                         'message': '신고 처리에 실패했습니다.'
                     }, status=status.HTTP_400_BAD_REQUEST)
+            elif report_type == 'chat':
+                from chat.models import Report as ChatReport
+                from chat.admin_actions import handle_chat_report_dismiss
+
+                report = get_object_or_404(ChatReport, id=report_id)
+                result = handle_chat_report_dismiss(report, request.user)
+
+                if result['success']:
+                    return Response({
+                        'success': True,
+                        'message': result['message'],
+                        'report_count': result['report_count'],
+                        'active_report_count': result['active_report_count']
+                    }, status=status.HTTP_200_OK)
+                else:
+                    return Response({
+                        'success': False,
+                        'message': result['message']
+                    }, status=status.HTTP_400_BAD_REQUEST)
             else:
-                # Chat report handling would go here
                 return Response({
                     'success': False,
-                    'message': '채팅 신고 기각은 아직 지원되지 않습니다.'
+                    'message': '알 수 없는 신고 유형입니다.'
                 }, status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as e:
@@ -1582,3 +1633,106 @@ class UnbanUserAPIView(APIView):
                 'success': False,
                 'message': f'오류가 발생했습니다: {str(e)}'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# ==================== Password Reset Views ====================
+
+def password_reset_request_view(request):
+    """
+    Render password reset request form page.
+    """
+    return render(request, 'accounts/password_reset/request.html')
+
+
+class PasswordResetRequestAPIView(APIView):
+    """
+    API endpoint to process password reset requests.
+
+    POST /api/accounts/password-reset/
+    Body: { "email": "user@example.com" }
+
+    Features:
+    - Rate limiting: Max 3 attempts per email per hour
+    - Generates temporary password
+    - Sends email with temp password
+    - Returns success/error response
+    """
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        email = request.data.get('email', '').strip().lower()
+
+        # Validate email format
+        if not email:
+            return Response({
+                'success': False,
+                'message': _('이메일 주소를 입력해주세요.')
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Check rate limit
+        from accounts.utils import check_rate_limit, record_password_reset_attempt, generate_temporary_password, send_password_reset_email
+
+        allowed, attempts_count, time_remaining = check_rate_limit(email)
+
+        if not allowed:
+            return Response({
+                'success': False,
+                'message': _('너무 많은 요청이 있었습니다. {}후에 다시 시도해주세요.').format(time_remaining)
+            }, status=status.HTTP_429_TOO_MANY_REQUESTS)
+
+        # Check if user exists
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            # Don't reveal if email exists (security best practice)
+            # Still record attempt for rate limiting
+            ip_address = self.get_client_ip(request)
+            record_password_reset_attempt(email, ip_address)
+
+            return Response({
+                'success': True,
+                'message': _('등록된 이메일 주소라면 임시 비밀번호가 발송되었습니다.')
+            }, status=status.HTTP_200_OK)
+
+        # Check if user account is active
+        if not user.is_active:
+            return Response({
+                'success': False,
+                'message': _('비활성화된 계정입니다. 관리자에게 문의하세요.')
+            }, status=status.HTTP_403_FORBIDDEN)
+
+        # Generate temporary password
+        temp_password = generate_temporary_password()
+
+        # Set new password (will be hashed automatically)
+        user.set_password(temp_password)
+        user.save(update_fields=['password'])
+
+        # Send email
+        email_sent = send_password_reset_email(user, temp_password)
+
+        # Record attempt
+        ip_address = self.get_client_ip(request)
+        record_password_reset_attempt(email, ip_address)
+
+        if email_sent:
+            return Response({
+                'success': True,
+                'message': _('임시 비밀번호가 이메일로 발송되었습니다.')
+            }, status=status.HTTP_200_OK)
+        else:
+            # Email sending failed - revert password change
+            user.refresh_from_db()
+            return Response({
+                'success': False,
+                'message': _('이메일 발송에 실패했습니다. 잠시 후 다시 시도해주세요.')
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def get_client_ip(self, request):
+        """Get client IP address from request"""
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[0]
+        else:
+            ip = request.META.get('REMOTE_ADDR')
+        return ip

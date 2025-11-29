@@ -9,6 +9,29 @@
  * - No external dependencies
  */
 
+function getCurrentLanguage() {
+  // Try HTML lang attribute first
+  const htmlLang = document.documentElement.lang;
+  if (htmlLang && htmlLang !== '') {
+    const lang = htmlLang.toLowerCase();
+    if (['en', 'ja', 'es', 'ko'].includes(lang)) {
+      return lang;
+    }
+  }
+
+  // Fallback: read from Django's language cookie
+  const cookieMatch = document.cookie.match(/django_language=([^;]+)/);
+  if (cookieMatch) {
+    const lang = cookieMatch[1].toLowerCase();
+    if (['en', 'ja', 'es', 'ko'].includes(lang)) {
+      return lang;
+    }
+  }
+
+  // Default to Korean
+  return 'ko';
+}
+
 class CountrySelector {
   constructor(elementId, options = {}) {
     this.element = document.getElementById(elementId);
@@ -19,9 +42,10 @@ class CountrySelector {
 
     this.options = {
       countries: options.countries || COUNTRIES,
-      placeholder: options.placeholder || '선택하세요',
-      searchPlaceholder: options.searchPlaceholder || '🔍 국가 검색...',
-      emptyText: options.emptyText || '검색 결과가 없습니다',
+      placeholder: options.placeholder || this.getDefaultPlaceholder(),
+      searchPlaceholder: options.searchPlaceholder || this.getDefaultSearchPlaceholder(),
+      emptyText: options.emptyText || this.getDefaultEmptyText(),
+      modalTitle: options.modalTitle || this.getDefaultModalTitle(),
       onChange: options.onChange || null,
       initialValue: options.initialValue || ''
     };
@@ -46,8 +70,58 @@ class CountrySelector {
     }
   }
 
+  getDefaultPlaceholder() {
+    const lang = getCurrentLanguage();
+    const placeholders = {
+      'en': 'Please select',
+      'ja': '選択してください',
+      'es': 'Por favor seleccione',
+      'ko': '선택하세요'
+    };
+    return placeholders[lang] || placeholders['ko'];
+  }
+
+  getDefaultSearchPlaceholder() {
+    const lang = getCurrentLanguage();
+    const placeholders = {
+      'en': '🔍 Search country...',
+      'ja': '🔍 国を検索...',
+      'es': '🔍 Buscar país...',
+      'ko': '🔍 국가 검색...'
+    };
+    return placeholders[lang] || placeholders['ko'];
+  }
+
+  getDefaultEmptyText() {
+    const lang = getCurrentLanguage();
+    const texts = {
+      'en': 'No search results',
+      'ja': '検索結果がありません',
+      'es': 'No hay resultados',
+      'ko': '검색 결과가 없습니다'
+    };
+    return texts[lang] || texts['ko'];
+  }
+
+  getDefaultModalTitle() {
+    const lang = getCurrentLanguage();
+    const titles = {
+      'en': 'Select Country',
+      'ja': '国を選択',
+      'es': 'Seleccionar país',
+      'ko': '국가 선택'
+    };
+    return titles[lang] || titles['ko'];
+  }
+
   init() {
     const lang = getCurrentLanguage();
+    const closeLabels = {
+      'ko': '닫기',
+      'en': 'Close',
+      'ja': '閉じる',
+      'es': 'Cerrar'
+    };
     // Create component HTML structure
     this.element.innerHTML = `
       <button type="button" class="country-selector-toggle form-control"
@@ -57,8 +131,8 @@ class CountrySelector {
       </button>
       <div class="country-dropdown" hidden>
         <div class="country-dropdown-header">
-          <h3 class="country-dropdown-title">${this.options.modalTitle || (lang === 'en' ? 'Select Country' : '국가 선택')}</h3>
-          <button type="button" class="country-dropdown-close" aria-label="${lang === 'en' ? 'Close' : '닫기'}">✕</button>
+          <h3 class="country-dropdown-title">${this.options.modalTitle}</h3>
+          <button type="button" class="country-dropdown-close" aria-label="${closeLabels[lang] || closeLabels['ko']}">✕</button>
         </div>
         <div class="country-search-wrapper">
           <input type="text" class="country-search form-control"
@@ -84,6 +158,17 @@ class CountrySelector {
 
     // Attach swipe gesture for mobile
     this.attachSwipeGesture();
+  }
+
+  getCountryName(country) {
+    const lang = getCurrentLanguage();
+    const nameMap = {
+      'en': country.nameEn,
+      'ja': country.nameJa || country.nameEn,
+      'es': country.nameEs || country.nameEn,
+      'ko': country.name
+    };
+    return nameMap[lang] || country.nameEn;
   }
 
   attachEvents() {
@@ -315,6 +400,8 @@ class CountrySelector {
         return (
           country.name.toLowerCase().includes(lowerQuery) ||
           country.nameEn.toLowerCase().includes(lowerQuery) ||
+          (country.nameJa && country.nameJa.toLowerCase().includes(lowerQuery)) ||
+          (country.nameEs && country.nameEs.toLowerCase().includes(lowerQuery)) ||
           country.code.toLowerCase().includes(lowerQuery)
         );
       });
@@ -338,8 +425,7 @@ class CountrySelector {
           data-code="${country.code}"
           data-index="${index}"
           aria-selected="${this.selectedCountry?.code === country.code}">
-        <span class="country-name-en">${country.nameEn}</span>
-        <span class="country-name-kr">${country.name}</span>
+        <span class="country-name">${this.getCountryName(country)}</span>
       </li>
     `).join('');
 
@@ -357,7 +443,7 @@ class CountrySelector {
     if (!country) return;
 
     this.selectedCountry = country;
-    this.valueDisplay.textContent = `${country.nameEn} (${country.name})`;
+    this.valueDisplay.textContent = `${this.getCountryName(country)}`;
     this.valueDisplay.classList.add('has-value');
 
     // Update hidden input value
@@ -379,7 +465,7 @@ class CountrySelector {
     const country = this.options.countries.find(c => c.code === code);
     if (country) {
       this.selectedCountry = country;
-      this.valueDisplay.textContent = `${country.nameEn} (${country.name})`;
+      this.valueDisplay.textContent = `${this.getCountryName(country)}`;
       this.valueDisplay.classList.add('has-value');
     }
   }

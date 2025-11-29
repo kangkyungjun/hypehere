@@ -158,8 +158,14 @@
             `;
         }
 
+        // Translate deleted post message if needed
+        let content = post.content;
+        if (content === '게시물은 신고에 의해 삭제되었습니다.') {
+            content = window.APP_I18N.deletedPostMessage || content;
+        }
+
         // Format content (convert newlines to <br>)
-        const formattedContent = post.content.replace(/\n/g, '<br>');
+        const formattedContent = content.replace(/\n/g, '<br>');
 
         return `
             <div class="post-card mb-md" style="border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-md);">

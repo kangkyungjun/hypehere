@@ -134,6 +134,29 @@
         </div>
     </div>
 
+    <!-- 관리자 섹션 (관리자만 보임) -->
+    {% if user.is_staff %}
+    <div class="settings-section">
+        <h2 class="settings-section-title">{% trans "관리" %}</h2>
+        <div class="settings-list">
+            <a href="{% url 'analytics:dashboard' %}" class="settings-item admin-item">
+                <div class="settings-item-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    </svg>
+                </div>
+                <div class="settings-item-content">
+                    <h3 class="settings-item-title">{% trans "관리자 페이지" %}</h3>
+                    <p class="settings-item-description">{% trans "사용자 관리 및 시스템 설정" %}</p>
+                </div>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="m9 18 6-6-6-6"/>
+                </svg>
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
     <!-- 로그아웃 버튼 (최하단 가운데) -->
     <div class="settings-logout">
         <form method="post" action="{% url 'accounts:logout' %}">

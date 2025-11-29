@@ -36,20 +36,20 @@
     </div>
 
     <!-- 활성화된 필터 태그 -->
-    <div id="active-filters" class="active-filters-container" class="hidden"></div>
+    <div id="active-filters" class="active-filters-container"></div>
 
     <!-- 탭 네비게이션 -->
     <div class="report-tabs">
         <button class="tab-button active" data-tab="post-reports">
-            {% trans "게시물 신고" %}
+            {% trans "게시물" %}
             <span class="tab-count">{{ post_reports.count }}</span>
         </button>
         <button class="tab-button" data-tab="comment-reports">
-            {% trans "댓글 신고" %}
+            {% trans "댓글" %}
             <span class="tab-count">{{ comment_reports.count }}</span>
         </button>
         <button class="tab-button" data-tab="chat-reports">
-            {% trans "채팅 신고" %}
+            {% trans "채팅" %}
             <span class="tab-count">{{ chat_reports.count }}</span>
         </button>
     </div>
@@ -227,11 +227,11 @@
                 <!-- 관리자 전용 액션 버튼 (채팅 신고) -->
                 {% if request.user.is_staff %}
                 <div class="report-actions" style="display: flex; gap: var(--space-sm); margin-top: var(--space-md); flex-wrap: wrap;">
-                    <button class="btn btn-danger btn-sm" data-action="open-delete-modal" data-report-id="{{ report.id }}" data-report-type="chat" disabled>
-                        {% trans "삭제 처리 (준비중)" %}
+                    <button class="btn btn-danger btn-sm" data-action="open-delete-modal" data-report-id="{{ report.id }}" data-report-type="chat">
+                        {% trans "삭제 처리" %}
                     </button>
-                    <button class="btn btn-ghost btn-sm" data-action="open-dismiss-modal" data-report-id="{{ report.id }}" data-report-type="chat" disabled>
-                        {% trans "신고 기각 (준비중)" %}
+                    <button class="btn btn-ghost btn-sm" data-action="open-dismiss-modal" data-report-id="{{ report.id }}" data-report-type="chat">
+                        {% trans "신고 기각" %}
                     </button>
                 </div>
                 {% endif %}
@@ -280,7 +280,7 @@
                 </div>
             </div>
             <div class="admin-modal-footer">
-                <button class="btn btn-danger" id="confirm-delete-btn">\${i18n.deleteAction || "삭제 처리"}</button>
+                <button class="btn btn-danger" id="confirm-delete-btn">{% trans "삭제 처리" %}</button>
                 <button class="btn btn-secondary" data-action="close-admin-modal" data-modal-id="admin-delete-modal">{% trans "취소" %}</button>
             </div>
         </div>
@@ -317,7 +317,7 @@
                 </div>
             </div>
             <div class="admin-modal-footer">
-                <button class="btn btn-ghost" id="confirm-dismiss-btn">\${i18n.dismissReport || "신고 기각"}</button>
+                <button class="btn btn-ghost" id="confirm-dismiss-btn">{% trans "신고 기각" %}</button>
                 <button class="btn btn-secondary" data-action="close-admin-modal" data-modal-id="admin-dismiss-modal">{% trans "취소" %}</button>
             </div>
         </div>
@@ -348,10 +348,6 @@
                         <div class="filter-option">
                             <input type="radio" name="status" id="status-pending" value="pending">
                             <label for="status-pending">{% trans "대기 중" %}</label>
-                        </div>
-                        <div class="filter-option">
-                            <input type="radio" name="status" id="status-reviewing" value="reviewing">
-                            <label for="status-reviewing">{% trans "검토 중" %}</label>
                         </div>
                         <div class="filter-option">
                             <input type="radio" name="status" id="status-resolved" value="resolved">
@@ -435,6 +431,13 @@
 
 {% block extra_js %}
 <script>
+    // Initialize i18n translations for JavaScript
+    window.APP_I18N = {
+        deleteAction: "{% trans '삭제 처리' %}",
+        dismissReport: "{% trans '신고 기각' %}",
+        viewPost: "{% trans '게시물 보기' %}",
+        reportContentLabel: "{% trans '신고 내용:' %}"
+    };
     const i18n = window.APP_I18N || {};
 
 // Global variables for modal state
@@ -631,7 +634,7 @@ let hasNextPage = {
     chat: true
 };
 
-let isLoading = false;
+let isLoading = { post: false, comment: false, chat: false };
 
 function openFilterModal() {
     const modal = document.getElementById('filter-modal');
@@ -655,6 +658,9 @@ function resetFilters() {
     document.getElementById('type-all').checked = true;
     document.getElementById('date-all').checked = true;
     document.getElementById('search-input').value = '';
+
+    // Apply the reset by reloading all reports with cleared filters
+    applyFilters();
 }
 
 function applyFilters() {
@@ -666,22 +672,24 @@ function applyFilters() {
 
     // Reset pages
     currentPage.post = 1;
+    currentPage.comment = 1;
     currentPage.chat = 1;
     hasNextPage.post = true;
+    hasNextPage.comment = true;
     hasNextPage.chat = true;
 
-    // Clear current reports
+    // Clear all tab contents (including Django-rendered cards and empty-state)
     const postTab = document.getElementById('post-reports-tab');
+    const commentTab = document.getElementById('comment-reports-tab');
     const chatTab = document.getElementById('chat-reports-tab');
 
-    const postCards = postTab.querySelectorAll('.report-card');
-    const chatCards = chatTab.querySelectorAll('.report-card');
-
-    postCards.forEach(card => card.remove());
-    chatCards.forEach(card => card.remove());
+    postTab.innerHTML = '';
+    commentTab.innerHTML = '';
+    chatTab.innerHTML = '';
 
     // Load filtered results
     loadReports('post');
+    loadReports('comment');
     loadReports('chat');
 
     // Update active filters display
@@ -766,9 +774,9 @@ function removeFilter(key) {
 
 // Load reports with AJAX
 async function loadReports(reportType) {
-    if (isLoading || !hasNextPage[reportType]) return;
+    if (isLoading[reportType] || !hasNextPage[reportType]) return;
 
-    isLoading = true;
+    isLoading[reportType] = true;
     const loadingIndicator = document.getElementById('loading-indicator');
     loadingIndicator.classList.add('active');
 
@@ -813,7 +821,7 @@ async function loadReports(reportType) {
         console.error('Error loading reports:', error);
         alert('신고 내역을 불러오는 중 오류가 발생했습니다.');
     } finally {
-        isLoading = false;
+        isLoading[reportType] = false;
         loadingIndicator.classList.remove('active');
     }
 }
@@ -853,13 +861,13 @@ function createReportCard(report, reportType) {
     const isStaff = {% if request.user.is_staff %}true{% else %}false{% endif %};
     if (isStaff) {
         const postViewBtn = reportType === 'post' && report.post_id ?
-            `<a href="/?postId=${report.post_id}" class="btn btn-secondary btn-sm">\${i18n.viewPost || "게시물 보기"}</a>` : '';
+            `<a href="/?postId=${report.post_id}" class="btn btn-secondary btn-sm">${i18n.viewPost || "게시물 보기"}</a>` : '';
 
         adminActions = `
             <div class="report-actions" style="display: flex; gap: var(--space-sm); margin-top: var(--space-md); flex-wrap: wrap;">
                 ${postViewBtn}
-                <button class="btn btn-danger btn-sm" data-action="open-delete-modal" data-report-id="${report.id}" data-report-type="${reportType}">\${i18n.deleteAction || "삭제 처리"}</button>
-                <button class="btn btn-ghost btn-sm" data-action="open-dismiss-modal" data-report-id="${report.id}" data-report-type="${reportType}">\${i18n.dismissReport || "신고 기각"}</button>
+                <button class="btn btn-danger btn-sm" data-action="open-delete-modal" data-report-id="${report.id}" data-report-type="${reportType}">${i18n.deleteAction || "삭제 처리"}</button>
+                <button class="btn btn-ghost btn-sm" data-action="open-dismiss-modal" data-report-id="${report.id}" data-report-type="${reportType}">${i18n.dismissReport || "신고 기각"}</button>
             </div>
         `;
     }
@@ -880,7 +888,7 @@ function createReportCard(report, reportType) {
         </div>
         ${postSection}
         <div class="report-section">
-            <strong class="report-label">\${i18n.reportContentLabel || "신고 내용:"}</strong>
+            <strong class="report-label">${i18n.reportContentLabel || "신고 내용:"}</strong>
             <p class="report-description">${report.description || i18n.noDescription || '설명 없음'}</p>
         </div>
         ${adminActions}

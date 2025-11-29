@@ -85,10 +85,11 @@ class ConversationViewSet(viewsets.ModelViewSet):
         return ConversationDetailSerializer
 
     def get_queryset(self):
-        """현재 사용자가 참가한 대화만 반환 (is_active=True인 대화만)"""
+        """현재 사용자가 참가한 일반 채팅만 반환 (익명 채팅 제외, is_active=True인 대화만)"""
         return Conversation.objects.filter(
             participant_relations__user=self.request.user,
-            participant_relations__is_active=True
+            participant_relations__is_active=True,
+            is_anonymous=False
         ).distinct().order_by('-updated_at')
 
     def retrieve(self, request, pk=None):
@@ -131,9 +132,10 @@ class ConversationViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # 기존 대화 확인 (두 사용자가 모두 참가한 대화)
+        # 기존 일반 대화 확인 (익명 채팅 제외)
         existing_conversation = Conversation.objects.filter(
-            participants=request.user
+            participants=request.user,
+            is_anonymous=False
         ).filter(
             participants=other_user
         ).first()
@@ -145,8 +147,8 @@ class ConversationViewSet(viewsets.ModelViewSet):
             )
             return Response(serializer.data)
 
-        # 새 대화 생성
-        conversation = Conversation.objects.create()
+        # 새 일반 대화 생성
+        conversation = Conversation.objects.create(is_anonymous=False)
         conversation.participants.add(request.user, other_user)
 
         serializer = ConversationDetailSerializer(

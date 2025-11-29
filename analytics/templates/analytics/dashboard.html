@@ -1,0 +1,458 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "관리자 대시보드" %} - HypeHere{% endblock %}
+
+{% block content %}
+<div class="admin-dashboard-container">
+    <!-- Header -->
+    <div class="admin-header">
+        <div class="header-content">
+            <h1 class="admin-title">{% trans "관리자 대시보드" %}</h1>
+            <div class="admin-nav">
+                <a href="{% url 'analytics:permissions' %}" class="btn-admin">{% trans "권한 부여" %}</a>
+                <a href="{% url 'analytics:lottery' %}" class="btn-admin">{% trans "로또" %}</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Dashboard -->
+    <div class="stats-container">
+        <div class="stats-grid">
+            <!-- Visitors Card -->
+            <div class="stat-card">
+                <h3 class="stat-card-title">{% trans "접속자" %} (Visitors)</h3>
+                <div class="stat-items">
+                    <div class="stat-item">
+                        <span class="stat-label">Today:</span>
+                        <span class="stat-value" id="visitors-today">--</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Yesterday:</span>
+                        <span class="stat-value" id="visitors-yesterday">--</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">This Week:</span>
+                        <span class="stat-value" id="visitors-week">--</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">This Month:</span>
+                        <span class="stat-value" id="visitors-month">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- New Users Card -->
+            <div class="stat-card">
+                <h3 class="stat-card-title">{% trans "가입자" %} (New Users)</h3>
+                <div class="stat-items">
+                    <div class="stat-item">
+                        <span class="stat-label">Today:</span>
+                        <span class="stat-value" id="users-today">--</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Yesterday:</span>
+                        <span class="stat-value" id="users-yesterday">--</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">This Week:</span>
+                        <span class="stat-value" id="users-week">--</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">This Month:</span>
+                        <span class="stat-value" id="users-month">--</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Total:</span>
+                        <span class="stat-value stat-highlight" id="users-total">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Users Card -->
+            <div class="stat-card">
+                <h3 class="stat-card-title">{% trans "실 사용자" %} (Active Users)</h3>
+                <div class="stat-items">
+                    <div class="stat-item">
+                        <span class="stat-label">Today:</span>
+                        <span class="stat-value" id="active-today">--</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Yesterday:</span>
+                        <span class="stat-value" id="active-yesterday">--</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">7-day Average:</span>
+                        <span class="stat-value" id="active-week-avg">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Posts Card -->
+            <div class="stat-card">
+                <h3 class="stat-card-title">{% trans "게시물" %} (Posts)</h3>
+                <div class="stat-items">
+                    <div class="stat-item">
+                        <span class="stat-label">Today:</span>
+                        <span class="stat-value" id="posts-today">--</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Yesterday:</span>
+                        <span class="stat-value" id="posts-yesterday">--</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">This Week:</span>
+                        <span class="stat-value" id="posts-week">--</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">This Month:</span>
+                        <span class="stat-value" id="posts-month">--</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Total:</span>
+                        <span class="stat-value stat-highlight" id="posts-total">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Anonymous Chat Card (Full Width) -->
+            <div class="stat-card stat-card-wide">
+                <h3 class="stat-card-title">{% trans "랜덤 채팅" %} (Random/Anonymous Chat)</h3>
+                <div class="stat-items-grid">
+                    <div class="stat-column">
+                        <h4 class="stat-subtitle">User Counts</h4>
+                        <div class="stat-item">
+                            <span class="stat-label">Daily Users:</span>
+                            <span class="stat-value" id="chat-users-today">--</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Weekly Users:</span>
+                            <span class="stat-value" id="chat-users-week">--</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Monthly Users:</span>
+                            <span class="stat-value" id="chat-users-month">--</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Total Users:</span>
+                            <span class="stat-value stat-highlight" id="chat-users-total">--</span>
+                        </div>
+                    </div>
+                    <div class="stat-column">
+                        <h4 class="stat-subtitle">Average per User</h4>
+                        <div class="stat-item">
+                            <span class="stat-label">Daily Average:</span>
+                            <span class="stat-value" id="chat-avg-daily">--</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Weekly Average:</span>
+                            <span class="stat-value" id="chat-avg-weekly">--</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Monthly Average:</span>
+                            <span class="stat-value" id="chat-avg-monthly">--</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Refresh Button -->
+        <div class="actions-bar">
+            <button class="btn-refresh" onclick="refreshStats()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 4v6h6M23 20v-6h-6"/>
+                    <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/>
+                </svg>
+                {% trans "Refresh Statistics" %}
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.admin-dashboard-container {
+    min-height: 100vh;
+    background: white;
+    padding-bottom: 15px;
+}
+
+.admin-header {
+    background: white;
+    color: black;
+    padding: 10px 15px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.header-content {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.admin-title {
+    font-size: 32px;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.admin-nav {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.btn-admin {
+    background: white;
+    color: black;
+    padding: 10px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: 1px solid #ccc;
+}
+
+.btn-admin:hover {
+    background: #f5f5f5;
+    color: black;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.stats-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 10px;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+}
+
+.stat-card-wide {
+    grid-column: 1 / -1;
+}
+
+.stat-card-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: black;
+    margin-bottom: 8px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #ddd;
+}
+
+.stat-items {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 0;
+}
+
+.stat-label {
+    color: black;
+    font-size: 14px;
+}
+
+.stat-value {
+    font-weight: 600;
+    color: black;
+    font-size: 18px;
+}
+
+.stat-highlight {
+    color: black;
+    font-size: 20px;
+}
+
+.stat-items-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 12px;
+}
+
+.stat-column {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.stat-subtitle {
+    font-size: 14px;
+    font-weight: 600;
+    color: black;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.actions-bar {
+    display: flex;
+    justify-content: center;
+    margin-top: 12px;
+}
+
+.btn-refresh {
+    background: white;
+    color: black;
+    border: 1px solid #ccc;
+    padding: 8px 20px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-refresh:hover {
+    background: #f5f5f5;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.btn-refresh svg {
+    transition: transform 0.5s ease;
+}
+
+.btn-refresh:active svg {
+    transform: rotate(180deg);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .admin-title {
+        font-size: 24px;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-nav {
+        flex-direction: column;
+    }
+
+    .btn-admin {
+        text-align: center;
+    }
+}
+
+/* Loading Animation */
+.stat-value {
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function loadDashboardStats() {
+    // Show loading state
+    document.querySelectorAll('.stat-value').forEach(el => {
+        el.textContent = '...';
+        el.style.opacity = '0.5';
+    });
+
+    fetch('/admin-dashboard/api/stats/')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to fetch statistics');
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Remove loading state
+            document.querySelectorAll('.stat-value').forEach(el => {
+                el.style.opacity = '1';
+            });
+
+            // Visitors
+            document.getElementById('visitors-today').textContent = data.visitors.today.toLocaleString();
+            document.getElementById('visitors-yesterday').textContent = data.visitors.yesterday.toLocaleString();
+            document.getElementById('visitors-week').textContent = data.visitors.week.toLocaleString();
+            document.getElementById('visitors-month').textContent = data.visitors.month.toLocaleString();
+
+            // New Users
+            document.getElementById('users-today').textContent = data.new_users.today.toLocaleString();
+            document.getElementById('users-yesterday').textContent = data.new_users.yesterday.toLocaleString();
+            document.getElementById('users-week').textContent = data.new_users.week.toLocaleString();
+            document.getElementById('users-month').textContent = data.new_users.month.toLocaleString();
+            document.getElementById('users-total').textContent = data.new_users.total.toLocaleString();
+
+            // Active Users
+            document.getElementById('active-today').textContent = data.active_users.today.toLocaleString();
+            document.getElementById('active-yesterday').textContent = data.active_users.yesterday.toLocaleString();
+            document.getElementById('active-week-avg').textContent = data.active_users.week_average.toLocaleString();
+
+            // Posts
+            document.getElementById('posts-today').textContent = data.posts.today.toLocaleString();
+            document.getElementById('posts-yesterday').textContent = data.posts.yesterday.toLocaleString();
+            document.getElementById('posts-week').textContent = data.posts.week.toLocaleString();
+            document.getElementById('posts-month').textContent = data.posts.month.toLocaleString();
+            document.getElementById('posts-total').textContent = data.posts.total.toLocaleString();
+
+            // Anonymous Chat
+            document.getElementById('chat-users-today').textContent = data.anonymous_chat.users.today.toLocaleString();
+            document.getElementById('chat-users-week').textContent = data.anonymous_chat.users.week.toLocaleString();
+            document.getElementById('chat-users-month').textContent = data.anonymous_chat.users.month.toLocaleString();
+            document.getElementById('chat-users-total').textContent = data.anonymous_chat.users.total.toLocaleString();
+
+            document.getElementById('chat-avg-daily').textContent = data.anonymous_chat.average_per_user.daily;
+            document.getElementById('chat-avg-weekly').textContent = data.anonymous_chat.average_per_user.weekly;
+            document.getElementById('chat-avg-monthly').textContent = data.anonymous_chat.average_per_user.monthly;
+        })
+        .catch(error => {
+            console.error('Error loading stats:', error);
+            alert('Failed to load statistics. Please try again.');
+            // Reset to loading state
+            document.querySelectorAll('.stat-value').forEach(el => {
+                el.textContent = '--';
+                el.style.opacity = '1';
+            });
+        });
+}
+
+function refreshStats() {
+    loadDashboardStats();
+}
+
+// Load stats on page load
+document.addEventListener('DOMContentLoaded', loadDashboardStats);
+
+// Auto-refresh every 5 minutes
+setInterval(loadDashboardStats, 5 * 60 * 1000);
+</script>
+{% endblock %}

@@ -10,7 +10,12 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
+import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -49,6 +54,8 @@ INSTALLED_APPS = [
     "chat",
     "notifications",
     "learning",
+    "analytics",  # Admin dashboard and analytics
+    "lotto",  # Lotto number management system
 ]
 
 MIDDLEWARE = [
@@ -61,6 +68,7 @@ MIDDLEWARE = [
     "accounts.middleware.SuspensionCheckMiddleware",  # Auto-lift expired suspensions
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "analytics.middleware.VisitorTrackingMiddleware",  # Track visitors and user activity
 ]
 
 ROOT_URLCONF = "hypehere.urls"
@@ -187,3 +195,34 @@ CHANNEL_LAYERS = {
         # },
     },
 }
+
+# ==================== Email Configuration ====================
+
+# Gmail SMTP Configuration
+# For development, you can use console backend to print emails instead of sending
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# For production, use SMTP backend with Gmail
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
+# IMPORTANT: Set these environment variables or replace with actual values
+# DO NOT commit sensitive credentials to version control
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'your-email@gmail.com')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'your-app-password')
+
+# Default email address to use for various automated correspondence
+DEFAULT_FROM_EMAIL = f'HypeHere <{EMAIL_HOST_USER}>'
+SERVER_EMAIL = f'HypeHere <{EMAIL_HOST_USER}>'
+
+# Site URL (for email links)
+SITE_URL = 'http://127.0.0.1:8000'  # Change to your domain in production
+
+# Email Configuration Notes:
+# 1. For Gmail, you need to generate an "App Password" (not your regular password)
+# 2. Visit: https://myaccount.google.com/apppasswords
+# 3. Enable 2-factor authentication first if not already enabled
+# 4. Generate app password and use it in EMAIL_HOST_PASSWORD
+# 5. For development, you can use console backend to test without actual emails

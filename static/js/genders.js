@@ -7,26 +7,36 @@ const GENDERS = [
     {
         value: '',
         labelKo: '선택 안 함',
-        labelEn: 'Not selected'
+        labelEn: 'Not selected',
+        labelJa: '選択なし',
+        labelEs: 'No seleccionado'
     },
     {
         value: 'male',
         labelKo: '남성',
-        labelEn: 'Male'
+        labelEn: 'Male',
+        labelJa: '男性',
+        labelEs: 'Masculino'
     },
     {
         value: 'female',
         labelKo: '여성',
-        labelEn: 'Female'
+        labelEn: 'Female',
+        labelJa: '女性',
+        labelEs: 'Femenino'
     },
     {
         value: 'other',
         labelKo: '기타',
-        labelEn: 'Other'
+        labelEn: 'Other',
+        labelJa: 'その他',
+        labelEs: 'Otro'
     },
     {
         value: 'prefer_not_to_say',
         labelKo: '밝히지 않음',
-        labelEn: 'Prefer not to say'
+        labelEn: 'Prefer not to say',
+        labelJa: '回答しない',
+        labelEs: 'Prefiero no decir'
     }
 ];

@@ -1,0 +1,76 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% trans "비밀번호 재설정" %} - HypeHere</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f5f5;">
+    <table role="presentation" style="width: 100%; border-collapse: collapse;">
+        <tr>
+            <td align="center" style="padding: 40px 0;">
+                <table role="presentation" style="width: 600px; max-width: 100%; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    <!-- Header -->
+                    <tr>
+                        <td style="padding: 40px 40px 20px; text-align: center;">
+                            <h1 style="margin: 0; font-size: 28px; color: #333; font-weight: bold;">HypeHere</h1>
+                        </td>
+                    </tr>
+
+                    <!-- Content -->
+                    <tr>
+                        <td style="padding: 0 40px 40px;">
+                            <h2 style="margin: 0 0 20px; font-size: 20px; color: #333; font-weight: 600;">{% trans "비밀번호 재설정" %}</h2>
+
+                            <p style="margin: 0 0 15px; font-size: 15px; line-height: 1.6; color: #666;">
+                                {% trans "안녕하세요," %}<br><br>
+                                {% trans "비밀번호 재설정을 요청하셨습니다." %}<br>
+                                {% trans "아래 임시 비밀번호로 로그인하신 후, 반드시 새 비밀번호로 변경해주세요." %}
+                            </p>
+
+                            <!-- Temporary Password Box -->
+                            <div style="margin: 30px 0; padding: 20px; background-color: #f8f9fa; border-left: 4px solid #007bff; border-radius: 4px;">
+                                <p style="margin: 0 0 10px; font-size: 14px; color: #666; font-weight: 600;">{% trans "임시 비밀번호" %}</p>
+                                <p style="margin: 0; font-size: 24px; font-weight: bold; color: #333; font-family: monospace; letter-spacing: 2px;">
+                                    {{ temporary_password }}
+                                </p>
+                            </div>
+
+                            <!-- Login Button -->
+                            <div style="text-align: center; margin: 30px 0;">
+                                <a href="{{ login_url }}" style="display: inline-block; padding: 14px 32px; background-color: #007bff; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px;">
+                                    {% trans "로그인하기" %}
+                                </a>
+                            </div>
+
+                            <!-- Warning Message -->
+                            <div style="margin: 30px 0; padding: 15px; background-color: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px;">
+                                <p style="margin: 0; font-size: 14px; color: #856404; line-height: 1.5;">
+                                    <strong>{% trans "⚠️ 보안 안내" %}</strong><br>
+                                    {% trans "로그인 후 즉시 비밀번호를 변경하시기 바랍니다." %}<br>
+                                    {% trans "본인이 요청하지 않은 경우, 이 이메일을 무시하시고 관리자에게 문의해주세요." %}
+                                </p>
+                            </div>
+
+                            <p style="margin: 30px 0 0; font-size: 14px; color: #999; line-height: 1.6;">
+                                {% trans "감사합니다." %}<br>
+                                <strong>{% trans "HypeHere 팀" %}</strong>
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td style="padding: 20px 40px; border-top: 1px solid #eee; text-align: center;">
+                            <p style="margin: 0; font-size: 12px; color: #999;">
+                                {% trans "본 메일은 발신 전용입니다. 문의사항은 고객센터를 이용해주세요." %}
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

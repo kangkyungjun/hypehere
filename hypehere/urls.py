@@ -40,6 +40,7 @@ urlpatterns = [
     path("messages/", include("chat.urls")),  # Chat app: /messages/ (view)
     path("notifications/", include("notifications.urls")),  # Notifications: /notifications/ (view) + /notifications/api/ (API)
     path("learning/", include("learning.urls")),  # Learning: /learning/api/ (API)
+    path("admin-dashboard/", include("analytics.urls")),  # Admin dashboard and analytics
     path("i18n/", include("django.conf.urls.i18n")),  # Language selection
     path("jsi18n/", JavaScriptCatalog.as_view(), name='javascript-catalog'),  # JavaScript i18n
 ]

@@ -267,15 +267,18 @@ class AnonymousChatConsumer(AsyncWebsocketConsumer):
                 if not content:
                     return
 
-                # 익명 대화는 메시지를 DB에 저장하지 않음 (ephemeral)
-                # 실시간으로만 전송
+                # 익명 대화 메시지를 7일간 임시 저장 (하이브리드 방식)
+                message = await self.save_anonymous_message(content)
+
                 await self.channel_layer.group_send(
                     self.room_group_name,
                     {
                         'type': 'chat_message',
+                        'message_id': message.id,
                         'sender_id': self.user.id,
                         'content': content,
-                        'created_at': timezone.now().isoformat(),
+                        'created_at': message.created_at.isoformat(),
+                        'expires_at': message.expires_at.isoformat() if message.expires_at else None,
                     }
                 )
 
@@ -379,6 +382,23 @@ class AnonymousChatConsumer(AsyncWebsocketConsumer):
             return {'id': None, 'username': None}
         except Conversation.DoesNotExist:
             return {'id': None, 'username': None}
+
+    @database_sync_to_async
+    def save_anonymous_message(self, content):
+        """익명 대화 메시지를 7일 만료 설정으로 저장"""
+        from datetime import timedelta
+        from .models import Message, Conversation
+
+        conversation = Conversation.objects.get(id=self.conversation_id)
+        expires_at = timezone.now() + timedelta(days=7)
+
+        return Message.objects.create(
+            conversation=conversation,
+            sender=self.user,
+            content=content,
+            expires_at=expires_at,
+            is_expired=False
+        )
 
     @database_sync_to_async
     def cleanup_anonymous_conversation(self):

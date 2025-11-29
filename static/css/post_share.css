@@ -1,0 +1,278 @@
+/**
+ * Post Share Modal - Bottom Sheet Style
+ * Mobile-friendly bottom slide-up modal
+ */
+
+/* Overlay */
+.share-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 9998;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.share-modal-overlay.active {
+    opacity: 1;
+}
+
+/* Bottom Sheet Modal */
+.share-modal-bottom {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--color-bg, #ffffff);
+    border-radius: 20px 20px 0 0;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+    z-index: 9999;
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.share-modal-bottom.active {
+    transform: translateY(0);
+}
+
+/* Modal Header */
+.share-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px;
+    border-bottom: 1px solid var(--color-border, #e5e7eb);
+    position: sticky;
+    top: 0;
+    background: var(--color-bg, #ffffff);
+    z-index: 1;
+}
+
+.share-modal-header::before {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 4px;
+    background: var(--color-border, #e5e7eb);
+    border-radius: 2px;
+}
+
+.share-modal-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--color-text, #1f2937);
+    margin: 0;
+}
+
+.share-modal-close {
+    background: none;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    color: var(--color-text-secondary, #6b7280);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background-color 0.2s ease;
+}
+
+.share-modal-close:hover {
+    background-color: var(--color-bg-secondary, #f3f4f6);
+}
+
+.share-modal-close svg {
+    width: 24px;
+    height: 24px;
+}
+
+/* Modal Content */
+.share-modal-content {
+    padding: 16px 20px 32px;
+}
+
+/* Share Option Button */
+.share-option-btn {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    padding: 16px;
+    background: var(--color-bg, #ffffff);
+    border: 1px solid var(--color-border, #e5e7eb);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+}
+
+.share-option-btn:hover {
+    background: var(--color-bg-secondary, #f9fafb);
+    border-color: var(--color-primary, #3b82f6);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.share-option-btn:active {
+    transform: translateY(0);
+}
+
+.share-option-icon {
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-primary-light, #eff6ff);
+    border-radius: 12px;
+    color: var(--color-primary, #3b82f6);
+}
+
+.share-option-icon svg {
+    width: 24px;
+    height: 24px;
+}
+
+.share-option-text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.share-option-title {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--color-text, #1f2937);
+}
+
+.share-option-desc {
+    font-size: 13px;
+    color: var(--color-text-secondary, #6b7280);
+}
+
+/* Toast Notification */
+.share-toast {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-100px);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    background: var(--color-bg, #ffffff);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    z-index: 10000;
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    min-width: 200px;
+}
+
+.share-toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+}
+
+.share-toast-success {
+    border-left: 4px solid #10b981;
+}
+
+.share-toast-success svg {
+    color: #10b981;
+}
+
+.share-toast-error {
+    border-left: 4px solid #ef4444;
+}
+
+.share-toast-error svg {
+    color: #ef4444;
+}
+
+.share-toast svg {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+}
+
+.share-toast span {
+    font-size: 14px;
+    color: var(--color-text, #1f2937);
+    font-weight: 500;
+}
+
+/* Mobile Responsiveness */
+@media (min-width: 640px) {
+    .share-modal-bottom {
+        left: 50%;
+        right: auto;
+        transform: translateX(-50%) translateY(100%);
+        max-width: 480px;
+        border-radius: 20px;
+    }
+
+    .share-modal-bottom.active {
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    .share-modal-bottom,
+    .share-modal-header {
+        background: #1f2937;
+    }
+
+    .share-modal-title {
+        color: #f9fafb;
+    }
+
+    .share-modal-close {
+        color: #9ca3af;
+    }
+
+    .share-modal-close:hover {
+        background-color: #374151;
+    }
+
+    .share-option-btn {
+        background: #1f2937;
+        border-color: #374151;
+    }
+
+    .share-option-btn:hover {
+        background: #374151;
+        border-color: #3b82f6;
+    }
+
+    .share-option-icon {
+        background: rgba(59, 130, 246, 0.1);
+    }
+
+    .share-option-title {
+        color: #f9fafb;
+    }
+
+    .share-option-desc {
+        color: #9ca3af;
+    }
+
+    .share-toast {
+        background: #1f2937;
+    }
+
+    .share-toast span {
+        color: #f9fafb;
+    }
+}

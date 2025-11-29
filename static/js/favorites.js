@@ -298,7 +298,13 @@ class FavoritesManager {
       </div>
 
       <div class="post-content">
-        <p>${this.escapeHtml(post.content).replace(/\n/g, '<br>')}</p>
+        <p>${(() => {
+          let content = post.content;
+          if (content === '게시물은 신고에 의해 삭제되었습니다.') {
+            content = window.APP_I18N.deletedPostMessage || content;
+          }
+          return this.escapeHtml(content).replace(/\n/g, '<br>');
+        })()}</p>
         ${hashtagsHTML}
       </div>
 

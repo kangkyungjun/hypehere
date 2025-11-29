@@ -1,0 +1,2051 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "로또" %} - HypeHere{% endblock %}
+
+{% block content %}
+<div class="admin-dashboard-container">
+    <!-- Header -->
+    <div class="admin-header">
+        <div class="header-content">
+            <a href="{% url 'analytics:dashboard' %}" class="btn-back">&lt;</a>
+            <h1 class="admin-title">{% trans "로또" %} (Lottery)</h1>
+        </div>
+    </div>
+
+    <!-- Lottery Content -->
+    <div class="lottery-container">
+        <div class="overlap-card">
+            <div class="card-header-with-button">
+                <h2 class="card-title">{% trans "로또 중복 분석" %} ({{ current_round }}{% trans "회차" %})</h2>
+                <button type="button" class="btn-add-draw" id="btnAddDraw" title="새 당첨 번호 입력">+</button>
+            </div>
+            <div class="overlap-list">
+                <div class="overlap-item">
+                    <span class="overlap-label">• {% trans "1-1 중복" %}:</span>
+                    <span class="number">{{ duplicate_count }}{% trans "회" %}</span>
+                </div>
+                <div class="overlap-item">
+                    <span class="overlap-label">• {% trans "1-2 중복" %}:</span>
+                    {% if overlap_1_2 > 0 %}
+                        <span class="number clickable" data-pair="1-2">
+                            {{ overlap_1_2 }}{% trans "회" %}
+                            {% if previous_round > 0 %}
+                                {% if overlap_1_2 > prev_overlap_1_2 %}
+                                    <span class="trend-indicator trend-up">↑</span>
+                                {% elif overlap_1_2 < prev_overlap_1_2 %}
+                                    <span class="trend-indicator trend-down">↓</span>
+                                {% else %}
+                                    <span class="trend-indicator trend-same">→</span>
+                                {% endif %}
+                                <span class="trend-detail">({{ previous_round }}회: {{ prev_overlap_1_2 }}회)</span>
+                            {% endif %}
+                        </span>
+                    {% else %}
+                        <span class="number">0{% trans "회" %}</span>
+                    {% endif %}
+                </div>
+                <div class="overlap-item">
+                    <span class="overlap-label">• {% trans "1-3 중복" %}:</span>
+                    {% if overlap_1_3 > 0 %}
+                        <span class="number clickable" data-pair="1-3">
+                            {{ overlap_1_3 }}{% trans "회" %}
+                            {% if previous_round > 0 %}
+                                {% if overlap_1_3 > prev_overlap_1_3 %}
+                                    <span class="trend-indicator trend-up">↑</span>
+                                {% elif overlap_1_3 < prev_overlap_1_3 %}
+                                    <span class="trend-indicator trend-down">↓</span>
+                                {% else %}
+                                    <span class="trend-indicator trend-same">→</span>
+                                {% endif %}
+                                <span class="trend-detail">({{ previous_round }}회: {{ prev_overlap_1_3 }}회)</span>
+                            {% endif %}
+                        </span>
+                    {% else %}
+                        <span class="number">0{% trans "회" %}</span>
+                    {% endif %}
+                </div>
+                <div class="overlap-item">
+                    <span class="overlap-label">• {% trans "1-4 중복" %}:</span>
+                    {% if overlap_1_4 > 0 %}
+                        <span class="number clickable" data-pair="1-4">
+                            {{ overlap_1_4 }}{% trans "회" %}
+                            {% if previous_round > 0 %}
+                                {% if overlap_1_4 > prev_overlap_1_4 %}
+                                    <span class="trend-indicator trend-up">↑</span>
+                                {% elif overlap_1_4 < prev_overlap_1_4 %}
+                                    <span class="trend-indicator trend-down">↓</span>
+                                {% else %}
+                                    <span class="trend-indicator trend-same">→</span>
+                                {% endif %}
+                                <span class="trend-detail">({{ previous_round }}회: {{ prev_overlap_1_4 }}회)</span>
+                            {% endif %}
+                        </span>
+                    {% else %}
+                        <span class="number">0{% trans "회" %}</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Probability Analysis Card -->
+        <div class="overlap-card" style="margin-top: 20px;">
+            <h2 class="card-title">📊 {% trans "스마트 번호 당첨 확률 분석" %}</h2>
+            <div class="probability-stats" id="probabilityStats">
+                <p class="loading-text">{% trans "계산 중..." %}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Number Check Section -->
+    <div class="lottery-container" style="margin-top: 20px;">
+        <div class="overlap-card" style="max-width: 600px;">
+            <h2 class="card-title">{% trans "번호 확인" %}</h2>
+            <p class="card-desc">{% trans "당신의 번호가 역대 1~4등 당첨 번호였는지 확인하세요" %}</p>
+
+            <div class="number-input-section">
+                <div class="number-inputs">
+                    <input type="number" class="lotto-number-input" id="num1" min="1" max="45" placeholder="1">
+                    <input type="number" class="lotto-number-input" id="num2" min="1" max="45" placeholder="2">
+                    <input type="number" class="lotto-number-input" id="num3" min="1" max="45" placeholder="3">
+                    <input type="number" class="lotto-number-input" id="num4" min="1" max="45" placeholder="4">
+                    <input type="number" class="lotto-number-input" id="num5" min="1" max="45" placeholder="5">
+                    <input type="number" class="lotto-number-input" id="num6" min="1" max="45" placeholder="6">
+                </div>
+                <div style="display: flex; gap: 10px; align-items: center; flex-direction: column;">
+                    <!-- 기본 전략 -->
+                    <div style="width: 100%; display: flex; gap: 10px;">
+                        <button type="button" class="btn-check" id="btnCheck">{% trans "확인" %}</button>
+                        <button type="button" class="btn-generate" id="btnGenerate">{% trans "스마트 번호 생성" %}</button>
+                    </div>
+
+                    <!-- 추가 전략 -->
+                    <div class="strategy-section">
+                        <div class="strategy-label">📊 {% trans "고급 필터링 전략" %}</div>
+                        <div class="strategy-buttons">
+                            <button type="button" class="btn-strategy" id="btnStrategy1" data-strategy="strategy1">
+                                {% trans "추가전략 1" %} <span class="info-icon" data-info="strategy1">ⓘ</span>
+                            </button>
+                            <button type="button" class="btn-strategy" id="btnStrategy2" data-strategy="strategy2">
+                                {% trans "추가전략 2" %} <span class="info-icon" data-info="strategy2">ⓘ</span>
+                            </button>
+                            <button type="button" class="btn-strategy" id="btnStrategy3" data-strategy="strategy3">
+                                {% trans "추가전략 3" %} <span class="info-icon" data-info="strategy3">ⓘ</span>
+                            </button>
+                            <button type="button" class="btn-strategy" id="btnStrategy4" data-strategy="strategy4">
+                                {% trans "추가전략 4" %} <span class="info-icon" data-info="strategy4">ⓘ</span>
+                            </button>
+                            <button type="button" class="btn-strategy" id="btnStrategy5" data-strategy="strategy5">
+                                {% trans "통합 전략" %} <span class="info-icon" data-info="strategy5">ⓘ</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="error-message" id="errorMessage" style="display: none;"></div>
+            </div>
+        </div>
+
+        <!-- Saved Numbers Section -->
+        <div class="overlap-card" style="max-width: 600px; margin-top: 15px;">
+            <h2 class="card-title">{% trans "저장한 번호" %}</h2>
+            <div class="saved-numbers-list" id="savedNumbersList">
+                <p class="loading-text">{% trans "불러오는 중..." %}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Result Modal -->
+    <div id="resultModal" class="modal">
+        <div class="modal-content-custom">
+            <div class="modal-header-custom">
+                <h2 class="modal-title-custom">{% trans "결과" %}</h2>
+                <span class="close-custom" id="closeModal">&times;</span>
+            </div>
+            <div class="modal-body-custom">
+                <div class="result-message" id="resultMessage"></div>
+                <div class="result-numbers" id="resultNumbers"></div>
+                <div class="result-details" id="resultDetails"></div>
+            </div>
+            <div class="modal-footer-custom">
+                <button type="button" class="btn-cancel-custom" id="btnCancel">{% trans "취소" %}</button>
+                <button type="button" class="btn-save-custom" id="btnSave">{% trans "저장" %}</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteConfirmModal" class="modal">
+        <div class="modal-content-custom">
+            <div class="modal-header-custom">
+                <h2 class="modal-title-custom">{% trans "번호 삭제" %}</h2>
+                <span class="close-custom" id="closeDeleteModal">&times;</span>
+            </div>
+            <div class="modal-body-custom">
+                <p class="delete-confirm-message">{% trans "이 번호를 삭제하시겠습니까?" %}</p>
+            </div>
+            <div class="modal-footer-custom">
+                <button type="button" class="btn-cancel-custom" id="btnCancelDelete">{% trans "취소" %}</button>
+                <button type="button" class="btn-delete-confirm" id="btnConfirmDelete">{% trans "삭제" %}</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Strategy Info Modal -->
+    <div id="strategyInfoModal" class="modal">
+        <div class="modal-content-custom">
+            <div class="modal-header-custom">
+                <h2 class="modal-title-custom" id="strategyInfoTitle">{% trans "전략 설명" %}</h2>
+                <span class="close-custom" id="closeStrategyInfo">&times;</span>
+            </div>
+            <div class="modal-body-custom">
+                <div id="strategyInfoContent" style="text-align: left; line-height: 1.6;"></div>
+            </div>
+            <div class="modal-footer-custom">
+                <button type="button" class="btn-cancel-custom" id="btnCloseStrategyInfo">{% trans "확인" %}</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Draw Modal -->
+    <div id="addDrawModal" class="modal">
+        <div class="modal-content-large">
+            <div class="modal-header-custom">
+                <h2 class="modal-title-custom">{% trans "새 당첨 번호 입력" %}</h2>
+                <span class="close-custom" id="closeAddDrawModal">&times;</span>
+            </div>
+            <div class="modal-body-custom">
+                <form id="addDrawForm">
+                    <div class="form-row">
+                        <label for="drawDate">{% trans "추첨일" %}:</label>
+                        <input type="date" id="drawDate" class="form-input" required>
+                    </div>
+
+                    <div class="form-row">
+                        <label>{% trans "당첨 번호" %} (6개):</label>
+                        <div class="draw-number-inputs">
+                            <input type="number" class="draw-number-input" id="drawNum1" min="1" max="45" placeholder="1" required>
+                            <input type="number" class="draw-number-input" id="drawNum2" min="1" max="45" placeholder="2" required>
+                            <input type="number" class="draw-number-input" id="drawNum3" min="1" max="45" placeholder="3" required>
+                            <input type="number" class="draw-number-input" id="drawNum4" min="1" max="45" placeholder="4" required>
+                            <input type="number" class="draw-number-input" id="drawNum5" min="1" max="45" placeholder="5" required>
+                            <input type="number" class="draw-number-input" id="drawNum6" min="1" max="45" placeholder="6" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <label for="bonusNumber">{% trans "보너스 번호" %}:</label>
+                        <input type="number" id="bonusNumber" class="form-input" min="1" max="45" placeholder="7" required>
+                    </div>
+
+                    <div class="form-row">
+                        <label for="firstPrizeAmount">{% trans "1등 당첨금" %} (원):</label>
+                        <input type="number" id="firstPrizeAmount" class="form-input" min="0" placeholder="1000000000">
+                    </div>
+
+                    <div class="form-row">
+                        <label for="firstPrizeWinners">{% trans "1등 당첨자 수" %}:</label>
+                        <input type="number" id="firstPrizeWinners" class="form-input" min="0" placeholder="5">
+                    </div>
+
+                    <div class="form-row">
+                        <label for="secondPrizeAmount">{% trans "2등 당첨금" %} (원):</label>
+                        <input type="number" id="secondPrizeAmount" class="form-input" min="0" placeholder="50000000">
+                    </div>
+
+                    <div class="form-row">
+                        <label for="secondPrizeWinners">{% trans "2등 당첨자 수" %}:</label>
+                        <input type="number" id="secondPrizeWinners" class="form-input" min="0" placeholder="20">
+                    </div>
+
+                    <div class="error-message" id="drawErrorMessage" style="display: none;"></div>
+                </form>
+            </div>
+            <div class="modal-footer-custom">
+                <button type="button" class="btn-cancel-custom" id="btnCancelAddDraw">{% trans "취소" %}</button>
+                <button type="button" class="btn-save-custom" id="btnSaveDrawConfirm">{% trans "저장" %}</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals for each overlap pair -->
+    {% for pair_code, details in overlap_details.items %}
+    {% if details %}
+    <div id="overlapModal{{ pair_code }}" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>{% trans "등수 간 중복 조합 상세 정보" %} ({{ pair_code }})</h2>
+                <span class="close" data-modal="overlapModal{{ pair_code }}">&times;</span>
+            </div>
+            <div class="modal-body">
+                {% for detail in details %}
+                <div class="overlap-detail">
+                    <div class="combination-numbers">
+                        <strong>{% trans "조합:" %}</strong>
+                        {% for num in detail.numbers %}
+                            <span class="lotto-ball">{{ num }}</span>
+                        {% endfor %}
+                    </div>
+                    <div class="occurrence-info">
+                        <p><strong>{{ detail.first_rank }}:</strong> {{ detail.first_rank_round }}{% trans "회차" %} ({{ detail.first_rank_date }})</p>
+                        <p><strong>{{ detail.second_rank }}:</strong> {{ detail.second_rank_round }}{% trans "회차" %} ({{ detail.second_rank_date }})</p>
+                    </div>
+                </div>
+                {% if not forloop.last %}
+                <hr class="detail-divider">
+                {% endif %}
+                {% endfor %}
+            </div>
+            <div class="modal-footer">
+                <button class="close-btn" data-modal="overlapModal{{ pair_code }}">{% trans "닫기" %}</button>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.admin-dashboard-container {
+    min-height: 100vh;
+    background: white;
+    padding-bottom: 15px;
+}
+
+.admin-header {
+    background: white;
+    color: black;
+    padding: 10px 15px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.header-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.admin-title {
+    font-size: 32px;
+    font-weight: bold;
+    margin-bottom: 0;
+}
+
+.btn-back {
+    background: white;
+    color: black;
+    padding: 8px 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 24px;
+    transition: all 0.3s ease;
+    border: 1px solid #ccc;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+}
+
+.btn-back:hover {
+    background: #f5f5f5;
+    color: black;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.lottery-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 10px;
+}
+
+.overlap-card {
+    background: white;
+    border-radius: 8px;
+    padding: 15px 20px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+    max-width: 400px;
+    margin: 10px auto;
+    border: 1px solid #e0e0e0;
+}
+
+.card-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.card-desc {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 10px;
+}
+
+.result-value {
+    margin-bottom: 8px;
+}
+
+.result-value .number {
+    font-size: 32px;
+    font-weight: bold;
+    color: #1976d2;
+}
+
+.analysis-info {
+    font-size: 11px;
+    color: #999;
+    font-style: italic;
+}
+
+.number.clickable {
+    color: #1976d2;
+    cursor: pointer;
+    text-decoration: underline;
+    transition: color 0.3s ease;
+}
+
+.number.clickable:hover {
+    color: #0d47a1;
+}
+
+.click-hint {
+    font-size: 9px;
+    color: #1976d2;
+    margin-left: 4px;
+}
+
+.overlap-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 15px 0;
+}
+
+.overlap-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 0;
+}
+
+.overlap-label {
+    font-size: 14px;
+    color: #555;
+    font-weight: 500;
+}
+
+/* Trend Indicator Styles */
+.trend-indicator {
+    margin-left: 8px;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.trend-indicator.trend-up {
+    color: #f44336;  /* Red for increases (more duplicates = worse) */
+}
+
+.trend-indicator.trend-down {
+    color: #4CAF50;  /* Green for decreases (fewer duplicates = better) */
+}
+
+.trend-indicator.trend-same {
+    color: #9e9e9e;  /* Gray for no change */
+}
+
+.trend-detail {
+    font-size: 11px;
+    color: #999;
+    margin-left: 4px;
+    font-weight: normal;
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+    background-color: white;
+    margin: 5% auto;
+    padding: 0;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 600px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.modal-header {
+    padding: 15px 20px;
+    background-color: #1976d2;
+    color: white;
+    border-radius: 8px 8px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.close {
+    color: white;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.close:hover {
+    color: #f0f0f0;
+}
+
+.modal-body {
+    padding: 20px;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.overlap-detail {
+    margin-bottom: 15px;
+}
+
+.combination-numbers {
+    margin-bottom: 10px;
+}
+
+.lotto-ball {
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    border-radius: 50%;
+    background-color: #1976d2;
+    color: white;
+    text-align: center;
+    margin: 0 3px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.occurrence-info p {
+    margin: 8px 0;
+    font-size: 14px;
+}
+
+.occurrence-info ul {
+    margin: 5px 0;
+    padding-left: 20px;
+}
+
+.occurrence-info li {
+    font-size: 13px;
+    margin: 3px 0;
+}
+
+.detail-divider {
+    border: none;
+    border-top: 1px solid #e0e0e0;
+    margin: 15px 0;
+}
+
+.modal-footer {
+    padding: 12px 20px;
+    background-color: #f5f5f5;
+    border-radius: 0 0 8px 8px;
+    text-align: right;
+}
+
+.close-btn {
+    background-color: #1976d2;
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+.close-btn:hover {
+    background-color: #0d47a1;
+}
+
+/* Number Input Section */
+.number-input-section {
+    margin-top: 20px;
+}
+
+.number-inputs {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.lotto-number-input {
+    width: 100%;
+    height: 50px;
+    font-size: 20px;
+    text-align: center;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+}
+
+.lotto-number-input:focus {
+    outline: none;
+    border-color: #1976d2;
+    box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
+}
+
+.lotto-number-input.error {
+    border-color: #d32f2f;
+}
+
+.btn-check {
+    width: 100%;
+    height: 45px;
+    font-size: 16px;
+    font-weight: bold;
+    color: white;
+    background: #1976d2;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-check:hover {
+    background: #1565c0;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(25, 118, 210, 0.3);
+}
+
+.btn-check:active {
+    transform: translateY(0);
+}
+
+.btn-generate {
+    width: 100%;
+    height: 45px;
+    font-size: 16px;
+    font-weight: bold;
+    color: white;
+    background: #43a047;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.btn-generate:hover {
+    background: #388e3c;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(67, 160, 71, 0.3);
+}
+
+.btn-generate:active {
+    transform: translateY(0);
+}
+
+.btn-generate:disabled {
+    background: #9e9e9e;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Strategy Section Styles */
+.strategy-section {
+    width: 100%;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.strategy-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #555;
+    margin-bottom: 10px;
+    text-align: left;
+}
+
+.strategy-buttons {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
+
+.btn-strategy {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.btn-strategy:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.btn-strategy:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-strategy:active {
+    transform: translateY(0);
+}
+
+.info-icon {
+    display: inline-block;
+    margin-left: 4px;
+    font-size: 14px;
+    cursor: help;
+    opacity: 0.8;
+}
+
+.info-icon:hover {
+    opacity: 1;
+}
+
+.strategy-tag {
+    display: inline-block;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+    margin-right: 8px;
+}
+
+.error-message {
+    background: #ffebee;
+    color: #c62828;
+    padding: 10px 15px;
+    border-radius: 6px;
+    margin-top: 10px;
+    text-align: center;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+/* Saved Numbers */
+.saved-numbers-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.loading-text {
+    text-align: center;
+    color: #999;
+    font-size: 13px;
+    padding: 20px;
+}
+
+.no-data {
+    text-align: center;
+    color: #999;
+    font-size: 14px;
+    padding: 30px;
+}
+
+.error-text {
+    text-align: center;
+    color: #c62828;
+    font-size: 14px;
+    padding: 30px;
+}
+
+.saved-number-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    background: #f5f5f5;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.saved-number-item:hover {
+    background: #eeeeee;
+}
+
+.saved-number-balls {
+    display: flex;
+    gap: 6px;
+}
+
+.number-ball {
+    width: 32px;
+    height: 32px;
+    line-height: 32px;
+    border-radius: 50%;
+    background: #1976d2;
+    color: white;
+    text-align: center;
+    font-weight: bold;
+    font-size: 13px;
+}
+
+.saved-number-info {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    font-size: 11px;
+    color: #666;
+}
+
+.saved-number-round {
+    font-weight: bold;
+    color: #333;
+}
+
+.saved-number-date {
+    color: #999;
+}
+
+.saved-number-rank {
+    font-weight: bold;
+    color: #1976d2;
+    font-size: 12px;
+}
+
+.delete-number-btn {
+    background: #ff5252;
+    color: white;
+    border: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-left: 10px;
+}
+
+.delete-number-btn:hover {
+    background: #d32f2f;
+    transform: scale(1.1);
+}
+
+.delete-number-btn:active {
+    transform: scale(0.95);
+}
+
+.no-saved-numbers {
+    text-align: center;
+    color: #999;
+    padding: 30px 15px;
+    font-size: 13px;
+}
+
+/* Result Modal Custom (to avoid conflicts) */
+.modal-content-custom {
+    background-color: white;
+    margin: 10% auto;
+    padding: 0;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 450px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+}
+
+.modal-header-custom {
+    padding: 18px;
+    background: #1976d2;
+    color: white;
+    border-radius: 10px 10px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-title-custom {
+    margin: 0;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.close-custom {
+    color: white;
+    font-size: 26px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.close-custom:hover {
+    color: #f0f0f0;
+}
+
+.modal-body-custom {
+    padding: 25px;
+    text-align: center;
+}
+
+.result-message {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 18px;
+}
+
+.result-message.winning {
+    color: #2e7d32;
+}
+
+.result-message.not-winning {
+    color: #d32f2f;
+}
+
+.result-numbers {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 18px;
+}
+
+.result-number-ball {
+    width: 42px;
+    height: 42px;
+    line-height: 42px;
+    border-radius: 50%;
+    background: #1976d2;
+    color: white;
+    text-align: center;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.result-details {
+    font-size: 13px;
+    color: #666;
+    line-height: 1.6;
+}
+
+.result-details strong {
+    color: #333;
+}
+
+.modal-footer-custom {
+    padding: 15px;
+    background: #f5f5f5;
+    border-radius: 0 0 10px 10px;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.btn-cancel-custom,
+.btn-save-custom {
+    padding: 9px 20px;
+    font-size: 15px;
+    font-weight: 500;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-cancel-custom {
+    background: white;
+    color: #666;
+    border: 1px solid #ddd;
+}
+
+.btn-cancel-custom:hover {
+    background: #f5f5f5;
+    border-color: #bbb;
+}
+
+.btn-save-custom {
+    background: #1976d2;
+    color: white;
+}
+
+.btn-save-custom:hover {
+    background: #1565c0;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 4px rgba(25, 118, 210, 0.3);
+}
+
+.btn-save-custom:active {
+    transform: translateY(0);
+}
+
+.btn-delete-confirm {
+    background: #ff5252;
+    color: white;
+}
+
+.btn-delete-confirm:hover {
+    background: #d32f2f;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 4px rgba(255, 82, 82, 0.3);
+}
+
+.btn-delete-confirm:active {
+    transform: translateY(0);
+}
+
+.delete-confirm-message {
+    text-align: center;
+    font-size: 16px;
+    color: #333;
+    margin: 0;
+    padding: 10px 0;
+}
+
+/* Add Draw Button */
+.card-header-with-button {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+.card-header-with-button .card-title {
+    margin: 0;
+}
+
+.btn-add-draw {
+    background: #1976d2;
+    color: white;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-add-draw:hover {
+    background: #1565c0;
+    transform: scale(1.1);
+}
+
+/* Add Draw Modal */
+.modal-content-large {
+    background: white;
+    margin: 3% auto;
+    padding: 0;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 600px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+}
+
+.form-row {
+    margin-bottom: 15px;
+}
+
+.form-row label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+    color: #333;
+}
+
+.form-input {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #1976d2;
+}
+
+.draw-number-inputs {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+}
+
+.draw-number-input {
+    width: 100%;
+    height: 45px;
+    font-size: 16px;
+    text-align: center;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+}
+
+.draw-number-input:focus {
+    outline: none;
+    border-color: #1976d2;
+    box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .admin-title {
+        font-size: 24px;
+    }
+
+    .btn-back {
+        font-size: 20px;
+        padding: 6px 12px;
+        min-width: 40px;
+    }
+
+    .overlap-card {
+        padding: 12px 15px;
+        margin: 8px;
+    }
+
+    .card-title {
+        font-size: 14px;
+    }
+
+    .card-desc {
+        font-size: 12px;
+    }
+
+    .result-value .number {
+        font-size: 28px;
+    }
+
+    .analysis-info {
+        font-size: 10px;
+    }
+
+    .modal-content {
+        width: 95%;
+        margin: 10% auto;
+    }
+
+    .modal-header h2 {
+        font-size: 16px;
+    }
+
+    .lotto-ball {
+        width: 26px;
+        height: 26px;
+        line-height: 26px;
+        font-size: 12px;
+    }
+
+    .close-btn {
+        padding: 6px 15px;
+        font-size: 13px;
+    }
+
+    .number-inputs {
+        grid-template-columns: repeat(6, 1fr);
+        gap: 4px;
+    }
+
+    .lotto-number-input {
+        height: 40px;
+        font-size: 16px;
+    }
+
+    .btn-check {
+        height: 40px;
+        font-size: 15px;
+    }
+
+    .modal-content-custom {
+        width: 95%;
+        margin: 20% auto;
+    }
+
+    .result-numbers {
+        gap: 5px;
+    }
+
+    .result-number-ball {
+        width: 36px;
+        height: 36px;
+        line-height: 36px;
+        font-size: 14px;
+    }
+
+    .number-ball {
+        width: 28px;
+        height: 28px;
+        line-height: 28px;
+        font-size: 11px;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 모든 클릭 가능한 숫자에 이벤트 리스너 추가
+    document.querySelectorAll('.number.clickable').forEach(function(element) {
+        element.addEventListener('click', function() {
+            const pairCode = this.getAttribute('data-pair');
+            const modal = document.getElementById('overlapModal' + pairCode);
+            if (modal) {
+                modal.style.display = 'block';
+            }
+        });
+    });
+
+    // 모든 모달의 닫기 버튼 설정
+    document.querySelectorAll('.close, .close-btn').forEach(function(element) {
+        element.addEventListener('click', function() {
+            const modalId = this.getAttribute('data-modal');
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        });
+    });
+
+    // 모달 바깥 영역 클릭 시 닫기
+    window.addEventListener('click', function(event) {
+        if (event.target.classList.contains('modal')) {
+            event.target.style.display = 'none';
+        }
+    });
+
+    // ===== 로또 번호 확인 기능 =====
+    const numberInputs = [
+        document.getElementById('num1'),
+        document.getElementById('num2'),
+        document.getElementById('num3'),
+        document.getElementById('num4'),
+        document.getElementById('num5'),
+        document.getElementById('num6')
+    ];
+    const btnCheck = document.getElementById('btnCheck');
+    const errorMessage = document.getElementById('errorMessage');
+    const savedNumbersList = document.getElementById('savedNumbersList');
+    const resultModal = document.getElementById('resultModal');
+    const closeModal = document.getElementById('closeModal');
+    const btnCancel = document.getElementById('btnCancel');
+    const btnSave = document.getElementById('btnSave');
+    const resultMessage = document.getElementById('resultMessage');
+    const resultNumbers = document.getElementById('resultNumbers');
+    const resultDetails = document.getElementById('resultDetails');
+
+    // Delete modal elements
+    const deleteConfirmModal = document.getElementById('deleteConfirmModal');
+    const closeDeleteModal = document.getElementById('closeDeleteModal');
+    const btnCancelDelete = document.getElementById('btnCancelDelete');
+    const btnConfirmDelete = document.getElementById('btnConfirmDelete');
+
+    // Add Draw modal elements
+    const btnAddDraw = document.getElementById('btnAddDraw');
+    const addDrawModal = document.getElementById('addDrawModal');
+    const closeAddDrawModal = document.getElementById('closeAddDrawModal');
+    const btnCancelAddDraw = document.getElementById('btnCancelAddDraw');
+    const btnSaveDrawConfirm = document.getElementById('btnSaveDrawConfirm');
+    const drawErrorMessage = document.getElementById('drawErrorMessage');
+    const drawNumberInputs = [
+        document.getElementById('drawNum1'),
+        document.getElementById('drawNum2'),
+        document.getElementById('drawNum3'),
+        document.getElementById('drawNum4'),
+        document.getElementById('drawNum5'),
+        document.getElementById('drawNum6')
+    ];
+
+    // Generate button
+    const btnGenerate = document.getElementById('btnGenerate');
+
+    let currentCheckResult = null;
+    let pendingDeleteNumberId = null;
+    let wasGeneratedNumber = false;  // Track if numbers were auto-generated
+    let currentStrategy = 'basic';  // Track current strategy used
+
+    // Strategy descriptions
+    const strategyDescriptions = {
+        'strategy1': {
+            title: '추가전략 1: 빈출 번호 우선',
+            content: `
+                <h3 style="margin-top: 0;">📌 계산 방식</h3>
+                <ol style="padding-left: 20px;">
+                    <li>역대 전체 번호 출현 빈도 분석</li>
+                    <li>가장 많이 나온 상위 25개 번호 선택</li>
+                    <li>25개 중 6개 조합 생성 (C(25,6) = 177,100개)</li>
+                    <li>이미 나온 조합 제외 필터링</li>
+                </ol>
+                <h3>📊 실시간 확률</h3>
+                <div id="strategy1-stats" class="stats-loading">
+                    <p style="margin: 5px 0; color: #666;">불러오는 중...</p>
+                </div>
+            `
+        },
+        'strategy2': {
+            title: '추가전략 2: 홀짝 비율 최적화',
+            content: `
+                <h3 style="margin-top: 0;">📌 계산 방식</h3>
+                <ol style="padding-left: 20px;">
+                    <li>상위 25개 빈출번호 사용</li>
+                    <li>홀수 3개 + 짝수 3개 조합</li>
+                    <li>또는 홀수 4개 + 짝수 2개 조합</li>
+                    <li>이미 나온 조합 제외 필터링</li>
+                </ol>
+                <h3>📊 실시간 확률</h3>
+                <div id="strategy2-stats" class="stats-loading">
+                    <p style="margin: 5px 0; color: #666;">불러오는 중...</p>
+                </div>
+            `
+        },
+        'strategy3': {
+            title: '추가전략 3: 구간 분배 균형',
+            content: `
+                <h3 style="margin-top: 0;">📌 계산 방식</h3>
+                <ol style="padding-left: 20px;">
+                    <li>상위 25개 빈출번호 사용</li>
+                    <li>1~15 구간: 2개</li>
+                    <li>16~30 구간: 2개</li>
+                    <li>31~45 구간: 2개</li>
+                    <li>균등 분배로 조합 생성</li>
+                </ol>
+                <h3>📊 실시간 확률</h3>
+                <div id="strategy3-stats" class="stats-loading">
+                    <p style="margin: 5px 0; color: #666;">불러오는 중...</p>
+                </div>
+            `
+        },
+        'strategy4': {
+            title: '추가전략 4: 연속번호 제한',
+            content: `
+                <h3 style="margin-top: 0;">📌 계산 방식</h3>
+                <ol style="padding-left: 20px;">
+                    <li>상위 25개 빈출번호 사용</li>
+                    <li>연속 번호 최대 2개까지만 허용</li>
+                    <li>예: [7,8,14,21,28,35] - 7,8만 연속</li>
+                    <li>3개 이상 연속은 제외</li>
+                </ol>
+                <h3>📊 실시간 확률</h3>
+                <div id="strategy4-stats" class="stats-loading">
+                    <p style="margin: 5px 0; color: #666;">불러오는 중...</p>
+                </div>
+            `
+        },
+        'strategy5': {
+            title: '통합 전략: 전략 1+2+3+4 모두 적용',
+            content: `
+                <h3 style="margin-top: 0;">📌 계산 방식</h3>
+                <ol style="padding-left: 20px;">
+                    <li><strong>전략 1</strong>: 빈출 상위 25개 번호만 사용</li>
+                    <li><strong>전략 2</strong>: 홀짝 비율 3:3 또는 4:2 또는 2:4</li>
+                    <li><strong>전략 3</strong>: 구간별 균형 (1-15, 16-30, 31-45 각 최소 1개)</li>
+                    <li><strong>전략 4</strong>: 연속번호 최대 2개 제한</li>
+                    <li>모든 조건을 동시에 만족하는 조합만 생성</li>
+                    <li>이미 나온 조합 제외</li>
+                </ol>
+                <h3>📊 실시간 확률</h3>
+                <div id="strategy5-stats" class="stats-loading">
+                    <p style="margin: 5px 0; color: #666;">불러오는 중...</p>
+                </div>
+                <p style="margin-top: 12px; padding: 10px; background: #fff3e0; border-left: 3px solid #ff9800; font-size: 12px; color: #e65100;">
+                    <strong>⚡ 최고 난이도 전략</strong><br>
+                    4가지 필터를 모두 적용하여 가장 높은 개선 배수를 제공합니다.
+                </p>
+            `
+        }
+    };
+
+    function getCSRFToken() {
+        return document.querySelector('[name=csrfmiddlewaretoken]')?.value ||
+               document.cookie.split('; ').find(row => row.startsWith('csrftoken='))?.split('=')[1];
+    }
+
+    function validateNumbers() {
+        const numbers = numberInputs.map(input => parseInt(input.value));
+
+        if (numbers.some(isNaN)) {
+            showError('6개의 번호를 모두 입력해주세요');
+            return null;
+        }
+
+        if (numbers.some(n => n < 1 || n > 45)) {
+            showError('1부터 45 사이의 숫자를 입력해주세요');
+            return null;
+        }
+
+        const uniqueNumbers = new Set(numbers);
+        if (uniqueNumbers.size !== 6) {
+            showError('중복되지 않은 6개의 번호를 입력해주세요');
+            return null;
+        }
+
+        hideError();
+        return numbers;
+    }
+
+    function showError(message) {
+        errorMessage.textContent = message;
+        errorMessage.style.display = 'block';
+
+        numberInputs.forEach(input => {
+            if (!input.value || parseInt(input.value) < 1 || parseInt(input.value) > 45) {
+                input.classList.add('error');
+            }
+        });
+
+        setTimeout(() => hideError(), 3000);
+    }
+
+    function hideError() {
+        errorMessage.style.display = 'none';
+        numberInputs.forEach(input => input.classList.remove('error'));
+    }
+
+    async function checkNumbers() {
+        const numbers = validateNumbers();
+        if (!numbers) return;
+
+        // Reset generated flag when manually checking numbers
+        wasGeneratedNumber = false;
+
+        btnCheck.disabled = true;
+        btnCheck.textContent = '확인 중...';
+
+        try {
+            const response = await fetch('/admin-dashboard/lottery/check-number/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken()
+                },
+                body: JSON.stringify({ numbers })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                currentCheckResult = data;
+                showResultModal(data);
+            } else {
+                showError(data.error || '확인 중 오류가 발생했습니다');
+            }
+        } catch (error) {
+            console.error('Check error:', error);
+            showError('네트워크 오류가 발생했습니다');
+        } finally {
+            btnCheck.disabled = false;
+            btnCheck.textContent = '확인';
+        }
+    }
+
+    function showResultModal(data) {
+        resultMessage.className = 'result-message ' + (data.is_winning ? 'winning' : 'not-winning');
+        resultMessage.textContent = data.message;
+
+        resultNumbers.innerHTML = data.numbers.map(num =>
+            `<div class="result-number-ball">${num}</div>`
+        ).join('');
+
+        if (data.is_winning) {
+            resultDetails.innerHTML = `
+                <strong>회차:</strong> ${data.round_number}회<br>
+                <strong>등수:</strong> ${data.rank}<br>
+                <strong>추첨일:</strong> ${data.draw_date || '정보 없음'}
+            `;
+        } else {
+            resultDetails.innerHTML = '<p>이 번호 조합은 역대 1~4등 당첨 번호가 아닙니다</p>';
+        }
+
+        resultModal.style.display = 'block';
+    }
+
+    function hideResultModal() {
+        resultModal.style.display = 'none';
+        currentCheckResult = null;
+    }
+
+    async function saveNumbers() {
+        if (!currentCheckResult) return;
+
+        // Check 20-number limit
+        const savedCount = savedNumbersList.querySelectorAll('.saved-number-item').length;
+        if (savedCount >= 20) {
+            alert('최대 20개까지만 저장할 수 있습니다. 먼저 기존 번호를 삭제해주세요.');
+            return;
+        }
+
+        let roundNumber = currentCheckResult.round_number;
+
+        // For non-winning numbers, use 0 as placeholder (no prompt)
+        if (!currentCheckResult.is_winning) {
+            roundNumber = 0;
+        }
+
+        btnSave.disabled = true;
+        btnSave.textContent = '저장 중...';
+
+        try {
+            const response = await fetch('/admin-dashboard/lottery/save-number/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken()
+                },
+                body: JSON.stringify({
+                    numbers: currentCheckResult.numbers,
+                    round_number: roundNumber,
+                    strategy: currentStrategy
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                alert(data.message || '번호가 저장되었습니다');
+                hideResultModal();
+                loadSavedNumbers();
+                clearInputs();
+            } else {
+                alert(data.error || '저장 중 오류가 발생했습니다');
+            }
+        } catch (error) {
+            console.error('Save error:', error);
+            alert('네트워크 오류가 발생했습니다');
+        } finally {
+            btnSave.disabled = false;
+            btnSave.textContent = '저장';
+        }
+    }
+
+    async function generateSmartNumbers() {
+        // Reset strategy to basic
+        currentStrategy = 'basic';
+
+        // Disable button and show loading state
+        btnGenerate.disabled = true;
+        btnGenerate.textContent = '생성 중...';
+
+        try {
+            const response = await fetch('/admin-dashboard/lottery/generate-smart-numbers/', {
+                method: 'GET',
+                headers: {
+                    'X-CSRFToken': getCSRFToken()
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.success && data.numbers && data.numbers.length === 6) {
+                // Auto-fill the 6 input fields
+                data.numbers.forEach((num, index) => {
+                    numberInputs[index].value = num;
+                    numberInputs[index].classList.remove('error');
+                });
+
+                // Clear any error messages
+                hideError();
+
+                // Mark as generated number to skip round prompt later
+                wasGeneratedNumber = true;
+
+                // Optional: Show success message
+                // alert('스마트 번호가 생성되었습니다!');
+            } else {
+                showError(data.error || '번호 생성에 실패했습니다. 다시 시도해주세요.');
+            }
+        } catch (error) {
+            console.error('Generate smart numbers error:', error);
+            showError('네트워크 오류가 발생했습니다.');
+        } finally {
+            btnGenerate.disabled = false;
+            btnGenerate.textContent = '스마트 번호 생성';
+        }
+    }
+
+    // Strategy generation functions
+    async function generateStrategyNumbers(strategy) {
+        const btnStrategy = document.querySelector(`[data-strategy="${strategy}"]`);
+        btnStrategy.disabled = true;
+        btnStrategy.textContent = '생성 중...';
+
+        try {
+            const response = await fetch(`/admin-dashboard/lottery/generate-${strategy}/`, {
+                method: 'GET',
+                headers: {
+                    'X-CSRFToken': getCSRFToken()
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.success && data.numbers && data.numbers.length === 6) {
+                data.numbers.forEach((num, index) => {
+                    numberInputs[index].value = num;
+                });
+                currentStrategy = strategy;
+                wasGeneratedNumber = true;
+                hideError();
+            } else {
+                showError(data.error || '번호 생성에 실패했습니다');
+            }
+        } catch (error) {
+            console.error('Strategy generation error:', error);
+            showError('번호 생성 중 오류가 발생했습니다');
+        } finally {
+            btnStrategy.disabled = false;
+            btnStrategy.innerHTML = `추가전략 ${strategy.slice(-1)} <span class="info-icon" data-info="${strategy}">ⓘ</span>`;
+        }
+    }
+
+    // Load strategy probability from server
+    async function loadStrategyProbability(strategy) {
+        const statsDiv = document.getElementById(`${strategy}-stats`);
+
+        try {
+            const response = await fetch(`/admin-dashboard/lottery/strategy-probability/${strategy}/`, {
+                method: 'GET',
+                headers: {
+                    'X-CSRFToken': getCSRFToken()
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                statsDiv.innerHTML = `
+                    <p style="margin: 5px 0;">• 조합 수: <strong>${data.remaining_combinations.toLocaleString()}</strong>개</p>
+                    <p style="margin: 5px 0;">• 당첨 확률: <strong>1/${data.remaining_combinations.toLocaleString()}</strong> (${data.probability_percent})</p>
+                    <p style="margin: 5px 0;">• 일반 로또 대비: <strong style="color: #43a047;">${Math.round(data.improvement_ratio)}배 향상</strong></p>
+                    <p style="margin: 8px 0 0 0; font-size: 11px; color: #999;">기준: ${data.round_number}회차 | 업데이트: ${data.last_updated}</p>
+                `;
+            } else {
+                statsDiv.innerHTML = `<p style="color: #d32f2f; margin: 5px 0;">⚠️ ${data.error}</p>`;
+            }
+        } catch (error) {
+            console.error('Load strategy probability error:', error);
+            statsDiv.innerHTML = `<p style="color: #d32f2f; margin: 5px 0;">⚠️ 네트워크 오류가 발생했습니다</p>`;
+        }
+    }
+
+    // Show strategy info modal
+    function showStrategyInfo(strategy) {
+        const modal = document.getElementById('strategyInfoModal');
+        const title = document.getElementById('strategyInfoTitle');
+        const content = document.getElementById('strategyInfoContent');
+
+        const info = strategyDescriptions[strategy];
+        if (info) {
+            title.textContent = info.title;
+            content.innerHTML = info.content;
+            modal.style.display = 'block';
+
+            // Load probability data after modal is shown
+            loadStrategyProbability(strategy);
+        }
+    }
+
+    async function loadSavedNumbers() {
+        savedNumbersList.innerHTML = '<p class="loading-text">불러오는 중...</p>';
+
+        try {
+            const response = await fetch('/admin-dashboard/lottery/my-numbers/', {
+                method: 'GET',
+                headers: {
+                    'X-CSRFToken': getCSRFToken()
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.success && data.numbers.length > 0) {
+                savedNumbersList.innerHTML = data.numbers.map(item => {
+                    const strategyNames = {
+                        'basic': '기본 스마트',
+                        'strategy1': '추가전략 1',
+                        'strategy2': '추가전략 2',
+                        'strategy3': '추가전략 3',
+                        'strategy4': '추가전략 4',
+                        'strategy5': '통합 전략'
+                    };
+                    const strategyLabel = strategyNames[item.strategy_type] || '기본 스마트';
+
+                    return `
+                    <div class="saved-number-item">
+                        <div class="saved-number-balls">
+                            <span class="strategy-tag">${strategyLabel}</span>
+                            ${item.numbers.map(num =>
+                                `<div class="number-ball">${num}</div>`
+                            ).join('')}
+                        </div>
+                        <div class="saved-number-info">
+                            <div class="saved-number-date">${item.created_at}</div>
+                            ${item.matched_rank ? `<div class="saved-number-rank">${item.round_number}회 ${item.matched_rank}</div>` : `<div class="saved-number-rank">${item.round_number}회 미확인</div>`}
+                        </div>
+                        <button class="delete-number-btn" data-number-id="${item.id}" title="삭제">×</button>
+                    </div>
+                    `;
+                }).join('');
+            } else {
+                savedNumbersList.innerHTML = '<p class="no-saved-numbers">아직 저장한 번호가 없습니다</p>';
+            }
+
+            // 삭제 버튼에 이벤트 리스너 추가
+            document.querySelectorAll('.delete-number-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const numberId = this.getAttribute('data-number-id');
+                    deleteNumber(numberId);
+                });
+            });
+        } catch (error) {
+            console.error('Load saved numbers error:', error);
+            savedNumbersList.innerHTML = '<p class="no-saved-numbers">번호를 불러오는 중 오류가 발생했습니다</p>';
+        }
+    }
+
+    function deleteNumber(numberId) {
+        // Store the number ID and show delete confirmation modal
+        pendingDeleteNumberId = numberId;
+        deleteConfirmModal.style.display = 'block';
+    }
+
+    async function confirmDelete() {
+        if (!pendingDeleteNumberId) return;
+
+        try {
+            const response = await fetch(`/admin-dashboard/lottery/my-numbers/${pendingDeleteNumberId}/`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': getCSRFToken()
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                deleteConfirmModal.style.display = 'none';
+                pendingDeleteNumberId = null;
+                await loadSavedNumbers();
+            } else {
+                alert(data.error || '삭제 중 오류가 발생했습니다');
+            }
+        } catch (error) {
+            console.error('Delete error:', error);
+            alert('네트워크 오류가 발생했습니다');
+        }
+    }
+
+    function cancelDelete() {
+        deleteConfirmModal.style.display = 'none';
+        pendingDeleteNumberId = null;
+    }
+
+    // Add Draw functions
+    function showAddDrawModal() {
+        // Reset form
+        document.getElementById('addDrawForm').reset();
+        drawErrorMessage.style.display = 'none';
+        addDrawModal.style.display = 'block';
+    }
+
+    function hideAddDrawModal() {
+        addDrawModal.style.display = 'none';
+    }
+
+    async function saveNewDraw() {
+        const drawDate = document.getElementById('drawDate').value;
+        const numbers = drawNumberInputs.map(input => parseInt(input.value));
+        const bonusNumber = parseInt(document.getElementById('bonusNumber').value);
+        const firstPrizeAmount = parseInt(document.getElementById('firstPrizeAmount').value) || null;
+        const firstPrizeWinners = parseInt(document.getElementById('firstPrizeWinners').value) || null;
+        const secondPrizeAmount = parseInt(document.getElementById('secondPrizeAmount').value) || null;
+        const secondPrizeWinners = parseInt(document.getElementById('secondPrizeWinners').value) || null;
+
+        // Validation
+        if (!drawDate) {
+            showDrawError('추첨일을 입력해주세요');
+            return;
+        }
+
+        if (numbers.some(isNaN)) {
+            showDrawError('6개의 당첨 번호를 모두 입력해주세요');
+            return;
+        }
+
+        if (isNaN(bonusNumber)) {
+            showDrawError('보너스 번호를 입력해주세요');
+            return;
+        }
+
+        if (numbers.some(n => n < 1 || n > 45) || bonusNumber < 1 || bonusNumber > 45) {
+            showDrawError('1~45 범위의 숫자를 입력해주세요');
+            return;
+        }
+
+        const uniqueNumbers = new Set(numbers);
+        if (uniqueNumbers.size !== 6) {
+            showDrawError('중복되지 않은 6개의 번호를 입력해주세요');
+            return;
+        }
+
+        if (numbers.includes(bonusNumber)) {
+            showDrawError('보너스 번호는 당첨 번호와 중복될 수 없습니다');
+            return;
+        }
+
+        try {
+            const response = await fetch('/admin-dashboard/lottery/save-draw/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken()
+                },
+                body: JSON.stringify({
+                    draw_date: drawDate,
+                    numbers: numbers,
+                    bonus_number: bonusNumber,
+                    first_prize_amount: firstPrizeAmount,
+                    first_prize_winners: firstPrizeWinners,
+                    second_prize_amount: secondPrizeAmount,
+                    second_prize_winners: secondPrizeWinners
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                hideAddDrawModal();
+                alert(`${data.round_number}회차 당첨 번호가 저장되었습니다\n(${data.combinations_created}개의 조합 생성됨)`);
+                location.reload(); // Reload to show updated data
+            } else {
+                showDrawError(data.error || '저장 중 오류가 발생했습니다');
+            }
+        } catch (error) {
+            console.error('Save draw error:', error);
+            showDrawError('네트워크 오류가 발생했습니다');
+        }
+    }
+
+    function showDrawError(message) {
+        drawErrorMessage.textContent = message;
+        drawErrorMessage.style.display = 'block';
+        setTimeout(() => {
+            drawErrorMessage.style.display = 'none';
+        }, 5000);
+    }
+
+    function clearInputs() {
+        numberInputs.forEach(input => {
+            input.value = '';
+            input.classList.remove('error');
+        });
+        hideError();
+    }
+
+    function setupAutoFocus() {
+        numberInputs.forEach((input, index) => {
+            input.addEventListener('input', function() {
+                // 숫자만 입력 허용
+                this.value = this.value.replace(/[^0-9]/g, '');
+
+                let value = parseInt(this.value);
+
+                // 범위 검증 및 자동 조정 (1-45)
+                if (this.value !== '') {
+                    if (value > 45) {
+                        this.value = '45';
+                        value = 45;
+                    }
+                    if (value < 1) {
+                        this.value = '1';
+                        value = 1;
+                    }
+                }
+
+                // 2자리 숫자 입력 시에만 자동으로 다음 칸으로 이동
+                if (this.value.length === 2 && index < numberInputs.length - 1) {
+                    numberInputs[index + 1].focus();
+                }
+
+                this.classList.remove('error');
+            });
+
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Backspace' && !this.value && index > 0) {
+                    numberInputs[index - 1].focus();
+                }
+            });
+        });
+    }
+
+    // Event listeners
+    btnCheck.addEventListener('click', checkNumbers);
+    btnGenerate.addEventListener('click', generateSmartNumbers);
+    closeModal.addEventListener('click', hideResultModal);
+    btnCancel.addEventListener('click', hideResultModal);
+    btnSave.addEventListener('click', saveNumbers);
+
+    // Delete modal event listeners
+    closeDeleteModal.addEventListener('click', cancelDelete);
+    btnCancelDelete.addEventListener('click', cancelDelete);
+    btnConfirmDelete.addEventListener('click', confirmDelete);
+
+    // Add Draw modal event listeners
+    btnAddDraw.addEventListener('click', showAddDrawModal);
+    closeAddDrawModal.addEventListener('click', hideAddDrawModal);
+    btnCancelAddDraw.addEventListener('click', hideAddDrawModal);
+    btnSaveDrawConfirm.addEventListener('click', saveNewDraw);
+
+    numberInputs.forEach(input => {
+        input.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                checkNumbers();
+            }
+        });
+    });
+
+    // Strategy button event listeners
+    document.querySelectorAll('.btn-strategy').forEach(btn => {
+        btn.addEventListener('click', async function() {
+            const strategy = this.dataset.strategy;
+            await generateStrategyNumbers(strategy);
+        });
+    });
+
+    // Info icon click handler (event delegation for dynamically added icons)
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('info-icon')) {
+            e.stopPropagation();
+            const strategy = e.target.dataset.info;
+            showStrategyInfo(strategy);
+        }
+    });
+
+    // Strategy modal close handlers
+    document.getElementById('closeStrategyInfo').addEventListener('click', function() {
+        document.getElementById('strategyInfoModal').style.display = 'none';
+    });
+    document.getElementById('btnCloseStrategyInfo').addEventListener('click', function() {
+        document.getElementById('strategyInfoModal').style.display = 'none';
+    });
+
+    // ===== Load Probability Stats =====
+    async function loadProbabilityStats() {
+        const probabilityStats = document.getElementById('probabilityStats');
+        try {
+            const response = await fetch('/admin-dashboard/lottery/probability-stats/', {
+                method: 'GET',
+                headers: {
+                    'X-CSRFToken': getCSRFToken()
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // Helper function to generate trend indicator
+                const getTrendHTML = (current, previous, delta, invertColors = false) => {
+                    if (!data.previous_round || previous === 0) return '';
+
+                    let arrow = '→';
+                    let className = 'trend-same';
+
+                    if (delta > 0) {
+                        arrow = '↑';
+                        className = invertColors ? 'trend-down' : 'trend-up';
+                    } else if (delta < 0) {
+                        arrow = '↓';
+                        className = invertColors ? 'trend-up' : 'trend-down';
+                    }
+
+                    return `<span class="trend-indicator ${className}">${arrow}</span> <span class="trend-detail">(${data.previous_round}회: ${previous.toLocaleString()})</span>`;
+                };
+
+                probabilityStats.innerHTML = `
+                    <div class="overlap-list">
+                        <div class="overlap-item">
+                            <span class="overlap-label">• {% trans "전체 가능 조합" %}:</span>
+                            <span class="number">${data.total_combinations.toLocaleString()}</span>
+                        </div>
+                        <div class="overlap-item">
+                            <span class="overlap-label">• {% trans "제외된 조합" %} (1~4{% trans "등" %}):</span>
+                            <span class="number">
+                                ${data.excluded_count.toLocaleString()}
+                                ${getTrendHTML(data.excluded_count, data.prev_excluded_count, data.excluded_delta)}
+                            </span>
+                        </div>
+                        <div class="overlap-item">
+                            <span class="overlap-label">• {% trans "중복된 숫자 개수" %}:</span>
+                            <span class="number">
+                                ${data.duplicate_count.toLocaleString()}
+                                ${getTrendHTML(data.duplicate_count, data.prev_duplicate_count, data.duplicate_delta)}
+                            </span>
+                        </div>
+                        <div class="overlap-item">
+                            <span class="overlap-label">• {% trans "남은 조합" %}:</span>
+                            <span class="number">
+                                ${data.remaining_combinations.toLocaleString()}
+                                ${getTrendHTML(data.remaining_combinations, data.prev_remaining_combinations, data.remaining_delta, true)}
+                            </span>
+                        </div>
+                        <div class="overlap-item" style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1);">
+                            <span class="overlap-label" style="font-weight: 600;">🎯 {% trans "당첨 확률" %}:</span>
+                            <span class="number" style="color: #4CAF50; font-weight: 600;">${data.probability_fraction} (${data.probability_percent}%)</span>
+                        </div>
+                        <div class="overlap-item">
+                            <span class="overlap-label">✨ {% trans "일반 대비" %}:</span>
+                            <span class="number" style="color: #FF9800;">${data.improvement_ratio}{% trans "배 향상" %}</span>
+                        </div>
+                    </div>
+                `;
+            } else {
+                probabilityStats.innerHTML = '<p class="error-text">' + data.error + '</p>';
+            }
+        } catch (error) {
+            console.error('Load probability stats error:', error);
+            probabilityStats.innerHTML = '<p class="error-text">{% trans "통계를 불러오는 중 오류가 발생했습니다" %}</p>';
+        }
+    }
+
+    // Initialize
+    setupAutoFocus();
+    loadSavedNumbers();
+    loadProbabilityStats();
+});
+</script>
+{% endblock %}

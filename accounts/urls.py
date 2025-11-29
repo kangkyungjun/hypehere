@@ -6,6 +6,7 @@ from .views import (
     ProfileTemplateView,
     ProfileUpdateTemplateView,
     SettingsTemplateView,
+    AdminPanelView,
     NotificationSettingsTemplateView,
     FollowersListTemplateView,
     FollowingListTemplateView,
@@ -26,6 +27,8 @@ from .views import (
     LiftSuspensionAPIView,
     BanUserAPIView,
     UnbanUserAPIView,
+    password_reset_request_view,
+    PasswordResetRequestAPIView,
 )
 
 app_name = 'accounts'
@@ -35,6 +38,7 @@ urlpatterns = [
     path('register/', RegisterTemplateView.as_view(), name='register'),
     path('login/', LoginTemplateView.as_view(), name='login'),
     path('logout/', LogoutTemplateView.as_view(), name='logout'),
+    path('password-reset/', password_reset_request_view, name='password_reset'),
     path('profile/', ProfileTemplateView.as_view(), name='profile'),
     path('profile/<str:username>/', ProfileTemplateView.as_view(), name='profile_detail'),
     path('profile/<str:username>/followers/', FollowersListTemplateView.as_view(), name='followers_list'),
@@ -45,6 +49,7 @@ urlpatterns = [
     path('settings/privacy/', PrivacySettingsTemplateView.as_view(), name='privacy_settings'),
     path('settings/blocked-users/', BlockedUsersListTemplateView.as_view(), name='blocked_users'),
     path('settings/account-management/', AccountManagementTemplateView.as_view(), name='account_management'),
+    path('admin-panel/', AdminPanelView.as_view(), name='admin_panel'),
     path('favorites/', FavoritesTemplateView.as_view(), name='favorites'),
     path('reports/', ReportHistoryTemplateView.as_view(), name='report_history'),
 
@@ -65,4 +70,7 @@ urlpatterns = [
     path('api/admin/<str:username>/lift-suspension/', LiftSuspensionAPIView.as_view(), name='admin_lift_suspension'),
     path('api/admin/<str:username>/ban/', BanUserAPIView.as_view(), name='admin_ban_user'),
     path('api/admin/<str:username>/unban/', UnbanUserAPIView.as_view(), name='admin_unban_user'),
+
+    # Password Reset API
+    path('api/password-reset/', PasswordResetRequestAPIView.as_view(), name='password_reset_api'),
 ]

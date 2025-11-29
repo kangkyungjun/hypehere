@@ -95,6 +95,38 @@ class User(AbstractUser):
         verbose_name='성별'
     )
 
+    # Language learning preferences
+    native_language = models.CharField(
+        max_length=2,
+        choices=[
+            ('ko', '한국어'),
+            ('en', 'English'),
+            ('ja', '日本語'),
+            ('zh', '中文'),
+            ('es', 'Español'),
+            ('fr', 'Français'),
+            ('de', 'Deutsch')
+        ],
+        blank=True,
+        default='',
+        verbose_name='모국어'
+    )
+    target_language = models.CharField(
+        max_length=2,
+        choices=[
+            ('ko', '한국어'),
+            ('en', 'English'),
+            ('ja', '日本語'),
+            ('zh', '中文'),
+            ('es', 'Español'),
+            ('fr', 'Français'),
+            ('de', 'Deutsch')
+        ],
+        blank=True,
+        default='',
+        verbose_name='학습 언어'
+    )
+
     # Account status
     is_verified = models.BooleanField(default=False)
     is_premium = models.BooleanField(default=False)
@@ -462,3 +494,26 @@ class SupportTicket(models.Model):
     def has_response(self):
         """Check if admin has responded"""
         return bool(self.admin_response)
+
+
+class PasswordResetAttempt(models.Model):
+    """
+    Track password reset attempts for rate limiting.
+
+    This model records each password reset request to prevent abuse.
+    Rate limiting: Maximum 3 attempts per email per hour.
+    """
+    email = models.EmailField(verbose_name='이메일')
+    attempted_at = models.DateTimeField(auto_now_add=True, verbose_name='시도 시간')
+    ip_address = models.GenericIPAddressField(null=True, blank=True, verbose_name='IP 주소')
+
+    class Meta:
+        ordering = ['-attempted_at']
+        verbose_name = 'Password Reset Attempt'
+        verbose_name_plural = 'Password Reset Attempts'
+        indexes = [
+            models.Index(fields=['email', '-attempted_at']),
+        ]
+
+    def __str__(self):
+        return f"{self.email} - {self.attempted_at.strftime('%Y-%m-%d %H:%M:%S')}"

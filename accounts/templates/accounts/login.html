@@ -47,6 +47,14 @@
                     >
                 </div>
 
+                <!-- UI Language Selector -->
+                <div class="form-group">
+                    <label for="ui_language" class="form-label">{% trans "화면 언어 (선택)" %}</label>
+                    <div id="ui-language-selector-container"></div>
+                    <input type="hidden" id="ui_language" name="ui_language">
+                    <span class="form-text">{% trans "선택하면 즉시 페이지 언어가 변경됩니다." %}</span>
+                </div>
+
                 <div class="form-check mb-lg">
                     <input type="checkbox" class="form-check-input" id="remember_me" name="remember_me">
                     <label class="form-check-label" for="remember_me">
@@ -61,7 +69,7 @@
 
             <div class="text-center mt-lg">
                 <p class="text-light mb-sm">
-                    <a href="#" class="text-primary">{% trans "비밀번호를 잊으셨나요?" %}</a>
+                    <a href="{% url 'accounts:password_reset' %}" class="text-primary">{% trans "비밀번호를 잊으셨나요?" %}</a>
                 </p>
                 <p class="text-light">
                     {% trans "계정이 없으신가요?" %}
@@ -71,4 +79,75 @@
         </div>
     </div>
 </div>
+
+<!-- JavaScript for Language Selector -->
+<script src="{% static 'js/languages.js' %}"></script>
+<script src="{% static 'js/language-selector.js' %}"></script>
+<script>
+// CSRF Token Helper
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+const csrftoken = getCookie('csrftoken');
+
+// Initialize UI Language Selector on login page
+document.addEventListener('DOMContentLoaded', function() {
+    const uiLanguageContainer = document.getElementById('ui-language-selector-container');
+    const uiLanguageInput = document.getElementById('ui_language');
+
+    if (uiLanguageContainer && uiLanguageInput && typeof LanguageSelector !== 'undefined' && typeof LANGUAGES !== 'undefined') {
+        // Filter languages to only show those supported by Django i18n
+        // Django LANGUAGES: ko, en, ja, es (from settings.py)
+        const supportedUiLanguages = LANGUAGES.filter(lang =>
+            ['KO', 'EN', 'JA', 'ES'].includes(lang.code)
+        );
+
+        const uiLanguageSelector = new LanguageSelector('ui-language-selector-container', {
+            languages: supportedUiLanguages,  // Only show supported languages
+            useNativeNames: true,  // Show languages in their native scripts
+            onChange: async (language) => {
+                uiLanguageInput.value = language ? language.code : '';
+
+                // Instantly change page language
+                if (language && language.code) {
+                    console.log('Language selected:', language.code);
+
+                    const formData = new FormData();
+                    formData.append('language', language.code.toLowerCase());
+
+                    try {
+                        console.log('Sending language change request...');
+                        const response = await fetch('/i18n/setlang/', {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRFToken': csrftoken
+                            },
+                            body: formData
+                        });
+
+                        console.log('Language change response:', response.status);
+
+                        // Reload page to apply new language
+                        window.location.reload();
+                    } catch (error) {
+                        console.error('Language switch error:', error);
+                    }
+                }
+            }
+        });
+    }
+});
+</script>
 {% endblock %}

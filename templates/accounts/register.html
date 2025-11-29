@@ -1,7 +1,12 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load i18n %}
 
-{% block title %}회원가입 - HypeHere{% endblock %}
+{% block title %}{% trans "회원가입" %} - HypeHere{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/password_rules_modal.css' %}">
+{% endblock %}
 
 {% block content %}
 <div class="container" style="max-width: 480px; margin: 0 auto; padding: var(--space-lg);">
@@ -11,7 +16,7 @@
             HypeHere
         </h1>
         <p style="font-size: var(--font-size-base); color: var(--color-text-light);">
-            언어 교환 파트너를 만나보세요
+            {% trans "언어 교환 파트너를 만나보세요" %}
         </p>
     </div>
 
@@ -19,7 +24,7 @@
     <div class="card">
         <div class="card-body">
             <h2 style="font-size: var(--font-size-xl); margin-bottom: var(--space-lg); text-align: center;">
-                회원가입
+                {% trans "회원가입" %}
             </h2>
 
             <!-- Error Alert (Hidden by default) -->
@@ -29,71 +34,89 @@
 
             <!-- Success Alert (Hidden by default) -->
             <div id="success-alert" class="alert alert-success hidden" style="margin-bottom: var(--space-md);">
-                <span id="success-message">회원가입 성공! 로그인 중...</span>
+                <span id="success-message">{% trans "회원가입 성공! 로그인 중..." %}</span>
             </div>
 
             <form id="register-form" method="post">
                 {% csrf_token %}
 
+                <!-- UI Language (Optional) - Changes page language immediately -->
+                <div class="form-group">
+                    <label for="ui_language" class="form-label">{% trans "화면 언어 (선택)" %}</label>
+                    <div id="ui-language-selector-container"></div>
+                    <input type="hidden" id="ui_language" name="ui_language">
+                    <span class="form-text">{% trans "선택하면 즉시 페이지 언어가 변경됩니다." %}</span>
+                    <span class="form-error" id="ui_language-error"></span>
+                </div>
+
                 <!-- Email (Login ID) -->
                 <div class="form-group">
-                    <label for="email" class="form-label">이메일 (로그인 ID) *</label>
+                    <label for="email" class="form-label">{% trans "이메일 (로그인 ID)" %} *</label>
                     <input
                         type="email"
                         id="email"
                         name="email"
                         class="form-control"
-                        placeholder="example@email.com"
+                        placeholder="{% trans "example@email.com" %}"
                         required
                         autocomplete="email"
                     >
-                    <span class="form-text">이메일로 로그인합니다.</span>
+                    <span class="form-text">{% trans "이메일로 로그인합니다." %}</span>
                     <span class="form-error" id="email-error"></span>
                 </div>
 
                 <!-- Nickname (Display Name) -->
                 <div class="form-group">
-                    <label for="nickname" class="form-label">닉네임 (표시 이름) *</label>
+                    <label for="nickname" class="form-label">{% trans "닉네임 (표시 이름)" %} *</label>
                     <input
                         type="text"
                         id="nickname"
                         name="nickname"
                         class="form-control"
-                        placeholder="홍길동"
+                        placeholder="{% trans "홍길동" %}"
                         required
                         maxlength="50"
                         autocomplete="nickname"
                     >
-                    <span class="form-text">다른 사용자에게 표시될 이름입니다. 중복 가능합니다.</span>
+                    <span class="form-text">{% trans "다른 사용자에게 표시될 이름입니다. 중복 가능합니다." %}</span>
                     <span class="form-error" id="nickname-error"></span>
                 </div>
 
                 <!-- Password -->
                 <div class="form-group">
-                    <label for="password" class="form-label">비밀번호 *</label>
+                    <label for="password" class="form-label">
+                        {% trans "비밀번호" %} *
+                        <button type="button" id="password-rules-trigger" class="password-info-icon" aria-label="{% trans '비밀번호 규칙 보기' %}">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="16" x2="12" y2="12"></line>
+                                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                            </svg>
+                        </button>
+                    </label>
                     <input
                         type="password"
                         id="password"
                         name="password"
                         class="form-control"
-                        placeholder="8자 이상, 영문+숫자 조합"
+                        placeholder="{% trans "8자 이상, 영문+숫자 조합" %}"
                         required
                         minlength="8"
                         autocomplete="new-password"
                     >
-                    <span class="form-text">최소 8자 이상, 영문과 숫자를 포함해주세요.</span>
+                    <span class="form-text">{% trans "최소 8자 이상, 영문과 숫자를 포함해주세요." %}</span>
                     <span class="form-error" id="password-error"></span>
                 </div>
 
                 <!-- Password Confirm -->
                 <div class="form-group">
-                    <label for="password_confirm" class="form-label">비밀번호 확인 *</label>
+                    <label for="password_confirm" class="form-label">{% trans "비밀번호 확인" %} *</label>
                     <input
                         type="password"
                         id="password_confirm"
                         name="password_confirm"
                         class="form-control"
-                        placeholder="비밀번호를 다시 입력하세요"
+                        placeholder="{% trans "비밀번호를 다시 입력하세요" %}"
                         required
                         minlength="8"
                         autocomplete="new-password"
@@ -101,9 +124,25 @@
                     <span class="form-error" id="password_confirm-error"></span>
                 </div>
 
+                <!-- Gender (Optional) -->
+                <div class="form-group">
+                    <label for="gender" class="form-label">{% trans "성별 (선택)" %}</label>
+                    <div id="gender-selector-container"></div>
+                    <input type="hidden" id="gender" name="gender">
+                    <span class="form-error" id="gender-error"></span>
+                </div>
+
+                <!-- Country (Optional) -->
+                <div class="form-group">
+                    <label for="country" class="form-label">{% trans "국가 (선택)" %}</label>
+                    <div id="country-selector-container"></div>
+                    <input type="hidden" id="country" name="country">
+                    <span class="form-error" id="country-error"></span>
+                </div>
+
                 <!-- Submit Button -->
                 <button type="submit" class="btn btn-primary btn-block" id="submit-btn">
-                    <span id="submit-text">가입하기</span>
+                    <span id="submit-text">{% trans "가입하기" %}</span>
                     <span id="submit-loading" class="spinner spinner-primary" class="hidden"></span>
                 </button>
             </form>
@@ -111,8 +150,8 @@
             <!-- Login Link -->
             <div style="text-align: center; margin-top: var(--space-lg);">
                 <p class="text-sm text-light">
-                    이미 계정이 있으신가요?
-                    <a href="{% url 'accounts:login' %}" class="text-primary font-semibold">로그인</a>
+                    {% trans "이미 계정이 있으신가요?" %}
+                    <a href="{% url 'accounts:login' %}" class="text-primary font-semibold">{% trans "로그인" %}</a>
                 </p>
             </div>
         </div>
@@ -120,10 +159,20 @@
 
     <!-- Additional Info -->
     <div style="text-align: center; margin-top: var(--space-lg); color: var(--color-text-light); font-size: var(--font-size-sm);">
-        <p>가입하시면 <a href="#" class="text-primary">이용약관</a> 및 <a href="#" class="text-primary">개인정보처리방침</a>에 동의하는 것으로 간주됩니다.</p>
+        <p>{% blocktrans %}가입하시면 <a href="#" class="text-primary">이용약관</a> 및 <a href="#" class="text-primary">개인정보처리방침</a>에 동의하는 것으로 간주됩니다.{% endblocktrans %}</p>
     </div>
 </div>
 
+<!-- Password Rules Modal -->
+{% include 'partials/password_rules_modal.html' %}
+
 <!-- JavaScript for AJAX Registration -->
+<script src="{% static 'js/countries.js' %}"></script>
+<script src="{% static 'js/languages.js' %}"></script>
+<script src="{% static 'js/genders.js' %}"></script>
+<script src="{% static 'js/country-selector.js' %}"></script>
+<script src="{% static 'js/language-selector.js' %}"></script>
+<script src="{% static 'js/gender-selector.js' %}"></script>
 <script src="{% static 'js/auth.js' %}"></script>
+<script src="{% static 'js/password_rules_modal.js' %}"></script>
 {% endblock %}

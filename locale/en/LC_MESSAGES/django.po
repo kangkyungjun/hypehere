@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: HypeHere 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-23 11:03+0000\n"
+"POT-Creation-Date: 2025-11-27 10:23+0000\n"
 "PO-Revision-Date: 2025-11-23 12:00+0000\n"
 "Last-Translator: HypeHere Team <support@hypehere.com>\n"
 "Language-Team: English <en@hypehere.com>\n"
@@ -17,23 +17,23 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: accounts/models.py:401 accounts/templates/accounts/support/create.html:26
+#: accounts/models.py:433 accounts/templates/accounts/support/create.html:26
 msgid "계정 관련"
 msgstr "Account Management"
 
-#: accounts/models.py:402 accounts/templates/accounts/support/create.html:27
+#: accounts/models.py:434 accounts/templates/accounts/support/create.html:27
 msgid "결제 문의"
 msgstr "Payment"
 
-#: accounts/models.py:403 accounts/templates/accounts/support/create.html:28
+#: accounts/models.py:435 accounts/templates/accounts/support/create.html:28
 msgid "기술 지원"
 msgstr "Technical Support"
 
-#: accounts/models.py:404 accounts/templates/accounts/support/create.html:29
+#: accounts/models.py:436 accounts/templates/accounts/support/create.html:29
 msgid "기능 제안"
 msgstr "Feature Request"
 
-#: accounts/models.py:405 accounts/templates/accounts/report_history.html:393
+#: accounts/models.py:437 accounts/templates/accounts/report_history.html:389
 #: accounts/templates/accounts/support/create.html:30 posts/models.py:147
 #: posts/models.py:284 posts/models.py:355 templates/learning/matching.html:63
 #: templates/learning/matching.html:255 templates/learning/matching.html:297
@@ -42,42 +42,59 @@ msgstr "Feature Request"
 msgid "기타"
 msgstr "Other"
 
-#: accounts/models.py:409 accounts/templates/accounts/report_history.html:350
+#: accounts/models.py:441 accounts/templates/accounts/report_history.html:350
 msgid "대기 중"
 msgstr "Pending"
 
-#: accounts/models.py:410
+#: accounts/models.py:442
 msgid "답변 완료"
 msgstr "Answered"
 
-#: accounts/models.py:418
+#: accounts/models.py:450
 msgid "작성자"
 msgstr ""
 
-#: accounts/models.py:423 accounts/templates/accounts/support/create.html:23
+#: accounts/models.py:455 accounts/templates/accounts/support/create.html:23
 #: templates/learning/chat.html:128
 msgid "카테고리"
 msgstr "Category"
 
-#: accounts/models.py:425 accounts/templates/accounts/support/create.html:35
+#: accounts/models.py:457 accounts/templates/accounts/support/create.html:35
 msgid "제목"
 msgstr "Title"
 
-#: accounts/models.py:426 accounts/templates/accounts/support/create.html:40
+#: accounts/models.py:458 accounts/templates/accounts/support/create.html:40
 msgid "내용"
 msgstr "Content"
 
-#: accounts/models.py:431 accounts/templates/accounts/report_history.html:342
+#: accounts/models.py:463 accounts/templates/accounts/report_history.html:342
 msgid "상태"
 msgstr "Status"
 
-#: accounts/models.py:435 accounts/templates/accounts/support/detail.html:62
+#: accounts/models.py:467 accounts/templates/accounts/support/detail.html:62
 msgid "관리자 답변"
 msgstr "Admin Response"
 
-#: accounts/models.py:442
+#: accounts/models.py:474
 msgid "답변 관리자"
 msgstr ""
+
+#: accounts/serializers.py:62
+#, fuzzy
+#| msgid "사용자명 또는 비밀번호가 올바르지 않습니다."
+msgid "비밀번호가 일치하지 않습니다."
+msgstr "Invalid username or password."
+
+#: accounts/serializers.py:178
+#, fuzzy
+#| msgid "사용자명 또는 비밀번호가 올바르지 않습니다."
+msgid "현재 비밀번호가 올바르지 않습니다."
+msgstr "Invalid username or password."
+
+#: accounts/serializers.py:185
+#: accounts/templates/accounts/account_management.html:277
+msgid "새 비밀번호가 일치하지 않습니다."
+msgstr "New passwords do not match."
 
 #: accounts/templates/accounts/account_management.html:5
 msgid "계정 관리 - HypeHere"
@@ -101,51 +118,65 @@ msgstr "Will be permanently deleted in %(days)s days."
 msgid "삭제 취소"
 msgstr "Cancel Deletion"
 
-#: accounts/templates/accounts/account_management.html:41
+#: accounts/templates/accounts/account_management.html:40
+#: accounts/templates/accounts/account_management.html:50
+#: accounts/templates/accounts/account_management.html:207
+msgid "비밀번호 변경"
+msgstr "Change Password"
+
+#: accounts/templates/accounts/account_management.html:44
+msgid "비밀번호 관리"
+msgstr "Password Management"
+
+#: accounts/templates/accounts/account_management.html:46
+msgid "계정 보안을 위해 정기적으로 비밀번호를 변경하세요"
+msgstr "Change your password regularly for account security"
+
+#: accounts/templates/accounts/account_management.html:57
 msgid "계정 재활성화"
 msgstr "Reactivate Account"
 
-#: accounts/templates/accounts/account_management.html:45
+#: accounts/templates/accounts/account_management.html:61
 msgid "계정 다시 활성화"
 msgstr "Reactivate Account"
 
-#: accounts/templates/accounts/account_management.html:47
+#: accounts/templates/accounts/account_management.html:63
 msgid "비활성화된 계정을 다시 활성화하여 모든 기능을 이용할 수 있습니다"
 msgstr "Reactivate your deactivated account to access all features"
 
-#: accounts/templates/accounts/account_management.html:51
-#: accounts/templates/accounts/account_management.html:162
+#: accounts/templates/accounts/account_management.html:67
+#: accounts/templates/accounts/account_management.html:178
 msgid "재활성화"
 msgstr "Reactivate"
 
-#: accounts/templates/accounts/account_management.html:54
+#: accounts/templates/accounts/account_management.html:70
 msgid "계정 비활성화"
 msgstr "Deactivate Account"
 
-#: accounts/templates/accounts/account_management.html:58
+#: accounts/templates/accounts/account_management.html:74
 msgid "계정 일시 정지"
 msgstr "Temporary Account Suspension"
 
-#: accounts/templates/accounts/account_management.html:60
+#: accounts/templates/accounts/account_management.html:76
 msgid "프로필이 숨겨지지만 언제든지 다시 로그인하여 복구할 수 있습니다"
 msgstr ""
 "Your profile will be hidden, but you can recover it anytime by logging in "
 "again"
 
-#: accounts/templates/accounts/account_management.html:64
-#: accounts/templates/accounts/account_management.html:96
+#: accounts/templates/accounts/account_management.html:80
+#: accounts/templates/accounts/account_management.html:112
 msgid "비활성화"
 msgstr "Deactivate"
 
-#: accounts/templates/accounts/account_management.html:71
+#: accounts/templates/accounts/account_management.html:87
 msgid "계정 영구 삭제"
 msgstr "Permanent Account Deletion"
 
-#: accounts/templates/accounts/account_management.html:75
+#: accounts/templates/accounts/account_management.html:91
 msgid "계정 삭제"
 msgstr "Delete Account"
 
-#: accounts/templates/accounts/account_management.html:77
+#: accounts/templates/accounts/account_management.html:93
 msgid ""
 "30일 후 계정과 모든 데이터가 영구적으로 삭제됩니다. 이 작업은 되돌릴 수 없습"
 "니다."
@@ -153,25 +184,26 @@ msgstr ""
 "Your account and all data will be permanently deleted in 30 days. This "
 "action cannot be undone."
 
-#: accounts/templates/accounts/account_management.html:81
-#: accounts/templates/accounts/account_management.html:129
+#: accounts/templates/accounts/account_management.html:97
+#: accounts/templates/accounts/account_management.html:145
 msgid "삭제 요청"
 msgstr "Request Deletion"
 
-#: accounts/templates/accounts/account_management.html:92
+#: accounts/templates/accounts/account_management.html:108
 msgid "계정을 비활성화하시겠습니까?"
 msgstr "Do you want to deactivate your account?"
 
-#: accounts/templates/accounts/account_management.html:93
+#: accounts/templates/accounts/account_management.html:109
 msgid "프로필과 게시글이 숨겨지지만 언제든 다시 로그인하여 복구할 수 있습니다."
 msgstr ""
 "Your profile and posts will be hidden, but you can recover them anytime by "
 "logging in again."
 
-#: accounts/templates/accounts/account_management.html:95
-#: accounts/templates/accounts/account_management.html:114
-#: accounts/templates/accounts/account_management.html:128
-#: accounts/templates/accounts/account_management.html:161
+#: accounts/templates/accounts/account_management.html:111
+#: accounts/templates/accounts/account_management.html:130
+#: accounts/templates/accounts/account_management.html:144
+#: accounts/templates/accounts/account_management.html:177
+#: accounts/templates/accounts/account_management.html:266
 #: accounts/templates/accounts/report_history.html:284
 #: accounts/templates/accounts/report_history.html:321
 #: accounts/templates/accounts/settings.html:378
@@ -192,78 +224,139 @@ msgstr ""
 msgid "취소"
 msgstr "Cancel"
 
-#: accounts/templates/accounts/account_management.html:105
+#: accounts/templates/accounts/account_management.html:121
 msgid "정말로 계정을 삭제하시겠습니까?"
 msgstr "Are you sure you want to delete this post?"
 
-#: accounts/templates/accounts/account_management.html:106
+#: accounts/templates/accounts/account_management.html:122
 msgid "30일 후 다음 항목이 영구적으로 삭제됩니다:"
 msgstr "Profile has been updated successfully!"
 
-#: accounts/templates/accounts/account_management.html:108
+#: accounts/templates/accounts/account_management.html:124
 msgid "프로필 정보"
 msgstr "View My Profile"
 
-#: accounts/templates/accounts/account_management.html:109
+#: accounts/templates/accounts/account_management.html:125
 msgid "모든 게시글 및 댓글"
 msgstr "All posts and comments"
 
-#: accounts/templates/accounts/account_management.html:110
+#: accounts/templates/accounts/account_management.html:126
 msgid "팔로워 및 팔로잉 관계"
 msgstr "Follower and following relationships"
 
-#: accounts/templates/accounts/account_management.html:111
+#: accounts/templates/accounts/account_management.html:127
 msgid "모든 활동 기록"
 msgstr "All activity history"
 
-#: accounts/templates/accounts/account_management.html:115
+#: accounts/templates/accounts/account_management.html:131
 #: accounts/templates/accounts/support/list.html:134
 msgid "다음"
 msgstr "Next Step"
 
-#: accounts/templates/accounts/account_management.html:124
+#: accounts/templates/accounts/account_management.html:140
 msgid "계정 삭제 확인"
 msgstr "Confirm Account Deletion"
 
-#: accounts/templates/accounts/account_management.html:125
+#: accounts/templates/accounts/account_management.html:141
 msgid " 계속하려면 \"<strong>영구삭제</strong>\"를 입력하세요:"
 msgstr " To continue, type \"<strong>permanent delete</strong>\":"
 
-#: accounts/templates/accounts/account_management.html:126
+#: accounts/templates/accounts/account_management.html:142
 msgid "영구삭제"
 msgstr "permanent delete"
 
-#: accounts/templates/accounts/account_management.html:144
+#: accounts/templates/accounts/account_management.html:160
 #: templates/home.html:21 templates/learning/chat.html:20
 #: templates/learning/matching.html:16
 msgid "계정이 비활성화되었습니다"
 msgstr "Account is Deactivated"
 
-#: accounts/templates/accounts/account_management.html:146
+#: accounts/templates/accounts/account_management.html:162
 msgid "계정을 재활성화하려면 재활성화 버튼을 눌러주세요."
 msgstr "To reactivate your account, click the Reactivate button."
 
-#: accounts/templates/accounts/account_management.html:149
-#: accounts/templates/accounts/account_management.html:182
+#: accounts/templates/accounts/account_management.html:165
+#: accounts/templates/accounts/account_management.html:198
+#: accounts/templates/accounts/account_management.html:300
 #: templates/learning/matching.html:309
+#: templates/partials/password_rules_modal.html:69
 msgid "확인"
 msgstr "OK"
 
-#: accounts/templates/accounts/account_management.html:158
+#: accounts/templates/accounts/account_management.html:174
 msgid "계정을 재활성화하시겠습니까?"
 msgstr "Do you want to reactivate your account?"
 
-#: accounts/templates/accounts/account_management.html:159
+#: accounts/templates/accounts/account_management.html:175
 msgid "모든 기능을 다시 사용할 수 있게 됩니다."
 msgstr "You will be able to use all features again."
 
-#: accounts/templates/accounts/account_management.html:177
+#: accounts/templates/accounts/account_management.html:193
 msgid "계정이 재활성화되었습니다"
 msgstr "Account has been reactivated"
 
-#: accounts/templates/accounts/account_management.html:179
+#: accounts/templates/accounts/account_management.html:195
 msgid "이제 모든 기능을 사용할 수 있습니다."
 msgstr "You can now use all features."
+
+#: accounts/templates/accounts/account_management.html:208
+msgid "새로운 비밀번호를 입력해주세요"
+msgstr "Please enter a new password"
+
+#: accounts/templates/accounts/account_management.html:217
+#: accounts/templates/accounts/account_management.html:223
+msgid "현재 비밀번호"
+msgstr "Current Password"
+
+#: accounts/templates/accounts/account_management.html:231
+#: accounts/templates/accounts/account_management.html:245
+msgid "새 비밀번호"
+msgstr "New Password"
+
+#: accounts/templates/accounts/account_management.html:232
+#: templates/accounts/register.html:89
+msgid "비밀번호 규칙 보기"
+msgstr "View Password Rules"
+
+#: accounts/templates/accounts/account_management.html:252
+#: accounts/templates/accounts/account_management.html:258
+msgid "새 비밀번호 확인"
+msgstr "Confirm New Password"
+
+#: accounts/templates/accounts/account_management.html:267
+msgid "변경하기"
+msgstr "Change"
+
+#: accounts/templates/accounts/account_management.html:276
+msgid "모든 필드를 입력해주세요."
+msgstr "Please fill in all fields."
+
+#: accounts/templates/accounts/account_management.html:278
+msgid "비밀번호는 최소 8자 이상이어야 합니다."
+msgstr "Password must be at least 8 characters."
+
+#: accounts/templates/accounts/account_management.html:279
+msgid "비밀번호 변경에 실패했습니다."
+msgstr "Password change failed."
+
+#: accounts/templates/accounts/account_management.html:280
+msgid "비밀번호 변경 중 오류가 발생했습니다."
+msgstr "An error occurred while changing password."
+
+#: accounts/templates/accounts/account_management.html:281
+#: accounts/templates/accounts/profile.html:359
+#: templates/accounts/profile_update.html:146 templates/home.html:199
+#: templates/home.html:218
+msgid "네트워크 오류가 발생했습니다. 다시 시도해주세요."
+msgstr "Network error. Please try again."
+
+#: accounts/templates/accounts/account_management.html:295
+msgid "비밀번호가 변경되었습니다"
+msgstr "Password changed successfully"
+
+#: accounts/templates/accounts/account_management.html:297
+msgid "새로운 비밀번호로 로그인해주세요."
+msgstr "Please log in with your new password."
 
 #: accounts/templates/accounts/blocked_users_list.html:5
 #: accounts/templates/accounts/blocked_users_list.html:20
@@ -305,6 +398,7 @@ msgid "채팅방"
 msgstr "Leave Chat Room"
 
 #: accounts/templates/accounts/favorites.html:31
+#: accounts/templates/accounts/report_history.html:44
 #: templates/accounts/favorites.html:32 templates/explore.html:76
 msgid "게시물"
 msgstr "Posts"
@@ -339,8 +433,6 @@ msgid "팔로워"
 msgstr "Followers"
 
 #: accounts/templates/accounts/followers_list.html:33
-#, fuzzy
-#| msgid "메시지가 없습니다"
 msgid "팔로워가 없습니다"
 msgstr "No followers"
 
@@ -368,9 +460,10 @@ msgid "로그인 - HypeHere"
 msgstr "Login - HypeHere"
 
 #: accounts/templates/accounts/login.html:12
-#: accounts/templates/accounts/login.html:58
+#: accounts/templates/accounts/login.html:66
+#: accounts/templates/accounts/password_reset/request.html:53
 #: accounts/templates/accounts/register.html:151
-#: templates/partials/header.html:74
+#: templates/accounts/register.html:154 templates/partials/header.html:74
 msgid "로그인"
 msgstr "Login"
 
@@ -394,7 +487,7 @@ msgstr "Enter your username"
 
 #: accounts/templates/accounts/login.html:39
 #: accounts/templates/accounts/register.html:111
-#: templates/learning/chat.html:164
+#: templates/accounts/register.html:88 templates/learning/chat.html:164
 msgid "비밀번호"
 msgstr "Password"
 
@@ -403,20 +496,31 @@ msgstr "Password"
 msgid "비밀번호를 입력하세요"
 msgstr "Enter your password"
 
-#: accounts/templates/accounts/login.html:53
+#: accounts/templates/accounts/login.html:52
+#: templates/accounts/register.html:45
+msgid "화면 언어 (선택)"
+msgstr "UI Language (Optional)"
+
+#: accounts/templates/accounts/login.html:55
+#: templates/accounts/register.html:48
+msgid "선택하면 즉시 페이지 언어가 변경됩니다."
+msgstr "The page language will change immediately when selected."
+
+#: accounts/templates/accounts/login.html:61
 msgid "로그인 상태 유지"
 msgstr "Remember me"
 
-#: accounts/templates/accounts/login.html:64
+#: accounts/templates/accounts/login.html:72
 msgid "비밀번호를 잊으셨나요?"
 msgstr "Forgot your password?"
 
-#: accounts/templates/accounts/login.html:67
+#: accounts/templates/accounts/login.html:75
 msgid "계정이 없으신가요?"
 msgstr "Don't have an account?"
 
-#: accounts/templates/accounts/login.html:68
+#: accounts/templates/accounts/login.html:76
 #: accounts/templates/accounts/register.html:60
+#: templates/accounts/register.html:5 templates/accounts/register.html:27
 #: templates/partials/header.html:75
 msgid "회원가입"
 msgstr "Sign Up"
@@ -476,6 +580,7 @@ msgid "팔로우한 사람이 게시글을 작성했을 때"
 msgstr "When someone you follow creates a post"
 
 #: accounts/templates/accounts/notification_settings.html:110
+#: accounts/templates/accounts/report_history.html:48
 #: templates/partials/post_view_modal.html:73
 msgid "댓글"
 msgstr "Comments"
@@ -492,6 +597,115 @@ msgstr "Like"
 #: accounts/templates/accounts/notification_settings.html:128
 msgid "내 게시글에 좋아요를 눌렀을 때"
 msgstr "When someone likes your post"
+
+#: accounts/templates/accounts/password_reset/email.html:7
+#: accounts/templates/accounts/password_reset/email.html:24
+#: accounts/templates/accounts/password_reset/request.html:12
+msgid "비밀번호 재설정"
+msgstr "Password Reset"
+
+#: accounts/templates/accounts/password_reset/email.html:27
+msgid "안녕하세요,"
+msgstr "Hello,"
+
+#: accounts/templates/accounts/password_reset/email.html:28
+#, fuzzy
+#| msgid "사용자명 또는 비밀번호가 올바르지 않습니다."
+msgid "비밀번호 재설정을 요청하셨습니다."
+msgstr "Invalid username or password."
+
+#: accounts/templates/accounts/password_reset/email.html:29
+msgid "아래 임시 비밀번호로 로그인하신 후, 반드시 새 비밀번호로 변경해주세요."
+msgstr "Please log in with the temporary password below and change it to a new password."
+
+#: accounts/templates/accounts/password_reset/email.html:34
+#, fuzzy
+#| msgid "비밀번호"
+msgid "임시 비밀번호"
+msgstr "Password"
+
+#: accounts/templates/accounts/password_reset/email.html:43
+msgid "로그인하기"
+msgstr "Login"
+
+#: accounts/templates/accounts/password_reset/email.html:50
+msgid "⚠️ 보안 안내"
+msgstr "⚠️ Security Notice"
+
+#: accounts/templates/accounts/password_reset/email.html:51
+msgid "로그인 후 즉시 비밀번호를 변경하시기 바랍니다."
+msgstr "Please change your password immediately after logging in."
+
+#: accounts/templates/accounts/password_reset/email.html:52
+msgid ""
+"본인이 요청하지 않은 경우, 이 이메일을 무시하시고 관리자에게 문의해주세요."
+msgstr "If you did not request this, please ignore this email and contact the administrator."
+
+#: accounts/templates/accounts/password_reset/email.html:57
+msgid "감사합니다."
+msgstr "Thank you."
+
+#: accounts/templates/accounts/password_reset/email.html:58
+msgid "HypeHere 팀"
+msgstr "HypeHere Team"
+
+#: accounts/templates/accounts/password_reset/email.html:67
+msgid "본 메일은 발신 전용입니다. 문의사항은 고객센터를 이용해주세요."
+msgstr "This is an automated email. For inquiries, please contact our support center."
+
+#: accounts/templates/accounts/password_reset/request.html:5
+#, fuzzy
+#| msgid "설정 - HypeHere"
+msgid "비밀번호 재설정 - HypeHere"
+msgstr "Settings - HypeHere"
+
+#: accounts/templates/accounts/password_reset/request.html:13
+msgid "등록된 이메일 주소로 임시 비밀번호를 발송해드립니다"
+msgstr "We will send a temporary password to your registered email address"
+
+#: accounts/templates/accounts/password_reset/request.html:30
+msgid "이메일 주소"
+msgstr "Email Address"
+
+#: accounts/templates/accounts/password_reset/request.html:36
+#: templates/accounts/register.html:60
+msgid "example@email.com"
+msgstr "example@email.com"
+
+#: accounts/templates/accounts/password_reset/request.html:40
+msgid "가입 시 등록한 이메일 주소를 입력해주세요"
+msgstr "Please enter the email address you registered with"
+
+#: accounts/templates/accounts/password_reset/request.html:45
+msgid "임시 비밀번호 발송"
+msgstr "Send Temporary Password"
+
+#: accounts/templates/accounts/password_reset/request.html:52
+msgid "비밀번호가 기억나셨나요?"
+msgstr "Remember your password?"
+
+#: accounts/templates/accounts/password_reset/request.html:176
+#: accounts/templates/accounts/password_reset/request.html:177
+#, fuzzy
+#| msgid "문의 내용을 자세히 입력해주세요"
+msgid "이메일 주소를 입력해주세요"
+msgstr "Please enter post content."
+
+#: accounts/templates/accounts/password_reset/request.html:199
+msgid "임시 비밀번호가 이메일로 발송되었습니다"
+msgstr ""
+
+#: accounts/templates/accounts/password_reset/request.html:213
+#, fuzzy
+#| msgid "네트워크 오류가 발생했습니다. 다시 시도해주세요."
+msgid "오류가 발생했습니다. 다시 시도해주세요"
+msgstr "A network error occurred. Please try again."
+
+#: accounts/templates/accounts/password_reset/request.html:220
+#, fuzzy
+#| msgid "네트워크 오류가 발생했습니다. 다시 시도해주세요."
+msgid "네트워크 오류가 발생했습니다. 다시 시도해주세요"
+msgstr "A network error occurred. Please try again."
 
 #: accounts/templates/accounts/privacy_settings.html:5
 msgid "개인정보 보호 - HypeHere"
@@ -549,18 +763,20 @@ msgstr "Select Privacy"
 #: accounts/templates/accounts/privacy_settings.html:128
 #: accounts/templates/accounts/report_history.html:256
 #: accounts/templates/accounts/report_history.html:294
-#: templates/accounts/profile_update.html:152 templates/conversation.html:91
-#: templates/learning/chat_room.html:66 templates/learning/chat_room.html:121
-#: templates/learning/chat_room.html:159 templates/learning/chat_room.html:179
-#: templates/learning/chat_room.html:203 templates/learning/chat_room.html:230
-#: templates/learning/chat_room.html:256 templates/learning/chat_room.html:281
-#: templates/learning/chat_room.html:306 templates/learning/matching.html:290
+#: templates/accounts/profile_update.html:152 templates/base.html:488
+#: templates/conversation.html:91 templates/learning/chat_room.html:66
+#: templates/learning/chat_room.html:121 templates/learning/chat_room.html:159
+#: templates/learning/chat_room.html:179 templates/learning/chat_room.html:203
+#: templates/learning/chat_room.html:230 templates/learning/chat_room.html:256
+#: templates/learning/chat_room.html:281 templates/learning/chat_room.html:306
+#: templates/learning/matching.html:290
 #: templates/partials/block_user_modal.html:8
 #: templates/partials/comment_delete_confirm_modal.html:7
 #: templates/partials/comment_edit_modal.html:7
 #: templates/partials/comment_owner_action_modal.html:6
 #: templates/partials/message_action_modal.html:6
 #: templates/partials/message_report_modal.html:8
+#: templates/partials/password_rules_modal.html:10
 #: templates/partials/post_action_modal.html:6
 #: templates/partials/post_report_modal.html:8
 #: templates/partials/post_view_modal.html:8
@@ -633,15 +849,11 @@ msgstr "No posts yet"
 
 #: accounts/templates/accounts/profile.html:353 templates/home.html:194
 #: templates/learning/matching.html:360
-#, fuzzy
-#| msgid "성별"
 msgid "성공"
 msgstr "Gender"
 
 #: accounts/templates/accounts/profile.html:354 templates/home.html:195
 #: templates/learning/matching.html:359
-#, fuzzy
-#| msgid "오늘"
 msgid "오류"
 msgstr "Today"
 
@@ -654,8 +866,6 @@ msgid "삭제 실패"
 msgstr ""
 
 #: accounts/templates/accounts/profile.html:357
-#, fuzzy
-#| msgid "신고 접수 중 오류가 발생했습니다."
 msgid "서버 오류가 발생했습니다"
 msgstr "An error occurred while submitting the report."
 
@@ -663,14 +873,9 @@ msgstr "An error occurred while submitting the report."
 msgid "알 수 없는 오류"
 msgstr ""
 
-#: accounts/templates/accounts/profile.html:359
-#: templates/accounts/profile_update.html:146 templates/home.html:199
-#: templates/home.html:218
-msgid "네트워크 오류가 발생했습니다. 다시 시도해주세요."
-msgstr "A network error occurred. Please try again."
-
 #: accounts/templates/accounts/profile.html:599
-#: templates/accounts/profile_update.html:149 templates/home.html:221
+#: templates/accounts/profile_update.html:149 templates/home.html:222
+#: templates/learning/chat.html:80
 msgid "검색 결과가 없습니다"
 msgstr "No results found"
 
@@ -712,10 +917,12 @@ msgid "최소 8자 이상, 영문과 숫자를 포함해야 합니다."
 msgstr "At least 8 characters with letters and numbers."
 
 #: accounts/templates/accounts/register.html:124
+#: templates/accounts/register.html:113
 msgid "비밀번호 확인"
 msgstr "Confirm Password"
 
 #: accounts/templates/accounts/register.html:130
+#: templates/accounts/register.html:119
 msgid "비밀번호를 다시 입력하세요"
 msgstr "Re-enter your password"
 
@@ -740,6 +947,7 @@ msgid "다음 단계"
 msgstr "Next Step"
 
 #: accounts/templates/accounts/register.html:150
+#: templates/accounts/register.html:153
 msgid "이미 계정이 있으신가요?"
 msgstr "Already have an account?"
 
@@ -756,18 +964,9 @@ msgstr "Report History"
 msgid "필터"
 msgstr "Filter"
 
-#: accounts/templates/accounts/report_history.html:44
-#: templates/partials/post_report_modal.html:7
-msgid "게시물 신고"
-msgstr "Post Reports"
-
-#: accounts/templates/accounts/report_history.html:48
-msgid "댓글 신고"
-msgstr "Comment Reports"
-
 #: accounts/templates/accounts/report_history.html:52
-msgid "채팅 신고"
-msgstr "Chat Reports"
+msgid "채팅"
+msgstr "Chat"
 
 #: accounts/templates/accounts/report_history.html:78
 #: accounts/templates/accounts/report_history.html:147
@@ -777,16 +976,23 @@ msgstr " ago"
 
 #: accounts/templates/accounts/report_history.html:102
 #: accounts/templates/accounts/report_history.html:171
+#: accounts/templates/accounts/report_history.html:438
 msgid "게시물 보기"
 msgstr "Search Posts"
 
 #: accounts/templates/accounts/report_history.html:106
 #: accounts/templates/accounts/report_history.html:175
+#: accounts/templates/accounts/report_history.html:231
+#: accounts/templates/accounts/report_history.html:283
+#: accounts/templates/accounts/report_history.html:436
 msgid "삭제 처리"
 msgstr "Delete"
 
 #: accounts/templates/accounts/report_history.html:109
 #: accounts/templates/accounts/report_history.html:178
+#: accounts/templates/accounts/report_history.html:234
+#: accounts/templates/accounts/report_history.html:320
+#: accounts/templates/accounts/report_history.html:437
 msgid "신고 기각"
 msgstr "Dismiss Report"
 
@@ -805,14 +1011,6 @@ msgstr "No comment reports"
 #: accounts/templates/accounts/report_history.html:190
 msgid "아직 신고한 댓글이 없습니다"
 msgstr "You haven't reported any comments yet"
-
-#: accounts/templates/accounts/report_history.html:231
-msgid "삭제 처리 (준비중)"
-msgstr "Delete (Coming Soon)"
-
-#: accounts/templates/accounts/report_history.html:234
-msgid "신고 기각 (준비중)"
-msgstr "Dismiss (Coming Soon)"
 
 #: accounts/templates/accounts/report_history.html:245
 msgid "채팅 신고 내역이 없습니다"
@@ -883,8 +1081,8 @@ msgid "사용자 닉네임, 내용으로 검색..."
 msgstr "Search by nickname or content..."
 
 #: accounts/templates/accounts/report_history.html:346
-#: accounts/templates/accounts/report_history.html:373
-#: accounts/templates/accounts/report_history.html:404
+#: accounts/templates/accounts/report_history.html:369
+#: accounts/templates/accounts/report_history.html:400
 #: accounts/templates/accounts/support/list.html:27
 #: templates/learning/matching.html:60 templates/learning/matching.html:64
 #: templates/learning/matching.html:294
@@ -892,85 +1090,85 @@ msgid "전체"
 msgstr "All"
 
 #: accounts/templates/accounts/report_history.html:354
-msgid "검토 중"
-msgstr "Reviewing"
-
-#: accounts/templates/accounts/report_history.html:358
 msgid "처리 완료"
 msgstr "Resolved"
 
-#: accounts/templates/accounts/report_history.html:362
+#: accounts/templates/accounts/report_history.html:358
 msgid "기각"
 msgstr "Dismissed"
 
-#: accounts/templates/accounts/report_history.html:369
+#: accounts/templates/accounts/report_history.html:365
 #: templates/learning/matching.html:248
 #: templates/partials/message_report_modal.html:20
 #: templates/partials/post_report_modal.html:20
 msgid "신고 유형"
 msgstr "Report Type"
 
-#: accounts/templates/accounts/report_history.html:377 posts/models.py:143
+#: accounts/templates/accounts/report_history.html:373 posts/models.py:143
 #: posts/models.py:280 posts/models.py:351 templates/learning/matching.html:251
 #: templates/partials/message_report_modal.html:28
 #: templates/partials/post_report_modal.html:28
 msgid "욕설/비방"
 msgstr "Abuse/Slander"
 
-#: accounts/templates/accounts/report_history.html:381 posts/models.py:144
+#: accounts/templates/accounts/report_history.html:377 posts/models.py:144
 #: posts/models.py:281 posts/models.py:352 templates/learning/matching.html:252
 #: templates/partials/message_report_modal.html:35
 #: templates/partials/post_report_modal.html:35
 msgid "스팸/광고"
 msgstr "Spam/Advertising"
 
-#: accounts/templates/accounts/report_history.html:385 posts/models.py:145
+#: accounts/templates/accounts/report_history.html:381 posts/models.py:145
 #: posts/models.py:282 posts/models.py:353 templates/learning/matching.html:253
 #: templates/partials/message_report_modal.html:43
 #: templates/partials/post_report_modal.html:43
 msgid "부적절한 내용"
 msgstr "Inappropriate Content"
 
-#: accounts/templates/accounts/report_history.html:389 posts/models.py:146
+#: accounts/templates/accounts/report_history.html:385 posts/models.py:146
 #: posts/models.py:283 posts/models.py:354 templates/learning/matching.html:254
 #: templates/partials/message_report_modal.html:50
 #: templates/partials/post_report_modal.html:50
 msgid "성희롱"
 msgstr "Sexual Harassment"
 
-#: accounts/templates/accounts/report_history.html:400
+#: accounts/templates/accounts/report_history.html:396
 msgid "기간"
 msgstr "Ban Duration"
 
-#: accounts/templates/accounts/report_history.html:408
+#: accounts/templates/accounts/report_history.html:404
 msgid "오늘"
 msgstr "Today"
 
-#: accounts/templates/accounts/report_history.html:412
+#: accounts/templates/accounts/report_history.html:408
 msgid "최근 7일"
 msgstr "Last 7 Days"
 
-#: accounts/templates/accounts/report_history.html:416
+#: accounts/templates/accounts/report_history.html:412
 msgid "최근 30일"
 msgstr "Last 30 Days"
 
-#: accounts/templates/accounts/report_history.html:422
+#: accounts/templates/accounts/report_history.html:418
 msgid "초기화"
 msgstr "Reset"
 
-#: accounts/templates/accounts/report_history.html:423
+#: accounts/templates/accounts/report_history.html:419
 msgid "적용"
 msgstr "Apply"
 
-#: accounts/templates/accounts/report_history.html:431
+#: accounts/templates/accounts/report_history.html:427
 msgid "신고 내역을 불러오는 중..."
 msgstr "Loading reports..."
+
+#: accounts/templates/accounts/report_history.html:439
+msgid "신고 내용:"
+msgstr "Report History"
 
 #: accounts/templates/accounts/settings.html:5
 msgid "설정 - HypeHere"
 msgstr "Settings - HypeHere"
 
-#: accounts/templates/accounts/settings.html:12 templates/base.html:108
+#: accounts/templates/accounts/settings.html:12 templates/base.html:109
 msgid "프로필"
 msgstr "Profile"
 
@@ -984,7 +1182,7 @@ msgstr "Account"
 
 #: accounts/templates/accounts/settings.html:52
 #: accounts/templates/accounts/settings.html:56
-#: accounts/templates/accounts/settings.html:330 hypehere/settings.py:126
+#: accounts/templates/accounts/settings.html:330 hypehere/settings.py:127
 #: templates/partials/sidebar.html:95
 msgid "한국어"
 msgstr "Korean"
@@ -1002,7 +1200,7 @@ msgstr "Customer Support"
 msgid "로그아웃"
 msgstr "Log Out"
 
-#: accounts/templates/accounts/settings.html:319
+#: accounts/templates/accounts/settings.html:319 templates/home.html:219
 msgid "언어 선택"
 msgstr "Select Language"
 
@@ -1146,39 +1344,101 @@ msgstr "No chat reports"
 msgid "첫 문의 작성하기"
 msgstr "Create your first ticket"
 
-#: accounts/views.py:1117
+#: accounts/utils.py:102
+msgid "[HypeHere] 임시 비밀번호 발급"
+msgstr ""
+
+#: accounts/views.py:1118
 msgid "문의가 성공적으로 등록되었습니다."
 msgstr "Profile has been updated successfully!"
 
-#: accounts/views.py:1161
+#: accounts/views.py:1162
 msgid "답변 내용을 입력해주세요."
 msgstr "Please enter post content."
 
-#: accounts/views.py:1171
+#: accounts/views.py:1172
 msgid "답변이 성공적으로 등록되었습니다."
 msgstr "Profile has been updated successfully!"
 
-#: chat/views.py:825
+#: accounts/views.py:1656
+#, fuzzy
+#| msgid "메시지를 입력하세요..."
+msgid "이메일 주소를 입력해주세요."
+msgstr "Type a message..."
+
+#: accounts/views.py:1667
+#, fuzzy
+#| msgid "네트워크 오류가 발생했습니다. 다시 시도해주세요."
+msgid "너무 많은 요청이 있었습니다. {}후에 다시 시도해주세요."
+msgstr "A network error occurred. Please try again."
+
+#: accounts/views.py:1681
+msgid "등록된 이메일 주소라면 임시 비밀번호가 발송되었습니다."
+msgstr ""
+
+#: accounts/views.py:1688
+msgid "비활성화된 계정입니다. 관리자에게 문의하세요."
+msgstr ""
+
+#: accounts/views.py:1708
+msgid "임시 비밀번호가 이메일로 발송되었습니다."
+msgstr ""
+
+#: accounts/views.py:1715
+#, fuzzy
+#| msgid "네트워크 오류가 발생했습니다. 다시 시도해주세요."
+msgid "이메일 발송에 실패했습니다. 잠시 후 다시 시도해주세요."
+msgstr "A network error occurred. Please try again."
+
+# Auto-suspension notifications
+#: chat/admin_actions.py:40 posts/admin_actions.py:40
+#, python-format
+msgid "활성 신고 %(count)s건 누적으로 계정이 영구 정지되었습니다"
+msgstr "Account permanently banned due to %(count)s active reports"
+
+#: chat/admin_actions.py:58 posts/admin_actions.py:58
+#, python-format
+msgid "활성 신고 %(count)s건 누적으로 계정이 7일간 정지되었습니다"
+msgstr "Account suspended for 7 days due to %(count)s active reports"
+
+#: chat/admin_actions.py:76 posts/admin_actions.py:76
+#, python-format
+msgid "활성 신고 %(count)s건 누적으로 계정이 3일간 정지되었습니다"
+msgstr "Account suspended for 3 days due to %(count)s active reports"
+
+#: chat/admin_actions.py:118
+msgid "채팅 신고가 승인되었습니다. 주의해 주세요."
+msgstr "Your report has been submitted."
+
+#: chat/admin_actions.py:127
+msgid "신고하신 채팅 내용이 검토되어 조치가 완료되었습니다."
+msgstr "Your report has been reviewed but no action is required"
+
+#: chat/admin_actions.py:167
+msgid "신고하신 채팅 내용이 검토되었으나 기각되었습니다."
+msgstr "Your report has been reviewed but no action is required"
+
+#: chat/views.py:827
 msgid "방장이 나가면 채팅방이 삭제됩니다. 계속하시겠습니까?"
 msgstr "If you leave, the chat room will be deleted. Do you want to continue?"
 
-#: chat/views.py:837
+#: chat/views.py:839
 msgid "방이 삭제되었습니다"
 msgstr "The room has been deleted"
 
-#: chat/views.py:847
+#: chat/views.py:849
 msgid "채팅방에서 나갔습니다"
 msgstr "You have left the chat room"
 
-#: hypehere/settings.py:127
+#: hypehere/settings.py:128
 msgid "English"
 msgstr "English"
 
-#: hypehere/settings.py:128
+#: hypehere/settings.py:129
 msgid "日本語"
 msgstr "日本語"
 
-#: hypehere/settings.py:129
+#: hypehere/settings.py:130
 msgid "Español"
 msgstr "Español"
 
@@ -1221,22 +1481,6 @@ msgstr "%(sender)s reported a post"
 #: notifications/serializers.py:53
 msgid "새 알림"
 msgstr "New notification"
-
-# Auto-suspension notifications
-#: posts/admin_actions.py:40
-#, python-format
-msgid "활성 신고 %(count)s건 누적으로 계정이 영구 정지되었습니다"
-msgstr "Account permanently banned due to %(count)s active reports"
-
-#: posts/admin_actions.py:58
-#, python-format
-msgid "활성 신고 %(count)s건 누적으로 계정이 7일간 정지되었습니다"
-msgstr "Account suspended for 7 days due to %(count)s active reports"
-
-#: posts/admin_actions.py:76
-#, python-format
-msgid "활성 신고 %(count)s건 누적으로 계정이 3일간 정지되었습니다"
-msgstr "Account suspended for 3 days due to %(count)s active reports"
 
 #: posts/admin_actions.py:124
 #, python-format
@@ -1307,6 +1551,7 @@ msgid "프로필 수정 성공!"
 msgstr "Profile updated successfully!"
 
 #: templates/accounts/profile_update.html:27
+#: templates/accounts/register.html:54
 msgid "이메일 (로그인 ID)"
 msgstr "Email (Login ID)"
 
@@ -1319,6 +1564,7 @@ msgid "닉네임 (표시 이름) *"
 msgstr "Nickname (Display Name) *"
 
 #: templates/accounts/profile_update.html:49
+#: templates/accounts/register.html:76
 msgid "홍길동"
 msgstr "Your Name"
 
@@ -1412,15 +1658,63 @@ msgid "🔍 국가 검색..."
 msgstr "🔍 Search country..."
 
 #: templates/accounts/profile_update.html:150
-#, fuzzy
-#| msgid "선택 안함"
 msgid "선택 안 함"
-msgstr "Not Selected"
+msgstr "Not specified"
 
 #: templates/accounts/profile_update.html:151
 #: templates/learning/matching.html:289
 msgid "성별 선택"
 msgstr "Select Gender"
+
+#: templates/accounts/register.html:19
+#, fuzzy
+#| msgid "가입하고 첫 번째 언어 교환 친구를 만나보세요."
+msgid "언어 교환 파트너를 만나보세요"
+msgstr "Sign up and meet your first language exchange partner."
+
+#: templates/accounts/register.html:37
+msgid "회원가입 성공! 로그인 중..."
+msgstr "Registration successful! Logging in..."
+
+#: templates/accounts/register.html:64
+msgid "이메일로 로그인합니다."
+msgstr "You will log in with your email."
+
+#: templates/accounts/register.html:70
+msgid "닉네임 (표시 이름)"
+msgstr "Nickname (Display Name) *"
+
+#: templates/accounts/register.html:81
+msgid "다른 사용자에게 표시될 이름입니다. 중복 가능합니다."
+msgstr "This is the name that will be displayed to other users."
+
+#: templates/accounts/register.html:102
+msgid "8자 이상, 영문+숫자 조합"
+msgstr "At least 8 characters with letters and numbers."
+
+#: templates/accounts/register.html:107
+msgid "최소 8자 이상, 영문과 숫자를 포함해주세요."
+msgstr "At least 8 characters with letters and numbers."
+
+#: templates/accounts/register.html:129
+msgid "성별 (선택)"
+msgstr "Gender (Optional)"
+
+#: templates/accounts/register.html:137
+msgid "국가 (선택)"
+msgstr "Country (Optional)"
+
+#: templates/accounts/register.html:145
+msgid "가입하기"
+msgstr "Sign Up"
+
+#: templates/accounts/register.html:162
+msgid ""
+"가입하시면 <a href=\"#\" class=\"text-primary\">이용약관</a> 및 <a href=\"#"
+"\" class=\"text-primary\">개인정보처리방침</a>에 동의하는 것으로 간주됩니다."
+msgstr ""
+"By signing up, you agree to the <a href=\"#\" class=\"text-primary\">Terms "
+"of Service</a> and <a href=\"#\" class=\"text-primary\">Privacy Policy</a>."
 
 #: templates/base.html:9
 msgid "HypeHere - 친구를 사귀며 언어를 공부하는 SNS형 언어교환 플랫폼"
@@ -1438,17 +1732,37 @@ msgstr ""
 msgid "HypeHere - 언어교환 플랫폼"
 msgstr "HypeHere - Language Exchange Platform"
 
-#: templates/base.html:76 templates/partials/header.html:31
+#: templates/base.html:77 templates/partials/header.html:31
 msgid "홈"
 msgstr "Home"
 
-#: templates/base.html:85
+#: templates/base.html:86
 msgid "1:1매칭"
 msgstr "1:1 Matching"
 
-#: templates/base.html:101
+#: templates/base.html:102
 msgid "오픈채팅"
 msgstr "Open Chat"
+
+#: templates/base.html:487
+msgid "공유하기"
+msgstr "Share"
+
+#: templates/base.html:489
+msgid "링크 복사"
+msgstr "Copy Link"
+
+#: templates/base.html:490
+msgid "게시물 링크를 클립보드에 복사"
+msgstr "Copy post link to clipboard"
+
+#: templates/base.html:491
+msgid "링크가 복사되었습니다"
+msgstr "Link copied"
+
+#: templates/base.html:492
+msgid "링크 복사에 실패했습니다"
+msgstr "Failed to copy link"
 
 #: templates/conversation.html:7 templates/messages.html:5
 msgid "메시지 - HypeHere"
@@ -1457,10 +1771,6 @@ msgstr "Messages - HypeHere"
 #: templates/conversation.html:59
 msgid "방 나가기"
 msgstr "Leave Room"
-
-#: templates/base.html:263
-msgid "방 나가기 확인"
-msgstr "Confirm Leave"
 
 #: templates/conversation.html:74 templates/learning/chat_room.html:102
 #: templates/learning/matching.html:213
@@ -1493,7 +1803,7 @@ msgstr "Explore - HypeHere"
 msgid "사용자 및 게시물 검색..."
 msgstr "Search users and posts..."
 
-#: templates/explore.html:33
+#: templates/explore.html:33 templates/learning/chat.html:44
 msgid "검색어 지우기"
 msgstr "Clear Search"
 
@@ -1658,18 +1968,34 @@ msgstr "Posts can be up to 1000 characters."
 msgid "게시물 작성 중 오류가 발생했습니다."
 msgstr "An error occurred while creating the post."
 
-#: templates/home.html:219 templates/partials/post_create_modal.html:50
+#: templates/home.html:220 templates/partials/post_create_modal.html:50
 #: templates/partials/post_create_modal.html:65
 msgid "선택 안함"
 msgstr "Not Selected"
 
-#: templates/home.html:220
+#: templates/home.html:221
 msgid "언어 검색"
 msgstr "Search languages"
 
 #: templates/learning/chat.html:5
 msgid "오픈채팅 - HypeHere"
 msgstr "Open Chat - HypeHere"
+
+#: templates/learning/chat.html:41
+msgid "채팅방 검색..."
+msgstr "Search chat rooms..."
+
+#: templates/learning/chat.html:55
+msgid "즐겨찾기만 보기"
+msgstr "Show favorites only"
+
+#: templates/learning/chat.html:81
+msgid "다른 검색어나 필터를 사용해보세요"
+msgstr "Try a different search term or filter"
+
+#: templates/learning/chat.html:90
+msgid "채팅방 만들기"
+msgstr "Create Chat Room"
 
 #: templates/learning/chat.html:101
 msgid "새 채팅방 만들기"
@@ -1936,8 +2262,6 @@ msgid "예"
 msgstr "Yes"
 
 #: templates/learning/matching.html:319
-#, fuzzy
-#| msgid "차단하시겠습니까?"
 msgid "이 사용자를 차단하시겠습니까?"
 msgstr "Do you want to block this user?"
 
@@ -1970,75 +2294,51 @@ msgid "1:1 매칭하기"
 msgstr "Start 1:1 Matching"
 
 #: templates/learning/matching.html:353
-#, fuzzy
-#| msgid "카메라 끄기/켜기"
 msgid "카메라 끄기"
 msgstr "Toggle Camera"
 
 #: templates/learning/matching.html:354
-#, fuzzy
-#| msgid "카메라 끄기/켜기"
 msgid "카메라 켜기"
 msgstr "Toggle Camera"
 
 #: templates/learning/matching.html:355
-#, fuzzy
-#| msgid "마이크 끄기/켜기"
 msgid "마이크 끄기"
 msgstr "Toggle Microphone"
 
 #: templates/learning/matching.html:356
-#, fuzzy
-#| msgid "마이크 끄기/켜기"
 msgid "마이크 켜기"
 msgstr "Toggle Microphone"
 
 #: templates/learning/matching.html:364
-#, fuzzy
-#| msgid "게시물 작성 중 오류가 발생했습니다."
 msgid "매칭 시작 중 오류가 발생했습니다."
 msgstr "An error occurred while creating the post."
 
 #: templates/learning/matching.html:365
-#, fuzzy
-#| msgid "프로필 수정 중 오류가 발생했습니다."
 msgid "팔로우 요청 중 오류가 발생했습니다."
 msgstr "An error occurred while updating profile."
 
 #: templates/learning/matching.html:366
-#, fuzzy
-#| msgid "신고 접수 중 오류가 발생했습니다."
 msgid "오류가 발생했습니다."
 msgstr "An error occurred while submitting the report."
 
 #: templates/learning/matching.html:367
-#, fuzzy
-#| msgid "신고 접수 중 오류가 발생했습니다."
 msgid "신고 중 오류가 발생했습니다."
 msgstr "An error occurred while submitting the report."
 
 #: templates/learning/matching.html:368
-#, fuzzy
-#| msgid "신고할 게시물 정보를 찾을 수 없습니다."
 msgid "차단할 사용자 정보를 찾을 수 없습니다."
 msgstr "Cannot find post information to report."
 
 # Notification JavaScript Translations
 #: templates/learning/matching.html:369
-#, fuzzy
-#| msgid "알림을 불러오는데 실패했습니다."
 msgid "차단에 실패했습니다."
 msgstr "Failed to load notifications."
 
 #: templates/learning/matching.html:370
-#, fuzzy
-#| msgid "신고 접수 중 오류가 발생했습니다."
 msgid "차단 중 오류가 발생했습니다."
 msgstr "An error occurred while submitting the report."
 
 #: templates/learning/matching.html:373
-#, fuzzy
-#| msgid "상대방이 연결되었습니다"
 msgid "상대방이 팔로우 요청을 수락했습니다."
 msgstr "Partner connected"
 
@@ -2059,8 +2359,6 @@ msgid "이미 팔로우 되어있는 상대입니다."
 msgstr ""
 
 #: templates/learning/matching.html:381
-#, fuzzy
-#| msgid "상대방이 연결되었습니다"
 msgid "상대방이 팔로우를 거부하셨습니다."
 msgstr "Partner connected"
 
@@ -2156,6 +2454,42 @@ msgstr "Optional"
 msgid "신고 사유를 상세히 작성해주세요..."
 msgstr "Please describe the reason for reporting in detail..."
 
+#: templates/partials/password_rules_modal.html:9
+msgid "비밀번호 규칙"
+msgstr "Password Rules"
+
+#: templates/partials/password_rules_modal.html:25
+msgid "최소 8자 이상"
+msgstr "At least 8 characters"
+
+#: templates/partials/password_rules_modal.html:31
+msgid "영문 대문자 포함 권장"
+msgstr "Uppercase letter recommended"
+
+#: templates/partials/password_rules_modal.html:37
+msgid "영문 소문자 포함 권장"
+msgstr "Lowercase letter recommended"
+
+#: templates/partials/password_rules_modal.html:43
+msgid "숫자 포함 권장"
+msgstr "Number recommended"
+
+#: templates/partials/password_rules_modal.html:49
+msgid "특수문자 포함 권장"
+msgstr "Special character recommended"
+
+#: templates/partials/password_rules_modal.html:49
+msgid "등"
+msgstr "etc."
+
+#: templates/partials/password_rules_modal.html:55
+msgid "이메일과 유사하지 않아야 함"
+msgstr "Should not be similar to email"
+
+#: templates/partials/password_rules_modal.html:61
+msgid "일반적인 단어 사용 불가"
+msgstr "Common words not allowed"
+
 #: templates/partials/post_create_modal.html:8
 msgid "새 게시물"
 msgstr "New Post"
@@ -2188,6 +2522,10 @@ msgstr "Learning Language"
 msgid "게시하기"
 msgstr "Post"
 
+#: templates/partials/post_report_modal.html:7
+msgid "게시물 신고"
+msgstr "Post Reports"
+
 #: templates/partials/post_view_modal.html:16
 msgid "이전 포스트"
 msgstr ""
@@ -2197,8 +2535,6 @@ msgid "다음 포스트"
 msgstr ""
 
 #: templates/partials/post_view_modal.html:84
-#, fuzzy
-#| msgid "계정"
 msgid "공유"
 msgstr "Account"
 
@@ -2241,3 +2577,19 @@ msgstr "Trending Tags"
 #: templates/partials/sidebar.html:123
 msgid "추천 사용자"
 msgstr "Suggested Users"
+
+
+msgid "관리"
+msgstr "Administration"
+
+
+msgid "관리자 페이지"
+msgstr "Admin Panel"
+
+
+msgid "사용자 관리 및 시스템 설정"
+msgstr "User management and system settings"
+
+
+msgid "관리자 대시보드"
+msgstr "Admin Dashboard"

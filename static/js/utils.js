@@ -20,22 +20,75 @@ function formatRelativeTime(timestamp) {
     const diffYear = Math.floor(diffDay / 365);
 
     // Get current language setting
-    const lang = document.documentElement.lang || 'ko';
+    const htmlLang = document.documentElement.lang;
+    let lang = 'ko';
+    if (htmlLang && htmlLang !== '') {
+        const langLower = htmlLang.toLowerCase();
+        if (['en', 'ja', 'es', 'ko'].includes(langLower)) {
+            lang = langLower;
+        }
+    }
+
+    // Time format dictionaries for all supported languages
+    const timeFormats = {
+        justNow: {
+            'ko': '방금 전',
+            'en': 'just now',
+            'ja': 'たった今',
+            'es': 'justo ahora'
+        },
+        minute: {
+            'ko': (n) => `${n}분 전`,
+            'en': (n) => `${n} minute${n > 1 ? 's' : ''} ago`,
+            'ja': (n) => `${n}分前`,
+            'es': (n) => `hace ${n} minuto${n > 1 ? 's' : ''}`
+        },
+        hour: {
+            'ko': (n) => `${n}시간 전`,
+            'en': (n) => `${n} hour${n > 1 ? 's' : ''} ago`,
+            'ja': (n) => `${n}時間前`,
+            'es': (n) => `hace ${n} hora${n > 1 ? 's' : ''}`
+        },
+        day: {
+            'ko': (n) => `${n}일 전`,
+            'en': (n) => `${n} day${n > 1 ? 's' : ''} ago`,
+            'ja': (n) => `${n}日前`,
+            'es': (n) => `hace ${n} día${n > 1 ? 's' : ''}`
+        },
+        week: {
+            'ko': (n) => `${n}주 전`,
+            'en': (n) => `${n} week${n > 1 ? 's' : ''} ago`,
+            'ja': (n) => `${n}週間前`,
+            'es': (n) => `hace ${n} semana${n > 1 ? 's' : ''}`
+        },
+        month: {
+            'ko': (n) => `${n}개월 전`,
+            'en': (n) => `${n} month${n > 1 ? 's' : ''} ago`,
+            'ja': (n) => `${n}ヶ月前`,
+            'es': (n) => `hace ${n} mes${n > 1 ? 'es' : ''}`
+        },
+        year: {
+            'ko': (n) => `${n}년 전`,
+            'en': (n) => `${n} year${n > 1 ? 's' : ''} ago`,
+            'ja': (n) => `${n}年前`,
+            'es': (n) => `hace ${n} año${n > 1 ? 's' : ''}`
+        }
+    };
 
     if (diffSec < 60) {
-        return lang === 'en' ? 'just now' : '방금 전';
+        return timeFormats.justNow[lang] || timeFormats.justNow['en'];
     } else if (diffMin < 60) {
-        return lang === 'en' ? `${diffMin} minute${diffMin > 1 ? 's' : ''} ago` : `${diffMin}분 전`;
+        return timeFormats.minute[lang](diffMin);
     } else if (diffHour < 24) {
-        return lang === 'en' ? `${diffHour} hour${diffHour > 1 ? 's' : ''} ago` : `${diffHour}시간 전`;
+        return timeFormats.hour[lang](diffHour);
     } else if (diffDay < 7) {
-        return lang === 'en' ? `${diffDay} day${diffDay > 1 ? 's' : ''} ago` : `${diffDay}일 전`;
+        return timeFormats.day[lang](diffDay);
     } else if (diffWeek < 4) {
-        return lang === 'en' ? `${diffWeek} week${diffWeek > 1 ? 's' : ''} ago` : `${diffWeek}주 전`;
+        return timeFormats.week[lang](diffWeek);
     } else if (diffMonth < 12) {
-        return lang === 'en' ? `${diffMonth} month${diffMonth > 1 ? 's' : ''} ago` : `${diffMonth}개월 전`;
+        return timeFormats.month[lang](diffMonth);
     } else {
-        return lang === 'en' ? `${diffYear} year${diffYear > 1 ? 's' : ''} ago` : `${diffYear}년 전`;
+        return timeFormats.year[lang](diffYear);
     }
 }
 

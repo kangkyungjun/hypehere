@@ -1,0 +1,667 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "권한 부여" %} - HypeHere{% endblock %}
+
+{% block content %}
+<div class="admin-dashboard-container">
+    <!-- Header -->
+    <div class="admin-header">
+        <div class="header-content">
+            <h1 class="admin-title">{% trans "권한 부여" %} (Permission Management)</h1>
+            <div class="admin-nav">
+                <a href="{% url 'analytics:dashboard' %}" class="btn-admin">{% trans "대시보드로 돌아가기" %}</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Permission Management -->
+    <div class="permissions-container">
+        <!-- Search Section -->
+        <div class="search-section">
+            <h3 class="section-title">{% trans "사용자 검색" %}</h3>
+            <div class="search-bar">
+                <input type="text" id="search-input" class="search-input"
+                       placeholder="{% trans 'Enter email or nickname...' %}">
+                <button class="btn-search" onclick="searchUsers()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                    {% trans "Search" %}
+                </button>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div class="results-section" id="search-results">
+            <div class="empty-state">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                </svg>
+                <p>{% trans "Enter a search query to find users" %}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Role Change Modal -->
+    <div id="roleModal" class="role-modal">
+        <div class="role-modal-content">
+            <h2 class="modal-title">{% trans "권한 변경" %}</h2>
+            <div class="modal-user-info">
+                <p><strong>{% trans "사용자" %}:</strong> <span id="modal-user-nickname"></span></p>
+                <p><strong>{% trans "이메일" %}:</strong> <span id="modal-user-email"></span></p>
+            </div>
+            <div class="modal-role-selection">
+                <h3>{% trans "역할 선택" %}:</h3>
+                <div class="role-options">
+                    <div id="role-user" class="role-option" onclick="selectRole('user')">
+                        <span>User</span>
+                    </div>
+                    <div id="role-staff" class="role-option" onclick="selectRole('staff')">
+                        <span>Staff</span>
+                    </div>
+                    <div id="role-superuser" class="role-option" onclick="selectRole('superuser')">
+                        <span>Superuser</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-modal btn-cancel" onclick="closeRoleModal()">{% trans "취소" %}</button>
+                <button class="btn-modal btn-confirm" onclick="confirmRoleChange()">{% trans "변경" %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.admin-dashboard-container {
+    min-height: 100vh;
+    background: white;
+    padding-bottom: 15px;
+}
+
+.admin-header {
+    background: white;
+    color: black;
+    padding: 10px 15px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.header-content {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.admin-title {
+    font-size: 32px;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.admin-nav {
+    display: flex;
+    gap: 6px;
+}
+
+.btn-admin {
+    background: white;
+    color: black;
+    padding: 10px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: 1px solid #ccc;
+}
+
+.btn-admin:hover {
+    background: #f5f5f5;
+    color: black;
+    transform: translateY(-2px);
+}
+
+.permissions-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.search-section {
+    background: white;
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+.section-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.search-bar {
+    display: flex;
+    gap: 8px;
+}
+
+.search-input {
+    flex: 1;
+    padding: 10px 16px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.btn-search {
+    background: #667eea;
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-search:hover {
+    background: #764ba2;
+    transform: translateY(-2px);
+}
+
+.results-section {
+    background: white;
+    border-radius: 12px;
+    padding: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    min-height: 400px;
+}
+
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    color: #999;
+}
+
+.empty-state p {
+    margin-top: 12px;
+    font-size: 16px;
+}
+
+.results-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.results-table th {
+    text-align: left;
+    padding: 8px;
+    background: white;
+    font-weight: 600;
+    color: #333;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.results-table td {
+    padding: 8px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.results-table tr:hover {
+    background: #f5f5f5;
+}
+
+.results-table td:nth-child(1) {
+    width: 60px;
+}
+
+.results-table td:nth-child(2) {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.role-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.role-user {
+    background: #e3f2fd;
+    color: #1976d2;
+}
+
+.role-staff {
+    background: #fff3e0;
+    color: #f57c00;
+}
+
+.role-superuser {
+    background: #fce4ec;
+    color: #c2185b;
+}
+
+.role-select {
+    padding: 8px 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.role-select:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.loading {
+    text-align: center;
+    padding: 15px;
+    color: #999;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .search-bar {
+        flex-direction: column;
+    }
+
+    .results-table {
+        font-size: 12px;
+    }
+
+    .results-table th,
+    .results-table td {
+        padding: 6px;
+    }
+}
+
+/* Role Modal */
+.role-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+.role-modal-content {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.modal-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: black;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+.modal-user-info {
+    margin-bottom: 15px;
+}
+
+.modal-user-info p {
+    margin: 5px 0;
+    font-size: 14px;
+    color: black;
+}
+
+.modal-user-info strong {
+    color: black;
+}
+
+.modal-role-selection h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: black;
+    margin-bottom: 10px;
+}
+
+.role-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.role-option {
+    padding: 10px 15px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: white;
+}
+
+.role-option:hover {
+    border-color: #999;
+    background: #f5f5f5;
+}
+
+.role-option.selected {
+    border-color: black;
+    background: #f0f0f0;
+}
+
+.role-option span {
+    font-size: 14px;
+    font-weight: 500;
+    color: black;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.btn-modal {
+    padding: 8px 20px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-cancel {
+    background: white;
+    color: black;
+    border: 1px solid #ccc;
+}
+
+.btn-cancel:hover {
+    background: #f5f5f5;
+}
+
+.btn-confirm {
+    background: black;
+    color: white;
+    border: 1px solid black;
+}
+
+.btn-confirm:hover {
+    background: #333;
+}
+
+@media (max-width: 768px) {
+    .role-modal-content {
+        width: 95%;
+        padding: 15px;
+    }
+
+    .modal-title {
+        font-size: 18px;
+    }
+
+    .modal-actions {
+        flex-direction: column;
+    }
+
+    .btn-modal {
+        width: 100%;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function searchUsers() {
+    const query = document.getElementById('search-input').value.trim();
+    const resultsDiv = document.getElementById('search-results');
+
+    if (!query) {
+        resultsDiv.innerHTML = `
+            <div class="empty-state">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                </svg>
+                <p>Enter a search query to find users</p>
+            </div>
+        `;
+        return;
+    }
+
+    // Show loading state
+    resultsDiv.innerHTML = '<div class="loading">Searching...</div>';
+
+    fetch(`/admin-dashboard/api/users/search/?q=${encodeURIComponent(query)}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Search failed');
+            }
+            return response.json();
+        })
+        .then(data => {
+            displayResults(data.results);
+        })
+        .catch(error => {
+            console.error('Error searching users:', error);
+            resultsDiv.innerHTML = `
+                <div class="empty-state">
+                    <p style="color: #f44336;">Error: Failed to search users. Please try again.</p>
+                </div>
+            `;
+        });
+}
+
+function displayResults(results) {
+    const container = document.getElementById('search-results');
+
+    if (results.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <p>No users found matching your search</p>
+            </div>
+        `;
+        return;
+    }
+
+    let html = `
+        <table class="results-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Email</th>
+                    <th>Nickname</th>
+                    <th>Current Role</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+    results.forEach(user => {
+        const roleClass = user.role === 'Superuser' ? 'role-superuser' :
+                         (user.role === 'Staff' ? 'role-staff' : 'role-user');
+
+        html += `
+            <tr>
+                <td>${user.id}</td>
+                <td>${user.email}</td>
+                <td>${user.nickname}</td>
+                <td>
+                    <span class="role-badge ${roleClass}"
+                          onclick="openRoleModal(${user.id}, '${user.role}', '${user.nickname}', '${user.email}')"
+                          style="cursor: pointer;">
+                        ${user.role}
+                    </span>
+                </td>
+            </tr>
+        `;
+    });
+
+    html += '</tbody></table>';
+    container.innerHTML = html;
+}
+
+function updatePermission(userId, role) {
+    if (!role) return;
+
+    if (!confirm(`Are you sure you want to change this user's role to ${role.toUpperCase()}?`)) {
+        // Reset select if cancelled
+        event.target.value = '';
+        return;
+    }
+
+    const csrftoken = getCookie('csrftoken');
+
+    fetch(`/admin-dashboard/api/users/${userId}/permissions/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken
+        },
+        body: JSON.stringify({ role: role })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Failed to update permissions');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            alert('Permissions updated successfully!');
+            searchUsers(); // Refresh results
+        } else {
+            alert('Error: ' + (data.error || 'Unknown error occurred'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while updating permissions. Please try again.');
+    })
+    .finally(() => {
+        // Reset select
+        event.target.value = '';
+    });
+}
+
+// Allow search on Enter key
+document.getElementById('search-input').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        searchUsers();
+    }
+});
+
+// Modal state
+let selectedUserId = null;
+let selectedRole = null;
+let selectedUserNickname = null;
+let selectedUserEmail = null;
+
+function openRoleModal(userId, currentRole, nickname, email) {
+    selectedUserId = userId;
+    selectedRole = currentRole.toLowerCase();
+    selectedUserNickname = nickname;
+    selectedUserEmail = email;
+
+    document.getElementById('modal-user-nickname').textContent = nickname;
+    document.getElementById('modal-user-email').textContent = email;
+
+    // Reset role selection
+    document.querySelectorAll('.role-option').forEach(opt => opt.classList.remove('selected'));
+
+    // Highlight current role
+    const currentRoleOption = document.getElementById('role-' + currentRole.toLowerCase());
+    if (currentRoleOption) {
+        currentRoleOption.classList.add('selected');
+    }
+
+    document.getElementById('roleModal').style.display = 'flex';
+}
+
+function closeRoleModal() {
+    document.getElementById('roleModal').style.display = 'none';
+    selectedUserId = null;
+    selectedRole = null;
+    selectedUserNickname = null;
+    selectedUserEmail = null;
+}
+
+function selectRole(role) {
+    selectedRole = role;
+    document.querySelectorAll('.role-option').forEach(opt => opt.classList.remove('selected'));
+    document.getElementById('role-' + role).classList.add('selected');
+}
+
+function confirmRoleChange() {
+    if (!selectedUserId || !selectedRole) {
+        alert('Please select a role');
+        return;
+    }
+
+    if (!confirm(`Are you sure you want to change ${selectedUserNickname}'s role to ${selectedRole.toUpperCase()}?`)) {
+        return;
+    }
+
+    updatePermission(selectedUserId, selectedRole);
+    closeRoleModal();
+}
+
+// Close modal when clicking outside
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('roleModal');
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            closeRoleModal();
+        }
+    });
+});
+</script>
+{% endblock %}

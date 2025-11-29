@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: HypeHere 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-23 07:20+0000\n"
+"POT-Creation-Date: 2025-11-25 11:30+0000\n"
 "PO-Revision-Date: 2025-11-23 12:00+0000\n"
 "Last-Translator: HypeHere Team <support@hypehere.com>\n"
 "Language-Team: English <en@hypehere.com>\n"
@@ -157,23 +157,23 @@ msgstr "Remove from favorites?"
 msgid "즐겨찾기 해제에 실패했습니다."
 msgstr "Failed to remove from favorites."
 
-#: static/js/open-chat-room.js:854
+#: static/js/open-chat-room.js:1006
 msgid "방 개설자"
 msgstr "Room Creator"
 
-#: static/js/open-chat-room.js:860
+#: static/js/open-chat-room.js:1012
 msgid "관리자"
 msgstr "Admin"
 
-#: static/js/open-chat-room.js:885 static/js/open-chat-room.js:886
+#: static/js/open-chat-room.js:1037 static/js/open-chat-room.js:1038
 msgid "팔로우"
 msgstr "Follow"
 
-#: static/js/open-chat-room.js:896
+#: static/js/open-chat-room.js:1048
 msgid "메시지"
 msgstr "Message"
 
-#: static/js/open-chat-room.js:897
+#: static/js/open-chat-room.js:1049
 msgid "메시지 보내기"
 msgstr "Send Message"
 
@@ -193,37 +193,44 @@ msgstr "Edit Post"
 msgid "수정하기"
 msgstr "Edit"
 
-#: templates/base.html
-msgid "게시물"
-msgstr "Posts"
+msgid "채팅방에 입장했습니다"
+msgstr "You have entered the chat room"
 
-#: templates/base.html
-msgid "팔로워"
-msgstr "Followers"
+#~ msgid "더보기"
+#~ msgstr "More"
 
-#: templates/base.html
-msgid "팔로잉"
-msgstr "Following"
+#~ msgid "강퇴"
+#~ msgstr "Kick"
 
-#: templates/base.html
-msgid "맞팔로우"
-msgstr "Mutual"
+#~ msgid "강퇴자:"
+#~ msgstr "Kicked by:"
 
-#: templates/base.html
-msgid "나"
-msgstr "Me"
+#~ msgid "사유:"
+#~ msgstr "Reason:"
 
-#: templates/base.html
-msgid "로그인"
-msgstr "Login"
+#~ msgid "게시물"
+#~ msgstr "Posts"
 
-#: templates/base.html
-msgid "오류 발생"
-msgstr "Error"
+#~ msgid "팔로워"
+#~ msgstr "Followers"
 
-#: templates/base.html
-msgid "데이터를 불러오는 중 오류가 발생했습니다"
-msgstr "An error occurred while loading data"
+#~ msgid "팔로잉"
+#~ msgstr "Following"
+
+#~ msgid "맞팔로우"
+#~ msgstr "Mutual"
+
+#~ msgid "나"
+#~ msgstr "Me"
+
+#~ msgid "로그인"
+#~ msgstr "Login"
+
+#~ msgid "오류 발생"
+#~ msgstr "Error"
+
+#~ msgid "데이터를 불러오는 중 오류가 발생했습니다"
+#~ msgstr "An error occurred while loading data"
 
 #~ msgid "님에게 관리자 권한을 부여하시겠습니까?"
 #~ msgstr "Would you like to grant admin privileges to"
@@ -257,3 +264,7 @@ msgstr "An error occurred while loading data"
 
 #~ msgid "차단 해제"
 #~ msgstr "Unblock"
+
+#: templates/base.html:195
+msgid "아직 댓글이 없습니다. 첫 번째 댓글을 작성해보세요!"
+msgstr "No comments yet. Be the first to comment!"

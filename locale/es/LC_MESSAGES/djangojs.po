@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-23 04:00+0000\n"
+"POT-Creation-Date: 2025-11-25 11:30+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -21,161 +21,161 @@ msgstr ""
 
 #: static/js/favorites.js:120
 msgid "즐겨찾기를 불러오는데 실패했습니다."
-msgstr ""
+msgstr "No se pudieron cargar los favoritos."
 
 #: static/js/favorites.js:167 static/js/favorites.js:293
 msgid "즐겨찾기 해제"
-msgstr ""
+msgstr "Quitar de favoritos"
 
 #: static/js/favorites.js:182
 msgid "명"
-msgstr ""
+msgstr "personas"
 
 #: static/js/favorites.js:187
 msgid "입장하기"
-msgstr ""
+msgstr "Entrar"
 
 #: static/js/favorites.js:209
 msgid "언어교환"
-msgstr ""
+msgstr "Intercambio de idiomas"
 
 #: static/js/favorites.js:210
 msgid "스터디"
-msgstr ""
+msgstr "Estudio"
 
 #: static/js/favorites.js:211
 msgid "문화교류"
-msgstr ""
+msgstr "Intercambio cultural"
 
 #: static/js/favorites.js:212
 msgid "질문답변"
-msgstr ""
+msgstr "Preguntas y respuestas"
 
 #: static/js/favorites.js:213
 msgid "자유대화"
-msgstr ""
+msgstr "Conversación libre"
 
 #: static/js/favorites.js:214
 msgid "국가"
-msgstr ""
+msgstr "País"
 
 #: static/js/favorites.js:310 static/js/favorites.js:404
 msgid "좋아요 취소"
-msgstr ""
+msgstr "Quitar me gusta"
 
 #: static/js/favorites.js:310 static/js/favorites.js:408
 msgid "좋아요"
-msgstr ""
+msgstr "Me gusta"
 
 #: static/js/favorites.js:317
 msgid "댓글"
-msgstr ""
+msgstr "Comentarios"
 
 #: static/js/favorites.js:329
 msgid "한국어"
-msgstr ""
+msgstr "Coreano"
 
 #: static/js/favorites.js:330
 msgid "English"
-msgstr ""
+msgstr "Inglés"
 
 #: static/js/favorites.js:331
 msgid "日本語"
-msgstr ""
+msgstr "Japonés"
 
 #: static/js/favorites.js:332
 msgid "中文"
-msgstr ""
+msgstr "Chino"
 
 #: static/js/favorites.js:333
 msgid "Español"
-msgstr ""
+msgstr "Español"
 
 #: static/js/favorites.js:334
 msgid "Français"
-msgstr ""
+msgstr "Francés"
 
 #: static/js/favorites.js:335
 msgid "Deutsch"
-msgstr ""
+msgstr "Alemán"
 
 #: static/js/favorites.js:336
 msgid "Italiano"
-msgstr ""
+msgstr "Italiano"
 
 #: static/js/favorites.js:337
 msgid "Português"
-msgstr ""
+msgstr "Portugués"
 
 #: static/js/favorites.js:338
 msgid "Русский"
-msgstr ""
+msgstr "Ruso"
 
 #: static/js/favorites.js:347
 msgid "년"
-msgstr ""
+msgstr "año(s)"
 
 #: static/js/favorites.js:348
 msgid "개월"
-msgstr ""
+msgstr "mes(es)"
 
 #: static/js/favorites.js:349
 msgid "주"
-msgstr ""
+msgstr "semana(s)"
 
 #: static/js/favorites.js:350
 msgid "일"
-msgstr ""
+msgstr "día(s)"
 
 #: static/js/favorites.js:351
 msgid "시간"
-msgstr ""
+msgstr "hora(s)"
 
 #: static/js/favorites.js:352
 msgid "분"
-msgstr ""
+msgstr "minuto(s)"
 
 #: static/js/favorites.js:358
 msgid "전"
-msgstr ""
+msgstr "hace"
 
 #: static/js/favorites.js:361
 msgid "방금 전"
-msgstr ""
+msgstr "justo ahora"
 
 #: static/js/favorites.js:379
 msgid "로그인이 필요합니다."
-msgstr ""
+msgstr "Inicio de sesión requerido."
 
 #: static/js/favorites.js:390
 msgid "좋아요 처리 중 오류가 발생했습니다."
-msgstr ""
+msgstr "Ocurrió un error al procesar me gusta."
 
 #: static/js/favorites.js:416 static/js/favorites.js:447
 msgid "즐겨찾기를 해제하시겠습니까?"
-msgstr ""
+msgstr "¿Desea quitar de favoritos?"
 
 #: static/js/favorites.js:442 static/js/favorites.js:475
 msgid "즐겨찾기 해제에 실패했습니다."
-msgstr ""
+msgstr "No se pudo quitar de favoritos."
 
-#: static/js/open-chat-room.js:854
+#: static/js/open-chat-room.js:1006
 msgid "방 개설자"
-msgstr ""
+msgstr "Creador de la sala"
 
-#: static/js/open-chat-room.js:860
+#: static/js/open-chat-room.js:1012
 msgid "관리자"
-msgstr ""
+msgstr "Administrador"
 
-#: static/js/open-chat-room.js:885 static/js/open-chat-room.js:886
+#: static/js/open-chat-room.js:1037 static/js/open-chat-room.js:1038
 msgid "팔로우"
 msgstr "Seguir"
 
-#: static/js/open-chat-room.js:896
+#: static/js/open-chat-room.js:1048
 msgid "메시지"
 msgstr "Mensaje"
 
-#: static/js/open-chat-room.js:897
+#: static/js/open-chat-room.js:1049
 msgid "메시지 보내기"
 msgstr "Enviar mensaje"
 
@@ -195,34 +195,45 @@ msgstr "Editar publicación"
 msgid "수정하기"
 msgstr "Editar"
 
-#: templates/base.html
-msgid "게시물"
-msgstr "Publicaciones"
+msgid "채팅방에 입장했습니다"
+msgstr "Has entrado en la sala de chat"
 
-#: templates/base.html
-msgid "팔로워"
-msgstr "Seguidores"
+#~ msgid "더보기"
+#~ msgstr "Más"
 
-#: templates/base.html
-msgid "팔로잉"
-msgstr "Siguiendo"
+#~ msgid "강퇴"
+#~ msgstr "Expulsar"
 
-#: templates/base.html
-msgid "맞팔로우"
-msgstr "Mutuo"
+#~ msgid "강퇴자:"
+#~ msgstr "Expulsado por:"
 
-#: templates/base.html
-msgid "나"
-msgstr "Yo"
+#~ msgid "사유:"
+#~ msgstr "Razón:"
 
-#: templates/base.html
-msgid "로그인"
-msgstr "Iniciar sesión"
+#~ msgid "게시물"
+#~ msgstr "Publicaciones"
 
-#: templates/base.html
-msgid "오류 발생"
-msgstr "Error"
+#~ msgid "팔로워"
+#~ msgstr "Seguidores"
 
-#: templates/base.html
-msgid "데이터를 불러오는 중 오류가 발생했습니다"
-msgstr "Ocurrió un error al cargar los datos"
+#~ msgid "팔로잉"
+#~ msgstr "Siguiendo"
+
+#~ msgid "맞팔로우"
+#~ msgstr "Mutuo"
+
+#~ msgid "나"
+#~ msgstr "Yo"
+
+#~ msgid "로그인"
+#~ msgstr "Iniciar sesión"
+
+#~ msgid "오류 발생"
+#~ msgstr "Error"
+
+#~ msgid "데이터를 불러오는 중 오류가 발생했습니다"
+#~ msgstr "Ocurrió un error al cargar los datos"
+
+#: templates/base.html:195
+msgid "아직 댓글이 없습니다. 첫 번째 댓글을 작성해보세요!"
+msgstr "¡Aún no hay comentarios. Sé el primero en comentar!"

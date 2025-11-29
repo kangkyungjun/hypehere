@@ -30,7 +30,12 @@ function showAlert(type, message) {
     const messageElement = document.getElementById(messageId);
 
     if (alertElement && messageElement) {
-        messageElement.textContent = message;
+        // Use innerHTML for error messages to support HTML formatting (bullet points)
+        if (type === 'error') {
+            messageElement.innerHTML = message;
+        } else {
+            messageElement.textContent = message;
+        }
         alertElement.classList.remove('hidden');
 
         // Auto-hide success messages after 3 seconds
@@ -39,6 +44,64 @@ function showAlert(type, message) {
                 alertElement.classList.add('hidden');
             }, 3000);
         }
+    }
+}
+
+// Parse all registration errors from server response
+function parseRegistrationErrors(data) {
+    const errors = [];
+
+    // Collect errors from all fields
+    if (data.email) {
+        const emailErrors = Array.isArray(data.email) ? data.email : [data.email];
+        errors.push(...emailErrors);
+    }
+    if (data.nickname) {
+        const nicknameErrors = Array.isArray(data.nickname) ? data.nickname : [data.nickname];
+        errors.push(...nicknameErrors);
+    }
+    if (data.password) {
+        const passwordErrors = Array.isArray(data.password) ? data.password : [data.password];
+        errors.push(...passwordErrors);
+    }
+    if (data.password_confirm) {
+        const confirmErrors = Array.isArray(data.password_confirm) ? data.password_confirm : [data.password_confirm];
+        errors.push(...confirmErrors);
+    }
+    if (data.gender) {
+        const genderErrors = Array.isArray(data.gender) ? data.gender : [data.gender];
+        errors.push(...genderErrors);
+    }
+    if (data.country) {
+        const countryErrors = Array.isArray(data.country) ? data.country : [data.country];
+        errors.push(...countryErrors);
+    }
+    if (data.native_language) {
+        const nativeLanguageErrors = Array.isArray(data.native_language) ? data.native_language : [data.native_language];
+        errors.push(...nativeLanguageErrors);
+    }
+    if (data.target_language) {
+        const targetLanguageErrors = Array.isArray(data.target_language) ? data.target_language : [data.target_language];
+        errors.push(...targetLanguageErrors);
+    }
+    if (data.non_field_errors) {
+        const nonFieldErrors = Array.isArray(data.non_field_errors) ? data.non_field_errors : [data.non_field_errors];
+        errors.push(...nonFieldErrors);
+    }
+    if (data.detail) {
+        errors.push(data.detail);
+    }
+    if (data.message) {
+        errors.push(data.message);
+    }
+
+    // Format multiple errors with bullet points
+    if (errors.length > 1) {
+        return errors.map(err => `• ${err}`).join('<br>');
+    } else if (errors.length === 1) {
+        return errors[0];
+    } else {
+        return '회원가입 중 오류가 발생했습니다.';
     }
 }
 
@@ -140,6 +203,79 @@ document.addEventListener('DOMContentLoaded', function() {
     const registerForm = document.getElementById('register-form');
 
     if (registerForm) {
+        // Initialize Gender Selector
+        let genderSelector = null;
+        const genderContainer = document.getElementById('gender-selector-container');
+        const genderInput = document.getElementById('gender');
+
+        if (genderContainer && genderInput && typeof GenderSelector !== 'undefined') {
+            genderSelector = new GenderSelector('gender-selector-container', {
+                onChange: (gender) => {
+                    genderInput.value = gender ? gender.value : '';
+                }
+            });
+        }
+
+        // Initialize Country Selector
+        let countrySelector = null;
+        const countryContainer = document.getElementById('country-selector-container');
+        const countryInput = document.getElementById('country');
+
+        if (countryContainer && countryInput && typeof CountrySelector !== 'undefined') {
+            countrySelector = new CountrySelector('country-selector-container', {
+                onChange: (country) => {
+                    countryInput.value = country ? country.name : '';
+                }
+            });
+        }
+
+        // Initialize UI Language Selector (with instant language switching)
+        let uiLanguageSelector = null;
+        const uiLanguageContainer = document.getElementById('ui-language-selector-container');
+        const uiLanguageInput = document.getElementById('ui_language');
+
+        if (uiLanguageContainer && uiLanguageInput && typeof LanguageSelector !== 'undefined') {
+            // Filter languages to only show those supported by Django i18n
+            // Django LANGUAGES: ko, en, ja, es (from settings.py)
+            const supportedUiLanguages = LANGUAGES.filter(lang =>
+                ['KO', 'EN', 'JA', 'ES'].includes(lang.code)
+            );
+
+            uiLanguageSelector = new LanguageSelector('ui-language-selector-container', {
+                languages: supportedUiLanguages,  // Only show supported languages
+                useNativeNames: true,  // Show languages in their native scripts
+                onChange: async (language) => {
+                    uiLanguageInput.value = language ? language.code : '';
+
+                    // Instantly change page language
+                    if (language && language.code) {
+                        console.log('Language selected:', language.code);
+
+                        const formData = new FormData();
+                        formData.append('language', language.code.toLowerCase());
+
+                        try {
+                            console.log('Sending language change request...');
+                            const response = await fetch('/i18n/setlang/', {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRFToken': csrftoken
+                                },
+                                body: formData
+                            });
+
+                            console.log('Language change response:', response.status);
+
+                            // Reload page to apply new language
+                            window.location.reload();
+                        } catch (error) {
+                            console.error('Language switch error:', error);
+                        }
+                    }
+                }
+            });
+        }
+
         registerForm.addEventListener('submit', async function(e) {
             e.preventDefault();
 
@@ -165,7 +301,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 email: formData.get('email'),
                 nickname: formData.get('nickname'),
                 password: formData.get('password'),
-                password_confirm: formData.get('password_confirm')
+                password_confirm: formData.get('password_confirm'),
+                gender: formData.get('gender') || '',
+                country: formData.get('country') || '',
+                native_language: formData.get('native_language') || '',
+                target_language: formData.get('target_language') || ''
             };
 
             // Set loading state
@@ -199,24 +339,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     }, 1500);
 
                 } else {
-                    // Error - Display field-specific or general errors
-                    if (result.email) {
-                        showFieldError('email', Array.isArray(result.email) ? result.email[0] : result.email);
-                    }
-                    if (result.nickname) {
-                        showFieldError('nickname', Array.isArray(result.nickname) ? result.nickname[0] : result.nickname);
-                    }
-                    if (result.password) {
-                        showFieldError('password', Array.isArray(result.password) ? result.password[0] : result.password);
-                    }
-                    if (result.password_confirm) {
-                        showFieldError('password_confirm', Array.isArray(result.password_confirm) ? result.password_confirm[0] : result.password_confirm);
-                    }
-
-                    // Show general error message
-                    const errorMessage = result.detail || result.message || '회원가입 중 오류가 발생했습니다.';
+                    // Error - Parse and display all errors
+                    const errorMessage = parseRegistrationErrors(result);
                     showAlert('error', errorMessage);
-
                     setLoadingState(false);
                 }
 

@@ -64,18 +64,19 @@ class Conversation(models.Model):
         return self.participants.exclude(id=current_user.id).first()
 
     def get_last_message(self):
-        """마지막 메시지 반환"""
-        return self.messages.order_by('-created_at').first()
+        """마지막 메시지 반환 (만료되지 않은 메시지만)"""
+        return self.messages.filter(is_expired=False).order_by('-created_at').first()
 
     def get_unread_count(self, user):
-        """특정 사용자의 읽지 않은 메시지 수 (left_at 이후만)"""
+        """특정 사용자의 읽지 않은 메시지 수 (left_at 이후만, 만료되지 않은 메시지만)"""
         try:
             participant = self.participant_relations.get(user=user)
 
-            # 본인이 보내지 않은 읽지 않은 메시지
+            # 본인이 보내지 않은 읽지 않은 메시지 (만료되지 않은 것만)
             messages = self.messages.filter(
                 ~Q(sender=user),
-                is_read=False
+                is_read=False,
+                is_expired=False
             )
 
             # 나간 적이 있으면 left_at 이후 메시지만 카운트
@@ -113,6 +114,10 @@ class Message(models.Model):
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)
+
+    # Anonymous message expiration fields
+    expires_at = models.DateTimeField(null=True, blank=True, db_index=True, verbose_name='만료 시간')
+    is_expired = models.BooleanField(default=False, db_index=True, verbose_name='만료 여부')
 
     class Meta:
         ordering = ['created_at']

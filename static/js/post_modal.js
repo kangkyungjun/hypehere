@@ -292,6 +292,7 @@ if (postForm) {
         const placeholderNone = window.POST_MODAL_I18N?.placeholderNone || 'None selected';
         const placeholderSearch = window.POST_MODAL_I18N?.placeholderSearch || '🔍 Search languages...';
         const emptyResult = window.POST_MODAL_I18N?.emptySearchResult || 'No results found';
+        const modalTitle = window.POST_MODAL_I18N?.modalTitle || 'Select Language';
 
         // Native Language Selector
         new LanguageSelector('native-language-selector', {
@@ -299,6 +300,7 @@ if (postForm) {
             placeholder: placeholderNone,
             searchPlaceholder: placeholderSearch,
             emptyText: emptyResult,
+            modalTitle: modalTitle,
             initialValue: '',
             onChange: function(language) {
                 console.log('Native language selected:', language);
@@ -311,6 +313,7 @@ if (postForm) {
             placeholder: placeholderNone,
             searchPlaceholder: placeholderSearch,
             emptyText: emptyResult,
+            modalTitle: modalTitle,
             initialValue: '',
             onChange: function(language) {
                 console.log('Target language selected:', language);

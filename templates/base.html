@@ -19,6 +19,7 @@
     <link rel="stylesheet" href="{% static 'css/post_action_modal.css' %}">
     <link rel="stylesheet" href="{% static 'css/post_delete_modal.css' %}">
     <link rel="stylesheet" href="{% static 'css/alert_modal.css' %}">
+    <link rel="stylesheet" href="{% static 'css/post_share.css' %}">
     {% block extra_css %}{% endblock %}
 </head>
 <body class="{% block body_class %}{% endblock %}"{% if user.is_authenticated %} data-user-id="{{ user.id }}"{% endif %}>
@@ -113,16 +114,74 @@
     <script src="{% url 'javascript-catalog' %}"></script>
     <script>
     // Global i18n object for all JavaScript files
-    window.APP_I18N = {
+    (function() {
+        const lang = document.documentElement.lang || 'ko';
+        const timeStrings = {
+            'ko': {
+                justNow: '방금 전',
+                secondsAgo: '초 전',
+                minutesAgo: '분 전',
+                hoursAgo: '시간 전',
+                daysAgo: '일 전',
+                weeksAgo: '주 전',
+                monthsAgo: '개월 전',
+                yearsAgo: '년 전',
+                deletedPost: '게시물은 신고에 의해 삭제되었습니다.',
+                deletedComment: '신고로 삭제됨'
+            },
+            'en': {
+                justNow: 'Just now',
+                secondsAgo: ' sec ago',
+                minutesAgo: ' min ago',
+                hoursAgo: ' hours ago',
+                daysAgo: ' days ago',
+                weeksAgo: ' weeks ago',
+                monthsAgo: ' months ago',
+                yearsAgo: ' years ago',
+                deletedPost: 'This post has been deleted due to a report.',
+                deletedComment: 'Deleted by report'
+            },
+            'ja': {
+                justNow: 'たった今',
+                secondsAgo: '秒前',
+                minutesAgo: '分前',
+                hoursAgo: '時間前',
+                daysAgo: '日前',
+                weeksAgo: '週間前',
+                monthsAgo: 'ヶ月前',
+                yearsAgo: '年前',
+                deletedPost: 'この投稿は報告により削除されました。',
+                deletedComment: '報告により削除'
+            },
+            'es': {
+                justNow: 'justo ahora',
+                secondsAgo: ' seg atrás',
+                minutesAgo: ' min atrás',
+                hoursAgo: ' horas atrás',
+                daysAgo: ' días atrás',
+                weeksAgo: ' semanas atrás',
+                monthsAgo: ' meses atrás',
+                yearsAgo: ' años atrás',
+                deletedPost: 'Esta publicación ha sido eliminada debido a un reporte.',
+                deletedComment: 'Eliminado por reporte'
+            }
+        };
+        const currentLang = timeStrings[lang] || timeStrings['ko'];
+
+        window.APP_I18N = {
             // Time strings
-            timeJustNow: document.documentElement.lang === 'en' ? 'Just now' : '방금 전',
-            timeSecondsAgo: document.documentElement.lang === 'en' ? ' sec ago' : '초 전',
-            timeMinutesAgo: document.documentElement.lang === 'en' ? ' min ago' : '분 전',
-            timeHoursAgo: document.documentElement.lang === 'en' ? ' hours ago' : '시간 전',
-            timeDaysAgo: document.documentElement.lang === 'en' ? ' days ago' : '일 전',
-            timeWeeksAgo: document.documentElement.lang === 'en' ? ' weeks ago' : '주 전',
-            timeMonthsAgo: document.documentElement.lang === 'en' ? ' months ago' : '개월 전',
-            timeYearsAgo: document.documentElement.lang === 'en' ? ' years ago' : '년 전',
+            timeJustNow: currentLang.justNow,
+            timeSecondsAgo: currentLang.secondsAgo,
+            timeMinutesAgo: currentLang.minutesAgo,
+            timeHoursAgo: currentLang.hoursAgo,
+            timeDaysAgo: currentLang.daysAgo,
+            timeWeeksAgo: currentLang.weeksAgo,
+            timeMonthsAgo: currentLang.monthsAgo,
+            timeYearsAgo: currentLang.yearsAgo,
+
+            // Deleted content messages
+            deletedPostMessage: currentLang.deletedPost,
+            deletedCommentMessage: currentLang.deletedComment,
 
             // Time units
             year: gettext('년'),
@@ -243,7 +302,7 @@
 
             // Open chat room
             participantsCount: gettext('명 참여 중'),
-            roomJoined: document.documentElement.lang === 'en' ? 'You have entered the chat room' : '채팅방에 입장했습니다',
+            roomJoined: gettext('채팅방에 입장했습니다'),
             enterMessage: gettext('메시지를 입력하세요...'),
             send: gettext('전송'),
             backButton: gettext('뒤로 가기'),
@@ -262,6 +321,8 @@
             leaveRoomFailed: gettext('채팅방 나가기에 실패했습니다.'),
             leaveConfirmTitle: gettext('방 나가기 확인'),
             leave: gettext('나가기'),
+            roomDeleted: gettext('방 삭제 완료'),
+            roomClosed: gettext('채팅방 폐쇄'),
 
             // Kick system
             kickUser: gettext('사용자 강퇴'),
@@ -328,6 +389,12 @@
             createRoomFailed: gettext('채팅방 생성에 실패했습니다.'),
             errorTitle: gettext('오류'),
             countryCategory: gettext('국가'),
+            more: gettext('더보기'),
+            grantAdmin: gettext('관리자 권한 부여'),
+            revokeAdmin: gettext('관리자 권한 해제'),
+            kick: gettext('강퇴'),
+            kickedBy2: gettext('강퇴자:'),
+            reason: gettext('사유:'),
 
             // Account Management
             deletionScheduled: gettext('삭제 예약됨'),
@@ -386,8 +453,10 @@
             deleteAction: gettext('삭제 처리'),
             dismissReport: gettext('신고 기각')
         };
+    })();
     </script>
     <script src="{% static 'js/main.js' %}"></script>
+    <script src="{% static 'js/header_scroll.js' %}"></script>
     <script src="{% static 'js/utils.js' %}"></script>
     <script src="{% static 'js/follow.js' %}"></script>
     {% if user.is_authenticated %}
@@ -410,6 +479,21 @@
             <script src="{% static 'js/infinite_scroll.js' %}"></script>
         {% endif %}
     {% endif %}
+
+    <!-- Post Share Modal -->
+    <script>
+        // Share modal i18n translations
+        window.SHARE_I18N = {
+            shareTitle: "{% trans '공유하기' %}",
+            close: "{% trans '닫기' %}",
+            copyLink: "{% trans '링크 복사' %}",
+            copyLinkDesc: "{% trans '게시물 링크를 클립보드에 복사' %}",
+            linkCopied: "{% trans '링크가 복사되었습니다' %}",
+            copyFailed: "{% trans '링크 복사에 실패했습니다' %}"
+        };
+    </script>
+    <script src="{% static 'js/post_share.js' %}"></script>
+
     {% block extra_js %}{% endblock %}
 </body>
 </html>

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-23 04:00+0000\n"
+"POT-Creation-Date: 2025-11-25 11:30+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -20,161 +20,161 @@ msgstr ""
 
 #: static/js/favorites.js:120
 msgid "즐겨찾기를 불러오는데 실패했습니다."
-msgstr ""
+msgstr "お気に入りの読み込みに失敗しました。"
 
 #: static/js/favorites.js:167 static/js/favorites.js:293
 msgid "즐겨찾기 해제"
-msgstr ""
+msgstr "お気に入りから削除"
 
 #: static/js/favorites.js:182
 msgid "명"
-msgstr ""
+msgstr "人"
 
 #: static/js/favorites.js:187
 msgid "입장하기"
-msgstr ""
+msgstr "入室する"
 
 #: static/js/favorites.js:209
 msgid "언어교환"
-msgstr ""
+msgstr "言語交換"
 
 #: static/js/favorites.js:210
 msgid "스터디"
-msgstr ""
+msgstr "スタディ"
 
 #: static/js/favorites.js:211
 msgid "문화교류"
-msgstr ""
+msgstr "文化交流"
 
 #: static/js/favorites.js:212
 msgid "질문답변"
-msgstr ""
+msgstr "質問回答"
 
 #: static/js/favorites.js:213
 msgid "자유대화"
-msgstr ""
+msgstr "自由会話"
 
 #: static/js/favorites.js:214
 msgid "국가"
-msgstr ""
+msgstr "国"
 
 #: static/js/favorites.js:310 static/js/favorites.js:404
 msgid "좋아요 취소"
-msgstr ""
+msgstr "いいねを取消"
 
 #: static/js/favorites.js:310 static/js/favorites.js:408
 msgid "좋아요"
-msgstr ""
+msgstr "いいね"
 
 #: static/js/favorites.js:317
 msgid "댓글"
-msgstr ""
+msgstr "コメント"
 
 #: static/js/favorites.js:329
 msgid "한국어"
-msgstr ""
+msgstr "韓国語"
 
 #: static/js/favorites.js:330
 msgid "English"
-msgstr ""
+msgstr "英語"
 
 #: static/js/favorites.js:331
 msgid "日本語"
-msgstr ""
+msgstr "日本語"
 
 #: static/js/favorites.js:332
 msgid "中文"
-msgstr ""
+msgstr "中国語"
 
 #: static/js/favorites.js:333
 msgid "Español"
-msgstr ""
+msgstr "スペイン語"
 
 #: static/js/favorites.js:334
 msgid "Français"
-msgstr ""
+msgstr "フランス語"
 
 #: static/js/favorites.js:335
 msgid "Deutsch"
-msgstr ""
+msgstr "ドイツ語"
 
 #: static/js/favorites.js:336
 msgid "Italiano"
-msgstr ""
+msgstr "イタリア語"
 
 #: static/js/favorites.js:337
 msgid "Português"
-msgstr ""
+msgstr "ポルトガル語"
 
 #: static/js/favorites.js:338
 msgid "Русский"
-msgstr ""
+msgstr "ロシア語"
 
 #: static/js/favorites.js:347
 msgid "년"
-msgstr ""
+msgstr "年"
 
 #: static/js/favorites.js:348
 msgid "개월"
-msgstr ""
+msgstr "ヶ月"
 
 #: static/js/favorites.js:349
 msgid "주"
-msgstr ""
+msgstr "週間"
 
 #: static/js/favorites.js:350
 msgid "일"
-msgstr ""
+msgstr "日"
 
 #: static/js/favorites.js:351
 msgid "시간"
-msgstr ""
+msgstr "時間"
 
 #: static/js/favorites.js:352
 msgid "분"
-msgstr ""
+msgstr "分"
 
 #: static/js/favorites.js:358
 msgid "전"
-msgstr ""
+msgstr "前"
 
 #: static/js/favorites.js:361
 msgid "방금 전"
-msgstr ""
+msgstr "たった今"
 
 #: static/js/favorites.js:379
 msgid "로그인이 필요합니다."
-msgstr ""
+msgstr "ログインが必要です。"
 
 #: static/js/favorites.js:390
 msgid "좋아요 처리 중 오류가 발생했습니다."
-msgstr ""
+msgstr "いいね処理中にエラーが発生しました。"
 
 #: static/js/favorites.js:416 static/js/favorites.js:447
 msgid "즐겨찾기를 해제하시겠습니까?"
-msgstr ""
+msgstr "お気に入りから削除してもよろしいですか？"
 
 #: static/js/favorites.js:442 static/js/favorites.js:475
 msgid "즐겨찾기 해제에 실패했습니다."
-msgstr ""
+msgstr "お気に入り削除に失敗しました。"
 
-#: static/js/open-chat-room.js:854
+#: static/js/open-chat-room.js:1006
 msgid "방 개설자"
-msgstr ""
+msgstr "ルーム主"
 
-#: static/js/open-chat-room.js:860
+#: static/js/open-chat-room.js:1012
 msgid "관리자"
-msgstr ""
+msgstr "管理者"
 
-#: static/js/open-chat-room.js:885 static/js/open-chat-room.js:886
+#: static/js/open-chat-room.js:1037 static/js/open-chat-room.js:1038
 msgid "팔로우"
 msgstr "フォロー"
 
-#: static/js/open-chat-room.js:896
+#: static/js/open-chat-room.js:1048
 msgid "메시지"
 msgstr "メッセージ"
 
-#: static/js/open-chat-room.js:897
+#: static/js/open-chat-room.js:1049
 msgid "메시지 보내기"
 msgstr "メッセージを送信"
 
@@ -194,34 +194,45 @@ msgstr "投稿を編集"
 msgid "수정하기"
 msgstr "編集"
 
-#: templates/base.html
-msgid "게시물"
-msgstr "投稿"
+msgid "채팅방에 입장했습니다"
+msgstr "チャットルームに入室しました"
 
-#: templates/base.html
-msgid "팔로워"
-msgstr "フォロワー"
+#~ msgid "더보기"
+#~ msgstr "もっと見る"
 
-#: templates/base.html
-msgid "팔로잉"
-msgstr "フォロー中"
+#~ msgid "강퇴"
+#~ msgstr "キック"
 
-#: templates/base.html
-msgid "맞팔로우"
-msgstr "相互"
+#~ msgid "강퇴자:"
+#~ msgstr "キックした人:"
 
-#: templates/base.html
-msgid "나"
-msgstr "自分"
+#~ msgid "사유:"
+#~ msgstr "理由:"
 
-#: templates/base.html
-msgid "로그인"
-msgstr "ログイン"
+#~ msgid "게시물"
+#~ msgstr "投稿"
 
-#: templates/base.html
-msgid "오류 발생"
-msgstr "エラー"
+#~ msgid "팔로워"
+#~ msgstr "フォロワー"
 
-#: templates/base.html
-msgid "데이터를 불러오는 중 오류가 발생했습니다"
-msgstr "データの読み込み中にエラーが発生しました"
+#~ msgid "팔로잉"
+#~ msgstr "フォロー中"
+
+#~ msgid "맞팔로우"
+#~ msgstr "相互"
+
+#~ msgid "나"
+#~ msgstr "自分"
+
+#~ msgid "로그인"
+#~ msgstr "ログイン"
+
+#~ msgid "오류 발생"
+#~ msgstr "エラー"
+
+#~ msgid "데이터를 불러오는 중 오류가 발생했습니다"
+#~ msgstr "データの読み込み中にエラーが発生しました"
+
+#: templates/base.html:195
+msgid "아직 댓글이 없습니다. 첫 번째 댓글을 작성해보세요!"
+msgstr "まだコメントがありません。最初にコメントしてみましょう！"

@@ -3,6 +3,57 @@
  * Handles block and report actions for posts
  */
 
+/**
+ * Get localized text for post actions
+ * @param {string} key - The text key to translate
+ * @returns {string} Localized text
+ */
+function getPostActionText(key) {
+    const htmlLang = document.documentElement.lang;
+    let lang = 'ko';
+    if (htmlLang && htmlLang !== '') {
+        const langLower = htmlLang.toLowerCase();
+        if (['en', 'ja', 'es', 'ko'].includes(langLower)) {
+            lang = langLower;
+        }
+    }
+
+    const texts = {
+        reported: {
+            'ko': '신고됨',
+            'en': 'Reported',
+            'ja': '報告済み',
+            'es': 'Reportado'
+        },
+        reportedBadge: {
+            'ko': '신고됨',
+            'en': 'Reported',
+            'ja': '報告済み',
+            'es': 'Reportado'
+        },
+        selectReportType: {
+            'ko': '신고 유형을 선택해주세요.',
+            'en': 'Please select a report type.',
+            'ja': '報告タイプを選択してください。',
+            'es': 'Por favor seleccione un tipo de reporte.'
+        },
+        cannotFindUser: {
+            'ko': '신고할 사용자를 찾을 수 없습니다.',
+            'en': 'Cannot find user to report.',
+            'ja': '報告するユーザーが見つかりません。',
+            'es': 'No se puede encontrar el usuario para reportar.'
+        },
+        networkError: {
+            'ko': '네트워크 오류가 발생했습니다. 다시 시도해주세요.',
+            'en': 'Network error occurred. Please try again.',
+            'ja': 'ネットワークエラーが発生しました。もう一度お試しください。',
+            'es': 'Ocurrió un error de red. Por favor, inténtelo de nuevo.'
+        }
+    };
+
+    return texts[key] && texts[key][lang] ? texts[key][lang] : texts[key]['en'];
+}
+
 class PostActionsManager {
     constructor() {
         this.modal = document.getElementById('post-action-modal');
@@ -353,14 +404,16 @@ class PostActionsManager {
 
         this.currentBlockUsername = username;
 
-        // Set modal content
+        // Set modal content with multi-language support
         const lang = document.documentElement.lang || 'ko';
         if (this.blockUserName) {
-            if (lang === 'en') {
-                this.blockUserName.textContent = `Block ${username}?`;
-            } else {
-                this.blockUserName.textContent = `${username}님을 차단하시겠습니까?`;
-            }
+            const blockTexts = {
+                'ko': `${username}님을 차단하시겠습니까?`,
+                'en': `Block ${username}?`,
+                'ja': `${username}さんをブロックしますか？`,
+                'es': `¿Bloquear a ${username}?`
+            };
+            this.blockUserName.textContent = blockTexts[lang] || blockTexts['ko'];
             console.log('[PostActions] Set block user name text');
         } else {
             console.warn('[PostActions] blockUserName element not found');
@@ -503,8 +556,7 @@ class PostActionsManager {
             // Change text to indicate it's already reported
             const textContent = reportBtn.textContent.trim();
             if (!textContent.includes('✓') && !textContent.includes('신고됨') && !textContent.includes('Reported')) {
-                const lang = document.documentElement.lang || 'ko';
-                reportBtn.textContent = lang === 'en' ? '✓ Reported' : '✓ 신고됨';
+                reportBtn.textContent = '✓ ' + getPostActionText('reported');
             }
 
             console.log('[PostActions] Report button disabled for post:', postId);
@@ -516,8 +568,7 @@ class PostActionsManager {
             const badge = document.createElement('div');
             badge.className = 'reported-badge';
             badge.style.cssText = 'position: absolute; top: 10px; right: 10px; background: rgba(255, 59, 48, 0.1); color: #ff3b30; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;';
-            const lang = document.documentElement.lang || 'ko';
-            badge.textContent = lang === 'en' ? 'Reported' : '신고됨';
+            badge.textContent = getPostActionText('reportedBadge');
 
             // Make sure post card has relative positioning
             if (postCard.style.position !== 'relative' && postCard.style.position !== 'absolute') {
@@ -827,15 +878,13 @@ class PostActionsManager {
         const description = document.getElementById('post-report-description').value;
 
         if (!reportType) {
-            const lang = document.documentElement.lang || 'ko';
-            alert(lang === 'en' ? 'Please select a report type.' : '신고 유형을 선택해주세요.');
+            alert(getPostActionText('selectReportType'));
             return;
         }
 
         if (!this.currentReportUserId) {
             console.error('No user ID available for report');
-            const lang = document.documentElement.lang || 'ko';
-            alert(lang === 'en' ? 'Cannot find user to report.' : '신고할 사용자를 찾을 수 없습니다.');
+            alert(getPostActionText('cannotFindUser'));
             return;
         }
 
@@ -863,8 +912,7 @@ class PostActionsManager {
             }
         } catch (error) {
             console.error('User report submission error:', error);
-            const lang = document.documentElement.lang || 'ko';
-            alert(lang === 'en' ? 'Network error occurred. Please try again.' : '네트워크 오류가 발생했습니다. 다시 시도해주세요.');
+            alert(getPostActionText('networkError'));
         }
     }
 

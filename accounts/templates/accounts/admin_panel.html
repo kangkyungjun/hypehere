@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "관리자 대시보드" %} - HypeHere{% endblock %}
+
+{% block content %}
+<div class="admin-panel-container">
+    <div class="admin-panel-header">
+        <h1 class="admin-panel-title">{% trans "관리자 대시보드" %}</h1>
+        <p class="admin-panel-subtitle">{% trans "사용자 관리 및 시스템 설정" %}</p>
+    </div>
+
+    <div class="admin-panel-content">
+        <!-- 빈 페이지 - 추후 관리자 기능 추가 예정 -->
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.admin-panel-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--space-xl) var(--space-md);
+}
+
+.admin-panel-header {
+    margin-bottom: var(--space-xl);
+    text-align: center;
+}
+
+.admin-panel-title {
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text);
+    margin-bottom: var(--space-sm);
+}
+
+.admin-panel-subtitle {
+    font-size: var(--font-size-base);
+    color: var(--color-text-light);
+}
+
+.admin-panel-content {
+    min-height: 400px;
+    background: var(--color-bg);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+}
+
+/* 모바일 대응 */
+@media (max-width: 768px) {
+    .admin-panel-container {
+        padding: var(--space-lg) var(--space-sm);
+    }
+
+    .admin-panel-title {
+        font-size: var(--font-size-xl);
+    }
+
+    .admin-panel-content {
+        padding: var(--space-lg);
+    }
+}
+</style>
+{% endblock %}

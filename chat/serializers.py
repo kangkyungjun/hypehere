@@ -105,6 +105,9 @@ class ConversationDetailSerializer(serializers.ModelSerializer):
         if participant.left_at:
             messages = messages.filter(created_at__gt=participant.left_at)
 
+        # 만료되지 않은 메시지만 조회 (익명 채팅 7일 만료 정책)
+        messages = messages.filter(is_expired=False)
+
         return MessageSerializer(messages, many=True).data
 
     def get_other_user(self, obj):

@@ -11,13 +11,19 @@ function getCurrentLanguage() {
   // Try HTML lang attribute first
   const htmlLang = document.documentElement.lang;
   if (htmlLang && htmlLang !== '') {
-    return htmlLang === 'en' ? 'en' : 'ko';
+    const lang = htmlLang.toLowerCase();
+    if (['en', 'ja', 'es', 'ko'].includes(lang)) {
+      return lang;
+    }
   }
 
   // Fallback: read from Django's language cookie
   const cookieMatch = document.cookie.match(/django_language=([^;]+)/);
   if (cookieMatch) {
-    return cookieMatch[1] === 'en' ? 'en' : 'ko';
+    const lang = cookieMatch[1].toLowerCase();
+    if (['en', 'ja', 'es', 'ko'].includes(lang)) {
+      return lang;
+    }
   }
 
   // Default to Korean
@@ -98,12 +104,25 @@ class OpenChatManager {
 
     // Initialize Country Selector
     if (typeof CountrySelector !== 'undefined' && typeof COUNTRIES !== 'undefined') {
+      const lang = getCurrentLanguage();
+      const countryPlaceholders = {
+        'ko': '모든 국가',
+        'en': 'All Countries',
+        'ja': 'すべての国',
+        'es': 'Todos los países'
+      };
       this.countrySelector = new CountrySelector('country-filter-selector', {
         countries: [
-          { code: "all", name: "모든 국가", nameEn: "All Countries" },
+          {
+            code: "all",
+            name: "모든 국가",
+            nameEn: "All Countries",
+            nameJa: "すべての国",
+            nameEs: "Todos los países"
+          },
           ...COUNTRIES
         ],
-        placeholder: '모든 국가',
+        placeholder: countryPlaceholders[lang] || countryPlaceholders['ko'],
         initialValue: 'all',
         onChange: (country) => {
           this.currentFilters.country = country.code;
@@ -115,9 +134,15 @@ class OpenChatManager {
     // Initialize Category Selector
     if (typeof CategorySelector !== 'undefined' && typeof CATEGORIES !== 'undefined') {
       const lang = getCurrentLanguage();
+      const categoryPlaceholders = {
+        'ko': '모든 카테고리',
+        'en': 'All Categories',
+        'ja': 'すべてのカテゴリ',
+        'es': 'Todas las categorías'
+      };
       this.categorySelector = new CategorySelector('category-filter-selector', {
         categories: CATEGORIES,
-        placeholder: lang === 'en' ? 'All Categories' : '모든 카테고리',
+        placeholder: categoryPlaceholders[lang] || categoryPlaceholders['ko'],
         initialValue: 'all',
         onChange: (category) => {
           this.currentFilters.category = category.code;
@@ -360,7 +385,13 @@ class OpenChatManager {
     const lang = getCurrentLanguage();
     const category = CATEGORIES.find(c => c.code === categoryCode);
     if (category) {
-      return lang === 'en' ? category.nameEn : category.name;
+      const nameMap = {
+        'en': category.nameEn,
+        'ja': category.nameJa || category.nameEn,
+        'es': category.nameEs || category.nameEn,
+        'ko': category.name
+      };
+      return nameMap[lang] || category.nameEn;
     }
     // Fallback for special cases
     if (categoryCode === 'country') {

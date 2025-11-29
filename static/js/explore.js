@@ -284,8 +284,14 @@ class ExploreManager {
     }
 
     createPostHTML(post, index) {
+        // Translate deleted post message if needed
+        let content = post.content;
+        if (content === '게시물은 신고에 의해 삭제되었습니다.') {
+            content = window.APP_I18N.deletedPostMessage || content;
+        }
+
         // Format content (limit for grid preview)
-        let contentPreview = post.content;
+        let contentPreview = content;
         if (contentPreview.length > 100) {
             contentPreview = contentPreview.substring(0, 100) + '...';
         }

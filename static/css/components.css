@@ -736,7 +736,8 @@ textarea.form-control {
     align-items: center;
     justify-content: space-between;
     padding: var(--space-sm) var(--space-md);
-    background-color: var(--color-bg-primary);
+    background-color: #ffffff;
+    background-color: var(--color-bg-primary, #ffffff);
     border: 1px solid var(--color-border);
     border-radius: var(--border-radius);
     cursor: pointer;
@@ -773,7 +774,8 @@ textarea.form-control {
     top: calc(100% + var(--space-xs));
     left: 0;
     right: 0;
-    background-color: var(--color-bg-primary);
+    background-color: #ffffff;
+    background-color: var(--color-bg-primary, #ffffff);
     border: 1px solid var(--color-border);
     border-radius: var(--border-radius);
     box-shadow: var(--shadow-lg);

@@ -4,10 +4,37 @@
  * Features:
  * - Keyboard navigation (↑↓, Enter, Esc)
  * - Mobile-optimized (bottom sheet on < 768px)
- * - Multi-language support (Korean/English)
+ * - Multi-language support (Korean/English/Japanese/Spanish)
  * - Accessibility (ARIA attributes)
  * - Based on CountrySelector pattern (simplified - no search)
  */
+
+/**
+ * Get current UI language from HTML lang attribute or default to Korean
+ * @returns {string} 'en', 'ja', 'es', or 'ko'
+ */
+function getCurrentLanguage() {
+  // Try HTML lang attribute first
+  const htmlLang = document.documentElement.lang;
+  if (htmlLang && htmlLang !== '') {
+    const lang = htmlLang.toLowerCase();
+    if (['en', 'ja', 'es', 'ko'].includes(lang)) {
+      return lang;
+    }
+  }
+
+  // Fallback: read from Django's language cookie
+  const cookieMatch = document.cookie.match(/django_language=([^;]+)/);
+  if (cookieMatch) {
+    const lang = cookieMatch[1].toLowerCase();
+    if (['en', 'ja', 'es', 'ko'].includes(lang)) {
+      return lang;
+    }
+  }
+
+  // Default to Korean
+  return 'ko';
+}
 
 class GenderSelector {
   constructor(elementId, options = {}) {
@@ -19,8 +46,8 @@ class GenderSelector {
 
     this.options = {
       genders: options.genders || GENDERS,
-      placeholder: options.placeholder || '선택 안 함',
-      modalTitle: options.modalTitle || '성별 선택',
+      placeholder: options.placeholder || this.getDefaultPlaceholder(),
+      modalTitle: options.modalTitle || this.getDefaultModalTitle(),
       onChange: options.onChange || null,
       initialValue: options.initialValue || ''
     };
@@ -44,8 +71,38 @@ class GenderSelector {
     }
   }
 
+  getDefaultPlaceholder() {
+    const lang = getCurrentLanguage();
+    const placeholders = {
+      'en': 'Not selected',
+      'ja': '選択なし',
+      'es': 'No seleccionado',
+      'ko': '선택 안 함'
+    };
+    return placeholders[lang] || placeholders['ko'];
+  }
+
+  getDefaultModalTitle() {
+    const lang = getCurrentLanguage();
+    const titles = {
+      'en': 'Select Gender',
+      'ja': '性別を選択',
+      'es': 'Seleccionar género',
+      'ko': '성별 선택'
+    };
+    return titles[lang] || titles['ko'];
+  }
+
   init() {
     const lang = getCurrentLanguage();
+    const closeLabels = {
+      'ko': '닫기',
+      'en': 'Close',
+      'ja': '閉じる',
+      'es': 'Cerrar'
+    };
+    const closeLabel = closeLabels[lang] || closeLabels['en'];
+
     // Create component HTML structure
     this.element.innerHTML = `
       <button type="button" class="gender-selector-toggle form-control"
@@ -56,7 +113,7 @@ class GenderSelector {
       <div class="gender-dropdown" hidden>
         <div class="gender-dropdown-header">
           <h3 class="gender-dropdown-title">${this.options.modalTitle}</h3>
-          <button type="button" class="gender-dropdown-close" aria-label="${lang === 'en' ? 'Close' : '닫기'}">✕</button>
+          <button type="button" class="gender-dropdown-close" aria-label="${closeLabel}">✕</button>
         </div>
         <ul class="gender-list" role="listbox"></ul>
       </div>
@@ -172,7 +229,12 @@ class GenderSelector {
   renderList() {
     const lang = getCurrentLanguage();
     const genderItems = this.options.genders.map(gender => {
-      const label = lang === 'en' ? gender.labelEn : gender.labelKo;
+      const label = {
+        'en': gender.labelEn,
+        'ja': gender.labelJa || gender.labelEn,
+        'es': gender.labelEs || gender.labelEn,
+        'ko': gender.labelKo
+      }[lang] || gender.labelKo;
       const isSelected = this.selectedGender && this.selectedGender.value === gender.value;
 
       return `
@@ -238,7 +300,12 @@ class GenderSelector {
     this.selectedGender = this.options.genders.find(g => g.value === value);
 
     if (this.selectedGender) {
-      const label = lang === 'en' ? this.selectedGender.labelEn : this.selectedGender.labelKo;
+      const label = {
+        'en': this.selectedGender.labelEn,
+        'ja': this.selectedGender.labelJa || this.selectedGender.labelEn,
+        'es': this.selectedGender.labelEs || this.selectedGender.labelEn,
+        'ko': this.selectedGender.labelKo
+      }[lang] || this.selectedGender.labelKo;
       this.valueDisplay.textContent = label;
 
       // Update hidden input value
@@ -262,7 +329,12 @@ class GenderSelector {
     const gender = this.options.genders.find(g => g.value === code);
     if (gender) {
       this.selectedGender = gender;
-      const label = lang === 'en' ? gender.labelEn : gender.labelKo;
+      const label = {
+        'en': gender.labelEn,
+        'ja': gender.labelJa || gender.labelEn,
+        'es': gender.labelEs || gender.labelEn,
+        'ko': gender.labelKo
+      }[lang] || gender.labelKo;
       this.valueDisplay.textContent = label;
       this.renderList();
     }

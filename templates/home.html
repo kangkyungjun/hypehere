@@ -107,7 +107,7 @@
                     </svg>
                     <span class="comment-count">{{ post.comment_count }}</span>
                 </button>
-                <button class="post-action-btn">
+                <button class="post-action-btn share-btn" data-post-id="{{ post.id }}">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="18" cy="5" r="3"/>
                         <circle cx="6" cy="12" r="3"/>
@@ -216,6 +216,7 @@
         errorMaxLength: "{% trans '게시물은 최대 1000자까지 작성할 수 있습니다.' %}",
         errorSubmit: "{% trans '게시물 작성 중 오류가 발생했습니다.' %}",
         errorNetwork: "{% trans '네트워크 오류가 발생했습니다. 다시 시도해주세요.' %}",
+        modalTitle: "{% trans '언어 선택' %}",
         placeholderNone: "{% trans '선택 안함' %}",
         placeholderSearch: "{% trans '언어 검색' %}",
         emptySearchResult: "{% trans '검색 결과가 없습니다' %}"

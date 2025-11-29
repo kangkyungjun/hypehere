@@ -11,19 +11,25 @@
 
 /**
  * Get current UI language from HTML lang attribute or default to Korean
- * @returns {string} 'en' or 'ko'
+ * @returns {string} 'en', 'ja', 'es', or 'ko'
  */
 function getCurrentLanguage() {
   // Try HTML lang attribute first
   const htmlLang = document.documentElement.lang;
   if (htmlLang && htmlLang !== '') {
-    return htmlLang === 'en' ? 'en' : 'ko';
+    const lang = htmlLang.toLowerCase();
+    if (['en', 'ja', 'es', 'ko'].includes(lang)) {
+      return lang;
+    }
   }
 
   // Fallback: read from Django's language cookie
   const cookieMatch = document.cookie.match(/django_language=([^;]+)/);
   if (cookieMatch) {
-    return cookieMatch[1] === 'en' ? 'en' : 'ko';
+    const lang = cookieMatch[1].toLowerCase();
+    if (['en', 'ja', 'es', 'ko'].includes(lang)) {
+      return lang;
+    }
   }
 
   // Default to Korean
@@ -39,11 +45,30 @@ class CategorySelector {
     }
 
     const lang = getCurrentLanguage();
+    const placeholders = {
+      'en': 'Select',
+      'ja': '選択',
+      'es': 'Seleccionar',
+      'ko': '선택하세요'
+    };
+    const searchPlaceholders = {
+      'en': '🔍 Search categories...',
+      'ja': '🔍 カテゴリを検索...',
+      'es': '🔍 Buscar categorías...',
+      'ko': '🔍 카테고리 검색...'
+    };
+    const emptyTexts = {
+      'en': 'No results found',
+      'ja': '検索結果がありません',
+      'es': 'No se encontraron resultados',
+      'ko': '검색 결과가 없습니다'
+    };
+
     this.options = {
       categories: options.categories || CATEGORIES,
-      placeholder: options.placeholder || (lang === 'en' ? 'Select' : '선택하세요'),
-      searchPlaceholder: options.searchPlaceholder || (lang === 'en' ? '🔍 Search categories...' : '🔍 카테고리 검색...'),
-      emptyText: options.emptyText || (lang === 'en' ? 'No results found' : '검색 결과가 없습니다'),
+      placeholder: options.placeholder || placeholders[lang],
+      searchPlaceholder: options.searchPlaceholder || searchPlaceholders[lang],
+      emptyText: options.emptyText || emptyTexts[lang],
       onChange: options.onChange || null,
       initialValue: options.initialValue || ''
     };
@@ -69,6 +94,19 @@ class CategorySelector {
   }
 
   init() {
+    const lang = getCurrentLanguage();
+    const modalTitles = {
+      'ko': '카테고리 선택',
+      'en': 'Select Category',
+      'ja': 'カテゴリを選択',
+      'es': 'Seleccionar categoría'
+    };
+    const closeLabels = {
+      'ko': '닫기',
+      'en': 'Close',
+      'ja': '閉じる',
+      'es': 'Cerrar'
+    };
     // Create component HTML structure
     this.element.innerHTML = `
       <button type="button" class="country-selector-toggle form-control"
@@ -78,8 +116,8 @@ class CategorySelector {
       </button>
       <div class="country-dropdown" hidden>
         <div class="country-dropdown-header">
-          <h3 class="country-dropdown-title">${getCurrentLanguage() === 'en' ? 'Select Category' : '카테고리 선택'}</h3>
-          <button type="button" class="country-dropdown-close" aria-label="${getCurrentLanguage() === 'en' ? 'Close' : '닫기'}">✕</button>
+          <h3 class="country-dropdown-title">${modalTitles[lang] || modalTitles['ko']}</h3>
+          <button type="button" class="country-dropdown-close" aria-label="${closeLabels[lang] || closeLabels['ko']}">✕</button>
         </div>
         <div class="country-search-wrapper">
           <input type="text" class="country-search form-control"
@@ -318,6 +356,8 @@ class CategorySelector {
         return (
           category.name.toLowerCase().includes(lowerQuery) ||
           category.nameEn.toLowerCase().includes(lowerQuery) ||
+          (category.nameJa && category.nameJa.toLowerCase().includes(lowerQuery)) ||
+          (category.nameEs && category.nameEs.toLowerCase().includes(lowerQuery)) ||
           category.code.toLowerCase().includes(lowerQuery)
         );
       });
@@ -325,6 +365,17 @@ class CategorySelector {
 
     this.focusedIndex = -1;
     this.renderList();
+  }
+
+  getCategoryName(category) {
+    const lang = getCurrentLanguage();
+    const nameMap = {
+      'en': category.nameEn,
+      'ja': category.nameJa || category.nameEn,
+      'es': category.nameEs || category.nameEn,
+      'ko': category.name
+    };
+    return nameMap[lang] || category.nameEn;
   }
 
   renderList() {
@@ -335,14 +386,13 @@ class CategorySelector {
       return;
     }
 
-    const lang = getCurrentLanguage();
     this.list.innerHTML = this.filteredCategories.map((category, index) => `
       <li class="country-option"
           role="option"
           data-code="${category.code}"
           data-index="${index}"
           aria-selected="${this.selectedCategory?.code === category.code}">
-        <span class="country-name">${lang === 'en' ? category.nameEn : category.name}</span>
+        <span class="country-name">${this.getCategoryName(category)}</span>
       </li>
     `).join('');
 
@@ -360,8 +410,7 @@ class CategorySelector {
     if (!category) return;
 
     this.selectedCategory = category;
-    const lang = getCurrentLanguage();
-    this.valueDisplay.textContent = lang === 'en' ? category.nameEn : category.name;
+    this.valueDisplay.textContent = this.getCategoryName(category);
     this.valueDisplay.classList.add('has-value');
 
     // Update hidden select element if exists
@@ -383,8 +432,7 @@ class CategorySelector {
     const category = this.options.categories.find(c => c.code === code);
     if (category) {
       this.selectedCategory = category;
-      const lang = getCurrentLanguage();
-      this.valueDisplay.textContent = lang === 'en' ? category.nameEn : category.name;
+      this.valueDisplay.textContent = this.getCategoryName(category);
       this.valueDisplay.classList.add('has-value');
     }
   }

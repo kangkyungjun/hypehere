@@ -38,10 +38,10 @@
                 type="text"
                 id="search-input"
                 class="search-input"
-                placeholder="채팅방 검색..."
+                placeholder="{% trans '채팅방 검색...' %}"
                 autocomplete="off"
             >
-            <button type="button" id="clear-search" class="btn-clear hidden" aria-label="검색어 지우기">
+            <button type="button" id="clear-search" class="btn-clear hidden" aria-label="{% trans '검색어 지우기' %}">
                 <svg viewBox="0 0 24 24">
                     <line x1="18" y1="6" x2="6" y2="18"/>
                     <line x1="6" y1="6" x2="18" y2="18"/>
@@ -52,7 +52,7 @@
 
     <!-- Filters Section -->
     <div class="chat-filters">
-        <button id="favorites-filter" class="btn-filter-favorites" aria-label="즐겨찾기만 보기" title="즐겨찾기만 보기">
+        <button id="favorites-filter" class="btn-filter-favorites" aria-label="{% trans '즐겨찾기만 보기' %}" title="{% trans '즐겨찾기만 보기' %}">
             <svg class="star-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
             </svg>
@@ -77,8 +77,8 @@
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
             </svg>
         </div>
-        <h3>검색 결과가 없습니다</h3>
-        <p>다른 검색어나 필터를 사용해보세요</p>
+        <h3>{% trans '검색 결과가 없습니다' %}</h3>
+        <p>{% trans '다른 검색어나 필터를 사용해보세요' %}</p>
     </div>
 
     <!-- Loading State -->
@@ -87,7 +87,7 @@
     </div>
 
     <!-- Floating Action Button -->
-    <button id="create-room-fab" class="fab" aria-label="채팅방 만들기">
+    <button id="create-room-fab" class="fab" aria-label="{% trans '채팅방 만들기' %}">
         <svg viewBox="0 0 24 24">
             <line x1="12" y1="5" x2="12" y2="19"/>
             <line x1="5" y1="12" x2="19" y2="12"/>

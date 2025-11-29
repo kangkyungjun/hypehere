@@ -180,7 +180,12 @@ class PostModalViewer {
 
         // 포스트 본문
         const content = document.getElementById('modal-post-content');
-        content.innerHTML = post.content.replace(/\n/g, '<br>');
+        // Translate deleted post message if needed
+        let postContent = post.content;
+        if (postContent === '게시물은 신고에 의해 삭제되었습니다.') {
+            postContent = window.APP_I18N.deletedPostMessage || postContent;
+        }
+        content.innerHTML = postContent.replace(/\n/g, '<br>');
 
         // 해시태그
         const hashtagsContainer = document.getElementById('modal-hashtags');

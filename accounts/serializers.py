@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model, authenticate
 from django.contrib.auth.password_validation import validate_password
+from django.utils.translation import gettext_lazy as _
 from .models import Follow, Block
 
 User = get_user_model()
@@ -24,6 +25,10 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         - nickname: Display name (duplicates allowed, required)
         - password: User password (required)
         - password_confirm: Password confirmation (required)
+        - gender: Gender (optional)
+        - country: Country (optional)
+        - native_language: Native language (optional)
+        - target_language: Target learning language (optional)
     """
     password = serializers.CharField(
         write_only=True,
@@ -39,17 +44,22 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('email', 'nickname', 'password', 'password_confirm')
+        fields = ('email', 'nickname', 'password', 'password_confirm',
+                  'gender', 'country', 'native_language', 'target_language')
         extra_kwargs = {
             'email': {'required': True},
             'nickname': {'required': True},
+            'gender': {'required': False},
+            'country': {'required': False},
+            'native_language': {'required': False},
+            'target_language': {'required': False},
         }
 
     def validate(self, attrs):
         """Validate password confirmation"""
         if attrs['password'] != attrs['password_confirm']:
             raise serializers.ValidationError({
-                "password": "Password fields didn't match."
+                "password": _("비밀번호가 일치하지 않습니다.")
             })
         return attrs
 
@@ -165,14 +175,14 @@ class PasswordChangeSerializer(serializers.Serializer):
         """Validate old password"""
         user = self.context['request'].user
         if not user.check_password(value):
-            raise serializers.ValidationError("Old password is incorrect.")
+            raise serializers.ValidationError(_("현재 비밀번호가 올바르지 않습니다."))
         return value
 
     def validate(self, attrs):
         """Validate new password confirmation"""
         if attrs['new_password'] != attrs['new_password_confirm']:
             raise serializers.ValidationError({
-                "new_password": "New password fields didn't match."
+                "new_password": _("새 비밀번호가 일치하지 않습니다.")
             })
         return attrs
 

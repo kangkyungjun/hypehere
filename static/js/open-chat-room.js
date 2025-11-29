@@ -3,6 +3,30 @@
  * Handles real-time messaging in open chat rooms
  */
 
+/**
+ * Get current locale for date/time formatting
+ * @returns {string} Locale string (en-US, ja-JP, es-ES, ko-KR)
+ */
+function getCurrentLocale() {
+  const htmlLang = document.documentElement.lang;
+  let lang = 'ko';
+  if (htmlLang && htmlLang !== '') {
+    const langLower = htmlLang.toLowerCase();
+    if (['en', 'ja', 'es', 'ko'].includes(langLower)) {
+      lang = langLower;
+    }
+  }
+
+  const localeMap = {
+    'ko': 'ko-KR',
+    'en': 'en-US',
+    'ja': 'ja-JP',
+    'es': 'es-ES'
+  };
+
+  return localeMap[lang] || 'ko-KR';
+}
+
 class OpenChatRoom {
   constructor() {
     // i18n support
@@ -672,9 +696,8 @@ class OpenChatRoom {
     const date = new Date(timestamp);
     const now = new Date();
 
-    // Get current language from HTML or cookie
-    const lang = document.documentElement.lang || 'ko';
-    const locale = lang === 'en' ? 'en-US' : 'ko-KR';
+    // Get current locale for date formatting
+    const locale = getCurrentLocale();
 
     const isToday = date.toDateString() === now.toDateString();
 
@@ -993,7 +1016,7 @@ class OpenChatRoom {
       if (participant.id === this.userId) {
         const youBadge = document.createElement('span');
         youBadge.className = 'you-badge';
-        youBadge.textContent = '(Me)';
+        youBadge.textContent = `(${this.i18n.me || 'Me'})`;
         name.appendChild(youBadge);
       }
 
@@ -1570,8 +1593,7 @@ class OpenChatRoom {
 
       // Kicked by and date
       const kickedBy = document.createElement('span');
-      const lang = document.documentElement.lang || 'ko';
-      const locale = lang === 'en' ? 'en-US' : 'ko-KR';
+      const locale = getCurrentLocale();
       const kickedDate = new Date(kickData.kicked_at).toLocaleString(locale);
       kickedBy.textContent = `${this.i18n.kickedBy2 || '강퇴자:'} ${kickData.kicked_by_nickname} | ${kickedDate}`;
       details.appendChild(kickedBy);
@@ -1589,8 +1611,7 @@ class OpenChatRoom {
         banStatus.textContent = this.i18n.permanentBan || '영구 차단';
         banStatus.className = 'ban-status active';
       } else if (kickData.is_ban_active) {
-        const lang = document.documentElement.lang || 'ko';
-        const locale = lang === 'en' ? 'en-US' : 'ko-KR';
+        const locale = getCurrentLocale();
         const banUntil = new Date(kickData.ban_until).toLocaleString(locale);
         banStatus.textContent = `${this.i18n.bannedUntil || '차단'} (${banUntil}${this.i18n.until || '까지'})`;
         banStatus.className = 'ban-status active';

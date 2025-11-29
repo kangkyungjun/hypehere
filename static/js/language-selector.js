@@ -11,19 +11,25 @@
 
 /**
  * Get current UI language from HTML lang attribute or default to Korean
- * @returns {string} 'en' or 'ko'
+ * @returns {string} 'en', 'ja', 'es', or 'ko'
  */
 function getCurrentLanguage() {
   // Try HTML lang attribute first
   const htmlLang = document.documentElement.lang;
   if (htmlLang && htmlLang !== '') {
-    return htmlLang === 'en' ? 'en' : 'ko';
+    const lang = htmlLang.toLowerCase();
+    if (['en', 'ja', 'es', 'ko'].includes(lang)) {
+      return lang;
+    }
   }
 
   // Fallback: read from Django's language cookie
   const cookieMatch = document.cookie.match(/django_language=([^;]+)/);
   if (cookieMatch) {
-    return cookieMatch[1] === 'en' ? 'en' : 'ko';
+    const lang = cookieMatch[1].toLowerCase();
+    if (['en', 'ja', 'es', 'ko'].includes(lang)) {
+      return lang;
+    }
   }
 
   // Default to Korean
@@ -43,8 +49,10 @@ class LanguageSelector {
       placeholder: options.placeholder || '선택하세요',
       searchPlaceholder: options.searchPlaceholder || '🔍 언어 검색...',
       emptyText: options.emptyText || '검색 결과가 없습니다',
+      modalTitle: options.modalTitle || this.getDefaultModalTitle(),
       onChange: options.onChange || null,
-      initialValue: options.initialValue || ''
+      initialValue: options.initialValue || '',
+      useNativeNames: options.useNativeNames || false
     };
 
     this.isOpen = false;
@@ -67,7 +75,53 @@ class LanguageSelector {
     }
   }
 
+  getDefaultModalTitle() {
+    const lang = getCurrentLanguage();
+    const titles = {
+      'en': 'Select Language',
+      'ja': '言語を選択',
+      'es': 'Seleccionar idioma',
+      'ko': '언어 선택'
+    };
+    return titles[lang] || '언어 선택';
+  }
+
+  getLanguageName(language) {
+    // If useNativeNames is enabled, always show in native language
+    if (this.options.useNativeNames) {
+      const nativeNames = {
+        'EN': language.nameEn,
+        'KO': language.name,
+        'JA': language.nameJa,
+        'ES': language.nameEs,
+        'ZH': language.nameZh || language.nameEn,
+        'FR': language.nameFr || language.nameEn,
+        'DE': language.nameDe || language.nameEn
+      };
+      return nativeNames[language.code] || language.name;
+    }
+
+    // Otherwise, show based on current UI language
+    const lang = getCurrentLanguage();
+    const nameMap = {
+      'en': language.nameEn,
+      'ja': language.nameJa,
+      'es': language.nameEs,
+      'ko': language.name
+    };
+    return nameMap[lang] || language.name;
+  }
+
   init() {
+    const lang = getCurrentLanguage();
+    const closeLabels = {
+      'ko': '닫기',
+      'en': 'Close',
+      'ja': '閉じる',
+      'es': 'Cerrar'
+    };
+    const closeLabel = closeLabels[lang] || closeLabels['en'];
+
     // Create component HTML structure
     this.element.innerHTML = `
       <button type="button" class="country-selector-toggle form-control"
@@ -77,8 +131,8 @@ class LanguageSelector {
       </button>
       <div class="country-dropdown" hidden>
         <div class="country-dropdown-header">
-          <h3 class="country-dropdown-title">언어 선택</h3>
-          <button type="button" class="country-dropdown-close" aria-label="닫기">✕</button>
+          <h3 class="country-dropdown-title">${this.options.modalTitle}</h3>
+          <button type="button" class="country-dropdown-close" aria-label="${closeLabel}">✕</button>
         </div>
         <div class="country-search-wrapper">
           <input type="text" class="country-search form-control"
@@ -352,14 +406,13 @@ class LanguageSelector {
       return;
     }
 
-    const lang = getCurrentLanguage();
     this.list.innerHTML = this.filteredLanguages.map((language, index) => `
       <li class="country-option"
           role="option"
           data-code="${language.code}"
           data-index="${index}"
           aria-selected="${this.selectedLanguage?.code === language.code}">
-        <span class="country-name">${language.flag} ${lang === 'en' ? language.nameEn : language.name}</span>
+        <span class="country-name">${language.flag} ${this.getLanguageName(language)}</span>
       </li>
     `).join('');
 
@@ -377,7 +430,7 @@ class LanguageSelector {
     if (!language) return;
 
     this.selectedLanguage = language;
-    this.valueDisplay.textContent = `${language.flag} ${language.name}`;
+    this.valueDisplay.textContent = `${language.flag} ${this.getLanguageName(language)}`;
     this.valueDisplay.classList.add('has-value');
 
     // Update hidden select element if exists
@@ -399,7 +452,7 @@ class LanguageSelector {
     const language = this.options.languages.find(l => l.code === code);
     if (language) {
       this.selectedLanguage = language;
-      this.valueDisplay.textContent = `${language.flag} ${language.name}`;
+      this.valueDisplay.textContent = `${language.flag} ${this.getLanguageName(language)}`;
       this.valueDisplay.classList.add('has-value');
     }
   }
