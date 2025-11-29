@@ -348,3 +348,65 @@ class StrategyStatistics(models.Model):
         return f"{self.strategy_type} - {self.round_number}회차 (확률: 1/{self.remaining_count:,})"
 
 
+class StrategyStatisticsHistory(models.Model):
+    """전략별 확률 통계 히스토리 - 회차별 변화 추적"""
+    strategy_type = models.CharField(
+        max_length=20,
+        verbose_name="전략 타입"
+    )
+    round_number = models.IntegerField(
+        verbose_name="회차"
+    )
+
+    # 통계 데이터
+    total_theoretical = models.IntegerField(
+        verbose_name="이론적 전체 조합 수"
+    )
+    excluded_count = models.IntegerField(
+        verbose_name="제외된 조합 수"
+    )
+    remaining_count = models.IntegerField(
+        verbose_name="남은 조합 수"
+    )
+    probability = models.FloatField(
+        verbose_name="당첨 확률"
+    )
+    improvement_ratio = models.FloatField(
+        verbose_name="일반 로또 대비 배수"
+    )
+
+    # 전 회차 대비 변화량 (첫 회차는 NULL)
+    change_remaining = models.IntegerField(
+        null=True,
+        blank=True,
+        verbose_name="조합 수 변화"
+    )
+    change_probability_pct = models.FloatField(
+        null=True,
+        blank=True,
+        verbose_name="확률 변화 %"
+    )
+    change_ratio = models.FloatField(
+        null=True,
+        blank=True,
+        verbose_name="개선 배수 변화"
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="생성일시"
+    )
+
+    class Meta:
+        unique_together = ['strategy_type', 'round_number']
+        ordering = ['-round_number', 'strategy_type']
+        verbose_name = "전략 통계 히스토리"
+        verbose_name_plural = "전략 통계 히스토리 목록"
+        indexes = [
+            models.Index(fields=['strategy_type', '-round_number']),
+        ]
+
+    def __str__(self):
+        return f"{self.strategy_type} - {self.round_number}회차"
+
+

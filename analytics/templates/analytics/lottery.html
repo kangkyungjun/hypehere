@@ -303,6 +303,13 @@
     {% endif %}
     {% endfor %}
 </div>
+
+<!-- Toast Notification -->
+<div id="lotteryToast" class="lottery-toast">
+    <span class="toast-icon">✓</span>
+    <span class="toast-message"></span>
+</div>
+
 {% endblock %}
 
 {% block extra_css %}
@@ -739,9 +746,9 @@
     display: inline-block;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
-    padding: 2px 8px;
+    padding: 3px 8px;
     border-radius: 4px;
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 500;
     margin-right: 8px;
 }
@@ -786,10 +793,11 @@
 }
 
 .saved-number-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
+    gap: 4px;
+    padding: 10px 12px;
     background: #f5f5f5;
     border-radius: 6px;
     transition: all 0.3s ease;
@@ -803,6 +811,9 @@
 .saved-number-balls {
     display: flex;
     gap: 6px;
+    align-items: center;
+    grid-column: 1 / 2;
+    grid-row: 1;
 }
 
 .number-ball {
@@ -819,10 +830,14 @@
 
 .saved-number-info {
     display: flex;
-    flex-direction: column;
-    gap: 3px;
+    flex-direction: row;
+    gap: 8px;
     font-size: 11px;
     color: #666;
+    align-items: center;
+    justify-content: center;
+    grid-column: 1 / 2;
+    grid-row: 2;
 }
 
 .saved-number-round {
@@ -832,6 +847,12 @@
 
 .saved-number-date {
     color: #999;
+}
+
+.saved-number-date::after {
+    content: " · ";
+    color: #ccc;
+    margin: 0 2px;
 }
 
 .saved-number-rank {
@@ -855,7 +876,9 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    margin-left: 10px;
+    grid-column: 2;
+    grid-row: 1;
+    align-self: center;
 }
 
 .delete-number-btn:hover {
@@ -1215,11 +1238,85 @@
         font-size: 11px;
     }
 }
+
+/* Toast Notification */
+.lottery-toast {
+    position: fixed;
+    top: 20vh;  /* 화면 상단 20% */
+    left: 50%;
+    transform: translateX(-50%) translateY(-100px);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 24px;
+    background: #43a047;  /* 성공 색상 (초록) */
+    color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    z-index: 10000;
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 15px;
+    font-weight: 500;
+    pointer-events: none;
+}
+
+.lottery-toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+    pointer-events: auto;
+}
+
+.lottery-toast .toast-icon {
+    font-size: 20px;
+    line-height: 1;
+}
+
+.lottery-toast .toast-message {
+    line-height: 1.4;
+}
+
+/* 에러 변형 */
+.lottery-toast.error {
+    background: #d32f2f;  /* 에러 색상 (빨강) */
+}
+
+.lottery-toast.error .toast-icon::before {
+    content: '⚠';
+}
 </style>
 {% endblock %}
 
 {% block extra_js %}
 <script>
+// Toast notification function
+function showToast(message, type = 'success', duration = 1000) {
+    const toast = document.getElementById('lotteryToast');
+    const messageEl = toast.querySelector('.toast-message');
+    const iconEl = toast.querySelector('.toast-icon');
+
+    // 메시지 설정
+    messageEl.textContent = message;
+
+    // 타입별 아이콘 및 클래스 설정
+    toast.classList.remove('error', 'success');
+    toast.classList.add(type);
+
+    if (type === 'success') {
+        iconEl.textContent = '✓';
+    } else if (type === 'error') {
+        iconEl.textContent = '⚠';
+    }
+
+    // 표시
+    toast.classList.add('show');
+
+    // 자동 숨김
+    setTimeout(() => {
+        toast.classList.remove('show');
+    }, duration);
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     // 모든 클릭 가능한 숫자에 이벤트 리스너 추가
     document.querySelectorAll('.number.clickable').forEach(function(element) {
@@ -1506,7 +1603,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Check 20-number limit
         const savedCount = savedNumbersList.querySelectorAll('.saved-number-item').length;
         if (savedCount >= 20) {
-            alert('최대 20개까지만 저장할 수 있습니다. 먼저 기존 번호를 삭제해주세요.');
+            showToast('최대 20개까지만 저장할 수 있습니다. 먼저 기존 번호를 삭제해주세요.', 'error', 2000);
             return;
         }
 
@@ -1537,16 +1634,16 @@ document.addEventListener('DOMContentLoaded', function() {
             const data = await response.json();
 
             if (data.success) {
-                alert(data.message || '번호가 저장되었습니다');
+                showToast(data.message || '번호가 저장되었습니다', 'success', 1000);
                 hideResultModal();
                 loadSavedNumbers();
                 clearInputs();
             } else {
-                alert(data.error || '저장 중 오류가 발생했습니다');
+                showToast(data.error || '저장 중 오류가 발생했습니다', 'error', 2000);
             }
         } catch (error) {
             console.error('Save error:', error);
-            alert('네트워크 오류가 발생했습니다');
+            showToast('네트워크 오류가 발생했습니다', 'error', 2000);
         } finally {
             btnSave.disabled = false;
             btnSave.textContent = '저장';
@@ -1648,11 +1745,41 @@ document.addEventListener('DOMContentLoaded', function() {
             const data = await response.json();
 
             if (data.success) {
+                let comparisonHTML = '';
+                if (data.comparison && data.comparison.has_previous) {
+                    const comp = data.comparison;
+                    const trendClass = comp.trend === 'down' ? 'trend-down' :
+                                      (comp.trend === 'up' ? 'trend-up' : 'trend-same');
+
+                    // 개선배수 트렌드 (증가는 좋음)
+                    const ratioTrendClass = comp.change_ratio > 0 ? 'trend-up' :
+                                           (comp.change_ratio < 0 ? 'trend-down' : 'trend-same');
+                    const ratioArrow = comp.change_ratio > 0 ? '↑' :
+                                      (comp.change_ratio < 0 ? '↓' : '→');
+
+                    comparisonHTML = `
+                        <div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid #eee;">
+                            <p style="margin: 0 0 6px 0; font-weight: 600; color: #555; font-size: 12px;">📊 전 회차 대비 변화</p>
+                            <p style="margin: 4px 0; font-size: 11px;">
+                                • 조합수: ${data.remaining_combinations.toLocaleString()}개
+                                <span class="trend-indicator ${trendClass}">${comp.trend_arrow}</span>
+                                <span class="trend-detail">(${comp.previous_round}회: ${comp.previous_remaining.toLocaleString()}개)</span>
+                            </p>
+                            <p style="margin: 4px 0; font-size: 11px;">
+                                • 개선배수: ${Math.round(data.improvement_ratio)}배
+                                <span class="trend-indicator ${ratioTrendClass}">${ratioArrow}</span>
+                                <span class="trend-detail">(${comp.previous_round}회: ${Math.round(comp.previous_ratio)}배)</span>
+                            </p>
+                        </div>
+                    `;
+                }
+
                 statsDiv.innerHTML = `
                     <p style="margin: 5px 0;">• 조합 수: <strong>${data.remaining_combinations.toLocaleString()}</strong>개</p>
                     <p style="margin: 5px 0;">• 당첨 확률: <strong>1/${data.remaining_combinations.toLocaleString()}</strong> (${data.probability_percent})</p>
                     <p style="margin: 5px 0;">• 일반 로또 대비: <strong style="color: #43a047;">${Math.round(data.improvement_ratio)}배 향상</strong></p>
                     <p style="margin: 8px 0 0 0; font-size: 11px; color: #999;">기준: ${data.round_number}회차 | 업데이트: ${data.last_updated}</p>
+                    ${comparisonHTML}
                 `;
             } else {
                 statsDiv.innerHTML = `<p style="color: #d32f2f; margin: 5px 0;">⚠️ ${data.error}</p>`;

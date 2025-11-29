@@ -1276,8 +1276,8 @@ def _calculate_strategy5_stats():
 
 
 def update_all_strategy_statistics():
-    """모든 전략 통계 업데이트"""
-    from lotto.models import LottoDraw, StrategyStatistics
+    """모든 전략 통계 업데이트 및 히스토리 저장"""
+    from lotto.models import LottoDraw, StrategyStatistics, StrategyStatisticsHistory
 
     latest_draw = LottoDraw.objects.order_by('-round_number').first()
     if not latest_draw:
@@ -1293,6 +1293,25 @@ def update_all_strategy_statistics():
 
     for strategy_type, calc_func in strategies:
         stats = calc_func()
+
+        # 1. 이전 회차 히스토리 조회 (전 회차 데이터)
+        previous = StrategyStatisticsHistory.objects.filter(
+            strategy_type=strategy_type
+        ).order_by('-round_number').first()
+
+        # 2. 변화량 계산
+        if previous:
+            change_remaining = stats['remaining'] - previous.remaining_count
+            change_prob_pct = ((stats['probability'] - previous.probability)
+                              / previous.probability * 100) if previous.probability > 0 else 0
+            change_ratio = stats['improvement'] - previous.improvement_ratio
+        else:
+            # 첫 회차는 비교 대상 없음
+            change_remaining = None
+            change_prob_pct = None
+            change_ratio = None
+
+        # 3. 현재 통계 업데이트 (StrategyStatistics - 덮어쓰기)
         StrategyStatistics.objects.update_or_create(
             strategy_type=strategy_type,
             defaults={
@@ -1305,6 +1324,20 @@ def update_all_strategy_statistics():
             }
         )
 
+        # 4. 히스토리 저장 (StrategyStatisticsHistory - 새 레코드 추가)
+        StrategyStatisticsHistory.objects.create(
+            strategy_type=strategy_type,
+            round_number=latest_draw.round_number,
+            total_theoretical=stats['total'],
+            excluded_count=stats['excluded'],
+            remaining_count=stats['remaining'],
+            probability=stats['probability'],
+            improvement_ratio=stats['improvement'],
+            change_remaining=change_remaining,
+            change_probability_pct=change_prob_pct,
+            change_ratio=change_ratio
+        )
+
     return True
 
 
@@ -1315,12 +1348,13 @@ def get_strategy_probability_api(request, strategy_type):
     Get probability statistics for a specific strategy
     GET /admin-dashboard/lottery/strategy-probability/<strategy_type>/
     """
-    from lotto.models import StrategyStatistics
+    from lotto.models import StrategyStatistics, StrategyStatisticsHistory
 
     try:
         stats = StrategyStatistics.objects.get(strategy_type=strategy_type)
 
-        return Response({
+        # 기본 응답 데이터
+        response_data = {
             'success': True,
             'round_number': stats.round_number,
             'total_combinations': stats.total_theoretical,
@@ -1330,7 +1364,40 @@ def get_strategy_probability_api(request, strategy_type):
             'probability_percent': f"{stats.probability * 100:.8f}%",
             'improvement_ratio': stats.improvement_ratio,
             'last_updated': stats.last_updated.strftime('%Y-%m-%d %H:%M:%S')
-        }, status=status.HTTP_200_OK)
+        }
+
+        # 이전 회차 조회
+        previous = StrategyStatisticsHistory.objects.filter(
+            strategy_type=strategy_type,
+            round_number__lt=stats.round_number
+        ).order_by('-round_number').first()
+
+        # 전 회차 비교 데이터 추가
+        if previous:
+            # 변화량 계산
+            change_remaining = stats.remaining_count - previous.remaining_count
+            change_ratio = stats.improvement_ratio - previous.improvement_ratio
+
+            # 트렌드 방향 결정 (조합수 감소는 개선)
+            trend = 'down' if change_remaining < 0 else ('up' if change_remaining > 0 else 'same')
+            trend_arrow = '↓' if trend == 'down' else ('↑' if trend == 'up' else '→')
+
+            response_data['comparison'] = {
+                'has_previous': True,
+                'previous_round': previous.round_number,
+                'previous_remaining': previous.remaining_count,
+                'previous_ratio': previous.improvement_ratio,
+                'change_remaining': change_remaining,
+                'change_ratio': change_ratio,
+                'trend': trend,
+                'trend_arrow': trend_arrow
+            }
+        else:
+            response_data['comparison'] = {
+                'has_previous': False
+            }
+
+        return Response(response_data, status=status.HTTP_200_OK)
 
     except StrategyStatistics.DoesNotExist:
         return Response({
