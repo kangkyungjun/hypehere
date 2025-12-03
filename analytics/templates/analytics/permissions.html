@@ -4,6 +4,9 @@
 {% block title %}{% trans "권한 부여" %} - HypeHere{% endblock %}
 
 {% block content %}
+<!-- Toast Container -->
+<div id="toast-container"></div>
+
 <div class="admin-dashboard-container">
     <!-- Header -->
     <div class="admin-header">
@@ -55,14 +58,20 @@
             </div>
             <div class="modal-role-selection">
                 <h3>{% trans "역할 선택" %}:</h3>
-                <div class="role-options">
+                <div class="role-options" id="role-options-container">
                     <div id="role-user" class="role-option" onclick="selectRole('user')">
                         <span>User</span>
+                    </div>
+                    <div id="role-gold" class="role-option" onclick="selectRole('gold')">
+                        <span>GoldUser</span>
                     </div>
                     <div id="role-staff" class="role-option" onclick="selectRole('staff')">
                         <span>Staff</span>
                     </div>
-                    <div id="role-superuser" class="role-option" onclick="selectRole('superuser')">
+                    <div id="role-prime" class="role-option" onclick="selectRole('prime')" style="display: none;">
+                        <span>Prime</span>
+                    </div>
+                    <div id="role-superuser" class="role-option" onclick="selectRole('superuser')" style="display: none;">
                         <span>Superuser</span>
                     </div>
                 </div>
@@ -256,9 +265,19 @@
     color: #1976d2;
 }
 
+.role-gold {
+    background: #fff9c4;
+    color: #f57f17;
+}
+
 .role-staff {
     background: #fff3e0;
     color: #f57c00;
+}
+
+.role-prime {
+    background: #e1bee7;
+    color: #7b1fa2;
 }
 
 .role-superuser {
@@ -440,11 +459,97 @@
         width: 100%;
     }
 }
+
+/* Toast Notification Styles */
+#toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.toast {
+    background: #333;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    font-size: 14px;
+    font-weight: 500;
+    min-width: 250px;
+    max-width: 400px;
+    animation: slideIn 0.3s ease-out;
+    opacity: 0.95;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 0.95;
+    }
+}
+
+@media (max-width: 768px) {
+    #toast-container {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+    }
+
+    .toast {
+        min-width: auto;
+        max-width: none;
+    }
+}
 </style>
 {% endblock %}
 
 {% block extra_js %}
+{% load static %}
+<script src="{% static 'js/auth.js' %}"></script>
 <script>
+// Current user role - passed from backend
+const currentUserRole = '{{ user_role }}';
+
+// Permission hierarchy mapping
+const roleHierarchy = {
+    'user': ['user'],
+    'gold': ['user'],
+    'staff': ['user', 'gold', 'staff'],
+    'prime': ['user', 'gold', 'staff'],
+    'superuser': ['user', 'gold', 'staff', 'prime', 'superuser']
+};
+
+// Get available roles based on current user's permission
+function getAvailableRoles() {
+    const userRole = currentUserRole.toLowerCase();
+    return roleHierarchy[userRole] || [];
+}
+
+// Filter role options in modal based on current user permissions
+function filterRoleOptions() {
+    const availableRoles = getAvailableRoles();
+
+    // Show/hide role options based on permissions
+    ['user', 'gold', 'staff', 'prime', 'superuser'].forEach(role => {
+        const roleOption = document.getElementById('role-' + role);
+        if (roleOption) {
+            if (availableRoles.includes(role)) {
+                roleOption.style.display = 'block';
+            } else {
+                roleOption.style.display = 'none';
+            }
+        }
+    });
+}
+
 function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
@@ -526,8 +631,17 @@ function displayResults(results) {
     `;
 
     results.forEach(user => {
-        const roleClass = user.role === 'Superuser' ? 'role-superuser' :
-                         (user.role === 'Staff' ? 'role-staff' : 'role-user');
+        // 5-tier role system CSS mapping
+        let roleClass = 'role-user';
+        if (user.role === 'Prime') {
+            roleClass = 'role-prime';
+        } else if (user.role === 'Superuser') {
+            roleClass = 'role-superuser';
+        } else if (user.role === 'Staff') {
+            roleClass = 'role-staff';
+        } else if (user.role === 'GoldUser') {
+            roleClass = 'role-gold';
+        }
 
         html += `
             <tr>
@@ -552,12 +666,6 @@ function displayResults(results) {
 function updatePermission(userId, role) {
     if (!role) return;
 
-    if (!confirm(`Are you sure you want to change this user's role to ${role.toUpperCase()}?`)) {
-        // Reset select if cancelled
-        event.target.value = '';
-        return;
-    }
-
     const csrftoken = getCookie('csrftoken');
 
     fetch(`/admin-dashboard/api/users/${userId}/permissions/`, {
@@ -576,19 +684,15 @@ function updatePermission(userId, role) {
     })
     .then(data => {
         if (data.success) {
-            alert('Permissions updated successfully!');
+            showToast('권한이 성공적으로 변경되었습니다.', 2000);
             searchUsers(); // Refresh results
         } else {
-            alert('Error: ' + (data.error || 'Unknown error occurred'));
+            showToast(data.error || '권한 변경 중 오류가 발생했습니다.', 3000);
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('An error occurred while updating permissions. Please try again.');
-    })
-    .finally(() => {
-        // Reset select
-        event.target.value = '';
+        showToast('네트워크 오류가 발생했습니다. 다시 시도해주세요.', 3000);
     });
 }
 
@@ -614,12 +718,15 @@ function openRoleModal(userId, currentRole, nickname, email) {
     document.getElementById('modal-user-nickname').textContent = nickname;
     document.getElementById('modal-user-email').textContent = email;
 
+    // Apply role filtering based on current user's permissions
+    filterRoleOptions();
+
     // Reset role selection
     document.querySelectorAll('.role-option').forEach(opt => opt.classList.remove('selected'));
 
     // Highlight current role
     const currentRoleOption = document.getElementById('role-' + currentRole.toLowerCase());
-    if (currentRoleOption) {
+    if (currentRoleOption && currentRoleOption.style.display !== 'none') {
         currentRoleOption.classList.add('selected');
     }
 

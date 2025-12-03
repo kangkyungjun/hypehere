@@ -4,7 +4,7 @@
 
 {% block body_class %}conversation-page{% endblock %}
 
-{% block title %}{{ other_user.username }} - {% trans "메시지 - HypeHere" %}{% endblock %}
+{% block title %}{{ other_user.nickname }} - {% trans "메시지 - HypeHere" %}{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/messages.css' %}">
@@ -21,7 +21,7 @@
         </a>
         <a href="{% url 'accounts:profile_detail' other_user.username %}" class="chat-header-user-link">
             {% if other_user.profile_picture %}
-                <img class="chat-header-avatar" src="{{ other_user.profile_picture.url }}" alt="{{ other_user.username }}">
+                <img class="chat-header-avatar" src="{{ other_user.profile_picture.url }}" alt="{{ other_user.nickname }}">
             {% else %}
                 <div class="chat-header-avatar">
                     <svg viewBox="0 0 100 100" fill="currentColor" style="color: var(--color-primary);">
@@ -31,7 +31,12 @@
                 </div>
             {% endif %}
             <div class="chat-header-info">
-                <h3>{{ other_user.username }}</h3>
+                <h3>
+                    {{ other_user.nickname }}
+                    {% if is_blocking %}
+                        <span class="blocked-label">차단</span>
+                    {% endif %}
+                </h3>
             </div>
         </a>
 
@@ -40,7 +45,9 @@
             <!-- 점 세개 버튼 -->
             <button class="btn btn-ghost btn-sm chat-actions-toggle"
                     data-username="{{ other_user.username }}"
+                    data-nickname="{{ other_user.nickname }}"
                     data-user-id="{{ other_user.id }}"
+                    data-is-blocking="{% if is_blocking %}true{% else %}false{% endif %}"
                     id="chat-actions-btn">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <circle cx="12" cy="12" r="1"/>
@@ -68,6 +75,21 @@
 
     <!-- 메시지 입력 -->
     <div class="message-input-container">
+        {% if is_blocking %}
+        <textarea
+            id="message-input"
+            class="message-input"
+            placeholder="차단한 상대에게는 메시지를 보낼 수 없습니다"
+            rows="1"
+            disabled
+        ></textarea>
+        <button class="send-button" id="send-button" disabled style="opacity: 0.5; cursor: not-allowed;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 2L11 13"/>
+                <path d="M22 2L15 22L11 13L2 9L22 2Z"/>
+            </svg>
+        </button>
+        {% else %}
         <textarea
             id="message-input"
             class="message-input"
@@ -80,6 +102,7 @@
                 <path d="M22 2L15 22L11 13L2 9L22 2Z"/>
             </svg>
         </button>
+        {% endif %}
     </div>
 </div>
 
@@ -119,6 +142,9 @@
 <!-- Include Report Modal -->
 {% include 'partials/message_report_modal.html' %}
 
+<!-- Include Unblock User Modal -->
+{% include 'partials/unblock_user_modal.html' %}
+
 <!-- Block User Modal is already included in base.html -->
 {% endblock %}
 
@@ -128,6 +154,9 @@
     window.CONVERSATION_ID = {{ conversation_id }};
     // Current logged-in user information for JavaScript
     window.CURRENT_USER = "{{ user.username }}";
+    // 차단 상태 전달
+    window.IS_BLOCKING = {{ is_blocking|yesno:"true,false" }};
+    window.IS_BLOCKED_BY = {{ is_blocked_by|yesno:"true,false" }};
 </script>
 <script src="{% static 'js/conversation.js' %}"></script>
 {% endblock %}

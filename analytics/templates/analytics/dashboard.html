@@ -11,7 +11,9 @@
             <h1 class="admin-title">{% trans "관리자 대시보드" %}</h1>
             <div class="admin-nav">
                 <a href="{% url 'analytics:permissions' %}" class="btn-admin">{% trans "권한 부여" %}</a>
+                {% if user.is_prime or user.is_superuser %}
                 <a href="{% url 'analytics:lottery' %}" class="btn-admin">{% trans "로또" %}</a>
+                {% endif %}
             </div>
         </div>
     </div>

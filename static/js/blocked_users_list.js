@@ -85,12 +85,10 @@ class BlockedUsersListManager {
         card.innerHTML = `
             <div class="user-clickable-area">
                 <img class="user-avatar"
-                     src="${user.profile_picture || '/static/images/default-avatar.png'}"
-                     alt="${this.escapeHtml(user.nickname)}"
-                     onerror="this.src='/static/images/default-avatar.png'">
+                     src="${user.profile_picture || this.getDefaultAvatar()}"
+                     alt="${this.escapeHtml(user.nickname)}">
                 <div class="user-info">
                     <div class="user-nickname">${this.escapeHtml(user.nickname)}</div>
-                    <div class="user-username">@${this.escapeHtml(user.username)}</div>
                     ${user.bio ? `<div class="user-bio">${this.escapeHtml(user.bio)}</div>` : ''}
                 </div>
             </div>
@@ -158,6 +156,18 @@ class BlockedUsersListManager {
             unblockBtn.disabled = false;
             unblockBtn.textContent = originalText;
         }
+    }
+
+    /**
+     * 기본 아바타 SVG 반환
+     */
+    getDefaultAvatar() {
+        return 'data:image/svg+xml,' + encodeURIComponent(`
+            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="50" cy="35" r="20" fill="#4F46E5"/>
+                <path d="M15 85 Q15 55 50 55 Q85 55 85 85 Z" fill="#4F46E5"/>
+            </svg>
+        `);
     }
 
     /**

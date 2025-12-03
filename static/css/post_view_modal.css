@@ -135,7 +135,6 @@
 .post-options-btn {
   position: relative;
   z-index: 10;
-  background: rgba(0, 0, 0, 0.05);
   border: none;
   padding: var(--space-xs);
   color: var(--color-text);
@@ -150,7 +149,6 @@
 }
 
 .post-options-btn:hover {
-  background-color: rgba(0, 0, 0, 0.1);
   transform: scale(1.05);
 }
 

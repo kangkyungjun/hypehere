@@ -438,3 +438,129 @@ class CommentReport(models.Model):
             from datetime import timedelta
             return self.reviewed_at + timedelta(days=30)
         return None
+
+
+class UserInteraction(models.Model):
+    """
+    Track user interactions with posts for recommendation system
+    - Logs: view, click, like, comment, scroll_depth, dwell_time
+    - Used for scoring, ML training, and personalization
+    """
+    INTERACTION_TYPES = [
+        ('view', 'View'),              # Post appeared in feed
+        ('click', 'Click'),            # User clicked/opened post
+        ('like', 'Like'),              # User liked post
+        ('unlike', 'Unlike'),          # User unliked post
+        ('comment', 'Comment'),        # User commented on post
+        ('share', 'Share'),            # User shared post
+        ('favorite', 'Favorite'),      # User favorited post
+        ('skip', 'Skip'),              # User explicitly skipped/hid post
+        ('report', 'Report'),          # User reported post
+    ]
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='post_interactions',
+        verbose_name='User',
+        db_index=True
+    )
+    post = models.ForeignKey(
+        Post,
+        on_delete=models.CASCADE,
+        related_name='interactions',
+        verbose_name='Post',
+        db_index=True
+    )
+    interaction_type = models.CharField(
+        max_length=20,
+        choices=INTERACTION_TYPES,
+        verbose_name='Interaction Type',
+        db_index=True
+    )
+
+    # Engagement metrics
+    scroll_depth = models.IntegerField(
+        default=0,
+        verbose_name='Scroll Depth (%)',
+        help_text='How far user scrolled in post (0-100%)'
+    )
+    dwell_time = models.FloatField(
+        default=0.0,
+        verbose_name='Dwell Time (seconds)',
+        help_text='Time spent viewing post'
+    )
+
+    # Context metadata
+    metadata = models.JSONField(
+        default=dict,
+        blank=True,
+        verbose_name='Metadata',
+        help_text='Additional context: device, feed_position, source_feed, etc.'
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='Created At')
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'User Interaction'
+        verbose_name_plural = 'User Interactions'
+        indexes = [
+            models.Index(fields=['user', 'interaction_type', '-created_at']),
+            models.Index(fields=['post', 'interaction_type', '-created_at']),
+            models.Index(fields=['user', 'post', '-created_at']),
+            models.Index(fields=['interaction_type', '-created_at']),
+            models.Index(fields=['-created_at']),  # For recent interactions queries
+        ]
+
+    def __str__(self):
+        return f"{self.user.nickname} - {self.interaction_type} - Post {self.post.id}"
+
+    @classmethod
+    def log_interaction(cls, user, post, interaction_type, scroll_depth=0, dwell_time=0.0, metadata=None):
+        """
+        Helper method to log user interaction
+        Usage: UserInteraction.log_interaction(user, post, 'click', scroll_depth=50, dwell_time=3.5)
+        """
+        return cls.objects.create(
+            user=user,
+            post=post,
+            interaction_type=interaction_type,
+            scroll_depth=scroll_depth,
+            dwell_time=dwell_time,
+            metadata=metadata or {}
+        )
+
+    @classmethod
+    def get_user_engagement_score(cls, user, post):
+        """
+        Calculate engagement score for a specific user-post pair
+        Returns: float (0-100)
+        """
+        interactions = cls.objects.filter(user=user, post=post)
+
+        score = 0
+        for interaction in interactions:
+            if interaction.interaction_type == 'like':
+                score += 30
+            elif interaction.interaction_type == 'comment':
+                score += 40
+            elif interaction.interaction_type == 'share':
+                score += 50
+            elif interaction.interaction_type == 'favorite':
+                score += 35
+            elif interaction.interaction_type == 'click':
+                score += 10
+            elif interaction.interaction_type == 'skip':
+                score -= 15
+            elif interaction.interaction_type == 'report':
+                score -= 50
+
+        # Bonus for dwell time and scroll depth
+        avg_dwell = interactions.aggregate(models.Avg('dwell_time'))['dwell_time__avg'] or 0
+        avg_scroll = interactions.aggregate(models.Avg('scroll_depth'))['scroll_depth__avg'] or 0
+
+        score += min(avg_dwell * 2, 20)  # Max +20 for dwell time
+        score += min(avg_scroll / 5, 20)  # Max +20 for scroll depth
+
+        return max(0, min(score, 100))  # Clamp between 0-100

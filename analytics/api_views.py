@@ -146,11 +146,22 @@ def search_users_api(request):
     # Search by email or nickname
     users = User.objects.filter(
         Q(email__icontains=query) | Q(nickname__icontains=query)
-    ).values('id', 'email', 'nickname', 'is_staff', 'is_superuser')[:20]
+    ).values('id', 'email', 'nickname', 'is_staff', 'is_superuser', 'is_prime', 'is_gold')[:20]
 
     results = []
     for user in users:
-        role = 'Superuser' if user['is_superuser'] else ('Staff' if user['is_staff'] else 'User')
+        # 5단계 권한 시스템 적용
+        if user.get('is_prime'):
+            role = 'Prime'
+        elif user['is_superuser']:
+            role = 'Superuser'
+        elif user['is_staff']:
+            role = 'Staff'
+        elif user.get('is_gold'):
+            role = 'GoldUser'
+        else:
+            role = 'User'
+
         results.append({
             'id': user['id'],
             'email': user['email'],
@@ -165,10 +176,16 @@ def search_users_api(request):
 @permission_classes([IsAdminUser])
 def update_user_permissions_api(request, user_id):
     """
-    Update user permissions (staff/superuser status)
+    Update user permissions (5-tier permission system)
     POST /admin-dashboard/api/users/<user_id>/permissions/
 
-    Body: {"role": "user|staff|superuser"}
+    Body: {"role": "user|gold|staff|prime|superuser"}
+
+    Permission Hierarchy:
+        - User/GoldUser: 권한 부여 불가
+        - Staff: user, gold, staff까지만 부여 가능
+        - Prime: user, gold, staff까지만 부여 가능 (Prime은 Superuser만 부여 가능)
+        - Superuser: 모든 권한 부여 가능
 
     Returns updated user information
     """
@@ -179,20 +196,72 @@ def update_user_permissions_api(request, user_id):
 
     role = request.data.get('role')
 
+    # 권한 부여 제약 검증
+    if not request.user.can_assign_role(role):
+        return Response({
+            'success': False,
+            'error': '해당 권한을 부여할 수 없습니다.'
+        }, status=status.HTTP_403_FORBIDDEN)
+
+    # 대상 사용자의 현재 역할 검증
+    # Prime 사용자는 Superuser만 변경 가능
+    if user.is_prime and not request.user.is_superuser:
+        return Response({
+            'success': False,
+            'error': 'Prime의 권한 변경이 불가합니다.'
+        }, status=status.HTTP_403_FORBIDDEN)
+
+    # Superuser는 Superuser만 변경 가능 (Prime이 아닌 Superuser)
+    if user.is_superuser and not user.is_prime and not request.user.is_superuser:
+        return Response({
+            'success': False,
+            'error': 'Superuser의 권한은 Superuser만 변경할 수 있습니다.'
+        }, status=status.HTTP_403_FORBIDDEN)
+
+    # 역할별 권한 설정
     if role == 'user':
         user.is_staff = False
         user.is_superuser = False
+        user.is_prime = False
+        user.is_gold = False
+    elif role == 'gold':
+        user.is_staff = False
+        user.is_superuser = False
+        user.is_prime = False
+        user.is_gold = True
     elif role == 'staff':
         user.is_staff = True
         user.is_superuser = False
+        user.is_prime = False
+        user.is_gold = True  # Staff는 유료 기능 사용 가능
+    elif role == 'prime':
+        user.is_staff = True
+        user.is_superuser = True
+        user.is_prime = True
+        user.is_gold = True
     elif role == 'superuser':
         user.is_staff = True
         user.is_superuser = True
+        user.is_prime = False
+        user.is_gold = True
     else:
-        return Response({'error': 'Invalid role. Must be: user, staff, or superuser'},
-                       status=status.HTTP_400_BAD_REQUEST)
+        return Response({
+            'error': 'Invalid role. Must be: user, gold, staff, prime, or superuser'
+        }, status=status.HTTP_400_BAD_REQUEST)
 
-    user.save(update_fields=['is_staff', 'is_superuser'])
+    user.save(update_fields=['is_staff', 'is_superuser', 'is_prime', 'is_gold'])
+
+    # 역할 레이블 결정
+    if user.is_prime:
+        role_label = 'Prime'
+    elif user.is_superuser:
+        role_label = 'Superuser'
+    elif user.is_staff:
+        role_label = 'Staff'
+    elif user.is_gold:
+        role_label = 'GoldUser'
+    else:
+        role_label = 'User'
 
     return Response({
         'success': True,
@@ -200,7 +269,7 @@ def update_user_permissions_api(request, user_id):
             'id': user.id,
             'email': user.email,
             'nickname': user.nickname,
-            'role': 'Superuser' if user.is_superuser else ('Staff' if user.is_staff else 'User')
+            'role': role_label
         }
     })
 
@@ -525,6 +594,9 @@ def save_draw_api(request):
         # Auto-generate NumberCombination (1-4등)
         created_count = _generate_number_combinations(draw, numbers, bonus_number)
 
+        # Update number frequency statistics
+        _update_number_statistics(draw, numbers, bonus_number)
+
         # Update strategy statistics automatically
         update_all_strategy_statistics()
 
@@ -572,29 +644,34 @@ def _generate_number_combinations(draw, numbers, bonus_number):
         )
         created_count += 1
 
-    # 3등: 5개 일치 (6가지)
-    for combo in combinations(numbers, 5):
-        combo_sorted = sorted(list(combo))
-        combination_hash = hashlib.sha256(str(combo_sorted).encode()).hexdigest()
-        NumberCombination.objects.create(
-            combination_hash=combination_hash,
-            numbers=combo_sorted,
-            round_number=round_number,
-            rank='3등'
-        )
-        created_count += 1
+    # 비당첨 번호 목록 (보너스 제외한 나머지 38개)
+    non_winning = [n for n in range(1, 46) if n not in numbers and n != bonus_number]
 
-    # 4등: 4개 일치 (15가지)
-    for combo in combinations(numbers, 4):
-        combo_sorted = sorted(list(combo))
-        combination_hash = hashlib.sha256(str(combo_sorted).encode()).hexdigest()
-        NumberCombination.objects.create(
-            combination_hash=combination_hash,
-            numbers=combo_sorted,
-            round_number=round_number,
-            rank='4등'
-        )
-        created_count += 1
+    # 3등: 5개 당첨번호 + 1개 비당첨번호 (6 × 38 = 228가지)
+    for winning_5 in combinations(numbers, 5):
+        for non_win in non_winning:
+            combo_sorted = sorted(list(winning_5) + [non_win])
+            combination_hash = hashlib.sha256(str(combo_sorted).encode()).hexdigest()
+            NumberCombination.objects.create(
+                combination_hash=combination_hash,
+                numbers=combo_sorted,
+                round_number=round_number,
+                rank='3등'
+            )
+            created_count += 1
+
+    # 4등: 4개 당첨번호 + 2개 비당첨번호 (15 × C(38,2) = 15 × 703 = 10,545가지)
+    for winning_4 in combinations(numbers, 4):
+        for non_win_2 in combinations(non_winning, 2):
+            combo_sorted = sorted(list(winning_4) + list(non_win_2))
+            combination_hash = hashlib.sha256(str(combo_sorted).encode()).hexdigest()
+            NumberCombination.objects.create(
+                combination_hash=combination_hash,
+                numbers=combo_sorted,
+                round_number=round_number,
+                rank='4등'
+            )
+            created_count += 1
 
     return created_count
 
@@ -623,96 +700,62 @@ def _generate_strategy1_numbers():
 
 
 def _generate_strategy2_numbers():
-    """추가전략2: 홀짝 비율 최적화 + 빈출번호"""
-    top_numbers = _get_top_frequent_numbers(25)
-    if len(top_numbers) < 6:
-        return None
-
-    odd_numbers = [n for n in top_numbers if n % 2 == 1]
-    even_numbers = [n for n in top_numbers if n % 2 == 0]
+    """추가전략2: 홀짝 비율 최적화 (전체 45개 번호 사용)"""
+    # 전체 45개 번호 사용
+    all_numbers = list(range(1, 46))
+    odd_numbers = [n for n in all_numbers if n % 2 == 1]  # 1,3,5,...,45 = 23개
+    even_numbers = [n for n in all_numbers if n % 2 == 0]  # 2,4,6,...,44 = 22개
 
     max_attempts = 100
     for _ in range(max_attempts):
-        # 홀수 3개, 짝수 3개 또는 홀수 4개, 짝수 2개 랜덤 선택
-        if random.choice([True, False]) and len(odd_numbers) >= 3 and len(even_numbers) >= 3:
-            selected = random.sample(odd_numbers, 3) + random.sample(even_numbers, 3)
-        elif len(odd_numbers) >= 4 and len(even_numbers) >= 2:
-            selected = random.sample(odd_numbers, 4) + random.sample(even_numbers, 2)
-        elif len(odd_numbers) >= 2 and len(even_numbers) >= 4:
-            selected = random.sample(odd_numbers, 2) + random.sample(even_numbers, 4)
-        else:
-            continue
+        # 홀짝 비율 랜덤 선택: 3:3, 4:2, 2:4
+        ratio_choice = random.choice(['3:3', '4:2', '2:4'])
 
-        if len(selected) != 6:
-            continue
+        if ratio_choice == '3:3':
+            selected = random.sample(odd_numbers, 3) + random.sample(even_numbers, 3)
+        elif ratio_choice == '4:2':
+            selected = random.sample(odd_numbers, 4) + random.sample(even_numbers, 2)
+        else:  # 2:4
+            selected = random.sample(odd_numbers, 2) + random.sample(even_numbers, 4)
 
         numbers = sorted(selected)
         combination_hash = hashlib.sha256(str(numbers).encode()).hexdigest()
 
+        # 1~4등 당첨 조합 제외
         if not NumberCombination.objects.filter(combination_hash=combination_hash).exists():
             return numbers
     return None
 
 
 def _generate_strategy3_numbers():
-    """추가전략3: 구간 분배 균형"""
-    top_numbers = _get_top_frequent_numbers(25)
-    if len(top_numbers) < 6:
-        return None
-
-    range1 = [n for n in top_numbers if 1 <= n <= 15]
-    range2 = [n for n in top_numbers if 16 <= n <= 30]
-    range3 = [n for n in top_numbers if 31 <= n <= 45]
+    """추가전략3: 구간 분배 균형 (전체 45개 번호 사용)"""
+    # 전체 45개 번호를 3개 범위로 균등 분할
+    range1 = list(range(1, 16))    # [1, 2, ..., 15] = 15개
+    range2 = list(range(16, 31))   # [16, 17, ..., 30] = 15개
+    range3 = list(range(31, 46))   # [31, 32, ..., 45] = 15개
 
     max_attempts = 100
     for _ in range(max_attempts):
-        if len(range1) < 2 or len(range2) < 2 or len(range3) < 2:
-            # Fallback: 각 구간에서 가능한 만큼 선택
-            selected = []
-            if len(range1) >= 2:
-                selected.extend(random.sample(range1, 2))
-            elif len(range1) >= 1:
-                selected.extend(random.sample(range1, 1))
-
-            if len(range2) >= 2:
-                selected.extend(random.sample(range2, 2))
-            elif len(range2) >= 1:
-                selected.extend(random.sample(range2, 1))
-
-            if len(range3) >= 2:
-                selected.extend(random.sample(range3, 2))
-            elif len(range3) >= 1:
-                selected.extend(random.sample(range3, 1))
-
-            # 6개가 안되면 top_numbers에서 추가
-            while len(selected) < 6:
-                remaining = [n for n in top_numbers if n not in selected]
-                if not remaining:
-                    break
-                selected.append(random.choice(remaining))
-        else:
-            selected = random.sample(range1, 2) + random.sample(range2, 2) + random.sample(range3, 2)
-
-        if len(selected) != 6:
-            continue
+        # 각 범위에서 정확히 2개씩 선택 (15개씩 있으므로 항상 가능)
+        selected = random.sample(range1, 2) + random.sample(range2, 2) + random.sample(range3, 2)
 
         numbers = sorted(selected)
         combination_hash = hashlib.sha256(str(numbers).encode()).hexdigest()
 
+        # 1~4등 당첨 조합 제외
         if not NumberCombination.objects.filter(combination_hash=combination_hash).exists():
             return numbers
     return None
 
 
 def _generate_strategy4_numbers():
-    """추가전략4: 연속번호 제한 (최대 2개)"""
-    top_numbers = _get_top_frequent_numbers(25)
-    if len(top_numbers) < 6:
-        return None
+    """추가전략4: 연속번호 제한 - 최대 2개 (전체 45개 번호 사용)"""
+    # 전체 45개 번호 사용
+    all_numbers = list(range(1, 46))
 
     max_attempts = 100
     for _ in range(max_attempts):
-        numbers = sorted(random.sample(top_numbers, 6))
+        numbers = sorted(random.sample(all_numbers, 6))
 
         # 연속 번호 체크
         consecutive_count = 1
@@ -724,18 +767,20 @@ def _generate_strategy4_numbers():
             else:
                 consecutive_count = 1
 
+        # 연속 번호가 3개 이상이면 스킵
         if max_consecutive > 2:
             continue
 
         combination_hash = hashlib.sha256(str(numbers).encode()).hexdigest()
 
+        # 1~4등 당첨 조합 제외
         if not NumberCombination.objects.filter(combination_hash=combination_hash).exists():
             return numbers
     return None
 
 
 def _generate_strategy5_numbers():
-    """통합 전략: 전략 1+2+3+4 모두 적용"""
+    """통합 전략: 상위 25개 + 홀짝 + 범위 + 연속 모든 필터 적용"""
     top_numbers = _get_top_frequent_numbers(25)
     if len(top_numbers) < 6:
         return None
@@ -749,13 +794,14 @@ def _generate_strategy5_numbers():
     odd_numbers = [n for n in top_numbers if n % 2 == 1]
     even_numbers = [n for n in top_numbers if n % 2 == 0]
 
+    # ⚠️ 검증: 각 범위에 최소 2개씩 있어야 범위 분산 필터 적용 가능
+    if len(range1) < 2 or len(range2) < 2 or len(range3) < 2:
+        # 조건 충족 불가능 - 통합전략 생성 실패
+        return None
+
     max_attempts = 500  # 더 많은 시도 (필터가 많으므로)
     for _ in range(max_attempts):
         # Strategy 3: 각 구간에서 2개씩 선택
-        if len(range1) < 2 or len(range2) < 2 or len(range3) < 2:
-            # 구간별 충분한 번호가 없으면 실패
-            continue
-
         selected = random.sample(range1, 2) + random.sample(range2, 2) + random.sample(range3, 2)
 
         if len(selected) != 6:
@@ -927,7 +973,7 @@ def generate_strategy5_numbers_api(request):
             return Response({
                 'success': True,
                 'numbers': numbers,
-                'strategy': 'strategy5'
+                'strategy': 'integrated'
             }, status=status.HTTP_200_OK)
         return Response({
             'success': False,
@@ -1073,56 +1119,41 @@ def _calculate_strategy1_stats():
 
 
 def _calculate_strategy2_stats():
-    """추가전략2 통계 계산: 홀짝 비율 최적화"""
+    """추가전략2 통계 계산: 남은 조합 중 홀짝 비율 최적화"""
     from lotto.models import NumberCombination
     from itertools import combinations
-    import math
 
-    # 상위 25개 빈출 번호
-    top_numbers = _get_top_frequent_numbers(25)
-    odd_numbers = [n for n in top_numbers if n % 2 == 1]
-    even_numbers = [n for n in top_numbers if n % 2 == 0]
+    # ⚡ 성능 최적화: 1~4등 당첨 조합 해시를 메모리에 로드 (1회 DB 쿼리)
+    excluded_hashes = set(
+        NumberCombination.objects.values_list('combination_hash', flat=True)
+    )
 
-    # 가능한 조합: 홀3짝3 + 홀4짝2 + 홀2짝4
     total_theoretical = 0
-    total_theoretical += math.comb(len(odd_numbers), 3) * math.comb(len(even_numbers), 3)  # 홀3짝3
-    total_theoretical += math.comb(len(odd_numbers), 4) * math.comb(len(even_numbers), 2)  # 홀4짝2
-    total_theoretical += math.comb(len(odd_numbers), 2) * math.comb(len(even_numbers), 4)  # 홀2짝4
 
-    # 제외된 조합 카운트
-    excluded_count = 0
+    for combo in combinations(range(1, 46), 6):
+        numbers = sorted(combo)
+        combination_hash = hashlib.sha256(str(numbers).encode()).hexdigest()
 
-    # 홀3짝3
-    for odd_combo in combinations(odd_numbers, 3):
-        for even_combo in combinations(even_numbers, 3):
-            numbers = sorted(list(odd_combo) + list(even_combo))
-            combination_hash = hashlib.sha256(str(numbers).encode()).hexdigest()
-            if NumberCombination.objects.filter(combination_hash=combination_hash).exists():
-                excluded_count += 1
+        # ⚡ 메모리 set 조회 (O(1) - 극히 빠름)
+        if combination_hash in excluded_hashes:
+            continue
 
-    # 홀4짝2
-    for odd_combo in combinations(odd_numbers, 4):
-        for even_combo in combinations(even_numbers, 2):
-            numbers = sorted(list(odd_combo) + list(even_combo))
-            combination_hash = hashlib.sha256(str(numbers).encode()).hexdigest()
-            if NumberCombination.objects.filter(combination_hash=combination_hash).exists():
-                excluded_count += 1
+        # 홀짝 비율 체크 (3:3, 4:2, 2:4만 허용)
+        odd_count = sum(1 for n in numbers if n % 2 == 1)
+        even_count = 6 - odd_count
 
-    # 홀2짝4
-    for odd_combo in combinations(odd_numbers, 2):
-        for even_combo in combinations(even_numbers, 4):
-            numbers = sorted(list(odd_combo) + list(even_combo))
-            combination_hash = hashlib.sha256(str(numbers).encode()).hexdigest()
-            if NumberCombination.objects.filter(combination_hash=combination_hash).exists():
-                excluded_count += 1
+        if (odd_count == 3 and even_count == 3) or \
+           (odd_count == 4 and even_count == 2) or \
+           (odd_count == 2 and even_count == 4):
+            total_theoretical += 1
 
-    remaining_count = total_theoretical - excluded_count
+    remaining_count = total_theoretical
     probability = 1 / remaining_count if remaining_count > 0 else 0
     improvement_ratio = 8145060 / remaining_count if remaining_count > 0 else 0
 
     return {
         'total': total_theoretical,
-        'excluded': excluded_count,
+        'excluded': 0,
         'remaining': remaining_count,
         'probability': probability,
         'improvement': improvement_ratio
@@ -1130,36 +1161,40 @@ def _calculate_strategy2_stats():
 
 
 def _calculate_strategy3_stats():
-    """추가전략3 통계 계산: 범위 분산"""
+    """추가전략3 통계 계산: 남은 조합 중 범위 분산"""
     from lotto.models import NumberCombination
     from itertools import combinations
-    import math
 
-    top_numbers = _get_top_frequent_numbers(25)
-    range1 = [n for n in top_numbers if 1 <= n <= 15]
-    range2 = [n for n in top_numbers if 16 <= n <= 30]
-    range3 = [n for n in top_numbers if 31 <= n <= 45]
+    # ⚡ 성능 최적화: 1~4등 당첨 조합 해시를 메모리에 로드 (1회 DB 쿼리)
+    excluded_hashes = set(
+        NumberCombination.objects.values_list('combination_hash', flat=True)
+    )
 
-    # 이론적 조합: 각 구간에서 2개씩
-    total_theoretical = math.comb(len(range1), 2) * math.comb(len(range2), 2) * math.comb(len(range3), 2)
+    total_theoretical = 0
 
-    # 제외된 조합 카운트
-    excluded_count = 0
-    for r1_combo in combinations(range1, 2):
-        for r2_combo in combinations(range2, 2):
-            for r3_combo in combinations(range3, 2):
-                numbers = sorted(list(r1_combo) + list(r2_combo) + list(r3_combo))
-                combination_hash = hashlib.sha256(str(numbers).encode()).hexdigest()
-                if NumberCombination.objects.filter(combination_hash=combination_hash).exists():
-                    excluded_count += 1
+    for combo in combinations(range(1, 46), 6):
+        numbers = sorted(combo)
+        combination_hash = hashlib.sha256(str(numbers).encode()).hexdigest()
 
-    remaining_count = total_theoretical - excluded_count
+        # ⚡ 메모리 set 조회 (O(1) - 극히 빠름)
+        if combination_hash in excluded_hashes:
+            continue
+
+        # 범위 분산 체크 (각 범위에서 정확히 2개씩)
+        r1_count = sum(1 for n in numbers if 1 <= n <= 15)
+        r2_count = sum(1 for n in numbers if 16 <= n <= 30)
+        r3_count = sum(1 for n in numbers if 31 <= n <= 45)
+
+        if r1_count == 2 and r2_count == 2 and r3_count == 2:
+            total_theoretical += 1
+
+    remaining_count = total_theoretical
     probability = 1 / remaining_count if remaining_count > 0 else 0
     improvement_ratio = 8145060 / remaining_count if remaining_count > 0 else 0
 
     return {
         'total': total_theoretical,
-        'excluded': excluded_count,
+        'excluded': 0,
         'remaining': remaining_count,
         'probability': probability,
         'improvement': improvement_ratio
@@ -1167,20 +1202,26 @@ def _calculate_strategy3_stats():
 
 
 def _calculate_strategy4_stats():
-    """추가전략4 통계 계산: 연속 번호 제한 (최대 2개)"""
+    """추가전략4 통계 계산: 남은 조합 중 연속 번호 제한"""
     from lotto.models import NumberCombination
     from itertools import combinations
 
-    top_numbers = _get_top_frequent_numbers(25)
+    # ⚡ 성능 최적화: 1~4등 당첨 조합 해시를 메모리에 로드 (1회 DB 쿼리)
+    excluded_hashes = set(
+        NumberCombination.objects.values_list('combination_hash', flat=True)
+    )
 
-    # 모든 조합 중 연속 번호가 최대 2개인 경우만 카운트
     total_theoretical = 0
-    excluded_count = 0
 
-    for combo in combinations(top_numbers, 6):
+    for combo in combinations(range(1, 46), 6):
         numbers = sorted(combo)
+        combination_hash = hashlib.sha256(str(numbers).encode()).hexdigest()
 
-        # 연속 번호 체크
+        # ⚡ 메모리 set 조회 (O(1) - 극히 빠름)
+        if combination_hash in excluded_hashes:
+            continue
+
+        # 연속 번호 체크 (최대 2개까지만 허용)
         consecutive_count = 1
         max_consecutive = 1
         for i in range(1, len(numbers)):
@@ -1194,18 +1235,13 @@ def _calculate_strategy4_stats():
         if max_consecutive <= 2:
             total_theoretical += 1
 
-            # 이 조합이 이미 나왔는지 체크
-            combination_hash = hashlib.sha256(str(numbers).encode()).hexdigest()
-            if NumberCombination.objects.filter(combination_hash=combination_hash).exists():
-                excluded_count += 1
-
-    remaining_count = total_theoretical - excluded_count
+    remaining_count = total_theoretical
     probability = 1 / remaining_count if remaining_count > 0 else 0
     improvement_ratio = 8145060 / remaining_count if remaining_count > 0 else 0
 
     return {
         'total': total_theoretical,
-        'excluded': excluded_count,
+        'excluded': 0,
         'remaining': remaining_count,
         'probability': probability,
         'improvement': improvement_ratio
@@ -1213,33 +1249,52 @@ def _calculate_strategy4_stats():
 
 
 def _calculate_strategy5_stats():
-    """통합 전략 통계 계산: 전략 1+2+3+4 모두 적용"""
+    """통합 전략 통계 계산: 상위 25개 + 홀짝 + 범위 + 연속 모든 필터"""
     from lotto.models import NumberCombination
     from itertools import combinations
 
+    # ⚡ 성능 최적화: 1~4등 당첨 조합 해시를 메모리에 로드 (1회 DB 쿼리)
+    excluded_hashes = set(
+        NumberCombination.objects.values_list('combination_hash', flat=True)
+    )
+
     top_numbers = _get_top_frequent_numbers(25)
 
-    # 모든 필터를 만족하는 조합만 카운트
+    # 구간별 번호 분류
+    range1 = [n for n in top_numbers if 1 <= n <= 15]
+    range2 = [n for n in top_numbers if 16 <= n <= 30]
+    range3 = [n for n in top_numbers if 31 <= n <= 45]
+
+    # ⚠️ 검증: 각 범위에 최소 2개씩 있어야 함
+    if len(range1) < 2 or len(range2) < 2 or len(range3) < 2:
+        return {
+            'total': 0,
+            'excluded': 0,
+            'remaining': 0,
+            'probability': 0,
+            'improvement': 0
+        }
+
     total_theoretical = 0
     excluded_count = 0
 
     for combo in combinations(top_numbers, 6):
         numbers = sorted(combo)
 
-        # Filter 1: 구간별 분배 (각 구간에 최소 1개씩)
+        # Filter 1: 구간별 분배 (각 구간에서 정확히 2개씩)
         r1_count = sum(1 for n in numbers if 1 <= n <= 15)
         r2_count = sum(1 for n in numbers if 16 <= n <= 30)
         r3_count = sum(1 for n in numbers if 31 <= n <= 45)
 
-        if r1_count == 0 or r2_count == 0 or r3_count == 0:
-            continue  # 이 조합은 카운트하지 않음
+        if r1_count != 2 or r2_count != 2 or r3_count != 2:
+            continue
 
         # Filter 2: 홀짝 비율 (3:3 또는 4:2 또는 2:4)
         odd_count = sum(1 for n in numbers if n % 2 == 1)
         even_count = 6 - odd_count
 
         if not ((odd_count == 3 and even_count == 3) or (odd_count == 4 and even_count == 2) or (odd_count == 2 and even_count == 4)):
-            continue  # 이 조합은 카운트하지 않음
+            continue
 
         # Filter 3: 연속번호 최대 2개
         consecutive_count = 1
@@ -1252,14 +1307,14 @@ def _calculate_strategy5_stats():
                 consecutive_count = 1
 
         if max_consecutive > 2:
-            continue  # 이 조합은 카운트하지 않음
+            continue
 
         # 모든 필터 통과 - 이론적 조합에 포함
         total_theoretical += 1
 
-        # Filter 4: 이미 나온 조합 제외
+        # Filter 4: 이미 나온 조합 제외 (⚡ 메모리 set 조회)
         combination_hash = hashlib.sha256(str(numbers).encode()).hexdigest()
-        if NumberCombination.objects.filter(combination_hash=combination_hash).exists():
+        if combination_hash in excluded_hashes:
             excluded_count += 1
 
     remaining_count = total_theoretical - excluded_count
@@ -1288,7 +1343,7 @@ def update_all_strategy_statistics():
         ('strategy2', _calculate_strategy2_stats),
         ('strategy3', _calculate_strategy3_stats),
         ('strategy4', _calculate_strategy4_stats),
-        ('strategy5', _calculate_strategy5_stats),
+        ('integrated', _calculate_strategy5_stats),  # 통합전략
     ]
 
     for strategy_type, calc_func in strategies:
@@ -1410,5 +1465,34 @@ def get_strategy_probability_api(request, strategy_type):
             'success': False,
             'error': f'통계 조회 중 오류가 발생했습니다: {str(e)}'
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+def _update_number_statistics(draw, numbers, bonus_number):
+    """
+    새 당첨 번호에 대한 NumberStatistics 업데이트
+
+    Args:
+        draw: LottoDraw 객체
+        numbers: 당첨 번호 리스트 (6개)
+        bonus_number: 보너스 번호 (1개)
+    """
+    from lotto.models import NumberStatistics
+
+    # 당첨 번호 6개 업데이트
+    for num in numbers:
+        stat, created = NumberStatistics.objects.get_or_create(number=num)
+        stat.first_prize_count += 1
+        stat.total_count += 1
+        stat.last_appeared_round = draw.round_number
+        stat.last_appeared_date = draw.draw_date
+        stat.save()
+
+    # 보너스 번호 업데이트
+    bonus_stat, created = NumberStatistics.objects.get_or_create(number=bonus_number)
+    bonus_stat.bonus_count += 1
+    bonus_stat.total_count += 1
+    bonus_stat.last_appeared_round = draw.round_number
+    bonus_stat.last_appeared_date = draw.draw_date
+    bonus_stat.save()
 
 

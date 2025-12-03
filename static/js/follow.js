@@ -122,7 +122,7 @@ async function messageUser(userId) {
 
     try {
         // Create or get conversation with this user
-        const response = await fetch('/messages/api/conversations/', {
+        const response = await fetch('/api/chat/conversations/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

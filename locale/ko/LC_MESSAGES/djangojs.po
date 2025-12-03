@@ -193,3 +193,67 @@ msgstr "게시물 수정"
 #: static/js/post_modal.js:106
 msgid "수정하기"
 msgstr "수정하기"
+
+#: templates/base.html:239
+msgid "No messages"
+msgstr "메시지가 없습니다"
+
+#: templates/base.html:240
+msgid "Start conversation"
+msgstr "대화를 시작하세요"
+
+#: templates/base.html:243
+msgid "Are you sure you want to delete your profile picture?"
+msgstr "프로필 사진을 삭제하시겠습니까?"
+
+#: templates/base.html:244
+msgid "Profile picture has been deleted"
+msgstr "프로필 사진이 삭제되었습니다"
+
+#: templates/base.html:245
+msgid "Failed to delete profile picture"
+msgstr "프로필 사진 삭제에 실패했습니다"
+
+#: static/js/auth.js
+msgid "8자 이상"
+msgstr "8자 이상"
+
+#: static/js/auth.js
+msgid "영문 포함"
+msgstr "영문 포함"
+
+#: static/js/auth.js
+msgid "숫자 포함"
+msgstr "숫자 포함"
+
+#: static/js/auth.js
+msgid "대문자 포함 (권장)"
+msgstr "대문자 포함 (권장)"
+
+#: static/js/auth.js
+msgid "소문자 포함 (권장)"
+msgstr "소문자 포함 (권장)"
+
+#: static/js/auth.js
+msgid "특수문자 포함 !@#$%^&* (권장)"
+msgstr "특수문자 포함 !@#$%^&* (권장)"
+
+#: static/js/auth.js
+msgid "약함"
+msgstr "약함"
+
+#: static/js/auth.js
+msgid "보통"
+msgstr "보통"
+
+#: static/js/auth.js
+msgid "강함"
+msgstr "강함"
+
+#: static/js/auth.js
+msgid "비밀번호가 규칙을 만족하지 않습니다"
+msgstr "비밀번호가 규칙을 만족하지 않습니다"
+
+#: static/js/auth.js
+msgid "8자 이상, 영문+숫자 필요"
+msgstr "8자 이상, 영문+숫자 필요"

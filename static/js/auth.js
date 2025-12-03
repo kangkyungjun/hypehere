@@ -21,32 +21,6 @@ function getCookie(name) {
 
 const csrftoken = getCookie('csrftoken');
 
-// Show/Hide Alert Messages
-function showAlert(type, message) {
-    const alertId = type === 'error' ? 'error-alert' : 'success-alert';
-    const messageId = type === 'error' ? 'error-message' : 'success-message';
-
-    const alertElement = document.getElementById(alertId);
-    const messageElement = document.getElementById(messageId);
-
-    if (alertElement && messageElement) {
-        // Use innerHTML for error messages to support HTML formatting (bullet points)
-        if (type === 'error') {
-            messageElement.innerHTML = message;
-        } else {
-            messageElement.textContent = message;
-        }
-        alertElement.classList.remove('hidden');
-
-        // Auto-hide success messages after 3 seconds
-        if (type === 'success') {
-            setTimeout(() => {
-                alertElement.classList.add('hidden');
-            }, 3000);
-        }
-    }
-}
-
 // Parse all registration errors from server response
 function parseRegistrationErrors(data) {
     const errors = [];
@@ -103,14 +77,6 @@ function parseRegistrationErrors(data) {
     } else {
         return '회원가입 중 오류가 발생했습니다.';
     }
-}
-
-function hideAlerts() {
-    const errorAlert = document.getElementById('error-alert');
-    const successAlert = document.getElementById('success-alert');
-
-    if (errorAlert) errorAlert.classList.add('hidden');
-    if (successAlert) successAlert.classList.add('hidden');
 }
 
 // Show/Hide Field Error
@@ -198,6 +164,172 @@ function setLoadingState(isLoading) {
     }
 }
 
+// =================================================================
+// Password Validation Functions with Multi-language Support
+// =================================================================
+
+/**
+ * Show toast notification
+ * @param {string} message - Message to display
+ * @param {number} duration - Duration in milliseconds (default: 1000)
+ */
+function showToast(message, duration = 1000) {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.textContent = message;
+    container.appendChild(toast);
+
+    // Remove toast after duration
+    setTimeout(() => {
+        toast.remove();
+    }, duration);
+}
+
+/**
+ * Validate password against all rules
+ * @param {string} password - Password to validate
+ * @returns {Object} - Validation results with detailed checks
+ */
+function validatePasswordRules(password) {
+    return {
+        length: password.length >= 8,
+        letters: /[A-Za-z]/.test(password),
+        numbers: /\d/.test(password),
+        uppercase: /[A-Z]/.test(password),
+        lowercase: /[a-z]/.test(password),
+        special: /[!@#$%^&*]/.test(password)
+    };
+}
+
+/**
+ * Calculate password strength
+ * @param {string} password - Password to evaluate
+ * @returns {string} - 'weak', 'medium', or 'strong'
+ */
+function calculatePasswordStrength(password) {
+    const rules = validatePasswordRules(password);
+
+    // Required criteria
+    if (!rules.length || !rules.letters || !rules.numbers) {
+        return 'weak';
+    }
+
+    // Count recommended criteria
+    let recommendedCount = 0;
+    if (rules.uppercase) recommendedCount++;
+    if (rules.lowercase) recommendedCount++;
+    if (rules.special) recommendedCount++;
+
+    // Determine strength
+    if (recommendedCount >= 3) {
+        return 'strong';
+    } else if (recommendedCount >= 1) {
+        return 'medium';
+    } else {
+        return 'weak';
+    }
+}
+
+/**
+ * Update password checklist UI with multi-language support
+ * @param {string} password - Current password value
+ */
+function updatePasswordChecklist(password) {
+    const rules = validatePasswordRules(password);
+    const checklistItems = {
+        'check-length': { valid: rules.length, text: gettext('8자 이상') },
+        'check-letters': { valid: rules.letters, text: gettext('영문 포함') },
+        'check-numbers': { valid: rules.numbers, text: gettext('숫자 포함') },
+        'check-uppercase': { valid: rules.uppercase, text: gettext('대문자 포함 (권장)') },
+        'check-lowercase': { valid: rules.lowercase, text: gettext('소문자 포함 (권장)') },
+        'check-special': { valid: rules.special, text: gettext('특수문자 포함 !@#$%^&* (권장)') }
+    };
+
+    Object.keys(checklistItems).forEach(id => {
+        const li = document.getElementById(id);
+        const item = checklistItems[id];
+
+        if (li) {
+            const checkIcon = li.querySelector('.check-icon');
+            const checkText = li.querySelector('.check-text');
+
+            if (item.valid) {
+                li.classList.add('valid');
+                if (checkIcon) checkIcon.textContent = '✓';
+            } else {
+                li.classList.remove('valid');
+                if (checkIcon) checkIcon.textContent = '○';
+            }
+
+            if (checkText) {
+                checkText.textContent = item.text;
+            }
+        }
+    });
+}
+
+/**
+ * Update password strength indicator with multi-language support
+ * @param {string} password - Current password value
+ */
+function updatePasswordStrength(password) {
+    const container = document.getElementById('password-strength-container');
+    const fill = document.getElementById('password-strength-fill');
+    const text = document.getElementById('password-strength-text');
+
+    if (!container || !fill || !text) return;
+
+    if (password.length === 0) {
+        container.style.display = 'none';
+        return;
+    }
+
+    container.style.display = 'block';
+    const strength = calculatePasswordStrength(password);
+
+    // Remove all strength classes
+    fill.classList.remove('weak', 'medium', 'strong');
+    text.classList.remove('weak', 'medium', 'strong');
+
+    // Add current strength class
+    fill.classList.add(strength);
+    text.classList.add(strength);
+
+    // Update text with translation
+    const strengthTexts = {
+        'weak': gettext('약함'),
+        'medium': gettext('보통'),
+        'strong': gettext('강함')
+    };
+
+    text.textContent = strengthTexts[strength] || '';
+}
+
+/**
+ * Validate password and show toast if invalid (for form submission)
+ * @param {string} password - Password to validate
+ * @returns {boolean} - True if valid, false otherwise
+ */
+function validatePasswordWithToast(password) {
+    const rules = validatePasswordRules(password);
+
+    // Check required rules
+    if (!rules.length) {
+        showToast(gettext('비밀번호가 규칙을 만족하지 않습니다') + ': ' + gettext('8자 이상, 영문+숫자 필요'));
+        return false;
+    }
+
+    if (!rules.letters || !rules.numbers) {
+        showToast(gettext('비밀번호가 규칙을 만족하지 않습니다') + ': ' + gettext('8자 이상, 영문+숫자 필요'));
+        return false;
+    }
+
+    return true;
+}
+
 // Registration Form Handler
 document.addEventListener('DOMContentLoaded', function() {
     const registerForm = document.getElementById('register-form');
@@ -280,11 +412,22 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
 
             // Clear previous errors
-            hideAlerts();
             clearFieldErrors();
 
             // Get form data
             const formData = new FormData(registerForm);
+
+            // Validate password first with toast notification
+            const password = formData.get('password');
+            const passwordInput = document.getElementById('password');
+
+            if (!validatePasswordWithToast(password)) {
+                // Show red border on password field
+                if (passwordInput) {
+                    passwordInput.classList.add('is-invalid');
+                }
+                return;
+            }
 
             // Client-side validation
             const validationErrors = validateRegistrationForm(formData);
@@ -292,7 +435,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 Object.keys(validationErrors).forEach(field => {
                     showFieldError(field, validationErrors[field]);
                 });
-                showAlert('error', '입력 정보를 확인해주세요.');
+                window.showAlert('입력 정보를 확인해주세요.', 'error');
                 return;
             }
 
@@ -326,7 +469,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 if (response.ok) {
                     // Success - Show message and redirect
-                    showAlert('success', '회원가입 성공! 로그인 중...');
+                    window.showAlert('회원가입 성공! 로그인 중...', 'success');
 
                     // Store token if provided (for API authentication)
                     if (result.token) {
@@ -341,21 +484,44 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else {
                     // Error - Parse and display all errors
                     const errorMessage = parseRegistrationErrors(result);
-                    showAlert('error', errorMessage);
+                    window.showAlert(errorMessage, 'error');
                     setLoadingState(false);
                 }
 
             } catch (error) {
                 console.error('Registration error:', error);
-                showAlert('error', '네트워크 오류가 발생했습니다. 다시 시도해주세요.');
+                window.showAlert('네트워크 오류가 발생했습니다. 다시 시도해주세요.', 'error');
                 setLoadingState(false);
             }
         });
 
-        // Real-time password match validation
+        // Real-time password validation with checklist and strength indicator
         const passwordInput = document.getElementById('password');
         const passwordConfirmInput = document.getElementById('password_confirm');
 
+        if (passwordInput) {
+            // Initialize checklist on page load
+            updatePasswordChecklist('');
+
+            // Real-time validation on password input
+            passwordInput.addEventListener('input', function() {
+                const password = passwordInput.value;
+
+                // Update checklist and strength indicator
+                updatePasswordChecklist(password);
+                updatePasswordStrength(password);
+
+                // Clear password error if valid
+                const passwordError = document.getElementById('password-error');
+                if (validatePasswordWithToast(password) && passwordError) {
+                    passwordError.textContent = '';
+                    passwordError.classList.add('hidden');
+                    passwordInput.classList.remove('is-invalid');
+                }
+            });
+        }
+
+        // Real-time password match validation
         if (passwordConfirmInput) {
             passwordConfirmInput.addEventListener('input', function() {
                 const password = passwordInput.value;
@@ -447,7 +613,6 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
 
             // Clear previous errors
-            hideAlerts();
             clearFieldErrors();
 
             // Get form data
@@ -460,19 +625,19 @@ document.addEventListener('DOMContentLoaded', function() {
             const nickname = formData.get('nickname');
             if (!nickname || nickname.trim().length < 1) {
                 showFieldError('nickname', window.AUTH_I18N.errorNicknameRequired);
-                showAlert('error', window.AUTH_I18N.errorCheckInput);
+                window.showAlert(window.AUTH_I18N.errorCheckInput, 'error');
                 return;
             }
             if (nickname.length > 50) {
                 showFieldError('nickname', window.AUTH_I18N.errorNicknameLength);
-                showAlert('error', window.AUTH_I18N.errorCheckInput);
+                window.showAlert(window.AUTH_I18N.errorCheckInput, 'error');
                 return;
             }
 
             const bio = formData.get('bio');
             if (bio && bio.length > 200) {
                 showFieldError('bio', window.AUTH_I18N.errorBioLength);
-                showAlert('error', window.AUTH_I18N.errorCheckInput);
+                window.showAlert(window.AUTH_I18N.errorCheckInput, 'error');
                 return;
             }
 
@@ -494,7 +659,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 if (response.ok) {
                     // Success - Show message and redirect
-                    showAlert('success', window.AUTH_I18N.successUpdate);
+                    window.showAlert(window.AUTH_I18N.successUpdate, 'success', { autoDismiss: 800 });
 
                     // Redirect to profile page after 1 second
                     setTimeout(() => {
@@ -527,14 +692,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     // Show general error message
                     const errorMessage = result.detail || result.message || window.AUTH_I18N.errorUpdateFailed;
-                    showAlert('error', errorMessage);
+                    window.showAlert(errorMessage, 'error');
 
                     setLoadingState(false);
                 }
 
             } catch (error) {
                 console.error('Profile update error:', error);
-                showAlert('error', window.AUTH_I18N.errorNetwork);
+                window.showAlert(window.AUTH_I18N.errorNetwork, 'error');
                 setLoadingState(false);
             }
         });

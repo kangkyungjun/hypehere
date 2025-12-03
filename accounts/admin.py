@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth import get_user_model
-from .models import Follow, SupportTicket
+from .models import Follow, SupportTicket, UserReport
 
 User = get_user_model()
 
@@ -97,3 +97,34 @@ class SupportTicketAdmin(admin.ModelAdmin):
         return obj.has_response()
     has_response.boolean = True
     has_response.short_description = 'Answered'
+
+
+@admin.register(UserReport)
+class UserReportAdmin(admin.ModelAdmin):
+    """Admin interface for User Reports"""
+    list_display = ('id', 'reporter', 'reported_user', 'report_type', 'status', 'created_at')
+    list_filter = ('status', 'report_type', 'created_at')
+    search_fields = ('reporter__username', 'reporter__nickname', 'reporter__email',
+                     'reported_user__username', 'reported_user__nickname', 'reported_user__email',
+                     'description')
+    date_hierarchy = 'created_at'
+    raw_id_fields = ('reporter', 'reported_user', 'resolved_by')
+    readonly_fields = ('created_at', 'reviewed_at')
+    ordering = ('-created_at',)
+
+    fieldsets = (
+        ('Report Information', {
+            'fields': ('reporter', 'reported_user', 'report_type', 'description', 'status')
+        }),
+        ('Admin Review', {
+            'fields': ('admin_note', 'resolved_by', 'reviewed_at')
+        }),
+        ('Timestamps', {
+            'fields': ('created_at',),
+            'classes': ('collapse',)
+        }),
+    )
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        return qs.select_related('reporter', 'reported_user', 'resolved_by')

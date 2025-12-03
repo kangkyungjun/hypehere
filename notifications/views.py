@@ -23,10 +23,23 @@ class NotificationViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = NotificationSerializer
 
     def get_queryset(self):
-        """현재 사용자의 알림만 반환"""
-        return Notification.objects.filter(
+        """현재 사용자의 알림만 반환 (차단한 사용자 제외)"""
+        from accounts.models import Block
+
+        # 차단한 사용자 목록 조회
+        blocked_user_ids = Block.objects.filter(
+            blocker=self.request.user
+        ).values_list('blocked_id', flat=True)
+
+        queryset = Notification.objects.filter(
             recipient=self.request.user
         ).select_related('sender').order_by('-created_at')
+
+        # 차단한 사용자의 알림 제외
+        if blocked_user_ids:
+            queryset = queryset.exclude(sender_id__in=blocked_user_ids)
+
+        return queryset
 
     @action(detail=True, methods=['post'])
     def mark_read(self, request, pk=None):
@@ -57,13 +70,26 @@ class NotificationViewSet(viewsets.ReadOnlyModelViewSet):
     @action(detail=False, methods=['get'])
     def unread_count(self, request):
         """
-        안읽은 알림 개수 조회
+        안읽은 알림 개수 조회 (차단한 사용자 제외)
         GET /notifications/api/unread_count/
         """
-        count = Notification.objects.filter(
+        from accounts.models import Block
+
+        # 차단한 사용자 목록 조회
+        blocked_user_ids = Block.objects.filter(
+            blocker=request.user
+        ).values_list('blocked_id', flat=True)
+
+        notifications = Notification.objects.filter(
             recipient=request.user,
             is_read=False
-        ).count()
+        )
+
+        # 차단한 사용자의 알림 제외
+        if blocked_user_ids:
+            notifications = notifications.exclude(sender_id__in=blocked_user_ids)
+
+        count = notifications.count()
 
         return Response({'unread_count': count})
 

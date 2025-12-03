@@ -236,3 +236,66 @@ msgstr "チャットルームに入室しました"
 #: templates/base.html:195
 msgid "아직 댓글이 없습니다. 첫 번째 댓글을 작성해보세요!"
 msgstr "まだコメントがありません。最初にコメントしてみましょう！"
+
+#: templates/base.html:239
+msgid "No messages"
+msgstr "メッセージがありません"
+
+#: templates/base.html:240
+msgid "Start conversation"
+msgstr "会話を始める"
+
+#: templates/base.html:243
+msgid "Are you sure you want to delete your profile picture?"
+msgstr "プロフィール写真を削除してもよろしいですか？"
+
+#: templates/base.html:244
+msgid "Profile picture has been deleted"
+msgstr "プロフィール写真が削除されました"
+
+#: templates/base.html:245
+msgid "Failed to delete profile picture"
+msgstr "プロフィール写真の削除に失敗しました"
+#: static/js/auth.js
+msgid "8자 이상"
+msgstr "8文字以上"
+
+#: static/js/auth.js
+msgid "영문 포함"
+msgstr "英字を含む"
+
+#: static/js/auth.js
+msgid "숫자 포함"
+msgstr "数字を含む"
+
+#: static/js/auth.js
+msgid "대문자 포함 (권장)"
+msgstr "大文字を含む（推奨）"
+
+#: static/js/auth.js
+msgid "소문자 포함 (권장)"
+msgstr "小文字を含む（推奨）"
+
+#: static/js/auth.js
+msgid "특수문자 포함 !@#$%^&* (권장)"
+msgstr "特殊文字を含む !@#$%^&*（推奨）"
+
+#: static/js/auth.js
+msgid "약함"
+msgstr "弱い"
+
+#: static/js/auth.js
+msgid "보통"
+msgstr "普通"
+
+#: static/js/auth.js
+msgid "강함"
+msgstr "強い"
+
+#: static/js/auth.js
+msgid "비밀번호가 규칙을 만족하지 않습니다"
+msgstr "パスワードが要件を満たしていません"
+
+#: static/js/auth.js
+msgid "8자 이상, 영문+숫자 필요"
+msgstr "8文字以上、英字+数字が必要"

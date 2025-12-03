@@ -134,7 +134,7 @@ class OpenChatRoom {
 
   async loadInitialMessages() {
     try {
-      const response = await fetch(`/api/chat/api/open-rooms/${this.roomId}/`);
+      const response = await fetch(`/api/chat/open-rooms/${this.roomId}/`);
       if (!response.ok) throw new Error('Failed to load messages');
 
       const data = await response.json();
@@ -577,6 +577,26 @@ class OpenChatRoom {
         }
       });
     }
+
+    // Redirect scroll events from header and input to messages container
+    const redirectScrollToMessages = (e) => {
+      if (this.messagesContainer) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.messagesContainer.scrollTop += e.deltaY;
+      }
+    };
+
+    const header = document.querySelector('.chat-room-header');
+    const inputContainer = document.querySelector('.message-input-container');
+
+    if (header) {
+      header.addEventListener('wheel', redirectScrollToMessages, { passive: false });
+    }
+
+    if (inputContainer) {
+      inputContainer.addEventListener('wheel', redirectScrollToMessages, { passive: false });
+    }
   }
 
   sendMessage() {
@@ -724,7 +744,7 @@ class OpenChatRoom {
 
   async updateParticipantCount() {
     try {
-      const response = await fetch(`/api/chat/api/open-rooms/${this.roomId}/`);
+      const response = await fetch(`/api/chat/open-rooms/${this.roomId}/`);
       if (!response.ok) return;
 
       const data = await response.json();
@@ -766,7 +786,7 @@ class OpenChatRoom {
 
     try {
       // First request - check if confirmation needed
-      const response = await fetch(`/api/chat/api/open-rooms/${this.roomId}/leave/`, {
+      const response = await fetch(`/api/chat/open-rooms/${this.roomId}/leave/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -853,7 +873,7 @@ class OpenChatRoom {
     this.closeCreatorLeaveConfirmation();
 
     try {
-      const response = await fetch(`/api/chat/api/open-rooms/${this.roomId}/leave/`, {
+      const response = await fetch(`/api/chat/open-rooms/${this.roomId}/leave/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -919,7 +939,7 @@ class OpenChatRoom {
     const endpoint = this.isFavorited ? 'unfavorite' : 'favorite';
 
     try {
-      const response = await fetch(`/api/chat/api/open-rooms/${this.roomId}/${endpoint}/`, {
+      const response = await fetch(`/api/chat/open-rooms/${this.roomId}/${endpoint}/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -1265,7 +1285,7 @@ class OpenChatRoom {
 
     try {
       // Create or get existing conversation with the user
-      const response = await fetch('/api/chat/api/conversations/', {
+      const response = await fetch('/api/chat/conversations/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -1399,7 +1419,7 @@ class OpenChatRoom {
         requestBody.ban_until = banUntil;
       }
 
-      const response = await fetch(`/api/chat/api/open-rooms/${this.roomId}/kick_user/`, {
+      const response = await fetch(`/api/chat/open-rooms/${this.roomId}/kick_user/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -1442,7 +1462,7 @@ class OpenChatRoom {
     const { userId, nickname } = this.currentGrantAdminTarget;
 
     try {
-      const response = await fetch(`/api/chat/api/open-rooms/${this.roomId}/grant_admin/`, {
+      const response = await fetch(`/api/chat/open-rooms/${this.roomId}/grant_admin/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -1488,7 +1508,7 @@ class OpenChatRoom {
     const { userId, nickname } = this.currentRevokeAdminTarget;
 
     try {
-      const response = await fetch(`/api/chat/api/open-rooms/${this.roomId}/revoke_admin/`, {
+      const response = await fetch(`/api/chat/open-rooms/${this.roomId}/revoke_admin/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -1522,7 +1542,7 @@ class OpenChatRoom {
 
     // Fetch kicked users list
     try {
-      const response = await fetch(`/api/chat/api/open-rooms/${this.roomId}/get_kicked_users/`, {
+      const response = await fetch(`/api/chat/open-rooms/${this.roomId}/get_kicked_users/`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -1664,7 +1684,7 @@ class OpenChatRoom {
     const { userId, nickname } = this.currentUnbanTarget;
 
     try {
-      const response = await fetch(`/api/chat/api/open-rooms/${this.roomId}/unban_user/`, {
+      const response = await fetch(`/api/chat/open-rooms/${this.roomId}/unban_user/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

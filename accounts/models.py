@@ -132,6 +132,10 @@ class User(AbstractUser):
     is_premium = models.BooleanField(default=False)
     is_private = models.BooleanField(default=False, verbose_name='Private Profile')
 
+    # Permission levels
+    is_prime = models.BooleanField(default=False, verbose_name='프리미엄 관리자')
+    is_gold = models.BooleanField(default=False, verbose_name='골드 사용자')
+
     # Moderation tracking
     report_count = models.IntegerField(
         default=0,
@@ -262,12 +266,12 @@ class User(AbstractUser):
         return self.followers.filter(follower=user).exists()
 
     def is_blocking(self, user):
-        """Check if this user is blocking another user"""
-        return self.blocking.filter(blocked=user).exists()
+        """Check if this user is actively blocking another user"""
+        return self.blocking.filter(blocked=user, is_active=True).exists()
 
     def is_blocked_by(self, user):
-        """Check if this user is blocked by another user"""
-        return self.blocked_by.filter(blocker=user).exists()
+        """Check if this user is actively blocked by another user"""
+        return self.blocked_by.filter(blocker=user, is_active=True).exists()
 
     def get_blocked_users_count(self):
         """Return number of users this user has blocked"""
@@ -367,6 +371,38 @@ class User(AbstractUser):
 
         return post_reports + comment_reports + chat_reports
 
+    # Permission management methods
+    @property
+    def has_gold_features(self):
+        """유료 기능 접근 권한 (GoldUser, Staff, Prime, Superuser 모두 포함)"""
+        return self.is_gold or self.is_staff or self.is_superuser
+
+    def can_assign_role(self, target_role):
+        """현재 사용자가 target_role을 부여할 수 있는지 검증
+
+        Args:
+            target_role (str): 부여하려는 역할 ('user', 'gold', 'staff', 'prime', 'superuser')
+
+        Returns:
+            bool: 권한 부여 가능 여부
+
+        Permission Hierarchy:
+            - User/GoldUser: 권한 부여 불가
+            - Staff: user, gold, staff까지만 부여 가능
+            - Prime: user, gold, staff까지만 부여 가능 (Prime은 Superuser만 부여 가능)
+            - Superuser: 모든 권한 부여 가능
+        """
+        if self.is_superuser:
+            # Superuser는 모든 권한 부여 가능
+            return True
+
+        if self.is_prime or self.is_staff:
+            # Prime과 Staff는 user, gold, staff까지만 부여 가능
+            return target_role in ['user', 'gold', 'staff']
+
+        # User, GoldUser는 권한 부여 불가
+        return False
+
 
 class Follow(models.Model):
     """Follow relationship between users"""
@@ -410,7 +446,9 @@ class Block(models.Model):
         related_name='blocked_by',  # blocked.blocked_by.all() = users who blocked them
         verbose_name='Blocked User'
     )
+    is_active = models.BooleanField(default=True, db_index=True)
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+    unblocked_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         ordering = ['-created_at']
@@ -418,8 +456,8 @@ class Block(models.Model):
         verbose_name = 'Block'
         verbose_name_plural = 'Blocks'
         indexes = [
-            models.Index(fields=['blocker', '-created_at']),
-            models.Index(fields=['blocked', '-created_at']),
+            models.Index(fields=['blocker', 'is_active', '-created_at']),
+            models.Index(fields=['blocked', 'is_active', '-created_at']),
         ]
 
     def __str__(self):
@@ -517,3 +555,108 @@ class PasswordResetAttempt(models.Model):
 
     def __str__(self):
         return f"{self.email} - {self.attempted_at.strftime('%Y-%m-%d %H:%M:%S')}"
+
+
+class UserReport(models.Model):
+    """
+    User reports for moderation.
+
+    Users can report other users for violations of community guidelines.
+    Similar structure to PostReport and CommentReport for consistency.
+    """
+    reporter = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='user_reports_made',
+        verbose_name=_('신고자')
+    )
+    reported_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='user_reports_received',
+        verbose_name=_('신고된 사용자')
+    )
+
+    REPORT_TYPES = [
+        ('abuse', _('욕설/비방')),
+        ('spam', _('스팸/광고')),
+        ('inappropriate', _('부적절한 내용')),
+        ('harassment', _('성희롱')),
+        ('other', _('기타'))
+    ]
+    report_type = models.CharField(
+        max_length=20,
+        choices=REPORT_TYPES,
+        verbose_name=_('신고 유형')
+    )
+    description = models.TextField(
+        blank=True,
+        verbose_name=_('상세 설명')
+    )
+
+    STATUS_CHOICES = [
+        ('pending', _('대기 중')),
+        ('reviewing', _('검토 중')),
+        ('resolved', _('처리 완료')),
+        ('dismissed', _('기각'))
+    ]
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='pending',
+        verbose_name=_('상태')
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_('신고 시간'))
+    reviewed_at = models.DateTimeField(null=True, blank=True, verbose_name=_('검토 시간'))
+    admin_note = models.TextField(blank=True, verbose_name=_('관리자 메모'))
+
+    # Admin tracking
+    resolved_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='user_reports_resolved',
+        verbose_name=_('처리 관리자')
+    )
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = _('사용자 신고')
+        verbose_name_plural = _('사용자 신고')
+        indexes = [
+            models.Index(fields=['reporter', '-created_at']),
+            models.Index(fields=['reported_user', '-created_at']),
+            models.Index(fields=['status', '-created_at']),
+        ]
+        # Prevent duplicate reports
+        constraints = [
+            models.UniqueConstraint(
+                fields=['reporter', 'reported_user', 'report_type'],
+                condition=models.Q(status='pending'),
+                name='unique_pending_user_report'
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.reporter.nickname} reported {self.reported_user.nickname} - {self.get_report_type_display()}"
+
+    def resolve(self, admin_user, note=''):
+        """Mark report as resolved and increment reported user's report count"""
+        self.status = 'resolved'
+        self.reviewed_at = models.timezone.now()
+        self.resolved_by = admin_user
+        self.admin_note = note
+        self.save()
+
+        # Increment reported user's report count
+        self.reported_user.increment_report_count()
+
+    def dismiss(self, admin_user, note=''):
+        """Mark report as dismissed"""
+        self.status = 'dismissed'
+        self.reviewed_at = models.timezone.now()
+        self.resolved_by = admin_user
+        self.admin_note = note
+        self.save()

@@ -1,0 +1,24 @@
+{% load i18n %}
+
+<!-- Unblock User Modal -->
+<div id="unblock-user-modal" class="modal hidden">
+    <div class="modal-content" style="background-color: #ffffff; border-radius: 12px; padding: 1.5rem; max-width: 400px; margin: auto; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+        <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid #e5e7eb; padding-bottom: 1rem;">
+            <h3 style="margin: 0; font-size: 1.25rem; font-weight: 600;">{% trans '차단 해제' %}</h3>
+            <button id="close-unblock-user-modal" class="btn-icon" aria-label="{% trans '닫기' %}" style="background: none; border: none; cursor: pointer; padding: 0.25rem;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body" style="margin-bottom: 1.5rem;">
+            <p id="unblock-user-name" style="text-align: center; margin: 1rem 0; font-size: 1rem; font-weight: 600;">
+            </p>
+        </div>
+        <div class="modal-footer" style="display: flex; gap: 0.75rem; justify-content: flex-end;">
+            <button id="cancel-unblock-user" class="btn btn-secondary" style="padding: 0.5rem 1rem; border-radius: 6px;">{% trans '취소' %}</button>
+            <button id="confirm-unblock-user" class="btn btn-primary" style="padding: 0.5rem 1rem; border-radius: 6px;">{% trans '차단 해제' %}</button>
+        </div>
+    </div>
+</div>

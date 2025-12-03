@@ -69,6 +69,8 @@ class Conversation(models.Model):
 
     def get_unread_count(self, user):
         """특정 사용자의 읽지 않은 메시지 수 (left_at 이후만, 만료되지 않은 메시지만)"""
+        from accounts.models import Block
+
         try:
             participant = self.participant_relations.get(user=user)
 
@@ -83,6 +85,15 @@ class Conversation(models.Model):
             if participant.left_at:
                 messages = messages.filter(created_at__gt=participant.left_at)
                 print(f"[Model] Conversation {self.id}: User {user.id} left_at={participant.left_at}, unread after left={messages.count()}")
+
+            # 차단한 사용자의 메시지 제외
+            blocked_user_ids = Block.objects.filter(
+                blocker=user,
+                is_active=True  # 활성 차단만 필터링
+            ).values_list('blocked_id', flat=True)
+
+            if blocked_user_ids:
+                messages = messages.exclude(sender_id__in=blocked_user_ids)
 
             return messages.count()
 
@@ -171,9 +182,66 @@ class AnonymousMatchingPreference(models.Model):
         return f"{self.user.username}'s matching preferences"
 
 
+class ConversationBuffer(models.Model):
+    """
+    Message buffer for chat evidence collection
+    Stores last 50 messages per conversation for potential reports
+    """
+    conversation = models.OneToOneField(
+        Conversation,
+        on_delete=models.CASCADE,
+        related_name='message_buffer',
+        verbose_name='대화방'
+    )
+    messages_json = models.JSONField(
+        default=list,
+        verbose_name='메시지 버퍼',
+        help_text='최근 50개 메시지 저장'
+    )
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='업데이트 시간')
+
+    class Meta:
+        verbose_name = 'Conversation Buffer'
+        verbose_name_plural = 'Conversation Buffers'
+
+    def __str__(self):
+        return f"Buffer for Conversation {self.conversation.id}"
+
+    def add_message(self, message):
+        """
+        Add message to buffer, keeping only last 50 messages
+        """
+        from django.utils.timezone import localtime
+
+        buffer = self.messages_json or []
+
+        # Create message entry
+        message_entry = {
+            'sender_id': message.sender.id,
+            'sender_nickname': message.sender.nickname if hasattr(message.sender, 'nickname') else message.sender.username,
+            'content': message.content,
+            'timestamp': localtime(message.created_at).isoformat(),
+            'message_id': message.id
+        }
+
+        # Add to buffer
+        buffer.append(message_entry)
+
+        # Keep only last 50 messages
+        self.messages_json = buffer[-50:]
+        self.save(update_fields=['messages_json', 'updated_at'])
+
+    def get_snapshot(self):
+        """
+        Get current buffer snapshot for report evidence
+        """
+        return self.messages_json.copy() if self.messages_json else []
+
+
 class Report(models.Model):
     """
     User report system for moderation
+    Enhanced with automatic evidence capture
     """
     reporter = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -203,6 +271,21 @@ class Report(models.Model):
     report_type = models.CharField(max_length=20, choices=REPORT_TYPES)
     description = models.TextField(blank=True)
 
+    # Evidence fields
+    message_snapshot = models.JSONField(
+        null=True,
+        blank=True,
+        verbose_name='메시지 증거',
+        help_text='신고 당시 대화 내역 (최근 50개)'
+    )
+    video_frame = models.ImageField(
+        upload_to='report_evidence/video/',
+        null=True,
+        blank=True,
+        verbose_name='화상 채팅 캡처',
+        help_text='화상 채팅 신고 시 캡처된 화면'
+    )
+
     STATUS_CHOICES = [
         ('pending', '대기 중'),
         ('reviewing', '검토 중'),
@@ -214,6 +297,17 @@ class Report(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     reviewed_at = models.DateTimeField(null=True, blank=True)
     admin_note = models.TextField(blank=True)
+
+    # Evidence access tracking
+    evidence_viewed_at = models.DateTimeField(null=True, blank=True, verbose_name='증거 열람 시간')
+    evidence_viewed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='evidence_views',
+        verbose_name='증거 열람자'
+    )
 
     class Meta:
         ordering = ['-created_at']

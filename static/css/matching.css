@@ -681,7 +681,7 @@
     display: flex;
     flex-direction: column;
     width: 100%;
-    height: auto;
+    height: 100vh; /* Full viewport height */
     background: #000;
     border-radius: 12px;
     overflow: hidden;
@@ -696,7 +696,8 @@
 .remote-video-wrapper {
     position: relative;
     width: 100%;
-    height: calc(50vh - 130px); /* 50% viewport - header/input */
+    flex: 1; /* Take 50% of parent */
+    flex-shrink: 0; /* Prevent shrinking */
     background: #1a1a1a;
 }
 
@@ -711,7 +712,8 @@
 .local-video-wrapper {
     position: relative;
     width: 100%;
-    height: calc(50vh - 130px); /* 50% viewport - header/input */
+    flex: 1; /* Take 50% of parent */
+    flex-shrink: 0; /* Prevent shrinking */
     background: #2a2a2a;
     border-top: 1px solid #333;
 }
@@ -779,13 +781,11 @@
         background: transparent;
     }
 
-    /* 비디오 영역 조정 */
-    .remote-video-wrapper {
-        height: 40vh;
-    }
-
+    /* 비디오 영역 - flex로 50:50 자동 분할 (고정 height 제거) */
+    .remote-video-wrapper,
     .local-video-wrapper {
-        height: 40vh;
+        flex: 1;
+        flex-shrink: 0;
     }
 
     /* 헤더 투명 배경 (비디오 모드) */
@@ -873,14 +873,14 @@
 
 @media (max-width: 480px) {
     .video-container {
-        height: 250px;
+        height: 100vh; /* Maintain full viewport height */
     }
 
-    #local-video {
-        width: 100px;
-        height: 75px;
-        top: 8px;
-        right: 8px;
+    /* Keep 50:50 split on small screens */
+    .remote-video-wrapper,
+    .local-video-wrapper {
+        flex: 1;
+        flex-shrink: 0;
     }
 
     .video-control-btn {

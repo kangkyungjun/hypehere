@@ -35,6 +35,26 @@ class PermissionManagementView(LoginRequiredMixin, UserPassesTestMixin, Template
         """Check if user is staff or superuser"""
         return self.request.user.is_staff or self.request.user.is_superuser
 
+    def get_context_data(self, **kwargs):
+        """Add current user's role to context for permission filtering"""
+        context = super().get_context_data(**kwargs)
+
+        # Determine current user's role for frontend permission filtering
+        user = self.request.user
+        if user.is_prime:
+            user_role = 'Prime'
+        elif user.is_superuser:
+            user_role = 'Superuser'
+        elif user.is_staff:
+            user_role = 'Staff'
+        elif user.is_gold:
+            user_role = 'GoldUser'
+        else:
+            user_role = 'User'
+
+        context['user_role'] = user_role
+        return context
+
 
 class LotteryView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     """
@@ -45,8 +65,8 @@ class LotteryView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     login_url = reverse_lazy('accounts:login')
 
     def test_func(self):
-        """Check if user is staff or superuser"""
-        return self.request.user.is_staff or self.request.user.is_superuser
+        """Check if user is Prime or Superuser (Staff는 접근 불가)"""
+        return self.request.user.is_prime or self.request.user.is_superuser
 
     def get_context_data(self, **kwargs):
         """Add lottery statistics to context"""

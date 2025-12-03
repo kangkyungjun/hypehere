@@ -267,6 +267,12 @@ textarea.form-control {
   object-fit: cover;
 }
 
+.avatar svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
 .avatar-sm {
   width: 2rem;                                /* 32px base → scales 28px(mobile) to 36px(desktop) */
   height: 2rem;
@@ -887,5 +893,158 @@ textarea.form-control {
 
     .gender-label {
         font-size: var(--font-size-md);
+    }
+}
+
+/* =================================================================
+   Password Validation UI Components
+   ================================================================= */
+
+/* Toast Notification Container */
+#toast-container {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    pointer-events: none;
+}
+
+.toast {
+    background: #d32f2f;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    margin-bottom: 10px;
+    opacity: 0;
+    animation: fadeIn 0.2s forwards, fadeOut 0.5s 0.5s forwards;
+    pointer-events: auto;
+    font-size: 14px;
+    max-width: 90%;
+    text-align: center;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+/* Password Strength Container */
+.password-strength-container {
+    margin-top: 8px;
+    margin-bottom: 8px;
+}
+
+.password-strength-bar {
+    height: 4px;
+    background: #e0e0e0;
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 4px;
+}
+
+.password-strength-fill {
+    height: 100%;
+    transition: width 0.3s ease, background-color 0.3s ease;
+    border-radius: 2px;
+}
+
+.password-strength-fill.weak {
+    background: #d32f2f;
+    width: 33%;
+}
+
+.password-strength-fill.medium {
+    background: #ff9800;
+    width: 66%;
+}
+
+.password-strength-fill.strong {
+    background: #43a047;
+    width: 100%;
+}
+
+.password-strength-text {
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.password-strength-text.weak {
+    color: #d32f2f;
+}
+
+.password-strength-text.medium {
+    color: #ff9800;
+}
+
+.password-strength-text.strong {
+    color: #43a047;
+}
+
+/* Password Checklist */
+.password-checklist {
+    list-style: none;
+    padding: 0;
+    margin: 8px 0;
+}
+
+.password-checklist li {
+    color: #999;
+    font-size: 12px;
+    margin: 4px 0;
+    transition: color 0.2s ease;
+    display: flex;
+    align-items: center;
+}
+
+.password-checklist li.valid {
+    color: #43a047;
+}
+
+.password-checklist li .check-icon {
+    display: inline-block;
+    min-width: 16px;
+    margin-right: 6px;
+    font-weight: bold;
+}
+
+.password-checklist li.valid .check-icon {
+    color: #43a047;
+}
+
+.password-checklist li:not(.valid) .check-icon {
+    color: #999;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 767px) {
+    .toast {
+        font-size: 13px;
+        padding: 10px 20px;
+        max-width: 95%;
+    }
+    
+    .password-checklist {
+        font-size: 11px;
+    }
+    
+    .password-strength-text {
+        font-size: 11px;
     }
 }

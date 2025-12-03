@@ -24,10 +24,31 @@ def create_message_notification(sender, instance, created, **kwargs):
         **kwargs: 추가 인자
     """
     if created:
+        # 익명 채팅(랜덤 매칭)은 알림 생성 제외
+        if instance.conversation.is_anonymous:
+            logger.debug(f"익명 채팅 메시지는 알림 생성 안 함: conversation_id={instance.conversation.id}")
+            return
+
         # 수신자 (대화의 상대방) 가져오기
         recipient = instance.conversation.get_other_user(instance.sender)
 
         if recipient:
+            # 수신자가 현재 채팅방에 WebSocket 접속 중인지 확인
+            # is_active=True인 경우, 실시간으로 메시지를 받고 있으므로 알림 제외
+            try:
+                from chat.models import ConversationParticipant
+                participant = ConversationParticipant.objects.filter(
+                    conversation=instance.conversation,
+                    user=recipient
+                ).first()
+
+                if participant and participant.is_active:
+                    logger.debug(f"수신자가 채팅방에 접속 중: {recipient.nickname} (conversation_id={instance.conversation.id})")
+                    return
+            except Exception as e:
+                logger.error(f"ConversationParticipant 확인 중 오류: {e}")
+                # 오류 발생 시에도 알림은 생성 (안전한 fallback)
+                pass
             # 알림 설정 확인
             settings = NotificationSettings.objects.filter(user=recipient).first()
             if settings and settings.is_notification_enabled('MESSAGE'):

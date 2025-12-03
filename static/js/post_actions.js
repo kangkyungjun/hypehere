@@ -64,6 +64,7 @@ class PostActionsManager {
         this.cancelDeleteBtn = document.getElementById('cancel-delete-btn');
         this.currentPostId = null;
         this.currentAuthorUsername = null;
+        this.currentNickname = null;
         this.deleteCallback = null;
 
         // Leave conversation modal elements
@@ -81,6 +82,14 @@ class PostActionsManager {
         this.blockUserName = document.getElementById('block-user-name') || document.getElementById('block-user-name-chat');
         this.currentBlockUsername = null;
         this.currentReportUserId = null;  // For user reporting in chat rooms
+
+        // Unblock user modal elements
+        this.unblockUserModal = document.getElementById('unblock-user-modal');
+        this.confirmUnblockUserBtn = document.getElementById('confirm-unblock-user');
+        this.cancelUnblockUserBtn = document.getElementById('cancel-unblock-user');
+        this.closeUnblockUserBtn = document.getElementById('close-unblock-user-modal');
+        this.unblockUserName = document.getElementById('unblock-user-name');
+        this.currentUnblockUsername = null;
 
         // Alert modal elements (for success/error messages)
         this.alertModal = document.getElementById('alert-modal');
@@ -111,6 +120,7 @@ class PostActionsManager {
         this.setupDeleteModal();
         this.setupLeaveConversationModal();
         this.setupBlockUserModal();
+        this.setupUnblockUserModal();
         this.setupAlertModal();
     }
 
@@ -194,10 +204,12 @@ class PostActionsManager {
     handleProfileDropdownClick(button) {
         // Get user data from button attributes
         this.currentAuthorUsername = button.dataset.username;
+        this.currentNickname = button.dataset.nickname;  // Get nickname for display
         this.currentUserId = button.dataset.userId;
+        this.currentIsBlocking = button.dataset.isBlocking === 'true';  // Check blocking status
         this.currentPostId = null;  // No post ID for profile actions
 
-        console.log('Opening modal for user:', this.currentAuthorUsername, 'ID:', this.currentUserId);
+        console.log('Opening modal for user:', this.currentNickname, 'Username:', this.currentAuthorUsername, 'ID:', this.currentUserId, 'Blocking:', this.currentIsBlocking);
         this.openModal();
     }
 
@@ -245,7 +257,7 @@ class PostActionsManager {
         if (!this.currentConversationId) return;
 
         try {
-            const response = await fetch(`/messages/api/conversations/${this.currentConversationId}/leave/`, {
+            const response = await fetch(`/api/chat/conversations/${this.currentConversationId}/leave/`, {
                 method: 'POST',
                 headers: {
                     'X-CSRFToken': this.getCsrfToken(),
@@ -380,6 +392,7 @@ class PostActionsManager {
         console.log('[PostActions] Block action triggered');
         console.log('[PostActions] Post ID:', this.currentPostId);
         console.log('[PostActions] Author username:', this.currentAuthorUsername);
+        console.log('[PostActions] Is blocking:', this.currentIsBlocking);
 
         if (!this.currentAuthorUsername) {
             console.error('[PostActions] No author username available');
@@ -387,15 +400,23 @@ class PostActionsManager {
             return;
         }
 
-        // Save username before closing modal (closeModal clears currentAuthorUsername)
+        // Save username and blocking status before closing modal (closeModal clears these)
         const username = this.currentAuthorUsername;
+        const isBlocking = this.currentIsBlocking;
 
         // Close action modal
         this.closeModal();
 
-        // Open block confirmation modal
-        console.log('[PostActions] Calling openBlockUserModal with username:', username);
-        this.openBlockUserModal(username);
+        // Route to appropriate modal based on blocking status
+        if (isBlocking) {
+            // User is already blocked -> Show unblock confirmation modal
+            console.log('[PostActions] Calling openUnblockUserModal with username:', username);
+            this.openUnblockUserModal(username);
+        } else {
+            // User is not blocked -> Show block confirmation modal
+            console.log('[PostActions] Calling openBlockUserModal with username:', username);
+            this.openBlockUserModal(username);
+        }
     }
 
     openBlockUserModal(username) {
@@ -404,17 +425,20 @@ class PostActionsManager {
 
         this.currentBlockUsername = username;
 
+        // Use nickname for display, fallback to username if nickname not available
+        const displayName = this.currentNickname || username;
+
         // Set modal content with multi-language support
         const lang = document.documentElement.lang || 'ko';
         if (this.blockUserName) {
             const blockTexts = {
-                'ko': `${username}님을 차단하시겠습니까?`,
-                'en': `Block ${username}?`,
-                'ja': `${username}さんをブロックしますか？`,
-                'es': `¿Bloquear a ${username}?`
+                'ko': `${displayName}님을 차단하시겠습니까?`,
+                'en': `Block ${displayName}?`,
+                'ja': `${displayName}さんをブロックしますか？`,
+                'es': `¿Bloquear a ${displayName}?`
             };
             this.blockUserName.textContent = blockTexts[lang] || blockTexts['ko'];
-            console.log('[PostActions] Set block user name text');
+            console.log('[PostActions] Set block user name text with displayName:', displayName);
         } else {
             console.warn('[PostActions] blockUserName element not found');
         }
@@ -452,10 +476,12 @@ class PostActionsManager {
             });
 
             if (response.ok) {
+                // Use nickname for display, fallback to username if not available
+                const displayName = this.currentNickname || this.currentBlockUsername;
                 const lang = document.documentElement.lang || 'ko';
                 const message = lang === 'en'
-                    ? `${this.currentBlockUsername} has been blocked`
-                    : `${this.currentBlockUsername}님을 차단했습니다`;
+                    ? `${displayName} has been blocked`
+                    : `${displayName}님을 차단했습니다`;
                 window.showAlert(message, 'success');
 
                 this.closeBlockUserModal();
@@ -627,6 +653,145 @@ class PostActionsManager {
                 this.closeBlockUserModal();
             }
         });
+    }
+
+    setupUnblockUserModal() {
+        console.log('[PostActions] setupUnblockUserModal called');
+        // 이미 설정된 경우 스킵
+        if (this._unblockModalSetup) {
+            return;
+        }
+        if (!this.unblockUserModal) {
+            console.warn('[PostActions] Unblock user modal not found');
+            return;
+        }
+        this._unblockModalSetup = true;
+        console.log('[PostActions] Unblock user modal found, setting up event listeners');
+
+        // Confirm unblock button
+        if (this.confirmUnblockUserBtn) {
+            this.confirmUnblockUserBtn.addEventListener('click', () => {
+                this.confirmUnblockUser();
+            });
+        }
+
+        // Cancel unblock button
+        if (this.cancelUnblockUserBtn) {
+            this.cancelUnblockUserBtn.addEventListener('click', () => {
+                this.closeUnblockUserModal();
+            });
+        }
+
+        // Close button (X)
+        if (this.closeUnblockUserBtn) {
+            this.closeUnblockUserBtn.addEventListener('click', () => {
+                this.closeUnblockUserModal();
+            });
+        }
+
+        // Click outside to close
+        this.unblockUserModal.addEventListener('click', (e) => {
+            if (e.target === this.unblockUserModal) {
+                this.closeUnblockUserModal();
+            }
+        });
+
+        // Escape key to close
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !this.unblockUserModal.classList.contains('hidden')) {
+                this.closeUnblockUserModal();
+            }
+        });
+    }
+
+    openUnblockUserModal(username) {
+        console.log('[PostActions] openUnblockUserModal called with username:', username);
+        console.log('[PostActions] unblockUserModal element:', this.unblockUserModal);
+
+        this.currentUnblockUsername = username;
+
+        // Use nickname for display, fallback to username if nickname not available
+        const displayName = this.currentNickname || username;
+
+        // Set modal content with multi-language support
+        const lang = document.documentElement.lang || 'ko';
+        if (this.unblockUserName) {
+            const unblockTexts = {
+                'ko': `${displayName}님을 차단 해제하시겠습니까?`,
+                'en': `Unblock ${displayName}?`,
+                'ja': `${displayName}さんのブロックを解除しますか？`,
+                'es': `¿Desbloquear a ${displayName}?`
+            };
+            this.unblockUserName.textContent = unblockTexts[lang] || unblockTexts['ko'];
+            console.log('[PostActions] Set unblock user name text with displayName:', displayName);
+        } else {
+            console.warn('[PostActions] unblockUserName element not found');
+        }
+
+        // Show modal
+        if (this.unblockUserModal) {
+            console.log('[PostActions] Showing unblock user modal');
+            this.unblockUserModal.classList.remove('hidden');
+            this.unblockUserModal.classList.add('show');
+            console.log('[PostActions] Modal classes:', this.unblockUserModal.classList);
+        } else {
+            console.error('[PostActions] unblockUserModal is null, cannot show modal');
+        }
+    }
+
+    closeUnblockUserModal() {
+        if (this.unblockUserModal) {
+            this.unblockUserModal.classList.remove('show');
+            this.unblockUserModal.classList.add('hidden');
+        }
+        this.currentUnblockUsername = null;
+    }
+
+    async confirmUnblockUser() {
+        if (!this.currentUnblockUsername) return;
+
+        try {
+            const response = await fetch(`/api/accounts/${this.currentUnblockUsername}/unblock/`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': this.getCsrfToken(),
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'same-origin'
+            });
+
+            if (response.ok) {
+                // Use nickname for display, fallback to username if not available
+                const displayName = this.currentNickname || this.currentUnblockUsername;
+                const lang = document.documentElement.lang || 'ko';
+                const message = lang === 'en'
+                    ? `${displayName} has been unblocked`
+                    : `${displayName}님을 차단 해제했습니다`;
+                window.showAlert(message, 'success');
+
+                this.closeUnblockUserModal();
+
+                // Reload the page to update UI (blocking status changed)
+                setTimeout(() => {
+                    window.location.reload();
+                }, 500);
+            } else {
+                const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+                const lang = document.documentElement.lang || 'ko';
+                const message = lang === 'en'
+                    ? `Unblock failed: ${error.error || 'Server error occurred'}`
+                    : `차단 해제 실패: ${error.error || '서버 오류가 발생했습니다'}`;
+                window.showAlert(message, 'error');
+            }
+        } catch (error) {
+            console.error('Unblock user error:', error);
+            const lang = document.documentElement.lang || 'ko';
+            if (lang === 'en') {
+                alert('An error occurred while unblocking the user.\n\nPlease check your network connection.');
+            } else {
+                alert('사용자 차단 해제 중 오류가 발생했습니다.\n\n네트워크 연결을 확인해주세요.');
+            }
+        }
     }
 
     handleReport() {
@@ -889,18 +1054,20 @@ class PostActionsManager {
         }
 
         try {
+            // Use FormData for file + data transmission
+            const formData = new FormData();
+            formData.append('reported_user', this.currentReportUserId);
+            formData.append('report_type', reportType);
+            formData.append('description', description || '');
+
             const response = await fetch('/api/chat/report/', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
                     'X-CSRFToken': this.getCsrfToken()
+                    // Content-Type removed - browser sets multipart/form-data automatically
                 },
                 credentials: 'same-origin',
-                body: JSON.stringify({
-                    reported_user: this.currentReportUserId,
-                    report_type: reportType,
-                    description: description
-                })
+                body: formData
             });
 
             if (response.ok) {

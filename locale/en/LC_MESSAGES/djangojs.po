@@ -268,3 +268,67 @@ msgstr "You have entered the chat room"
 #: templates/base.html:195
 msgid "아직 댓글이 없습니다. 첫 번째 댓글을 작성해보세요!"
 msgstr "No comments yet. Be the first to comment!"
+
+#: templates/base.html:239
+msgid "No messages"
+msgstr "No messages"
+
+#: templates/base.html:240
+msgid "Start conversation"
+msgstr "Start conversation"
+
+#: templates/base.html:243
+msgid "Are you sure you want to delete your profile picture?"
+msgstr "Are you sure you want to delete your profile picture?"
+
+#: templates/base.html:244
+msgid "Profile picture has been deleted"
+msgstr "Profile picture has been deleted"
+
+#: templates/base.html:245
+msgid "Failed to delete profile picture"
+msgstr "Failed to delete profile picture"
+
+#: static/js/auth.js
+msgid "8자 이상"
+msgstr "At least 8 characters"
+
+#: static/js/auth.js
+msgid "영문 포함"
+msgstr "Contains letters"
+
+#: static/js/auth.js
+msgid "숫자 포함"
+msgstr "Contains numbers"
+
+#: static/js/auth.js
+msgid "대문자 포함 (권장)"
+msgstr "Uppercase letter (recommended)"
+
+#: static/js/auth.js
+msgid "소문자 포함 (권장)"
+msgstr "Lowercase letter (recommended)"
+
+#: static/js/auth.js
+msgid "특수문자 포함 !@#$%^&* (권장)"
+msgstr "Special characters !@#$%^&* (recommended)"
+
+#: static/js/auth.js
+msgid "약함"
+msgstr "Weak"
+
+#: static/js/auth.js
+msgid "보통"
+msgstr "Medium"
+
+#: static/js/auth.js
+msgid "강함"
+msgstr "Strong"
+
+#: static/js/auth.js
+msgid "비밀번호가 규칙을 만족하지 않습니다"
+msgstr "Password does not meet requirements"
+
+#: static/js/auth.js
+msgid "8자 이상, 영문+숫자 필요"
+msgstr "Requires 8+ characters, letters + numbers"

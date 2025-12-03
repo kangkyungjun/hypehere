@@ -7,6 +7,8 @@
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/post_grid.css' %}">
 <link rel="stylesheet" href="{% static 'css/post_view_modal.css' %}">
+<link rel="stylesheet" href="{% static 'css/profile_picture_modal.css' %}">
+<link rel="stylesheet" href="{% static 'css/post_delete_modal.css' %}">
 <style>
   /* 프로필 페이지 전용: 좌우 여백 6px */
   .main-content {
@@ -68,11 +70,11 @@
                 <input type="file" id="profile-picture-input" accept="image/*" class="hidden">
                 <div class="flex-1">
                     <div class="flex items-center justify-between mb-xs" style="width: 100%;">
-                        <h1 class="mb-0" style="flex: 0 0 auto;">{{ profile_user.username }}</h1>
+                        <h1 class="mb-0" style="flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ profile_user.nickname }}</h1>
                         {% if is_own_profile %}
                         <a href="{% url 'accounts:update' %}"
                            class="btn btn-ghost btn-sm"
-                           style="padding: 0.25rem 0.5rem; font-size: 0.875rem; min-height: auto;"
+                           style="padding: 0.25rem 0.5rem; font-size: 0.875rem; min-height: auto; flex: 0 0 auto; margin-left: 0.5rem;"
                            title="{% trans '프로필 편집' %}"
                            aria-label="{% trans '프로필 편집' %}">
                             {% trans "편집" %}
@@ -80,7 +82,9 @@
                         {% else %}
                         <button class="btn btn-ghost btn-sm dropdown-toggle profile-actions-toggle"
                                 data-username="{{ profile_user.username }}"
+                                data-nickname="{{ profile_user.nickname }}"
                                 data-user-id="{{ profile_user.id }}"
+                                data-is-blocking="{% if is_blocking %}true{% else %}false{% endif %}"
                                 style="padding: 0.25rem 0.5rem; flex: 0 0 auto;"
                                 title="사용자 작업"
                                 aria-label="사용자 작업">
@@ -107,6 +111,22 @@
             </div>
 
             <div class="flex justify-center gap-lg pt-lg pb-md" style="border-top: 1px solid var(--color-border);">
+                {% if blocked %}
+                <!-- 차단된 경우: 모든 통계를 "-"로 표시 -->
+                <div class="flex flex-col items-center gap-xs">
+                    <div class="text-2xl font-bold" style="color: var(--color-text-lighter);">-</div>
+                    <div class="text-sm text-light">{% trans "팔로워" %}</div>
+                </div>
+                <div class="flex flex-col items-center gap-xs">
+                    <div class="text-2xl font-bold" style="color: var(--color-text-lighter);">-</div>
+                    <div class="text-sm text-light">{% trans "팔로잉" %}</div>
+                </div>
+                <div class="flex flex-col items-center gap-xs">
+                    <div class="text-2xl font-bold" style="color: var(--color-text-lighter);">-</div>
+                    <div class="text-sm text-light">{% trans "포스트" %}</div>
+                </div>
+                {% else %}
+                <!-- 일반적인 경우: 정상 통계 표시 -->
                 <a href="{% url 'accounts:followers_list' profile_user.username %}" class="flex flex-col items-center gap-xs stat-link">
                     <div class="text-2xl font-bold" id="profile-follower-count">{{ profile_user.get_follower_count }}</div>
                     <div class="text-sm text-light">{% trans "팔로워" %}</div>
@@ -119,6 +139,7 @@
                     <div class="text-2xl font-bold">{{ total_posts }}</div>
                     <div class="text-sm text-light">{% trans "포스트" %}</div>
                 </div>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -286,10 +307,10 @@
                                     data-post-id="{{ post.id }}"
                                     data-author-username="{{ post.author.username }}"
                                     aria-label="{% trans '게시물 옵션' %}">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                                    <circle cx="12" cy="5" r="2"/>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                    <circle cx="5" cy="12" r="2"/>
                                     <circle cx="12" cy="12" r="2"/>
-                                    <circle cx="12" cy="19" r="2"/>
+                                    <circle cx="19" cy="12" r="2"/>
                                 </svg>
                             </button>
                             {% endif %}
@@ -379,10 +400,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const avatarSvg = document.getElementById('avatar-svg');
     const loadingOverlay = document.getElementById('avatar-loading');
 
-    // Click avatar to trigger file picker
-    avatar.addEventListener('click', function() {
-        fileInput.click();
-    });
+    // Click avatar handler is now managed by profile_picture_modal.js
+    // avatar.addEventListener('click', function() {
+    //     fileInput.click();
+    // });
 
     // Handle file selection and upload
     fileInput.addEventListener('change', async function(e) {
@@ -899,5 +920,101 @@ function getCookie(name) {
 }
 </script>
 {% endif %}
+
+<!-- Profile Picture Preview Modal -->
+<div id="profile-picture-modal" class="hidden">
+    <div class="profile-picture-preview">
+        <img id="preview-image" src="" alt="{% trans 'Profile Picture' %}">
+
+        <!-- Top-right controls -->
+        <div class="profile-picture-controls">
+            <!-- Three dots menu button -->
+            <button id="picture-actions-btn" class="control-btn" aria-label="{% trans 'Actions' %}">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="5" r="1"/>
+                    <circle cx="12" cy="12" r="1"/>
+                    <circle cx="12" cy="19" r="1"/>
+                </svg>
+            </button>
+
+            <!-- Close button -->
+            <button id="close-preview-btn" class="control-btn" aria-label="{% trans 'Close' %}">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Profile Picture Actions Sheet (Bottom Slide-up Modal) -->
+<div id="profile-picture-actions-sheet" class="hidden">
+    <div class="modal-container">
+        {% if is_own_profile %}
+        <!-- Edit Action -->
+        <div id="edit-picture-action" class="action-item">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+            </svg>
+            <span>{% trans '수정' %}</span>
+        </div>
+
+        <!-- Delete Action -->
+        <div id="delete-picture-action" class="action-item action-danger">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                <line x1="10" y1="11" x2="10" y2="17"></line>
+                <line x1="14" y1="11" x2="14" y2="17"></line>
+            </svg>
+            <span>{% trans '삭제' %}</span>
+        </div>
+        {% else %}
+        <!-- Report Action (for other users' profiles) -->
+        <div id="report-user-action" class="action-item action-danger">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+            <span>{% trans '신고' %}</span>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Profile Picture Delete Confirmation Modal -->
+<div id="profile-picture-delete-confirm-modal" class="modal-overlay delete-modal-overlay hidden">
+    <div class="modal-container delete-modal-container">
+        <div class="modal-header delete-modal-header">
+            <h3 class="delete-modal-title">{% trans "프로필 사진 삭제" %}</h3>
+        </div>
+        <div class="modal-body delete-modal-body">
+            <p class="delete-warning-text">{% trans "프로필 사진을 삭제하시겠습니까?" %}</p>
+        </div>
+        <div class="modal-footer delete-modal-footer">
+            <button type="button" class="btn btn-secondary" id="cancel-picture-delete-btn">
+                {% trans "취소" %}
+            </button>
+            <button type="button" class="btn btn-danger" id="confirm-picture-delete-btn">
+                {% trans "삭제" %}
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Include User Report Modal -->
+{% include 'partials/user_report_modal.html' %}
+
+<!-- Include Block User Modal -->
+{% include 'partials/block_user_modal.html' %}
+
+<!-- Include Unblock User Modal -->
+{% include 'partials/unblock_user_modal.html' %}
+
+<!-- Profile Picture Modal JavaScript -->
+<script src="{% static 'js/profile_picture_modal.js' %}"></script>
 
 {% endblock %}

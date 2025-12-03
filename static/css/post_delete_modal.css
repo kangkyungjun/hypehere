@@ -156,3 +156,8 @@
 body.delete-modal-open {
     overflow: hidden;
 }
+
+/* Profile Picture Delete Modal - Must be above all profile modals */
+#profile-picture-delete-confirm-modal.delete-modal-overlay {
+    z-index: 3030 !important;
+}

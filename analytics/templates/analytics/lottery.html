@@ -135,8 +135,8 @@
                             <button type="button" class="btn-strategy" id="btnStrategy4" data-strategy="strategy4">
                                 {% trans "추가전략 4" %} <span class="info-icon" data-info="strategy4">ⓘ</span>
                             </button>
-                            <button type="button" class="btn-strategy" id="btnStrategy5" data-strategy="strategy5">
-                                {% trans "통합 전략" %} <span class="info-icon" data-info="strategy5">ⓘ</span>
+                            <button type="button" class="btn-strategy" id="btnStrategy5" data-strategy="integrated">
+                                {% trans "통합 전략" %} <span class="info-icon" data-info="integrated">ⓘ</span>
                             </button>
                         </div>
                     </div>
@@ -1464,7 +1464,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
             `
         },
-        'strategy5': {
+        'integrated': {
             title: '통합 전략: 전략 1+2+3+4 모두 적용',
             content: `
                 <h3 style="margin-top: 0;">📌 계산 방식</h3>
@@ -1477,7 +1477,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <li>이미 나온 조합 제외</li>
                 </ol>
                 <h3>📊 실시간 확률</h3>
-                <div id="strategy5-stats" class="stats-loading">
+                <div id="integrated-stats" class="stats-loading">
                     <p style="margin: 5px 0; color: #666;">불러오는 중...</p>
                 </div>
                 <p style="margin-top: 12px; padding: 10px; background: #fff3e0; border-left: 3px solid #ff9800; font-size: 12px; color: #e65100;">
@@ -1745,41 +1745,43 @@ document.addEventListener('DOMContentLoaded', function() {
             const data = await response.json();
 
             if (data.success) {
-                let comparisonHTML = '';
+                // 기본 텍스트 준비
+                let totalText = `<strong>${data.total_combinations.toLocaleString()}</strong>개`;
+                let excludedText = `<strong>${data.excluded_combinations.toLocaleString()}</strong>개`;
+                let remainingText = `<strong>${data.remaining_combinations.toLocaleString()}</strong>개`;
+                let improvementText = `<strong style="color: #43a047;">${Math.round(data.improvement_ratio)}배 향상</strong>`;
+
+                // 이전 회차 비교 데이터 추가
                 if (data.comparison && data.comparison.has_previous) {
                     const comp = data.comparison;
-                    const trendClass = comp.trend === 'down' ? 'trend-down' :
-                                      (comp.trend === 'up' ? 'trend-up' : 'trend-same');
 
-                    // 개선배수 트렌드 (증가는 좋음)
-                    const ratioTrendClass = comp.change_ratio > 0 ? 'trend-up' :
-                                           (comp.change_ratio < 0 ? 'trend-down' : 'trend-same');
-                    const ratioArrow = comp.change_ratio > 0 ? '↑' :
-                                      (comp.change_ratio < 0 ? '↓' : '→');
+                    // 제외된 조합 변화 = -(남은 조합 변화)
+                    // 남은 조합이 감소하면 제외된 조합은 증가
+                    const excludedChange = -comp.change_remaining;
+                    const excludedColor = excludedChange > 0 ? '#43a047' : (excludedChange < 0 ? '#d32f2f' : '#999');
+                    const excludedArrow = excludedChange > 0 ? '↑' : (excludedChange < 0 ? '↓' : '→');
+                    excludedText = `<strong>${data.excluded_combinations.toLocaleString()}</strong>개 <span style="color: ${excludedColor}; font-size: 11px;">(${comp.previous_round}회 대비 ${excludedArrow}${Math.abs(excludedChange).toLocaleString()}개)</span>`;
 
-                    comparisonHTML = `
-                        <div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid #eee;">
-                            <p style="margin: 0 0 6px 0; font-weight: 600; color: #555; font-size: 12px;">📊 전 회차 대비 변화</p>
-                            <p style="margin: 4px 0; font-size: 11px;">
-                                • 조합수: ${data.remaining_combinations.toLocaleString()}개
-                                <span class="trend-indicator ${trendClass}">${comp.trend_arrow}</span>
-                                <span class="trend-detail">(${comp.previous_round}회: ${comp.previous_remaining.toLocaleString()}개)</span>
-                            </p>
-                            <p style="margin: 4px 0; font-size: 11px;">
-                                • 개선배수: ${Math.round(data.improvement_ratio)}배
-                                <span class="trend-indicator ${ratioTrendClass}">${ratioArrow}</span>
-                                <span class="trend-detail">(${comp.previous_round}회: ${Math.round(comp.previous_ratio)}배)</span>
-                            </p>
-                        </div>
-                    `;
+                    // 남은 조합 변화 (감소는 녹색, 증가는 빨강)
+                    const remainingChange = comp.change_remaining;
+                    const remainingColor = remainingChange < 0 ? '#43a047' : (remainingChange > 0 ? '#d32f2f' : '#999');
+                    const remainingArrow = remainingChange < 0 ? '↓' : (remainingChange > 0 ? '↑' : '→');
+                    remainingText = `<strong>${data.remaining_combinations.toLocaleString()}</strong>개 <span style="color: ${remainingColor}; font-size: 11px;">(${comp.previous_round}회 대비 ${remainingArrow}${Math.abs(remainingChange).toLocaleString()}개)</span>`;
+
+                    // 개선배수 변화 (증가는 녹색, 감소는 빨강)
+                    const ratioChange = comp.change_ratio;
+                    const ratioColor = ratioChange > 0 ? '#43a047' : (ratioChange < 0 ? '#d32f2f' : '#999');
+                    const ratioArrow = ratioChange > 0 ? '↑' : (ratioChange < 0 ? '↓' : '→');
+                    improvementText = `<strong style="color: #43a047;">${Math.round(data.improvement_ratio)}배 향상</strong> <span style="color: ${ratioColor}; font-size: 11px;">(${comp.previous_round}회 대비 ${ratioArrow}${Math.abs(Math.round(ratioChange))}배)</span>`;
                 }
 
                 statsDiv.innerHTML = `
-                    <p style="margin: 5px 0;">• 조합 수: <strong>${data.remaining_combinations.toLocaleString()}</strong>개</p>
+                    <p style="margin: 5px 0;">• 전체 가능 조합: ${totalText}</p>
+                    <p style="margin: 5px 0;">• 제외된 조합: ${excludedText}</p>
+                    <p style="margin: 5px 0;">• 남은 조합: ${remainingText}</p>
                     <p style="margin: 5px 0;">• 당첨 확률: <strong>1/${data.remaining_combinations.toLocaleString()}</strong> (${data.probability_percent})</p>
-                    <p style="margin: 5px 0;">• 일반 로또 대비: <strong style="color: #43a047;">${Math.round(data.improvement_ratio)}배 향상</strong></p>
+                    <p style="margin: 5px 0;">• 일반 로또 대비: ${improvementText}</p>
                     <p style="margin: 8px 0 0 0; font-size: 11px; color: #999;">기준: ${data.round_number}회차 | 업데이트: ${data.last_updated}</p>
-                    ${comparisonHTML}
                 `;
             } else {
                 statsDiv.innerHTML = `<p style="color: #d32f2f; margin: 5px 0;">⚠️ ${data.error}</p>`;
@@ -1828,7 +1830,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         'strategy2': '추가전략 2',
                         'strategy3': '추가전략 3',
                         'strategy4': '추가전략 4',
-                        'strategy5': '통합 전략'
+                        'integrated': '통합 전략'
                     };
                     const strategyLabel = strategyNames[item.strategy_type] || '기본 스마트';
 
@@ -1976,9 +1978,16 @@ document.addEventListener('DOMContentLoaded', function() {
             const data = await response.json();
 
             if (data.success) {
+                // 1초간 성공 토스트 표시
+                showToast(`${data.round_number}회차 당첨 번호가 저장되었습니다 (${data.combinations_created}개 조합 생성)`, 'success', 1000);
+
+                // 모달 즉시 닫기
                 hideAddDrawModal();
-                alert(`${data.round_number}회차 당첨 번호가 저장되었습니다\n(${data.combinations_created}개의 조합 생성됨)`);
-                location.reload(); // Reload to show updated data
+
+                // 1초 후 페이지 새로고침
+                setTimeout(() => {
+                    location.reload();
+                }, 1000);
             } else {
                 showDrawError(data.error || '저장 중 오류가 발생했습니다');
             }

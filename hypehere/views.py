@@ -2,37 +2,57 @@ from django.views.generic import TemplateView, RedirectView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Count, Exists, OuterRef
 from posts.models import Post, Like, PostFavorite
+from posts.services.recommendation import get_recommendations_for_user
 
 
 class HomeView(TemplateView):
     """
     Home page view
-    Displays landing page for guests and feed for authenticated users
+    Displays landing page for guests and personalized feed for authenticated users
     """
     template_name = 'home.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         if self.request.user.is_authenticated:
-            # Subquery to check if current user liked the post
-            user_likes = Like.objects.filter(
-                post=OuterRef('pk'),
-                user=self.request.user
+            # Get personalized recommendations using ML-based recommendation engine
+            recommended_posts = get_recommendations_for_user(
+                user=self.request.user,
+                page=1,
+                page_size=20
             )
 
-            # Subquery to check if current user favorited the post
-            user_favorites = PostFavorite.objects.filter(
-                post=OuterRef('pk'),
-                user=self.request.user
-            )
+            # Annotate recommended posts with user-specific data
+            if recommended_posts:
+                # Get post IDs from recommendations
+                post_ids = [post.id for post in recommended_posts]
 
-            # Fetch posts with like and comment counts
-            posts = Post.objects.select_related('author').prefetch_related('hashtags').annotate(
-                like_count=Count('likes', distinct=True),
-                comment_count=Count('comments', distinct=True),
-                is_liked=Exists(user_likes),
-                is_favorited=Exists(user_favorites)
-            ).order_by('-created_at')[:20]
+                # Subquery to check if current user liked the post
+                user_likes = Like.objects.filter(
+                    post=OuterRef('pk'),
+                    user=self.request.user
+                )
+
+                # Subquery to check if current user favorited the post
+                user_favorites = PostFavorite.objects.filter(
+                    post=OuterRef('pk'),
+                    user=self.request.user
+                )
+
+                # Annotate posts with is_liked and is_favorited
+                # Note: recommended_posts already have like_count and comment_count
+                annotated_posts = Post.objects.filter(id__in=post_ids).select_related('author').prefetch_related('hashtags').annotate(
+                    like_count=Count('likes', distinct=True),
+                    comment_count=Count('comments', distinct=True),
+                    is_liked=Exists(user_likes),
+                    is_favorited=Exists(user_favorites)
+                )
+
+                # Preserve recommendation order
+                post_dict = {post.id: post for post in annotated_posts}
+                posts = [post_dict[post.id] for post in recommended_posts if post.id in post_dict]
+            else:
+                posts = []
 
             context['posts'] = posts
         return context

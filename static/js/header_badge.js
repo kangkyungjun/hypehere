@@ -33,7 +33,7 @@ class HeaderBadgeManager {
 
     async updateMessageBadge(retryCount = 0) {
         try {
-            const response = await fetch('/messages/api/unread-count/', {
+            const response = await fetch('/api/chat/unread-count/', {
                 credentials: 'same-origin'
             });
 

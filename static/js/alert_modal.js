@@ -61,14 +61,16 @@ class AlertModal {
         };
         this.icon.textContent = icons[type] || icons.info;
 
-        // Set title
-        const defaultTitles = {
-            success: 'Success',
-            error: 'Error',
-            warning: 'Warning',
-            info: 'Notification'
-        };
-        this.title.textContent = options.title || defaultTitles[type] || defaultTitles.info;
+        // Set title (if title element exists)
+        if (this.title) {
+            const defaultTitles = {
+                success: 'Success',
+                error: 'Error',
+                warning: 'Warning',
+                info: 'Notification'
+            };
+            this.title.textContent = options.title || defaultTitles[type] || defaultTitles.info;
+        }
 
         // Set message
         this.message.textContent = message;

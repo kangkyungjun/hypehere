@@ -32,12 +32,16 @@
   max-width: 100%;
   margin: 0 auto;
   background-color: var(--color-bg);
+  overflow: hidden;
 }
 
 /* ==========================================
    Header
    ========================================== */
 .chat-room-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
   display: flex;
   align-items: center;
   gap: var(--space-md);
@@ -160,6 +164,8 @@
   flex: 1;
   overflow-y: auto;
   padding: var(--space-lg);
+  min-height: 0;
+  overscroll-behavior: contain;
   display: flex;
   flex-direction: column;
   gap: var(--space-md);

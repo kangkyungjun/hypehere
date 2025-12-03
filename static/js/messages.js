@@ -22,7 +22,7 @@ class MessagesApp {
 
     async loadConversations() {
         try {
-            const response = await fetch('/messages/api/conversations/', {
+            const response = await fetch('/api/chat/conversations/', {
                 credentials: 'same-origin'
             });
 
@@ -67,7 +67,7 @@ class MessagesApp {
                         <circle cx="50" cy="45" r="3"/>
                         <circle cx="70" cy="45" r="3"/>
                     </svg>
-                    <p>메시지가 없습니다</p>
+                    <p>${window.APP_I18N.noMessages}</p>
                 </div>
             `;
             return;
@@ -106,6 +106,7 @@ class MessagesApp {
 
         const lastMessage = conversation.last_message;
         const unreadCount = conversation.unread_count;
+        const isBlockingOtherUser = conversation.is_blocking_other_user || false;
 
         // Badge 생성 로그
         if (window.DEBUG) {
@@ -126,12 +127,15 @@ class MessagesApp {
         // Unread badge - inline style ensures visibility on initial render
         const unreadBadge = unreadCount > 0 ? `<span class="unread-badge" style="display: inline-flex;">${unreadCount}</span>` : '';
 
+        // Blocked badge - 차단한 사람만 볼 수 있음
+        const blockedBadge = isBlockingOtherUser ? '<span class="blocked-label">차단</span>' : '';
+
         return `
             <div class="conversation-item" data-conversation-id="${conversation.id}">
                 <img class="conversation-avatar" src="${avatarSrc}" alt="${this.escapeHtml(otherUser.nickname)}">
                 <div class="conversation-info">
                     <div class="conversation-header">
-                        <span class="conversation-nickname">${this.escapeHtml(otherUser.nickname)}</span>
+                        <span class="conversation-nickname">${this.escapeHtml(otherUser.nickname)} ${blockedBadge}</span>
                         <span class="conversation-time">${timeStr}</span>
                     </div>
                     <div class="conversation-last-message">

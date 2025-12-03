@@ -455,7 +455,7 @@ class FavoritesManager {
     }
 
     try {
-      const response = await fetch(`/api/chat/api/open-rooms/${roomId}/unfavorite/`, {
+      const response = await fetch(`/api/chat/open-rooms/${roomId}/unfavorite/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

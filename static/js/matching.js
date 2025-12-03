@@ -214,6 +214,9 @@ const MatchingSystem = {
      * Start matching process
      */
     async startMatching() {
+        // Clear any previous chat UI and resources
+        this.clearChatUI();
+
         const preferredGender = document.getElementById('preferred-gender').value;
         const preferredCountry = this.countrySelector ? this.countrySelector.getValue() : '';
         const chatMode = document.querySelector('input[name="chat_mode"]:checked')?.value || 'text';
@@ -223,7 +226,7 @@ const MatchingSystem = {
 
         try {
             // Start matching via API
-            const response = await fetch('/messages/api/matching/start/', {
+            const response = await fetch('/api/chat/matching/start/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -259,7 +262,7 @@ const MatchingSystem = {
      */
     async stopMatching() {
         try {
-            await fetch('/messages/api/matching/stop/', {
+            await fetch('/api/chat/matching/stop/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -320,6 +323,9 @@ const MatchingSystem = {
      * Connect to anonymous chat WebSocket
      */
     connectToChat() {
+        // Clear previous chat UI and resources before connecting to new conversation
+        this.clearChatUI();
+
         this.showChatScreen();
 
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -494,13 +500,14 @@ const MatchingSystem = {
      * Rematch - go back to preferences
      */
     rematch() {
+        // Clear chat UI and resources before rematch
+        this.clearChatUI();
+
         if (this.chatWebSocket) {
             this.chatWebSocket.close();
             this.chatWebSocket = null;
         }
         this.conversationId = null;
-        this.otherUserId = null;
-        this.otherUserUsername = null;
         this.showPreferencesScreen();
     },
 
@@ -510,6 +517,9 @@ const MatchingSystem = {
     async leaveChat() {
         this.hideLeaveModal();
 
+        // Clear chat UI and resources
+        this.clearChatUI();
+
         if (this.chatWebSocket) {
             this.chatWebSocket.close();
             this.chatWebSocket = null;
@@ -518,7 +528,7 @@ const MatchingSystem = {
         if (this.conversationId) {
             // Leave conversation via API
             try {
-                await fetch(`/messages/api/conversations/${this.conversationId}/leave/`, {
+                await fetch(`/api/chat/conversations/${this.conversationId}/leave/`, {
                     method: 'POST',
                     headers: {
                         'X-CSRFToken': this.getCSRFToken()
@@ -530,9 +540,6 @@ const MatchingSystem = {
         }
 
         this.conversationId = null;
-        this.otherUserId = null;
-        this.otherUserUsername = null;
-        this.isFollowing = false; // Reset follow state
         this.showPreferencesScreen();
     },
 
@@ -555,7 +562,7 @@ const MatchingSystem = {
             followBtn.disabled = true;
             followBtn.style.opacity = '0.5';
 
-            const response = await fetch('/messages/api/anonymous/connection-request/', {
+            const response = await fetch('/api/chat/anonymous/connection-request/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -601,7 +608,7 @@ const MatchingSystem = {
         if (!this.currentRequestId) return;
 
         try {
-            const response = await fetch('/messages/api/anonymous/connection-respond/', {
+            const response = await fetch('/api/chat/anonymous/connection-respond/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -636,7 +643,7 @@ const MatchingSystem = {
         if (!this.currentRequestId) return;
 
         try {
-            const response = await fetch('/messages/api/anonymous/connection-respond/', {
+            const response = await fetch('/api/chat/anonymous/connection-respond/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -674,18 +681,51 @@ const MatchingSystem = {
         if (!reportType) return;
 
         try {
-            const response = await fetch('/messages/api/report/', {
+            // Use FormData for file + data transmission
+            const formData = new FormData();
+            formData.append('reported_user', this.otherUserId);
+            formData.append('conversation', this.conversationId);
+            formData.append('report_type', reportType);
+            formData.append('description', description || '');
+
+            // Capture video frame if in video mode (with retry logic)
+            if (this.isVideoMode) {
+                console.log('[Report] Video mode detected, capturing video frame...');
+                let videoFrame = null;
+                const maxAttempts = 3;
+                const retryDelay = 1000; // 1 second
+
+                for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+                    console.log(`[Report] Video capture attempt ${attempt}/${maxAttempts}`);
+                    videoFrame = await this.captureVideoFrame();
+
+                    if (videoFrame) {
+                        console.log(`[Report] Video frame captured successfully on attempt ${attempt}`);
+                        break;
+                    }
+
+                    // If not the last attempt, wait before retrying
+                    if (attempt < maxAttempts) {
+                        console.log(`[Report] Waiting ${retryDelay}ms before retry...`);
+                        await new Promise(resolve => setTimeout(resolve, retryDelay));
+                    }
+                }
+
+                if (videoFrame) {
+                    formData.append('video_frame', videoFrame, 'video_evidence.png');
+                    console.log('[Report] Video frame attached to report');
+                } else {
+                    console.warn(`[Report] Failed to capture video frame after ${maxAttempts} attempts`);
+                }
+            }
+
+            const response = await fetch('/api/chat/report/', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
                     'X-CSRFToken': this.getCSRFToken()
+                    // Content-Type removed - browser sets multipart/form-data automatically
                 },
-                body: JSON.stringify({
-                    reported_user: this.otherUserId,
-                    conversation: this.conversationId,
-                    report_type: reportType,
-                    description: description
-                })
+                body: formData
             });
 
             if (response.ok) {
@@ -697,6 +737,115 @@ const MatchingSystem = {
             console.error('Error submitting report:', error);
             showAlertModal(window.MATCHING_I18N.error, window.MATCHING_I18N.reportError);
         }
+    },
+
+    /**
+     * Capture video frame from remote video element
+     * @returns {Promise<Blob|null>} PNG blob of video frame or null if capture fails
+     */
+    async captureVideoFrame() {
+        try {
+            const remoteVideo = document.getElementById('remote-video');
+
+            // Check if remote video element exists and has video data
+            if (!remoteVideo) {
+                console.warn('[Report] Remote video element not found');
+                return null;
+            }
+
+            if (!remoteVideo.videoWidth || !remoteVideo.videoHeight) {
+                console.warn('[Report] Remote video has no dimensions (not playing)');
+                return null;
+            }
+
+            // Create canvas element
+            const canvas = document.createElement('canvas');
+            canvas.width = remoteVideo.videoWidth;
+            canvas.height = remoteVideo.videoHeight;
+
+            // Draw video frame to canvas
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(remoteVideo, 0, 0, canvas.width, canvas.height);
+
+            console.log(`[Report] Captured video frame: ${canvas.width}x${canvas.height}`);
+
+            // Convert canvas to PNG blob
+            return new Promise((resolve) => {
+                canvas.toBlob((blob) => {
+                    if (blob) {
+                        console.log(`[Report] Video frame blob created: ${blob.size} bytes`);
+                        resolve(blob);
+                    } else {
+                        console.error('[Report] Failed to create blob from canvas');
+                        resolve(null);
+                    }
+                }, 'image/png');
+            });
+        } catch (error) {
+            console.error('[Report] Error capturing video frame:', error);
+            return null;
+        }
+    },
+
+    /**
+     * Clear chat UI for new conversation
+     * Removes all messages, resets video state, and cleans up resources
+     */
+    clearChatUI() {
+        // 메시지 컨테이너 비우기
+        const messagesContainer = document.getElementById('chat-messages');
+        if (messagesContainer) {
+            messagesContainer.innerHTML = '';
+            console.log('[Matching] Chat messages cleared');
+        }
+
+        // 비디오 컨테이너 숨기기 및 초기화
+        const videoContainer = document.getElementById('video-container');
+        if (videoContainer) {
+            videoContainer.classList.add('hidden');
+            console.log('[Matching] Video container hidden');
+        }
+
+        // 비디오 스트림 정리
+        this.stopVideoStreams();
+
+        // 상태 변수 초기화
+        this.otherUserId = null;
+        this.otherUserUsername = null;
+        this.isFollowing = false;
+        this.currentRequestId = null;
+
+        console.log('[Matching] Chat UI cleared for new conversation');
+    },
+
+    /**
+     * Stop and clean up video streams
+     * Releases WebRTC resources and resets video elements
+     */
+    stopVideoStreams() {
+        // WebRTC client cleanup
+        if (this.webrtcClient && this.isVideoMode) {
+            this.webrtcClient.stopVideo();
+            console.log('[Matching] WebRTC client stopped');
+        }
+
+        // Reset video mode flag
+        this.isVideoMode = false;
+
+        // Video 엘리먼트 초기화
+        const localVideo = document.getElementById('local-video');
+        const remoteVideo = document.getElementById('remote-video');
+
+        if (localVideo) {
+            localVideo.srcObject = null;
+            console.log('[Matching] Local video cleared');
+        }
+        if (remoteVideo) {
+            remoteVideo.srcObject = null;
+            console.log('[Matching] Remote video cleared');
+        }
+
+        console.log('[Matching] Video streams cleaned up');
     },
 
     /**

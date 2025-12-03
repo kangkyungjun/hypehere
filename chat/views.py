@@ -60,9 +60,15 @@ def conversation_detail_view(request, conversation_id):
     # 상대방 정보 가져오기
     other_user = conversation.get_other_user(request.user)
 
+    # 차단 상태 확인
+    is_blocking = request.user.is_blocking(other_user)
+    is_blocked_by = other_user.is_blocking(request.user)
+
     return render(request, 'conversation.html', {
         'conversation_id': conversation_id,
         'other_user': other_user,
+        'is_blocking': is_blocking,
+        'is_blocked_by': is_blocked_by,
     })
 
 
@@ -94,16 +100,28 @@ class ConversationViewSet(viewsets.ModelViewSet):
 
     def retrieve(self, request, pk=None):
         """특정 대화의 상세 정보 및 메시지 내역 조회"""
+        from accounts.models import Block
+
         conversation = get_object_or_404(
             Conversation.objects.filter(participants=request.user),
             pk=pk
         )
 
-        # 읽지 않은 메시지를 읽음 상태로 표시
-        Message.objects.filter(
+        # 차단한 사용자의 메시지는 읽음 처리 안함
+        blocked_user_ids = Block.objects.filter(
+            blocker=request.user,
+            is_active=True  # 활성 차단만 필터링
+        ).values_list('blocked_id', flat=True)
+
+        unread_messages = Message.objects.filter(
             conversation=conversation,
             is_read=False
-        ).exclude(sender=request.user).update(is_read=True)
+        ).exclude(sender=request.user)
+
+        if blocked_user_ids:
+            unread_messages = unread_messages.exclude(sender_id__in=blocked_user_ids)
+
+        unread_messages.update(is_read=True)
 
         serializer = self.get_serializer(conversation)
         return Response(serializer.data)
@@ -130,6 +148,20 @@ class ConversationViewSet(viewsets.ModelViewSet):
             return Response(
                 {'error': 'Cannot create conversation with yourself'},
                 status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # 차단 관계 확인
+        from accounts.models import Block
+        is_blocked = Block.objects.filter(
+            Q(blocker=request.user, blocked=other_user) |
+            Q(blocker=other_user, blocked=request.user),
+            is_active=True  # 활성 차단만 체크
+        ).exists()
+
+        if is_blocked:
+            return Response(
+                {'error': '차단된 사용자와는 대화를 시작할 수 없습니다'},
+                status=status.HTTP_403_FORBIDDEN
             )
 
         # 기존 일반 대화 확인 (익명 채팅 제외)
@@ -570,23 +602,53 @@ def connection_respond_view(request):
 @permission_classes([IsAuthenticated])
 def report_user_view(request):
     """
-    사용자 신고 API
+    사용자 신고 API with Evidence Capture
     POST /api/chat/report/
 
-    Request body: {
+    Request body (multipart/form-data): {
         "reported_user": 123,
         "conversation": 456 (optional),
         "report_type": "abuse" | "spam" | "inappropriate" | "harassment" | "other",
-        "description": "설명"
+        "description": "설명",
+        "video_frame": <file> (optional - for video chat reports)
     }
     """
+    from .models import ConversationBuffer
+
     serializer = ReportSerializer(
         data=request.data,
         context={'request': request}
     )
 
     if serializer.is_valid():
-        serializer.save(reporter=request.user)
+        # Create report
+        report = serializer.save(reporter=request.user)
+
+        # Attach message buffer snapshot (text evidence)
+        conversation_id = request.data.get('conversation')
+        if conversation_id:
+            try:
+                conversation = Conversation.objects.get(id=conversation_id)
+
+                # Get message buffer snapshot
+                try:
+                    buffer = ConversationBuffer.objects.get(conversation=conversation)
+                    report.message_snapshot = buffer.get_snapshot()
+                except ConversationBuffer.DoesNotExist:
+                    # No buffer exists yet, that's okay
+                    pass
+
+            except Conversation.DoesNotExist:
+                pass
+
+        # Attach video frame if provided (video chat evidence)
+        video_frame = request.FILES.get('video_frame')
+        if video_frame:
+            report.video_frame = video_frame
+
+        # Save report with evidence
+        report.save()
+
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -11,6 +11,10 @@ class ConversationApp {
         this.maxReconnectAttempts = 5;
         this.reconnectDelay = 1000;
 
+        // 차단 상태
+        this.isBlocking = window.IS_BLOCKING || false;
+        this.isBlockedBy = window.IS_BLOCKED_BY || false;
+
         // DOM elements
         this.messagesList = document.getElementById('messages-list');
         this.messageInput = document.getElementById('message-input');
@@ -35,12 +39,21 @@ class ConversationApp {
 
     async init() {
         console.log('[Conversation] Initializing for conversation:', this.conversationId);
+        console.log('[Conversation] Blocking status - isBlocking:', this.isBlocking, 'isBlockedBy:', this.isBlockedBy);
+
+        // 차단 상태에 따라 입력 비활성화
+        if (this.isBlocking) {
+            this.disableMessageInput();
+        }
+
         await this.loadConversationDetails();
         this.setupEventListeners();
         this.setupAutoResize();
+        this.setupScrollRedirection();
         this.setupActionModal();
         this.setupReportModal();
         this.setupBlockModal();
+        this.setupUnblockModal();
         this.setupLeaveModal();
         this.connectWebSocket();
         console.log('[Conversation] Initialization complete');
@@ -88,9 +101,31 @@ class ConversationApp {
         });
     }
 
+    setupScrollRedirection() {
+        // Redirect scroll events from header and input to messages list
+        const redirectScrollToMessages = (e) => {
+            if (this.messagesList) {
+                e.preventDefault();
+                e.stopPropagation();
+                this.messagesList.scrollTop += e.deltaY;
+            }
+        };
+
+        const header = document.querySelector('.chat-header');
+        const inputContainer = document.querySelector('.message-input-container');
+
+        if (header) {
+            header.addEventListener('wheel', redirectScrollToMessages, { passive: false });
+        }
+
+        if (inputContainer) {
+            inputContainer.addEventListener('wheel', redirectScrollToMessages, { passive: false });
+        }
+    }
+
     async loadConversationDetails() {
         try {
-            const response = await fetch(`/messages/api/conversations/${this.conversationId}/`, {
+            const response = await fetch(`/api/chat/conversations/${this.conversationId}/`, {
                 credentials: 'same-origin'
             });
 
@@ -109,7 +144,7 @@ class ConversationApp {
 
     renderMessages(messages) {
         if (messages.length === 0) {
-            this.messagesList.innerHTML = '<div class="empty-state"><p>메시지가 없습니다</p></div>';
+            this.messagesList.innerHTML = `<div class="empty-state"><p>${window.APP_I18N.noMessages}</p></div>`;
             return;
         }
 
@@ -197,6 +232,12 @@ class ConversationApp {
     }
 
     async sendMessage() {
+        // 차단한 사용자에게는 메시지를 보낼 수 없음
+        if (this.isBlocking) {
+            this.showError('차단한 상대에게는 메시지를 보낼 수 없습니다.');
+            return;
+        }
+
         const content = this.messageInput.value.trim();
         if (!content || !this.currentWebSocket) {
             return;
@@ -310,6 +351,19 @@ class ConversationApp {
         alert(message);
     }
 
+    disableMessageInput() {
+        // 메시지 입력창과 전송 버튼 비활성화
+        if (this.messageInput) {
+            this.messageInput.disabled = true;
+            this.messageInput.placeholder = '차단한 상대에게는 메시지를 보낼 수 없습니다';
+        }
+        if (this.sendButton) {
+            this.sendButton.disabled = true;
+            this.sendButton.style.opacity = '0.5';
+            this.sendButton.style.cursor = 'not-allowed';
+        }
+    }
+
     // ===== Action Modal Methods =====
 
     setupActionModal() {
@@ -321,7 +375,9 @@ class ConversationApp {
             chatActionsBtn.addEventListener('click', () => {
                 const userId = parseInt(chatActionsBtn.dataset.userId);
                 const username = chatActionsBtn.dataset.username;
-                this.openActionModal(userId, username);
+                const nickname = chatActionsBtn.dataset.nickname;
+                const isBlocking = chatActionsBtn.dataset.isBlocking === 'true';
+                this.openActionModal(userId, username, nickname, isBlocking);
             });
         }
 
@@ -354,7 +410,7 @@ class ConversationApp {
         });
     }
 
-    openActionModal(userId, username) {
+    openActionModal(userId, username, nickname, isBlocking) {
         // Prevent self-actions
         const currentUserId = parseInt(document.body.dataset.userId);
         if (userId === currentUserId) {
@@ -372,6 +428,8 @@ class ConversationApp {
 
         this.currentReportedUserId = userId;
         this.currentReportedUsername = username;
+        this.currentNickname = nickname;
+        this.currentIsBlocking = isBlocking;
 
         // Show modal
         this.actionModal.classList.remove('hidden');
@@ -497,18 +555,20 @@ class ConversationApp {
         }
 
         try {
+            // Use FormData for file + data transmission
+            const formData = new FormData();
+            formData.append('reported_user', this.currentReportedUserId);
+            formData.append('report_type', reportType);
+            formData.append('description', description || '');
+            formData.append('conversation', this.conversationId);
+
             const response = await fetch('/api/chat/report/', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
                     'X-CSRFToken': this.getCsrfToken()
+                    // Content-Type removed - browser sets multipart/form-data automatically
                 },
-                body: JSON.stringify({
-                    reported_user: this.currentReportedUserId,
-                    report_type: reportType,
-                    description: description || '',
-                    conversation: this.conversationId
-                })
+                body: formData
             });
 
             if (response.ok) {
@@ -603,7 +663,12 @@ class ConversationApp {
             console.error('No user ID set for blocking');
             return;
         }
-        this.openBlockModal();
+        // Smart routing: if already blocking, show unblock modal
+        if (this.currentIsBlocking) {
+            this.openUnblockModal();
+        } else {
+            this.openBlockModal();
+        }
     }
 
     openBlockModal() {
@@ -679,6 +744,86 @@ class ConversationApp {
         }
     }
 
+    // ===== Unblock Modal Methods =====
+
+    setupUnblockModal() {
+        this.unblockModal = document.getElementById('unblock-user-modal');
+        if (!this.unblockModal) return;
+
+        const closeBtn = document.getElementById('close-unblock-user-modal');
+        const cancelBtn = document.getElementById('cancel-unblock-user');
+        const confirmBtn = document.getElementById('confirm-unblock-user');
+
+        if (closeBtn) closeBtn.addEventListener('click', () => this.closeUnblockModal());
+        if (cancelBtn) cancelBtn.addEventListener('click', () => this.closeUnblockModal());
+        if (confirmBtn) confirmBtn.addEventListener('click', () => this.confirmUnblockUser());
+
+        // Close on ESC key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !this.unblockModal.classList.contains('hidden')) {
+                this.closeUnblockModal();
+            }
+        });
+    }
+
+    openUnblockModal() {
+        const usernameSpan = this.unblockModal.querySelector('#unblock-username');
+        if (usernameSpan) {
+            usernameSpan.textContent = this.currentNickname || this.currentReportedUsername;
+        }
+        this.unblockModal.classList.remove('hidden');
+    }
+
+    closeUnblockModal() {
+        this.unblockModal.classList.add('hidden');
+    }
+
+    async confirmUnblockUser() {
+        try {
+            const response = await fetch(`/api/accounts/${this.currentReportedUsername}/unblock/`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': this.getCsrfToken(),
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const lang = document.documentElement.lang || 'ko';
+            if (response.ok) {
+                const message = lang === 'en'
+                    ? `${this.currentNickname} has been unblocked`
+                    : `${this.currentNickname}님의 차단을 해제했습니다`;
+                if (window.showAlert) {
+                    window.showAlert(message, 'success');
+                } else {
+                    alert(message);
+                }
+                this.closeUnblockModal();
+                location.reload();
+            } else {
+                const message = lang === 'en'
+                    ? 'Unblock failed'
+                    : '차단 해제에 실패했습니다';
+                if (window.showAlert) {
+                    window.showAlert(message, 'error');
+                } else {
+                    alert(message);
+                }
+            }
+        } catch (error) {
+            console.error('Unblock user error:', error);
+            const lang = document.documentElement.lang || 'ko';
+            const message = lang === 'en'
+                ? 'Network error occurred. Please try again.'
+                : '네트워크 오류가 발생했습니다. 다시 시도해주세요.';
+            if (window.showAlert) {
+                window.showAlert(message, 'error');
+            } else {
+                alert(message);
+            }
+        }
+    }
+
     // ==================== Leave Conversation Modal Methods ====================
 
     setupLeaveModal() {
@@ -738,7 +883,7 @@ class ConversationApp {
         this.closeLeaveModal();
 
         try {
-            const response = await fetch(`/messages/api/conversations/${this.conversationId}/leave/`, {
+            const response = await fetch(`/api/chat/conversations/${this.conversationId}/leave/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

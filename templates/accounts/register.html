@@ -9,6 +9,9 @@
 {% endblock %}
 
 {% block content %}
+<!-- Toast Container -->
+<div id="toast-container"></div>
+
 <div class="container" style="max-width: 480px; margin: 0 auto; padding: var(--space-lg);">
     <!-- Header -->
     <div style="text-align: center; margin-bottom: var(--space-xl);">
@@ -104,6 +107,43 @@
                         minlength="8"
                         autocomplete="new-password"
                     >
+
+                    <!-- Password Strength Indicator -->
+                    <div class="password-strength-container" id="password-strength-container" style="display: none;">
+                        <div class="password-strength-bar">
+                            <div class="password-strength-fill" id="password-strength-fill"></div>
+                        </div>
+                        <div class="password-strength-text" id="password-strength-text"></div>
+                    </div>
+
+                    <!-- Password Checklist -->
+                    <ul class="password-checklist" id="password-checklist">
+                        <li id="check-length">
+                            <span class="check-icon">○</span>
+                            <span class="check-text"></span>
+                        </li>
+                        <li id="check-letters">
+                            <span class="check-icon">○</span>
+                            <span class="check-text"></span>
+                        </li>
+                        <li id="check-numbers">
+                            <span class="check-icon">○</span>
+                            <span class="check-text"></span>
+                        </li>
+                        <li id="check-uppercase">
+                            <span class="check-icon">○</span>
+                            <span class="check-text"></span>
+                        </li>
+                        <li id="check-lowercase">
+                            <span class="check-icon">○</span>
+                            <span class="check-text"></span>
+                        </li>
+                        <li id="check-special">
+                            <span class="check-icon">○</span>
+                            <span class="check-text"></span>
+                        </li>
+                    </ul>
+
                     <span class="form-text">{% trans "최소 8자 이상, 영문과 숫자를 포함해주세요." %}</span>
                     <span class="form-error" id="password-error"></span>
                 </div>
@@ -167,6 +207,7 @@
 {% include 'partials/password_rules_modal.html' %}
 
 <!-- JavaScript for AJAX Registration -->
+<script src="{% url 'javascript-catalog' %}"></script>
 <script src="{% static 'js/countries.js' %}"></script>
 <script src="{% static 'js/languages.js' %}"></script>
 <script src="{% static 'js/genders.js' %}"></script>

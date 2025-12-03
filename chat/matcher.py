@@ -89,7 +89,8 @@ class AnonymousMatchingQueue:
                     from accounts.models import Block
                     is_blocked = Block.objects.filter(
                         Q(blocker=user, blocked=partner) |
-                        Q(blocker=partner, blocked=user)
+                        Q(blocker=partner, blocked=user),
+                        is_active=True  # Only check active blocks
                     ).exists()
 
                     if is_blocked:

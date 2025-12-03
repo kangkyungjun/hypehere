@@ -224,6 +224,58 @@
                 </div>
                 {% endif %}
 
+                <!-- 증거 표시 섹션 (관리자만 볼 수 있음) -->
+                {% if request.user.is_staff %}
+                    {% if report.message_snapshot or report.video_frame %}
+                    <div class="evidence-section" style="margin-top: var(--space-md); padding: var(--space-md); background: var(--bg-secondary); border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                        <div class="evidence-header" style="display: flex; align-items: center; gap: var(--space-sm); margin-bottom: var(--space-sm); cursor: pointer;" onclick="toggleEvidence(this)">
+                            <svg style="width: 20px; height: 20px; transition: transform 0.2s;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                            <strong>{% trans "신고 증거" %}</strong>
+                            <span style="color: var(--text-secondary); font-size: 0.875rem;">
+                                {% if report.message_snapshot %}{% trans "메시지" %}{% endif %}
+                                {% if report.message_snapshot and report.video_frame %} | {% endif %}
+                                {% if report.video_frame %}{% trans "화면 캡처" %}{% endif %}
+                            </span>
+                        </div>
+
+                        <div class="evidence-content" style="display: none;">
+                            {% if report.message_snapshot %}
+                            <div class="message-snapshot" style="margin-bottom: var(--space-md);">
+                                <h4 style="margin-bottom: var(--space-sm); font-size: 0.875rem; color: var(--text-secondary);">{% trans "대화 내역" %}</h4>
+                                <div style="max-height: 300px; overflow-y: auto; background: var(--bg-primary); border-radius: var(--radius-sm); padding: var(--space-sm);">
+                                    {% for msg in report.message_snapshot %}
+                                    <div style="padding: var(--space-xs); margin-bottom: var(--space-xs); border-bottom: 1px solid var(--border-color);">
+                                        <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 2px;">
+                                            <span>
+                                                <strong style="color: var(--text-primary);">{{ msg.sender_nickname }}</strong>
+                                                {% if msg.sender_id == report.reporter.id %}
+                                                    <span style="background: #e3f2fd; color: #1976d2; padding: 2px 6px; border-radius: 3px; font-size: 0.7rem; margin-left: 4px;">{% trans "신고자" %}</span>
+                                                {% elif msg.sender_id == report.reported_user.id %}
+                                                    <span style="background: #ffebee; color: #c62828; padding: 2px 6px; border-radius: 3px; font-size: 0.7rem; margin-left: 4px;">{% trans "피신고자" %}</span>
+                                                {% endif %}
+                                            </span>
+                                            <span class="evidence-timestamp" data-timestamp="{{ msg.timestamp }}">{{ msg.timestamp }}</span>
+                                        </div>
+                                        <div style="font-size: 0.875rem;">{{ msg.content }}</div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            {% if report.video_frame %}
+                            <div class="video-frame">
+                                <h4 style="margin-bottom: var(--space-sm); font-size: 0.875rem; color: var(--text-secondary);">{% trans "화상 채팅 캡처" %}</h4>
+                                <img src="{{ report.video_frame.url }}" alt="{% trans '증거 캡처' %}" style="max-width: 100%; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                {% endif %}
+
                 <!-- 관리자 전용 액션 버튼 (채팅 신고) -->
                 {% if request.user.is_staff %}
                 <div class="report-actions" style="display: flex; gap: var(--space-sm); margin-top: var(--space-md); flex-wrap: wrap;">
@@ -443,6 +495,31 @@
 // Global variables for modal state
 let currentReportId = null;
 let currentReportType = null;
+
+// Toggle evidence section visibility
+function toggleEvidence(headerElement) {
+    const evidenceSection = headerElement.parentElement;
+    const evidenceContent = evidenceSection.querySelector('.evidence-content');
+    const arrowIcon = headerElement.querySelector('svg');
+
+    if (evidenceContent.style.display === 'none') {
+        evidenceContent.style.display = 'block';
+        arrowIcon.style.transform = 'rotate(90deg)';
+    } else {
+        evidenceContent.style.display = 'none';
+        arrowIcon.style.transform = 'rotate(0deg)';
+    }
+}
+
+// Format evidence timestamps on page load
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.evidence-timestamp').forEach(element => {
+        const timestamp = element.dataset.timestamp;
+        if (timestamp) {
+            element.textContent = formatRelativeTime(timestamp);
+        }
+    });
+});
 
 // Tab switching
 document.addEventListener('DOMContentLoaded', function() {

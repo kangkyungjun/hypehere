@@ -236,8 +236,19 @@
             conversationCreateFailed: gettext('대화를 시작할 수 없습니다.'),
 
             // Messages
-            noMessages: gettext('메시지가 없습니다'),
-            startConversation: gettext('대화를 시작하세요'),
+            noMessages: gettext('No messages'),
+            startConversation: gettext('Start conversation'),
+
+            // Profile Picture
+            confirmDeleteProfilePicture: gettext('Are you sure you want to delete your profile picture?'),
+            profilePictureDeleted: gettext('Profile picture has been deleted'),
+            deleteFailed: gettext('Failed to delete profile picture'),
+
+            // User Report
+            userReportSuccess: gettext('사용자 신고가 접수되었습니다'),
+            reportFailed: gettext('신고 접수에 실패했습니다'),
+            duplicateReport: gettext('이미 신고한 사용자입니다'),
+            cannotReportSelf: gettext('자신을 신고할 수 없습니다'),
 
             // Explore
             enterRoom: gettext('입장하기'),
@@ -493,6 +504,11 @@
         };
     </script>
     <script src="{% static 'js/post_share.js' %}"></script>
+
+    <!-- Post Interaction Tracker (for recommendation system) -->
+    {% if user.is_authenticated %}
+        <script src="{% static 'js/post_interaction_tracker.js' %}"></script>
+    {% endif %}
 
     {% block extra_js %}{% endblock %}
 </body>

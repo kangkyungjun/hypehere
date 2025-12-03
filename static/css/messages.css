@@ -20,8 +20,8 @@
 .conversation-detail-container {
     display: flex;
     flex-direction: column;
-    height: 100vh; /* Full viewport height - header is hidden */
-    background: var(--color-bg);
+    height: 100%; /* Use parent height - works with absolute positioning on mobile */
+    background: #FAF9FC;
     overflow: hidden;
 }
 
@@ -148,7 +148,11 @@
     align-items: center;
     padding: var(--space-md) var(--space-lg);
     border-bottom: 1px solid var(--color-border);
-    background: var(--color-surface);
+    background: #FFFFFF;
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    z-index: 10;
 }
 
 .back-button {
@@ -269,7 +273,9 @@
 .messages-list {
     flex: 1;
     overflow-y: auto;
-    padding: var(--space-lg);
+    padding: var(--space-lg) var(--space-lg) 0 var(--space-lg);
+    min-height: 0;
+    overscroll-behavior: contain;
     display: flex;
     flex-direction: column;
     gap: var(--space-sm);
@@ -340,7 +346,7 @@
     gap: var(--space-md);
     padding: var(--space-md) var(--space-lg);
     border-top: 1px solid var(--color-border);
-    background: var(--color-surface);
+    background: #FFFFFF;
 }
 
 .message-input {
@@ -457,7 +463,29 @@
 
 /* 메시지 리스트 하단에 입력창 높이만큼 여백 추가 */
 .conversation-page .messages-list {
-    padding-bottom: calc(var(--space-md) * 2 + 60px); /* 입력창 높이 + 패딩 */
+    padding-bottom: calc(100px + env(safe-area-inset-bottom)); /* 입력창 높이와 정확히 일치 */
+}
+
+/* conversation-page에서 body 상단 여백 제거 */
+body.conversation-page {
+    padding-top: 0 !important;
+}
+
+/* layout 위치 조정 */
+.conversation-page .layout {
+    min-height: 100vh;
+    height: 100vh;
+    margin: 0;
+}
+
+/* conversation-detail-container 전체 화면 */
+.conversation-page .conversation-detail-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: 0;
 }
 
 /* ====================
@@ -619,4 +647,18 @@
 
 .btn-ghost svg {
   stroke: currentColor;
+}
+
+/* 차단 라벨 스타일 */
+.blocked-label {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 2px 8px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #ef4444;
+    background-color: #fee2e2;
+    border: 1px solid #fecaca;
+    border-radius: 4px;
+    vertical-align: middle;
 }

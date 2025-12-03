@@ -27,11 +27,12 @@ class ConversationListSerializer(serializers.ModelSerializer):
     other_user = serializers.SerializerMethodField()
     last_message = serializers.SerializerMethodField()
     unread_count = serializers.SerializerMethodField()
+    is_blocking_other_user = serializers.SerializerMethodField()
 
     class Meta:
         model = Conversation
-        fields = ('id', 'other_user', 'last_message', 'unread_count', 'updated_at')
-        read_only_fields = ('id', 'other_user', 'last_message', 'unread_count', 'updated_at')
+        fields = ('id', 'other_user', 'last_message', 'unread_count', 'updated_at', 'is_blocking_other_user')
+        read_only_fields = ('id', 'other_user', 'last_message', 'unread_count', 'updated_at', 'is_blocking_other_user')
 
     def get_other_user(self, obj):
         """현재 사용자가 아닌 대화 상대 정보"""
@@ -51,8 +52,25 @@ class ConversationListSerializer(serializers.ModelSerializer):
         return None
 
     def get_last_message(self, obj):
-        """마지막 메시지 내용 및 시간"""
-        last_msg = obj.get_last_message()
+        """마지막 메시지 내용 및 시간 (차단한 사용자 메시지 제외)"""
+        from accounts.models import Block
+
+        request = self.context.get('request')
+        if not request or not request.user.is_authenticated:
+            last_msg = obj.get_last_message()
+        else:
+            # 차단한 사용자의 메시지 제외
+            blocked_user_ids = Block.objects.filter(
+                blocker=request.user,
+                is_active=True  # 활성 차단만 필터링
+            ).values_list('blocked_id', flat=True)
+
+            messages = obj.messages.filter(is_expired=False).order_by('-created_at')
+            if blocked_user_ids:
+                messages = messages.exclude(sender_id__in=blocked_user_ids)
+
+            last_msg = messages.first()
+
         if last_msg:
             return {
                 'content': last_msg.content,
@@ -67,6 +85,15 @@ class ConversationListSerializer(serializers.ModelSerializer):
         if request and request.user.is_authenticated:
             return obj.get_unread_count(request.user)
         return 0
+
+    def get_is_blocking_other_user(self, obj):
+        """현재 사용자가 대화 상대를 차단했는지 확인"""
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            other_user = obj.get_other_user(request.user)
+            if other_user:
+                return request.user.is_blocking(other_user)
+        return False
 
 
 class ConversationDetailSerializer(serializers.ModelSerializer):
@@ -84,7 +111,10 @@ class ConversationDetailSerializer(serializers.ModelSerializer):
         현재 사용자가 볼 수 있는 메시지만 반환
         - 나간 적이 있으면: left_at 이후의 메시지만
         - 나간 적이 없으면: 모든 메시지
+        - 차단한 사용자의 메시지 영구 제외 (차단 해제해도 안보임)
         """
+        from accounts.models import Block
+
         request = self.context.get('request')
         if not request or not request.user.is_authenticated:
             return []
@@ -107,6 +137,15 @@ class ConversationDetailSerializer(serializers.ModelSerializer):
 
         # 만료되지 않은 메시지만 조회 (익명 채팅 7일 만료 정책)
         messages = messages.filter(is_expired=False)
+
+        # 차단한 사용자의 메시지 영구 제외 (차단 해제해도 이전 메시지는 안보임)
+        blocked_user_ids = Block.objects.filter(
+            blocker=request.user,
+            is_active=True  # 활성 차단만 필터링
+        ).values_list('blocked_id', flat=True)
+
+        if blocked_user_ids:
+            messages = messages.exclude(sender_id__in=blocked_user_ids)
 
         return MessageSerializer(messages, many=True).data
 
@@ -141,12 +180,24 @@ class ReportSerializer(serializers.ModelSerializer):
     """Serializer for user reports"""
     reporter_nickname = serializers.CharField(source='reporter.nickname', read_only=True)
     reported_user_nickname = serializers.CharField(source='reported_user.nickname', read_only=True)
+    video_frame_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Report
         fields = ('id', 'reported_user', 'conversation', 'report_type', 'description',
-                  'reporter_nickname', 'reported_user_nickname', 'status', 'created_at')
-        read_only_fields = ('id', 'reporter_nickname', 'reported_user_nickname', 'status', 'created_at')
+                  'reporter_nickname', 'reported_user_nickname', 'status', 'created_at',
+                  'message_snapshot', 'video_frame', 'video_frame_url')
+        read_only_fields = ('id', 'reporter_nickname', 'reported_user_nickname', 'status', 'created_at',
+                            'video_frame_url')
+
+    def get_video_frame_url(self, obj):
+        """Get video frame URL if exists"""
+        if obj.video_frame:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.video_frame.url)
+            return obj.video_frame.url
+        return None
 
     def validate(self, data):
         """유효성 검사"""

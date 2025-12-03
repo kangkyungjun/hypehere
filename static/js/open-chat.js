@@ -227,7 +227,7 @@ class OpenChatManager {
     this.showLoading();
 
     try {
-      const response = await fetch('/api/chat/api/open-rooms/');
+      const response = await fetch('/api/chat/open-rooms/');
 
       if (!response.ok) {
         throw new Error('Failed to load rooms');
@@ -434,7 +434,7 @@ class OpenChatManager {
   async enterRoom(roomId) {
     try {
       // Try to join the room first
-      const response = await fetch(`/api/chat/api/open-rooms/${roomId}/join/`, {
+      const response = await fetch(`/api/chat/open-rooms/${roomId}/join/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -501,7 +501,7 @@ class OpenChatManager {
     };
 
     try {
-      const response = await fetch('/api/chat/api/open-rooms/', {
+      const response = await fetch('/api/chat/open-rooms/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

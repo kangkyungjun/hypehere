@@ -25,12 +25,20 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-dw8@f#omml@5u*(=$q92ou)9c37pfffh9b*)r2)1b)*d5a4*l2"
+# Generate new secret key using:
+# python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())'
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
+
+if not SECRET_KEY:
+    raise ValueError("DJANGO_SECRET_KEY environment variable is not set. Please set it before running the application.")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# DEBUG should be False in production
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = []
+# For production, set ALLOWED_HOSTS environment variable
+# Example: ALLOWED_HOSTS=example.com,www.example.com,api.example.com
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 
 # Application definition
@@ -58,8 +66,17 @@ INSTALLED_APPS = [
     "lotto",  # Lotto number management system
 ]
 
+# Add django-storages only in production (when installed)
+if not DEBUG:
+    try:
+        import storages  # noqa
+        INSTALLED_APPS.append("storages")
+    except ImportError:
+        pass  # django-storages not installed, will use local storage
+
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",  # Static file serving (must be after SecurityMiddleware)
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",  # Language detection and activation
     "django.middleware.common.CommonMiddleware",
@@ -96,12 +113,32 @@ WSGI_APPLICATION = "hypehere.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+# Environment-based database configuration
+if DEBUG:
+    # Development: SQLite (simple, no setup required)
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
     }
-}
+else:
+    # Production: PostgreSQL (scalable, supports multiple instances)
+    # Requires DATABASE_URL environment variable
+    # Format: postgresql://user:password@host:5432/dbname
+    import dj_database_url
+
+    database_url = os.environ.get('DATABASE_URL')
+    if not database_url:
+        raise ValueError("DATABASE_URL environment variable must be set in production (DEBUG=False)")
+
+    DATABASES = {
+        "default": dj_database_url.config(
+            default=database_url,
+            conn_max_age=600,  # Connection pooling: reuse connections for 10 minutes
+            conn_health_checks=True,  # Check connection health before reuse
+        )
+    }
 
 
 # Password validation
@@ -154,6 +191,10 @@ USE_TZ = True
 STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 
+# Static files collection directory (required for production)
+# Run 'python manage.py collectstatic' before deployment
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
@@ -183,18 +224,32 @@ MEDIA_ROOT = BASE_DIR / 'media'
 ASGI_APPLICATION = 'hypehere.asgi.application'
 
 # Channel Layers (for WebSocket)
-CHANNEL_LAYERS = {
-    'default': {
-        # Development: In-memory channel layer (simpler, no Redis needed)
-        'BACKEND': 'channels.layers.InMemoryChannelLayer'
+if DEBUG:
+    # Development: In-memory channel layer (simple, no Redis needed)
+    # Note: Only works with single server instance
+    CHANNEL_LAYERS = {
+        'default': {
+            'BACKEND': 'channels.layers.InMemoryChannelLayer'
+        },
+    }
+else:
+    # Production: Redis channel layer (supports multiple server instances)
+    # Requires REDIS_URL environment variable
+    # Format: redis://host:6379/1
+    redis_url = os.environ.get('REDIS_URL')
+    if not redis_url:
+        raise ValueError("REDIS_URL environment variable must be set in production (DEBUG=False)")
 
-        # Production: Uncomment below and comment above when deploying
-        # 'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        # 'CONFIG': {
-        #     "hosts": [('127.0.0.1', 6379)],
-        # },
-    },
-}
+    CHANNEL_LAYERS = {
+        'default': {
+            'BACKEND': 'channels_redis.core.RedisChannelLayer',
+            'CONFIG': {
+                "hosts": [redis_url],
+                "capacity": 1500,  # Maximum number of messages to store
+                "expiry": 10,  # Message expiry time in seconds
+            },
+        },
+    }
 
 # ==================== Email Configuration ====================
 
@@ -208,17 +263,26 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
-# IMPORTANT: Set these environment variables or replace with actual values
-# DO NOT commit sensitive credentials to version control
-EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'your-email@gmail.com')
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'your-app-password')
+# Email credentials from environment variables (required in production)
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+
+# Validation: Ensure email credentials are set in production
+if not DEBUG:
+    if not EMAIL_HOST_USER or not EMAIL_HOST_PASSWORD:
+        raise ValueError("EMAIL_HOST_USER and EMAIL_HOST_PASSWORD must be set in production environment.")
 
 # Default email address to use for various automated correspondence
 DEFAULT_FROM_EMAIL = f'HypeHere <{EMAIL_HOST_USER}>'
 SERVER_EMAIL = f'HypeHere <{EMAIL_HOST_USER}>'
 
-# Site URL (for email links)
-SITE_URL = 'http://127.0.0.1:8000'  # Change to your domain in production
+# Site URL for email links and redirects
+SITE_URL = os.environ.get('SITE_URL', 'http://127.0.0.1:8000')
+
+# In production, SITE_URL should use HTTPS
+if not DEBUG and SITE_URL.startswith('http://'):
+    import warnings
+    warnings.warn("SITE_URL should use HTTPS in production", UserWarning)
 
 # Email Configuration Notes:
 # 1. For Gmail, you need to generate an "App Password" (not your regular password)
@@ -226,3 +290,71 @@ SITE_URL = 'http://127.0.0.1:8000'  # Change to your domain in production
 # 3. Enable 2-factor authentication first if not already enabled
 # 4. Generate app password and use it in EMAIL_HOST_PASSWORD
 # 5. For development, you can use console backend to test without actual emails
+
+# ==================== Security Settings ====================
+
+# Production Security Settings (only when DEBUG=False)
+if not DEBUG:
+    # Force HTTPS
+    SECURE_SSL_REDIRECT = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+    # Session and CSRF security
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    CSRF_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = 'Lax'
+    CSRF_COOKIE_SAMESITE = 'Lax'
+
+    # HSTS (HTTP Strict Transport Security)
+    SECURE_HSTS_SECONDS = 31536000  # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+
+    # Additional security headers
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_BROWSER_XSS_FILTER = True
+    X_FRAME_OPTIONS = 'DENY'
+
+    # CSRF trusted origins (set via environment variable)
+    # Example: CSRF_TRUSTED_ORIGINS=https://example.com,https://www.example.com
+    csrf_origins = os.environ.get('CSRF_TRUSTED_ORIGINS', '')
+    if csrf_origins:
+        CSRF_TRUSTED_ORIGINS = csrf_origins.split(',')
+
+# ==================== AWS S3 Configuration (for production - Phase 3) ====================
+
+if not DEBUG:
+    # AWS S3 Settings (required when DEBUG=False)
+    AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
+    AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
+    AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
+    AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', 'us-east-1')
+    
+    # Validation: Ensure S3 bucket is configured
+    if not AWS_STORAGE_BUCKET_NAME:
+        raise ValueError("AWS_STORAGE_BUCKET_NAME must be set in production (DEBUG=False)")
+    
+    # S3 Configuration
+    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+    AWS_S3_OBJECT_PARAMETERS = {
+        'CacheControl': 'max-age=86400',  # 1 day cache
+    }
+    AWS_DEFAULT_ACL = 'public-read'
+    AWS_S3_FILE_OVERWRITE = False
+    AWS_QUERYSTRING_AUTH = False
+    
+    # Static files (CSS, JavaScript, Images)
+    STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
+    
+    # Media files (User uploads)
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
+
+# Notes:
+# 1. AWS credentials can be set via environment variables (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY)
+# 2. For better security, use IAM roles instead of access keys when deploying to EC2/ECS
+# 3. S3 bucket must have proper CORS configuration for file uploads
+# 4. Run 'python manage.py collectstatic' before deploying to upload static files to S3

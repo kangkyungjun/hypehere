@@ -1,5 +1,30 @@
+# ==================== Core Django ====================
 Django>=5.1.11
 djangorestframework>=3.14.0
 Pillow>=10.0.0
+python-dotenv>=1.0.0
+
+# ==================== WebSocket Support ====================
+channels>=4.0.0
+daphne>=4.0.0
+
+# ==================== Data Processing ====================
 pandas>=2.0.0
 openpyxl>=3.0.0
+
+# ==================== Production Dependencies ====================
+# Database
+psycopg2-binary>=2.9.0  # PostgreSQL adapter
+dj-database-url>=2.0.0  # Database URL parsing
+
+# Cache & WebSocket
+redis>=5.0.0  # Redis client
+channels-redis>=4.1.0  # Redis channel layer for Django Channels
+
+# Web Server
+gunicorn>=21.0.0  # WSGI server for HTTP
+whitenoise>=6.5.0  # Static file serving
+
+# AWS S3 Storage
+boto3>=1.28.0  # AWS SDK for Python
+django-storages>=1.14.0  # Django storage backends for S3

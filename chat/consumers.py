@@ -6,7 +6,8 @@ from django.utils import timezone
 from django.utils.translation import gettext as _
 from .models import (
     Conversation, Message, ConversationParticipant,
-    OpenChatRoom, OpenChatParticipant, OpenChatMessage
+    OpenChatRoom, OpenChatParticipant, OpenChatMessage,
+    ConversationBuffer
 )
 
 User = get_user_model()
@@ -34,6 +35,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.close()
             return
 
+        # ConversationBuffer를 사전에 생성 (신고 증거 수집용)
+        # 메시지가 없어도 신고 시 버퍼가 존재하도록 보장
+        await self.create_conversation_buffer()
+
         # 대화 그룹에 참가
         await self.channel_layer.group_add(
             self.room_group_name,
@@ -41,6 +46,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
         )
 
         await self.accept()
+
+        # WebSocket 연결 시 기존 안읽은 메시지 모두 읽음 처리
+        await self.mark_messages_as_read()
 
     async def disconnect(self, close_code):
         """사용자가 WebSocket 연결을 끊을 때 호출"""
@@ -61,6 +69,40 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 if not content:
                     return
 
+                # 차단 관계 확인
+                from accounts.models import Block
+                from django.db.models import Q
+                conversation = await database_sync_to_async(
+                    Conversation.objects.get
+                )(id=self.conversation_id)
+                other_user = await database_sync_to_async(
+                    conversation.get_other_user
+                )(self.user)
+
+                is_blocking = await database_sync_to_async(
+                    Block.objects.filter(blocker=self.user, blocked=other_user, is_active=True).exists
+                )()
+                is_blocked_by = await database_sync_to_async(
+                    Block.objects.filter(blocker=other_user, blocked=self.user, is_active=True).exists
+                )()
+
+                # 차단당한 사람이 메시지 보냄 - 저장하지만 차단한 사람에게 전달 안함
+                if is_blocked_by:
+                    # 메시지는 저장 (본인에게는 보임)
+                    message = await self.save_message(content)
+
+                    # 본인에게만 메시지 표시 (group_send 하지 않음)
+                    await self.send(text_data=json.dumps({
+                        'type': 'message',
+                        'message_id': message.id,
+                        'sender_id': self.user.id,
+                        'sender_nickname': self.user.nickname,
+                        'content': message.content,
+                        'created_at': message.created_at.isoformat(),
+                    }))
+                    return
+
+                # 차단 관계가 아님 - 정상적으로 메시지 전송
                 # 메시지를 데이터베이스에 저장
                 message = await self.save_message(content)
 
@@ -115,6 +157,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'created_at': event['created_at'],
         }))
 
+        # 메시지를 받으면 자동으로 읽음 처리 (실시간 읽음 처리)
+        await self.mark_messages_as_read()
+
     @database_sync_to_async
     def check_participant(self):
         """현재 사용자가 대화의 참가자인지 확인"""
@@ -123,6 +168,17 @@ class ChatConsumer(AsyncWebsocketConsumer):
             return conversation.participants.filter(id=self.user.id).exists()
         except Conversation.DoesNotExist:
             return False
+
+    @database_sync_to_async
+    def create_conversation_buffer(self):
+        """대화 연결 시 ConversationBuffer를 사전 생성 (신고 증거 수집용)"""
+        try:
+            conversation = Conversation.objects.get(id=self.conversation_id)
+            # 익명 채팅이 아닌 경우에만 버퍼 생성
+            if not conversation.is_ephemeral:
+                ConversationBuffer.objects.get_or_create(conversation=conversation)
+        except Conversation.DoesNotExist:
+            pass
 
     @database_sync_to_async
     def save_message(self, content):
@@ -151,6 +207,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
             sender=self.user,
             content=content
         )
+
+        # 메시지 버퍼에 저장 (신고 증거용)
+        # 익명 채팅이 아닌 경우에만 버퍼 저장
+        if not conversation.is_ephemeral:
+            buffer, created = ConversationBuffer.objects.get_or_create(
+                conversation=conversation
+            )
+            buffer.add_message(message)
+
         # 대화의 updated_at 자동 업데이트 (auto_now=True)
         conversation.save()
         return message
@@ -158,11 +223,24 @@ class ChatConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def get_notification_data(self, message):
         """알림에 필요한 데이터 가져오기"""
+        from accounts.models import Block
+
         try:
             conversation = Conversation.objects.get(id=self.conversation_id)
             other_user = conversation.get_other_user(self.user)
 
             if other_user:
+                # 차단 확인: other_user(수신자)가 self.user(발신자)를 차단했는지 확인
+                is_blocked_by_recipient = Block.objects.filter(
+                    blocker=other_user,
+                    blocked=self.user
+                ).exists()
+
+                # 수신자가 발신자를 차단한 경우 알림을 보내지 않음
+                if is_blocked_by_recipient:
+                    print(f"[ChatConsumer] 🚫 Notification blocked: {other_user.nickname} is blocking {self.user.nickname}")
+                    return None
+
                 unread_count = conversation.get_unread_count(other_user)
                 print(f"[ChatConsumer] 📊 Notification data prepared:")
                 print(f"[ChatConsumer]   Other user: {other_user.id} ({other_user.nickname})")
@@ -210,6 +288,10 @@ class AnonymousChatConsumer(AsyncWebsocketConsumer):
         if not is_participant:
             await self.close()
             return
+
+        # ConversationBuffer를 사전에 생성 (신고 증거 수집용)
+        # 익명 대화도 7일간 보관되므로 메시지가 없어도 버퍼 생성
+        await self.create_anonymous_conversation_buffer()
 
         # 대화 그룹에 참가
         await self.channel_layer.group_add(
@@ -369,6 +451,16 @@ class AnonymousChatConsumer(AsyncWebsocketConsumer):
             return False
 
     @database_sync_to_async
+    def create_anonymous_conversation_buffer(self):
+        """익명 대화 연결 시 ConversationBuffer를 사전 생성 (신고 증거 수집용)"""
+        try:
+            conversation = Conversation.objects.get(id=self.conversation_id)
+            # 익명 대화도 7일간 보관되므로 버퍼 생성
+            ConversationBuffer.objects.get_or_create(conversation=conversation)
+        except Conversation.DoesNotExist:
+            pass
+
+    @database_sync_to_async
     def get_other_user_info(self):
         """익명 대화의 상대방 정보 가져오기"""
         try:
@@ -392,13 +484,22 @@ class AnonymousChatConsumer(AsyncWebsocketConsumer):
         conversation = Conversation.objects.get(id=self.conversation_id)
         expires_at = timezone.now() + timedelta(days=7)
 
-        return Message.objects.create(
+        message = Message.objects.create(
             conversation=conversation,
             sender=self.user,
             content=content,
             expires_at=expires_at,
             is_expired=False
         )
+
+        # 메시지 버퍼에 저장 (신고 증거용)
+        # 익명 대화도 7일간 임시 저장되므로 버퍼에도 저장
+        buffer, created = ConversationBuffer.objects.get_or_create(
+            conversation=conversation
+        )
+        buffer.add_message(message)
+
+        return message
 
     @database_sync_to_async
     def cleanup_anonymous_conversation(self):

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Post, Hashtag, Like, Comment, PostReport, CommentReport
+from .models import Post, Hashtag, Like, Comment, PostReport, CommentReport, UserInteraction
 
 
 @admin.register(Hashtag)
@@ -120,3 +120,25 @@ class CommentReportAdmin(admin.ModelAdmin):
             return content[:50] + '...' if len(content) > 50 else content
         return 'Deleted Comment'
     comment_preview.short_description = 'Comment'
+
+
+@admin.register(UserInteraction)
+class UserInteractionAdmin(admin.ModelAdmin):
+    """Admin configuration for UserInteraction model"""
+    list_display = ('id', 'user', 'post', 'interaction_type', 'scroll_depth', 'dwell_time', 'created_at')
+    list_filter = ('interaction_type', 'created_at')
+    search_fields = ('user__email', 'user__nickname', 'post__content')
+    readonly_fields = ('created_at',)
+    ordering = ('-created_at',)
+
+    fieldsets = (
+        ('Interaction Info', {
+            'fields': ('user', 'post', 'interaction_type')
+        }),
+        ('Engagement Metrics', {
+            'fields': ('scroll_depth', 'dwell_time', 'metadata')
+        }),
+        ('Timestamp', {
+            'fields': ('created_at',)
+        }),
+    )

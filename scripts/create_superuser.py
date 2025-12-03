@@ -21,26 +21,26 @@ def main():
     print("🔑 개발용 슈퍼유저 생성 중...\n")
 
     # 기본 슈퍼유저 정보
-    username = "admin"
     email = "admin@hypehere.com"
+    nickname = "Admin"
     password = "admin123"  # 개발용 비밀번호
 
-    # 이미 존재하는지 확인
-    if User.objects.filter(username=username).exists():
-        user = User.objects.get(username=username)
-        print(f"ℹ️  슈퍼유저가 이미 존재합니다: {username}")
+    # 이미 존재하는지 확인 (email 기반)
+    if User.objects.filter(email=email).exists():
+        user = User.objects.get(email=email)
+        print(f"ℹ️  슈퍼유저가 이미 존재합니다: {email}")
 
         # 슈퍼유저 권한 확인 및 부여
         if not user.is_superuser:
             user.is_superuser = True
             user.is_staff = True
             user.save()
-            print(f"✅ {username}에게 슈퍼유저 권한을 부여했습니다.")
+            print(f"✅ {email}에게 슈퍼유저 권한을 부여했습니다.")
     else:
         # 새 슈퍼유저 생성
         user = User.objects.create_superuser(
-            username=username,
             email=email,
+            nickname=nickname,
             password=password
         )
         print(f"✅ 슈퍼유저가 생성되었습니다!")
@@ -52,8 +52,8 @@ def main():
     print(f"   - ID: {user.id}")
 
     print(f"\n🌐 Django Admin 접속:")
-    print(f"   URL: http://127.0.0.1:8001/admin/")
-    print(f"   로그인: {username} / {password}")
+    print(f"   URL: http://127.0.0.1:8000/admin/")
+    print(f"   로그인: {email} / {password}")
 
     print("\n⚠️  주의: 이는 개발용 계정입니다. 프로덕션에서는 강력한 비밀번호를 사용하세요!")
     print("✨ 완료!")

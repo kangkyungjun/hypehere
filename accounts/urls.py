@@ -29,6 +29,8 @@ from .views import (
     UnbanUserAPIView,
     password_reset_request_view,
     PasswordResetRequestAPIView,
+    ProfilePictureDeleteView,
+    UserReportCreateView,
 )
 
 app_name = 'accounts'
@@ -73,4 +75,10 @@ urlpatterns = [
 
     # Password Reset API
     path('api/password-reset/', PasswordResetRequestAPIView.as_view(), name='password_reset_api'),
+
+    # Profile Picture API
+    path('api/profile-picture/', ProfilePictureDeleteView.as_view(), name='profile_picture_delete'),
+
+    # User Report API
+    path('api/users/report/', UserReportCreateView.as_view(), name='user_report_create'),
 ]

@@ -5,12 +5,13 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.serializers import ValidationError
 from django.shortcuts import get_object_or_404
 from django.db.models import Count, Q
-from .models import Post, Like, Comment, PostFavorite, PostReport, CommentReport
+from .models import Post, Like, Comment, PostFavorite, PostReport, CommentReport, UserInteraction
 from .serializers import (
     PostSerializer, PostCreateSerializer,
     CommentSerializer, CommentCreateSerializer,
     LikeSerializer, PostReportSerializer, CommentReportSerializer
 )
+from .services.recommendation import get_recommendations_for_user
 
 
 class PostPagination(PageNumberPagination):
@@ -29,11 +30,24 @@ class PostListCreateAPIView(generics.ListCreateAPIView):
     pagination_class = PostPagination
 
     def get_queryset(self):
-        """Return posts with like and comment counts"""
-        return Post.objects.select_related('author').prefetch_related('hashtags').annotate(
+        """Return posts with like and comment counts, excluding blocked users"""
+        queryset = Post.objects.select_related('author').prefetch_related('hashtags').annotate(
             like_count=Count('likes', distinct=True),
             comment_count=Count('comments', distinct=True)
         ).exclude(author__is_deactivated=True)
+
+        # 차단 관계 필터링 (로그인한 경우)
+        if self.request.user.is_authenticated:
+            from accounts.models import Block
+            # 내가 차단한 사용자의 게시물 제외
+            blocked_users = Block.objects.filter(blocker=self.request.user, is_active=True).values_list('blocked', flat=True)
+            queryset = queryset.exclude(author__in=blocked_users)
+
+            # 나를 차단한 사용자의 게시물 제외
+            blocking_users = Block.objects.filter(blocked=self.request.user, is_active=True).values_list('blocker', flat=True)
+            queryset = queryset.exclude(author__in=blocking_users)
+
+        return queryset
 
     def get_serializer_class(self):
         """Use different serializers for read and write operations"""
@@ -144,7 +158,20 @@ class PostCommentListCreateAPIView(generics.ListCreateAPIView):
         if post.is_deleted_by_report:
             return Comment.objects.none()
 
-        return Comment.objects.filter(post_id=post_id).select_related('author').exclude(author__is_deactivated=True).order_by('-created_at')
+        queryset = Comment.objects.filter(post_id=post_id).select_related('author').exclude(author__is_deactivated=True)
+
+        # 차단 관계 필터링 (로그인한 경우)
+        if self.request.user.is_authenticated:
+            from accounts.models import Block
+            # 내가 차단한 사용자의 댓글 제외
+            blocked_users = Block.objects.filter(blocker=self.request.user, is_active=True).values_list('blocked', flat=True)
+            queryset = queryset.exclude(author__in=blocked_users)
+
+            # 나를 차단한 사용자의 댓글 제외
+            blocking_users = Block.objects.filter(blocked=self.request.user, is_active=True).values_list('blocker', flat=True)
+            queryset = queryset.exclude(author__in=blocking_users)
+
+        return queryset.order_by('-created_at')
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
@@ -215,7 +242,7 @@ class PostSearchAPIView(generics.ListAPIView):
     pagination_class = PostPagination
 
     def get_queryset(self):
-        """Search posts by query parameter"""
+        """Search posts by query parameter, excluding blocked users"""
         query = self.request.query_params.get('q', '').strip()
 
         if not query:
@@ -228,9 +255,20 @@ class PostSearchAPIView(generics.ListAPIView):
             comment_count=Count('comments', distinct=True)
         ).filter(
             Q(content__icontains=query) | Q(hashtags__name__icontains=query)
-        ).exclude(author__is_deactivated=True).distinct().order_by('-created_at')
+        ).exclude(author__is_deactivated=True).distinct()
 
-        return queryset
+        # 차단 관계 필터링 (로그인한 경우)
+        if self.request.user.is_authenticated:
+            from accounts.models import Block
+            # 내가 차단한 사용자의 게시물 제외
+            blocked_users = Block.objects.filter(blocker=self.request.user, is_active=True).values_list('blocked', flat=True)
+            queryset = queryset.exclude(author__in=blocked_users)
+
+            # 나를 차단한 사용자의 게시물 제외
+            blocking_users = Block.objects.filter(blocked=self.request.user, is_active=True).values_list('blocker', flat=True)
+            queryset = queryset.exclude(author__in=blocking_users)
+
+        return queryset.order_by('-created_at')
 
 
 @api_view(['POST'])
@@ -312,3 +350,134 @@ def comment_report_view(request, post_id, comment_id):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def log_interaction(request):
+    """
+    POST /api/posts/log-interaction/
+    Log user interaction with a post
+
+    Request body:
+    {
+        "post_id": 123,
+        "interaction_type": "click",  // view, click, like, unlike, comment, share, favorite, skip, report
+        "scroll_depth": 50,  // Optional: 0-100
+        "dwell_time": 3.5,   // Optional: seconds
+        "metadata": {        // Optional: additional context
+            "device": "mobile",
+            "feed_position": 5,
+            "source_feed": "home"
+        }
+    }
+
+    Returns:
+    {
+        "success": true,
+        "interaction_id": 456
+    }
+    """
+    post_id = request.data.get('post_id')
+    interaction_type = request.data.get('interaction_type')
+    scroll_depth = request.data.get('scroll_depth', 0)
+    dwell_time = request.data.get('dwell_time', 0.0)
+    metadata = request.data.get('metadata', {})
+
+    # Validate required fields
+    if not post_id or not interaction_type:
+        return Response(
+            {'error': 'post_id and interaction_type are required'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # Validate interaction_type
+    valid_types = ['view', 'click', 'like', 'unlike', 'comment', 'share', 'favorite', 'skip', 'report']
+    if interaction_type not in valid_types:
+        return Response(
+            {'error': f'Invalid interaction_type. Must be one of: {", ".join(valid_types)}'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # Get post
+    try:
+        post = Post.objects.get(id=post_id)
+    except Post.DoesNotExist:
+        return Response(
+            {'error': 'Post not found'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    # Create interaction
+    try:
+        interaction = UserInteraction.log_interaction(
+            user=request.user,
+            post=post,
+            interaction_type=interaction_type,
+            scroll_depth=int(scroll_depth),
+            dwell_time=float(dwell_time),
+            metadata=metadata
+        )
+
+        return Response({
+            'success': True,
+            'interaction_id': interaction.id
+        }, status=status.HTTP_201_CREATED)
+
+    except Exception as e:
+        return Response(
+            {'error': str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+class RecommendedPostListAPIView(generics.ListAPIView):
+    """
+    GET /api/posts/recommended/ - Get personalized recommended posts
+
+    Uses ML-based recommendation engine with multi-factor scoring:
+    - Relationship score (follow/mutual connections)
+    - Engagement metrics (likes, comments)
+    - Interest alignment (hashtags, language)
+    - Freshness (post recency)
+    - Penalties (reports, skips, duplicates)
+
+    Query parameters:
+    - page: Page number (default: 1)
+    - page_size: Posts per page (default: 20, max: 50)
+    """
+    serializer_class = PostSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    pagination_class = PostPagination
+
+    def get_queryset(self):
+        """Get recommended posts using recommendation engine"""
+        # Get page and page_size from query params
+        page = int(self.request.query_params.get('page', 1))
+        page_size = min(int(self.request.query_params.get('page_size', 20)), 50)
+
+        # Get recommendations from engine
+        recommended_posts = get_recommendations_for_user(
+            user=self.request.user,
+            page=page,
+            page_size=page_size
+        )
+
+        # Convert list to QuerySet for proper serialization
+        # Note: The recommendation engine returns a list of Post objects
+        # We need to preserve the order, so we can't use .filter(id__in=...)
+        # Instead, return the list as-is and handle pagination manually
+        return recommended_posts
+
+    def list(self, request, *args, **kwargs):
+        """Override list to handle non-QuerySet results"""
+        posts = self.get_queryset()
+
+        # Manually serialize posts (already paginated by recommendation engine)
+        serializer = self.get_serializer(posts, many=True)
+
+        # Return response with metadata
+        return Response({
+            'count': len(posts),
+            'results': serializer.data
+        })

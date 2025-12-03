@@ -2,7 +2,7 @@ from rest_framework import serializers
 from django.contrib.auth import get_user_model, authenticate
 from django.contrib.auth.password_validation import validate_password
 from django.utils.translation import gettext_lazy as _
-from .models import Follow, Block
+from .models import Follow, Block, UserReport
 
 User = get_user_model()
 
@@ -296,3 +296,30 @@ class AccountManagementSerializer(serializers.ModelSerializer):
     def get_can_cancel_deletion(self, obj):
         """Check if deletion can be cancelled"""
         return obj.can_cancel_deletion()
+
+
+class UserReportSerializer(serializers.ModelSerializer):
+    """Serializer for UserReport data"""
+    reporter_nickname = serializers.CharField(source='reporter.nickname', read_only=True)
+    reported_user_nickname = serializers.CharField(source='reported_user.nickname', read_only=True)
+
+    class Meta:
+        model = UserReport
+        fields = [
+            'id', 'reporter', 'reporter_nickname',
+            'reported_user', 'reported_user_nickname',
+            'report_type', 'description',
+            'status', 'created_at'
+        ]
+        read_only_fields = ['id', 'reporter', 'status', 'created_at']
+
+    def validate(self, attrs):
+        """Prevent self-reporting"""
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            reported_user = attrs.get('reported_user')
+            if reported_user == request.user:
+                raise serializers.ValidationError({
+                    "reported_user": _("자기 자신을 신고할 수 없습니다.")
+                })
+        return attrs

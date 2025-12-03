@@ -24,9 +24,10 @@ from .serializers import (
     FollowSerializer,
     UserProfileDetailSerializer,
     PrivacySettingsSerializer,
-    BlockSerializer
+    BlockSerializer,
+    UserReportSerializer
 )
-from .models import Follow, Block, SupportTicket
+from .models import Follow, Block, SupportTicket, UserReport
 from posts.models import Post, PostFavorite, PostReport, CommentReport
 from posts.serializers import PostSerializer, PostFavoriteSerializer
 from posts.views import PostPagination
@@ -233,7 +234,20 @@ class CombinedSearchAPIView(APIView):
         # Search users by nickname (case-insensitive)
         users = User.objects.filter(
             Q(nickname__icontains=query)
-        ).exclude(is_deactivated=True).order_by('nickname')[:20]  # Limit to 20 users
+        ).exclude(is_deactivated=True)
+
+        # 차단 관계 필터링 (로그인한 경우)
+        if request.user.is_authenticated:
+            from accounts.models import Block
+            # 내가 차단한 사용자 제외
+            blocked_users = Block.objects.filter(blocker=request.user, is_active=True).values_list('blocked', flat=True)
+            users = users.exclude(id__in=blocked_users)
+
+            # 나를 차단한 사용자 제외
+            blocking_users = Block.objects.filter(blocked=request.user, is_active=True).values_list('blocker', flat=True)
+            users = users.exclude(id__in=blocking_users)
+
+        users = users.order_by('nickname')[:20]  # Limit to 20 users
 
         # Search posts by content and hashtags
         from posts.models import Post
@@ -242,7 +256,20 @@ class CombinedSearchAPIView(APIView):
             comment_count=Count('comments', distinct=True)
         ).filter(
             Q(content__icontains=query) | Q(hashtags__name__icontains=query)
-        ).distinct().order_by('-created_at')[:30]  # Limit to 30 posts
+        ).distinct()
+
+        # 차단 관계 필터링 (로그인한 경우) - 게시물도 필터링
+        if request.user.is_authenticated:
+            from accounts.models import Block
+            # 내가 차단한 사용자의 게시물 제외
+            blocked_users = Block.objects.filter(blocker=request.user, is_active=True).values_list('blocked', flat=True)
+            posts = posts.exclude(author__in=blocked_users)
+
+            # 나를 차단한 사용자의 게시물 제외
+            blocking_users = Block.objects.filter(blocked=request.user, is_active=True).values_list('blocker', flat=True)
+            posts = posts.exclude(author__in=blocking_users)
+
+        posts = posts.order_by('-created_at')[:30]  # Limit to 30 posts
 
         # Serialize the data
         user_data = []
@@ -331,6 +358,21 @@ class ProfileTemplateView(LoginRequiredMixin, TemplateView):
             profile_user = self.request.user
 
         is_own_profile = (self.request.user == profile_user)
+
+        # Check if blocked (only if viewing another user's profile)
+        if not is_own_profile:
+            is_blocking = self.request.user.is_blocking(profile_user)
+            is_blocked_by = profile_user.is_blocking(self.request.user)
+
+            if is_blocking or is_blocked_by:
+                context.update({
+                    'blocked': True,
+                    'is_blocking': is_blocking,
+                    'is_blocked_by': is_blocked_by,
+                    'profile_user': profile_user,
+                    'is_own_profile': False,
+                })
+                return context
 
         # Fetch user's posts
         user_posts = Post.objects.filter(author=profile_user).select_related('author').prefetch_related('hashtags').annotate(
@@ -831,18 +873,32 @@ class BlockUserView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Check if already blocked
+        # Check if already actively blocked
         if request.user.is_blocking(user_to_block):
             return Response(
                 {'error': 'User is already blocked'},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Create block relationship
-        block = Block.objects.create(
+        # Check if there's an inactive block record (previously blocked then unblocked)
+        existing_block = Block.objects.filter(
             blocker=request.user,
-            blocked=user_to_block
-        )
+            blocked=user_to_block,
+            is_active=False
+        ).first()
+
+        if existing_block:
+            # Re-activate the existing block
+            existing_block.is_active = True
+            existing_block.unblocked_at = None
+            existing_block.save(update_fields=['is_active', 'unblocked_at'])
+            block = existing_block
+        else:
+            # Create new block relationship
+            block = Block.objects.create(
+                blocker=request.user,
+                blocked=user_to_block
+            )
 
         # Remove follow relationships if they exist
         Follow.objects.filter(
@@ -866,12 +922,15 @@ class UnblockUserView(APIView):
 
     def delete(self, request, username):
         """Unblock a user"""
+        from django.utils import timezone
+
         user_to_unblock = get_object_or_404(User, username=username)
 
-        # Check if user is blocked
+        # Check if user is actively blocked
         block = Block.objects.filter(
             blocker=request.user,
-            blocked=user_to_unblock
+            blocked=user_to_unblock,
+            is_active=True
         ).first()
 
         if not block:
@@ -880,7 +939,10 @@ class UnblockUserView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        block.delete()
+        # Soft delete: 삭제하지 않고 is_active=False로 변경
+        block.is_active = False
+        block.unblocked_at = timezone.now()
+        block.save(update_fields=['is_active', 'unblocked_at'])
 
         return Response({
             'message': 'User unblocked successfully'
@@ -896,9 +958,10 @@ class BlockedUsersListView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        # Get users that current user has blocked
+        # Get users that current user has actively blocked
         blocked_ids = Block.objects.filter(
-            blocker=self.request.user
+            blocker=self.request.user,
+            is_active=True
         ).values_list('blocked_id', flat=True)
         return User.objects.filter(id__in=blocked_ids)
 
@@ -1316,6 +1379,12 @@ class ReportListAPIView(APIView):
                 report_dict['comment_content'] = report.comment.content[:100] if report.comment.content else ''
                 if report.comment.post:
                     report_dict['post_id'] = report.comment.post.id
+            elif report_type == 'chat':
+                # Add evidence fields for chat reports
+                if hasattr(report, 'message_snapshot') and report.message_snapshot:
+                    report_dict['message_snapshot'] = report.message_snapshot
+                if hasattr(report, 'video_frame') and report.video_frame:
+                    report_dict['video_frame_url'] = request.build_absolute_uri(report.video_frame.url)
 
             reports_data.append(report_dict)
 
@@ -1736,3 +1805,42 @@ class PasswordResetRequestAPIView(APIView):
         else:
             ip = request.META.get('REMOTE_ADDR')
         return ip
+
+
+class ProfilePictureDeleteView(APIView):
+    """
+    API view for deleting user profile picture
+    DELETE /api/accounts/profile-picture/
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def delete(self, request):
+        """Delete the current user's profile picture"""
+        user = request.user
+
+        # Delete the profile picture file if it exists
+        if user.profile_picture:
+            user.profile_picture.delete(save=False)
+
+        # Set profile_picture field to None
+        user.profile_picture = None
+        user.save()
+
+        return Response({
+            'success': True,
+            'message': _('프로필 사진이 삭제되었습니다.')
+        }, status=status.HTTP_200_OK)
+
+
+class UserReportCreateView(generics.CreateAPIView):
+    """
+    API view for creating user reports
+    POST /api/accounts/users/report/
+    """
+    queryset = UserReport.objects.all()
+    serializer_class = UserReportSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_create(self, serializer):
+        """Set the reporter to the current user"""
+        serializer.save(reporter=self.request.user)
