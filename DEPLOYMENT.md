@@ -1,22 +1,25 @@
 # HypeHere AWS 배포 가이드
 
 **프로젝트**: HypeHere - 언어 학습 소셜 플랫폼
-**아키텍처**: AWS App Runner + Neon PostgreSQL + Upstash Redis + AWS S3
-**예상 비용**: 월 $11-18
-**배포 시간**: 약 60-90분
+**아키텍처**: AWS EC2 + RDS PostgreSQL + ElastiCache Redis + S3
+**예상 비용**: 월 $58-70
+**배포 시간**: 약 120-180분
 
 ## 📋 목차
 
 1. [아키텍처 개요](#아키텍처-개요)
 2. [사전 준비](#사전-준비)
-3. [Step 1: 외부 데이터베이스 설정](#step-1-외부-데이터베이스-설정)
-4. [Step 2: Redis 설정](#step-2-redis-설정)
-5. [Step 3: AWS S3 설정](#step-3-aws-s3-설정)
-6. [Step 4: GitHub 저장소 준비](#step-4-github-저장소-준비)
-7. [Step 5: AWS App Runner 배포](#step-5-aws-app-runner-배포)
-8. [Step 6: 배포 후 검증](#step-6-배포-후-검증)
-9. [문제 해결](#문제-해결)
-10. [향후 확장](#향후-확장)
+3. [Step 0: VPC 및 네트워킹 설정](#step-0-vpc-및-네트워킹-설정)
+4. [Step 1: AWS RDS PostgreSQL 설정](#step-1-aws-rds-postgresql-설정)
+5. [Step 2: AWS ElastiCache Redis 설정](#step-2-aws-elasticache-redis-설정)
+6. [Step 3: AWS S3 설정](#step-3-aws-s3-설정)
+7. [Step 4: AWS EC2 인스턴스 설정](#step-4-aws-ec2-인스턴스-설정)
+8. [Step 5: Django 애플리케이션 배포](#step-5-django-애플리케이션-배포)
+9. [Step 6: Application Load Balancer 설정](#step-6-application-load-balancer-설정)
+10. [Step 7: GitHub Actions CI/CD 설정](#step-7-github-actions-cicd-설정)
+11. [Step 8: 배포 후 검증](#step-8-배포-후-검증)
+12. [문제 해결](#문제-해결)
+13. [향후 확장](#향후-확장)
 
 ---
 
@@ -25,55 +28,81 @@
 ### 전체 구조
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    사용자 (웹/모바일)                          │
-│               웹 브라우저 | 웹앱 | Flutter 앱                 │
-└────────────────────┬────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                    사용자 (웹/모바일)                              │
+│              웹 브라우저 | 웹앱 | Flutter 앱                       │
+└────────────────────┬────────────────────────────────────────────┘
                      │ HTTPS
                      ▼
-┌─────────────────────────────────────────────────────────────┐
-│  AWS App Runner (Django + Daphne ASGI)                       │
-│  - HTTP + WebSocket 지원                                      │
-│  - 자동 SSL 인증서                                            │
-│  - 자동 스케일링 (0.25 vCPU, 0.5GB RAM)                      │
-│  - GitHub 자동 배포                                           │
-│  예상 비용: $10-15/월                                         │
-└──────┬──────────────────────┬──────────────────────────────┘
-       │                      │
-       ▼                      ▼
-┌──────────────┐      ┌──────────────────┐
-│ Neon DB      │      │ Upstash Redis    │
-│ (PostgreSQL) │      │ (Redis)          │
-│ - 512MB 저장소│      │ - 10K cmd/day    │
-│ - 무료 계층   │      │ - 무료 계층       │
-│ $0/월        │      │ $0/월            │
-└──────────────┘      └──────────────────┘
-       │
-       ▼
-┌─────────────────────┐
-│  AWS S3             │
-│  - Static files     │
-│  - Media uploads    │
-│  예상: $1-3/월      │
-└─────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│  Application Load Balancer (ALB)                                 │
+│  - HTTPS 종료 (SSL/TLS)                                          │
+│  - WebSocket 지원                                                │
+│  - 헬스 체크                                                      │
+│  예상 비용: $20/월                                                │
+└────────────────────┬────────────────────────────────────────────┘
+                     │
+                     ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                        AWS VPC (10.0.0.0/16)                     │
+│                                                                   │
+│  ┌─────────────────────── Public Subnets ────────────────────┐  │
+│  │                                                             │  │
+│  │  ┌──────────────────────────────────────────────────────┐ │  │
+│  │  │  EC2 Instance (t3.small)                              │ │  │
+│  │  │  - Ubuntu 22.04 LTS                                   │ │  │
+│  │  │  - Nginx (Reverse Proxy)                             │ │  │
+│  │  │  - Django 5.1 + Daphne ASGI                          │ │  │
+│  │  │  - Auto Scaling Group (선택사항)                      │ │  │
+│  │  │  예상 비용: $15/월                                     │ │  │
+│  │  └──────────────────────────────────────────────────────┘ │  │
+│  │                                                             │  │
+│  └─────────────────────────────────────────────────────────────┘  │
+│                                                                   │
+│  ┌─────────────────────── Private Subnets ───────────────────┐  │
+│  │                                                             │  │
+│  │  ┌────────────────────┐      ┌──────────────────────────┐ │  │
+│  │  │ RDS PostgreSQL 13  │      │ ElastiCache Redis 7.x    │ │  │
+│  │  │ db.t3.micro        │      │ cache.t3.micro           │ │  │
+│  │  │ Single-AZ          │      │ Single Node              │ │  │
+│  │  │ 20GB gp2           │      │                          │ │  │
+│  │  │ 예상: $15/월        │      │ 예상: $15/월              │ │  │
+│  │  └────────────────────┘      └──────────────────────────┘ │  │
+│  │                                                             │  │
+│  └─────────────────────────────────────────────────────────────┘  │
+│                                                                   │
+│  Security Groups:                                                │
+│  - EC2 SG: 22 (SSH), 80 (HTTP), 443 (HTTPS), 8000 (Django)     │
+│  - RDS SG: 5432 (PostgreSQL) from EC2 SG                        │
+│  - ElastiCache SG: 6379 (Redis) from EC2 SG                     │
+│  - ALB SG: 80, 443 from 0.0.0.0/0                               │
+└───────────────────────────────────────────────────────────────────┘
+                     │
+                     ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  AWS S3 (hypehere-static-media)                                  │
+│  - Static files (CSS, JS)                                        │
+│  - Media uploads (이미지, 파일)                                    │
+│  - CORS 설정                                                      │
+│  예상 비용: $1-3/월                                               │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ### 왜 이 아키텍처인가?
 
 #### ✅ 장점
-1. **최저 비용**: 무료 서비스 활용 + 최소 컴퓨팅
-2. **서버 관리 불필요**: AWS가 모든 인프라 관리
-3. **자동 배포**: GitHub 푸시 → 자동 재배포
+1. **순수 AWS 솔루션**: 외부 서비스 의존성 없음, AWS 통합 관리
+2. **확장성**: EC2 Auto Scaling으로 트래픽 증가 대응
+3. **안정성**: VPC 내부 Private Subnet으로 DB/Cache 보안 강화
 4. **멀티 플랫폼 지원**: 웹/웹앱/Flutter 앱 모두 지원
-5. **WebSocket 완벽 지원**: 실시간 채팅 기능
-6. **확장성**: 트래픽 증가 시 쉽게 업그레이드 가능
+5. **WebSocket 완벽 지원**: ALB + Daphne로 실시간 채팅 기능
+6. **비용 최적화 가능**: Reserved Instance로 30-40% 절감 가능
 
-#### ⚠️ 제한사항
-1. **무료 계층 한계**:
-   - Neon DB: 512MB 저장소, 월 100시간 활성 시간
-   - Upstash Redis: 10,000 commands/day
-2. **App Runner 최소 비용**: 월 $10-15는 피할 수 없음
-3. **Cold Start**: 트래픽이 없으면 첫 요청 시 약 1-2초 지연
+#### ⚠️ 고려사항
+1. **초기 비용**: 월 $58-70 (외부 서비스 대비 3-4배)
+2. **서버 관리 필요**: OS 업데이트, 보안 패치, 애플리케이션 배포
+3. **설정 복잡도**: VPC, Security Group, Load Balancer 설정 필요
+4. **Auto Scaling 설정**: 트래픽 패턴 분석 후 적절한 정책 수립
 
 ---
 
@@ -82,13 +111,12 @@
 ### 필요한 계정
 - [x] AWS 계정 (이미 보유)
 - [ ] GitHub 계정
-- [ ] Neon 계정 (https://neon.tech)
-- [ ] Upstash 계정 (https://upstash.com)
+- [ ] SSH 키 페어 (로컬에 생성 필요)
 
 ### 로컬 환경 요구사항
 - Python 3.12
 - Git
-- 인터넷 연결
+- SSH 클라이언트
 - 텍스트 에디터
 
 ### 준비 완료 확인
@@ -99,1118 +127,1661 @@ python --version  # Python 3.12.x
 # 2. Git 상태 확인
 git status
 
-# 3. 필수 파일 존재 확인
-ls -la apprunner.yaml deploy.sh .env.production
+# 3. SSH 키 생성 (없는 경우)
+ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
+
+# 4. requirements.txt 확인
+cat requirements.txt | grep -E "Django|daphne|psycopg2|redis|boto3"
 ```
 
 ---
 
-## Step 1: 외부 데이터베이스 설정
+## Step 0: VPC 및 네트워킹 설정
 
-### Neon PostgreSQL 데이터베이스 생성
+### 0.1. VPC 생성
 
-#### 1-1. Neon 계정 생성
-1. https://neon.tech 접속
-2. "Sign Up" 클릭
-3. GitHub 또는 Google 계정으로 가입
-4. 이메일 인증 완료
+1. **AWS Console 접속**
+   - 서비스 → VPC → "VPC 생성" 클릭
 
-#### 1-2. 프로젝트 생성
-1. Neon 대시보드 → "Create a project" 클릭
-2. 설정 입력:
+2. **VPC 설정**
    ```
-   Project name: hypehere-db
-   PostgreSQL version: 15 (최신)
-   Region: US East (Ohio) - us-east-2
+   이름: hypehere-vpc
+   IPv4 CIDR: 10.0.0.0/16
+   IPv6 CIDR: 없음
+   테넌시: 기본값
+   DNS 호스트 이름 활성화: ✅
+   DNS 확인 활성화: ✅
    ```
-   > **중요**: App Runner 리전과 동일하게 설정하여 네트워크 지연 최소화
-3. "Create Project" 클릭
 
-#### 1-3. 연결 정보 복사
-프로젝트 생성 후 표시되는 연결 문자열 복사:
+### 0.2. Subnet 생성
+
+**Public Subnet (EC2, ALB용)**
+
 ```
-postgresql://user:password@ep-xxx-xxx.us-east-2.aws.neon.tech/neondb
+Subnet 1 (Public):
+- 이름: hypehere-public-subnet-1a
+- 가용 영역: us-east-2a
+- IPv4 CIDR: 10.0.1.0/24
+
+Subnet 2 (Public):
+- 이름: hypehere-public-subnet-1b
+- 가용 영역: us-east-2b
+- IPv4 CIDR: 10.0.2.0/24
 ```
 
-이 정보를 안전한 곳에 저장 (나중에 App Runner 환경 변수로 입력)
+**Private Subnet (RDS, ElastiCache용)**
 
-#### 1-4. 연결 테스트 (선택사항)
-로컬에서 연결 테스트:
+```
+Subnet 3 (Private):
+- 이름: hypehere-private-subnet-1a
+- 가용 영역: us-east-2a
+- IPv4 CIDR: 10.0.11.0/24
+
+Subnet 4 (Private):
+- 이름: hypehere-private-subnet-1b
+- 가용 영역: us-east-2b
+- IPv4 CIDR: 10.0.12.0/24
+```
+
+> **참고**: RDS와 ElastiCache는 최소 2개의 서로 다른 AZ에 있는 서브넷이 필요합니다.
+
+### 0.3. Internet Gateway 생성
+
+1. **Internet Gateway 생성**
+   ```
+   이름: hypehere-igw
+   ```
+
+2. **VPC에 연결**
+   - Internet Gateway 선택 → "VPC에 연결" → hypehere-vpc 선택
+
+### 0.4. Route Table 설정
+
+**Public Route Table**
+
+1. **생성**
+   ```
+   이름: hypehere-public-rt
+   VPC: hypehere-vpc
+   ```
+
+2. **라우팅 규칙 추가**
+   ```
+   대상: 0.0.0.0/0
+   타겟: hypehere-igw (Internet Gateway)
+   ```
+
+3. **Subnet 연결**
+   - hypehere-public-subnet-1a 연결
+   - hypehere-public-subnet-1b 연결
+
+**Private Route Table**
+
+1. **생성**
+   ```
+   이름: hypehere-private-rt
+   VPC: hypehere-vpc
+   ```
+
+2. **Subnet 연결**
+   - hypehere-private-subnet-1a 연결
+   - hypehere-private-subnet-1b 연결
+
+> **참고**: Private Subnet은 Internet Gateway 연결 없음 (외부 접근 차단)
+
+### 0.5. Security Groups 생성
+
+**ALB Security Group**
+
+```
+이름: hypehere-alb-sg
+설명: Security group for Application Load Balancer
+VPC: hypehere-vpc
+
+인바운드 규칙:
+- Type: HTTP, Port: 80, Source: 0.0.0.0/0
+- Type: HTTPS, Port: 443, Source: 0.0.0.0/0
+
+아웃바운드 규칙:
+- Type: 모든 트래픽, Destination: 0.0.0.0/0
+```
+
+**EC2 Security Group**
+
+```
+이름: hypehere-ec2-sg
+설명: Security group for EC2 Django application
+VPC: hypehere-vpc
+
+인바운드 규칙:
+- Type: SSH, Port: 22, Source: [내 IP 또는 Bastion IP]
+- Type: HTTP, Port: 80, Source: hypehere-alb-sg
+- Type: Custom TCP, Port: 8000, Source: hypehere-alb-sg
+
+아웃바운드 규칙:
+- Type: 모든 트래픽, Destination: 0.0.0.0/0
+```
+
+**RDS Security Group**
+
+```
+이름: hypehere-rds-sg
+설명: Security group for RDS PostgreSQL
+VPC: hypehere-vpc
+
+인바운드 규칙:
+- Type: PostgreSQL, Port: 5432, Source: hypehere-ec2-sg
+
+아웃바운드 규칙:
+- Type: 모든 트래픽, Destination: 0.0.0.0/0
+```
+
+**ElastiCache Security Group**
+
+```
+이름: hypehere-elasticache-sg
+설명: Security group for ElastiCache Redis
+VPC: hypehere-vpc
+
+인바운드 규칙:
+- Type: Custom TCP, Port: 6379, Source: hypehere-ec2-sg
+
+아웃바운드 규칙:
+- Type: 모든 트래픽, Destination: 0.0.0.0/0
+```
+
+### 0.6. 검증
+
 ```bash
-# psql 설치되어 있다면
-psql "postgresql://user:password@ep-xxx.us-east-2.aws.neon.tech/neondb"
+# AWS CLI로 VPC 확인
+aws ec2 describe-vpcs --filters "Name=tag:Name,Values=hypehere-vpc"
 
-# 또는 Python으로 테스트
-python -c "import psycopg2; conn = psycopg2.connect('postgresql://...'); print('✅ 연결 성공'); conn.close()"
+# Subnet 확인
+aws ec2 describe-subnets --filters "Name=vpc-id,Values=<VPC_ID>"
+
+# Security Group 확인
+aws ec2 describe-security-groups --filters "Name=vpc-id,Values=<VPC_ID>"
 ```
-
-**예상 소요 시간**: 5분
 
 ---
 
-## Step 2: Redis 설정
+## Step 1: AWS RDS PostgreSQL 설정
 
-### Upstash Redis 인스턴스 생성
+### 1.1. DB Subnet Group 생성
 
-#### 2-1. Upstash 계정 생성
-1. https://upstash.com 접속
-2. "Sign Up" 클릭
-3. GitHub 또는 Google 계정으로 가입
-4. 이메일 인증 완료
+1. **RDS Console 접속**
+   - 서비스 → RDS → "서브넷 그룹" → "DB 서브넷 그룹 생성"
 
-#### 2-2. Redis 데이터베이스 생성
-1. Upstash 콘솔 → "Redis" → "Create Database" 클릭
-2. 설정 입력:
+2. **설정**
    ```
-   Name: hypehere-redis
-   Type: Regional (무료)
-   Region: US East (가장 가까운 리전 선택)
-   Primary Region: us-east-1
-   Eviction: True (메모리 부족 시 자동 삭제)
-   TLS: Enabled (보안 연결)
+   이름: hypehere-db-subnet-group
+   설명: Subnet group for HypeHere RDS
+   VPC: hypehere-vpc
+
+   서브넷 추가:
+   - hypehere-private-subnet-1a (10.0.11.0/24)
+   - hypehere-private-subnet-1b (10.0.12.0/24)
    ```
-3. "Create" 클릭
 
-#### 2-3. 연결 정보 복사
-생성 후 "Details" 탭에서 연결 URL 복사:
+### 1.2. RDS PostgreSQL 인스턴스 생성
+
+1. **"데이터베이스 생성" 클릭**
+
+2. **엔진 선택**
+   ```
+   엔진 유형: PostgreSQL
+   버전: PostgreSQL 15.x (최신 안정 버전)
+   템플릿: 프리 티어 (테스트용) 또는 프로덕션 (실사용)
+   ```
+
+3. **설정**
+   ```
+   DB 인스턴스 식별자: hypehere-db
+   마스터 사용자 이름: postgres
+   마스터 암호: [강력한 암호 생성 - 최소 16자, 특수문자 포함]
+   암호 확인: [동일한 암호]
+   ```
+
+   > **중요**: 마스터 암호는 반드시 안전한 곳에 저장하세요!
+
+4. **인스턴스 구성**
+   ```
+   DB 인스턴스 클래스: db.t3.micro (1 vCPU, 1GB RAM)
+   스토리지 유형: 범용 SSD (gp2)
+   할당된 스토리지: 20GB
+   스토리지 자동 조정: ✅ 활성화 (최대 100GB)
+   ```
+
+5. **연결**
+   ```
+   컴퓨팅 리소스: EC2 컴퓨팅 리소스에 연결 안 함
+   VPC: hypehere-vpc
+   DB 서브넷 그룹: hypehere-db-subnet-group
+   퍼블릭 액세스: 아니요 (Private Subnet 사용)
+   VPC 보안 그룹: hypehere-rds-sg
+   가용 영역: 기본 설정 없음
+   ```
+
+6. **추가 구성**
+   ```
+   초기 데이터베이스 이름: hypehere
+   DB 파라미터 그룹: default.postgres15
+   백업 보존 기간: 7일
+   암호화: ✅ 활성화 (기본 AWS KMS 키)
+   성능 개선 도우미: ✅ 활성화
+   자동 마이너 버전 업그레이드: ✅ 활성화
+   삭제 방지: ✅ 활성화 (프로덕션에만)
+   ```
+
+7. **"데이터베이스 생성" 클릭**
+
+   > 생성 완료까지 약 5-10분 소요
+
+### 1.3. 데이터베이스 및 사용자 생성
+
+RDS 인스턴스가 생성되면 애플리케이션용 데이터베이스와 사용자를 생성해야 합니다.
+
+1. **엔드포인트 확인**
+   - RDS Console → hypehere-db → "연결 & 보안" 탭
+   - 엔드포인트 복사: `hypehere-db.c9abc123xyz.us-east-2.rds.amazonaws.com`
+
+2. **EC2 Bastion Host 또는 로컬에서 연결 (임시)**
+
+   > **주의**: Private Subnet에 있으므로 직접 연결 불가. EC2 인스턴스 생성 후 진행하거나, 임시로 Public 액세스 활성화
+
+   **임시 Public 액세스 활성화 (선택사항)**
+   - RDS Console → hypehere-db → "수정"
+   - 퍼블릭 액세스: 예
+   - VPC 보안 그룹: 임시로 내 IP 허용
+   - "즉시 적용" 선택 → "DB 인스턴스 수정"
+
+3. **psql로 연결**
+   ```bash
+   # psql 설치 (로컬)
+   brew install postgresql  # macOS
+   sudo apt install postgresql-client  # Ubuntu
+
+   # RDS 연결
+   psql -h hypehere-db.c9abc123xyz.us-east-2.rds.amazonaws.com \
+        -U postgres \
+        -d postgres
+   ```
+
+4. **애플리케이션 사용자 및 데이터베이스 생성**
+   ```sql
+   -- 애플리케이션 사용자 생성
+   CREATE USER hypehere_app WITH PASSWORD 'your_secure_app_password';
+
+   -- 데이터베이스 생성 (이미 있으면 생략)
+   CREATE DATABASE hypehere OWNER hypehere_app;
+
+   -- 권한 부여
+   GRANT ALL PRIVILEGES ON DATABASE hypehere TO hypehere_app;
+
+   -- 연결 확인
+   \c hypehere
+   \du
+   \l
+
+   -- 종료
+   \q
+   ```
+
+5. **Public 액세스 다시 비활성화 (임시 활성화한 경우)**
+   - RDS Console → hypehere-db → "수정"
+   - 퍼블릭 액세스: 아니요
+   - "즉시 적용" → "DB 인스턴스 수정"
+
+### 1.4. 연결 정보 기록
+
 ```
-redis://default:password@us1-xxx-xxx.upstash.io:6379
+RDS 엔드포인트: hypehere-db.c9abc123xyz.us-east-2.rds.amazonaws.com
+포트: 5432
+데이터베이스 이름: hypehere
+마스터 사용자: postgres
+마스터 암호: [저장한 암호]
+애플리케이션 사용자: hypehere_app
+애플리케이션 암호: your_secure_app_password
+
+DATABASE_URL:
+postgresql://hypehere_app:your_secure_app_password@hypehere-db.c9abc123xyz.us-east-2.rds.amazonaws.com:5432/hypehere
 ```
 
-이 정보를 안전한 곳에 저장
+---
 
-#### 2-4. 연결 테스트 (선택사항)
-로컬에서 연결 테스트:
+## Step 2: AWS ElastiCache Redis 설정
+
+### 2.1. Cache Subnet Group 생성
+
+1. **ElastiCache Console 접속**
+   - 서비스 → ElastiCache → "서브넷 그룹" → "서브넷 그룹 생성"
+
+2. **설정**
+   ```
+   이름: hypehere-cache-subnet-group
+   설명: Subnet group for HypeHere Redis
+   VPC: hypehere-vpc
+
+   서브넷 추가:
+   - hypehere-private-subnet-1a (10.0.11.0/24)
+   - hypehere-private-subnet-1b (10.0.12.0/24)
+   ```
+
+### 2.2. Redis Cluster 생성
+
+1. **"Redis 클러스터 생성" 클릭**
+
+2. **클러스터 설정**
+   ```
+   클러스터 모드: 비활성화 (단일 노드)
+   이름: hypehere-cache
+   설명: Redis cache for HypeHere
+   엔진 버전: 7.1 (최신 안정 버전)
+   포트: 6379 (기본값)
+   파라미터 그룹: default.redis7
+   노드 유형: cache.t3.micro (0.5GB)
+   복제본 수: 0 (Single Node, 비용 절감)
+   ```
+
+3. **고급 Redis 설정**
+   ```
+   서브넷 그룹: hypehere-cache-subnet-group
+   Multi-AZ: 비활성화 (복제본 없으므로)
+   보안 그룹: hypehere-elasticache-sg
+   암호화: 전송 중 암호화 비활성화 (VPC 내부이므로)
+   백업: 자동 백업 비활성화 (cache.t3.micro는 지원 안 함)
+   ```
+
+4. **"생성" 클릭**
+
+   > 생성 완료까지 약 5-10분 소요
+
+### 2.3. 연결 정보 확인
+
+1. **엔드포인트 확인**
+   - ElastiCache Console → Redis → hypehere-cache
+   - "기본 엔드포인트" 복사: `hypehere-cache.abc123.0001.use2.cache.amazonaws.com:6379`
+
+2. **연결 정보 기록**
+   ```
+   Redis 엔드포인트: hypehere-cache.abc123.0001.use2.cache.amazonaws.com
+   포트: 6379
+   패스워드: 없음 (VPC 내부 보안)
+
+   REDIS_URL:
+   redis://hypehere-cache.abc123.0001.use2.cache.amazonaws.com:6379
+   ```
+
+### 2.4. 연결 테스트 (EC2 생성 후)
+
+EC2 인스턴스가 생성되면 아래 명령으로 Redis 연결을 테스트합니다.
+
 ```bash
-# redis-cli 설치되어 있다면
-redis-cli -u "redis://default:password@us1-xxx.upstash.io:6379" PING
+# redis-cli 설치
+sudo apt install redis-tools -y
+
+# Redis 연결 테스트
+redis-cli -h hypehere-cache.abc123.0001.use2.cache.amazonaws.com ping
 # 응답: PONG
 
-# 또는 Python으로 테스트
-python -c "import redis; r = redis.from_url('redis://...'); print(r.ping()); print('✅ 연결 성공')"
+# 간단한 테스트
+redis-cli -h hypehere-cache.abc123.0001.use2.cache.amazonaws.com
+> SET test "Hello from HypeHere"
+> GET test
+> DEL test
+> QUIT
 ```
-
-**예상 소요 시간**: 5분
 
 ---
 
 ## Step 3: AWS S3 설정
 
-### 3-1. S3 버킷 생성
+### 3.1. S3 Bucket 생성
 
-#### AWS 콘솔 접속
-1. https://console.aws.amazon.com/s3 접속
-2. 리전 선택: **US East (Ohio) - us-east-2**
-   > App Runner 및 Neon DB와 동일 리전 사용
+1. **S3 Console 접속**
+   - 서비스 → S3 → "버킷 만들기"
 
-#### 버킷 생성
-1. "Create bucket" 클릭
-2. 설정 입력:
+2. **일반 구성**
    ```
-   Bucket name: hypehere-static-media-[YOUR-NAME]
-   예: hypehere-static-media-john
-   (S3 버킷 이름은 전 세계적으로 고유해야 함)
+   버킷 이름: hypehere-static-media-[고유번호]
+   예: hypehere-static-media-20250103
 
-   AWS Region: US East (Ohio) us-east-2
+   AWS 리전: us-east-2 (Ohio)
 
-   Object Ownership: ACLs disabled (권장)
-
-   Block Public Access settings:
-   ⚠️ 모든 체크 해제 (정적 파일 공개 필요)
-   - [ ] Block all public access
-   - [ ] Block public access to buckets and objects granted through new access control lists (ACLs)
-   - [ ] Block public access to buckets and objects granted through any access control lists (ACLs)
-   - [ ] Block public access to buckets and objects granted through new public bucket or access point policies
-   - [ ] Block public and cross-account access to buckets and objects through any public bucket or access point policies
+   객체 소유권: ACL 활성화됨
    ```
-3. 경고 확인:
-   - ☑️ "I acknowledge that the current settings might result in this bucket and the objects within becoming public"
-4. "Create bucket" 클릭
 
-**예상 소요 시간**: 3분
-
----
-
-### 3-2. S3 버킷 CORS 설정
-
-#### CORS 구성
-1. 생성한 버킷 클릭 → "Permissions" 탭
-2. "Cross-origin resource sharing (CORS)" 섹션 스크롤
-3. "Edit" 클릭
-4. 다음 JSON 입력:
-
-```json
-[
-    {
-        "AllowedHeaders": [
-            "*"
-        ],
-        "AllowedMethods": [
-            "GET",
-            "PUT",
-            "POST",
-            "DELETE",
-            "HEAD"
-        ],
-        "AllowedOrigins": [
-            "*"
-        ],
-        "ExposeHeaders": [
-            "ETag"
-        ],
-        "MaxAgeSeconds": 3000
-    }
-]
-```
-
-5. "Save changes" 클릭
-
-**CORS가 필요한 이유**: 웹 브라우저에서 직접 S3에 파일 업로드 시 필요
-
-**예상 소요 시간**: 2분
-
----
-
-### 3-3. IAM 사용자 생성 (S3 접근용)
-
-#### IAM 사용자 생성
-1. https://console.aws.amazon.com/iam 접속
-2. 좌측 메뉴 → "Users" → "Create user" 클릭
-3. 사용자 이름 입력:
+3. **퍼블릭 액세스 차단 설정**
    ```
-   User name: hypehere-s3-user
+   ☑️ 모든 퍼블릭 액세스 차단: 해제
+
+   ⚠️ 경고 확인: ☑️ 퍼블릭 액세스를 부여할 수 있음을 알고 있습니다.
    ```
-4. "Next" 클릭
 
-#### 권한 설정
-1. "Attach policies directly" 선택
-2. 검색창에 "S3" 입력
-3. **AmazonS3FullAccess** 체크
-4. "Next" 클릭
-5. "Create user" 클릭
-
-#### Access Key 발급
-1. 생성된 사용자 클릭
-2. "Security credentials" 탭
-3. "Access keys" 섹션 → "Create access key" 클릭
-4. Use case 선택:
+4. **버킷 버전 관리**
    ```
-   Use case: Application running outside AWS
+   버전 관리: 비활성화 (비용 절감)
    ```
-5. "Next" 클릭
-6. Description 입력 (선택사항):
+
+5. **"버킷 만들기" 클릭**
+
+### 3.2. Bucket Policy 설정
+
+1. **버킷 선택 → "권한" 탭**
+
+2. **버킷 정책 편집**
+   ```json
+   {
+     "Version": "2012-10-17",
+     "Statement": [
+       {
+         "Sid": "PublicReadGetObject",
+         "Effect": "Allow",
+         "Principal": "*",
+         "Action": "s3:GetObject",
+         "Resource": "arn:aws:s3:::hypehere-static-media-20250103/*"
+       }
+     ]
+   }
    ```
-   Description tag: HypeHere S3 Access for Production
+
+   > **주의**: `hypehere-static-media-20250103` 부분을 실제 버킷 이름으로 변경하세요.
+
+### 3.3. CORS 설정
+
+1. **버킷 선택 → "권한" 탭 → "CORS(교차 오리진 리소스 공유)" 편집**
+
+2. **CORS 규칙 추가**
+   ```json
+   [
+     {
+       "AllowedHeaders": [
+         "*"
+       ],
+       "AllowedMethods": [
+         "GET",
+         "PUT",
+         "POST",
+         "DELETE",
+         "HEAD"
+       ],
+       "AllowedOrigins": [
+         "http://localhost:8000",
+         "http://127.0.0.1:8000",
+         "https://*.amazonaws.com",
+         "https://yourdomain.com"
+       ],
+       "ExposeHeaders": [
+         "ETag",
+         "x-amz-meta-custom-header"
+       ],
+       "MaxAgeSeconds": 3000
+     }
+   ]
    ```
-7. "Create access key" 클릭
 
-#### 🔑 Access Key 저장
-**중요**: 다음 정보는 한 번만 표시됩니다!
+   > **나중에 업데이트**: EC2/ALB 도메인을 `AllowedOrigins`에 추가하세요.
+
+### 3.4. IAM 사용자 및 액세스 키 생성
+
+1. **IAM Console → "사용자" → "사용자 추가"**
+   ```
+   사용자 이름: hypehere-s3-user
+   액세스 유형: 액세스 키 - 프로그래밍 방식 액세스
+   ```
+
+2. **권한 설정**
+   - "기존 정책 직접 연결" 선택
+   - 검색: `AmazonS3FullAccess` 선택
+
+   > **프로덕션 권장**: S3FullAccess 대신 특정 버킷에만 접근 가능한 정책 생성
+
+3. **사용자 생성 완료**
+   - **액세스 키 ID**: `AKIA...` (복사)
+   - **비밀 액세스 키**: `wJalrXUtn...` (복사)
+
+   > **중요**: 비밀 액세스 키는 이 화면에서만 확인 가능합니다. 안전한 곳에 저장하세요!
+
+### 3.5. 연결 정보 기록
 
 ```
-Access key ID: AKIA...
-Secret access key: wJalrXUtn...
-```
+S3 버킷 이름: hypehere-static-media-20250103
+리전: us-east-2
+액세스 키 ID: AKIA...
+비밀 액세스 키: wJalrXUtn...
 
-**안전하게 저장하세요** (나중에 App Runner 환경 변수로 입력):
-- 메모장이나 비밀번호 관리 도구에 저장
-- 절대 GitHub에 커밋하지 마세요
-
-**예상 소요 시간**: 5분
-
----
-
-## Step 4: GitHub 저장소 준비
-
-### 4-1. .gitignore 확인
-
-민감한 정보가 GitHub에 업로드되지 않도록 확인:
-
-```bash
-# .gitignore 파일 확인
-cat .gitignore | grep -E "(\.env|db\.sqlite3|__pycache__|media)"
-
-# 출력 예시:
-# .env
-# .env.local
-# .env.production
-# db.sqlite3
-# __pycache__/
-# media/
-```
-
-만약 없다면 추가:
-```bash
-cat >> .gitignore << 'EOF'
-# Environment variables
-.env
-.env.local
-.env.production
-
-# Database
-db.sqlite3
-*.sqlite3
-
-# Python cache
-__pycache__/
-*.pyc
-*.pyo
-
-# Media files
-media/
-
-# Static files collection
-staticfiles/
-EOF
-```
-
-**예상 소요 시간**: 2분
-
----
-
-### 4-2. Git 커밋 및 푸시
-
-#### 현재 변경사항 확인
-```bash
-git status
-```
-
-#### 새 파일들 추가
-```bash
-git add apprunner.yaml deploy.sh .env.production DEPLOYMENT.md
-```
-
-#### 커밋
-```bash
-git commit -m "Add AWS deployment configuration
-
-- Add apprunner.yaml for App Runner deployment
-- Add deploy.sh deployment script
-- Add .env.production template
-- Add DEPLOYMENT.md comprehensive deployment guide
-
-Prepared for production deployment to AWS App Runner"
-```
-
-#### GitHub 원격 저장소 확인
-```bash
-git remote -v
-
-# 출력 예시:
-# origin  https://github.com/YOUR-USERNAME/hypehere.git (fetch)
-# origin  https://github.com/YOUR-USERNAME/hypehere.git (push)
-```
-
-#### 푸시
-```bash
-git push origin master
-```
-
-**예상 소요 시간**: 5분
-
----
-
-## Step 5: AWS App Runner 배포
-
-### 5-1. App Runner 서비스 생성
-
-#### AWS App Runner 콘솔 접속
-1. https://console.aws.amazon.com/apprunner 접속
-2. 리전 선택: **US East (Ohio) - us-east-2**
-3. "Create service" 클릭
-
----
-
-#### Source and deployment 설정
-
-**Step 1: Source**
-```
-Repository type: Source code repository
-
-Connect to GitHub: "Add new" 클릭
-- GitHub 계정 연결 (OAuth 인증)
-- "Authorize AWS Connector for GitHub" 클릭
-- 인증 완료 후 돌아오기
-
-Repository: [YOUR-USERNAME]/hypehere 선택
-Branch: master (또는 main)
-
-Deployment settings:
-- Deployment trigger: Automatic
-  (GitHub에 푸시할 때마다 자동 재배포)
-```
-
-**Step 2: Build settings**
-```
-Configuration file: Use a configuration file
-
-Configuration file: apprunner.yaml
-(우리가 생성한 파일 사용)
-```
-
-"Next" 클릭
-
-**예상 소요 시간**: 5분
-
----
-
-#### Service settings 설정
-
-**Service name**
-```
-Service name: hypehere
-```
-
-**Compute configuration**
-```
-Virtual CPU: 0.25 vCPU (최소 사양)
-Memory: 0.5 GB (최소 사양)
-
-⚠️ 초기에는 최소 사양으로 시작하고,
-트래픽이 증가하면 나중에 업그레이드
-```
-
-**Auto scaling**
-```
-Auto scaling configuration: Default
-
-Max concurrency: 100
-(동시에 처리할 수 있는 최대 요청 수)
-
-Min size: 1
-(항상 최소 1개 인스턴스 실행)
-
-Max size: 10
-(최대 10개까지 자동 확장)
-```
-
-"Next" 클릭
-
-**예상 소요 시간**: 3분
-
----
-
-#### Environment variables 설정
-
-**⚠️ 매우 중요**: 모든 환경 변수를 정확하게 입력해야 합니다.
-
-"Add environment variable" 클릭하여 하나씩 추가:
-
-```bash
-# Django Configuration
-DEBUG=False
-DJANGO_SECRET_KEY=[새로 생성한 시크릿 키]
-ALLOWED_HOSTS=*.awsapprunner.com
-CSRF_TRUSTED_ORIGINS=https://*.awsapprunner.com
-
-# Site Configuration
-SITE_URL=https://[APP-RUNNER-URL]  # 나중에 업데이트
-
-# Email Configuration
-EMAIL_HOST_USER=your-email@gmail.com
-EMAIL_HOST_PASSWORD=[Gmail App Password]
-
-# Database (Neon)
-DATABASE_URL=postgresql://user:password@ep-xxx.us-east-2.aws.neon.tech/neondb
-
-# Redis (Upstash)
-REDIS_URL=redis://default:password@us1-xxx.upstash.io:6379
-
-# AWS S3
-AWS_STORAGE_BUCKET_NAME=hypehere-static-media-[YOUR-NAME]
+환경변수:
+AWS_STORAGE_BUCKET_NAME=hypehere-static-media-20250103
 AWS_S3_REGION_NAME=us-east-2
 AWS_ACCESS_KEY_ID=AKIA...
 AWS_SECRET_ACCESS_KEY=wJalrXUtn...
 ```
 
-**DJANGO_SECRET_KEY 생성 방법**:
+---
+
+## Step 4: AWS EC2 인스턴스 설정
+
+### 4.1. EC2 인스턴스 생성
+
+1. **EC2 Console 접속**
+   - 서비스 → EC2 → "인스턴스 시작"
+
+2. **이름 및 태그**
+   ```
+   이름: hypehere-web-server
+   ```
+
+3. **애플리케이션 및 OS 이미지 (AMI)**
+   ```
+   OS: Ubuntu
+   AMI: Ubuntu Server 22.04 LTS (HVM), SSD Volume Type
+   아키텍처: 64비트 (x86)
+   ```
+
+4. **인스턴스 유형**
+   ```
+   인스턴스 유형: t3.small (2 vCPU, 2GB RAM)
+   ```
+
+   > **참고**: Django + Daphne + Redis Channels 실행에 최소 2GB RAM 권장
+
+5. **키 페어 (로그인)**
+   - **새 키 페어 생성**
+     ```
+     키 페어 이름: hypehere-key
+     키 페어 유형: RSA
+     프라이빗 키 파일 형식: .pem (SSH 사용)
+     ```
+   - "키 페어 생성" → `hypehere-key.pem` 다운로드
+
+   > **중요**: 키 파일은 안전한 곳에 저장하고 권한 설정
+   ```bash
+   chmod 400 hypehere-key.pem
+   ```
+
+6. **네트워크 설정**
+   ```
+   VPC: hypehere-vpc
+   서브넷: hypehere-public-subnet-1a
+   퍼블릭 IP 자동 할당: 활성화
+   방화벽 (보안 그룹): 기존 보안 그룹 선택
+   보안 그룹: hypehere-ec2-sg
+   ```
+
+7. **스토리지 구성**
+   ```
+   볼륨 유형: gp3 (General Purpose SSD)
+   크기: 20GB
+   ```
+
+8. **고급 세부 정보**
+   - 나머지는 기본값 유지
+
+9. **"인스턴스 시작" 클릭**
+
+### 4.2. Elastic IP 할당 (선택사항, 권장)
+
+고정 IP 주소를 사용하려면 Elastic IP를 할당합니다.
+
+1. **EC2 Console → "Elastic IP" → "Elastic IP 주소 할당"**
+   ```
+   네트워크 경계 그룹: us-east-2
+   퍼블릭 IPv4 주소 풀: Amazon의 IP 주소 풀
+   ```
+
+2. **"할당" 클릭**
+
+3. **Elastic IP 연결**
+   - Elastic IP 선택 → "작업" → "Elastic IP 주소 연결"
+   - 인스턴스: hypehere-web-server
+   - "연결" 클릭
+
+### 4.3. EC2 인스턴스 접속
+
 ```bash
+# SSH 키 권한 설정 (처음 한 번만)
+chmod 400 hypehere-key.pem
+
+# EC2 접속 (Elastic IP 또는 Public IP 사용)
+ssh -i hypehere-key.pem ubuntu@<ELASTIC_IP>
+
+# 예시
+ssh -i hypehere-key.pem ubuntu@3.134.123.45
+```
+
+### 4.4. 시스템 업데이트
+
+```bash
+# 패키지 업데이트
+sudo apt update
+sudo apt upgrade -y
+
+# 필수 패키지 설치
+sudo apt install -y python3.12 python3.12-venv python3.12-dev \
+                    git nginx postgresql-client redis-tools \
+                    build-essential libpq-dev
+```
+
+---
+
+## Step 5: Django 애플리케이션 배포
+
+### 5.1. 애플리케이션 사용자 생성
+
+```bash
+# 애플리케이션 전용 사용자 생성
+sudo useradd -m -s /bin/bash django
+sudo passwd django  # 암호 설정
+
+# sudo 권한 부여 (선택사항)
+sudo usermod -aG sudo django
+
+# 사용자 전환
+sudo su - django
+```
+
+### 5.2. 프로젝트 Clone
+
+```bash
+# GitHub 프로젝트 Clone
+cd ~
+git clone https://github.com/kangkyungjun/hypehere.git
+cd hypehere
+
+# 또는 Private 저장소인 경우
+git clone https://github.com/kangkyungjun/hypehere.git
+# GitHub Personal Access Token 입력 필요
+```
+
+### 5.3. 가상환경 설정
+
+```bash
+# 가상환경 생성
+python3.12 -m venv venv
+
+# 가상환경 활성화
+source venv/bin/activate
+
+# pip 업그레이드
+pip install --upgrade pip
+
+# 의존성 설치
+pip install -r requirements.txt
+```
+
+### 5.4. 환경변수 설정
+
+```bash
+# .env 파일 생성
+nano .env
+```
+
+**`.env` 파일 내용** (실제 값으로 변경):
+
+```bash
+# ==================== Django Configuration ====================
+DEBUG=False
+DJANGO_SECRET_KEY=your-production-secret-key-here
+
+# Django Secret Key 생성 (한 번 실행)
 python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())'
 
-# 출력 예시:
-# django-insecure-abc123xyz...
+# Allowed Hosts (ALB DNS 이름, 도메인)
+ALLOWED_HOSTS=*.amazonaws.com,yourdomain.com,<EC2_PUBLIC_IP>
+
+# ==================== Site Configuration ====================
+SITE_URL=https://your-alb-dns-name.us-east-2.elb.amazonaws.com
+
+# ==================== Email Configuration ====================
+EMAIL_HOST_USER=your-email@gmail.com
+EMAIL_HOST_PASSWORD=your-gmail-app-password
+
+# ==================== Security Configuration ====================
+CSRF_TRUSTED_ORIGINS=https://*.amazonaws.com,https://yourdomain.com
+
+# ==================== Database Configuration (RDS) ====================
+DATABASE_URL=postgresql://hypehere_app:your_secure_app_password@hypehere-db.c9abc123xyz.us-east-2.rds.amazonaws.com:5432/hypehere
+
+# ==================== Redis Configuration (ElastiCache) ====================
+REDIS_URL=redis://hypehere-cache.abc123.0001.use2.cache.amazonaws.com:6379
+
+# ==================== AWS S3 Configuration ====================
+AWS_STORAGE_BUCKET_NAME=hypehere-static-media-20250103
+AWS_S3_REGION_NAME=us-east-2
+AWS_ACCESS_KEY_ID=AKIA...
+AWS_SECRET_ACCESS_KEY=wJalrXUtn...
 ```
 
-**Gmail App Password 생성 방법**:
-1. https://myaccount.google.com/apppasswords 접속
-2. 2단계 인증 활성화 (아직 안 했다면)
-3. "앱 비밀번호" 생성
-4. 앱 선택: "메일"
-5. 기기 선택: "기타" → "HypeHere Production" 입력
-6. 생성된 16자리 비밀번호 복사
+> **중요**:
+> 1. `DJANGO_SECRET_KEY`는 반드시 새로 생성하세요.
+> 2. 모든 `your-*`, `<PLACEHOLDER>` 부분을 실제 값으로 변경하세요.
+> 3. `.env` 파일은 절대 Git에 커밋하지 마세요!
 
-"Next" 클릭
+### 5.5. 데이터베이스 마이그레이션
 
-**예상 소요 시간**: 10분
-
----
-
-#### Security 설정
-
-**Instance role**
-```
-Instance role: Create new service role
-(App Runner가 자동으로 생성)
-
-Role name: AppRunnerECRAccessRole (기본값)
-```
-
-**Tags** (선택사항)
-```
-Key: Environment
-Value: Production
-
-Key: Project
-Value: HypeHere
-```
-
----
-
-#### Review and create
-
-모든 설정 확인 후:
-1. 설정 검토
-2. "Create & deploy" 클릭
-
-**배포 시작!** 🚀
-
-**예상 배포 시간**: 5-10분
-
----
-
-### 5-2. 배포 모니터링
-
-#### Activity 탭 확인
-1. App Runner 서비스 페이지에서 "Activity" 탭 클릭
-2. 배포 진행 상황 확인:
-   ```
-   ● Provisioning
-   ● Building
-   ● Deploying
-   ● Running
-   ```
-
-#### Logs 탭 확인
-배포 중 발생하는 로그 실시간 확인:
-```
-Logs → Deployment logs
-```
-
-**정상 배포 시 로그 예시**:
-```
-=== Pre-build phase ===
-Python 3.12.x
-pip 24.x
-
-=== Build phase ===
-Successfully installed Django-5.1.11...
-
-=== Post-build phase ===
-Collecting static files to S3...
-123 static files uploaded to S3
-Running database migrations...
-Operations to perform:
-  Apply all migrations: accounts, posts, chat...
-Running migrations:
-  Applying accounts.0001_initial... OK
-  ...
-Build completed successfully!
-```
-
----
-
-### 5-3. Default Domain URL 확인
-
-배포 완료 후:
-1. "Default domain" 섹션에서 URL 복사:
-   ```
-   https://abc123xyz.us-east-2.awsapprunner.com
-   ```
-2. **이 URL을 저장하세요** - 나중에 환경 변수 업데이트에 사용
-
----
-
-### 5-4. SITE_URL 환경 변수 업데이트
-
-App Runner URL을 받은 후:
-
-1. App Runner 서비스 → "Configuration" 탭
-2. "Environment variables" → "Edit" 클릭
-3. `SITE_URL` 변수 찾기
-4. 값 업데이트:
-   ```
-   SITE_URL=https://abc123xyz.us-east-2.awsapprunner.com
-   ```
-5. "Deploy" 클릭 (재배포 시작)
-
-**예상 소요 시간**: 5분
-
----
-
-## Step 6: 배포 후 검증
-
-### 6-1. 기본 접속 테스트
-
-#### 홈페이지 접속
-브라우저에서 App Runner URL 접속:
-```
-https://abc123xyz.us-east-2.awsapprunner.com
-```
-
-**기대 결과**:
-- [ ] 페이지 로딩 성공
-- [ ] HTTPS 인증서 정상 (자물쇠 아이콘)
-- [ ] 기본 UI 표시
-
----
-
-#### Admin 패널 접속
-```
-https://abc123xyz.us-east-2.awsapprunner.com/admin/
-```
-
-**기대 결과**:
-- [ ] Admin 로그인 페이지 표시
-- [ ] CSS 정상 로딩 (S3에서)
-
----
-
-### 6-2. 슈퍼유저 생성
-
-#### 로컬에서 프로덕션 DB 접근
 ```bash
-# 환경 변수 설정
-export DATABASE_URL="postgresql://user:password@ep-xxx.us-east-2.aws.neon.tech/neondb"
-export DEBUG=False
-export DJANGO_SECRET_KEY="[App Runner에 설정한 동일한 키]"
+# Static 파일 수집 (S3로 업로드)
+python manage.py collectstatic --noinput
+
+# 데이터베이스 마이그레이션
+python manage.py migrate
+
+# 슈퍼유저 생성 (선택사항)
+python manage.py createsuperuser
+```
+
+### 5.6. Gunicorn/Daphne 테스트
+
+```bash
+# Daphne로 서버 실행 (테스트)
+daphne -b 0.0.0.0 -p 8000 hypehere.asgi:application
+
+# 다른 터미널에서 접속 테스트
+curl http://localhost:8000
+```
+
+### 5.7. Systemd 서비스 파일 생성
+
+```bash
+# 가상환경 비활성화
+deactivate
+
+# 사용자 전환 (ubuntu로 돌아가기)
+exit
+
+# Systemd 서비스 파일 생성
+sudo nano /etc/systemd/system/hypehere.service
+```
+
+**`/etc/systemd/system/hypehere.service` 내용**:
+
+```ini
+[Unit]
+Description=HypeHere Django Application
+After=network.target
+
+[Service]
+Type=notify
+User=django
+Group=django
+WorkingDirectory=/home/django/hypehere
+Environment="PATH=/home/django/hypehere/venv/bin"
+EnvironmentFile=/home/django/hypehere/.env
+ExecStart=/home/django/hypehere/venv/bin/daphne -b 0.0.0.0 -p 8000 hypehere.asgi:application
+ExecReload=/bin/kill -s HUP $MAINPID
+KillMode=mixed
+TimeoutStopSec=5
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
+```
+
+**서비스 활성화 및 시작**:
+
+```bash
+# Systemd 데몬 리로드
+sudo systemctl daemon-reload
+
+# 서비스 활성화 (부팅 시 자동 시작)
+sudo systemctl enable hypehere
+
+# 서비스 시작
+sudo systemctl start hypehere
+
+# 서비스 상태 확인
+sudo systemctl status hypehere
+
+# 로그 확인
+sudo journalctl -u hypehere -f
+```
+
+### 5.8. Nginx 설정
+
+```bash
+# Nginx 설정 파일 생성
+sudo nano /etc/nginx/sites-available/hypehere
+```
+
+**`/etc/nginx/sites-available/hypehere` 내용**:
+
+```nginx
+upstream django {
+    server 127.0.0.1:8000;
+}
+
+server {
+    listen 80;
+    server_name _;  # ALB가 모든 요청을 전달하므로
+
+    client_max_body_size 100M;
+
+    # Static files (이미 S3에 있으므로 불필요, 하지만 로컬 백업용)
+    location /static/ {
+        alias /home/django/hypehere/staticfiles/;
+    }
+
+    # Media files (S3에 저장되므로 불필요)
+    location /media/ {
+        alias /home/django/hypehere/media/;
+    }
+
+    # WebSocket 지원
+    location /ws/ {
+        proxy_pass http://django;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_redirect off;
+    }
+
+    # 일반 HTTP 요청
+    location / {
+        proxy_pass http://django;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_redirect off;
+    }
+}
+```
+
+**Nginx 활성화 및 재시작**:
+
+```bash
+# Symlink 생성
+sudo ln -s /etc/nginx/sites-available/hypehere /etc/nginx/sites-enabled/
+
+# 기본 설정 비활성화
+sudo rm /etc/nginx/sites-enabled/default
+
+# Nginx 설정 테스트
+sudo nginx -t
+
+# Nginx 재시작
+sudo systemctl restart nginx
+
+# Nginx 상태 확인
+sudo systemctl status nginx
+```
+
+### 5.9. 방화벽 설정 (UFW)
+
+```bash
+# UFW 활성화
+sudo ufw enable
+
+# SSH 허용
+sudo ufw allow 22/tcp
+
+# HTTP/HTTPS 허용
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+
+# 상태 확인
+sudo ufw status
+```
+
+---
+
+## Step 6: Application Load Balancer 설정
+
+### 6.1. Target Group 생성
+
+1. **EC2 Console → "대상 그룹" → "대상 그룹 생성"**
+
+2. **기본 구성**
+   ```
+   대상 유형: 인스턴스
+   대상 그룹 이름: hypehere-tg
+   프로토콜: HTTP
+   포트: 80
+   VPC: hypehere-vpc
+   프로토콜 버전: HTTP1
+   ```
+
+3. **상태 검사**
+   ```
+   상태 검사 프로토콜: HTTP
+   상태 검사 경로: /
+   고급 상태 검사 설정:
+     포트: 트래픽 포트
+     정상 임계값: 2
+     비정상 임계값: 2
+     제한 시간: 5초
+     간격: 30초
+     성공 코드: 200
+   ```
+
+4. **대상 등록**
+   - hypehere-web-server 선택 → "아래에 보류 중인 것으로 포함" 클릭
+
+5. **"대상 그룹 생성" 클릭**
+
+### 6.2. Application Load Balancer 생성
+
+1. **EC2 Console → "로드 밸런서" → "로드 밸런서 생성"**
+
+2. **로드 밸런서 유형 선택**
+   - "Application Load Balancer" 선택
+
+3. **기본 구성**
+   ```
+   로드 밸런서 이름: hypehere-alb
+   체계: 인터넷 경계
+   IP 주소 유형: IPv4
+   ```
+
+4. **네트워크 매핑**
+   ```
+   VPC: hypehere-vpc
+
+   가용 영역 (최소 2개 선택):
+   ☑️ us-east-2a - hypehere-public-subnet-1a
+   ☑️ us-east-2b - hypehere-public-subnet-1b
+   ```
+
+5. **보안 그룹**
+   ```
+   보안 그룹: hypehere-alb-sg
+   ```
+
+6. **리스너 및 라우팅**
+   ```
+   리스너 1:
+   - 프로토콜: HTTP
+   - 포트: 80
+   - 기본 작업: hypehere-tg로 전달
+   ```
+
+   > **HTTPS 리스너는 Step 6.3에서 추가**
+
+7. **"로드 밸런서 생성" 클릭**
+
+### 6.3. HTTPS 리스너 추가 (선택사항, 권장)
+
+**SSL/TLS 인증서가 필요합니다.** AWS Certificate Manager (ACM)에서 무료로 발급 가능합니다.
+
+1. **ACM Console → "인증서 요청"**
+   ```
+   도메인 이름: yourdomain.com, www.yourdomain.com
+   검증 방법: DNS 검증 (권장) 또는 이메일 검증
+   ```
+
+2. **인증서 검증 완료 후 → ALB에 HTTPS 리스너 추가**
+   - EC2 Console → hypehere-alb → "리스너" 탭 → "리스너 추가"
+   ```
+   프로토콜: HTTPS
+   포트: 443
+   기본 작업: hypehere-tg로 전달
+   보안 정책: ELBSecurityPolicy-2016-08
+   SSL/TLS 인증서: ACM에서 발급받은 인증서 선택
+   ```
+
+3. **HTTP → HTTPS 리디렉션 (선택사항)**
+   - HTTP 리스너 편집 → "리디렉션" 작업 추가
+   ```
+   리디렉션 대상: HTTPS
+   포트: 443
+   상태 코드: 301 (영구 리디렉션)
+   ```
+
+### 6.4. DNS 설정 (도메인 사용 시)
+
+Route 53 또는 외부 DNS 제공업체에서 도메인을 ALB DNS 이름으로 CNAME 레코드 설정:
+
+```
+yourdomain.com       CNAME   hypehere-alb-1234567890.us-east-2.elb.amazonaws.com
+www.yourdomain.com   CNAME   hypehere-alb-1234567890.us-east-2.elb.amazonaws.com
+```
+
+### 6.5. 환경변수 업데이트
+
+EC2 인스턴스의 `.env` 파일을 ALB DNS 이름으로 업데이트:
+
+```bash
+# SSH로 EC2 접속
+ssh -i hypehere-key.pem ubuntu@<EC2_IP>
+
+# django 사용자로 전환
+sudo su - django
+cd hypehere
+
+# .env 파일 편집
+nano .env
+```
+
+**수정 내용**:
+```bash
+# ALLOWED_HOSTS에 ALB DNS 이름 추가
+ALLOWED_HOSTS=hypehere-alb-1234567890.us-east-2.elb.amazonaws.com,yourdomain.com,<EC2_IP>
+
+# SITE_URL 변경
+SITE_URL=https://hypehere-alb-1234567890.us-east-2.elb.amazonaws.com
+
+# CSRF_TRUSTED_ORIGINS 업데이트
+CSRF_TRUSTED_ORIGINS=https://hypehere-alb-1234567890.us-east-2.elb.amazonaws.com,https://yourdomain.com
+```
+
+**Django 서비스 재시작**:
+```bash
+# ubuntu 사용자로 전환
+exit
+
+# 서비스 재시작
+sudo systemctl restart hypehere
+
+# 상태 확인
+sudo systemctl status hypehere
+```
+
+---
+
+## Step 7: GitHub Actions CI/CD 설정
+
+### 7.1. GitHub Secrets 설정
+
+1. **GitHub 저장소 → Settings → Secrets and variables → Actions**
+
+2. **New repository secret 클릭하여 아래 Secrets 추가**:
+
+```
+EC2_HOST: <EC2 Public IP 또는 Elastic IP>
+EC2_USER: django
+EC2_SSH_KEY: <hypehere-key.pem 파일 내용 전체 복사>
+```
+
+### 7.2. GitHub Actions Workflow 생성
+
+프로젝트 루트에 `.github/workflows/deploy.yml` 파일 생성:
+
+```yaml
+name: Deploy to EC2
+
+on:
+  push:
+    branches:
+      - master  # 또는 main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd ~/hypehere
+            git pull origin master
+            source venv/bin/activate
+            pip install -r requirements.txt
+            python manage.py collectstatic --noinput
+            python manage.py migrate --noinput
+            sudo systemctl restart hypehere
+            sudo systemctl restart nginx
+```
+
+### 7.3. 배포 테스트
+
+```bash
+# 로컬에서 변경사항 커밋 및 푸시
+git add .github/workflows/deploy.yml
+git commit -m "Add GitHub Actions deployment workflow"
+git push origin master
+
+# GitHub Actions 탭에서 워크플로우 실행 확인
+```
+
+---
+
+## Step 8: 배포 후 검증
+
+### 8.1. ALB 헬스체크 확인
+
+```bash
+# EC2 Console → 대상 그룹 → hypehere-tg → "대상" 탭
+# 상태: healthy 확인
+```
+
+### 8.2. 애플리케이션 접속 테스트
+
+```bash
+# 브라우저에서 접속
+http://<ALB_DNS_NAME>
+
+# 예시
+http://hypehere-alb-1234567890.us-east-2.elb.amazonaws.com
+```
+
+### 8.3. WebSocket 연결 테스트
+
+```javascript
+// 브라우저 개발자 도구 Console에서 실행
+const ws = new WebSocket('ws://<ALB_DNS_NAME>/ws/test/');
+ws.onopen = () => console.log('WebSocket connected');
+ws.onmessage = (e) => console.log('Message:', e.data);
+ws.onerror = (e) => console.error('WebSocket error:', e);
+```
+
+### 8.4. 데이터베이스 연결 확인
+
+```bash
+# EC2에 SSH 접속
+ssh -i hypehere-key.pem ubuntu@<EC2_IP>
+
+# django 사용자로 전환
+sudo su - django
+cd hypehere
 
 # Django shell 실행
+source venv/bin/activate
 python manage.py shell
+
+# 쿼리 테스트
+>>> from accounts.models import User
+>>> User.objects.count()
+0  # 또는 실제 사용자 수
+>>> exit()
 ```
 
-#### Shell에서 슈퍼유저 생성
-```python
-from accounts.models import User
+### 8.5. Redis 연결 확인
 
-# 슈퍼유저 생성
-User.objects.create_superuser(
-    email='admin@hypehere.com',
-    nickname='Admin',
-    password='YourSecurePassword123!'
-)
-
-# 확인
-print("✅ 슈퍼유저 생성 완료!")
-exit()
-```
-
----
-
-### 6-3. Admin 로그인 테스트
-
-1. Admin 페이지 접속
-2. 생성한 슈퍼유저로 로그인
-3. 대시보드 확인
-
-**기대 결과**:
-- [ ] 로그인 성공
-- [ ] 모든 앱 (accounts, posts, chat 등) 표시
-- [ ] 정적 파일 (CSS/JS) 정상 로딩
-
----
-
-### 6-4. 기능 테스트
-
-#### 회원가입 테스트
-1. 홈페이지 → 회원가입
-2. 이메일, 닉네임, 비밀번호 입력
-3. 가입 완료 확인
-
-**기대 결과**:
-- [ ] 회원가입 성공
-- [ ] 이메일 인증 메일 발송 (Gmail SMTP 작동 확인)
-- [ ] 데이터베이스에 사용자 저장 확인
-
----
-
-#### 게시글 작성 테스트
-1. 로그인
-2. 게시글 작성
-3. 이미지 업로드
-
-**기대 결과**:
-- [ ] 게시글 작성 성공
-- [ ] 이미지 S3에 업로드 확인
-- [ ] 게시글 목록에 표시
-
----
-
-#### 채팅 기능 테스트
-1. 2개의 브라우저 (또는 시크릿 모드) 사용
-2. 각각 다른 계정으로 로그인
-3. 채팅 시작
-
-**기대 결과**:
-- [ ] WebSocket 연결 성공
-- [ ] 실시간 메시지 전송/수신
-- [ ] 메시지 데이터베이스 저장 확인
-
----
-
-### 6-5. 성능 테스트
-
-#### 페이지 로딩 속도
-브라우저 개발자 도구 (F12) → Network 탭:
-- First Contentful Paint (FCP): < 1.5초
-- Largest Contentful Paint (LCP): < 2.5초
-
-#### API 응답 시간
 ```bash
-curl -o /dev/null -s -w "Time: %{time_total}s\n" https://abc123xyz.us-east-2.awsapprunner.com/api/posts/
+# EC2에서 Redis 연결 테스트
+redis-cli -h hypehere-cache.abc123.0001.use2.cache.amazonaws.com ping
+# 응답: PONG
+
+# Django shell에서 Redis 테스트
+python manage.py shell
+>>> import redis
+>>> from django.conf import settings
+>>> r = redis.from_url(settings.CHANNEL_LAYERS['default']['CONFIG']['hosts'][0])
+>>> r.ping()
+True
+>>> r.set('test', 'hello')
+True
+>>> r.get('test')
+b'hello'
+>>> exit()
 ```
 
-**기대 결과**: < 500ms
+### 8.6. Static/Media 파일 확인
 
----
+```bash
+# S3에 파일이 업로드되었는지 확인
+aws s3 ls s3://hypehere-static-media-20250103/static/ --recursive | head -20
 
-### 6-6. 로그 확인
-
-#### Application Logs
-App Runner 콘솔 → Logs → Application logs:
-- 에러 로그 확인
-- 경고 메시지 확인
-- 정상 작동 로그 확인
-
-**정상 로그 예시**:
-```
-[INFO] Server started at 0.0.0.0:8000
-[INFO] WebSocket connected: /ws/chat/123/
-[INFO] HTTP GET /api/posts/ 200
+# 브라우저에서 Static 파일 접속 테스트
+https://hypehere-static-media-20250103.s3.us-east-2.amazonaws.com/static/css/components.css
 ```
 
 ---
 
 ## 문제 해결
 
-### 일반적인 문제와 해결 방법
+### 문제 1: ALB 헬스체크 실패
 
----
+**증상**: Target Group에서 EC2 인스턴스 상태가 `unhealthy`
 
-### 문제 1: 배포 실패 - "Build failed"
+**원인**:
+1. Nginx 또는 Django 서비스가 실행되지 않음
+2. Security Group에서 ALB → EC2 통신 차단
+3. Django가 `/` 경로에서 200 응답을 반환하지 않음
 
-**증상**:
-```
-Error: Could not install packages due to an EnvironmentError
-```
+**해결 방법**:
 
-**원인**: requirements.txt의 패키지 충돌 또는 누락
+```bash
+# 1. 서비스 상태 확인
+sudo systemctl status hypehere
+sudo systemctl status nginx
 
-**해결**:
-1. 로컬에서 requirements.txt 테스트:
-   ```bash
-   pip install -r requirements.txt
-   ```
-2. 문제 패키지 확인 및 버전 고정
-3. GitHub에 푸시하여 재배포
+# 2. Security Group 확인
+# EC2 Console → hypehere-ec2-sg → 인바운드 규칙
+# Source: hypehere-alb-sg, Port: 80 확인
 
----
+# 3. Nginx 로그 확인
+sudo tail -f /var/log/nginx/access.log
+sudo tail -f /var/log/nginx/error.log
 
-### 문제 2: 데이터베이스 연결 오류
+# 4. Django 로그 확인
+sudo journalctl -u hypehere -f
 
-**증상**:
-```
-django.db.utils.OperationalError: could not connect to server
-```
-
-**원인**: DATABASE_URL이 잘못되었거나 Neon DB 접근 불가
-
-**해결**:
-1. Neon 콘솔에서 연결 문자열 재확인
-2. App Runner 환경 변수 확인:
-   ```
-   DATABASE_URL=postgresql://user:password@host:5432/dbname
-   ```
-3. Neon DB 상태 확인 (대시보드에서)
-4. 환경 변수 수정 후 재배포
-
----
-
-### 문제 3: Redis 연결 오류
-
-**증상**:
-```
-redis.exceptions.ConnectionError: Error 111 connecting
+# 5. 수동 헬스체크 테스트
+curl http://localhost:80
 ```
 
-**원인**: REDIS_URL이 잘못되었거나 Upstash Redis 접근 불가
+### 문제 2: RDS 연결 실패
 
-**해결**:
-1. Upstash 콘솔에서 연결 문자열 재확인
-2. App Runner 환경 변수 확인:
-   ```
-   REDIS_URL=redis://default:password@host:6379
-   ```
-3. Upstash Redis 상태 확인
-4. 환경 변수 수정 후 재배포
+**증상**: `psycopg2.OperationalError: could not connect to server`
 
----
+**원인**:
+1. Security Group에서 EC2 → RDS 통신 차단
+2. DATABASE_URL 환경변수 오타
+3. RDS 인스턴스가 실행 중이 아님
+
+**해결 방법**:
+
+```bash
+# 1. Security Group 확인
+# RDS Console → hypehere-db → "연결 & 보안" → 보안 그룹
+# 인바운드 규칙: Source = hypehere-ec2-sg, Port = 5432
+
+# 2. 환경변수 확인
+cat ~/hypehere/.env | grep DATABASE_URL
+
+# 3. RDS 엔드포인트 직접 연결 테스트
+psql -h hypehere-db.c9abc123xyz.us-east-2.rds.amazonaws.com \
+     -U hypehere_app \
+     -d hypehere
+
+# 4. Django에서 연결 테스트
+python manage.py dbshell
+```
+
+### 문제 3: ElastiCache 연결 실패
+
+**증상**: `redis.exceptions.ConnectionError: Error connecting to Redis`
+
+**원인**:
+1. Security Group에서 EC2 → ElastiCache 통신 차단
+2. REDIS_URL 환경변수 오타
+3. ElastiCache 클러스터가 실행 중이 아님
+
+**해결 방법**:
+
+```bash
+# 1. Security Group 확인
+# ElastiCache Console → hypehere-cache → "세부 정보" → 보안 그룹
+# 인바운드 규칙: Source = hypehere-ec2-sg, Port = 6379
+
+# 2. 환경변수 확인
+cat ~/hypehere/.env | grep REDIS_URL
+
+# 3. Redis 직접 연결 테스트
+redis-cli -h hypehere-cache.abc123.0001.use2.cache.amazonaws.com ping
+
+# 4. Telnet으로 포트 확인
+telnet hypehere-cache.abc123.0001.use2.cache.amazonaws.com 6379
+```
 
 ### 문제 4: S3 업로드 실패
 
-**증상**:
-```
-botocore.exceptions.NoCredentialsError: Unable to locate credentials
-```
+**증상**: `ClientError: An error occurred (403) when calling the PutObject operation: Forbidden`
 
-**원인**: AWS Access Key가 잘못되었거나 권한 부족
+**원인**:
+1. IAM 사용자 권한 부족
+2. Bucket Policy 오류
+3. AWS 액세스 키 환경변수 오타
 
-**해결**:
-1. IAM 사용자 권한 확인:
-   - AmazonS3FullAccess 정책 부여되었는지 확인
-2. Access Key 재확인:
-   ```
-   AWS_ACCESS_KEY_ID=AKIA...
-   AWS_SECRET_ACCESS_KEY=wJalrXUtn...
-   ```
-3. S3 버킷 이름 확인:
-   ```
-   AWS_STORAGE_BUCKET_NAME=[실제 버킷 이름]
-   ```
-4. 환경 변수 수정 후 재배포
+**해결 방법**:
 
----
-
-### 문제 5: Static files 404 에러
-
-**증상**: CSS/JS 파일이 로드되지 않음 (404 에러)
-
-**원인**: collectstatic이 실행되지 않았거나 S3 업로드 실패
-
-**해결**:
-1. App Runner Deployment logs 확인:
-   ```
-   Collecting static files to S3...
-   ```
-2. S3 버킷에서 static/ 폴더 확인
-3. 수동으로 collectstatic 실행:
-   ```bash
-   # 로컬에서 프로덕션 환경 변수 설정 후
-   python manage.py collectstatic --noinput
-   ```
-4. GitHub에 푸시하여 재배포
-
----
-
-### 문제 6: WebSocket 연결 실패
-
-**증상**: 채팅 기능이 작동하지 않음, "WebSocket connection failed"
-
-**원인**: Daphne가 제대로 실행되지 않았거나 Redis 문제
-
-**해결**:
-1. App Runner Application logs 확인:
-   ```
-   Daphne running at 0.0.0.0:8000
-   ```
-2. REDIS_URL 재확인
-3. apprunner.yaml의 run command 확인:
-   ```yaml
-   command: daphne -b 0.0.0.0 -p 8000 hypehere.asgi:application
-   ```
-4. 재배포
-
----
-
-### 문제 7: 환경 변수가 적용되지 않음
-
-**증상**: 설정한 환경 변수가 작동하지 않음
-
-**원인**: 환경 변수 추가 후 재배포하지 않음
-
-**해결**:
-1. App Runner 콘솔 → Configuration → Environment variables
-2. 모든 필수 변수 확인
-3. **반드시 "Deploy" 버튼 클릭하여 재배포**
-4. 배포 완료 후 테스트
-
----
-
-### 문제 8: CSRF 토큰 에러
-
-**증상**:
-```
-403 Forbidden: CSRF verification failed
-```
-
-**원인**: CSRF_TRUSTED_ORIGINS에 App Runner 도메인 미포함
-
-**해결**:
-1. 환경 변수 확인:
-   ```
-   CSRF_TRUSTED_ORIGINS=https://*.awsapprunner.com
-   ```
-2. 커스텀 도메인 사용 시 추가:
-   ```
-   CSRF_TRUSTED_ORIGINS=https://*.awsapprunner.com,https://yourdomain.com
-   ```
-3. 재배포
-
----
-
-### 긴급 롤백 방법
-
-배포 후 심각한 문제 발생 시:
-
-1. App Runner 콘솔 → "Activity" 탭
-2. 이전 배포 선택 → "Actions" → "Redeploy"
-3. 이전 버전으로 롤백 완료
-
-또는 GitHub에서 이전 커밋으로 롤백:
 ```bash
-git revert HEAD
-git push origin master
+# 1. 환경변수 확인
+cat ~/hypehere/.env | grep AWS_
+
+# 2. AWS CLI로 직접 테스트
+aws s3 cp test.txt s3://hypehere-static-media-20250103/test.txt \
+    --region us-east-2
+
+# 3. IAM 사용자 권한 확인
+# IAM Console → hypehere-s3-user → "권한" 탭
+# AmazonS3FullAccess 정책 연결 확인
+
+# 4. Django에서 collectstatic 재시도
+python manage.py collectstatic --noinput -v 2
+```
+
+### 문제 5: WebSocket 연결 실패
+
+**증상**: WebSocket 연결 시 `Error: Unexpected server response: 400/404`
+
+**원인**:
+1. Nginx에서 WebSocket 프록시 설정 누락
+2. Django Channels 설정 오류
+3. ALB가 WebSocket 업그레이드를 전달하지 않음
+
+**해결 방법**:
+
+```bash
+# 1. Nginx 설정 확인
+sudo cat /etc/nginx/sites-available/hypehere | grep -A 10 "/ws/"
+
+# 2. Django Channels 설정 확인
+cat ~/hypehere/hypehere/settings.py | grep -A 5 "CHANNEL_LAYERS"
+
+# 3. Nginx 재시작
+sudo systemctl restart nginx
+
+# 4. Django 재시작
+sudo systemctl restart hypehere
+
+# 5. 로그 확인
+sudo journalctl -u hypehere -f
+```
+
+### 문제 6: GitHub Actions 배포 실패
+
+**증상**: GitHub Actions 워크플로우에서 SSH 연결 실패
+
+**원인**:
+1. GitHub Secrets에 SSH 키가 잘못 설정됨
+2. EC2 Public IP가 변경됨 (Elastic IP 미사용)
+3. EC2 Security Group에서 GitHub Actions IP 차단
+
+**해결 방법**:
+
+```bash
+# 1. GitHub Secrets 확인
+# GitHub 저장소 → Settings → Secrets → Actions
+# EC2_SSH_KEY가 정확히 설정되었는지 확인
+
+# 2. EC2 Public IP 확인
+# EC2 Console → hypehere-web-server → "퍼블릭 IPv4 주소"
+# GitHub Secrets의 EC2_HOST 업데이트
+
+# 3. Elastic IP 사용 권장
+# EC2 Console → "Elastic IP" → 할당 → 인스턴스에 연결
+
+# 4. SSH 수동 테스트
+ssh -i hypehere-key.pem ubuntu@<EC2_IP>
+```
+
+### 문제 7: 502 Bad Gateway 오류
+
+**증상**: ALB 접속 시 `502 Bad Gateway` 오류
+
+**원인**:
+1. Django/Daphne 서비스가 실행되지 않음
+2. Nginx 업스트림 설정 오류
+3. Target Group 헬스체크 실패
+
+**해결 방법**:
+
+```bash
+# 1. Django 서비스 상태 확인
+sudo systemctl status hypehere
+
+# 2. Django 로그 확인
+sudo journalctl -u hypehere -n 50
+
+# 3. Nginx 업스트림 확인
+sudo cat /etc/nginx/sites-available/hypehere | grep "upstream django"
+
+# 4. Nginx 오류 로그 확인
+sudo tail -f /var/log/nginx/error.log
+
+# 5. 서비스 재시작
+sudo systemctl restart hypehere
+sudo systemctl restart nginx
+```
+
+### 문제 8: Static 파일 404 오류
+
+**증상**: CSS/JS 파일이 로드되지 않음 (404 Not Found)
+
+**원인**:
+1. collectstatic 실행 안 됨
+2. S3 Bucket Policy가 Public Read 허용 안 함
+3. STATIC_URL 설정 오류
+
+**해결 방법**:
+
+```bash
+# 1. collectstatic 재실행
+cd ~/hypehere
+source venv/bin/activate
+python manage.py collectstatic --noinput
+
+# 2. S3 Bucket Policy 확인
+# S3 Console → hypehere-static-media-20250103 → "권한" 탭
+# Bucket Policy에서 "s3:GetObject" 허용 확인
+
+# 3. settings.py 확인
+cat ~/hypehere/hypehere/settings.py | grep -A 5 "STATIC_URL"
+
+# 4. 브라우저에서 S3 URL 직접 접속 테스트
+https://hypehere-static-media-20250103.s3.us-east-2.amazonaws.com/static/css/components.css
 ```
 
 ---
 
 ## 향후 확장
 
-### 트래픽 증가 시 업그레이드 경로
+### 비용 최적화
 
-#### 단계 1: App Runner 스케일 업 (100-500명 사용자)
-**예상 비용**: $20-40/월
-
-```
-App Runner:
-- vCPU: 0.25 → 0.5 vCPU
-- Memory: 0.5GB → 1GB
-- Max size: 10 → 25
-```
-
-**방법**:
-1. App Runner 콘솔 → Configuration → Edit
-2. CPU/Memory 변경
-3. Deploy
-
----
-
-#### 단계 2: 유료 DB/Redis 전환 (500-2000명 사용자)
-**예상 비용**: $50-100/월
+#### Reserved Instances
+1년 또는 3년 약정으로 30-40% 비용 절감:
 
 ```
-Neon PostgreSQL:
-- 무료 계층 → Pro 계층 ($19/월)
-- 저장소: 512MB → 10GB
-- 컴퓨팅: 공유 → 전용 vCPU
+EC2 t3.small Reserved Instance (1년 선불):
+- 온디맨드: $15/월
+- Reserved: $9/월
+- 절감: $6/월 (40%)
 
-Upstash Redis:
-- 무료 계층 → Pro 계층 ($10/월)
-- Commands: 10K/day → 무제한
-- 메모리: 256MB → 1GB
+RDS db.t3.micro Reserved Instance (1년 선불):
+- 온디맨드: $15/월
+- Reserved: $9/월
+- 절감: $6/월 (40%)
+
+ElastiCache cache.t3.micro Reserved Instance (1년 선불):
+- 온디맨드: $15/월
+- Reserved: $9/월
+- 절감: $6/월 (40%)
+
+총 절감: $18/월 → 연간 $216
 ```
 
----
-
-#### 단계 3: RDS + ElastiCache 전환 (2000명+ 사용자)
-**예상 비용**: $100-200/월
+#### Savings Plans
+더 유연한 비용 절감 옵션:
 
 ```
-AWS RDS PostgreSQL:
-- db.t3.small ($30/월)
-- 20GB 저장소
-
-AWS ElastiCache Redis:
-- cache.t3.micro ($15/월)
-- 0.5GB 메모리
-
-CloudFront CDN:
-- S3 앞단에 배치
-- 전 세계 빠른 전송
+Compute Savings Plans (1년):
+- 모든 EC2, Fargate, Lambda에 적용
+- 최대 66% 할인
 ```
 
----
+### Auto Scaling 설정
 
-### 웹앱 (PWA) 전환
+트래픽 증가 시 자동으로 EC2 인스턴스 추가:
 
-Progressive Web App으로 변환하여 모바일 홈 화면 추가 지원:
+1. **AMI (Amazon Machine Image) 생성**
+   - EC2 Console → hypehere-web-server → "이미지 및 템플릿" → "이미지 생성"
 
-#### 필요한 작업
-1. Service Worker 추가
-2. manifest.json 생성
-3. 오프라인 지원
-4. Push 알림 구현
+2. **Launch Template 생성**
+   ```
+   이름: hypehere-lt
+   AMI: 위에서 생성한 AMI
+   인스턴스 유형: t3.small
+   키 페어: hypehere-key
+   보안 그룹: hypehere-ec2-sg
+   ```
 
-**예상 작업 시간**: 1-2일
+3. **Auto Scaling Group 생성**
+   ```
+   이름: hypehere-asg
+   Launch Template: hypehere-lt
+   VPC: hypehere-vpc
+   서브넷: hypehere-public-subnet-1a, hypehere-public-subnet-1b
 
----
+   그룹 크기:
+   - 원하는 용량: 2
+   - 최소 용량: 1
+   - 최대 용량: 5
 
-### Flutter 앱 개발
+   조정 정책:
+   - 대상 추적 조정
+   - 지표: 평균 CPU 사용률
+   - 대상 값: 70%
+   ```
 
-현재 배포된 서버를 그대로 API 서버로 사용:
+4. **ALB Target Group 연결**
+   - Auto Scaling Group → "로드 밸런싱" → hypehere-tg 연결
 
-#### Flutter 앱 구조
+### Multi-AZ 고가용성
+
+#### RDS Multi-AZ 배포
 ```
-Flutter 앱 (모바일)
-  ↓ HTTPS REST API
-Django 서버 (현재 배포된 서버)
-  ↓
-PostgreSQL + Redis + S3
+RDS Console → hypehere-db → "수정"
+Multi-AZ 배포: ✅ 활성화
+→ 비용: $15/월 → $30/월 (2배)
+→ 장점: 자동 장애 조치, 99.95% SLA
 ```
 
-#### 필요한 작업
-1. Flutter 프로젝트 생성
-2. HTTP 클라이언트 패키지 추가 (dio, http)
-3. WebSocket 클라이언트 추가 (web_socket_channel)
-4. 기존 API 엔드포인트 활용
-5. UI 개발
+#### ElastiCache 복제
+```
+ElastiCache Console → hypehere-cache → "수정"
+복제본 수: 1
+→ 비용: $15/월 → $30/월 (2배)
+→ 장점: 읽기 성능 향상, 자동 장애 조치
+```
 
-**예상 작업 시간**: 2-4주
+### CDN (CloudFront) 추가
 
-**장점**:
-- 서버 코드 변경 불필요
-- API 공유로 개발 속도 향상
-- 웹/앱 동시 서비스 가능
+전 세계 사용자에게 빠른 콘텐츠 전송:
 
----
+```
+CloudFront Console → "배포 생성"
+원본 도메인: hypehere-alb-1234567890.us-east-2.elb.amazonaws.com
+원본 프로토콜 정책: HTTPS만
+뷰어 프로토콜 정책: HTTP를 HTTPS로 리디렉션
+가격 등급: 미국, 캐나다, 유럽 사용 (비용 최적화)
 
-### 모니터링 및 알림 설정
+예상 비용: $10-20/월 (트래픽 따라)
+```
 
-#### Sentry 통합 (에러 추적)
-**무료 계층**: 월 5,000 이벤트
+### 모니터링 및 알림
 
+#### CloudWatch 알림 설정
 ```bash
-pip install sentry-sdk
-
-# settings.py
-import sentry_sdk
-sentry_sdk.init(
-    dsn="https://your-sentry-dsn@sentry.io/project-id",
-    traces_sample_rate=1.0,
-)
+# AWS CLI로 알림 생성
+aws cloudwatch put-metric-alarm \
+    --alarm-name hypehere-high-cpu \
+    --alarm-description "Alert when CPU exceeds 80%" \
+    --metric-name CPUUtilization \
+    --namespace AWS/EC2 \
+    --statistic Average \
+    --period 300 \
+    --threshold 80 \
+    --comparison-operator GreaterThanThreshold \
+    --datapoints-to-alarm 2 \
+    --evaluation-periods 2 \
+    --alarm-actions arn:aws:sns:us-east-2:123456789012:hypehere-alerts
 ```
 
----
-
-#### AWS CloudWatch 알림
-배포 후 CloudWatch에서 자동 생성되는 메트릭:
-- CPU 사용률
-- 메모리 사용률
-- 요청 수
-- 응답 시간
-
-**알림 설정 방법**:
-1. CloudWatch 콘솔 → Alarms → Create alarm
-2. 메트릭 선택 (예: CPU > 80%)
-3. 이메일 알림 설정
-
----
-
-### 백업 전략
-
-#### Neon DB 백업
-- 무료 계층: 7일 자동 백업
-- Pro 계층: 30일 자동 백업
-
-**수동 백업 방법**:
+#### 로그 집중화 (CloudWatch Logs)
 ```bash
-pg_dump "postgresql://user:password@host/db" > backup.sql
+# EC2에서 CloudWatch Logs 에이전트 설치
+wget https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb
+sudo dpkg -i amazon-cloudwatch-agent.deb
+
+# 설정 파일 생성
+sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-config-wizard
+
+# Django 로그를 CloudWatch로 전송
+sudo nano /opt/aws/amazon-cloudwatch-agent/etc/config.json
+```
+
+### Flutter 앱 지원
+
+Django 백엔드는 이미 REST API + WebSocket을 지원하므로 Flutter 앱에서 바로 사용 가능:
+
+```dart
+// Flutter에서 REST API 호출
+import 'package:http/http.dart' as http;
+
+final response = await http.get(
+  Uri.parse('https://your-alb-dns/api/posts/'),
+  headers: {'Authorization': 'Token your_token'},
+);
+
+// Flutter에서 WebSocket 연결
+import 'package:web_socket_channel/web_socket_channel.dart';
+
+final channel = WebSocketChannel.connect(
+  Uri.parse('wss://your-alb-dns/ws/chat/123/'),
+);
+```
+
+### 데이터베이스 백업 자동화
+
+#### RDS 자동 백업
+```
+RDS Console → hypehere-db → "수정"
+백업 보존 기간: 7일 → 30일 (장기 보관)
+백업 시간: 02:00-03:00 (트래픽 적은 시간)
+```
+
+#### Manual Snapshot (중요한 시점)
+```bash
+# AWS CLI로 수동 스냅샷 생성
+aws rds create-db-snapshot \
+    --db-instance-identifier hypehere-db \
+    --db-snapshot-identifier hypehere-db-snapshot-20250103
 ```
 
 ---
 
-#### S3 버전 관리
-S3 버킷에서 버전 관리 활성화:
-1. S3 콘솔 → 버킷 선택 → Properties
-2. "Versioning" → "Enable"
-3. 파일 삭제/수정 시 이전 버전 보관
+## 최종 체크리스트
+
+### 배포 완료 확인
+- [ ] VPC, Subnet, Security Group 생성 완료
+- [ ] RDS PostgreSQL 생성 및 연결 테스트 완료
+- [ ] ElastiCache Redis 생성 및 연결 테스트 완료
+- [ ] S3 Bucket 생성 및 Static 파일 업로드 완료
+- [ ] EC2 인스턴스 생성 및 SSH 접속 가능
+- [ ] Django 애플리케이션 배포 완료
+- [ ] Nginx 설정 및 프록시 동작 확인
+- [ ] Systemd 서비스 자동 시작 설정 완료
+- [ ] ALB 생성 및 헬스체크 통과
+- [ ] HTTPS 리스너 설정 (SSL 인증서)
+- [ ] GitHub Actions CI/CD 설정 완료
+- [ ] WebSocket 연결 테스트 완료
+- [ ] Admin 페이지 접속 가능
+- [ ] 실시간 채팅 기능 테스트 완료
+
+### 보안 설정 확인
+- [ ] RDS Public 액세스 비활성화
+- [ ] ElastiCache Private Subnet 배치
+- [ ] Security Group 최소 권한 원칙 적용
+- [ ] SSH 키 권한 400으로 설정
+- [ ] `.env` 파일이 Git에 커밋되지 않음
+- [ ] Django SECRET_KEY 프로덕션 전용 생성
+- [ ] AWS IAM 액세스 키 안전하게 보관
+- [ ] RDS 암호화 활성화
+- [ ] HTTPS 강제 리디렉션 설정
+
+### 모니터링 설정 확인
+- [ ] CloudWatch 알림 설정
+- [ ] CloudWatch Logs 에이전트 설치
+- [ ] RDS 성능 개선 도우미 활성화
+- [ ] ALB 액세스 로그 활성화 (선택사항)
 
 ---
 
-## 배포 완료 체크리스트
+## 참고 자료
 
-### ✅ 사전 준비
-- [ ] AWS 계정 준비
-- [ ] GitHub 계정 준비
-- [ ] 로컬 환경 확인 (Python 3.12, Git)
-
-### ✅ 외부 서비스 설정
-- [ ] Neon PostgreSQL 데이터베이스 생성
-- [ ] DATABASE_URL 복사 및 저장
-- [ ] Upstash Redis 인스턴스 생성
-- [ ] REDIS_URL 복사 및 저장
-
-### ✅ AWS S3 설정
-- [ ] S3 버킷 생성
-- [ ] CORS 설정 완료
-- [ ] IAM 사용자 생성 및 권한 부여
-- [ ] Access Key 발급 및 저장
-
-### ✅ GitHub 준비
-- [ ] .gitignore에 .env* 포함 확인
-- [ ] 배포 파일 커밋 (apprunner.yaml, deploy.sh 등)
-- [ ] GitHub에 푸시 완료
-
-### ✅ AWS App Runner 배포
-- [ ] App Runner 서비스 생성
-- [ ] GitHub 연결 완료
-- [ ] 모든 환경 변수 입력
-- [ ] 첫 배포 성공
-- [ ] SITE_URL 업데이트 및 재배포
-
-### ✅ 배포 후 검증
-- [ ] 홈페이지 접속 확인
-- [ ] HTTPS 인증서 확인
-- [ ] Admin 패널 접속 확인
-- [ ] 슈퍼유저 생성 완료
-- [ ] 회원가입 테스트 성공
-- [ ] 게시글 작성 및 이미지 업로드 성공
-- [ ] 채팅 (WebSocket) 기능 테스트 성공
-- [ ] 정적 파일 (CSS/JS) 로딩 확인
-- [ ] S3 파일 업로드 확인
-
-### ✅ 추가 설정
-- [ ] 비용 모니터링 알림 설정
-- [ ] CloudWatch 로그 확인
-- [ ] 백업 전략 수립
+- [AWS EC2 Documentation](https://docs.aws.amazon.com/ec2/)
+- [AWS RDS PostgreSQL Guide](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_PostgreSQL.html)
+- [AWS ElastiCache Redis Guide](https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/)
+- [AWS Application Load Balancer](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/)
+- [Django Deployment Checklist](https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/)
+- [Django Channels Deployment](https://channels.readthedocs.io/en/stable/deploying.html)
+- [Nginx Configuration for Django](https://docs.nginx.com/nginx/admin-guide/web-server/reverse-proxy/)
 
 ---
 
-## 도움이 필요하세요?
+**배포 완료!** 🎉
 
-### 공식 문서
-- [AWS App Runner 문서](https://docs.aws.amazon.com/apprunner/)
-- [Neon 문서](https://neon.tech/docs/introduction)
-- [Upstash 문서](https://docs.upstash.com/)
-- [Django 배포 체크리스트](https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/)
-
-### 커뮤니티
-- [Django Forum](https://forum.djangoproject.com/)
-- [AWS Community](https://repost.aws/)
-
----
-
-## 다음 단계
-
-배포 완료 후:
-
-1. **사용자 피드백 수집**
-   - 웹사이트 공유 및 테스트 요청
-   - 버그 리포트 수집
-
-2. **성능 모니터링**
-   - CloudWatch 메트릭 확인
-   - 사용자 행동 분석
-
-3. **기능 개선**
-   - 우선순위 높은 기능 개발
-   - 사용자 요청 반영
-
-4. **앱 개발 준비**
-   - Flutter 프로젝트 시작
-   - API 문서화
-
----
-
-**🎉 축하합니다! HypeHere 프로덕션 배포가 완료되었습니다!**
-
-이제 웹을 통해 서비스를 제공할 수 있으며, 향후 웹앱 및 Flutter 앱으로 확장할 준비가 되었습니다.
+문제가 발생하면 "문제 해결" 섹션을 참고하거나 CloudWatch Logs를 확인하세요.
