@@ -160,12 +160,12 @@ cat requirements.txt | grep -E "Django|daphne|psycopg2|redis|boto3"
 ```
 Subnet 1 (Public):
 - 이름: hypehere-public-subnet-1a
-- 가용 영역: us-east-2a
+- 가용 영역: ap-northeast-2a
 - IPv4 CIDR: 10.0.1.0/24
 
 Subnet 2 (Public):
 - 이름: hypehere-public-subnet-1b
-- 가용 영역: us-east-2b
+- 가용 영역: ap-northeast-2b
 - IPv4 CIDR: 10.0.2.0/24
 ```
 
@@ -174,12 +174,12 @@ Subnet 2 (Public):
 ```
 Subnet 3 (Private):
 - 이름: hypehere-private-subnet-1a
-- 가용 영역: us-east-2a
+- 가용 영역: ap-northeast-2a
 - IPv4 CIDR: 10.0.11.0/24
 
 Subnet 4 (Private):
 - 이름: hypehere-private-subnet-1b
-- 가용 영역: us-east-2b
+- 가용 영역: ap-northeast-2b
 - IPv4 CIDR: 10.0.12.0/24
 ```
 
@@ -383,7 +383,7 @@ RDS 인스턴스가 생성되면 애플리케이션용 데이터베이스와 사
 
 1. **엔드포인트 확인**
    - RDS Console → hypehere-db → "연결 & 보안" 탭
-   - 엔드포인트 복사: `hypehere-db.c9abc123xyz.us-east-2.rds.amazonaws.com`
+   - 엔드포인트 복사: `hypehere-db.c9abc123xyz.ap-northeast-2.rds.amazonaws.com`
 
 2. **EC2 Bastion Host 또는 로컬에서 연결 (임시)**
 
@@ -402,7 +402,7 @@ RDS 인스턴스가 생성되면 애플리케이션용 데이터베이스와 사
    sudo apt install postgresql-client  # Ubuntu
 
    # RDS 연결
-   psql -h hypehere-db.c9abc123xyz.us-east-2.rds.amazonaws.com \
+   psql -h hypehere-db.c9abc123xyz.ap-northeast-2.rds.amazonaws.com \
         -U postgres \
         -d postgres
    ```
@@ -435,7 +435,7 @@ RDS 인스턴스가 생성되면 애플리케이션용 데이터베이스와 사
 ### 1.4. 연결 정보 기록
 
 ```
-RDS 엔드포인트: hypehere-db.c9abc123xyz.us-east-2.rds.amazonaws.com
+RDS 엔드포인트: hypehere-db.c9abc123xyz.ap-northeast-2.rds.amazonaws.com
 포트: 5432
 데이터베이스 이름: hypehere
 마스터 사용자: postgres
@@ -444,7 +444,7 @@ RDS 엔드포인트: hypehere-db.c9abc123xyz.us-east-2.rds.amazonaws.com
 애플리케이션 암호: your_secure_app_password
 
 DATABASE_URL:
-postgresql://hypehere_app:your_secure_app_password@hypehere-db.c9abc123xyz.us-east-2.rds.amazonaws.com:5432/hypehere
+postgresql://hypehere_app:your_secure_app_password@hypehere-db.c9abc123xyz.ap-northeast-2.rds.amazonaws.com:5432/hypehere
 ```
 
 ---
@@ -546,7 +546,7 @@ redis-cli -h hypehere-cache.abc123.0001.use2.cache.amazonaws.com
    버킷 이름: hypehere-static-media-[고유번호]
    예: hypehere-static-media-20250103
 
-   AWS 리전: us-east-2 (Ohio)
+   AWS 리전: ap-northeast-2 (Seoul)
 
    객체 소유권: ACL 활성화됨
    ```
@@ -646,13 +646,13 @@ redis-cli -h hypehere-cache.abc123.0001.use2.cache.amazonaws.com
 
 ```
 S3 버킷 이름: hypehere-static-media-20250103
-리전: us-east-2
+리전: ap-northeast-2
 액세스 키 ID: AKIA...
 비밀 액세스 키: wJalrXUtn...
 
 환경변수:
 AWS_STORAGE_BUCKET_NAME=hypehere-static-media-20250103
-AWS_S3_REGION_NAME=us-east-2
+AWS_S3_REGION_NAME=ap-northeast-2
 AWS_ACCESS_KEY_ID=AKIA...
 AWS_SECRET_ACCESS_KEY=wJalrXUtn...
 ```
@@ -725,7 +725,7 @@ AWS_SECRET_ACCESS_KEY=wJalrXUtn...
 
 1. **EC2 Console → "Elastic IP" → "Elastic IP 주소 할당"**
    ```
-   네트워크 경계 그룹: us-east-2
+   네트워크 경계 그룹: ap-northeast-2
    퍼블릭 IPv4 주소 풀: Amazon의 IP 주소 풀
    ```
 
@@ -830,7 +830,7 @@ python -c 'from django.core.management.utils import get_random_secret_key; print
 ALLOWED_HOSTS=*.amazonaws.com,yourdomain.com,<EC2_PUBLIC_IP>
 
 # ==================== Site Configuration ====================
-SITE_URL=https://your-alb-dns-name.us-east-2.elb.amazonaws.com
+SITE_URL=https://your-alb-dns-name.ap-northeast-2.elb.amazonaws.com
 
 # ==================== Email Configuration ====================
 EMAIL_HOST_USER=your-email@gmail.com
@@ -840,14 +840,14 @@ EMAIL_HOST_PASSWORD=your-gmail-app-password
 CSRF_TRUSTED_ORIGINS=https://*.amazonaws.com,https://yourdomain.com
 
 # ==================== Database Configuration (RDS) ====================
-DATABASE_URL=postgresql://hypehere_app:your_secure_app_password@hypehere-db.c9abc123xyz.us-east-2.rds.amazonaws.com:5432/hypehere
+DATABASE_URL=postgresql://hypehere_app:your_secure_app_password@hypehere-db.c9abc123xyz.ap-northeast-2.rds.amazonaws.com:5432/hypehere
 
 # ==================== Redis Configuration (ElastiCache) ====================
 REDIS_URL=redis://hypehere-cache.abc123.0001.use2.cache.amazonaws.com:6379
 
 # ==================== AWS S3 Configuration ====================
 AWS_STORAGE_BUCKET_NAME=hypehere-static-media-20250103
-AWS_S3_REGION_NAME=us-east-2
+AWS_S3_REGION_NAME=ap-northeast-2
 AWS_ACCESS_KEY_ID=AKIA...
 AWS_SECRET_ACCESS_KEY=wJalrXUtn...
 ```
@@ -1082,8 +1082,8 @@ sudo ufw status
    VPC: hypehere-vpc
 
    가용 영역 (최소 2개 선택):
-   ☑️ us-east-2a - hypehere-public-subnet-1a
-   ☑️ us-east-2b - hypehere-public-subnet-1b
+   ☑️ ap-northeast-2a - hypehere-public-subnet-1a
+   ☑️ ap-northeast-2b - hypehere-public-subnet-1b
    ```
 
 5. **보안 그룹**
@@ -1136,8 +1136,8 @@ sudo ufw status
 Route 53 또는 외부 DNS 제공업체에서 도메인을 ALB DNS 이름으로 CNAME 레코드 설정:
 
 ```
-yourdomain.com       CNAME   hypehere-alb-1234567890.us-east-2.elb.amazonaws.com
-www.yourdomain.com   CNAME   hypehere-alb-1234567890.us-east-2.elb.amazonaws.com
+yourdomain.com       CNAME   hypehere-alb-1234567890.ap-northeast-2.elb.amazonaws.com
+www.yourdomain.com   CNAME   hypehere-alb-1234567890.ap-northeast-2.elb.amazonaws.com
 ```
 
 ### 6.5. 환경변수 업데이트
@@ -1159,13 +1159,13 @@ nano .env
 **수정 내용**:
 ```bash
 # ALLOWED_HOSTS에 ALB DNS 이름 추가
-ALLOWED_HOSTS=hypehere-alb-1234567890.us-east-2.elb.amazonaws.com,yourdomain.com,<EC2_IP>
+ALLOWED_HOSTS=hypehere-alb-1234567890.ap-northeast-2.elb.amazonaws.com,yourdomain.com,<EC2_IP>
 
 # SITE_URL 변경
-SITE_URL=https://hypehere-alb-1234567890.us-east-2.elb.amazonaws.com
+SITE_URL=https://hypehere-alb-1234567890.ap-northeast-2.elb.amazonaws.com
 
 # CSRF_TRUSTED_ORIGINS 업데이트
-CSRF_TRUSTED_ORIGINS=https://hypehere-alb-1234567890.us-east-2.elb.amazonaws.com,https://yourdomain.com
+CSRF_TRUSTED_ORIGINS=https://hypehere-alb-1234567890.ap-northeast-2.elb.amazonaws.com,https://yourdomain.com
 ```
 
 **Django 서비스 재시작**:
@@ -1262,7 +1262,7 @@ git push origin master
 http://<ALB_DNS_NAME>
 
 # 예시
-http://hypehere-alb-1234567890.us-east-2.elb.amazonaws.com
+http://hypehere-alb-1234567890.ap-northeast-2.elb.amazonaws.com
 ```
 
 ### 8.3. WebSocket 연결 테스트
@@ -1324,7 +1324,7 @@ b'hello'
 aws s3 ls s3://hypehere-static-media-20250103/static/ --recursive | head -20
 
 # 브라우저에서 Static 파일 접속 테스트
-https://hypehere-static-media-20250103.s3.us-east-2.amazonaws.com/static/css/components.css
+https://hypehere-static-media-20250103.s3.ap-northeast-2.amazonaws.com/static/css/components.css
 ```
 
 ---
@@ -1382,7 +1382,7 @@ curl http://localhost:80
 cat ~/hypehere/.env | grep DATABASE_URL
 
 # 3. RDS 엔드포인트 직접 연결 테스트
-psql -h hypehere-db.c9abc123xyz.us-east-2.rds.amazonaws.com \
+psql -h hypehere-db.c9abc123xyz.ap-northeast-2.rds.amazonaws.com \
      -U hypehere_app \
      -d hypehere
 
@@ -1433,7 +1433,7 @@ cat ~/hypehere/.env | grep AWS_
 
 # 2. AWS CLI로 직접 테스트
 aws s3 cp test.txt s3://hypehere-static-media-20250103/test.txt \
-    --region us-east-2
+    --region ap-northeast-2
 
 # 3. IAM 사용자 권한 확인
 # IAM Console → hypehere-s3-user → "권한" 탭
@@ -1552,7 +1552,7 @@ python manage.py collectstatic --noinput
 cat ~/hypehere/hypehere/settings.py | grep -A 5 "STATIC_URL"
 
 # 4. 브라우저에서 S3 URL 직접 접속 테스트
-https://hypehere-static-media-20250103.s3.us-east-2.amazonaws.com/static/css/components.css
+https://hypehere-static-media-20250103.s3.ap-northeast-2.amazonaws.com/static/css/components.css
 ```
 
 ---
@@ -1653,7 +1653,7 @@ ElastiCache Console → hypehere-cache → "수정"
 
 ```
 CloudFront Console → "배포 생성"
-원본 도메인: hypehere-alb-1234567890.us-east-2.elb.amazonaws.com
+원본 도메인: hypehere-alb-1234567890.ap-northeast-2.elb.amazonaws.com
 원본 프로토콜 정책: HTTPS만
 뷰어 프로토콜 정책: HTTP를 HTTPS로 리디렉션
 가격 등급: 미국, 캐나다, 유럽 사용 (비용 최적화)
@@ -1677,7 +1677,7 @@ aws cloudwatch put-metric-alarm \
     --comparison-operator GreaterThanThreshold \
     --datapoints-to-alarm 2 \
     --evaluation-periods 2 \
-    --alarm-actions arn:aws:sns:us-east-2:123456789012:hypehere-alerts
+    --alarm-actions arn:aws:sns:ap-northeast-2:123456789012:hypehere-alerts
 ```
 
 #### 로그 집중화 (CloudWatch Logs)
