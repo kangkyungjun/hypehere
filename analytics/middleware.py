@@ -40,20 +40,43 @@ class VisitorTrackingMiddleware:
         Increments visit_count for repeated visits
         """
         try:
+            from django.db import IntegrityError
+
             ip = self.get_client_ip(request)
             today = timezone.now().date()
             user = request.user if request.user.is_authenticated else None
 
-            visitor, created = DailyVisitor.objects.get_or_create(
+            # Try to get existing visitor first
+            visitor = DailyVisitor.objects.filter(
                 date=today,
                 ip_address=ip,
-                user=user,
-                defaults={'visit_count': 1}
-            )
+                user=user
+            ).first()
 
-            if not created:
+            if visitor:
+                # Existing visitor: increment count
                 visitor.visit_count += 1
                 visitor.save(update_fields=['visit_count', 'last_visit'])
+            else:
+                try:
+                    # New visitor: create record
+                    DailyVisitor.objects.create(
+                        date=today,
+                        ip_address=ip,
+                        user=user,
+                        visit_count=1
+                    )
+                except IntegrityError:
+                    # Race condition: another request already created it
+                    # Fetch the record that was just created and increment
+                    visitor = DailyVisitor.objects.filter(
+                        date=today,
+                        ip_address=ip,
+                        user=user
+                    ).first()
+                    if visitor:
+                        visitor.visit_count += 1
+                        visitor.save(update_fields=['visit_count', 'last_visit'])
 
         except Exception as e:
             # Fail silently to avoid breaking the app
