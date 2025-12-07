@@ -15,12 +15,39 @@ class HomeView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         if self.request.user.is_authenticated:
-            # Get personalized recommendations using ML-based recommendation engine
-            recommended_posts = get_recommendations_for_user(
-                user=self.request.user,
-                page=1,
-                page_size=20
-            )
+            try:
+                # Get personalized recommendations using ML-based recommendation engine
+                recommended_posts = get_recommendations_for_user(
+                    user=self.request.user,
+                    page=1,
+                    page_size=20
+                )
+
+                # Fallback 1: 추천 엔진이 빈 리스트 반환 시
+                if not recommended_posts:
+                    import logging
+                    logger = logging.getLogger(__name__)
+                    logger.warning(f"추천 엔진이 빈 리스트 반환 (사용자: {self.request.user.email})")
+
+                    # 최신 게시글 반환 (기존 DB 데이터 사용)
+                    recommended_posts = Post.objects.filter(
+                        is_deleted_by_report=False
+                    ).exclude(
+                        author=self.request.user
+                    ).select_related('author').prefetch_related('hashtags').order_by('-created_at')[:20]
+
+            except Exception as e:
+                # Fallback 2: 추천 엔진 에러 발생 시
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.error(f"추천 엔진 에러 (사용자: {self.request.user.email}): {e}", exc_info=True)
+
+                # 최신 게시글로 안전하게 Fallback
+                recommended_posts = Post.objects.filter(
+                    is_deleted_by_report=False
+                ).exclude(
+                    author=self.request.user
+                ).select_related('author').prefetch_related('hashtags').order_by('-created_at')[:20]
 
             # Annotate recommended posts with user-specific data
             if recommended_posts:
