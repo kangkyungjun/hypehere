@@ -233,20 +233,12 @@ if DEBUG:
         },
     }
 else:
-    # Production: Redis channel layer (supports multiple server instances)
-    # Requires REDIS_URL environment variable
-    # Format: redis://host:6379/1
-    redis_url = os.environ.get('REDIS_URL')
-    if not redis_url:
-        raise ValueError("REDIS_URL environment variable must be set in production (DEBUG=False)")
-
+    # Production: Redis channel layer for AWS
     CHANNEL_LAYERS = {
         'default': {
             'BACKEND': 'channels_redis.core.RedisChannelLayer',
             'CONFIG': {
-                "hosts": [redis_url],
-                "capacity": 1500,  # Maximum number of messages to store
-                "expiry": 10,  # Message expiry time in seconds
+                'hosts': [os.environ.get('REDIS_URL', 'redis://127.0.0.1:6379')],
             },
         },
     }
@@ -302,7 +294,7 @@ if not DEBUG:
     # Session and CSRF security
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
-    CSRF_COOKIE_HTTPONLY = True
+    CSRF_COOKIE_HTTPONLY = False  # Allow JavaScript to read CSRF token for API requests
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = 'Lax'
     CSRF_COOKIE_SAMESITE = 'Lax'
@@ -326,32 +318,36 @@ if not DEBUG:
 # ==================== AWS S3 Configuration (for production - Phase 3) ====================
 
 if not DEBUG:
-    # AWS S3 Settings (required when DEBUG=False)
+    # AWS S3 Settings (optional - only use if bucket is configured)
     AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
     AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
     AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
     AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', 'us-east-1')
-    
-    # Validation: Ensure S3 bucket is configured
-    if not AWS_STORAGE_BUCKET_NAME:
-        raise ValueError("AWS_STORAGE_BUCKET_NAME must be set in production (DEBUG=False)")
-    
-    # S3 Configuration
-    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
-    AWS_S3_OBJECT_PARAMETERS = {
-        'CacheControl': 'max-age=86400',  # 1 day cache
-    }
-    AWS_DEFAULT_ACL = 'public-read'
-    AWS_S3_FILE_OVERWRITE = False
-    AWS_QUERYSTRING_AUTH = False
-    
-    # Static files (CSS, JavaScript, Images)
-    STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-    STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
-    
-    # Media files (User uploads)
-    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
+
+    # Only use S3 if all credentials are provided
+    if AWS_STORAGE_BUCKET_NAME and AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY:
+        # S3 Configuration
+        AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+        AWS_S3_OBJECT_PARAMETERS = {
+            'CacheControl': 'max-age=86400',  # 1 day cache
+        }
+        AWS_DEFAULT_ACL = 'public-read'
+        AWS_S3_FILE_OVERWRITE = False
+        AWS_QUERYSTRING_AUTH = False
+
+        # Static files (CSS, JavaScript, Images) from S3
+        STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+        STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
+
+        # Media files (User uploads) from S3
+        DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+        MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
+    else:
+        # Fallback to WhiteNoise for static files (no S3)
+        STATIC_URL = '/static/'
+        STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+        # Media files served locally
+        MEDIA_URL = '/media/'
 
 # Notes:
 # 1. AWS credentials can be set via environment variables (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY)
