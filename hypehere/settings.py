@@ -233,12 +233,31 @@ if DEBUG:
         },
     }
 else:
-    # Production: Redis channel layer for AWS
+    # Production: Redis channel layer for AWS with TLS/SSL support
+    import ssl
+
+    # Parse Redis URL from environment
+    redis_url = os.environ.get('REDIS_URL', 'redis://127.0.0.1:6379')
+
+    # Extract host and port from Redis URL
+    # Format: redis://host:port or redis://host
+    redis_host = redis_url.replace('redis://', '').split(':')[0]
+    redis_port = 6379
+    if ':' in redis_url.replace('redis://', ''):
+        try:
+            redis_port = int(redis_url.replace('redis://', '').split(':')[1].split('/')[0])
+        except (ValueError, IndexError):
+            redis_port = 6379
+
     CHANNEL_LAYERS = {
         'default': {
             'BACKEND': 'channels_redis.core.RedisChannelLayer',
             'CONFIG': {
-                'hosts': [os.environ.get('REDIS_URL', 'redis://127.0.0.1:6379')],
+                'hosts': [{
+                    'address': (redis_host, redis_port),
+                    'ssl': True,  # Enable SSL/TLS for AWS ElastiCache
+                    'ssl_cert_reqs': None,  # Don't verify certificates (AWS ElastiCache doesn't use client certs)
+                }],
             },
         },
     }
