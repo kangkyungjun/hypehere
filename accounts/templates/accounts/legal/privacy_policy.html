@@ -1,0 +1,417 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "개인정보처리방침" %} - HypeHere{% endblock %}
+
+{% block extra_css %}
+<style>
+.privacy-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: var(--space-xl);
+    background: var(--color-surface);
+}
+
+.privacy-header {
+    text-align: center;
+    margin-bottom: var(--space-xl);
+    border-bottom: 2px solid var(--color-border);
+    padding-bottom: var(--space-lg);
+}
+
+.privacy-header h1 {
+    font-size: var(--font-size-3xl);
+    color: var(--color-text);
+    margin-bottom: var(--space-md);
+}
+
+.privacy-meta {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-light);
+}
+
+.privacy-section {
+    margin-bottom: var(--space-xl);
+}
+
+.privacy-section-title {
+    font-size: var(--font-size-xl);
+    font-weight: 600;
+    color: var(--color-text);
+    margin-bottom: var(--space-lg);
+    padding-bottom: var(--space-sm);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.privacy-article {
+    margin-bottom: var(--space-lg);
+}
+
+.privacy-article-title {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--color-text);
+    margin-bottom: var(--space-sm);
+}
+
+.privacy-article-content {
+    color: var(--color-text-light);
+    line-height: 1.8;
+    margin-bottom: var(--space-md);
+}
+
+.privacy-article-content p {
+    margin-bottom: var(--space-sm);
+}
+
+.privacy-article-content ul, .privacy-article-content ol {
+    margin-left: var(--space-lg);
+    margin-bottom: var(--space-sm);
+}
+
+.privacy-article-content li {
+    margin-bottom: var(--space-xs);
+}
+
+.privacy-article-content strong {
+    color: var(--color-text);
+    font-weight: 600;
+}
+
+.privacy-highlight {
+    background-color: var(--color-background);
+    border-left: 3px solid var(--color-primary);
+    padding: var(--space-md);
+    margin: var(--space-md) 0;
+}
+
+.privacy-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: var(--space-md) 0;
+}
+
+.privacy-table th, .privacy-table td {
+    border: 1px solid var(--color-border);
+    padding: var(--space-sm);
+    text-align: left;
+}
+
+.privacy-table th {
+    background-color: var(--color-background);
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.privacy-table td {
+    color: var(--color-text-light);
+}
+
+@media (max-width: 768px) {
+    .privacy-container {
+        padding: var(--space-md);
+    }
+
+    .privacy-header h1 {
+        font-size: var(--font-size-2xl);
+    }
+
+    .privacy-section-title {
+        font-size: var(--font-size-lg);
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+{% if use_database %}
+    <!-- Database-driven content -->
+    <div class="terms-container">
+        <div class="terms-header">
+            <h1>{{ document.title }}</h1>
+            <div class="terms-meta">
+                <p>{% trans "시행일" %}: {{ document.effective_date|date:"Y년 m월 d일" }}</p>
+                <p>{% trans "버전" %}: {{ document.version }}</p>
+            </div>
+        </div>
+
+        <div class="terms-content">
+            {{ document.content|safe }}
+        </div>
+    </div>
+{% else %}
+    <!-- Template fallback content -->
+<div class="privacy-container">
+    <div class="privacy-header">
+        <h1>{% trans "개인정보처리방침" %}</h1>
+        <div class="privacy-meta">
+            <p>{% trans "시행일자: 2025년 1월 1일" %}</p>
+        </div>
+    </div>
+
+    <!-- 제1장: 개인정보의 수집 및 이용 목적 -->
+    <div class="privacy-section">
+        <h2 class="privacy-section-title">{% trans "제1장 개인정보의 수집 및 이용 목적" %}</h2>
+
+        <div class="privacy-article">
+            <h3 class="privacy-article-title">{% trans "제1조 (개인정보 처리의 원칙)" %}</h3>
+            <div class="privacy-article-content">
+                <p>{% trans "HypeHere(이하 '회사')는 개인정보 보호법 등 관련 법령상의 개인정보 보호 규정을 준수하며, 이용자의 개인정보를 다음과 같은 목적으로 수집 및 이용합니다:" %}</p>
+                <ul>
+                    <li>{% trans "회원 가입 및 관리: 회원 가입 의사 확인, 회원제 서비스 제공, 본인 확인, 부정 이용 방지" %}</li>
+                    <li>{% trans "서비스 제공: 언어 학습 서비스, 게시물 작성 및 관리, 실시간 채팅 서비스 제공" %}</li>
+                    <li>{% trans "콘텐츠 제공: 맞춤형 학습 콘텐츠 추천, 학습 진도 관리, 언어 교환 파트너 매칭" %}</li>
+                    <li>{% trans "서비스 개선: 신규 서비스 개발, 서비스 품질 향상, 통계학적 특성에 따른 서비스 제공" %}</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="privacy-article">
+            <h3 class="privacy-article-title">{% trans "제2조 (처리하는 개인정보 항목)" %}</h3>
+            <div class="privacy-article-content">
+                <p>{% trans "회사는 회원가입 및 서비스 이용을 위해 다음과 같은 개인정보를 수집하고 있습니다:" %}</p>
+
+                <div class="privacy-highlight">
+                    <strong>{% trans "필수 수집 항목:" %}</strong>
+                    <ul>
+                        <li>{% trans "이메일 주소 (로그인 ID로 사용)" %}</li>
+                        <li>{% trans "닉네임 (표시 이름, 중복 가능)" %}</li>
+                        <li>{% trans "비밀번호 (암호화하여 저장)" %}</li>
+                    </ul>
+                </div>
+
+                <div class="privacy-highlight">
+                    <strong>{% trans "선택 수집 항목:" %}</strong>
+                    <ul>
+                        <li>{% trans "프로필 사진" %}</li>
+                        <li>{% trans "성별" %}</li>
+                        <li>{% trans "국가" %}</li>
+                        <li>{% trans "모국어 및 학습 목표 언어" %}</li>
+                        <li>{% trans "자기소개" %}</li>
+                    </ul>
+                </div>
+
+                <div class="privacy-highlight">
+                    <strong>{% trans "서비스 이용 과정에서 자동으로 생성·수집되는 정보:" %}</strong>
+                    <ul>
+                        <li>{% trans "서비스 이용 기록: 접속 로그, 쿠키, 접속 IP 정보" %}</li>
+                        <li>{% trans "생성 콘텐츠: 게시물, 댓글, 좋아요, 팔로우 정보" %}</li>
+                        <li>{% trans "채팅 메시지: 일반 채팅 메시지 (익명 채팅은 저장되지 않음)" %}</li>
+                        <li>{% trans "학습 기록: 학습 진도, 선호 학습 방식" %}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 제2장: 개인정보의 보유 및 이용기간 -->
+    <div class="privacy-section">
+        <h2 class="privacy-section-title">{% trans "제2장 개인정보의 보유 및 이용기간" %}</h2>
+
+        <div class="privacy-article">
+            <h3 class="privacy-article-title">{% trans "제3조 (개인정보 보유기간)" %}</h3>
+            <div class="privacy-article-content">
+                <p>{% trans "회사는 이용자의 개인정보를 다음과 같이 보유 및 이용합니다:" %}</p>
+
+                <table class="privacy-table">
+                    <thead>
+                        <tr>
+                            <th>{% trans "항목" %}</th>
+                            <th>{% trans "보유기간" %}</th>
+                            <th>{% trans "비고" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>{% trans "회원정보" %}</td>
+                            <td>{% trans "회원 탈퇴 시까지" %}</td>
+                            <td>{% trans "탈퇴 요청 후 30일 유예기간" %}</td>
+                        </tr>
+                        <tr>
+                            <td>{% trans "게시물·댓글" %}</td>
+                            <td>{% trans "삭제 요청 시까지" %}</td>
+                            <td>{% trans "신고된 게시물은 원본 보존" %}</td>
+                        </tr>
+                        <tr>
+                            <td>{% trans "일반 채팅 메시지" %}</td>
+                            <td>{% trans "대화방 유지 기간" %}</td>
+                            <td>{% trans "대화방 퇴장 시 개인별 삭제" %}</td>
+                        </tr>
+                        <tr>
+                            <td>{% trans "익명 채팅 메시지" %}</td>
+                            <td>{% trans "즉시 삭제" %}</td>
+                            <td>{% trans "데이터베이스에 저장되지 않음" %}</td>
+                        </tr>
+                        <tr>
+                            <td>{% trans "접속 로그" %}</td>
+                            <td>{% trans "3개월" %}</td>
+                            <td>{% trans "통신비밀보호법 준수" %}</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <p>{% trans "다만, 관계 법령에 따라 보존할 필요가 있는 경우 해당 법령에서 정한 기간 동안 개인정보를 보관합니다:" %}</p>
+                <ul>
+                    <li>{% trans "표시·광고에 관한 기록: 6개월 (전자상거래법)" %}</li>
+                    <li>{% trans "계약 또는 청약철회 기록: 5년 (전자상거래법)" %}</li>
+                    <li>{% trans "소비자 불만 또는 분쟁처리 기록: 3년 (전자상거래법)" %}</li>
+                    <li>{% trans "접속 로그 기록: 3개월 (통신비밀보호법)" %}</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="privacy-article">
+            <h3 class="privacy-article-title">{% trans "제4조 (계정 비활성화 및 삭제)" %}</h3>
+            <div class="privacy-article-content">
+                <p>{% trans "회원은 다음과 같은 방법으로 계정을 관리할 수 있습니다:" %}</p>
+                <ul>
+                    <li><strong>{% trans "비활성화:" %}</strong> {% trans "일시적으로 계정을 중단할 수 있으며, 30일 이내 재활성화 가능" %}</li>
+                    <li><strong>{% trans "탈퇴:" %}</strong> {% trans "탈퇴 요청 후 30일 유예기간이 부여되며, 유예기간 동안 복구 가능" %}</li>
+                    <li><strong>{% trans "완전 삭제:" %}</strong> {% trans "30일 유예기간 경과 후 모든 개인정보가 영구 삭제됨" %}</li>
+                </ul>
+
+                <div class="privacy-highlight">
+                    <strong>{% trans "주의사항:" %}</strong>
+                    <p>{% trans "계정 삭제 시 작성한 게시물 및 댓글은 자동으로 삭제되지 않으며, 개별적으로 삭제하셔야 합니다. 삭제를 원하지 않는 게시물은 '익명' 처리됩니다." %}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 제3장: 개인정보의 제3자 제공 및 처리위탁 -->
+    <div class="privacy-section">
+        <h2 class="privacy-section-title">{% trans "제3장 개인정보의 제3자 제공 및 처리위탁" %}</h2>
+
+        <div class="privacy-article">
+            <h3 class="privacy-article-title">{% trans "제5조 (개인정보의 제3자 제공)" %}</h3>
+            <div class="privacy-article-content">
+                <p>{% trans "회사는 원칙적으로 이용자의 개인정보를 제3자에게 제공하지 않습니다. 다만, 다음의 경우에는 예외로 합니다:" %}</p>
+                <ul>
+                    <li>{% trans "이용자가 사전에 동의한 경우" %}</li>
+                    <li>{% trans "법령의 규정에 의거하거나, 수사 목적으로 법령에 정해진 절차와 방법에 따라 수사기관의 요구가 있는 경우" %}</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="privacy-article">
+            <h3 class="privacy-article-title">{% trans "제6조 (개인정보 처리위탁)" %}</h3>
+            <div class="privacy-article-content">
+                <p>{% trans "회사는 서비스 향상을 위해 다음과 같이 개인정보 처리업무를 외부 전문업체에 위탁하여 운영하고 있습니다:" %}</p>
+
+                <table class="privacy-table">
+                    <thead>
+                        <tr>
+                            <th>{% trans "수탁업체" %}</th>
+                            <th>{% trans "위탁업무 내용" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>{% trans "Amazon Web Services (AWS)" %}</td>
+                            <td>{% trans "클라우드 서버 호스팅, 데이터 저장" %}</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <p>{% trans "위탁 계약 시 개인정보보호 관련 법규의 준수, 개인정보에 관한 비밀유지, 제3자 제공 금지 및 사고 시 책임부담 등을 명확히 규정하고 있습니다." %}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 제4장: 개인정보의 안전성 확보조치 -->
+    <div class="privacy-section">
+        <h2 class="privacy-section-title">{% trans "제4장 개인정보의 안전성 확보조치" %}</h2>
+
+        <div class="privacy-article">
+            <h3 class="privacy-article-title">{% trans "제7조 (기술적 보호조치)" %}</h3>
+            <div class="privacy-article-content">
+                <p>{% trans "회사는 개인정보의 안전성 확보를 위해 다음과 같은 기술적 조치를 취하고 있습니다:" %}</p>
+                <ul>
+                    <li><strong>{% trans "비밀번호 암호화:" %}</strong> {% trans "Django의 기본 암호화 알고리즘(PBKDF2)을 사용하여 비밀번호를 암호화 저장" %}</li>
+                    <li><strong>{% trans "HTTPS 통신:" %}</strong> {% trans "모든 개인정보 전송 시 SSL/TLS 암호화 프로토콜 사용" %}</li>
+                    <li><strong>{% trans "접근 제어:" %}</strong> {% trans "데이터베이스 및 개인정보 처리 시스템에 대한 접근 권한 관리" %}</li>
+                    <li><strong>{% trans "보안 프로그램:" %}</strong> {% trans "백신 프로그램 및 방화벽 운영" %}</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="privacy-article">
+            <h3 class="privacy-article-title">{% trans "제8조 (관리적 보호조치)" %}</h3>
+            <div class="privacy-article-content">
+                <p>{% trans "회사는 개인정보의 안전한 처리를 위해 다음과 같은 관리적 조치를 시행하고 있습니다:" %}</p>
+                <ul>
+                    <li>{% trans "개인정보 취급자 최소화 및 교육" %}</li>
+                    <li>{% trans "개인정보 처리 시스템 접근 권한 관리" %}</li>
+                    <li>{% trans "접속 기록 보관 및 위·변조 방지" %}</li>
+                    <li>{% trans "개인정보 보호 책임자 지정" %}</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- 제5장: 이용자의 권리와 행사방법 -->
+    <div class="privacy-section">
+        <h2 class="privacy-section-title">{% trans "제5장 이용자의 권리와 행사방법" %}</h2>
+
+        <div class="privacy-article">
+            <h3 class="privacy-article-title">{% trans "제9조 (이용자의 권리)" %}</h3>
+            <div class="privacy-article-content">
+                <p>{% trans "이용자는 다음과 같은 권리를 행사할 수 있습니다:" %}</p>
+                <ul>
+                    <li><strong>{% trans "열람권:" %}</strong> {% trans "본인의 개인정보 열람 요구" %}</li>
+                    <li><strong>{% trans "정정권:" %}</strong> {% trans "개인정보가 사실과 다를 경우 정정 요구" %}</li>
+                    <li><strong>{% trans "삭제권:" %}</strong> {% trans "개인정보 삭제 요구" %}</li>
+                    <li><strong>{% trans "처리정지권:" %}</strong> {% trans "개인정보 처리의 정지 요구" %}</li>
+                </ul>
+
+                <p>{% trans "위 권리를 행사하고자 할 경우, 다음 방법으로 요청하실 수 있습니다:" %}</p>
+                <ul>
+                    <li>{% trans "계정 설정 메뉴를 통한 직접 수정" %}</li>
+                    <li>{% trans "고객센터를 통한 요청" %}</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="privacy-article">
+            <h3 class="privacy-article-title">{% trans "제10조 (자동화된 의사결정)" %}</h3>
+            <div class="privacy-article-content">
+                <p>{% trans "회사는 다음과 같은 자동화된 처리를 수행합니다:" %}</p>
+                <ul>
+                    <li><strong>{% trans "언어 교환 파트너 매칭:" %}</strong> {% trans "학습 언어, 선호도, 활동 시간대 등을 기반으로 자동 추천" %}</li>
+                    <li><strong>{% trans "학습 콘텐츠 추천:" %}</strong> {% trans "학습 진도 및 선호 학습 방식에 따른 맞춤형 콘텐츠 제공" %}</li>
+                </ul>
+                <p>{% trans "이용자는 자동화된 의사결정에 대해 이의를 제기하거나 사람의 개입을 요구할 수 있습니다." %}</p>
+            </div>
+        </div>
+
+        <div class="privacy-article">
+            <h3 class="privacy-article-title">{% trans "제11조 (개인정보 보호책임자)" %}</h3>
+            <div class="privacy-article-content">
+                <p>{% trans "회사는 개인정보 처리에 관한 업무를 총괄해서 책임지고, 개인정보 처리와 관련한 정보주체의 불만처리 및 피해구제를 위하여 아래와 같이 개인정보 보호책임자를 지정하고 있습니다:" %}</p>
+
+                <div class="privacy-highlight">
+                    <strong>{% trans "개인정보 보호책임자" %}</strong>
+                    <ul>
+                        <li>{% trans "이름: HypeHere 운영팀" %}</li>
+                        <li>{% trans "연락처: 고객센터 문의" %}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="privacy-article">
+            <h3 class="privacy-article-title">{% trans "제12조 (개인정보 처리방침 변경)" %}</h3>
+            <div class="privacy-article-content">
+                <p>{% trans "이 개인정보 처리방침은 법령, 정책 또는 보안기술의 변경에 따라 내용이 추가, 삭제 및 수정될 수 있으며, 변경 시 최소 7일 전에 서비스 내 공지사항을 통해 고지할 것입니다." %}</p>
+                <p>{% trans "다만, 수집하는 개인정보의 항목, 이용목적의 변경 등과 같이 이용자 권리의 중대한 변경이 발생할 때에는 최소 30일 전에 고지합니다." %}</p>
+            </div>
+        </div>
+    </div>
+
+    <div style="text-align: center; margin-top: var(--space-xl); padding-top: var(--space-xl); border-top: 2px solid var(--color-border);">
+        <p class="privacy-meta">{% trans "본 개인정보처리방침은 2025년 1월 1일부터 적용됩니다." %}</p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

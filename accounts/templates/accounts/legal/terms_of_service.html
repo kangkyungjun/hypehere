@@ -1,0 +1,430 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "이용약관" %} - HypeHere{% endblock %}
+
+{% block extra_css %}
+<style>
+.terms-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: var(--space-xl);
+    background: var(--color-surface);
+}
+
+.terms-header {
+    text-align: center;
+    margin-bottom: var(--space-xl);
+    border-bottom: 2px solid var(--color-border);
+    padding-bottom: var(--space-lg);
+}
+
+.terms-header h1 {
+    font-size: var(--font-size-3xl);
+    color: var(--color-text);
+    margin-bottom: var(--space-md);
+}
+
+.terms-meta {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-light);
+}
+
+.terms-section {
+    margin-bottom: var(--space-xl);
+}
+
+.terms-section-title {
+    font-size: var(--font-size-xl);
+    font-weight: 600;
+    color: var(--color-text);
+    margin-bottom: var(--space-lg);
+    padding-bottom: var(--space-sm);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.terms-article {
+    margin-bottom: var(--space-lg);
+}
+
+.terms-article-title {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--color-text);
+    margin-bottom: var(--space-md);
+}
+
+.terms-article-content {
+    font-size: var(--font-size-base);
+    line-height: 1.8;
+    color: var(--color-text-light);
+    margin-left: var(--space-md);
+}
+
+.terms-article-content ol,
+.terms-article-content ul {
+    margin-top: var(--space-sm);
+    margin-bottom: var(--space-sm);
+    padding-left: var(--space-lg);
+}
+
+.terms-article-content li {
+    margin-bottom: var(--space-xs);
+}
+
+.terms-highlight {
+    background: var(--color-warning-light, #fff3cd);
+    padding: var(--space-md);
+    border-left: 4px solid var(--color-warning, #ffc107);
+    margin: var(--space-md) 0;
+    border-radius: var(--border-radius-sm);
+}
+
+.terms-footer {
+    text-align: center;
+    margin-top: var(--space-xl);
+    padding-top: var(--space-lg);
+    border-top: 1px solid var(--color-border);
+}
+
+@media (max-width: 768px) {
+    .terms-container {
+        padding: var(--space-md);
+    }
+
+    .terms-header h1 {
+        font-size: var(--font-size-2xl);
+    }
+
+    .terms-section-title {
+        font-size: var(--font-size-lg);
+    }
+
+    .terms-article-title {
+        font-size: var(--font-size-base);
+    }
+
+    .terms-article-content {
+        margin-left: var(--space-sm);
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+{% if use_database %}
+    <!-- Database-driven content -->
+    <div class="terms-container">
+        <div class="terms-header">
+            <h1>{{ document.title }}</h1>
+            <div class="terms-meta">
+                <p>{% trans "시행일" %}: {{ document.effective_date|date:"Y년 m월 d일" }}</p>
+                <p>{% trans "버전" %}: {{ document.version }}</p>
+            </div>
+        </div>
+
+        <div class="terms-content">
+            {{ document.content|safe }}
+        </div>
+    </div>
+{% else %}
+    <!-- Template fallback content -->
+<div class="terms-container">
+    <!-- Header -->
+    <div class="terms-header">
+        <h1>{% trans "HypeHere 서비스 이용약관" %}</h1>
+        <div class="terms-meta">
+            <p>{% trans "시행일: 2025년 1월 1일" %}</p>
+            <p>{% trans "최종 수정일: 2025년 1월 1일" %}</p>
+        </div>
+    </div>
+
+    <!-- 제1장: 총칙 -->
+    <div class="terms-section">
+        <h2 class="terms-section-title">{% trans "제1장 총칙" %}</h2>
+
+        <div class="terms-article">
+            <h3 class="terms-article-title">{% trans "제1조 (목적)" %}</h3>
+            <div class="terms-article-content">
+                <p>{% trans "본 약관은 HypeHere(이하 '회사')가 제공하는 언어 학습 소셜 플랫폼 서비스(이하 '서비스')의 이용과 관련하여 회사와 회원 간의 권리, 의무 및 책임사항, 기타 필요한 사항을 규정함을 목적으로 합니다." %}</p>
+            </div>
+        </div>
+
+        <div class="terms-article">
+            <h3 class="terms-article-title">{% trans "제2조 (용어의 정의)" %}</h3>
+            <div class="terms-article-content">
+                <p>{% trans "본 약관에서 사용하는 용어의 정의는 다음과 같습니다:" %}</p>
+                <ol>
+                    <li>{% trans "'서비스'란 회사가 제공하는 언어 학습 커뮤니티, 게시물 공유, 실시간 채팅, 익명 채팅, 비디오 채팅 등의 모든 서비스를 의미합니다." %}</li>
+                    <li>{% trans "'회원'이란 본 약관에 동의하고 회사와 이용계약을 체결하여 서비스를 이용하는 자를 의미합니다." %}</li>
+                    <li>{% trans "'아이디(ID)'란 회원의 식별과 서비스 이용을 위하여 회원이 등록한 이메일 주소를 의미합니다." %}</li>
+                    <li>{% trans "'닉네임'이란 회원이 서비스 내에서 다른 회원에게 표시되는 이름을 의미합니다." %}</li>
+                    <li>{% trans "'게시물'이란 회원이 서비스를 이용함에 있어 게시한 문자, 사진, 영상, 각종 파일 및 링크 등을 의미합니다." %}</li>
+                    <li>{% trans "'익명 채팅'이란 회원의 신원이 노출되지 않은 상태로 진행되는 1:1 채팅 서비스를 의미합니다." %}</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="terms-article">
+            <h3 class="terms-article-title">{% trans "제3조 (약관의 효력 및 변경)" %}</h3>
+            <div class="terms-article-content">
+                <ol>
+                    <li>{% trans "본 약관은 서비스 화면에 게시하거나 기타의 방법으로 회원에게 공지함으로써 효력이 발생합니다." %}</li>
+                    <li>{% trans "회사는 관련 법령을 위배하지 않는 범위에서 본 약관을 변경할 수 있으며, 약관이 변경되는 경우 변경사유 및 적용일자를 명시하여 적용일자 7일 전부터 공지합니다." %}</li>
+                    <li>{% trans "회원은 변경된 약관에 동의하지 않을 경우 서비스 이용을 중단하고 회원 탈퇴를 요청할 수 있습니다." %}</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="terms-article">
+            <h3 class="terms-article-title">{% trans "제4조 (약관 외 준칙)" %}</h3>
+            <div class="terms-article-content">
+                <p>{% trans "본 약관에 명시되지 않은 사항은 정보통신망 이용촉진 및 정보보호 등에 관한 법률, 전기통신사업법, 개인정보보호법 등 관련 법령의 규정과 일반적인 상관례에 따릅니다." %}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 제2장: 서비스 이용계약 -->
+    <div class="terms-section">
+        <h2 class="terms-section-title">{% trans "제2장 서비스 이용계약" %}</h2>
+
+        <div class="terms-article">
+            <h3 class="terms-article-title">{% trans "제5조 (이용계약의 성립)" %}</h3>
+            <div class="terms-article-content">
+                <ol>
+                    <li>{% trans "이용계약은 회원이 되고자 하는 자(이하 '가입신청자')가 본 약관의 내용에 대하여 동의를 한 다음 회원가입신청을 하고, 회사가 이를 승낙함으로써 체결됩니다." %}</li>
+                    <li>{% trans "회사는 가입신청자의 신청에 대하여 승낙함을 원칙으로 합니다. 다만, 다음 각 호에 해당하는 경우 회사는 가입신청을 거부하거나 승낙을 유보할 수 있습니다." %}</li>
+                </ol>
+                <ul style="margin-left: var(--space-lg);">
+                    <li>{% trans "실명이 아니거나 타인의 명의를 이용한 경우" %}</li>
+                    <li>{% trans "허위의 정보를 기재하거나, 회사가 제시하는 내용을 기재하지 않은 경우" %}</li>
+                    <li>{% trans "이전에 회원자격을 상실한 적이 있는 경우 (단, 회사의 재가입 승낙을 얻은 경우 제외)" %}</li>
+                    <li>{% trans "기타 회원으로 등록하는 것이 회사의 기술상 현저히 지장이 있다고 판단되는 경우" %}</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="terms-article">
+            <h3 class="terms-article-title">{% trans "제6조 (회원가입)" %}</h3>
+            <div class="terms-article-content">
+                <ol>
+                    <li>{% trans "가입신청자는 회사가 정한 가입 양식에 따라 회원정보를 기입한 후 본 약관에 동의한다는 의사표시를 함으로써 회원가입을 신청합니다." %}</li>
+                    <li>{% trans "회원가입 시 이메일 주소가 아이디(ID)로 사용되며, 닉네임은 다른 회원에게 표시되는 이름으로 중복이 가능합니다." %}</li>
+                    <li>{% trans "회원은 다음의 정보를 제공해야 합니다:" %}</li>
+                </ol>
+                <ul style="margin-left: var(--space-lg);">
+                    <li>{% trans "필수: 이메일, 닉네임, 비밀번호" %}</li>
+                    <li>{% trans "선택: 성별, 국가, 화면 언어" %}</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="terms-article">
+            <h3 class="terms-article-title">{% trans "제7조 (회원정보의 변경)" %}</h3>
+            <div class="terms-article-content">
+                <ol>
+                    <li>{% trans "회원은 마이페이지 또는 회원정보 관리 화면을 통하여 언제든지 본인의 개인정보를 열람하고 수정할 수 있습니다." %}</li>
+                    <li>{% trans "회원은 회원가입 신청 시 기재한 사항이 변경되었을 경우 온라인으로 수정하거나 회사에 그 변경사항을 알려야 합니다." %}</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="terms-article">
+            <h3 class="terms-article-title">{% trans "제8조 (개인정보보호 의무)" %}</h3>
+            <div class="terms-article-content">
+                <p>{% trans "회사는 관련 법령이 정하는 바에 따라 회원의 개인정보를 보호하기 위해 노력합니다. 회원의 개인정보 보호에 관해서는 관련 법령 및 회사가 별도로 정한 '개인정보처리방침'에 따릅니다." %}</p>
+            </div>
+        </div>
+
+        <div class="terms-article">
+            <h3 class="terms-article-title">{% trans "제9조 (회원의 아이디 및 비밀번호 관리 의무)" %}</h3>
+            <div class="terms-article-content">
+                <ol>
+                    <li>{% trans "회원의 아이디(이메일)와 비밀번호에 관한 관리책임은 회원에게 있으며, 이를 제3자가 이용하도록 하여서는 안 됩니다." %}</li>
+                    <li>{% trans "회사는 회원의 아이디가 개인정보 유출 우려가 있거나, 반사회적 또는 공서양속에 어긋나거나, 회사 및 회사의 운영자로 오인될 우려가 있는 경우, 해당 아이디의 이용을 제한할 수 있습니다." %}</li>
+                    <li>{% trans "회원은 아이디 및 비밀번호가 도용되거나 제3자가 사용하고 있음을 인지한 경우 즉시 회사에 통보하고 회사의 안내에 따라야 합니다." %}</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <!-- 제3장: 서비스 제공 및 이용 -->
+    <div class="terms-section">
+        <h2 class="terms-section-title">{% trans "제3장 서비스 제공 및 이용" %}</h2>
+
+        <div class="terms-article">
+            <h3 class="terms-article-title">{% trans "제10조 (서비스의 내용)" %}</h3>
+            <div class="terms-article-content">
+                <p>{% trans "회사가 제공하는 서비스는 다음과 같습니다:" %}</p>
+                <ol>
+                    <li>{% trans "언어 학습 커뮤니티 서비스: 게시물 작성, 댓글, 좋아요, 팔로우 기능" %}</li>
+                    <li>{% trans "1:1 채팅 서비스: 일반 실시간 텍스트 채팅 및 비디오 채팅" %}</li>
+                    <li>{% trans "익명 채팅 서비스: 익명 매칭 기반 1:1 채팅 및 비디오 채팅" %}</li>
+                    <li>{% trans "오픈 채팅방 서비스: 다수의 회원이 참여하는 그룹 채팅" %}</li>
+                    <li>{% trans "학습 자료 제공 서비스: 언어 학습을 위한 표현, 어휘 등 학습 콘텐츠" %}</li>
+                    <li>{% trans "알림 서비스: 메시지, 팔로우, 댓글, 좋아요 등의 실시간 알림" %}</li>
+                    <li>{% trans "기타 회사가 추가 개발하거나 제휴계약 등을 통해 회원에게 제공하는 일체의 서비스" %}</li>
+                </ol>
+                <div class="terms-highlight">
+                    <strong>{% trans "비디오 채팅 서비스 이용 시 주의사항" %}</strong>
+                    <p>{% trans "비디오 채팅은 WebRTC 기술을 사용하며, 영상 및 음성 데이터는 참여자 간 직접 전송됩니다. 회사는 비디오 채팅 내용을 저장하지 않으나, 회원은 타인의 영상을 녹화하거나 캡처하여 유포하는 행위를 해서는 안 됩니다." %}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="terms-article">
+            <h3 class="terms-article-title">{% trans "제11조 (서비스의 중단)" %}</h3>
+            <div class="terms-article-content">
+                <ol>
+                    <li>{% trans "회사는 컴퓨터 등 정보통신설비의 보수점검, 교체 및 고장, 통신두절 또는 운영상 상당한 이유가 있는 경우 서비스의 제공을 일시적으로 중단할 수 있습니다." %}</li>
+                    <li>{% trans "제1항에 의한 서비스 중단의 경우에는 회사는 사전에 서비스 화면 또는 이메일을 통하여 회원에게 통지합니다. 다만, 회사가 통제할 수 없는 사유로 인한 서비스의 중단으로 인하여 사전 통지가 불가능한 경우에는 사후에 통지할 수 있습니다." %}</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="terms-article">
+            <h3 class="terms-article-title">{% trans "제12조 (정보의 제공 및 광고의 게재)" %}</h3>
+            <div class="terms-article-content">
+                <ol>
+                    <li>{% trans "회사는 회원이 서비스 이용 중 필요하다고 인정되는 다양한 정보를 공지사항이나 이메일 등의 방법으로 회원에게 제공할 수 있습니다." %}</li>
+                    <li>{% trans "회사는 서비스의 운영과 관련하여 서비스 화면, 이메일 등에 광고를 게재할 수 있습니다." %}</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <!-- 제4장: 계약 당사자의 의무 -->
+    <div class="terms-section">
+        <h2 class="terms-section-title">{% trans "제4장 계약 당사자의 의무" %}</h2>
+
+        <div class="terms-article">
+            <h3 class="terms-article-title">{% trans "제13조 (회사의 의무)" %}</h3>
+            <div class="terms-article-content">
+                <ol>
+                    <li>{% trans "회사는 관련 법령과 본 약관이 금지하거나 공서양속에 반하는 행위를 하지 않으며, 계속적이고 안정적으로 서비스를 제공하기 위하여 최선을 다하여 노력합니다." %}</li>
+                    <li>{% trans "회사는 회원이 안전하게 서비스를 이용할 수 있도록 개인정보(신용정보 포함) 보호를 위해 보안시스템을 갖추어야 하며 개인정보처리방침을 공시하고 준수합니다." %}</li>
+                    <li>{% trans "회사는 서비스 이용과 관련하여 회원으로부터 제기된 의견이나 불만이 정당하다고 인정할 경우 이를 처리하여야 합니다." %}</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="terms-article">
+            <h3 class="terms-article-title">{% trans "제14조 (회원의 의무)" %}</h3>
+            <div class="terms-article-content">
+                <p>{% trans "회원은 다음 행위를 하여서는 안 됩니다:" %}</p>
+                <ol>
+                    <li>{% trans "신청 또는 변경 시 허위내용의 등록" %}</li>
+                    <li>{% trans "타인의 정보 도용" %}</li>
+                    <li>{% trans "회사가 게시한 정보의 변경" %}</li>
+                    <li>{% trans "회사가 정한 정보 이외의 정보(컴퓨터 프로그램 등) 등의 송신 또는 게시" %}</li>
+                    <li>{% trans "회사와 기타 제3자의 저작권 등 지적재산권에 대한 침해" %}</li>
+                    <li>{% trans "회사 및 기타 제3자의 명예를 손상시키거나 업무를 방해하는 행위" %}</li>
+                    <li>{% trans "외설 또는 폭력적인 메시지, 화상, 음성, 기타 공서양속에 반하는 정보를 서비스에 공개 또는 게시하는 행위" %}</li>
+                    <li>{% trans "회사의 동의 없이 영리를 목적으로 서비스를 사용하는 행위" %}</li>
+                    <li>{% trans "기타 불법적이거나 부당한 행위" %}</li>
+                </ol>
+                <div class="terms-highlight">
+                    <strong>{% trans "익명 채팅 이용 시 특별 주의사항" %}</strong>
+                    <p>{% trans "익명 채팅에서도 욕설, 성희롱, 불법 촬영물 유포 등의 행위는 엄격히 금지되며, 적발 시 즉시 계정 정지 및 법적 조치가 이루어질 수 있습니다." %}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="terms-article">
+            <h3 class="terms-article-title">{% trans "제15조 (게시물의 관리)" %}</h3>
+            <div class="terms-article-content">
+                <ol>
+                    <li>{% trans "회원이 작성한 게시물에 대한 모든 권리와 책임은 이를 게시한 회원에게 있습니다." %}</li>
+                    <li>{% trans "회사는 회원이 게시하거나 전달하는 서비스 내의 내용물이 다음 각 호에 해당한다고 판단되는 경우 사전통지 없이 삭제할 수 있으며, 이에 대해 회사는 어떠한 책임도 지지 않습니다." %}</li>
+                </ol>
+                <ul style="margin-left: var(--space-lg);">
+                    <li>{% trans "본 약관에 위배되거나 상용 또는 불법, 음란, 저속하다고 판단되는 게시물" %}</li>
+                    <li>{% trans "다른 회원 또는 제3자를 비방하거나 명예를 손상시키는 내용" %}</li>
+                    <li>{% trans "공공질서 및 미풍양속에 위반되는 내용" %}</li>
+                    <li>{% trans "범죄적 행위에 결부된다고 인정되는 내용" %}</li>
+                    <li>{% trans "회사의 저작권, 제3자의 저작권 등 기타 권리를 침해하는 내용" %}</li>
+                    <li>{% trans "회사에서 규정한 게시기간을 초과한 내용" %}</li>
+                    <li>{% trans "기타 관계 법령에 위배된다고 판단되는 경우" %}</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="terms-article">
+            <h3 class="terms-article-title">{% trans "제16조 (신고 시스템 및 제재 조치)" %}</h3>
+            <div class="terms-article-content">
+                <ol>
+                    <li>{% trans "회원은 다른 회원의 부적절한 게시물, 댓글 또는 행동에 대해 신고할 수 있습니다." %}</li>
+                    <li>{% trans "회사는 신고 내용을 검토한 후 다음과 같은 조치를 취할 수 있습니다:" %}</li>
+                </ol>
+                <ul style="margin-left: var(--space-lg);">
+                    <li>{% trans "경고: 위반 사항에 대한 경고 및 시정 요구" %}</li>
+                    <li>{% trans "일시 정지: 7일~30일 동안 계정 사용 일시 정지" %}</li>
+                    <li>{% trans "영구 차단: 심각한 위반 또는 반복적 위반 시 영구 계정 차단" %}</li>
+                    <li>{% trans "법적 조치: 범죄 행위가 의심될 경우 수사기관에 신고" %}</li>
+                </ul>
+                <p style="margin-top: var(--space-md);">{% trans "3. 회원이 신고를 누적 3회 이상 받은 경우 계정 정지가 자동으로 적용될 수 있으며, 신고 내용이 허위로 판명될 경우 신고자에게도 제재가 가해질 수 있습니다." %}</p>
+                <p>{% trans "4. 계정 비활성화를 요청한 경우 30일의 유예기간 후 자동으로 삭제되며, 유예기간 내에는 재활성화할 수 있습니다." %}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 제5장: 기타 -->
+    <div class="terms-section">
+        <h2 class="terms-section-title">{% trans "제5장 기타" %}</h2>
+
+        <div class="terms-article">
+            <h3 class="terms-article-title">{% trans "제17조 (저작권의 귀속 및 이용제한)" %}</h3>
+            <div class="terms-article-content">
+                <ol>
+                    <li>{% trans "회사가 작성한 저작물에 대한 저작권 기타 지적재산권은 회사에 귀속합니다." %}</li>
+                    <li>{% trans "회원은 서비스를 이용함으로써 얻은 정보 중 회사에게 지적재산권이 귀속된 정보를 회사의 사전 승낙 없이 복제, 송신, 출판, 배포, 방송 기타 방법에 의하여 영리목적으로 이용하거나 제3자에게 이용하게 하여서는 안 됩니다." %}</li>
+                    <li>{% trans "회원이 서비스 내에 게시한 게시물의 저작권은 해당 게시물의 저작자에게 귀속됩니다." %}</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="terms-article">
+            <h3 class="terms-article-title">{% trans "제18조 (분쟁해결)" %}</h3>
+            <div class="terms-article-content">
+                <ol>
+                    <li>{% trans "회사는 회원이 제기하는 정당한 의견이나 불만을 반영하고 그 피해를 보상처리하기 위하여 피해보상처리기구를 설치·운영합니다." %}</li>
+                    <li>{% trans "회사는 회원으로부터 제출되는 불만사항 및 의견은 우선적으로 그 사항을 처리합니다. 다만, 신속한 처리가 곤란한 경우에는 회원에게 그 사유와 처리일정을 즉시 통보해 드립니다." %}</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="terms-article">
+            <h3 class="terms-article-title">{% trans "제19조 (재판권 및 준거법)" %}</h3>
+            <div class="terms-article-content">
+                <ol>
+                    <li>{% trans "서비스 이용과 관련하여 회사와 회원 간에 분쟁이 발생한 경우, 쌍방간에 분쟁의 해결을 위해 성실히 협의합니다." %}</li>
+                    <li>{% trans "제1항의 협의에서도 분쟁이 해결되지 않을 경우 양 당사자는 민사소송법상의 관할법원에 소를 제기할 수 있습니다." %}</li>
+                    <li>{% trans "회사와 회원 간 제기된 소송은 대한민국 법을 준거법으로 합니다." %}</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="terms-article">
+            <h3 class="terms-article-title">{% trans "제20조 (부칙)" %}</h3>
+            <div class="terms-article-content">
+                <p>{% trans "본 약관은 2025년 1월 1일부터 적용됩니다." %}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="terms-footer">
+        <p>{% trans "회사 정보:" %}</p>
+        <p>{% trans "상호: HypeHere" %}</p>
+        <p>{% trans "대표자: [대표자명]" %}</p>
+        <p>{% trans "주소: [회사 주소]" %}</p>
+        <p>{% trans "사업자등록번호: [사업자번호]" %}</p>
+        <p>{% trans "연락처: [이메일 주소]" %}</p>
+        <p style="margin-top: var(--space-lg);">
+            <a href="{% url 'accounts:login' %}" class="btn btn-secondary">{% trans "닫기" %}</a>
+        </p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

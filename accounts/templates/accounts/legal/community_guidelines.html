@@ -1,0 +1,566 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "커뮤니티 가이드라인" %} - HypeHere{% endblock %}
+
+{% block content %}
+{% if use_database %}
+    <!-- Database-driven content -->
+    <div class="terms-container">
+        <div class="terms-header">
+            <h1>{{ document.title }}</h1>
+            <div class="terms-meta">
+                <p>{% trans "시행일" %}: {{ document.effective_date|date:"Y년 m월 d일" }}</p>
+                <p>{% trans "버전" %}: {{ document.version }}</p>
+            </div>
+        </div>
+
+        <div class="terms-content">
+            {{ document.content|safe }}
+        </div>
+    </div>
+{% else %}
+    <!-- Template fallback content -->
+<div class="guidelines-container">
+    <div class="guidelines-header">
+        <h1>{% trans "커뮤니티 가이드라인" %}</h1>
+        <p class="subtitle">{% trans "안전하고 긍정적인 언어 학습 공간을 만들어갑니다" %}</p>
+        <p class="effective-date">{% trans "시행일" %}: 2025{% trans "년" %} 1{% trans "월" %} 1{% trans "일" %}</p>
+    </div>
+
+    <div class="guidelines-intro">
+        <p>{% trans "HypeHere는 전 세계 언어 학습자들이 모여 서로 돕고 배우는 플랫폼입니다. 모든 사용자가 안전하고 즐거운 학습 경험을 누릴 수 있도록, 다음의 커뮤니티 가이드라인을 준수해 주시기 바랍니다." %}</p>
+    </div>
+
+    <!-- 제1장: 우리의 약속 -->
+    <div class="guidelines-chapter">
+        <h2>{% trans "제1장: 우리의 약속" %}</h2>
+
+        <div class="guidelines-article">
+            <h3>{% trans "제1조 (HypeHere의 미션)" %}</h3>
+            <p>{% trans "HypeHere는 언어와 문화의 경계를 넘어 사람들이 연결되는 공간입니다. 우리는 다음을 지향합니다:" %}</p>
+            <ul>
+                <li><strong>{% trans "존중" %}</strong>: {% trans "모든 사용자를 존중하며 다양성을 존중합니다" %}</li>
+                <li><strong>{% trans "학습" %}</strong>: {% trans "긍정적인 학습 환경을 조성합니다" %}</li>
+                <li><strong>{% trans "안전" %}</strong>: {% trans "모든 사용자가 안심하고 이용할 수 있는 공간을 만듭니다" %}</li>
+                <li><strong>{% trans "포용성" %}</strong>: {% trans "다양한 배경과 문화를 가진 사람들을 환영합니다" %}</li>
+            </ul>
+        </div>
+
+        <div class="guidelines-article">
+            <h3>{% trans "제2조 (커뮤니티 원칙)" %}</h3>
+            <p>{% trans "우리는 다음 원칙을 중요하게 여깁니다:" %}</p>
+            <ul>
+                <li>{% trans "서로의 언어 학습 여정을 응원합니다" %}</li>
+                <li>{% trans "실수를 인정하고 배움의 기회로 삼습니다" %}</li>
+                <li>{% trans "건설적인 피드백을 제공하고 수용합니다" %}</li>
+                <li>{% trans "문화적 차이를 이해하고 존중합니다" %}</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 제2장: 허용되는 행동 -->
+    <div class="guidelines-chapter">
+        <h2>{% trans "제2장: 허용되는 행동" %}</h2>
+
+        <div class="guidelines-article">
+            <h3>{% trans "제3조 (긍정적인 커뮤니티 참여)" %}</h3>
+            <p>{% trans "다음과 같은 행동을 권장합니다:" %}</p>
+            <ul>
+                <li>{% trans "존중하는 언어 교환 및 학습" %}</li>
+                <li>{% trans "게시물과 댓글에 건설적인 피드백 제공" %}</li>
+                <li>{% trans "다른 학습자를 돕고 격려하기" %}</li>
+                <li>{% trans "문화적 통찰과 경험 공유" %}</li>
+                <li>{% trans "부적절한 콘텐츠 발견 시 신고" %}</li>
+                <li>{% trans "긍정적이고 지지적인 분위기 조성" %}</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 제3장: 금지된 행동 -->
+    <div class="guidelines-chapter">
+        <h2>{% trans "제3장: 금지된 행동" %}</h2>
+
+        <div class="guidelines-article">
+            <h3>{% trans "제4조 (일반 금지사항)" %}</h3>
+            <p>{% trans "다음 행위는 엄격히 금지됩니다:" %}</p>
+            <ul>
+                <li><strong>{% trans "혐오 발언 및 차별" %}</strong>: {% trans "인종, 민족, 성별, 성적 지향, 종교, 국적, 장애 등을 이유로 한 차별적 발언" %}</li>
+                <li><strong>{% trans "괴롭힘 및 따돌림" %}</strong>: {% trans "특정 사용자를 지속적으로 괴롭히거나 공격하는 행위" %}</li>
+                <li><strong>{% trans "성적 콘텐츠 및 권유" %}</strong>: {% trans "성적 콘텐츠 게시, 성적 메시지 전송" %}</li>
+                <li><strong>{% trans "폭력 및 위협" %}</strong>: {% trans "폭력을 미화하거나 위협하는 행위" %}</li>
+                <li><strong>{% trans "스팸 및 상업적 활동" %}</strong>: {% trans "무분별한 홍보, 상업적 광고" %}</li>
+                <li><strong>{% trans "사칭 및 허위 계정" %}</strong>: {% trans "다른 사람으로 사칭하거나 허위 정보로 계정 생성" %}</li>
+                <li><strong>{% trans "저작권 침해" %}</strong>: {% trans "타인의 저작물을 무단으로 사용" %}</li>
+            </ul>
+        </div>
+
+        <div class="guidelines-article">
+            <h3>{% trans "제5조 (플랫폼별 특별 규칙)" %}</h3>
+
+            <div class="platform-rules">
+                <h4>{% trans "📝 게시물 (Posts)" %}</h4>
+                <ul>
+                    <li>{% trans "허위 정보나 오해의 소지가 있는 콘텐츠 금지" %}</li>
+                    <li>{% trans "주제와 무관한 콘텐츠 금지" %}</li>
+                    <li>{% trans "적절한 해시태그 사용으로 검색 가능성 향상" %}</li>
+                </ul>
+            </div>
+
+            <div class="platform-rules">
+                <h4>{% trans "💬 댓글 (Comments)" %}</h4>
+                <ul>
+                    <li>{% trans "트롤링이나 대화를 방해하는 행위 금지" %}</li>
+                    <li>{% trans "건설적이고 관련성 있는 댓글 권장" %}</li>
+                </ul>
+            </div>
+
+            <div class="platform-rules">
+                <h4>{% trans "💌 일반 채팅 (Regular Chat)" %}</h4>
+                <ul>
+                    <li>{% trans "무단 메시지 전송 금지" %}</li>
+                    <li>{% trans "개인정보 존중" %}</li>
+                    <li>{% trans "메시지는 삭제되지 않으므로 신중하게 작성" %}</li>
+                </ul>
+            </div>
+
+            <div class="platform-rules warning-box">
+                <h4>{% trans "🎭 익명 채팅 (Anonymous Chat) - 특별 주의사항" %}</h4>
+                <p><strong>{% trans "익명 채팅은 개인정보 보호를 위한 공간이지만, 책임 있는 행동이 요구됩니다:" %}</strong></p>
+                <ul>
+                    <li><strong>{% trans "⚠️ 개인정보 공유 절대 금지" %}</strong>: {% trans "이름, 전화번호, 이메일, 소셜 미디어 계정 등" %}</li>
+                    <li><strong>{% trans "⚠️ 녹화/스크린샷 금지" %}</strong>: {% trans "상대방 동의 없이 대화 내용 캡처 금지" %}</li>
+                    <li><strong>{% trans "⚠️ 성희롱 엄격 금지" %}</strong>: {% trans "익명성을 악용한 부적절한 발언은 즉시 영구 차단" %}</li>
+                    <li>{% trans "위반 시 경고 없이 즉시 차단 조치될 수 있습니다" %}</li>
+                </ul>
+            </div>
+
+            <div class="platform-rules warning-box">
+                <h4>{% trans "📹 비디오 채팅 (Video Chat) - 특별 주의사항" %}</h4>
+                <ul>
+                    <li><strong>{% trans "⚠️ 녹화/캡처 절대 금지" %}</strong>: {% trans "상대방 동의 없이 비디오 녹화 또는 화면 캡처 금지" %}</li>
+                    <li><strong>{% trans "⚠️ 적절한 복장 필수" %}</strong>: {% trans "공공장소에 적합한 복장 착용" %}</li>
+                    <li><strong>{% trans "⚠️ 동의 없는 공유 금지" %}</strong>: {% trans "비디오 내용을 제3자와 공유 금지" %}</li>
+                    <li>{% trans "위반 시 즉시 영구 차단됩니다" %}</li>
+                </ul>
+            </div>
+
+            <div class="platform-rules">
+                <h4>{% trans "🏠 오픈 채팅방 (Open Chat Rooms)" %}</h4>
+                <ul>
+                    <li>{% trans "방장 및 관리자가 설정한 방 규칙 준수" %}</li>
+                    <li>{% trans "참여자 수 제한 준수" %}</li>
+                    <li>{% trans "방 주제와 관련된 대화 유지" %}</li>
+                    <li>{% trans "관리자의 정당한 요청 존중" %}</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- 제4장: 신고 시스템 -->
+    <div class="guidelines-chapter">
+        <h2>{% trans "제4장: 신고 시스템" %}</h2>
+
+        <div class="guidelines-article">
+            <h3>{% trans "제6조 (신고 방법)" %}</h3>
+            <p>{% trans "부적절한 행위를 발견하면 다음과 같이 신고할 수 있습니다:" %}</p>
+            <ul>
+                <li><strong>{% trans "게시물/댓글 신고" %}</strong>: {% trans "해당 게시물이나 댓글의 신고 버튼 클릭" %}</li>
+                <li><strong>{% trans "채팅 신고" %}</strong>: {% trans "채팅 내용 캡처와 함께 신고 (증거 자료 제출)" %}</li>
+                <li><strong>{% trans "사용자 신고" %}</strong>: {% trans "사용자 프로필에서 신고 옵션 선택" %}</li>
+            </ul>
+            <p>{% trans "신고 시 다음 정보를 포함해 주세요:" %}</p>
+            <ul>
+                <li>{% trans "위반 유형 (혐오 발언, 괴롭힘, 스팸 등)" %}</li>
+                <li>{% trans "구체적인 위반 내용 설명" %}</li>
+                <li>{% trans "증거 자료 (스크린샷, 메시지 내용 등)" %}</li>
+            </ul>
+        </div>
+
+        <div class="guidelines-article">
+            <h3>{% trans "제7조 (신고 처리 절차)" %}</h3>
+            <p>{% trans "신고 접수 후 다음 절차로 처리됩니다:" %}</p>
+            <ol>
+                <li><strong>{% trans "접수 확인" %}</strong>: {% trans "신고 즉시 확인 (24시간 이내)" %}</li>
+                <li><strong>{% trans "조사" %}</strong>: {% trans "관리자가 증거 검토 및 조사 (1-3일)" %}</li>
+                <li><strong>{% trans "결정" %}</strong>: {% trans "위반 여부 판단 및 조치 결정" %}</li>
+                <li><strong>{% trans "통지" %}</strong>: {% trans "신고자 및 피신고자에게 결과 통보" %}</li>
+                <li><strong>{% trans "모니터링" %}</strong>: {% trans "재발 방지를 위한 지속적 모니터링" %}</li>
+            </ol>
+            <p class="note">{% trans "긴급한 경우 (폭력 위협, 불법 행위 등) 즉시 처리됩니다." %}</p>
+        </div>
+    </div>
+
+    <!-- 제5장: 제재 조치 -->
+    <div class="guidelines-chapter">
+        <h2>{% trans "제5장: 제재 조치" %}</h2>
+
+        <div class="guidelines-article">
+            <h3>{% trans "제8조 (단계별 제재 시스템)" %}</h3>
+            <p>{% trans "위반의 심각성과 빈도에 따라 다음과 같이 조치됩니다:" %}</p>
+
+            <div class="sanction-levels">
+                <div class="sanction-item">
+                    <h4>{% trans "1차 위반: 경고" %}</h4>
+                    <ul>
+                        <li>{% trans "콘텐츠 삭제" %}</li>
+                        <li>{% trans "경고 메시지 전송" %}</li>
+                        <li>{% trans "커뮤니티 가이드라인 재확인 요청" %}</li>
+                    </ul>
+                </div>
+
+                <div class="sanction-item">
+                    <h4>{% trans "2차 위반: 7일 정지" %}</h4>
+                    <ul>
+                        <li>{% trans "계정 일시 정지 (7일)" %}</li>
+                        <li>{% trans "모든 기능 사용 제한" %}</li>
+                        <li>{% trans "정지 사유 및 기간 통보" %}</li>
+                    </ul>
+                </div>
+
+                <div class="sanction-item">
+                    <h4>{% trans "3차 위반: 30일 정지" %}</h4>
+                    <ul>
+                        <li>{% trans "계정 일시 정지 (30일)" %}</li>
+                        <li>{% trans "추가 위반 시 영구 차단 경고" %}</li>
+                    </ul>
+                </div>
+
+                <div class="sanction-item severe">
+                    <h4>{% trans "4차 이상 / 중대한 위반: 영구 차단" %}</h4>
+                    <ul>
+                        <li>{% trans "계정 영구 정지" %}</li>
+                        <li>{% trans "모든 콘텐츠 및 데이터 삭제" %}</li>
+                        <li>{% trans "재가입 불가" %}</li>
+                    </ul>
+                    <p class="severe-note"><strong>{% trans "⚠️ 즉시 영구 차단되는 경우:" %}</strong></p>
+                    <ul>
+                        <li>{% trans "성희롱 또는 성적 착취" %}</li>
+                        <li>{% trans "불법 콘텐츠 게시 (아동 학대, 마약 등)" %}</li>
+                        <li>{% trans "폭력 위협 또는 테러 조장" %}</li>
+                        <li>{% trans "계정 해킹 또는 사기 행위" %}</li>
+                        <li>{% trans "반복적인 괴롭힘" %}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="guidelines-article">
+            <h3>{% trans "제9조 (이의제기 절차)" %}</h3>
+            <p>{% trans "제재 조치에 이의가 있는 경우 다음 절차를 따를 수 있습니다:" %}</p>
+            <ul>
+                <li><strong>{% trans "이의제기 기간" %}</strong>: {% trans "조치 통보일로부터 14일 이내" %}</li>
+                <li><strong>{% trans "제출 방법" %}</strong>: {% trans "고객지원을 통해 상세한 사유와 증거 제출" %}</li>
+                <li><strong>{% trans "재검토" %}</strong>: {% trans "다른 관리자가 독립적으로 재검토" %}</li>
+                <li><strong>{% trans "최종 결정" %}</strong>: {% trans "재검토 결과 통보 (7일 이내)" %}</li>
+            </ul>
+            <p class="note">{% trans "최종 결정 이후에는 추가 이의제기가 불가능합니다." %}</p>
+        </div>
+    </div>
+
+    <!-- 제6장: 특별 보호 정책 -->
+    <div class="guidelines-chapter">
+        <h2>{% trans "제6장: 특별 보호 정책" %}</h2>
+
+        <div class="guidelines-article">
+            <h3>{% trans "제10조 (개인정보 보호 및 도싱 방지)" %}</h3>
+            <p>{% trans "타인의 개인정보를 동의 없이 공개하는 '도싱(Doxing)'은 엄격히 금지됩니다:" %}</p>
+            <ul>
+                <li>{% trans "실명, 주소, 전화번호, 이메일 등 개인 식별 정보" %}</li>
+                <li>{% trans "사진, 영상 등 개인 이미지" %}</li>
+                <li>{% trans "소셜 미디어 계정 또는 기타 온라인 프로필" %}</li>
+            </ul>
+            <p><strong>{% trans "위반 시 즉시 영구 차단됩니다." %}</strong></p>
+        </div>
+
+        <div class="guidelines-article">
+            <h3>{% trans "제11조 (문화적 민감성 및 언어 학습 맥락)" %}</h3>
+            <p>{% trans "HypeHere는 언어 학습 플랫폼으로서 다음을 권장합니다:" %}</p>
+            <ul>
+                <li>{% trans "문화적 차이를 인정하고 존중" %}</li>
+                <li>{% trans "언어 실수에 대해 인내심 갖기" %}</li>
+                <li>{% trans "건설적인 피드백 제공" %}</li>
+                <li>{% trans "다양한 학습 수준을 고려한 소통" %}</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 제7장: 회사의 권리 -->
+    <div class="guidelines-chapter">
+        <h2>{% trans "제7장: 회사의 권리" %}</h2>
+
+        <div class="guidelines-article">
+            <h3>{% trans "제12조 (콘텐츠 관리 권한)" %}</h3>
+            <p>{% trans "HypeHere는 다음 권한을 보유합니다:" %}</p>
+            <ul>
+                <li>{% trans "사전 통지 없이 위반 콘텐츠를 삭제하거나 수정할 권리" %}</li>
+                <li>{% trans "필요한 경우 사용자 계정을 일시 정지하거나 영구 차단할 권리" %}</li>
+                <li>{% trans "법 집행 기관과 협력하여 불법 행위를 조사할 권리" %}</li>
+            </ul>
+        </div>
+
+        <div class="guidelines-article">
+            <h3>{% trans "제13조 (가이드라인 업데이트)" %}</h3>
+            <p>{% trans "본 커뮤니티 가이드라인은 서비스 개선 및 법률 변경에 따라 수정될 수 있습니다. 중요한 변경 사항이 있는 경우 공지사항을 통해 사전 안내합니다." %}</p>
+        </div>
+
+        <div class="guidelines-article">
+            <h3>{% trans "제14조 (법 집행 기관 협력)" %}</h3>
+            <p>{% trans "불법 행위가 확인되는 경우 관련 법률에 따라 법 집행 기관에 협조합니다:" %}</p>
+            <ul>
+                <li>{% trans "아동 학대 또는 착취" %}</li>
+                <li>{% trans "테러 또는 폭력 위협" %}</li>
+                <li>{% trans "마약 거래 또는 기타 불법 활동" %}</li>
+                <li>{% trans "사기 또는 금융 범죄" %}</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 맺음말 -->
+    <div class="guidelines-footer">
+        <h3>{% trans "맺음말" %}</h3>
+        <p>{% trans "HypeHere 커뮤니티의 일원이 되어주셔서 감사합니다. 우리 모두가 이 가이드라인을 준수함으로써 안전하고 긍정적인 학습 환경을 만들어갈 수 있습니다." %}</p>
+        <p>{% trans "궁금한 사항이 있으시면 고객지원팀에 문의해 주세요." %}</p>
+
+        <h3>{% trans "관련 문서" %}</h3>
+        <ul class="related-links">
+            <li><a href="{% url 'accounts:terms_of_service' %}">{% trans "이용약관" %}</a></li>
+            <li><a href="{% url 'accounts:privacy_policy' %}">{% trans "개인정보처리방침" %}</a></li>
+            <li><a href="{% url 'accounts:cookie_policy' %}">{% trans "쿠키 정책" %}</a></li>
+            <li><a href="{% url 'accounts:support_list' %}">{% trans "고객지원" %}</a></li>
+        </ul>
+    </div>
+
+    <!-- 뒤로가기 버튼 -->
+    <div class="guidelines-back">
+        <a href="javascript:history.back();" class="btn-back">{% trans "뒤로가기" %}</a>
+    </div>
+</div>
+
+<style>
+.guidelines-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: var(--space-xl);
+    background: var(--color-surface);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+.guidelines-header {
+    text-align: center;
+    margin-bottom: var(--space-xl);
+    padding-bottom: var(--space-lg);
+    border-bottom: 2px solid var(--color-border, #e5e7eb);
+}
+
+.guidelines-header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    margin-bottom: var(--space-sm);
+}
+
+.subtitle {
+    font-size: 1.125rem;
+    color: var(--color-text);
+    font-weight: 500;
+    margin: var(--space-sm) 0;
+}
+
+.effective-date {
+    font-size: 0.875rem;
+    color: var(--color-text-light);
+    margin-top: var(--space-md);
+}
+
+.guidelines-intro {
+    background: #f9fafb;
+    padding: var(--space-lg);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-xl);
+    border-left: 4px solid var(--color-primary);
+}
+
+.guidelines-intro p {
+    line-height: 1.8;
+    color: var(--color-text);
+    margin: 0;
+}
+
+.guidelines-chapter {
+    margin-bottom: var(--space-2xl);
+}
+
+.guidelines-chapter h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--color-text);
+    margin-bottom: var(--space-lg);
+    padding-bottom: var(--space-sm);
+    border-bottom: 2px solid var(--color-border, #e5e7eb);
+}
+
+.guidelines-article {
+    margin-bottom: var(--space-xl);
+}
+
+.guidelines-article h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--color-text);
+    margin-bottom: var(--space-md);
+}
+
+.guidelines-article h4 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--color-text);
+    margin-top: var(--space-lg);
+    margin-bottom: var(--space-md);
+}
+
+.guidelines-article p, .guidelines-article li {
+    line-height: 1.8;
+    color: var(--color-text);
+}
+
+.guidelines-article ul, .guidelines-article ol {
+    margin-left: var(--space-lg);
+    margin-bottom: var(--space-md);
+}
+
+.guidelines-article li {
+    margin-bottom: var(--space-sm);
+}
+
+.platform-rules {
+    background: #f9fafb;
+    padding: var(--space-lg);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-lg);
+}
+
+.warning-box {
+    background: #fef3c7;
+    border-left: 4px solid #f59e0b;
+}
+
+.sanction-levels {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+.sanction-item {
+    background: white;
+    padding: var(--space-lg);
+    border-radius: var(--radius-md);
+    border: 2px solid var(--color-border, #e5e7eb);
+}
+
+.sanction-item.severe {
+    background: #fee2e2;
+    border-color: #ef4444;
+}
+
+.sanction-item h4 {
+    margin-top: 0;
+    color: var(--color-primary);
+}
+
+.sanction-item.severe h4 {
+    color: #dc2626;
+}
+
+.severe-note {
+    font-weight: 600;
+    color: #dc2626;
+    margin-top: var(--space-md);
+    margin-bottom: var(--space-sm);
+}
+
+.note {
+    background: #e0e7ff;
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+    margin-top: var(--space-md);
+}
+
+.guidelines-footer {
+    background: #f9fafb;
+    padding: var(--space-lg);
+    border-radius: var(--radius-md);
+    margin-top: var(--space-2xl);
+}
+
+.guidelines-footer h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: var(--space-md);
+}
+
+.guidelines-footer p {
+    line-height: 1.8;
+    margin-bottom: var(--space-md);
+}
+
+.related-links {
+    list-style: none;
+    margin: var(--space-md) 0 0 0;
+    padding: 0;
+}
+
+.related-links li {
+    margin-bottom: var(--space-sm);
+}
+
+.related-links a {
+    color: var(--color-primary);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.related-links a:hover {
+    text-decoration: underline;
+}
+
+.guidelines-back {
+    text-align: center;
+    margin-top: var(--space-xl);
+}
+
+.btn-back {
+    display: inline-block;
+    padding: var(--space-sm) var(--space-lg);
+    background: var(--color-primary);
+    color: white;
+    text-decoration: none;
+    border-radius: var(--radius-md);
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+.btn-back:hover {
+    background: var(--color-primary-dark, #4f46e5);
+}
+
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+    .guidelines-container {
+        padding: var(--space-lg) var(--space-md);
+    }
+
+    .guidelines-header h1 {
+        font-size: 2rem;
+    }
+
+    .guidelines-chapter h2 {
+        font-size: 1.5rem;
+    }
+}
+</style>
+{% endif %}
+{% endblock %}
