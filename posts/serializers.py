@@ -1,7 +1,16 @@
 import re
 from rest_framework import serializers
-from .models import Post, Hashtag, Like, Comment, PostFavorite, PostReport, CommentReport
+from .models import Post, PostImage, Hashtag, Like, Comment, PostFavorite, PostReport, CommentReport
 from accounts.serializers import UserSerializer
+
+
+class PostImageSerializer(serializers.ModelSerializer):
+    """Serializer for PostImage model"""
+
+    class Meta:
+        model = PostImage
+        fields = ['id', 'image', 'order', 'created_at']
+        read_only_fields = ['id', 'created_at']
 
 
 class HashtagSerializer(serializers.ModelSerializer):
@@ -17,6 +26,7 @@ class PostSerializer(serializers.ModelSerializer):
     """Serializer for reading Post data"""
     author = UserSerializer(read_only=True)
     hashtags = HashtagSerializer(many=True, read_only=True)
+    images = PostImageSerializer(many=True, read_only=True)
     like_count = serializers.IntegerField(read_only=True)
     comment_count = serializers.IntegerField(read_only=True)
     is_liked = serializers.SerializerMethodField()
@@ -27,7 +37,7 @@ class PostSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'author', 'content',
             'native_language', 'target_language',
-            'hashtags', 'like_count', 'comment_count', 'is_liked', 'is_favorited',
+            'hashtags', 'images', 'like_count', 'comment_count', 'is_liked', 'is_favorited',
             'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'author', 'created_at', 'updated_at']
@@ -48,14 +58,30 @@ class PostSerializer(serializers.ModelSerializer):
 
 
 class PostCreateSerializer(serializers.ModelSerializer):
-    """Serializer for creating Post data"""
+    """Serializer for creating Post data with image uploads"""
+    images = serializers.ListField(
+        child=serializers.ImageField(),
+        write_only=True,
+        required=False,
+        max_length=5,  # Maximum 5 images
+        allow_empty=True
+    )
 
     class Meta:
         model = Post
-        fields = ['content', 'native_language', 'target_language']
+        fields = ['content', 'native_language', 'target_language', 'images']
+
+    def validate_images(self, value):
+        """Validate uploaded images"""
+        if len(value) > 5:
+            raise serializers.ValidationError("Maximum 5 images allowed per post")
+        return value
 
     def create(self, validated_data):
-        """Create post and extract hashtags from content"""
+        """Create post, extract hashtags, and associate images"""
+        # Extract images from validated_data (if present)
+        images_data = validated_data.pop('images', [])
+
         # Extract hashtags from content
         content = validated_data.get('content', '')
         hashtag_pattern = r'#([a-zA-Z0-9가-힣_]+)'
@@ -68,6 +94,14 @@ class PostCreateSerializer(serializers.ModelSerializer):
         for name in hashtag_names:
             hashtag, created = Hashtag.objects.get_or_create(name=name.lower())
             post.hashtags.add(hashtag)
+
+        # Create PostImage instances for each uploaded image
+        for index, image_file in enumerate(images_data):
+            PostImage.objects.create(
+                post=post,
+                image=image_file,
+                order=index
+            )
 
         return post
 

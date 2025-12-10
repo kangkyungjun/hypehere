@@ -1,9 +1,10 @@
 """
-Signal handlers for post report moderation
+Signal handlers for post report moderation and post image optimization
 """
-from django.db.models.signals import post_save, pre_save
+from django.db.models.signals import post_save, pre_save, post_delete
 from django.dispatch import receiver
 from .models import PostReport
+import os
 
 
 @receiver(pre_save, sender=PostReport)
@@ -36,3 +37,77 @@ def update_report_count_on_status_change(sender, instance, created, **kwargs):
         # Status changed from counted to non-counted
         elif old_status in ('reviewing', 'resolved') and new_status in ('pending', 'dismissed'):
             instance.reported_user.decrement_report_count()
+
+
+# ============================================================
+# Post Image Optimization Signals
+# ============================================================
+
+import os
+
+
+@receiver(pre_save, sender='posts.PostImage')
+def optimize_post_image_on_save(sender, instance, **kwargs):
+    """
+    Automatically optimize post image before saving PostImage model.
+
+    This signal handler:
+    1. Detects new post image uploads
+    2. Optimizes the image using optimize_post_image() (1280px, 90% quality)
+    3. Deletes old image when replaced
+
+    Triggered: Before PostImage.save()
+    """
+    from posts.utils import optimize_post_image
+
+    # Check if image field has a new upload
+    if instance.image and hasattr(instance.image, 'file'):
+        # Only optimize if it's a new upload (not already optimized)
+        # Check if file object is an uploaded file (not a FieldFile from database)
+        try:
+            # If the file is new (not saved yet), optimize it
+            if hasattr(instance.image.file, 'content_type'):
+                # This is a new upload via form/API
+                instance.image = optimize_post_image(
+                    instance.image.file
+                )
+        except Exception as e:
+            # If optimization fails, continue with original file
+            print(f"Post image optimization skipped: {e}")
+
+    # Delete old image if being replaced
+    if instance.pk:  # Only for existing images (not new uploads)
+        try:
+            old_instance = sender.objects.get(pk=instance.pk)
+
+            # Check if image is being changed
+            if old_instance.image and old_instance.image != instance.image:
+                # Delete old file from storage
+                if os.path.isfile(old_instance.image.path):
+                    os.remove(old_instance.image.path)
+
+        except sender.DoesNotExist:
+            # New image being created, no old file to delete
+            pass
+        except Exception as e:
+            # Log error but don't block save operation
+            print(f"Error deleting old post image: {e}")
+
+
+@receiver(post_delete, sender='posts.PostImage')
+def delete_post_image_on_delete(sender, instance, **kwargs):
+    """
+    Delete post image file when PostImage is deleted.
+
+    This ensures no orphaned files remain in storage after image deletion.
+
+    Triggered: After PostImage.delete()
+    """
+    try:
+        if instance.image:
+            # Check if file exists before trying to delete
+            if os.path.isfile(instance.image.path):
+                os.remove(instance.image.path)
+    except Exception as e:
+        # Log error but don't raise exception (image is already deleted from DB)
+        print(f"Error deleting post image file: {e}")

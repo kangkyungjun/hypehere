@@ -1039,6 +1039,120 @@ textarea.form-control {
     color: #999;
 }
 
+/* ===== Post Image Upload & Preview ===== */
+.image-upload-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+/* Compact icon button for image upload (Twitter-style) */
+.image-upload-btn-icon {
+    position: relative;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    padding: 0;
+    flex-shrink: 0;
+}
+
+.image-upload-btn-icon:hover {
+    background-color: var(--color-bg-secondary);
+    border-color: var(--color-primary);
+}
+
+.image-upload-btn-icon:active {
+    transform: scale(0.95);
+}
+
+.image-upload-btn-icon:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.image-upload-btn-icon svg {
+    color: var(--color-text-light);
+    transition: color var(--transition-fast);
+}
+
+.image-upload-btn-icon:hover svg {
+    color: var(--color-primary);
+}
+
+/* Image count badge (shows when images are selected) */
+.image-count-badge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    background-color: var(--color-primary);
+    color: white;
+    font-size: 10px;
+    font-weight: 600;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid white;
+}
+
+.image-preview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: var(--space-sm);
+    margin-top: var(--space-sm);
+}
+
+.image-preview-item {
+    position: relative;
+    aspect-ratio: 1;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background-color: var(--color-bg-secondary);
+    border: 1px solid var(--color-border-light);
+}
+
+.image-preview-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.image-preview-remove {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color var(--transition-fast);
+    padding: 0;
+}
+
+.image-preview-remove:hover {
+    background-color: rgba(255, 0, 0, 0.8);
+}
+
+.image-preview-remove svg {
+    width: 14px;
+    height: 14px;
+}
+
 /* Mobile Responsiveness */
 @media (max-width: 767px) {
     .toast {
@@ -1046,12 +1160,16 @@ textarea.form-control {
         padding: 10px 20px;
         max-width: 95%;
     }
-    
+
     .password-checklist {
         font-size: 11px;
     }
-    
+
     .password-strength-text {
         font-size: 11px;
+    }
+
+    .image-preview-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
     }
 }

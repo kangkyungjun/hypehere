@@ -3,6 +3,28 @@ from django.contrib.auth.models import AbstractUser, UserManager as BaseUserMana
 from django.core.validators import MinLengthValidator
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
+import uuid
+
+
+def profile_picture_upload_path(instance, filename):
+    """
+    Generate upload path for profile pictures with UUID-based filename.
+
+    This function:
+    - Creates unique filenames to prevent conflicts
+    - Always saves as .jpg (JPEG format)
+    - Organizes files in profile_pictures/ directory
+
+    Args:
+        instance: User model instance
+        filename: Original uploaded filename (ignored for security)
+
+    Returns:
+        str: Upload path like 'profile_pictures/550e8400-e29b-41d4-a716-446655440000.jpg'
+    """
+    # Generate UUID for filename (security best practice)
+    new_filename = f"{uuid.uuid4()}.jpg"
+    return f"profile_pictures/{new_filename}"
 
 
 class UserManager(BaseUserManager):
@@ -73,7 +95,13 @@ class User(AbstractUser):
     # Profile information
     date_of_birth = models.DateField(blank=True, null=True)
     bio = models.TextField(max_length=200, blank=True)
-    profile_picture = models.ImageField(upload_to='profile_pics/', blank=True, null=True)
+    profile_picture = models.ImageField(
+        upload_to=profile_picture_upload_path,
+        blank=True,
+        null=True,
+        verbose_name='프로필 사진',
+        help_text='프로필 사진 (자동으로 1024x1024, 85% 품질로 최적화됩니다)'
+    )
 
     # Address information
     address = models.CharField(max_length=255, blank=True)

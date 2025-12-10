@@ -2,6 +2,27 @@ from django.db import models
 from django.conf import settings
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+import uuid
+
+
+def post_image_upload_path(instance, filename):
+    """
+    Generate upload path for post images with UUID-based filename.
+
+    This function:
+    - Creates unique filenames to prevent conflicts
+    - Always saves as .jpg (JPEG format)
+    - Organizes files in post_images/ directory
+
+    Args:
+        instance: PostImage model instance
+        filename: Original uploaded filename (ignored for security)
+
+    Returns:
+        str: Upload path like 'post_images/550e8400-e29b-41d4-a716-446655440000.jpg'
+    """
+    new_filename = f"{uuid.uuid4()}.jpg"
+    return f"post_images/{new_filename}"
 
 
 class Hashtag(models.Model):
@@ -564,3 +585,41 @@ class UserInteraction(models.Model):
         score += min(avg_scroll / 5, 20)  # Max +20 for scroll depth
 
         return max(0, min(score, 100))  # Clamp between 0-100
+
+
+class PostImage(models.Model):
+    """
+    Post image model for multiple images per post.
+
+    Supports up to 5 images per post with automatic optimization:
+    - Resizes to max 1280x1280px (higher quality than profile pictures)
+    - Converts to JPEG format with 90% quality
+    - UUID-based secure filenames
+    """
+    post = models.ForeignKey(
+        Post,
+        on_delete=models.CASCADE,
+        related_name='images',
+        verbose_name='Post'
+    )
+    image = models.ImageField(
+        upload_to=post_image_upload_path,
+        verbose_name='Image'
+    )
+    order = models.PositiveSmallIntegerField(
+        default=0,
+        verbose_name='Display Order',
+        help_text='Order of image in carousel (0-based)'
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Created At')
+
+    class Meta:
+        ordering = ['order', 'created_at']
+        verbose_name = 'Post Image'
+        verbose_name_plural = 'Post Images'
+        indexes = [
+            models.Index(fields=['post', 'order']),
+        ]
+
+    def __str__(self):
+        return f"Image {self.order} for Post {self.post.id}"

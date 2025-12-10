@@ -41,6 +41,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const errorAlert = document.getElementById('post-error-alert');
     const errorMessage = document.getElementById('post-error-message');
 
+    // Image Upload Elements
+    const uploadImagesBtn = document.getElementById('upload-images-btn');
+    const postImagesInput = document.getElementById('post-images');
+    const imagePreviewGrid = document.getElementById('image-preview-grid');
+
+    // Store selected images
+    let selectedImages = [];
+
     // Debug: Log element status
     console.log('[PostModal] Elements found:', {
         modal: !!modal,
@@ -129,6 +137,12 @@ function resetForm() {
     editPostIdInput.value = '';
     updateCharCounter();
     hideError();
+
+    // Clear selected images
+    selectedImages = [];
+    if (imagePreviewGrid) {
+        imagePreviewGrid.innerHTML = '';
+    }
 }
 
 function showError(message) {
@@ -150,6 +164,105 @@ function setLoadingState(isLoading) {
         submitText.style.display = 'inline';
         submitLoading.classList.add('hidden');
     }
+}
+
+// Image Upload Functions
+function handleImageSelection(e) {
+    const files = Array.from(e.target.files);
+
+    // Validate total number of images (existing + new)
+    if (selectedImages.length + files.length > 5) {
+        const errorMsg = window.POST_MODAL_I18N?.errorMaxImages || 'Maximum 5 images allowed per post.';
+        showError(errorMsg);
+        e.target.value = ''; // Clear file input
+        return;
+    }
+
+    // Add new files to selectedImages array
+    files.forEach(file => {
+        // Validate file type
+        if (!file.type.match('image/(jpeg|jpg|png|heic)')) {
+            console.warn('Invalid file type:', file.type);
+            return;
+        }
+
+        selectedImages.push(file);
+    });
+
+    // Update preview display
+    displayImagePreviews();
+
+    // Update button state
+    updateUploadButtonState();
+
+    // Clear file input to allow selecting same files again
+    e.target.value = '';
+}
+
+function displayImagePreviews() {
+    if (!imagePreviewGrid) return;
+
+    // Clear existing previews
+    imagePreviewGrid.innerHTML = '';
+
+    // Create preview for each selected image
+    selectedImages.forEach((file, index) => {
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+            const previewItem = document.createElement('div');
+            previewItem.className = 'image-preview-item';
+            previewItem.innerHTML = `
+                <img src="${e.target.result}" alt="Preview ${index + 1}">
+                <button type="button" class="image-preview-remove" data-index="${index}">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            `;
+
+            imagePreviewGrid.appendChild(previewItem);
+
+            // Add remove button event listener
+            const removeBtn = previewItem.querySelector('.image-preview-remove');
+            removeBtn.addEventListener('click', () => removeImage(index));
+        };
+
+        reader.readAsDataURL(file);
+    });
+}
+
+function removeImage(index) {
+    // Remove image from selectedImages array
+    selectedImages.splice(index, 1);
+
+    // Update preview display
+    displayImagePreviews();
+
+    // Update button state
+    updateUploadButtonState();
+}
+
+// Update button state based on image count
+function updateUploadButtonState() {
+    const imageCountBadge = document.getElementById('image-count-badge');
+    const uploadBtn = document.getElementById('upload-images-btn');
+
+    if (!imageCountBadge || !uploadBtn) return;
+
+    const imageCount = selectedImages.length;
+
+    // Show/hide badge based on image count
+    if (imageCount > 0) {
+        imageCountBadge.textContent = imageCount;
+        imageCountBadge.classList.remove('hidden');
+    } else {
+        imageCountBadge.classList.add('hidden');
+    }
+
+    // Disable button when 5 images selected
+    uploadBtn.disabled = (imageCount >= 5);
 }
 
 // Character Counter
@@ -202,6 +315,17 @@ if (contentTextarea) {
     updateCharCounter(); // Initial update
 }
 
+// Image upload event listeners
+if (uploadImagesBtn && postImagesInput) {
+    // Trigger file input when button is clicked
+    uploadImagesBtn.addEventListener('click', function() {
+        postImagesInput.click();
+    });
+
+    // Handle file selection
+    postImagesInput.addEventListener('change', handleImageSelection);
+}
+
 // Form submission
 if (postForm) {
     postForm.addEventListener('submit', async function(e) {
@@ -226,19 +350,30 @@ if (postForm) {
             return;
         }
 
-        // Prepare data
-        const data = {
-            content: content,
-            native_language: nativeLanguage,
-            target_language: targetLanguage
-        };
-
         // Determine if we're creating or editing
         const mode = modal.dataset.mode;
         const postId = editPostIdInput.value;
         const isEdit = mode === 'edit' && postId;
 
         console.log('Form submission:', { mode, postId, isEdit });
+
+        // Prepare FormData for multipart/form-data upload
+        const formData = new FormData();
+        formData.append('content', content);
+        formData.append('native_language', nativeLanguage);
+        formData.append('target_language', targetLanguage);
+
+        // Append images to FormData
+        selectedImages.forEach((file, index) => {
+            formData.append('images', file);
+        });
+
+        console.log('FormData prepared:', {
+            content: content.substring(0, 50) + '...',
+            native_language: nativeLanguage,
+            target_language: targetLanguage,
+            images: selectedImages.length
+        });
 
         // Set loading state
         setLoadingState(true);
@@ -248,16 +383,16 @@ if (postForm) {
             const url = isEdit ? `/api/posts/${postId}/` : '/api/posts/';
             const method = isEdit ? 'PUT' : 'POST';
 
-            console.log('API request:', { url, method, data });
+            console.log('API request:', { url, method, imageCount: selectedImages.length });
 
             const response = await fetch(url, {
                 method: method,
                 headers: {
-                    'Content-Type': 'application/json',
+                    // Don't set Content-Type - browser will set it automatically with boundary for multipart/form-data
                     'X-CSRFToken': csrftoken
                 },
                 credentials: 'same-origin',
-                body: JSON.stringify(data)
+                body: formData
             });
 
             const result = await response.json();

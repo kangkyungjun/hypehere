@@ -33,12 +33,39 @@
                         placeholder="{% trans '무슨 일이 일어나고 있나요?&#10;&#10;해시태그를 사용하려면 #을 앞에 붙이세요 (예: #한국어학습)' %}"
                         required
                     ></textarea>
-                    <div class="flex" style="justify-content: space-between; align-items: center; margin-top: var(--space-xs);">
-                        <span class="form-text" id="char-counter">{% trans "0 / 1000자" %}</span>
-                        <span class="form-text" style="font-size: var(--font-size-xs); color: var(--color-text-lighter);">
-                            {% trans "팁: #해시태그를 사용하여 게시물을 분류하세요" %}
-                        </span>
+                    <!-- Textarea footer: image button + char counter + tip -->
+                    <div class="flex" style="justify-content: space-between; align-items: center; margin-top: var(--space-xs); gap: var(--space-sm);">
+                        <!-- Left: Image upload button -->
+                        <button type="button" class="image-upload-btn-icon" id="upload-images-btn" title="{% trans '이미지 첨부' %}">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                <circle cx="8.5" cy="8.5" r="1.5"/>
+                                <polyline points="21 15 16 10 5 21"/>
+                            </svg>
+                            <span class="image-count-badge hidden" id="image-count-badge">0</span>
+                        </button>
+
+                        <!-- Hidden file input -->
+                        <input
+                            type="file"
+                            id="post-images"
+                            name="images"
+                            accept="image/jpeg,image/jpg,image/png,image/heic"
+                            multiple
+                            style="display: none;"
+                        >
+
+                        <!-- Right: char counter + tip -->
+                        <div class="flex" style="gap: var(--space-md); align-items: center;">
+                            <span class="form-text" id="char-counter">{% trans "0 / 1000자" %}</span>
+                            <span class="form-text" style="font-size: var(--font-size-xs); color: var(--color-text-lighter);">
+                                {% trans "팁: #해시태그를 사용하여 게시물을 분류하세요" %}
+                            </span>
+                        </div>
                     </div>
+
+                    <!-- Image preview grid (shown when images are selected) -->
+                    <div id="image-preview-grid" class="image-preview-grid"></div>
                 </div>
 
                 <!-- Language Selection -->
