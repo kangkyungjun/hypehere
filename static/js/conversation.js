@@ -944,3 +944,27 @@ window.addEventListener('beforeunload', () => {
         conversationApp.closeWebSocket();
     }
 });
+
+// ==================== Mobile Viewport Height Fix ====================
+
+/**
+ * Calculate real viewport height for browsers that don't support 100dvh
+ * Sets CSS custom property --real-vh for fallback
+ *
+ * Mobile browsers change viewport height when address bar shows/hides.
+ * Using 100vh includes the address bar, causing layout issues.
+ * This calculates the actual visible viewport height dynamically.
+ */
+function setRealVH() {
+    const vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty('--real-vh', `${vh}px`);
+}
+
+// Update on page load
+window.addEventListener('load', setRealVH);
+
+// Update on window resize (handles orientation changes and browser chrome showing/hiding)
+window.addEventListener('resize', setRealVH);
+
+// Initial calculation
+setRealVH();

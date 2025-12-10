@@ -11,7 +11,63 @@
     </div>
 
     <div class="admin-panel-content">
-        <!-- 빈 페이지 - 추후 관리자 기능 추가 예정 -->
+        <div class="admin-cards-grid">
+            <!-- Legal Document Management Card -->
+            <a href="{% url 'accounts:legal_document_list' %}" class="admin-card">
+                <div class="admin-card-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="icon">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                    </svg>
+                </div>
+                <div class="admin-card-content">
+                    <h2 class="admin-card-title">{% trans "법적 문서 관리" %}</h2>
+                    <p class="admin-card-description">{% trans "이용약관, 개인정보처리방침, 쿠키 정책, 커뮤니티 가이드라인을 편집하고 버전을 관리합니다." %}</p>
+                </div>
+                <div class="admin-card-arrow">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="arrow-icon">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                    </svg>
+                </div>
+            </a>
+
+            <!-- Placeholder cards for future features -->
+            <div class="admin-card admin-card-disabled">
+                <div class="admin-card-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="icon">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+                    </svg>
+                </div>
+                <div class="admin-card-content">
+                    <h2 class="admin-card-title">{% trans "사용자 관리" %}</h2>
+                    <p class="admin-card-description">{% trans "추후 추가 예정" %}</p>
+                </div>
+            </div>
+
+            <div class="admin-card admin-card-disabled">
+                <div class="admin-card-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="icon">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+                    </svg>
+                </div>
+                <div class="admin-card-content">
+                    <h2 class="admin-card-title">{% trans "통계 및 분석" %}</h2>
+                    <p class="admin-card-description">{% trans "추후 추가 예정" %}</p>
+                </div>
+            </div>
+
+            <div class="admin-card admin-card-disabled">
+                <div class="admin-card-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="icon">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                </div>
+                <div class="admin-card-content">
+                    <h2 class="admin-card-title">{% trans "시스템 설정" %}</h2>
+                    <p class="admin-card-description">{% trans "추후 추가 예정" %}</p>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}
@@ -43,9 +99,97 @@
 
 .admin-panel-content {
     min-height: 400px;
+}
+
+.admin-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--space-lg);
+}
+
+.admin-card {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-md);
+    padding: var(--space-lg);
     background: var(--color-bg);
+    border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
-    padding: var(--space-xl);
+    text-decoration: none;
+    color: var(--color-text);
+    transition: all 0.2s ease;
+    cursor: pointer;
+    position: relative;
+}
+
+.admin-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-color: var(--color-primary);
+}
+
+.admin-card-disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.admin-card-disabled:hover {
+    transform: none;
+    box-shadow: none;
+    border-color: var(--color-border);
+}
+
+.admin-card-icon {
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-primary-light, rgba(59, 130, 246, 0.1));
+    border-radius: var(--radius-md);
+    color: var(--color-primary);
+}
+
+.admin-card-icon .icon {
+    width: 24px;
+    height: 24px;
+}
+
+.admin-card-content {
+    flex: 1;
+}
+
+.admin-card-title {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text);
+    margin-bottom: var(--space-xs);
+}
+
+.admin-card-description {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-light);
+    line-height: 1.5;
+}
+
+.admin-card-arrow {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    color: var(--color-text-lighter);
+    transition: transform 0.2s ease;
+}
+
+.admin-card:hover .admin-card-arrow {
+    transform: translateX(4px);
+    color: var(--color-primary);
+}
+
+.admin-card-arrow .arrow-icon {
+    width: 20px;
+    height: 20px;
 }
 
 /* 모바일 대응 */
@@ -58,8 +202,23 @@
         font-size: var(--font-size-xl);
     }
 
-    .admin-panel-content {
-        padding: var(--space-lg);
+    .admin-cards-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-md);
+    }
+
+    .admin-card {
+        padding: var(--space-md);
+    }
+
+    .admin-card-icon {
+        width: 40px;
+        height: 40px;
+    }
+
+    .admin-card-icon .icon {
+        width: 20px;
+        height: 20px;
     }
 }
 </style>

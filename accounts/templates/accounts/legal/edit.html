@@ -1,0 +1,242 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "법적 문서 편집" %} - HypeHere{% endblock %}
+
+{% block extra_css %}
+<style>
+.legal-edit-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--space-xl) var(--space-md);
+}
+
+.legal-edit-header {
+    margin-bottom: var(--space-xl);
+}
+
+.legal-edit-title {
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text);
+    margin-bottom: var(--space-sm);
+}
+
+.legal-edit-subtitle {
+    font-size: var(--font-size-base);
+    color: var(--color-text-light);
+}
+
+.legal-edit-form {
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+}
+
+.form-group {
+    margin-bottom: var(--space-lg);
+}
+
+.form-group label {
+    display: block;
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text);
+    margin-bottom: var(--space-sm);
+}
+
+.form-group input[type="text"],
+.form-group input[type="date"],
+.form-group textarea {
+    width: 100%;
+    padding: var(--space-sm);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-base);
+    font-family: inherit;
+    background: var(--color-bg);
+    color: var(--color-text);
+    transition: border-color 0.2s ease;
+}
+
+.form-group input[type="text"]:focus,
+.form-group input[type="date"]:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--color-primary);
+}
+
+.form-group textarea {
+    min-height: 400px;
+    resize: vertical;
+    font-family: 'Courier New', monospace;
+}
+
+.form-help-text {
+    display: block;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-light);
+    margin-top: var(--space-xs);
+}
+
+.form-actions {
+    display: flex;
+    gap: var(--space-md);
+    justify-content: flex-end;
+    margin-top: var(--space-xl);
+}
+
+.btn {
+    padding: var(--space-sm) var(--space-lg);
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-primary {
+    background: var(--color-primary);
+    color: white;
+}
+
+.btn-primary:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.btn-secondary {
+    background: var(--color-bg-secondary);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+}
+
+.btn-secondary:hover {
+    background: var(--color-bg-hover);
+}
+
+.document-info {
+    background: var(--color-bg-secondary);
+    border-left: 4px solid var(--color-primary);
+    padding: var(--space-md);
+    margin-bottom: var(--space-lg);
+    border-radius: var(--radius-md);
+}
+
+.document-info-title {
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text);
+    margin-bottom: var(--space-xs);
+}
+
+.document-info-text {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-light);
+}
+
+/* 모바일 대응 */
+@media (max-width: 768px) {
+    .legal-edit-container {
+        padding: var(--space-lg) var(--space-sm);
+    }
+
+    .legal-edit-form {
+        padding: var(--space-md);
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .btn {
+        width: 100%;
+    }
+
+    .form-group textarea {
+        min-height: 300px;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="legal-edit-container">
+    <div class="legal-edit-header">
+        <h1 class="legal-edit-title">{% trans "법적 문서 편집" %}</h1>
+        <p class="legal-edit-subtitle">
+            {% if document %}
+                {% trans "기존 문서를 수정하면 새 버전이 생성됩니다" %}
+            {% else %}
+                {% trans "새 법적 문서를 작성합니다" %}
+            {% endif %}
+        </p>
+    </div>
+
+    {% if document %}
+    <div class="document-info">
+        <div class="document-info-title">{% trans "현재 버전 정보" %}</div>
+        <div class="document-info-text">
+            {% trans "버전" %}: {{ document.version }} |
+            {% trans "시행일" %}: {{ document.effective_date|date:"Y년 m월 d일" }} |
+            {% trans "언어" %}: {{ language }}
+        </div>
+    </div>
+    {% endif %}
+
+    <form method="post" class="legal-edit-form">
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label for="{{ form.title.id_for_label }}">{{ form.title.label }}</label>
+            {{ form.title }}
+            {% if form.title.help_text %}
+                <span class="form-help-text">{{ form.title.help_text }}</span>
+            {% endif %}
+            {% if form.title.errors %}
+                <div class="form-error">{{ form.title.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.content.id_for_label }}">{{ form.content.label }}</label>
+            {{ form.content }}
+            {% if form.content.help_text %}
+                <span class="form-help-text">{{ form.content.help_text }}</span>
+            {% endif %}
+            {% if form.content.errors %}
+                <div class="form-error">{{ form.content.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.effective_date.id_for_label }}">{{ form.effective_date.label }}</label>
+            {{ form.effective_date }}
+            {% if form.effective_date.help_text %}
+                <span class="form-help-text">{{ form.effective_date.help_text }}</span>
+            {% endif %}
+            {% if form.effective_date.errors %}
+                <div class="form-error">{{ form.effective_date.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.version.id_for_label }}">{{ form.version.label }}</label>
+            {{ form.version }}
+            {% if form.version.help_text %}
+                <span class="form-help-text">{{ form.version.help_text }}</span>
+            {% endif %}
+            {% if form.version.errors %}
+                <div class="form-error">{{ form.version.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div class="form-actions">
+            <a href="{% url 'accounts:'|add:document_type %}" class="btn btn-secondary">{% trans "취소" %}</a>
+            <button type="submit" class="btn btn-primary">{% trans "저장" %}</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

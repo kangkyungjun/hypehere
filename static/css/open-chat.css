@@ -7,7 +7,12 @@
   max-width: var(--container-max-width);
   margin: 0 auto;
   padding: 0;
-  min-height: 100vh;
+  height: 100%;  /* 부모 높이에 맞춤 */
+  max-height: 100%;
+  overflow-y: auto;  /* 스크롤 경계 설정 */
+  overflow-x: hidden;
+  overscroll-behavior: contain;  /* 스크롤 전파 차단 */
+  -webkit-overflow-scrolling: touch;  /* iOS 부드러운 스크롤 */
 }
 
 /* ==========================================
@@ -20,6 +25,8 @@
   background-color: var(--color-bg);
   border-bottom: 1px solid var(--color-border-light);
   padding: var(--space-md);
+  height: 60px;  /* 명확한 높이 설정 */
+  flex-shrink: 0;  /* 크기 고정 */
   transition: box-shadow var(--transition-fast);
 }
 
@@ -108,19 +115,12 @@
   border-bottom: 1px solid var(--color-border-light);
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;  /* Firefox - 스크롤바 숨김 */
 }
 
+/* Chrome, Safari - 스크롤바 숨김 */
 .chat-filters::-webkit-scrollbar {
-  height: 4px;
-}
-
-.chat-filters::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.chat-filters::-webkit-scrollbar-thumb {
-  background: var(--color-border);
-  border-radius: var(--radius-full);
+  display: none;
 }
 
 .filter-item {
@@ -744,4 +744,16 @@
   right: 0 !important;
   bottom: 0 !important;
   z-index: 2000;
+}
+
+/* ==========================================
+   Mobile 100dvh Optimization
+   ========================================== */
+@media (max-width: 768px) {
+  .open-chat-container {
+    height: calc(100dvh - 60px);  /* Dynamic Viewport Height - 헤더 높이 제외 */
+    height: calc(var(--real-vh, 1vh) * 100 - 60px);  /* 구형 브라우저 Fallback */
+    max-height: calc(100dvh - 60px);
+    max-height: calc(var(--real-vh, 1vh) * 100 - 60px);
+  }
 }

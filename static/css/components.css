@@ -154,6 +154,13 @@
   opacity: 0.6;
 }
 
+/* iOS Safari: .form-control 자동 확대 방지 */
+@supports (-webkit-touch-callout: none) {
+  .form-control {
+    font-size: max(16px, var(--font-size-base)) !important;
+  }
+}
+
 .form-control.is-invalid {
   border-color: var(--color-error);
 }

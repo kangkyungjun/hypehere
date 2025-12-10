@@ -681,11 +681,18 @@
     display: flex;
     flex-direction: column;
     width: 100%;
-    height: 100vh; /* Full viewport height */
+    height: 100dvh; /* Dynamic viewport height for mobile */
+    max-height: 100dvh; /* Prevent overflow */
+    height: 100vh; /* Fallback for browsers without dvh support */
     background: #000;
     border-radius: 12px;
     overflow: hidden;
-    margin-bottom: var(--space-md);
+    position: fixed; /* Fix to viewport */
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10;
 }
 
 .video-container.hidden {
@@ -873,7 +880,9 @@
 
 @media (max-width: 480px) {
     .video-container {
-        height: 100vh; /* Maintain full viewport height */
+        height: 100dvh; /* Dynamic viewport for small screens */
+        max-height: 100dvh; /* Prevent overflow */
+        height: 100vh; /* Fallback */
     }
 
     /* Keep 50:50 split on small screens */

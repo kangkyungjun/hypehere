@@ -8,6 +8,7 @@ urlpatterns = [
     path('', views.AdminDashboardView.as_view(), name='dashboard'),
     path('permissions/', views.PermissionManagementView.as_view(), name='permissions'),
     path('lottery/', views.LotteryView.as_view(), name='lottery'),
+    path('lottery/edit/', views.LotteryEditView.as_view(), name='lottery_edit'),
 
     # API endpoints
     path('api/stats/', api_views.dashboard_stats_api, name='api_stats'),
@@ -29,4 +30,8 @@ urlpatterns = [
     path('lottery/generate-integrated/', api_views.generate_strategy5_numbers_api, name='lottery_generate_integrated'),
     path('lottery/probability-stats/', api_views.probability_stats_api, name='lottery_probability_stats'),
     path('lottery/strategy-probability/<str:strategy_type>/', api_views.get_strategy_probability_api, name='lottery_strategy_probability'),
+
+    # Lottery Management API endpoints (Admin only)
+    path('api/admin/lottery/recent-draws/', api_views.get_recent_draws_api, name='api_lottery_recent_draws'),
+    path('api/admin/lottery/draws/<int:round_number>/', api_views.delete_draw_api, name='api_lottery_delete_draw'),
 ]

@@ -13,6 +13,10 @@ from .views import (
     PrivacySettingsTemplateView,
     BlockedUsersListTemplateView,
     AccountManagementTemplateView,
+    TermsOfServiceView,
+    PrivacyPolicyView,
+    CookiePolicyView,
+    CommunityGuidelinesView,
     FavoritesTemplateView,
     ReportHistoryTemplateView,
     ReportListAPIView,
@@ -31,6 +35,10 @@ from .views import (
     PasswordResetRequestAPIView,
     ProfilePictureDeleteView,
     UserReportCreateView,
+    LegalDocumentListView,
+    LegalDocumentEditView,
+    LegalDocumentSaveView,
+    LegalDocumentVersionListView,
 )
 
 app_name = 'accounts'
@@ -41,6 +49,16 @@ urlpatterns = [
     path('login/', LoginTemplateView.as_view(), name='login'),
     path('logout/', LogoutTemplateView.as_view(), name='logout'),
     path('password-reset/', password_reset_request_view, name='password_reset'),
+    path('terms/', TermsOfServiceView.as_view(), name='terms_of_service'),
+    path('terms/', TermsOfServiceView.as_view(), name='terms'),
+    path('privacy/', PrivacyPolicyView.as_view(), name='privacy_policy'),
+    path('privacy/', PrivacyPolicyView.as_view(), name='privacy'),
+    path('cookies/', CookiePolicyView.as_view(), name='cookie_policy'),
+    path('cookies/', CookiePolicyView.as_view(), name='cookies'),
+    path('community-guidelines/', CommunityGuidelinesView.as_view(), name='community_guidelines'),
+
+    # Simplified Legal Document Edit URLs
+    path('legal/<str:document_type>/edit/', LegalDocumentEditView.as_view(), name='legal_document_edit_simple'),
     path('profile/', ProfileTemplateView.as_view(), name='profile'),
     path('profile/<str:username>/', ProfileTemplateView.as_view(), name='profile_detail'),
     path('profile/<str:username>/followers/', FollowersListTemplateView.as_view(), name='followers_list'),
@@ -52,6 +70,13 @@ urlpatterns = [
     path('settings/blocked-users/', BlockedUsersListTemplateView.as_view(), name='blocked_users'),
     path('settings/account-management/', AccountManagementTemplateView.as_view(), name='account_management'),
     path('admin-panel/', AdminPanelView.as_view(), name='admin_panel'),
+
+    # Legal Document Management URLs (Prime/Superuser only)
+    path('admin-panel/legal-documents/', LegalDocumentListView.as_view(), name='legal_document_list'),
+    path('admin-panel/legal-documents/<str:document_type>/<str:language>/edit/', LegalDocumentEditView.as_view(), name='legal_document_edit'),
+    path('admin-panel/legal-documents/<str:document_type>/<str:language>/save/', LegalDocumentSaveView.as_view(), name='legal_document_save'),
+    path('admin-panel/legal-documents/<str:document_type>/<str:language>/versions/', LegalDocumentVersionListView.as_view(), name='legal_document_versions'),
+
     path('favorites/', FavoritesTemplateView.as_view(), name='favorites'),
     path('reports/', ReportHistoryTemplateView.as_view(), name='report_history'),
 

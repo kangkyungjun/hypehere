@@ -10,6 +10,7 @@ from posts.models import Post
 from chat.models import Conversation
 from .models import DailyVisitor, UserActivityLog, AnonymousChatUsageStats, DailySummary
 from lotto.models import NumberCombination, UserLottoNumber, LottoDraw
+from lotto.utils import calculate_target_round, check_duplicate_for_user_round
 import hashlib
 from itertools import combinations
 import random
@@ -288,10 +289,28 @@ def check_user_numbers(numbers):
         draw = LottoDraw.objects.filter(round_number=match.round_number).first()
         draw_date = draw.draw_date.strftime('%Y-%m-%d') if draw else None
 
+        # 등수에 따른 일치 개수와 보너스 정보 계산
+        matched_count = 0
+        has_bonus = False
+        if match.rank == '1등':
+            matched_count = 6
+            has_bonus = False
+        elif match.rank == '2등':
+            matched_count = 5
+            has_bonus = True
+        elif match.rank == '3등':
+            matched_count = 5
+            has_bonus = False
+        elif match.rank == '4등':
+            matched_count = 4
+            has_bonus = False
+
         return {
             'is_winning': True,
             'round_number': match.round_number,
             'rank': match.rank,
+            'matched_count': matched_count,
+            'has_bonus': has_bonus,
             'draw_date': draw_date,
             'message': f'{match.round_number}회 {match.rank} 번호입니다',
             'numbers': sorted_numbers
@@ -301,6 +320,8 @@ def check_user_numbers(numbers):
             'is_winning': False,
             'round_number': None,
             'rank': None,
+            'matched_count': 0,
+            'has_bonus': False,
             'draw_date': None,
             'message': '나온적 없는 번호입니다',
             'numbers': sorted_numbers
@@ -365,7 +386,7 @@ def save_lotto_number_api(request):
     Body: {"numbers": [1,2,3,4,5,6], "round_number": 1150, "strategy": "basic"}
     """
     numbers = request.data.get('numbers', [])
-    round_number = request.data.get('round_number', 0)  # Default to 0 if not provided
+    round_number = request.data.get('round_number')
     strategy = request.data.get('strategy', 'basic')  # Default to basic
 
     # Input validation
@@ -378,7 +399,11 @@ def save_lotto_number_api(request):
     # Convert to integers
     try:
         numbers = sorted([int(n) for n in numbers])
-        round_number = int(round_number) if round_number else 0
+        # 타겟 회차가 없거나 0이면 날짜 기반으로 자동 계산
+        if not round_number or round_number == 0:
+            round_number = calculate_target_round()
+        else:
+            round_number = int(round_number)
     except (ValueError, TypeError):
         return Response({
             'success': False,
@@ -387,6 +412,14 @@ def save_lotto_number_api(request):
 
     # Check if numbers are winning numbers
     check_result = check_user_numbers(numbers)
+
+    # Check for duplicate numbers
+    is_duplicate, existing_round = check_duplicate_for_user_round(request.user, round_number, numbers)
+    if is_duplicate:
+        return Response({
+            'success': False,
+            'error': f'{existing_round}회에 저장한 이력이 있습니다.'
+        }, status=status.HTTP_400_BAD_REQUEST)
 
     # Create UserLottoNumber
     try:
@@ -399,9 +432,12 @@ def save_lotto_number_api(request):
             number4=numbers[3],
             number5=numbers[4],
             number6=numbers[5],
-            strategy_type=strategy,  # 추가
+            strategy_type=strategy,
             is_checked=check_result['is_winning'],
-            matched_rank=check_result['rank'] if check_result['is_winning'] else None
+            matched_rank=check_result['rank'] if check_result['is_winning'] else None,
+            matched_round=check_result['round_number'] if check_result['is_winning'] else None,
+            matched_count=check_result['matched_count'],
+            has_bonus=check_result['has_bonus']
         )
 
         return Response({
@@ -437,7 +473,10 @@ def my_lotto_numbers_api(request):
             'round_number': un.round_number,
             'is_checked': un.is_checked,
             'matched_rank': un.matched_rank,
-            'strategy_type': un.strategy_type,  # 추가
+            'matched_round': un.matched_round,  # 실제 당첨 회차
+            'matched_count': un.matched_count,  # 일치 개수
+            'has_bonus': un.has_bonus,  # 보너스 일치 여부
+            'strategy_type': un.strategy_type,
             'created_at': un.created_at.strftime('%Y-%m-%d %H:%M')
         })
 
@@ -600,11 +639,29 @@ def save_draw_api(request):
         # Update strategy statistics automatically
         update_all_strategy_statistics()
 
+        # AUTO-CHECK: Check unchecked user numbers for winning
+        unchecked = UserLottoNumber.objects.filter(
+            is_checked=False,
+            round_number__lte=draw.round_number
+        )
+
+        winners = []
+        for user_num in unchecked:
+            if user_num.check_winning():
+                winners.append({
+                    'user_id': user_num.user.id,
+                    'target': user_num.round_number,
+                    'actual': user_num.matched_round,
+                    'rank': user_num.matched_rank,
+                })
+
         return Response({
             'success': True,
             'message': f'{next_round}회차 당첨 번호가 저장되었습니다',
             'round_number': next_round,
-            'combinations_created': created_count
+            'combinations_created': created_count,
+            'winners_checked': len(winners),
+            'winners': winners
         }, status=status.HTTP_201_CREATED)
 
     except Exception as e:
@@ -1494,5 +1551,159 @@ def _update_number_statistics(draw, numbers, bonus_number):
     bonus_stat.last_appeared_round = draw.round_number
     bonus_stat.last_appeared_date = draw.draw_date
     bonus_stat.save()
+
+
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def get_recent_draws_api(request):
+    """
+    Get recent 5 lottery draws
+    GET /api/admin/lottery/recent-draws/
+    """
+    try:
+        # 최근 5개 회차 조회
+        draws = LottoDraw.objects.all().order_by('-round_number')[:5]
+
+        draws_list = []
+        for draw in draws:
+            numbers = [draw.number1, draw.number2, draw.number3, draw.number4, draw.number5, draw.number6]
+
+            # 중복 회차 감지 (같은 날짜에 같은 번호)
+            is_duplicate = False
+            if draws.count() > 1:
+                # 이전 회차들과 비교
+                prev_draws = LottoDraw.objects.filter(
+                    round_number__lt=draw.round_number,
+                    draw_date=draw.draw_date
+                ).values_list('number1', 'number2', 'number3', 'number4', 'number5', 'number6')
+
+                for prev_numbers in prev_draws:
+                    if list(prev_numbers) == numbers:
+                        is_duplicate = True
+                        break
+
+            draws_list.append({
+                'round_number': draw.round_number,
+                'draw_date': draw.draw_date.strftime('%Y-%m-%d'),
+                'numbers': numbers,
+                'bonus_number': draw.bonus_number,
+                'is_duplicate': is_duplicate
+            })
+
+        return Response({
+            'success': True,
+            'draws': draws_list
+        }, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response({
+            'success': False,
+            'error': f'회차 조회 중 오류가 발생했습니다: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAdminUser])
+def delete_draw_api(request, round_number):
+    """
+    Delete a lottery draw and all related data
+    DELETE /api/admin/lottery/draws/<round_number>/
+
+    Deletes:
+    - LottoDraw record
+    - All NumberCombination records for this round
+    - Updates NumberStatistics (decrements counts)
+    """
+    from django.db import transaction
+    from lotto.models import NumberStatistics
+
+    try:
+        # 트랜잭션으로 원자성 보장
+        with transaction.atomic():
+            # 1. LottoDraw 조회
+            try:
+                draw = LottoDraw.objects.get(round_number=round_number)
+            except LottoDraw.DoesNotExist:
+                return Response({
+                    'success': False,
+                    'error': f'{round_number}회차를 찾을 수 없습니다'
+                }, status=status.HTTP_404_NOT_FOUND)
+
+            # 2. 당첨 번호 수집 (NumberStatistics 보정용)
+            numbers = [draw.number1, draw.number2, draw.number3, draw.number4, draw.number5, draw.number6]
+            bonus_number = draw.bonus_number
+
+            # 3. NumberCombination 삭제
+            deleted_combos = NumberCombination.objects.filter(round_number=round_number).delete()
+            deleted_combo_count = deleted_combos[0] if deleted_combos else 0
+
+            # 4. NumberStatistics 보정 (카운트 감소)
+            for num in numbers:
+                try:
+                    stat = NumberStatistics.objects.get(number=num)
+                    stat.first_prize_count = max(0, stat.first_prize_count - 1)
+                    stat.total_count = max(0, stat.total_count - 1)
+
+                    # last_appeared_round 재계산 (필요시)
+                    if stat.last_appeared_round == round_number:
+                        # 이 번호가 마지막으로 나온 회차 찾기
+                        prev_draw = LottoDraw.objects.filter(
+                            Q(number1=num) | Q(number2=num) | Q(number3=num) |
+                            Q(number4=num) | Q(number5=num) | Q(number6=num) | Q(bonus_number=num)
+                        ).exclude(round_number=round_number).order_by('-round_number').first()
+
+                        if prev_draw:
+                            stat.last_appeared_round = prev_draw.round_number
+                            stat.last_appeared_date = prev_draw.draw_date
+                        else:
+                            # 이 번호가 한번도 안나온 경우
+                            stat.last_appeared_round = 0
+                            stat.last_appeared_date = None
+
+                    stat.save()
+                except NumberStatistics.DoesNotExist:
+                    pass  # 통계가 없으면 스킵
+
+            # 5. 보너스 번호 보정
+            try:
+                bonus_stat = NumberStatistics.objects.get(number=bonus_number)
+                bonus_stat.bonus_count = max(0, bonus_stat.bonus_count - 1)
+                bonus_stat.total_count = max(0, bonus_stat.total_count - 1)
+
+                if bonus_stat.last_appeared_round == round_number:
+                    prev_draw = LottoDraw.objects.filter(
+                        Q(number1=bonus_number) | Q(number2=bonus_number) | Q(number3=bonus_number) |
+                        Q(number4=bonus_number) | Q(number5=bonus_number) | Q(number6=bonus_number) | Q(bonus_number=bonus_number)
+                    ).exclude(round_number=round_number).order_by('-round_number').first()
+
+                    if prev_draw:
+                        bonus_stat.last_appeared_round = prev_draw.round_number
+                        bonus_stat.last_appeared_date = prev_draw.draw_date
+                    else:
+                        bonus_stat.last_appeared_round = 0
+                        bonus_stat.last_appeared_date = None
+
+                bonus_stat.save()
+            except NumberStatistics.DoesNotExist:
+                pass
+
+            # 6. LottoDraw 삭제
+            draw.delete()
+
+            # 7. StrategyStatistics 재계산 (삭제 후)
+            update_all_strategy_statistics()
+
+            return Response({
+                'success': True,
+                'message': f'{round_number}회차가 삭제되었습니다',
+                'deleted_combinations': deleted_combo_count,
+                'updated_statistics': len(numbers) + 1  # 당첨번호 6개 + 보너스 1개
+            }, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response({
+            'success': False,
+            'error': f'삭제 중 오류가 발생했습니다: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 

@@ -132,6 +132,11 @@ class UserLottoNumber(models.Model):
     )
 
     # 당첨 결과 (자동 계산)
+    matched_round = models.IntegerField(
+        null=True,
+        blank=True,
+        verbose_name="실제 당첨 회차"
+    )  # 실제로 당첨된 회차 (round_number와 다를 수 있음)
     matched_rank = models.CharField(
         max_length=10,
         null=True,
@@ -145,11 +150,11 @@ class UserLottoNumber(models.Model):
     strategy_type = models.CharField(
         max_length=20,
         choices=[
-            ('basic', '기본 스마트'),
-            ('strategy1', '추가전략1'),
-            ('strategy2', '추가전략2'),
-            ('strategy3', '추가전략3'),
-            ('strategy4', '추가전략4'),
+            ('basic', '기본'),
+            ('strategy1', '추가1'),
+            ('strategy2', '추가2'),
+            ('strategy3', '추가3'),
+            ('strategy4', '추가4'),
         ],
         default='basic',
         verbose_name="생성 전략"
@@ -185,6 +190,58 @@ class UserLottoNumber(models.Model):
         """선택한 번호 조합의 해시값 생성"""
         numbers = self.get_numbers_as_list()
         return hashlib.sha256(str(numbers).encode()).hexdigest()
+
+    def check_winning(self):
+        """
+        타겟 회차 이후 모든 추첨과 비교하여 당첨 여부 확인
+
+        Returns:
+            bool: 당첨되었으면 True, 아니면 False
+        """
+        # 타겟 회차 이후 모든 추첨 가져오기 (타겟 회차 포함)
+        draws = LottoDraw.objects.filter(
+            round_number__gte=self.round_number
+        ).order_by('round_number')
+
+        # 내 번호
+        my_numbers = self.get_numbers_as_set()
+
+        for draw in draws:
+            # 당첨 번호
+            winning_numbers = draw.get_numbers_as_set()
+
+            # 일치 개수 계산
+            matched = len(my_numbers & winning_numbers)
+
+            # 보너스 번호 일치 여부
+            has_bonus = draw.bonus_number in my_numbers
+
+            # 등수 결정
+            rank = None
+            if matched == 6:
+                rank = '1등'
+            elif matched == 5 and has_bonus:
+                rank = '2등'
+            elif matched == 5 and not has_bonus:
+                rank = '3등'
+            elif matched == 4 and not has_bonus:
+                rank = '4등'
+            # 5등(3개 일치) 체크 제거 - 4등까지만 확인
+
+            # 당첨된 경우
+            if rank:
+                self.matched_round = draw.round_number  # 실제 당첨 회차 저장
+                self.matched_rank = rank
+                self.matched_count = matched
+                self.has_bonus = has_bonus
+                self.is_checked = True
+                self.save()
+                return True
+
+        # 당첨되지 않은 경우
+        self.is_checked = True
+        self.save()
+        return False
 
 
 class NumberStatistics(models.Model):

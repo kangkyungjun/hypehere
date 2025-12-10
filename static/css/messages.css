@@ -150,8 +150,10 @@
     border-bottom: 1px solid var(--color-border);
     background: #FFFFFF;
     flex-shrink: 0;
-    position: sticky;
+    position: fixed;
     top: 0;
+    left: 0;
+    right: 0;
     z-index: 10;
 }
 
@@ -440,30 +442,31 @@
 
 /* 채팅 대화 화면에서 main-content 패딩 제거 및 전체 화면 설정 */
 .conversation-page .layout {
-    min-height: 100vh;
-    height: 100vh;
+    min-height: 100dvh;  /* Dynamic Viewport Height for mobile */
+    height: 100dvh;
+    height: calc(var(--real-vh, 1vh) * 100);  /* Fallback for older browsers */
 }
 
 .conversation-page .main-content {
     padding: 0;
-    height: 100vh;
+    height: 100dvh;  /* Dynamic Viewport Height for mobile */
+    height: calc(var(--real-vh, 1vh) * 100);  /* Fallback for older browsers */
     overflow: hidden;
+    position: relative;  /* Establish containing block for absolute children */
 }
 
-/* 채팅 입력창을 화면 최하단에 고정 (mobile-nav와 동일 방식) */
+/* 채팅 입력창을 flex container 내에서 자연스럽게 배치 */
 .conversation-page .message-input-container {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: calc(var(--z-sticky) - 1); /* mobile-nav보다 낮게 */
+    position: relative;  /* fixed에서 relative로 변경 */
+    z-index: var(--z-sticky);
     padding: var(--space-sm) var(--space-lg);  /* 상하 패딩 줄이기 */
     padding-bottom: calc(1.25rem + env(safe-area-inset-bottom)); /* 20px + safe-area for iPhone notch */
+    flex-shrink: 0;  /* 입력창이 축소되지 않도록 */
 }
 
-/* 메시지 리스트 하단에 입력창 높이만큼 여백 추가 */
+/* 메시지 리스트 하단 여백 최소화 (입력창이 flex 레이아웃 내에 있으므로) */
 .conversation-page .messages-list {
-    padding-bottom: calc(100px + env(safe-area-inset-bottom)); /* 입력창 높이와 정확히 일치 */
+    padding-bottom: var(--space-lg); /* 최소한의 여백만 유지 */
 }
 
 /* conversation-page에서 body 상단 여백 제거 */
@@ -476,6 +479,7 @@ body.conversation-page {
     min-height: 100vh;
     height: 100vh;
     margin: 0;
+    position: relative;  /* Establish containing block for absolute children */
 }
 
 /* conversation-detail-container 전체 화면 */

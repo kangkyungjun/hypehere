@@ -199,7 +199,9 @@
 
     <!-- Additional Info -->
     <div style="text-align: center; margin-top: var(--space-lg); color: var(--color-text-light); font-size: var(--font-size-sm);">
-        <p>{% blocktrans %}가입하시면 <a href="#" class="text-primary">이용약관</a> 및 <a href="#" class="text-primary">개인정보처리방침</a>에 동의하는 것으로 간주됩니다.{% endblocktrans %}</p>
+        {% url 'accounts:terms_of_service' as terms_url %}
+        {% url 'accounts:privacy_policy' as privacy_url %}
+        <p>{% blocktrans with terms_url=terms_url privacy_url=privacy_url %}가입하시면 <a href="{{ terms_url }}" class="text-primary">이용약관</a> 및 <a href="{{ privacy_url }}" class="text-primary">개인정보처리방침</a>에 동의하는 것으로 간주됩니다.{% endblocktrans %}</p>
     </div>
 </div>
 

@@ -5,7 +5,8 @@
 <html lang="{{ LANGUAGE_CODE }}">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 모바일: 자동 확대 및 사용자 줌 완전 차단 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="description" content="{% trans 'HypeHere - 친구를 사귀며 언어를 공부하는 SNS형 언어교환 플랫폼' %}">
     <meta name="keywords" content="{% trans '언어교환, 언어학습, SNS, 친구만들기, Language Exchange' %}">
     <title>{% block title %}{% trans 'HypeHere - 언어교환 플랫폼' %}{% endblock %}</title>

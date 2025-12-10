@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load i18n %}
+{% load static %}
 
 {% block title %}{% trans "로또" %} - HypeHere{% endblock %}
 
@@ -17,7 +18,10 @@
     <div class="lottery-container">
         <div class="overlap-card">
             <div class="card-header-with-button">
-                <h2 class="card-title">{% trans "로또 중복 분석" %} ({{ current_round }}{% trans "회차" %})</h2>
+                <h2 class="card-title">
+                    {% trans "로또 중복 분석" %} ({{ current_round }}{% trans "회차" %})
+                    <a href="{% url 'analytics:lottery_edit' %}" style="background: none; border: none; color: #999; font-size: 13px; font-weight: normal; text-decoration: none; margin-left: 8px; transition: color 0.2s;" onmouseover="this.style.color='#666'" onmouseout="this.style.color='#999'">편집</a>
+                </h2>
                 <button type="button" class="btn-add-draw" id="btnAddDraw" title="새 당첨 번호 입력">+</button>
             </div>
             <div class="overlap-list">
@@ -310,6 +314,9 @@
     <span class="toast-message"></span>
 </div>
 
+<!-- Lottery Edit Modal -->
+{% include 'analytics/partials/lottery_edit_modal.html' %}
+
 {% endblock %}
 
 {% block extra_css %}
@@ -431,15 +438,15 @@
 .overlap-list {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    margin: 15px 0;
+    gap: 6px;
+    margin: 8px 0;
 }
 
 .overlap-item {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 4px 0;
+    padding: 2px 0;
 }
 
 .overlap-label {
@@ -861,6 +868,61 @@
     font-size: 12px;
 }
 
+/* Winning Card Styles - Target Match (Yellow) */
+.saved-number-item.winning-target-match {
+    background: linear-gradient(135deg, #fff9e6 0%, #fffaed 100%);
+    border: 2px solid #ffd54f;
+    box-shadow: 0 4px 12px rgba(255, 213, 79, 0.3);
+    animation: pulse-yellow 2s ease-in-out infinite;
+}
+
+.saved-number-item.winning-target-match:hover {
+    background: linear-gradient(135deg, #fff8dc 0%, #fff9e6 100%);
+    box-shadow: 0 6px 16px rgba(255, 213, 79, 0.4);
+    transform: translateY(-2px);
+}
+
+@keyframes pulse-yellow {
+    0%, 100% {
+        box-shadow: 0 4px 12px rgba(255, 213, 79, 0.3);
+    }
+    50% {
+        box-shadow: 0 4px 20px rgba(255, 213, 79, 0.5);
+    }
+}
+
+.saved-number-rank.winning-match {
+    color: #f57f17;
+    font-weight: bold;
+    font-size: 13px;
+    background: rgba(255, 213, 79, 0.2);
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+/* Winning Card Styles - Target Mismatch (Purple) */
+.saved-number-item.winning-target-mismatch {
+    background: linear-gradient(135deg, #f3e5f5 0%, #f8f0fa 100%);
+    border: 2px solid #ba68c8;
+    box-shadow: 0 4px 12px rgba(186, 104, 200, 0.3);
+    transition: all 0.3s ease;
+}
+
+.saved-number-item.winning-target-mismatch:hover {
+    background: linear-gradient(135deg, #ede7f6 0%, #f3e5f5 100%);
+    box-shadow: 0 6px 16px rgba(186, 104, 200, 0.4);
+    transform: translateY(-2px);
+}
+
+.saved-number-rank.winning-mismatch {
+    color: #7b1fa2;
+    font-weight: bold;
+    font-size: 12px;
+    background: rgba(186, 104, 200, 0.15);
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
 .delete-number-btn {
     background: #ff5252;
     color: white;
@@ -879,6 +941,69 @@
     grid-column: 2;
     grid-row: 1;
     align-self: center;
+}
+
+/* Accordion Styles */
+.round-accordion {
+    margin-bottom: 16px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    background: white;
+}
+
+.round-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    background: linear-gradient(135deg, #f5f5f5 0%, #fafafa 100%);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    user-select: none;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.round-header:hover {
+    background: linear-gradient(135deg, #eeeeee 0%, #f5f5f5 100%);
+}
+
+.round-header-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+}
+
+.accordion-icon {
+    font-size: 14px;
+    transition: transform 0.3s ease;
+    color: #666;
+}
+
+.round-header.active .accordion-icon {
+    transform: rotate(180deg);
+}
+
+.round-content {
+    padding: 12px;
+    background: #fafafa;
+    display: none;
+}
+
+.round-content.show {
+    display: block;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        max-height: 0;
+    }
+    to {
+        opacity: 1;
+        max-height: 2000px;
+    }
 }
 
 .delete-number-btn:hover {
@@ -1285,6 +1410,10 @@
     content: '⚠';
 }
 </style>
+
+<!-- Lottery Edit Modal CSS -->
+<link rel="stylesheet" href="{% static 'css/lottery_edit.css' %}">
+
 {% endblock %}
 
 {% block extra_js %}
@@ -1823,48 +1952,140 @@ document.addEventListener('DOMContentLoaded', function() {
             const data = await response.json();
 
             if (data.success && data.numbers.length > 0) {
-                savedNumbersList.innerHTML = data.numbers.map(item => {
-                    const strategyNames = {
-                        'basic': '기본 스마트',
-                        'strategy1': '추가전략 1',
-                        'strategy2': '추가전략 2',
-                        'strategy3': '추가전략 3',
-                        'strategy4': '추가전략 4',
-                        'integrated': '통합 전략'
-                    };
-                    const strategyLabel = strategyNames[item.strategy_type] || '기본 스마트';
+                // Group numbers by round_number
+                const groupedByRound = {};
+                data.numbers.forEach(item => {
+                    const round = item.round_number;
+                    if (!groupedByRound[round]) {
+                        groupedByRound[round] = [];
+                    }
+                    groupedByRound[round].push(item);
+                });
+
+                // Sort rounds (newest first)
+                const sortedRounds = Object.keys(groupedByRound).sort((a, b) => b - a);
+
+                // Latest round to be opened by default
+                const latestRound = sortedRounds[0];
+
+                // Render accordion
+                savedNumbersList.innerHTML = sortedRounds.map((round, index) => {
+                    const items = groupedByRound[round];
+                    const isLatest = (round === latestRound);
+
+                    const cardsHTML = items.map(item => {
+                        const strategyNames = {
+                            'basic': '기본',
+                            'strategy1': '추가1',
+                            'strategy2': '추가2',
+                            'strategy3': '추가3',
+                            'strategy4': '추가4',
+                            'integrated': '통합'
+                        };
+                        const strategyLabel = strategyNames[item.strategy_type] || '기본';
+
+                        // 당첨 여부 및 타겟 일치 여부 판단
+                        const isWinning = item.matched_rank && item.matched_rank !== null;
+                        const isTargetMatch = isWinning && item.matched_round === item.round_number;
+                        const isTargetMismatch = isWinning && item.matched_round !== item.round_number;
+
+                        // 카드 클래스 결정
+                        let cardClass = 'saved-number-item';
+                        if (isTargetMatch) {
+                            cardClass += ' winning-target-match';  // 노란색
+                        } else if (isTargetMismatch) {
+                            cardClass += ' winning-target-mismatch';  // 보라색
+                        }
+
+                        // 당첨 정보 텍스트
+                        let winningInfo = '';
+                        if (isTargetMatch) {
+                            // 타겟 일치 당첨: "🎉 1202회 타겟 1등 당첨!"
+                            winningInfo = `<div class="saved-number-rank winning-match">🎉 ${item.round_number}회 타겟 ${item.matched_rank} 당첨!</div>`;
+                        } else if (isTargetMismatch) {
+                            // 타겟 불일치 당첨: "1200회 타겟 → 1205회 2등 당첨"
+                            winningInfo = `<div class="saved-number-rank winning-mismatch">${item.round_number}회 타겟 → ${item.matched_round}회 ${item.matched_rank} 당첨</div>`;
+                        } else if (item.is_checked) {
+                            // 미당첨: "1202회 타겟, 미당첨"
+                            winningInfo = `<div class="saved-number-rank">${item.round_number}회 타겟, 미당첨</div>`;
+                        } else {
+                            // 미확인: "1202회 타겟, 미확인"
+                            winningInfo = `<div class="saved-number-rank">${item.round_number}회 타겟, 미확인</div>`;
+                        }
+
+                        return `
+                        <div class="${cardClass}" ${isTargetMismatch ? `data-clickable="true" data-round="${item.round_number}"` : ''}>
+                            <div class="saved-number-balls">
+                                <span class="strategy-tag">${strategyLabel}</span>
+                                ${item.numbers.map(num =>
+                                    `<div class="number-ball">${num}</div>`
+                                ).join('')}
+                            </div>
+                            <div class="saved-number-info">
+                                <div class="saved-number-date">${item.created_at}</div>
+                                ${winningInfo}
+                            </div>
+                            <button class="delete-number-btn" data-number-id="${item.id}" title="삭제">×</button>
+                        </div>
+                        `;
+                    }).join('');
 
                     return `
-                    <div class="saved-number-item">
-                        <div class="saved-number-balls">
-                            <span class="strategy-tag">${strategyLabel}</span>
-                            ${item.numbers.map(num =>
-                                `<div class="number-ball">${num}</div>`
-                            ).join('')}
+                    <div class="round-accordion">
+                        <div class="round-header ${isLatest ? 'active' : ''}" data-round="${round}">
+                            <span class="round-header-title">${round}회차 타겟 (${items.length}개)</span>
+                            <span class="accordion-icon">▼</span>
                         </div>
-                        <div class="saved-number-info">
-                            <div class="saved-number-date">${item.created_at}</div>
-                            ${item.matched_rank ? `<div class="saved-number-rank">${item.round_number}회 ${item.matched_rank}</div>` : `<div class="saved-number-rank">${item.round_number}회 미확인</div>`}
+                        <div class="round-content ${isLatest ? 'show' : ''}">
+                            ${cardsHTML}
                         </div>
-                        <button class="delete-number-btn" data-number-id="${item.id}" title="삭제">×</button>
                     </div>
                     `;
                 }).join('');
+
+                // Add accordion toggle event listeners
+                document.querySelectorAll('.round-header').forEach(header => {
+                    header.addEventListener('click', function() {
+                        const content = this.nextElementSibling;
+                        const isActive = this.classList.contains('active');
+
+                        // Toggle active state
+                        this.classList.toggle('active');
+                        content.classList.toggle('show');
+                    });
+                });
+
             } else {
                 savedNumbersList.innerHTML = '<p class="no-saved-numbers">아직 저장한 번호가 없습니다</p>';
             }
 
             // 삭제 버튼에 이벤트 리스너 추가
             document.querySelectorAll('.delete-number-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();  // 카드 클릭 이벤트 방지
                     const numberId = this.getAttribute('data-number-id');
                     deleteNumber(numberId);
                 });
+            });
+
+            // 보라색 카드 (타겟 불일치) 클릭 이벤트 추가
+            document.querySelectorAll('.saved-number-item[data-clickable="true"]').forEach(card => {
+                card.addEventListener('click', function() {
+                    const targetRound = this.getAttribute('data-round');
+                    showEncouragementToast(targetRound);
+                });
+                // 클릭 가능한 카드에 커서 스타일 추가
+                card.style.cursor = 'pointer';
             });
         } catch (error) {
             console.error('Load saved numbers error:', error);
             savedNumbersList.innerHTML = '<p class="no-saved-numbers">번호를 불러오는 중 오류가 발생했습니다</p>';
         }
+    }
+
+    // 격려 토스트 표시 함수
+    function showEncouragementToast(targetRound) {
+        showToast('아쉽지만 계속 번호를 생성해 보세요', 'info', 5000);
     }
 
     function deleteNumber(numberId) {
@@ -2184,4 +2405,8 @@ document.addEventListener('DOMContentLoaded', function() {
     loadProbabilityStats();
 });
 </script>
+
+<!-- Lottery Edit Modal JavaScript -->
+<script src="{% static 'js/lottery_edit.js' %}"></script>
+
 {% endblock %}

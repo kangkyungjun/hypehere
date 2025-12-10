@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-26 13:33+0000\n"
+"POT-Creation-Date: 2025-12-08 18:04+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,2468 +18,3674 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: accounts/models.py:433 accounts/templates/accounts/support/create.html:26
 msgid "계정 관련"
 msgstr ""
 
-#: accounts/models.py:434 accounts/templates/accounts/support/create.html:27
 msgid "결제 문의"
 msgstr ""
 
-#: accounts/models.py:435 accounts/templates/accounts/support/create.html:28
 msgid "기술 지원"
 msgstr ""
 
-#: accounts/models.py:436 accounts/templates/accounts/support/create.html:29
 msgid "기능 제안"
 msgstr ""
 
-#: accounts/models.py:437 accounts/templates/accounts/report_history.html:389
-#: accounts/templates/accounts/support/create.html:30 posts/models.py:147
-#: posts/models.py:284 posts/models.py:355 templates/learning/matching.html:63
-#: templates/learning/matching.html:255 templates/learning/matching.html:297
-#: templates/partials/message_report_modal.html:58
-#: templates/partials/post_report_modal.html:58
 msgid "기타"
 msgstr ""
 
-#: accounts/models.py:441 accounts/templates/accounts/report_history.html:350
 msgid "대기 중"
 msgstr ""
 
-#: accounts/models.py:442
 msgid "답변 완료"
 msgstr ""
 
-#: accounts/models.py:450
 msgid "작성자"
 msgstr ""
 
-#: accounts/models.py:455 accounts/templates/accounts/support/create.html:23
-#: templates/learning/chat.html:128
 msgid "카테고리"
 msgstr ""
 
-#: accounts/models.py:457 accounts/templates/accounts/support/create.html:35
 msgid "제목"
 msgstr ""
 
-#: accounts/models.py:458 accounts/templates/accounts/support/create.html:40
 msgid "내용"
 msgstr ""
 
-#: accounts/models.py:463 accounts/templates/accounts/report_history.html:342
 msgid "상태"
 msgstr ""
 
-#: accounts/models.py:467 accounts/templates/accounts/support/detail.html:62
 msgid "관리자 답변"
 msgstr ""
 
-#: accounts/models.py:474
 msgid "답변 관리자"
 msgstr ""
 
-#: accounts/serializers.py:62
+msgid "신고자"
+msgstr ""
+
+msgid "신고된 사용자"
+msgstr ""
+
+msgid "욕설/비방"
+msgstr ""
+
+msgid "스팸/광고"
+msgstr ""
+
+msgid "부적절한 내용"
+msgstr ""
+
+msgid "성희롱"
+msgstr ""
+
+msgid "신고 유형"
+msgstr ""
+
+msgid "상세 설명"
+msgstr ""
+
+msgid "검토 중"
+msgstr ""
+
+msgid "처리 완료"
+msgstr ""
+
+msgid "기각"
+msgstr ""
+
+msgid "신고 시간"
+msgstr ""
+
+msgid "검토 시간"
+msgstr ""
+
+msgid "관리자 메모"
+msgstr ""
+
+msgid "처리 관리자"
+msgstr ""
+
+msgid "사용자 신고"
+msgstr ""
+
 msgid "비밀번호가 일치하지 않습니다."
 msgstr ""
 
-#: accounts/serializers.py:178
 msgid "현재 비밀번호가 올바르지 않습니다."
 msgstr ""
 
-#: accounts/serializers.py:185
-#: accounts/templates/accounts/account_management.html:284
 msgid "새 비밀번호가 일치하지 않습니다."
 msgstr ""
 
-#: accounts/templates/accounts/account_management.html:5
+msgid "자기 자신을 신고할 수 없습니다."
+msgstr ""
+
 msgid "계정 관리 - HypeHere"
 msgstr ""
 
-#: accounts/templates/accounts/account_management.html:17
-#: accounts/templates/accounts/settings.html:100
 msgid "계정 관리"
 msgstr ""
 
-#: accounts/templates/accounts/account_management.html:29
 msgid "계정 삭제 예약됨"
 msgstr ""
 
-#: accounts/templates/accounts/account_management.html:30
 #, python-format
 msgid "%(days)s일 후 영구 삭제됩니다."
 msgstr ""
 
-#: accounts/templates/accounts/account_management.html:33
 msgid "삭제 취소"
 msgstr ""
 
-#: accounts/templates/accounts/account_management.html:40
-#: accounts/templates/accounts/account_management.html:50
-#: accounts/templates/accounts/account_management.html:207
 msgid "비밀번호 변경"
 msgstr ""
 
-#: accounts/templates/accounts/account_management.html:44
 msgid "비밀번호 관리"
 msgstr ""
 
-#: accounts/templates/accounts/account_management.html:46
 msgid "계정 보안을 위해 정기적으로 비밀번호를 변경하세요"
 msgstr ""
 
-#: accounts/templates/accounts/account_management.html:57
 msgid "계정 재활성화"
 msgstr ""
 
-#: accounts/templates/accounts/account_management.html:61
 msgid "계정 다시 활성화"
 msgstr ""
 
-#: accounts/templates/accounts/account_management.html:63
 msgid "비활성화된 계정을 다시 활성화하여 모든 기능을 이용할 수 있습니다"
 msgstr ""
 
-#: accounts/templates/accounts/account_management.html:67
-#: accounts/templates/accounts/account_management.html:178
 msgid "재활성화"
 msgstr ""
 
-#: accounts/templates/accounts/account_management.html:70
 msgid "계정 비활성화"
 msgstr ""
 
-#: accounts/templates/accounts/account_management.html:74
 msgid "계정 일시 정지"
 msgstr ""
 
-#: accounts/templates/accounts/account_management.html:76
 msgid "프로필이 숨겨지지만 언제든지 다시 로그인하여 복구할 수 있습니다"
 msgstr ""
 
-#: accounts/templates/accounts/account_management.html:80
-#: accounts/templates/accounts/account_management.html:112
 msgid "비활성화"
 msgstr ""
 
-#: accounts/templates/accounts/account_management.html:87
 msgid "계정 영구 삭제"
 msgstr ""
 
-#: accounts/templates/accounts/account_management.html:91
 msgid "계정 삭제"
 msgstr ""
 
-#: accounts/templates/accounts/account_management.html:93
 msgid ""
 "30일 후 계정과 모든 데이터가 영구적으로 삭제됩니다. 이 작업은 되돌릴 수 없습"
 "니다."
 msgstr ""
 
-#: accounts/templates/accounts/account_management.html:97
-#: accounts/templates/accounts/account_management.html:145
 msgid "삭제 요청"
 msgstr ""
 
-#: accounts/templates/accounts/account_management.html:108
 msgid "계정을 비활성화하시겠습니까?"
 msgstr ""
 
-#: accounts/templates/accounts/account_management.html:109
 msgid "프로필과 게시글이 숨겨지지만 언제든 다시 로그인하여 복구할 수 있습니다."
 msgstr ""
 
-#: accounts/templates/accounts/account_management.html:111
-#: accounts/templates/accounts/account_management.html:130
-#: accounts/templates/accounts/account_management.html:144
-#: accounts/templates/accounts/account_management.html:177
-#: accounts/templates/accounts/account_management.html:273
-#: accounts/templates/accounts/report_history.html:284
-#: accounts/templates/accounts/report_history.html:321
-#: accounts/templates/accounts/settings.html:378
-#: accounts/templates/accounts/support/create.html:45
-#: templates/accounts/profile_update.html:125 templates/conversation.html:108
-#: templates/learning/chat.html:168 templates/learning/chat_room.html:149
-#: templates/learning/chat_room.html:193 templates/learning/chat_room.html:220
-#: templates/learning/chat_room.html:245 templates/learning/chat_room.html:271
-#: templates/learning/chat_room.html:296 templates/learning/chat_room.html:321
-#: templates/learning/matching.html:235 templates/learning/matching.html:263
-#: templates/partials/block_user_modal.html:23
-#: templates/partials/comment_delete_confirm_modal.html:20
-#: templates/partials/comment_edit_modal.html:33
-#: templates/partials/message_report_modal.html:81
-#: templates/partials/post_create_modal.html:80
-#: templates/partials/post_delete_modal.html:25
-#: templates/partials/post_report_modal.html:81
 msgid "취소"
 msgstr ""
 
-#: accounts/templates/accounts/account_management.html:121
 msgid "정말로 계정을 삭제하시겠습니까?"
 msgstr ""
 
-#: accounts/templates/accounts/account_management.html:122
 msgid "30일 후 다음 항목이 영구적으로 삭제됩니다:"
 msgstr ""
 
-#: accounts/templates/accounts/account_management.html:124
 msgid "프로필 정보"
 msgstr ""
 
-#: accounts/templates/accounts/account_management.html:125
 msgid "모든 게시글 및 댓글"
 msgstr ""
 
-#: accounts/templates/accounts/account_management.html:126
 msgid "팔로워 및 팔로잉 관계"
 msgstr ""
 
-#: accounts/templates/accounts/account_management.html:127
 msgid "모든 활동 기록"
 msgstr ""
 
-#: accounts/templates/accounts/account_management.html:131
-#: accounts/templates/accounts/support/list.html:134
 msgid "다음"
 msgstr ""
 
-#: accounts/templates/accounts/account_management.html:140
 msgid "계정 삭제 확인"
 msgstr ""
 
-#: accounts/templates/accounts/account_management.html:141
 msgid " 계속하려면 \"<strong>영구삭제</strong>\"를 입력하세요:"
 msgstr ""
 
-#: accounts/templates/accounts/account_management.html:142
 msgid "영구삭제"
 msgstr ""
 
-#: accounts/templates/accounts/account_management.html:160
-#: templates/home.html:21 templates/learning/chat.html:20
-#: templates/learning/matching.html:16
 msgid "계정이 비활성화되었습니다"
 msgstr ""
 
-#: accounts/templates/accounts/account_management.html:162
 msgid "계정을 재활성화하려면 재활성화 버튼을 눌러주세요."
 msgstr ""
 
-#: accounts/templates/accounts/account_management.html:165
-#: accounts/templates/accounts/account_management.html:198
-#: accounts/templates/accounts/account_management.html:307
-#: templates/learning/matching.html:309
 msgid "확인"
 msgstr ""
 
-#: accounts/templates/accounts/account_management.html:174
 msgid "계정을 재활성화하시겠습니까?"
 msgstr ""
 
-#: accounts/templates/accounts/account_management.html:175
 msgid "모든 기능을 다시 사용할 수 있게 됩니다."
 msgstr ""
 
-#: accounts/templates/accounts/account_management.html:193
 msgid "계정이 재활성화되었습니다"
 msgstr ""
 
-#: accounts/templates/accounts/account_management.html:195
 msgid "이제 모든 기능을 사용할 수 있습니다."
 msgstr ""
 
-#: accounts/templates/accounts/account_management.html:208
 msgid "새로운 비밀번호를 입력해주세요"
 msgstr ""
 
-#: accounts/templates/accounts/account_management.html:213
-#: templates/accounts/register.html:84
-msgid "비밀번호 규칙"
-msgstr ""
-
-#: accounts/templates/accounts/account_management.html:216
-#: templates/accounts/register.html:87
-msgid "최소 8자 이상"
-msgstr ""
-
-#: accounts/templates/accounts/account_management.html:217
-#: templates/accounts/register.html:88
-msgid "영문 대문자 포함 권장"
-msgstr ""
-
-#: accounts/templates/accounts/account_management.html:218
-#: templates/accounts/register.html:89
-msgid "영문 소문자 포함 권장"
-msgstr ""
-
-#: accounts/templates/accounts/account_management.html:219
-#: templates/accounts/register.html:90
-msgid "숫자 포함 권장"
-msgstr ""
-
-#: accounts/templates/accounts/account_management.html:220
-#: templates/accounts/register.html:91
-msgid "특수문자 포함 권장"
-msgstr ""
-
-#: accounts/templates/accounts/account_management.html:220
-#: templates/accounts/register.html:91
-msgid "등"
-msgstr ""
-
-#: accounts/templates/accounts/account_management.html:221
-#: templates/accounts/register.html:92
-msgid "이메일과 유사하지 않아야 함"
-msgstr ""
-
-#: accounts/templates/accounts/account_management.html:222
-#: templates/accounts/register.html:93
-msgid "일반적인 단어 사용 불가"
-msgstr ""
-
-#: accounts/templates/accounts/account_management.html:233
-#: accounts/templates/accounts/account_management.html:239
 msgid "현재 비밀번호"
 msgstr ""
 
-#: accounts/templates/accounts/account_management.html:246
-#: accounts/templates/accounts/account_management.html:252
 msgid "새 비밀번호"
 msgstr ""
 
-#: accounts/templates/accounts/account_management.html:259
-#: accounts/templates/accounts/account_management.html:265
+msgid "비밀번호 규칙 보기"
+msgstr ""
+
 msgid "새 비밀번호 확인"
 msgstr ""
 
-#: accounts/templates/accounts/account_management.html:274
 msgid "변경하기"
 msgstr ""
 
-#: accounts/templates/accounts/account_management.html:283
 msgid "모든 필드를 입력해주세요."
 msgstr ""
 
-#: accounts/templates/accounts/account_management.html:285
 msgid "비밀번호는 최소 8자 이상이어야 합니다."
 msgstr ""
 
-#: accounts/templates/accounts/account_management.html:286
 msgid "비밀번호 변경에 실패했습니다."
 msgstr ""
 
-#: accounts/templates/accounts/account_management.html:287
 msgid "비밀번호 변경 중 오류가 발생했습니다."
 msgstr ""
 
-#: accounts/templates/accounts/account_management.html:288
-#: accounts/templates/accounts/profile.html:359
-#: templates/accounts/profile_update.html:146 templates/home.html:199
-#: templates/home.html:218
 msgid "네트워크 오류가 발생했습니다. 다시 시도해주세요."
 msgstr ""
 
-#: accounts/templates/accounts/account_management.html:302
 msgid "비밀번호가 변경되었습니다"
 msgstr ""
 
-#: accounts/templates/accounts/account_management.html:304
 msgid "새로운 비밀번호로 로그인해주세요."
 msgstr ""
 
-#: accounts/templates/accounts/blocked_users_list.html:5
-#: accounts/templates/accounts/blocked_users_list.html:20
-#: accounts/templates/accounts/privacy_settings.html:111
+msgid "관리자 대시보드"
+msgstr ""
+
+msgid "사용자 관리 및 시스템 설정"
+msgstr ""
+
 msgid "차단 목록"
 msgstr ""
 
-#: accounts/templates/accounts/blocked_users_list.html:15
-#: accounts/templates/accounts/followers_list.html:15
-#: accounts/templates/accounts/following_list.html:15 templates/explore.html:16
 msgid "뒤로가기"
 msgstr ""
 
-#: accounts/templates/accounts/blocked_users_list.html:28
-#: accounts/templates/accounts/followers_list.html:28
-#: accounts/templates/accounts/following_list.html:28
 msgid "불러오는 중..."
 msgstr ""
 
-#: accounts/templates/accounts/blocked_users_list.html:33
 msgid "차단한 사용자가 없습니다"
 msgstr ""
 
-#: accounts/templates/accounts/favorites.html:5
-#: templates/accounts/favorites.html:5
 msgid "즐겨찾기 - HypeHere"
 msgstr ""
 
-#: accounts/templates/accounts/favorites.html:21
-#: accounts/templates/accounts/settings.html:76
-#: templates/accounts/favorites.html:22 templates/learning/chat_room.html:31
-#: templates/partials/post_view_modal.html:90
 msgid "즐겨찾기"
 msgstr ""
 
-#: accounts/templates/accounts/favorites.html:27
-#: templates/accounts/favorites.html:28
 msgid "채팅방"
 msgstr ""
 
-#: accounts/templates/accounts/favorites.html:31
-#: accounts/templates/accounts/report_history.html:44
-#: templates/accounts/favorites.html:32 templates/explore.html:76
 msgid "게시물"
 msgstr ""
 
-#: accounts/templates/accounts/favorites.html:52
-#: templates/accounts/favorites.html:54
 msgid "즐겨찾기한 채팅방이 없습니다"
 msgstr ""
 
-#: accounts/templates/accounts/favorites.html:53
 msgid "채팅방을 즐겨찾기에 추가해보세요"
 msgstr ""
 
-#: accounts/templates/accounts/favorites.html:54
-#: templates/accounts/favorites.html:56
 msgid "채팅방 둘러보기"
 msgstr ""
 
-#: accounts/templates/accounts/favorites.html:68
 msgid "게시물 즐겨찾기 준비 중"
 msgstr ""
 
-#: accounts/templates/accounts/favorites.html:69
 msgid "곧 게시물 즐겨찾기 기능이 추가됩니다"
 msgstr ""
 
-#: accounts/templates/accounts/followers_list.html:5
-#: accounts/templates/accounts/followers_list.html:20
-#: accounts/templates/accounts/profile.html:112
-#: templates/partials/sidebar.html:25
 msgid "팔로워"
 msgstr ""
 
-#: accounts/templates/accounts/followers_list.html:33
 msgid "팔로워가 없습니다"
 msgstr ""
 
-#: accounts/templates/accounts/followers_list.html:34
 msgid "아직 팔로워가 없습니다"
 msgstr ""
 
-#: accounts/templates/accounts/following_list.html:5
-#: accounts/templates/accounts/following_list.html:20
-#: accounts/templates/accounts/profile.html:116
-#: templates/partials/sidebar.html:29
 msgid "팔로잉"
 msgstr ""
 
-#: accounts/templates/accounts/following_list.html:33
 msgid "팔로잉이 없습니다"
 msgstr ""
 
-#: accounts/templates/accounts/following_list.html:34
 msgid "아직 팔로우한 사용자가 없습니다"
 msgstr ""
 
-#: accounts/templates/accounts/login.html:5
-msgid "로그인 - HypeHere"
+msgid "커뮤니티 가이드라인"
 msgstr ""
 
-#: accounts/templates/accounts/login.html:12
-#: accounts/templates/accounts/login.html:66
-#: accounts/templates/accounts/password_reset/request.html:53
-#: accounts/templates/accounts/register.html:151
-#: templates/accounts/register.html:157 templates/partials/header.html:74
-msgid "로그인"
+msgid "안전하고 긍정적인 언어 학습 공간을 만들어갑니다"
 msgstr ""
 
-#: accounts/templates/accounts/login.html:13
-msgid "HypeHere 계정으로 로그인하세요"
+msgid "시행일"
 msgstr ""
 
-#: accounts/templates/accounts/login.html:18
-msgid "사용자명 또는 비밀번호가 올바르지 않습니다."
+msgid "년"
 msgstr ""
 
-#: accounts/templates/accounts/login.html:26
-#: accounts/templates/accounts/register.html:85
-msgid "사용자명"
+msgid "월"
 msgstr ""
 
-#: accounts/templates/accounts/login.html:32
-#: accounts/templates/accounts/register.html:91
-msgid "사용자명을 입력하세요"
+msgid "일"
 msgstr ""
 
-#: accounts/templates/accounts/login.html:39
-#: accounts/templates/accounts/register.html:111
-#: templates/accounts/register.html:99 templates/learning/chat.html:164
-msgid "비밀번호"
+msgid ""
+"HypeHere는 전 세계 언어 학습자들이 모여 서로 돕고 배우는 플랫폼입니다. 모든 "
+"사용자가 안전하고 즐거운 학습 경험을 누릴 수 있도록, 다음의 커뮤니티 가이드라"
+"인을 준수해 주시기 바랍니다."
 msgstr ""
 
-#: accounts/templates/accounts/login.html:45
-#: accounts/templates/accounts/register.html:117
-msgid "비밀번호를 입력하세요"
+msgid "제1장: 우리의 약속"
 msgstr ""
 
-#: accounts/templates/accounts/login.html:52
-#: templates/accounts/register.html:41
-msgid "화면 언어 (선택)"
+msgid "제1조 (HypeHere의 미션)"
 msgstr ""
 
-#: accounts/templates/accounts/login.html:55
-#: templates/accounts/register.html:44
-msgid "선택하면 즉시 페이지 언어가 변경됩니다."
+msgid ""
+"HypeHere는 언어와 문화의 경계를 넘어 사람들이 연결되는 공간입니다. 우리는 다"
+"음을 지향합니다:"
 msgstr ""
 
-#: accounts/templates/accounts/login.html:61
-msgid "로그인 상태 유지"
+msgid "존중"
 msgstr ""
 
-#: accounts/templates/accounts/login.html:72
-msgid "비밀번호를 잊으셨나요?"
+msgid "모든 사용자를 존중하며 다양성을 존중합니다"
 msgstr ""
 
-#: accounts/templates/accounts/login.html:75
-msgid "계정이 없으신가요?"
+msgid "학습"
 msgstr ""
 
-#: accounts/templates/accounts/login.html:76
-#: accounts/templates/accounts/register.html:60
-#: templates/accounts/register.html:5 templates/accounts/register.html:23
-#: templates/partials/header.html:75
-msgid "회원가입"
+msgid "긍정적인 학습 환경을 조성합니다"
 msgstr ""
 
-#: accounts/templates/accounts/notification_settings.html:5
-msgid "알림 설정 - HypeHere"
+msgid "안전"
 msgstr ""
 
-#: accounts/templates/accounts/notification_settings.html:17
-#: accounts/templates/accounts/settings.html:65
-msgid "알림 설정"
+msgid "모든 사용자가 안심하고 이용할 수 있는 공간을 만듭니다"
 msgstr ""
 
-#: accounts/templates/accounts/notification_settings.html:18
-#: accounts/templates/accounts/privacy_settings.html:18
-msgid "저장됨"
+msgid "포용성"
 msgstr ""
 
-#: accounts/templates/accounts/notification_settings.html:30
-msgid "모든 알림"
+msgid "다양한 배경과 문화를 가진 사람들을 환영합니다"
 msgstr ""
 
-#: accounts/templates/accounts/notification_settings.html:31
-msgid "모든 알림을 한번에 켜거나 끕니다"
+msgid "제2조 (커뮤니티 원칙)"
 msgstr ""
 
-#: accounts/templates/accounts/notification_settings.html:43
-msgid "알림 타입"
+msgid "우리는 다음 원칙을 중요하게 여깁니다:"
 msgstr ""
 
-#: accounts/templates/accounts/notification_settings.html:52
-#: accounts/templates/accounts/profile.html:239
-#: templates/partials/header.html:58 templates/partials/sidebar.html:69
-msgid "메시지"
+msgid "서로의 언어 학습 여정을 응원합니다"
 msgstr ""
 
-#: accounts/templates/accounts/notification_settings.html:53
-msgid "새로운 메시지를 받았을 때"
+msgid "실수를 인정하고 배움의 기회로 삼습니다"
 msgstr ""
 
-#: accounts/templates/accounts/notification_settings.html:72
-#: accounts/templates/accounts/profile.html:234
-#: templates/partials/sidebar.html:136 templates/partials/sidebar.html:149
-msgid "팔로우"
+msgid "건설적인 피드백을 제공하고 수용합니다"
 msgstr ""
 
-#: accounts/templates/accounts/notification_settings.html:73
-msgid "새로운 팔로워가 생겼을 때"
+msgid "문화적 차이를 이해하고 존중합니다"
 msgstr ""
 
-#: accounts/templates/accounts/notification_settings.html:93
-msgid "게시글"
+msgid "제2장: 허용되는 행동"
 msgstr ""
 
-#: accounts/templates/accounts/notification_settings.html:94
-msgid "팔로우한 사람이 게시글을 작성했을 때"
+msgid "제3조 (긍정적인 커뮤니티 참여)"
 msgstr ""
 
-#: accounts/templates/accounts/notification_settings.html:110
-#: accounts/templates/accounts/report_history.html:48
-#: templates/partials/post_view_modal.html:73
-msgid "댓글"
+msgid "다음과 같은 행동을 권장합니다:"
 msgstr ""
 
-#: accounts/templates/accounts/notification_settings.html:111
-msgid "내 게시글에 댓글이 달렸을 때"
+msgid "존중하는 언어 교환 및 학습"
 msgstr ""
 
-#: accounts/templates/accounts/notification_settings.html:127
-#: templates/home.html:101 templates/partials/post_view_modal.html:66
-msgid "좋아요"
+msgid "게시물과 댓글에 건설적인 피드백 제공"
 msgstr ""
 
-#: accounts/templates/accounts/notification_settings.html:128
-msgid "내 게시글에 좋아요를 눌렀을 때"
+msgid "다른 학습자를 돕고 격려하기"
 msgstr ""
 
-#: accounts/templates/accounts/password_reset/request.html:5
-msgid "비밀번호 재설정 - HypeHere"
+msgid "문화적 통찰과 경험 공유"
 msgstr ""
 
-#: accounts/templates/accounts/password_reset/request.html:12
-msgid "비밀번호 재설정"
+msgid "부적절한 콘텐츠 발견 시 신고"
 msgstr ""
 
-#: accounts/templates/accounts/password_reset/request.html:13
-msgid "등록된 이메일 주소로 임시 비밀번호를 발송해드립니다"
+msgid "긍정적이고 지지적인 분위기 조성"
 msgstr ""
 
-#: accounts/templates/accounts/password_reset/request.html:30
-msgid "이메일 주소"
+msgid "제3장: 금지된 행동"
 msgstr ""
 
-#: accounts/templates/accounts/password_reset/request.html:36
-#: templates/accounts/register.html:56
-msgid "example@email.com"
+msgid "제4조 (일반 금지사항)"
 msgstr ""
 
-#: accounts/templates/accounts/password_reset/request.html:40
-msgid "가입 시 등록한 이메일 주소를 입력해주세요"
+msgid "다음 행위는 엄격히 금지됩니다:"
 msgstr ""
 
-#: accounts/templates/accounts/password_reset/request.html:45
-msgid "임시 비밀번호 발송"
+msgid "혐오 발언 및 차별"
 msgstr ""
 
-#: accounts/templates/accounts/password_reset/request.html:52
-msgid "비밀번호가 기억나셨나요?"
+msgid ""
+"인종, 민족, 성별, 성적 지향, 종교, 국적, 장애 등을 이유로 한 차별적 발언"
 msgstr ""
 
-#: accounts/templates/accounts/password_reset/request.html:176
-#: accounts/templates/accounts/password_reset/request.html:177
-msgid "이메일 주소를 입력해주세요"
+msgid "괴롭힘 및 따돌림"
 msgstr ""
 
-#: accounts/templates/accounts/password_reset/request.html:199
-msgid "임시 비밀번호가 이메일로 발송되었습니다"
+msgid "특정 사용자를 지속적으로 괴롭히거나 공격하는 행위"
 msgstr ""
 
-#: accounts/templates/accounts/password_reset/request.html:213
-msgid "오류가 발생했습니다. 다시 시도해주세요"
+msgid "성적 콘텐츠 및 권유"
 msgstr ""
 
-#: accounts/templates/accounts/password_reset/request.html:220
-msgid "네트워크 오류가 발생했습니다. 다시 시도해주세요"
+msgid "성적 콘텐츠 게시, 성적 메시지 전송"
 msgstr ""
 
-#: accounts/templates/accounts/privacy_settings.html:5
-msgid "개인정보 보호 - HypeHere"
+msgid "폭력 및 위협"
 msgstr ""
 
-#: accounts/templates/accounts/privacy_settings.html:17
-#: accounts/templates/accounts/settings.html:117
-msgid "개인정보 보호"
+msgid "폭력을 미화하거나 위협하는 행위"
 msgstr ""
 
-#: accounts/templates/accounts/privacy_settings.html:23
-msgid "계정 공개 설정"
+msgid "스팸 및 상업적 활동"
 msgstr ""
 
-#: accounts/templates/accounts/privacy_settings.html:33
-msgid "비공개 계정"
+msgid "무분별한 홍보, 상업적 광고"
 msgstr ""
 
-#: accounts/templates/accounts/privacy_settings.html:35
-msgid "비공개 계정으로 설정하면 팔로워만 내 게시글과 프로필을 볼 수 있습니다"
+msgid "사칭 및 허위 계정"
 msgstr ""
 
-#: accounts/templates/accounts/privacy_settings.html:48
-msgid "팔로우 목록 공개"
+msgid "다른 사람으로 사칭하거나 허위 정보로 계정 생성"
 msgstr ""
 
-#: accounts/templates/accounts/privacy_settings.html:60
-msgid "팔로워 목록"
+msgid "저작권 침해"
 msgstr ""
 
-#: accounts/templates/accounts/privacy_settings.html:62
-msgid "내 팔로워 목록을 볼 수 있는 사람"
+msgid "타인의 저작물을 무단으로 사용"
 msgstr ""
 
-#: accounts/templates/accounts/privacy_settings.html:84
-msgid "팔로잉 목록"
+msgid "제5조 (플랫폼별 특별 규칙)"
 msgstr ""
 
-#: accounts/templates/accounts/privacy_settings.html:86
-msgid "내가 팔로우하는 목록을 볼 수 있는 사람"
+msgid "📝 게시물 (Posts)"
 msgstr ""
 
-#: accounts/templates/accounts/privacy_settings.html:101
-msgid "차단 관리"
+msgid "허위 정보나 오해의 소지가 있는 콘텐츠 금지"
 msgstr ""
 
-#: accounts/templates/accounts/privacy_settings.html:112
-msgid "차단한 사용자 관리"
+msgid "주제와 무관한 콘텐츠 금지"
 msgstr ""
 
-#: accounts/templates/accounts/privacy_settings.html:127
-msgid "공개 범위 선택"
+msgid "적절한 해시태그 사용으로 검색 가능성 향상"
 msgstr ""
 
-#: accounts/templates/accounts/privacy_settings.html:128
-#: accounts/templates/accounts/report_history.html:256
-#: accounts/templates/accounts/report_history.html:294
-#: templates/accounts/profile_update.html:152 templates/base.html:488
-#: templates/conversation.html:91 templates/learning/chat_room.html:66
-#: templates/learning/chat_room.html:121 templates/learning/chat_room.html:159
-#: templates/learning/chat_room.html:179 templates/learning/chat_room.html:203
-#: templates/learning/chat_room.html:230 templates/learning/chat_room.html:256
-#: templates/learning/chat_room.html:281 templates/learning/chat_room.html:306
-#: templates/learning/matching.html:290
-#: templates/partials/block_user_modal.html:8
-#: templates/partials/comment_delete_confirm_modal.html:7
-#: templates/partials/comment_edit_modal.html:7
-#: templates/partials/comment_owner_action_modal.html:6
-#: templates/partials/message_action_modal.html:6
-#: templates/partials/message_report_modal.html:8
-#: templates/partials/post_action_modal.html:6
-#: templates/partials/post_report_modal.html:8
-#: templates/partials/post_view_modal.html:8
-msgid "닫기"
+msgid "💬 댓글 (Comments)"
 msgstr ""
 
-#: accounts/templates/accounts/privacy_settings.html:144
-msgid "전체 공개"
+msgid "트롤링이나 대화를 방해하는 행위 금지"
 msgstr ""
 
-#: accounts/templates/accounts/privacy_settings.html:145
-msgid "모든 사용자가 볼 수 있습니다"
+msgid "건설적이고 관련성 있는 댓글 권장"
 msgstr ""
 
-#: accounts/templates/accounts/privacy_settings.html:161
-msgid "팔로워만"
+msgid "💌 일반 채팅 (Regular Chat)"
 msgstr ""
 
-#: accounts/templates/accounts/privacy_settings.html:162
-msgid "나를 팔로우하는 사용자만"
+msgid "무단 메시지 전송 금지"
 msgstr ""
 
-#: accounts/templates/accounts/privacy_settings.html:176
-msgid "비공개"
+msgid "개인정보 존중"
 msgstr ""
 
-#: accounts/templates/accounts/privacy_settings.html:177
-msgid "나만 볼 수 있습니다"
+msgid "메시지는 삭제되지 않으므로 신중하게 작성"
 msgstr ""
 
-#: accounts/templates/accounts/profile.html:5
-msgid "내 프로필 - HypeHere"
+msgid "🎭 익명 채팅 (Anonymous Chat) - 특별 주의사항"
 msgstr ""
 
-#: accounts/templates/accounts/profile.html:76
-#: accounts/templates/accounts/profile.html:77
-#: accounts/templates/accounts/settings.html:31
-msgid "프로필 편집"
+msgid ""
+"익명 채팅은 개인정보 보호를 위한 공간이지만, 책임 있는 행동이 요구됩니다:"
 msgstr ""
 
-#: accounts/templates/accounts/profile.html:78
-msgid "편집"
+msgid "⚠️ 개인정보 공유 절대 금지"
 msgstr ""
 
-#: accounts/templates/accounts/profile.html:120
-#: templates/partials/sidebar.html:33
-msgid "포스트"
+msgid "이름, 전화번호, 이메일, 소셜 미디어 계정 등"
 msgstr ""
 
-#: accounts/templates/accounts/profile.html:255
-msgid "게시물 검색... (내용 또는 #해시태그)"
+msgid "⚠️ 녹화/스크린샷 금지"
 msgstr ""
 
-#: accounts/templates/accounts/profile.html:258
-msgid "검색 지우기"
+msgid "상대방 동의 없이 대화 내용 캡처 금지"
 msgstr ""
 
-#: accounts/templates/accounts/profile.html:268
-msgid "검색 결과"
+msgid "⚠️ 성희롱 엄격 금지"
 msgstr ""
 
-#: accounts/templates/accounts/profile.html:288
-#: templates/partials/post_view_modal.html:45
-msgid "게시물 옵션"
+msgid "익명성을 악용한 부적절한 발언은 즉시 영구 차단"
 msgstr ""
 
-#: accounts/templates/accounts/profile.html:327 templates/home.html:149
-msgid "아직 게시물이 없습니다"
+msgid "위반 시 경고 없이 즉시 차단 조치될 수 있습니다"
 msgstr ""
 
-#: accounts/templates/accounts/profile.html:353 templates/home.html:194
-#: templates/learning/matching.html:360
-msgid "성공"
+msgid "📹 비디오 채팅 (Video Chat) - 특별 주의사항"
 msgstr ""
 
-#: accounts/templates/accounts/profile.html:354 templates/home.html:195
-#: templates/learning/matching.html:359
-msgid "오류"
+msgid "⚠️ 녹화/캡처 절대 금지"
 msgstr ""
 
-#: accounts/templates/accounts/profile.html:355 templates/home.html:208
-msgid "게시물이 삭제되었습니다."
+msgid "상대방 동의 없이 비디오 녹화 또는 화면 캡처 금지"
 msgstr ""
 
-#: accounts/templates/accounts/profile.html:356
-msgid "삭제 실패"
+msgid "⚠️ 적절한 복장 필수"
 msgstr ""
 
-#: accounts/templates/accounts/profile.html:357
-msgid "서버 오류가 발생했습니다"
+msgid "공공장소에 적합한 복장 착용"
 msgstr ""
 
-#: accounts/templates/accounts/profile.html:358
-msgid "알 수 없는 오류"
+msgid "⚠️ 동의 없는 공유 금지"
 msgstr ""
 
-#: accounts/templates/accounts/profile.html:599
-#: templates/accounts/profile_update.html:149 templates/home.html:222
-#: templates/learning/chat.html:80
-msgid "검색 결과가 없습니다"
+msgid "비디오 내용을 제3자와 공유 금지"
 msgstr ""
 
-#: accounts/templates/accounts/register.html:5
-msgid "회원가입 - HypeHere"
+msgid "위반 시 즉시 영구 차단됩니다"
 msgstr ""
 
-#: accounts/templates/accounts/register.html:61
-msgid "HypeHere에 가입하여 언어 교환을 시작하세요"
+msgid "🏠 오픈 채팅방 (Open Chat Rooms)"
 msgstr ""
 
-#: accounts/templates/accounts/register.html:68
-msgid "기본 정보"
+msgid "방장 및 관리자가 설정한 방 규칙 준수"
 msgstr ""
 
-#: accounts/templates/accounts/register.html:72
-#: accounts/templates/accounts/settings.html:48
-msgid "언어 설정"
+msgid "참여자 수 제한 준수"
 msgstr ""
 
-#: accounts/templates/accounts/register.html:76
-msgid "관심사"
+msgid "방 주제와 관련된 대화 유지"
 msgstr ""
 
-#: accounts/templates/accounts/register.html:95
-msgid "4-20자의 영문, 숫자, 언더스코어만 사용 가능합니다."
+msgid "관리자의 정당한 요청 존중"
 msgstr ""
 
-#: accounts/templates/accounts/register.html:99
-msgid "이메일"
+msgid "제4장: 신고 시스템"
 msgstr ""
 
-#: accounts/templates/accounts/register.html:105
-msgid "이메일을 입력하세요"
+msgid "제6조 (신고 방법)"
 msgstr ""
 
-#: accounts/templates/accounts/register.html:120
-msgid "최소 8자 이상, 영문과 숫자를 포함해야 합니다."
+msgid "부적절한 행위를 발견하면 다음과 같이 신고할 수 있습니다:"
 msgstr ""
 
-#: accounts/templates/accounts/register.html:124
-#: templates/accounts/register.html:116
-msgid "비밀번호 확인"
+msgid "게시물/댓글 신고"
 msgstr ""
 
-#: accounts/templates/accounts/register.html:130
-#: templates/accounts/register.html:122
-msgid "비밀번호를 다시 입력하세요"
+msgid "해당 게시물이나 댓글의 신고 버튼 클릭"
 msgstr ""
 
-#: accounts/templates/accounts/register.html:138
+msgid "채팅 신고"
+msgstr ""
+
+msgid "채팅 내용 캡처와 함께 신고 (증거 자료 제출)"
+msgstr ""
+
+msgid "사용자 프로필에서 신고 옵션 선택"
+msgstr ""
+
+msgid "신고 시 다음 정보를 포함해 주세요:"
+msgstr ""
+
+msgid "위반 유형 (혐오 발언, 괴롭힘, 스팸 등)"
+msgstr ""
+
+msgid "구체적인 위반 내용 설명"
+msgstr ""
+
+msgid "증거 자료 (스크린샷, 메시지 내용 등)"
+msgstr ""
+
+msgid "제7조 (신고 처리 절차)"
+msgstr ""
+
+msgid "신고 접수 후 다음 절차로 처리됩니다:"
+msgstr ""
+
+msgid "접수 확인"
+msgstr ""
+
+msgid "신고 즉시 확인 (24시간 이내)"
+msgstr ""
+
+msgid "조사"
+msgstr ""
+
+msgid "관리자가 증거 검토 및 조사 (1-3일)"
+msgstr ""
+
+msgid "결정"
+msgstr ""
+
+msgid "위반 여부 판단 및 조치 결정"
+msgstr ""
+
+msgid "통지"
+msgstr ""
+
+msgid "신고자 및 피신고자에게 결과 통보"
+msgstr ""
+
+msgid "모니터링"
+msgstr ""
+
+msgid "재발 방지를 위한 지속적 모니터링"
+msgstr ""
+
+msgid "긴급한 경우 (폭력 위협, 불법 행위 등) 즉시 처리됩니다."
+msgstr ""
+
+msgid "제5장: 제재 조치"
+msgstr ""
+
+msgid "제8조 (단계별 제재 시스템)"
+msgstr ""
+
+msgid "위반의 심각성과 빈도에 따라 다음과 같이 조치됩니다:"
+msgstr ""
+
+msgid "1차 위반: 경고"
+msgstr ""
+
+msgid "콘텐츠 삭제"
+msgstr ""
+
+msgid "경고 메시지 전송"
+msgstr ""
+
+msgid "커뮤니티 가이드라인 재확인 요청"
+msgstr ""
+
+msgid "2차 위반: 7일 정지"
+msgstr ""
+
+msgid "계정 일시 정지 (7일)"
+msgstr ""
+
+msgid "모든 기능 사용 제한"
+msgstr ""
+
+msgid "정지 사유 및 기간 통보"
+msgstr ""
+
+msgid "3차 위반: 30일 정지"
+msgstr ""
+
+msgid "계정 일시 정지 (30일)"
+msgstr ""
+
+msgid "추가 위반 시 영구 차단 경고"
+msgstr ""
+
+msgid "4차 이상 / 중대한 위반: 영구 차단"
+msgstr ""
+
+msgid "계정 영구 정지"
+msgstr ""
+
+msgid "모든 콘텐츠 및 데이터 삭제"
+msgstr ""
+
+msgid "재가입 불가"
+msgstr ""
+
+msgid "⚠️ 즉시 영구 차단되는 경우:"
+msgstr ""
+
+msgid "성희롱 또는 성적 착취"
+msgstr ""
+
+msgid "불법 콘텐츠 게시 (아동 학대, 마약 등)"
+msgstr ""
+
+msgid "폭력 위협 또는 테러 조장"
+msgstr ""
+
+msgid "계정 해킹 또는 사기 행위"
+msgstr ""
+
+msgid "반복적인 괴롭힘"
+msgstr ""
+
+msgid "제9조 (이의제기 절차)"
+msgstr ""
+
+msgid "제재 조치에 이의가 있는 경우 다음 절차를 따를 수 있습니다:"
+msgstr ""
+
+msgid "이의제기 기간"
+msgstr ""
+
+msgid "조치 통보일로부터 14일 이내"
+msgstr ""
+
+msgid "제출 방법"
+msgstr ""
+
+msgid "고객지원을 통해 상세한 사유와 증거 제출"
+msgstr ""
+
+msgid "재검토"
+msgstr ""
+
+msgid "다른 관리자가 독립적으로 재검토"
+msgstr ""
+
+msgid "최종 결정"
+msgstr ""
+
+msgid "재검토 결과 통보 (7일 이내)"
+msgstr ""
+
+msgid "최종 결정 이후에는 추가 이의제기가 불가능합니다."
+msgstr ""
+
+msgid "제6장: 특별 보호 정책"
+msgstr ""
+
+msgid "제10조 (개인정보 보호 및 도싱 방지)"
+msgstr ""
+
+msgid ""
+"타인의 개인정보를 동의 없이 공개하는 '도싱(Doxing)'은 엄격히 금지됩니다:"
+msgstr ""
+
+msgid "실명, 주소, 전화번호, 이메일 등 개인 식별 정보"
+msgstr ""
+
+msgid "사진, 영상 등 개인 이미지"
+msgstr ""
+
+msgid "소셜 미디어 계정 또는 기타 온라인 프로필"
+msgstr ""
+
+msgid "위반 시 즉시 영구 차단됩니다."
+msgstr ""
+
+msgid "제11조 (문화적 민감성 및 언어 학습 맥락)"
+msgstr ""
+
+msgid "HypeHere는 언어 학습 플랫폼으로서 다음을 권장합니다:"
+msgstr ""
+
+msgid "문화적 차이를 인정하고 존중"
+msgstr ""
+
+msgid "언어 실수에 대해 인내심 갖기"
+msgstr ""
+
+msgid "건설적인 피드백 제공"
+msgstr ""
+
+msgid "다양한 학습 수준을 고려한 소통"
+msgstr ""
+
+msgid "제7장: 회사의 권리"
+msgstr ""
+
+msgid "제12조 (콘텐츠 관리 권한)"
+msgstr ""
+
+msgid "HypeHere는 다음 권한을 보유합니다:"
+msgstr ""
+
+msgid "사전 통지 없이 위반 콘텐츠를 삭제하거나 수정할 권리"
+msgstr ""
+
+msgid "필요한 경우 사용자 계정을 일시 정지하거나 영구 차단할 권리"
+msgstr ""
+
+msgid "법 집행 기관과 협력하여 불법 행위를 조사할 권리"
+msgstr ""
+
+msgid "제13조 (가이드라인 업데이트)"
+msgstr ""
+
+msgid ""
+"본 커뮤니티 가이드라인은 서비스 개선 및 법률 변경에 따라 수정될 수 있습니다. "
+"중요한 변경 사항이 있는 경우 공지사항을 통해 사전 안내합니다."
+msgstr ""
+
+msgid "제14조 (법 집행 기관 협력)"
+msgstr ""
+
+msgid "불법 행위가 확인되는 경우 관련 법률에 따라 법 집행 기관에 협조합니다:"
+msgstr ""
+
+msgid "아동 학대 또는 착취"
+msgstr ""
+
+msgid "테러 또는 폭력 위협"
+msgstr ""
+
+msgid "마약 거래 또는 기타 불법 활동"
+msgstr ""
+
+msgid "사기 또는 금융 범죄"
+msgstr ""
+
+msgid "맺음말"
+msgstr ""
+
+msgid ""
+"HypeHere 커뮤니티의 일원이 되어주셔서 감사합니다. 우리 모두가 이 가이드라인"
+"을 준수함으로써 안전하고 긍정적인 학습 환경을 만들어갈 수 있습니다."
+msgstr ""
+
+msgid "궁금한 사항이 있으시면 고객지원팀에 문의해 주세요."
+msgstr ""
+
+msgid "관련 문서"
+msgstr ""
+
 msgid "이용약관"
 msgstr ""
 
-#: accounts/templates/accounts/register.html:138
-msgid "및"
-msgstr ""
-
-#: accounts/templates/accounts/register.html:139
 msgid "개인정보처리방침"
 msgstr ""
 
-#: accounts/templates/accounts/register.html:139
-msgid "에 동의합니다"
+msgid "쿠키 정책"
 msgstr ""
 
-#: accounts/templates/accounts/register.html:144
-msgid "다음 단계"
-msgstr ""
-
-#: accounts/templates/accounts/register.html:150
-#: templates/accounts/register.html:156
-msgid "이미 계정이 있으신가요?"
-msgstr ""
-
-#: accounts/templates/accounts/report_history.html:5
-msgid "신고 내역 - HypeHere"
-msgstr ""
-
-#: accounts/templates/accounts/report_history.html:21
-#: accounts/templates/accounts/settings.html:87
-msgid "신고 내역"
-msgstr ""
-
-#: accounts/templates/accounts/report_history.html:34
-msgid "필터"
-msgstr ""
-
-#: accounts/templates/accounts/report_history.html:52
-msgid "채팅"
-msgstr ""
-
-#: accounts/templates/accounts/report_history.html:78
-#: accounts/templates/accounts/report_history.html:147
-#: accounts/templates/accounts/report_history.html:216
-msgid " 전"
-msgstr ""
-
-#: accounts/templates/accounts/report_history.html:102
-#: accounts/templates/accounts/report_history.html:171
-#: accounts/templates/accounts/report_history.html:438
-msgid "게시물 보기"
-msgstr ""
-
-#: accounts/templates/accounts/report_history.html:106
-#: accounts/templates/accounts/report_history.html:175
-#: accounts/templates/accounts/report_history.html:231
-#: accounts/templates/accounts/report_history.html:283
-#: accounts/templates/accounts/report_history.html:436
-msgid "삭제 처리"
-msgstr ""
-
-#: accounts/templates/accounts/report_history.html:109
-#: accounts/templates/accounts/report_history.html:178
-#: accounts/templates/accounts/report_history.html:234
-#: accounts/templates/accounts/report_history.html:320
-#: accounts/templates/accounts/report_history.html:437
-msgid "신고 기각"
-msgstr ""
-
-#: accounts/templates/accounts/report_history.html:120
-msgid "게시물 신고 내역이 없습니다"
-msgstr ""
-
-#: accounts/templates/accounts/report_history.html:121
-msgid "아직 신고한 게시물이 없습니다"
-msgstr ""
-
-#: accounts/templates/accounts/report_history.html:189
-msgid "댓글 신고 내역이 없습니다"
-msgstr ""
-
-#: accounts/templates/accounts/report_history.html:190
-msgid "아직 신고한 댓글이 없습니다"
-msgstr ""
-
-#: accounts/templates/accounts/report_history.html:245
-msgid "채팅 신고 내역이 없습니다"
-msgstr ""
-
-#: accounts/templates/accounts/report_history.html:246
-msgid "아직 신고한 채팅이 없습니다"
-msgstr ""
-
-#: accounts/templates/accounts/report_history.html:255
-msgid "게시물 삭제 확인"
-msgstr ""
-
-#: accounts/templates/accounts/report_history.html:272 templates/home.html:207
-#: templates/partials/post_delete_modal.html:15
-msgid "정말로 이 게시물을 삭제하시겠습니까?"
-msgstr ""
-
-#: accounts/templates/accounts/report_history.html:273
-#: accounts/templates/accounts/report_history.html:311
-msgid "이 작업은 다음을 수행합니다:"
-msgstr ""
-
-#: accounts/templates/accounts/report_history.html:275
-msgid "게시물 내용을 \\'신고로 삭제됨\\' 메시지로 변경"
-msgstr ""
-
-#: accounts/templates/accounts/report_history.html:276
-msgid "신고 상태를 \\'처리완료\\'로 변경"
-msgstr ""
-
-#: accounts/templates/accounts/report_history.html:277
-msgid "사용자의 신고 누적 횟수 증가"
-msgstr ""
-
-#: accounts/templates/accounts/report_history.html:278
-#: accounts/templates/accounts/report_history.html:315
-msgid "작성자와 신고자에게 알림 전송"
-msgstr ""
-
-#: accounts/templates/accounts/report_history.html:293
-msgid "신고 기각 확인"
-msgstr ""
-
-#: accounts/templates/accounts/report_history.html:310
-msgid "이 신고를 기각하시겠습니까?"
-msgstr ""
-
-#: accounts/templates/accounts/report_history.html:313
-msgid "신고 상태를 \\'기각\\'으로 변경"
-msgstr ""
-
-#: accounts/templates/accounts/report_history.html:314
-msgid "필요시 사용자의 신고 누적 횟수 감소"
-msgstr ""
-
-#: accounts/templates/accounts/report_history.html:330
-msgid "필터 및 검색"
-msgstr ""
-
-#: accounts/templates/accounts/report_history.html:336
-#: accounts/templates/accounts/support/list.html:58
-msgid "검색"
-msgstr ""
-
-#: accounts/templates/accounts/report_history.html:337
-msgid "사용자 닉네임, 내용으로 검색..."
-msgstr ""
-
-#: accounts/templates/accounts/report_history.html:346
-#: accounts/templates/accounts/report_history.html:369
-#: accounts/templates/accounts/report_history.html:400
-#: accounts/templates/accounts/support/list.html:27
-#: templates/learning/matching.html:60 templates/learning/matching.html:64
-#: templates/learning/matching.html:294
-msgid "전체"
-msgstr ""
-
-#: accounts/templates/accounts/report_history.html:354
-msgid "처리 완료"
-msgstr ""
-
-#: accounts/templates/accounts/report_history.html:358
-msgid "기각"
-msgstr ""
-
-#: accounts/templates/accounts/report_history.html:365
-#: templates/learning/matching.html:248
-#: templates/partials/message_report_modal.html:20
-#: templates/partials/post_report_modal.html:20
-msgid "신고 유형"
-msgstr ""
-
-#: accounts/templates/accounts/report_history.html:373 posts/models.py:143
-#: posts/models.py:280 posts/models.py:351 templates/learning/matching.html:251
-#: templates/partials/message_report_modal.html:28
-#: templates/partials/post_report_modal.html:28
-msgid "욕설/비방"
-msgstr ""
-
-#: accounts/templates/accounts/report_history.html:377 posts/models.py:144
-#: posts/models.py:281 posts/models.py:352 templates/learning/matching.html:252
-#: templates/partials/message_report_modal.html:35
-#: templates/partials/post_report_modal.html:35
-msgid "스팸/광고"
-msgstr ""
-
-#: accounts/templates/accounts/report_history.html:381 posts/models.py:145
-#: posts/models.py:282 posts/models.py:353 templates/learning/matching.html:253
-#: templates/partials/message_report_modal.html:43
-#: templates/partials/post_report_modal.html:43
-msgid "부적절한 내용"
-msgstr ""
-
-#: accounts/templates/accounts/report_history.html:385 posts/models.py:146
-#: posts/models.py:283 posts/models.py:354 templates/learning/matching.html:254
-#: templates/partials/message_report_modal.html:50
-#: templates/partials/post_report_modal.html:50
-msgid "성희롱"
-msgstr ""
-
-#: accounts/templates/accounts/report_history.html:396
-msgid "기간"
-msgstr ""
-
-#: accounts/templates/accounts/report_history.html:404
-msgid "오늘"
-msgstr ""
-
-#: accounts/templates/accounts/report_history.html:408
-msgid "최근 7일"
-msgstr ""
-
-#: accounts/templates/accounts/report_history.html:412
-msgid "최근 30일"
-msgstr ""
-
-#: accounts/templates/accounts/report_history.html:418
-msgid "초기화"
-msgstr ""
-
-#: accounts/templates/accounts/report_history.html:419
-msgid "적용"
-msgstr ""
-
-#: accounts/templates/accounts/report_history.html:427
-msgid "신고 내역을 불러오는 중..."
-msgstr ""
-
-#: accounts/templates/accounts/report_history.html:439
-msgid "신고 내용:"
-msgstr ""
-
-#: accounts/templates/accounts/settings.html:5
-msgid "설정 - HypeHere"
-msgstr ""
-
-#: accounts/templates/accounts/settings.html:12 templates/base.html:109
-msgid "프로필"
-msgstr ""
-
-#: accounts/templates/accounts/settings.html:19
-msgid "내 프로필 보기"
-msgstr ""
-
-#: accounts/templates/accounts/settings.html:41
-msgid "계정"
-msgstr ""
-
-#: accounts/templates/accounts/settings.html:52
-#: accounts/templates/accounts/settings.html:56
-#: accounts/templates/accounts/settings.html:330 hypehere/settings.py:127
-#: templates/partials/sidebar.html:95
-msgid "한국어"
-msgstr ""
-
-#: accounts/templates/accounts/settings.html:110
-msgid "개인정보"
-msgstr ""
-
-#: accounts/templates/accounts/settings.html:128
-#: accounts/templates/accounts/support/detail.html:5
 msgid "고객지원"
 msgstr ""
 
-#: accounts/templates/accounts/settings.html:141
+msgid "최종 수정일"
+msgstr ""
+
+msgid ""
+"HypeHere는 귀하의 개인정보를 소중히 여기며, 쿠키 사용에 대해 투명하게 공개합"
+"니다. 본 쿠키 정책은 HypeHere 서비스에서 사용하는 쿠키와 유사 기술에 대해 설"
+"명합니다."
+msgstr ""
+
+msgid "제1장: 쿠키의 이해"
+msgstr ""
+
+msgid "제1조 (쿠키란 무엇인가)"
+msgstr ""
+
+msgid ""
+"쿠키는 웹사이트가 귀하의 브라우저를 통해 컴퓨터나 모바일 기기에 저장하는 작"
+"은 텍스트 파일입니다. 쿠키는 웹사이트가 귀하의 방문 기록을 기억하고, 보다 나"
+"은 사용자 경험을 제공하는 데 도움을 줍니다."
+msgstr ""
+
+msgid "쿠키는 귀하의 기기를 식별하는 고유 식별자를 포함할 수 있습니다"
+msgstr ""
+
+msgid ""
+"쿠키는 귀하를 개인적으로 식별하지 않으며, 귀하의 이름이나 이메일 주소를 포함"
+"하지 않습니다"
+msgstr ""
+
+msgid "쿠키는 악성 소프트웨어가 아니며, 귀하의 기기를 손상시키지 않습니다"
+msgstr ""
+
+msgid "제2조 (HypeHere의 쿠키 사용 목적)"
+msgstr ""
+
+msgid "HypeHere는 다음과 같은 목적으로 쿠키를 사용합니다:"
+msgstr ""
+
+msgid "서비스 제공"
+msgstr ""
+
+msgid "로그인 상태 유지, 세션 관리"
+msgstr ""
+
+msgid "사용자 경험 개선"
+msgstr ""
+
+msgid "언어 설정, 사용자 선호도 저장"
+msgstr ""
+
+msgid "보안"
+msgstr ""
+
+msgid "CSRF 공격 방지, 계정 보안"
+msgstr ""
+
+msgid "서비스 분석"
+msgstr ""
+
+msgid "서비스 사용 패턴 분석 및 개선"
+msgstr ""
+
+msgid "제2장: 쿠키의 종류 및 사용 목적"
+msgstr ""
+
+msgid "제3조 (사용하는 쿠키의 종류)"
+msgstr ""
+
+msgid "1. 필수 쿠키 (Essential Cookies)"
+msgstr ""
+
+msgid ""
+"서비스 제공에 필수적인 쿠키로, 거부 시 서비스 이용이 제한될 수 있습니다."
+msgstr ""
+
+msgid "쿠키 이름"
+msgstr ""
+
+msgid "목적"
+msgstr ""
+
+msgid "유효기간"
+msgstr ""
+
+msgid "로그인 세션 유지, 사용자 인증 상태 관리"
+msgstr ""
+
+msgid "브라우저 종료 시"
+msgstr ""
+
+msgid "크로스 사이트 요청 위조(CSRF) 공격 방지"
+msgstr ""
+
+msgid "1년"
+msgstr ""
+
+msgid "사용자 언어 설정 저장"
+msgstr ""
+
+msgid "2. 기능 쿠키 (Functional Cookies)"
+msgstr ""
+
+msgid ""
+"사용자 경험을 향상시키는 쿠키로, 거부 가능하나 일부 기능이 제한될 수 있습니"
+"다."
+msgstr ""
+
+msgid "사용자 선호도"
+msgstr ""
+
+msgid "테마 설정, 화면 표시 옵션"
+msgstr ""
+
+msgid "자동 로그인"
+msgstr ""
+
+msgid "'로그인 상태 유지' 기능"
+msgstr ""
+
+msgid "3. 분석 쿠키 (Analytics Cookies)"
+msgstr ""
+
+msgid ""
+"서비스 사용 통계 수집을 위한 쿠키로, 서비스 개선에 활용됩니다. 개인을 식별하"
+"지 않으며, 익명화된 통계 데이터만 수집합니다."
+msgstr ""
+
+msgid "페이지 방문 횟수 및 사용 패턴"
+msgstr ""
+
+msgid "기능 사용 빈도"
+msgstr ""
+
+msgid "서비스 성능 및 오류 추적"
+msgstr ""
+
+msgid "제3장: 쿠키 관리 방법"
+msgstr ""
+
+msgid "제4조 (쿠키 설정 및 거부)"
+msgstr ""
+
+msgid ""
+"귀하는 언제든지 브라우저 설정을 통해 쿠키를 관리할 수 있습니다. 다만, 필수 쿠"
+"키를 거부하시는 경우 서비스 이용이 제한될 수 있습니다."
+msgstr ""
+
+msgid "브라우저별 쿠키 설정 방법"
+msgstr ""
+
+msgid "Google Chrome"
+msgstr ""
+
+msgid "브라우저 우측 상단의 '설정' 메뉴(⋮) 클릭"
+msgstr ""
+
+msgid "'개인정보 및 보안' → '쿠키 및 기타 사이트 데이터' 선택"
+msgstr ""
+
+msgid ""
+"원하는 옵션 선택 (모든 쿠키 허용/차단, 시크릿 모드에서만 타사 쿠키 차단 등)"
+msgstr ""
+
+msgid "Mozilla Firefox"
+msgstr ""
+
+msgid "브라우저 우측 상단의 '설정' 메뉴(☰) 클릭"
+msgstr ""
+
+msgid "'개인정보 및 보안' 선택"
+msgstr ""
+
+msgid "'쿠키 및 사이트 데이터' 섹션에서 설정 변경"
+msgstr ""
+
+msgid "Safari"
+msgstr ""
+
+msgid "'Safari' → '환경설정' 메뉴 선택"
+msgstr ""
+
+msgid "'개인정보 보호' 탭 클릭"
+msgstr ""
+
+msgid "'쿠키 및 웹 사이트 데이터' 섹션에서 설정 변경"
+msgstr ""
+
+msgid "Microsoft Edge"
+msgstr ""
+
+msgid "브라우저 우측 상단의 '설정' 메뉴(...) 클릭"
+msgstr ""
+
+msgid "'개인정보, 검색 및 서비스' 선택"
+msgstr ""
+
+msgid "'쿠키 및 사이트 권한' → '쿠키 및 사이트 데이터' 선택"
+msgstr ""
+
+msgid "모바일 기기"
+msgstr ""
+
+msgid "iOS"
+msgstr ""
+
+msgid "설정 → Safari → 개인정보 보호 및 보안 → 모든 쿠키 차단"
+msgstr ""
+
+msgid "Android"
+msgstr ""
+
+msgid "브라우저 앱 설정 → 사이트 설정 → 쿠키 → 쿠키 허용 여부 선택"
+msgstr ""
+
+msgid "⚠️ 주의"
+msgstr ""
+
+msgid "쿠키를 차단하시는 경우 다음과 같은 기능이 제한될 수 있습니다:"
+msgstr ""
+
+msgid "자동 로그인 및 세션 유지 불가"
+msgstr ""
+
+msgid "언어 설정 등 사용자 선호도 저장 불가"
+msgstr ""
+
+msgid "일부 서비스 이용 제한"
+msgstr ""
+
+msgid "제4장: 제3자 쿠키"
+msgstr ""
+
+msgid "제5조 (제3자 서비스)"
+msgstr ""
+
+msgid ""
+"HypeHere는 서비스 제공을 위해 다음과 같은 제3자 서비스를 이용할 수 있으며, 해"
+"당 서비스들은 자체 쿠키 정책을 적용합니다:"
+msgstr ""
+
+msgid "AWS (Amazon Web Services)"
+msgstr ""
+
+msgid "클라우드 호스팅 및 서비스 제공"
+msgstr ""
+
+msgid "Redis"
+msgstr ""
+
+msgid "세션 및 캐시 관리"
+msgstr ""
+
+msgid ""
+"제3자 서비스의 쿠키 정책은 해당 서비스 제공자의 웹사이트에서 확인하실 수 있습"
+"니다."
+msgstr ""
+
+msgid "제5장: 개인정보 보호"
+msgstr ""
+
+msgid "제6조 (개인정보보호법 준수)"
+msgstr ""
+
+msgid ""
+"HypeHere의 쿠키 사용은 대한민국 개인정보보호법 제30조 제1항 제7호에 따라 다음"
+"을 준수합니다:"
+msgstr ""
+
+msgid "쿠키의 설치 및 작동 방식 공개"
+msgstr ""
+
+msgid "쿠키를 통한 개인정보 수집 사실 고지"
+msgstr ""
+
+msgid "쿠키 거부 방법 안내"
+msgstr ""
+
+msgid "필수가 아닌 쿠키에 대한 사용자 동의 획득"
+msgstr ""
+
+msgid "제7조 (사용자의 권리)"
+msgstr ""
+
+msgid "귀하는 다음과 같은 권리를 보유합니다:"
+msgstr ""
+
+msgid "쿠키 허용 또는 거부 선택권"
+msgstr ""
+
+msgid "저장된 쿠키의 삭제 요청"
+msgstr ""
+
+msgid "쿠키를 통해 수집된 정보에 대한 열람 및 정정 요구권"
+msgstr ""
+
+msgid "쿠키 처리에 대한 동의 철회권"
+msgstr ""
+
+msgid "쿠키 관련 문의사항은 고객지원을 통해 연락주시기 바랍니다."
+msgstr ""
+
+msgid "제8조 (정책 변경)"
+msgstr ""
+
+msgid ""
+"본 쿠키 정책은 관련 법령 및 서비스 정책 변경에 따라 수정될 수 있습니다. 중요"
+"한 변경 사항이 있는 경우 서비스 공지사항을 통해 사전 고지하며, 변경된 정책은 "
+"공지 후 7일 이후부터 효력이 발생합니다."
+msgstr ""
+
+msgid "정책이 변경되는 경우 변경 사유 및 내용을 명시하여 공지하겠습니다."
+msgstr ""
+
+msgid "시행일자: 2025년 1월 1일"
+msgstr ""
+
+msgid "제1장 개인정보의 수집 및 이용 목적"
+msgstr ""
+
+msgid "제1조 (개인정보 처리의 원칙)"
+msgstr ""
+
+msgid ""
+"HypeHere(이하 '회사')는 개인정보 보호법 등 관련 법령상의 개인정보 보호 규정"
+"을 준수하며, 이용자의 개인정보를 다음과 같은 목적으로 수집 및 이용합니다:"
+msgstr ""
+
+msgid ""
+"회원 가입 및 관리: 회원 가입 의사 확인, 회원제 서비스 제공, 본인 확인, 부정 "
+"이용 방지"
+msgstr ""
+
+msgid ""
+"서비스 제공: 언어 학습 서비스, 게시물 작성 및 관리, 실시간 채팅 서비스 제공"
+msgstr ""
+
+msgid ""
+"콘텐츠 제공: 맞춤형 학습 콘텐츠 추천, 학습 진도 관리, 언어 교환 파트너 매칭"
+msgstr ""
+
+msgid ""
+"서비스 개선: 신규 서비스 개발, 서비스 품질 향상, 통계학적 특성에 따른 서비스 "
+"제공"
+msgstr ""
+
+msgid "제2조 (처리하는 개인정보 항목)"
+msgstr ""
+
+msgid ""
+"회사는 회원가입 및 서비스 이용을 위해 다음과 같은 개인정보를 수집하고 있습니"
+"다:"
+msgstr ""
+
+msgid "필수 수집 항목:"
+msgstr ""
+
+msgid "이메일 주소 (로그인 ID로 사용)"
+msgstr ""
+
+msgid "닉네임 (표시 이름, 중복 가능)"
+msgstr ""
+
+msgid "비밀번호 (암호화하여 저장)"
+msgstr ""
+
+msgid "선택 수집 항목:"
+msgstr ""
+
+msgid "프로필 사진"
+msgstr ""
+
+msgid "성별"
+msgstr ""
+
+msgid "국가"
+msgstr ""
+
+msgid "모국어 및 학습 목표 언어"
+msgstr ""
+
+msgid "자기소개"
+msgstr ""
+
+msgid "서비스 이용 과정에서 자동으로 생성·수집되는 정보:"
+msgstr ""
+
+msgid "서비스 이용 기록: 접속 로그, 쿠키, 접속 IP 정보"
+msgstr ""
+
+msgid "생성 콘텐츠: 게시물, 댓글, 좋아요, 팔로우 정보"
+msgstr ""
+
+msgid "채팅 메시지: 일반 채팅 메시지 (익명 채팅은 저장되지 않음)"
+msgstr ""
+
+msgid "학습 기록: 학습 진도, 선호 학습 방식"
+msgstr ""
+
+msgid "제2장 개인정보의 보유 및 이용기간"
+msgstr ""
+
+msgid "제3조 (개인정보 보유기간)"
+msgstr ""
+
+msgid "회사는 이용자의 개인정보를 다음과 같이 보유 및 이용합니다:"
+msgstr ""
+
+msgid "항목"
+msgstr ""
+
+msgid "보유기간"
+msgstr ""
+
+msgid "비고"
+msgstr ""
+
+msgid "회원정보"
+msgstr ""
+
+msgid "회원 탈퇴 시까지"
+msgstr ""
+
+msgid "탈퇴 요청 후 30일 유예기간"
+msgstr ""
+
+msgid "게시물·댓글"
+msgstr ""
+
+msgid "삭제 요청 시까지"
+msgstr ""
+
+msgid "신고된 게시물은 원본 보존"
+msgstr ""
+
+msgid "일반 채팅 메시지"
+msgstr ""
+
+msgid "대화방 유지 기간"
+msgstr ""
+
+msgid "대화방 퇴장 시 개인별 삭제"
+msgstr ""
+
+msgid "익명 채팅 메시지"
+msgstr ""
+
+msgid "즉시 삭제"
+msgstr ""
+
+msgid "데이터베이스에 저장되지 않음"
+msgstr ""
+
+msgid "접속 로그"
+msgstr ""
+
+msgid "3개월"
+msgstr ""
+
+msgid "통신비밀보호법 준수"
+msgstr ""
+
+msgid ""
+"다만, 관계 법령에 따라 보존할 필요가 있는 경우 해당 법령에서 정한 기간 동안 "
+"개인정보를 보관합니다:"
+msgstr ""
+
+msgid "표시·광고에 관한 기록: 6개월 (전자상거래법)"
+msgstr ""
+
+msgid "계약 또는 청약철회 기록: 5년 (전자상거래법)"
+msgstr ""
+
+msgid "소비자 불만 또는 분쟁처리 기록: 3년 (전자상거래법)"
+msgstr ""
+
+msgid "접속 로그 기록: 3개월 (통신비밀보호법)"
+msgstr ""
+
+msgid "제4조 (계정 비활성화 및 삭제)"
+msgstr ""
+
+msgid "회원은 다음과 같은 방법으로 계정을 관리할 수 있습니다:"
+msgstr ""
+
+msgid "비활성화:"
+msgstr ""
+
+msgid "일시적으로 계정을 중단할 수 있으며, 30일 이내 재활성화 가능"
+msgstr ""
+
+msgid "탈퇴:"
+msgstr ""
+
+msgid "탈퇴 요청 후 30일 유예기간이 부여되며, 유예기간 동안 복구 가능"
+msgstr ""
+
+msgid "완전 삭제:"
+msgstr ""
+
+msgid "30일 유예기간 경과 후 모든 개인정보가 영구 삭제됨"
+msgstr ""
+
+msgid "주의사항:"
+msgstr ""
+
+msgid ""
+"계정 삭제 시 작성한 게시물 및 댓글은 자동으로 삭제되지 않으며, 개별적으로 삭"
+"제하셔야 합니다. 삭제를 원하지 않는 게시물은 '익명' 처리됩니다."
+msgstr ""
+
+msgid "제3장 개인정보의 제3자 제공 및 처리위탁"
+msgstr ""
+
+msgid "제5조 (개인정보의 제3자 제공)"
+msgstr ""
+
+msgid ""
+"회사는 원칙적으로 이용자의 개인정보를 제3자에게 제공하지 않습니다. 다만, 다음"
+"의 경우에는 예외로 합니다:"
+msgstr ""
+
+msgid "이용자가 사전에 동의한 경우"
+msgstr ""
+
+msgid ""
+"법령의 규정에 의거하거나, 수사 목적으로 법령에 정해진 절차와 방법에 따라 수사"
+"기관의 요구가 있는 경우"
+msgstr ""
+
+msgid "제6조 (개인정보 처리위탁)"
+msgstr ""
+
+msgid ""
+"회사는 서비스 향상을 위해 다음과 같이 개인정보 처리업무를 외부 전문업체에 위"
+"탁하여 운영하고 있습니다:"
+msgstr ""
+
+msgid "수탁업체"
+msgstr ""
+
+msgid "위탁업무 내용"
+msgstr ""
+
+msgid "Amazon Web Services (AWS)"
+msgstr ""
+
+msgid "클라우드 서버 호스팅, 데이터 저장"
+msgstr ""
+
+msgid ""
+"위탁 계약 시 개인정보보호 관련 법규의 준수, 개인정보에 관한 비밀유지, 제3자 "
+"제공 금지 및 사고 시 책임부담 등을 명확히 규정하고 있습니다."
+msgstr ""
+
+msgid "제4장 개인정보의 안전성 확보조치"
+msgstr ""
+
+msgid "제7조 (기술적 보호조치)"
+msgstr ""
+
+msgid ""
+"회사는 개인정보의 안전성 확보를 위해 다음과 같은 기술적 조치를 취하고 있습니"
+"다:"
+msgstr ""
+
+msgid "비밀번호 암호화:"
+msgstr ""
+
+msgid "Django의 기본 암호화 알고리즘(PBKDF2)을 사용하여 비밀번호를 암호화 저장"
+msgstr ""
+
+msgid "HTTPS 통신:"
+msgstr ""
+
+msgid "모든 개인정보 전송 시 SSL/TLS 암호화 프로토콜 사용"
+msgstr ""
+
+msgid "접근 제어:"
+msgstr ""
+
+msgid "데이터베이스 및 개인정보 처리 시스템에 대한 접근 권한 관리"
+msgstr ""
+
+msgid "보안 프로그램:"
+msgstr ""
+
+msgid "백신 프로그램 및 방화벽 운영"
+msgstr ""
+
+msgid "제8조 (관리적 보호조치)"
+msgstr ""
+
+msgid ""
+"회사는 개인정보의 안전한 처리를 위해 다음과 같은 관리적 조치를 시행하고 있습"
+"니다:"
+msgstr ""
+
+msgid "개인정보 취급자 최소화 및 교육"
+msgstr ""
+
+msgid "개인정보 처리 시스템 접근 권한 관리"
+msgstr ""
+
+msgid "접속 기록 보관 및 위·변조 방지"
+msgstr ""
+
+msgid "개인정보 보호 책임자 지정"
+msgstr ""
+
+msgid "제5장 이용자의 권리와 행사방법"
+msgstr ""
+
+msgid "제9조 (이용자의 권리)"
+msgstr ""
+
+msgid "이용자는 다음과 같은 권리를 행사할 수 있습니다:"
+msgstr ""
+
+msgid "열람권:"
+msgstr ""
+
+msgid "본인의 개인정보 열람 요구"
+msgstr ""
+
+msgid "정정권:"
+msgstr ""
+
+msgid "개인정보가 사실과 다를 경우 정정 요구"
+msgstr ""
+
+msgid "삭제권:"
+msgstr ""
+
+msgid "개인정보 삭제 요구"
+msgstr ""
+
+msgid "처리정지권:"
+msgstr ""
+
+msgid "개인정보 처리의 정지 요구"
+msgstr ""
+
+msgid "위 권리를 행사하고자 할 경우, 다음 방법으로 요청하실 수 있습니다:"
+msgstr ""
+
+msgid "계정 설정 메뉴를 통한 직접 수정"
+msgstr ""
+
+msgid "고객센터를 통한 요청"
+msgstr ""
+
+msgid "제10조 (자동화된 의사결정)"
+msgstr ""
+
+msgid "회사는 다음과 같은 자동화된 처리를 수행합니다:"
+msgstr ""
+
+msgid "언어 교환 파트너 매칭:"
+msgstr ""
+
+msgid "학습 언어, 선호도, 활동 시간대 등을 기반으로 자동 추천"
+msgstr ""
+
+msgid "학습 콘텐츠 추천:"
+msgstr ""
+
+msgid "학습 진도 및 선호 학습 방식에 따른 맞춤형 콘텐츠 제공"
+msgstr ""
+
+msgid ""
+"이용자는 자동화된 의사결정에 대해 이의를 제기하거나 사람의 개입을 요구할 수 "
+"있습니다."
+msgstr ""
+
+msgid "제11조 (개인정보 보호책임자)"
+msgstr ""
+
+msgid ""
+"회사는 개인정보 처리에 관한 업무를 총괄해서 책임지고, 개인정보 처리와 관련한 "
+"정보주체의 불만처리 및 피해구제를 위하여 아래와 같이 개인정보 보호책임자를 지"
+"정하고 있습니다:"
+msgstr ""
+
+msgid "개인정보 보호책임자"
+msgstr ""
+
+msgid "이름: HypeHere 운영팀"
+msgstr ""
+
+msgid "연락처: 고객센터 문의"
+msgstr ""
+
+msgid "제12조 (개인정보 처리방침 변경)"
+msgstr ""
+
+msgid ""
+"이 개인정보 처리방침은 법령, 정책 또는 보안기술의 변경에 따라 내용이 추가, 삭"
+"제 및 수정될 수 있으며, 변경 시 최소 7일 전에 서비스 내 공지사항을 통해 고지"
+"할 것입니다."
+msgstr ""
+
+msgid ""
+"다만, 수집하는 개인정보의 항목, 이용목적의 변경 등과 같이 이용자 권리의 중대"
+"한 변경이 발생할 때에는 최소 30일 전에 고지합니다."
+msgstr ""
+
+msgid "본 개인정보처리방침은 2025년 1월 1일부터 적용됩니다."
+msgstr ""
+
+msgid "HypeHere 서비스 이용약관"
+msgstr ""
+
+msgid "시행일: 2025년 1월 1일"
+msgstr ""
+
+msgid "최종 수정일: 2025년 1월 1일"
+msgstr ""
+
+msgid "제1장 총칙"
+msgstr ""
+
+msgid "제1조 (목적)"
+msgstr ""
+
+msgid ""
+"본 약관은 HypeHere(이하 '회사')가 제공하는 언어 학습 소셜 플랫폼 서비스(이하 "
+"'서비스')의 이용과 관련하여 회사와 회원 간의 권리, 의무 및 책임사항, 기타 필"
+"요한 사항을 규정함을 목적으로 합니다."
+msgstr ""
+
+msgid "제2조 (용어의 정의)"
+msgstr ""
+
+msgid "본 약관에서 사용하는 용어의 정의는 다음과 같습니다:"
+msgstr ""
+
+msgid ""
+"'서비스'란 회사가 제공하는 언어 학습 커뮤니티, 게시물 공유, 실시간 채팅, 익"
+"명 채팅, 비디오 채팅 등의 모든 서비스를 의미합니다."
+msgstr ""
+
+msgid ""
+"'회원'이란 본 약관에 동의하고 회사와 이용계약을 체결하여 서비스를 이용하는 자"
+"를 의미합니다."
+msgstr ""
+
+msgid ""
+"'아이디(ID)'란 회원의 식별과 서비스 이용을 위하여 회원이 등록한 이메일 주소"
+"를 의미합니다."
+msgstr ""
+
+msgid ""
+"'닉네임'이란 회원이 서비스 내에서 다른 회원에게 표시되는 이름을 의미합니다."
+msgstr ""
+
+msgid ""
+"'게시물'이란 회원이 서비스를 이용함에 있어 게시한 문자, 사진, 영상, 각종 파"
+"일 및 링크 등을 의미합니다."
+msgstr ""
+
+msgid ""
+"'익명 채팅'이란 회원의 신원이 노출되지 않은 상태로 진행되는 1:1 채팅 서비스"
+"를 의미합니다."
+msgstr ""
+
+msgid "제3조 (약관의 효력 및 변경)"
+msgstr ""
+
+msgid ""
+"본 약관은 서비스 화면에 게시하거나 기타의 방법으로 회원에게 공지함으로써 효력"
+"이 발생합니다."
+msgstr ""
+
+msgid ""
+"회사는 관련 법령을 위배하지 않는 범위에서 본 약관을 변경할 수 있으며, 약관이 "
+"변경되는 경우 변경사유 및 적용일자를 명시하여 적용일자 7일 전부터 공지합니다."
+msgstr ""
+
+msgid ""
+"회원은 변경된 약관에 동의하지 않을 경우 서비스 이용을 중단하고 회원 탈퇴를 요"
+"청할 수 있습니다."
+msgstr ""
+
+msgid "제4조 (약관 외 준칙)"
+msgstr ""
+
+msgid ""
+"본 약관에 명시되지 않은 사항은 정보통신망 이용촉진 및 정보보호 등에 관한 법"
+"률, 전기통신사업법, 개인정보보호법 등 관련 법령의 규정과 일반적인 상관례에 따"
+"릅니다."
+msgstr ""
+
+msgid "제2장 서비스 이용계약"
+msgstr ""
+
+msgid "제5조 (이용계약의 성립)"
+msgstr ""
+
+msgid ""
+"이용계약은 회원이 되고자 하는 자(이하 '가입신청자')가 본 약관의 내용에 대하"
+"여 동의를 한 다음 회원가입신청을 하고, 회사가 이를 승낙함으로써 체결됩니다."
+msgstr ""
+
+msgid ""
+"회사는 가입신청자의 신청에 대하여 승낙함을 원칙으로 합니다. 다만, 다음 각 호"
+"에 해당하는 경우 회사는 가입신청을 거부하거나 승낙을 유보할 수 있습니다."
+msgstr ""
+
+msgid "실명이 아니거나 타인의 명의를 이용한 경우"
+msgstr ""
+
+msgid "허위의 정보를 기재하거나, 회사가 제시하는 내용을 기재하지 않은 경우"
+msgstr ""
+
+msgid ""
+"이전에 회원자격을 상실한 적이 있는 경우 (단, 회사의 재가입 승낙을 얻은 경우 "
+"제외)"
+msgstr ""
+
+msgid ""
+"기타 회원으로 등록하는 것이 회사의 기술상 현저히 지장이 있다고 판단되는 경우"
+msgstr ""
+
+msgid "제6조 (회원가입)"
+msgstr ""
+
+msgid ""
+"가입신청자는 회사가 정한 가입 양식에 따라 회원정보를 기입한 후 본 약관에 동의"
+"한다는 의사표시를 함으로써 회원가입을 신청합니다."
+msgstr ""
+
+msgid ""
+"회원가입 시 이메일 주소가 아이디(ID)로 사용되며, 닉네임은 다른 회원에게 표시"
+"되는 이름으로 중복이 가능합니다."
+msgstr ""
+
+msgid "회원은 다음의 정보를 제공해야 합니다:"
+msgstr ""
+
+msgid "필수: 이메일, 닉네임, 비밀번호"
+msgstr ""
+
+msgid "선택: 성별, 국가, 화면 언어"
+msgstr ""
+
+msgid "제7조 (회원정보의 변경)"
+msgstr ""
+
+msgid ""
+"회원은 마이페이지 또는 회원정보 관리 화면을 통하여 언제든지 본인의 개인정보"
+"를 열람하고 수정할 수 있습니다."
+msgstr ""
+
+msgid ""
+"회원은 회원가입 신청 시 기재한 사항이 변경되었을 경우 온라인으로 수정하거나 "
+"회사에 그 변경사항을 알려야 합니다."
+msgstr ""
+
+msgid "제8조 (개인정보보호 의무)"
+msgstr ""
+
+msgid ""
+"회사는 관련 법령이 정하는 바에 따라 회원의 개인정보를 보호하기 위해 노력합니"
+"다. 회원의 개인정보 보호에 관해서는 관련 법령 및 회사가 별도로 정한 '개인정보"
+"처리방침'에 따릅니다."
+msgstr ""
+
+msgid "제9조 (회원의 아이디 및 비밀번호 관리 의무)"
+msgstr ""
+
+msgid ""
+"회원의 아이디(이메일)와 비밀번호에 관한 관리책임은 회원에게 있으며, 이를 제3"
+"자가 이용하도록 하여서는 안 됩니다."
+msgstr ""
+
+msgid ""
+"회사는 회원의 아이디가 개인정보 유출 우려가 있거나, 반사회적 또는 공서양속에 "
+"어긋나거나, 회사 및 회사의 운영자로 오인될 우려가 있는 경우, 해당 아이디의 이"
+"용을 제한할 수 있습니다."
+msgstr ""
+
+msgid ""
+"회원은 아이디 및 비밀번호가 도용되거나 제3자가 사용하고 있음을 인지한 경우 즉"
+"시 회사에 통보하고 회사의 안내에 따라야 합니다."
+msgstr ""
+
+msgid "제3장 서비스 제공 및 이용"
+msgstr ""
+
+msgid "제10조 (서비스의 내용)"
+msgstr ""
+
+msgid "회사가 제공하는 서비스는 다음과 같습니다:"
+msgstr ""
+
+msgid "언어 학습 커뮤니티 서비스: 게시물 작성, 댓글, 좋아요, 팔로우 기능"
+msgstr ""
+
+msgid "1:1 채팅 서비스: 일반 실시간 텍스트 채팅 및 비디오 채팅"
+msgstr ""
+
+msgid "익명 채팅 서비스: 익명 매칭 기반 1:1 채팅 및 비디오 채팅"
+msgstr ""
+
+msgid "오픈 채팅방 서비스: 다수의 회원이 참여하는 그룹 채팅"
+msgstr ""
+
+msgid "학습 자료 제공 서비스: 언어 학습을 위한 표현, 어휘 등 학습 콘텐츠"
+msgstr ""
+
+msgid "알림 서비스: 메시지, 팔로우, 댓글, 좋아요 등의 실시간 알림"
+msgstr ""
+
+msgid ""
+"기타 회사가 추가 개발하거나 제휴계약 등을 통해 회원에게 제공하는 일체의 서비"
+"스"
+msgstr ""
+
+msgid "비디오 채팅 서비스 이용 시 주의사항"
+msgstr ""
+
+msgid ""
+"비디오 채팅은 WebRTC 기술을 사용하며, 영상 및 음성 데이터는 참여자 간 직접 전"
+"송됩니다. 회사는 비디오 채팅 내용을 저장하지 않으나, 회원은 타인의 영상을 녹"
+"화하거나 캡처하여 유포하는 행위를 해서는 안 됩니다."
+msgstr ""
+
+msgid "제11조 (서비스의 중단)"
+msgstr ""
+
+msgid ""
+"회사는 컴퓨터 등 정보통신설비의 보수점검, 교체 및 고장, 통신두절 또는 운영상 "
+"상당한 이유가 있는 경우 서비스의 제공을 일시적으로 중단할 수 있습니다."
+msgstr ""
+
+msgid ""
+"제1항에 의한 서비스 중단의 경우에는 회사는 사전에 서비스 화면 또는 이메일을 "
+"통하여 회원에게 통지합니다. 다만, 회사가 통제할 수 없는 사유로 인한 서비스의 "
+"중단으로 인하여 사전 통지가 불가능한 경우에는 사후에 통지할 수 있습니다."
+msgstr ""
+
+msgid "제12조 (정보의 제공 및 광고의 게재)"
+msgstr ""
+
+msgid ""
+"회사는 회원이 서비스 이용 중 필요하다고 인정되는 다양한 정보를 공지사항이나 "
+"이메일 등의 방법으로 회원에게 제공할 수 있습니다."
+msgstr ""
+
+msgid ""
+"회사는 서비스의 운영과 관련하여 서비스 화면, 이메일 등에 광고를 게재할 수 있"
+"습니다."
+msgstr ""
+
+msgid "제4장 계약 당사자의 의무"
+msgstr ""
+
+msgid "제13조 (회사의 의무)"
+msgstr ""
+
+msgid ""
+"회사는 관련 법령과 본 약관이 금지하거나 공서양속에 반하는 행위를 하지 않으"
+"며, 계속적이고 안정적으로 서비스를 제공하기 위하여 최선을 다하여 노력합니다."
+msgstr ""
+
+msgid ""
+"회사는 회원이 안전하게 서비스를 이용할 수 있도록 개인정보(신용정보 포함) 보호"
+"를 위해 보안시스템을 갖추어야 하며 개인정보처리방침을 공시하고 준수합니다."
+msgstr ""
+
+msgid ""
+"회사는 서비스 이용과 관련하여 회원으로부터 제기된 의견이나 불만이 정당하다고 "
+"인정할 경우 이를 처리하여야 합니다."
+msgstr ""
+
+msgid "제14조 (회원의 의무)"
+msgstr ""
+
+msgid "회원은 다음 행위를 하여서는 안 됩니다:"
+msgstr ""
+
+msgid "신청 또는 변경 시 허위내용의 등록"
+msgstr ""
+
+msgid "타인의 정보 도용"
+msgstr ""
+
+msgid "회사가 게시한 정보의 변경"
+msgstr ""
+
+msgid "회사가 정한 정보 이외의 정보(컴퓨터 프로그램 등) 등의 송신 또는 게시"
+msgstr ""
+
+msgid "회사와 기타 제3자의 저작권 등 지적재산권에 대한 침해"
+msgstr ""
+
+msgid "회사 및 기타 제3자의 명예를 손상시키거나 업무를 방해하는 행위"
+msgstr ""
+
+msgid ""
+"외설 또는 폭력적인 메시지, 화상, 음성, 기타 공서양속에 반하는 정보를 서비스"
+"에 공개 또는 게시하는 행위"
+msgstr ""
+
+msgid "회사의 동의 없이 영리를 목적으로 서비스를 사용하는 행위"
+msgstr ""
+
+msgid "기타 불법적이거나 부당한 행위"
+msgstr ""
+
+msgid "익명 채팅 이용 시 특별 주의사항"
+msgstr ""
+
+msgid ""
+"익명 채팅에서도 욕설, 성희롱, 불법 촬영물 유포 등의 행위는 엄격히 금지되며, "
+"적발 시 즉시 계정 정지 및 법적 조치가 이루어질 수 있습니다."
+msgstr ""
+
+msgid "제15조 (게시물의 관리)"
+msgstr ""
+
+msgid ""
+"회원이 작성한 게시물에 대한 모든 권리와 책임은 이를 게시한 회원에게 있습니다."
+msgstr ""
+
+msgid ""
+"회사는 회원이 게시하거나 전달하는 서비스 내의 내용물이 다음 각 호에 해당한다"
+"고 판단되는 경우 사전통지 없이 삭제할 수 있으며, 이에 대해 회사는 어떠한 책임"
+"도 지지 않습니다."
+msgstr ""
+
+msgid "본 약관에 위배되거나 상용 또는 불법, 음란, 저속하다고 판단되는 게시물"
+msgstr ""
+
+msgid "다른 회원 또는 제3자를 비방하거나 명예를 손상시키는 내용"
+msgstr ""
+
+msgid "공공질서 및 미풍양속에 위반되는 내용"
+msgstr ""
+
+msgid "범죄적 행위에 결부된다고 인정되는 내용"
+msgstr ""
+
+msgid "회사의 저작권, 제3자의 저작권 등 기타 권리를 침해하는 내용"
+msgstr ""
+
+msgid "회사에서 규정한 게시기간을 초과한 내용"
+msgstr ""
+
+msgid "기타 관계 법령에 위배된다고 판단되는 경우"
+msgstr ""
+
+msgid "제16조 (신고 시스템 및 제재 조치)"
+msgstr ""
+
+msgid ""
+"회원은 다른 회원의 부적절한 게시물, 댓글 또는 행동에 대해 신고할 수 있습니다."
+msgstr ""
+
+msgid "회사는 신고 내용을 검토한 후 다음과 같은 조치를 취할 수 있습니다:"
+msgstr ""
+
+msgid "경고: 위반 사항에 대한 경고 및 시정 요구"
+msgstr ""
+
+msgid "일시 정지: 7일~30일 동안 계정 사용 일시 정지"
+msgstr ""
+
+msgid "영구 차단: 심각한 위반 또는 반복적 위반 시 영구 계정 차단"
+msgstr ""
+
+msgid "법적 조치: 범죄 행위가 의심될 경우 수사기관에 신고"
+msgstr ""
+
+msgid ""
+"3. 회원이 신고를 누적 3회 이상 받은 경우 계정 정지가 자동으로 적용될 수 있으"
+"며, 신고 내용이 허위로 판명될 경우 신고자에게도 제재가 가해질 수 있습니다."
+msgstr ""
+
+msgid ""
+"4. 계정 비활성화를 요청한 경우 30일의 유예기간 후 자동으로 삭제되며, 유예기"
+"간 내에는 재활성화할 수 있습니다."
+msgstr ""
+
+msgid "제5장 기타"
+msgstr ""
+
+msgid "제17조 (저작권의 귀속 및 이용제한)"
+msgstr ""
+
+msgid "회사가 작성한 저작물에 대한 저작권 기타 지적재산권은 회사에 귀속합니다."
+msgstr ""
+
+msgid ""
+"회원은 서비스를 이용함으로써 얻은 정보 중 회사에게 지적재산권이 귀속된 정보"
+"를 회사의 사전 승낙 없이 복제, 송신, 출판, 배포, 방송 기타 방법에 의하여 영리"
+"목적으로 이용하거나 제3자에게 이용하게 하여서는 안 됩니다."
+msgstr ""
+
+msgid ""
+"회원이 서비스 내에 게시한 게시물의 저작권은 해당 게시물의 저작자에게 귀속됩니"
+"다."
+msgstr ""
+
+msgid "제18조 (분쟁해결)"
+msgstr ""
+
+msgid ""
+"회사는 회원이 제기하는 정당한 의견이나 불만을 반영하고 그 피해를 보상처리하"
+"기 위하여 피해보상처리기구를 설치·운영합니다."
+msgstr ""
+
+msgid ""
+"회사는 회원으로부터 제출되는 불만사항 및 의견은 우선적으로 그 사항을 처리합니"
+"다. 다만, 신속한 처리가 곤란한 경우에는 회원에게 그 사유와 처리일정을 즉시 통"
+"보해 드립니다."
+msgstr ""
+
+msgid "제19조 (재판권 및 준거법)"
+msgstr ""
+
+msgid ""
+"서비스 이용과 관련하여 회사와 회원 간에 분쟁이 발생한 경우, 쌍방간에 분쟁의 "
+"해결을 위해 성실히 협의합니다."
+msgstr ""
+
+msgid ""
+"제1항의 협의에서도 분쟁이 해결되지 않을 경우 양 당사자는 민사소송법상의 관할"
+"법원에 소를 제기할 수 있습니다."
+msgstr ""
+
+msgid "회사와 회원 간 제기된 소송은 대한민국 법을 준거법으로 합니다."
+msgstr ""
+
+msgid "제20조 (부칙)"
+msgstr ""
+
+msgid "본 약관은 2025년 1월 1일부터 적용됩니다."
+msgstr ""
+
+msgid "회사 정보:"
+msgstr ""
+
+msgid "상호: HypeHere"
+msgstr ""
+
+msgid "대표자: [대표자명]"
+msgstr ""
+
+msgid "주소: [회사 주소]"
+msgstr ""
+
+msgid "사업자등록번호: [사업자번호]"
+msgstr ""
+
+msgid "연락처: [이메일 주소]"
+msgstr ""
+
+msgid "닫기"
+msgstr ""
+
+msgid "로그인 - HypeHere"
+msgstr ""
+
+msgid "로그인"
+msgstr ""
+
+msgid "HypeHere 계정으로 로그인하세요"
+msgstr ""
+
+msgid "사용자명 또는 비밀번호가 올바르지 않습니다."
+msgstr ""
+
+msgid "사용자명"
+msgstr ""
+
+msgid "사용자명을 입력하세요"
+msgstr ""
+
+msgid "비밀번호"
+msgstr ""
+
+msgid "비밀번호를 입력하세요"
+msgstr ""
+
+msgid "화면 언어 (선택)"
+msgstr ""
+
+msgid "선택하면 즉시 페이지 언어가 변경됩니다."
+msgstr ""
+
+msgid "로그인 상태 유지"
+msgstr ""
+
+msgid "비밀번호를 잊으셨나요?"
+msgstr ""
+
+msgid "계정이 없으신가요?"
+msgstr ""
+
+msgid "회원가입"
+msgstr ""
+
+msgid "알림 설정 - HypeHere"
+msgstr ""
+
+msgid "알림 설정"
+msgstr ""
+
+msgid "저장됨"
+msgstr ""
+
+msgid "모든 알림"
+msgstr ""
+
+msgid "모든 알림을 한번에 켜거나 끕니다"
+msgstr ""
+
+msgid "알림 타입"
+msgstr ""
+
+msgid "메시지"
+msgstr ""
+
+msgid "새로운 메시지를 받았을 때"
+msgstr ""
+
+msgid "팔로우"
+msgstr ""
+
+msgid "새로운 팔로워가 생겼을 때"
+msgstr ""
+
+msgid "게시글"
+msgstr ""
+
+msgid "팔로우한 사람이 게시글을 작성했을 때"
+msgstr ""
+
+msgid "댓글"
+msgstr ""
+
+msgid "내 게시글에 댓글이 달렸을 때"
+msgstr ""
+
+msgid "좋아요"
+msgstr ""
+
+msgid "내 게시글에 좋아요를 눌렀을 때"
+msgstr ""
+
+msgid "비밀번호 재설정"
+msgstr ""
+
+msgid "안녕하세요,"
+msgstr ""
+
+msgid "비밀번호 재설정을 요청하셨습니다."
+msgstr ""
+
+msgid "아래 임시 비밀번호로 로그인하신 후, 반드시 새 비밀번호로 변경해주세요."
+msgstr ""
+
+msgid "임시 비밀번호"
+msgstr ""
+
+msgid "로그인하기"
+msgstr ""
+
+msgid "⚠️ 보안 안내"
+msgstr ""
+
+msgid "로그인 후 즉시 비밀번호를 변경하시기 바랍니다."
+msgstr ""
+
+msgid ""
+"본인이 요청하지 않은 경우, 이 이메일을 무시하시고 관리자에게 문의해주세요."
+msgstr ""
+
+msgid "감사합니다."
+msgstr ""
+
+msgid "HypeHere 팀"
+msgstr ""
+
+msgid "본 메일은 발신 전용입니다. 문의사항은 고객센터를 이용해주세요."
+msgstr ""
+
+msgid "비밀번호 재설정 - HypeHere"
+msgstr ""
+
+msgid "등록된 이메일 주소로 임시 비밀번호를 발송해드립니다"
+msgstr ""
+
+msgid "이메일 주소"
+msgstr ""
+
+msgid "example@email.com"
+msgstr ""
+
+msgid "가입 시 등록한 이메일 주소를 입력해주세요"
+msgstr ""
+
+msgid "임시 비밀번호 발송"
+msgstr ""
+
+msgid "비밀번호가 기억나셨나요?"
+msgstr ""
+
+msgid "이메일 주소를 입력해주세요"
+msgstr ""
+
+msgid "임시 비밀번호가 이메일로 발송되었습니다"
+msgstr ""
+
+msgid "오류가 발생했습니다. 다시 시도해주세요"
+msgstr ""
+
+msgid "네트워크 오류가 발생했습니다. 다시 시도해주세요"
+msgstr ""
+
+msgid "개인정보 보호 - HypeHere"
+msgstr ""
+
+msgid "개인정보 보호"
+msgstr ""
+
+msgid "계정 공개 설정"
+msgstr ""
+
+msgid "비공개 계정"
+msgstr ""
+
+msgid "비공개 계정으로 설정하면 팔로워만 내 게시글과 프로필을 볼 수 있습니다"
+msgstr ""
+
+msgid "팔로우 목록 공개"
+msgstr ""
+
+msgid "팔로워 목록"
+msgstr ""
+
+msgid "내 팔로워 목록을 볼 수 있는 사람"
+msgstr ""
+
+msgid "팔로잉 목록"
+msgstr ""
+
+msgid "내가 팔로우하는 목록을 볼 수 있는 사람"
+msgstr ""
+
+msgid "차단 관리"
+msgstr ""
+
+msgid "차단한 사용자 관리"
+msgstr ""
+
+msgid "공개 범위 선택"
+msgstr ""
+
+msgid "전체 공개"
+msgstr ""
+
+msgid "모든 사용자가 볼 수 있습니다"
+msgstr ""
+
+msgid "팔로워만"
+msgstr ""
+
+msgid "나를 팔로우하는 사용자만"
+msgstr ""
+
+msgid "비공개"
+msgstr ""
+
+msgid "나만 볼 수 있습니다"
+msgstr ""
+
+msgid "내 프로필 - HypeHere"
+msgstr ""
+
+msgid "프로필 편집"
+msgstr ""
+
+msgid "편집"
+msgstr ""
+
+msgid "포스트"
+msgstr ""
+
+msgid "게시물 검색... (내용 또는 #해시태그)"
+msgstr ""
+
+msgid "검색 지우기"
+msgstr ""
+
+msgid "검색 결과"
+msgstr ""
+
+msgid "게시물 옵션"
+msgstr ""
+
+msgid "아직 게시물이 없습니다"
+msgstr ""
+
+msgid "성공"
+msgstr ""
+
+msgid "오류"
+msgstr ""
+
+msgid "게시물이 삭제되었습니다."
+msgstr ""
+
+msgid "삭제 실패"
+msgstr ""
+
+msgid "서버 오류가 발생했습니다"
+msgstr ""
+
+msgid "알 수 없는 오류"
+msgstr ""
+
+msgid "검색 결과가 없습니다"
+msgstr ""
+
+msgid "Profile Picture"
+msgstr ""
+
+msgid "Actions"
+msgstr ""
+
+msgid "Close"
+msgstr ""
+
+msgid "수정"
+msgstr ""
+
+msgid "삭제"
+msgstr ""
+
+msgid "신고"
+msgstr ""
+
+msgid "프로필 사진 삭제"
+msgstr ""
+
+msgid "프로필 사진을 삭제하시겠습니까?"
+msgstr ""
+
+msgid "회원가입 - HypeHere"
+msgstr ""
+
+msgid "HypeHere에 가입하여 언어 교환을 시작하세요"
+msgstr ""
+
+msgid "기본 정보"
+msgstr ""
+
+msgid "언어 설정"
+msgstr ""
+
+msgid "관심사"
+msgstr ""
+
+msgid "4-20자의 영문, 숫자, 언더스코어만 사용 가능합니다."
+msgstr ""
+
+msgid "이메일"
+msgstr ""
+
+msgid "이메일을 입력하세요"
+msgstr ""
+
+msgid "최소 8자 이상, 영문과 숫자를 포함해야 합니다."
+msgstr ""
+
+msgid "비밀번호 확인"
+msgstr ""
+
+msgid "비밀번호를 다시 입력하세요"
+msgstr ""
+
+msgid "및"
+msgstr ""
+
+msgid "에 동의합니다"
+msgstr ""
+
+msgid "다음 단계"
+msgstr ""
+
+msgid "이미 계정이 있으신가요?"
+msgstr ""
+
+msgid "신고 내역 - HypeHere"
+msgstr ""
+
+msgid "신고 내역"
+msgstr ""
+
+msgid "필터"
+msgstr ""
+
+msgid "채팅"
+msgstr ""
+
+msgid " 전"
+msgstr ""
+
+msgid "게시물 보기"
+msgstr ""
+
+msgid "삭제 처리"
+msgstr ""
+
+msgid "신고 기각"
+msgstr ""
+
+msgid "게시물 신고 내역이 없습니다"
+msgstr ""
+
+msgid "아직 신고한 게시물이 없습니다"
+msgstr ""
+
+msgid "댓글 신고 내역이 없습니다"
+msgstr ""
+
+msgid "아직 신고한 댓글이 없습니다"
+msgstr ""
+
+msgid "신고 증거"
+msgstr ""
+
+msgid "화면 캡처"
+msgstr ""
+
+msgid "대화 내역"
+msgstr ""
+
+msgid "피신고자"
+msgstr ""
+
+msgid "화상 채팅 캡처"
+msgstr ""
+
+msgid "증거 캡처"
+msgstr ""
+
+msgid "채팅 신고 내역이 없습니다"
+msgstr ""
+
+msgid "아직 신고한 채팅이 없습니다"
+msgstr ""
+
+msgid "게시물 삭제 확인"
+msgstr ""
+
+msgid "정말로 이 게시물을 삭제하시겠습니까?"
+msgstr ""
+
+msgid "이 작업은 다음을 수행합니다:"
+msgstr ""
+
+msgid "게시물 내용을 \\'신고로 삭제됨\\' 메시지로 변경"
+msgstr ""
+
+msgid "신고 상태를 \\'처리완료\\'로 변경"
+msgstr ""
+
+msgid "사용자의 신고 누적 횟수 증가"
+msgstr ""
+
+msgid "작성자와 신고자에게 알림 전송"
+msgstr ""
+
+msgid "신고 기각 확인"
+msgstr ""
+
+msgid "이 신고를 기각하시겠습니까?"
+msgstr ""
+
+msgid "신고 상태를 \\'기각\\'으로 변경"
+msgstr ""
+
+msgid "필요시 사용자의 신고 누적 횟수 감소"
+msgstr ""
+
+msgid "필터 및 검색"
+msgstr ""
+
+msgid "검색"
+msgstr ""
+
+msgid "사용자 닉네임, 내용으로 검색..."
+msgstr ""
+
+msgid "전체"
+msgstr ""
+
+msgid "기간"
+msgstr ""
+
+msgid "오늘"
+msgstr ""
+
+msgid "최근 7일"
+msgstr ""
+
+msgid "최근 30일"
+msgstr ""
+
+msgid "초기화"
+msgstr ""
+
+msgid "적용"
+msgstr ""
+
+msgid "신고 내역을 불러오는 중..."
+msgstr ""
+
+msgid "신고 내용:"
+msgstr ""
+
+msgid "설정 - HypeHere"
+msgstr ""
+
+msgid "프로필"
+msgstr ""
+
+msgid "내 프로필 보기"
+msgstr ""
+
+msgid "계정"
+msgstr ""
+
+msgid "한국어"
+msgstr ""
+
+msgid "개인정보"
+msgstr ""
+
+msgid "법적 정보"
+msgstr ""
+
+msgid "관리"
+msgstr ""
+
+msgid "관리자 페이지"
+msgstr ""
+
 msgid "로그아웃"
 msgstr ""
 
-#: accounts/templates/accounts/settings.html:319 templates/home.html:219
 msgid "언어 선택"
 msgstr ""
 
-#: accounts/templates/accounts/settings.html:343
 msgid "영어"
 msgstr ""
 
-#: accounts/templates/accounts/settings.html:355
 msgid "일본어"
 msgstr ""
 
-#: accounts/templates/accounts/settings.html:367
 msgid "스페인어"
 msgstr ""
 
-#: accounts/templates/accounts/support/create.html:5
 msgid "문의 작성 - HypeHere"
 msgstr ""
 
-#: accounts/templates/accounts/support/create.html:14
 msgid "뒤로"
 msgstr ""
 
-#: accounts/templates/accounts/support/create.html:16
-#: accounts/templates/accounts/support/list.html:16
 msgid "문의 작성"
 msgstr ""
 
-#: accounts/templates/accounts/support/create.html:25
 msgid "카테고리를 선택하세요"
 msgstr ""
 
-#: accounts/templates/accounts/support/create.html:36
 msgid "문의 제목을 입력하세요"
 msgstr ""
 
-#: accounts/templates/accounts/support/create.html:41
 msgid "문의 내용을 자세히 입력해주세요"
 msgstr ""
 
-#: accounts/templates/accounts/support/create.html:46
 msgid "작성 완료"
 msgstr ""
 
-#: accounts/templates/accounts/support/detail.html:14
 msgid "목록으로"
 msgstr ""
 
-#: accounts/templates/accounts/support/detail.html:16
 msgid "문의 상세"
 msgstr ""
 
-#: accounts/templates/accounts/support/detail.html:25
-#: accounts/templates/accounts/support/list.html:32
-#: accounts/templates/accounts/support/list.html:69
-#: accounts/templates/accounts/support/list.html:93
 msgid "대기중"
 msgstr ""
 
-#: accounts/templates/accounts/support/detail.html:27
-#: accounts/templates/accounts/support/list.html:37
-#: accounts/templates/accounts/support/list.html:70
-#: accounts/templates/accounts/support/list.html:95
 msgid "답변완료"
 msgstr ""
 
-#: accounts/templates/accounts/support/detail.html:40
 msgid "작성:"
 msgstr ""
 
-#: accounts/templates/accounts/support/detail.html:48
-#: accounts/templates/accounts/support/list.html:109
 msgid "작성자:"
 msgstr ""
 
-#: accounts/templates/accounts/support/detail.html:64
 msgid "답변자:"
 msgstr ""
 
-#: accounts/templates/accounts/support/detail.html:79
 msgid "답변 내용"
 msgstr ""
 
-#: accounts/templates/accounts/support/detail.html:80
 msgid "답변을 입력하세요"
 msgstr ""
 
-#: accounts/templates/accounts/support/detail.html:83
 msgid "답변 등록"
 msgstr ""
 
-#: accounts/templates/accounts/support/detail.html:93
 msgid "관리자 답변을 기다리고 있습니다."
 msgstr ""
 
-#: accounts/templates/accounts/support/list.html:5
 msgid "고객지원 - HypeHere"
 msgstr ""
 
-#: accounts/templates/accounts/support/list.html:10
 msgid "전체 문의 목록"
 msgstr ""
 
-#: accounts/templates/accounts/support/list.html:10
 msgid "내 문의 목록"
 msgstr ""
 
-#: accounts/templates/accounts/support/list.html:55
 msgid "제목으로 검색..."
 msgstr ""
 
-#: accounts/templates/accounts/support/list.html:65
 msgid "필터:"
 msgstr ""
 
-#: accounts/templates/accounts/support/list.html:78
 msgid "검색:"
 msgstr ""
 
-#: accounts/templates/accounts/support/list.html:115
 msgid "답변"
 msgstr ""
 
-#: accounts/templates/accounts/support/list.html:127
 msgid "처음"
 msgstr ""
 
-#: accounts/templates/accounts/support/list.html:128
 msgid "이전"
 msgstr ""
 
-#: accounts/templates/accounts/support/list.html:135
 msgid "마지막"
 msgstr ""
 
-#: accounts/templates/accounts/support/list.html:144
 msgid "아직 문의 내역이 없습니다."
 msgstr ""
 
-#: accounts/templates/accounts/support/list.html:145
 msgid "첫 문의 작성하기"
 msgstr ""
 
-#: accounts/utils.py:102
 msgid "[HypeHere] 임시 비밀번호 발급"
 msgstr ""
 
-#: accounts/views.py:1118
 msgid "문의가 성공적으로 등록되었습니다."
 msgstr ""
 
-#: accounts/views.py:1162
 msgid "답변 내용을 입력해주세요."
 msgstr ""
 
-#: accounts/views.py:1172
 msgid "답변이 성공적으로 등록되었습니다."
 msgstr ""
 
-#: accounts/views.py:1656
 msgid "이메일 주소를 입력해주세요."
 msgstr ""
 
-#: accounts/views.py:1667
 msgid "너무 많은 요청이 있었습니다. {}후에 다시 시도해주세요."
 msgstr ""
 
-#: accounts/views.py:1681
 msgid "등록된 이메일 주소라면 임시 비밀번호가 발송되었습니다."
 msgstr ""
 
-#: accounts/views.py:1688
 msgid "비활성화된 계정입니다. 관리자에게 문의하세요."
 msgstr ""
 
-#: accounts/views.py:1708
 msgid "임시 비밀번호가 이메일로 발송되었습니다."
 msgstr ""
 
-#: accounts/views.py:1715
 msgid "이메일 발송에 실패했습니다. 잠시 후 다시 시도해주세요."
 msgstr ""
 
-#: chat/admin_actions.py:40 posts/admin_actions.py:40
+msgid "프로필 사진이 삭제되었습니다."
+msgstr ""
+
+msgid "권한 부여"
+msgstr ""
+
+msgid "로또"
+msgstr ""
+
+msgid "접속자"
+msgstr ""
+
+msgid "가입자"
+msgstr ""
+
+msgid "실 사용자"
+msgstr ""
+
+msgid "랜덤 채팅"
+msgstr ""
+
+msgid "Refresh Statistics"
+msgstr ""
+
+msgid "로또 중복 분석"
+msgstr ""
+
+msgid "회차"
+msgstr ""
+
+msgid "1-1 중복"
+msgstr ""
+
+msgid "회"
+msgstr ""
+
+msgid "1-2 중복"
+msgstr ""
+
+msgid "1-3 중복"
+msgstr ""
+
+msgid "1-4 중복"
+msgstr ""
+
+msgid "스마트 번호 당첨 확률 분석"
+msgstr ""
+
+msgid "계산 중..."
+msgstr ""
+
+msgid "번호 확인"
+msgstr ""
+
+msgid "당신의 번호가 역대 1~4등 당첨 번호였는지 확인하세요"
+msgstr ""
+
+msgid "스마트 번호 생성"
+msgstr ""
+
+msgid "고급 필터링 전략"
+msgstr ""
+
+msgid "추가전략 1"
+msgstr ""
+
+msgid "추가전략 2"
+msgstr ""
+
+msgid "추가전략 3"
+msgstr ""
+
+msgid "추가전략 4"
+msgstr ""
+
+msgid "통합 전략"
+msgstr ""
+
+msgid "저장한 번호"
+msgstr ""
+
+msgid "결과"
+msgstr ""
+
+msgid "저장"
+msgstr ""
+
+msgid "번호 삭제"
+msgstr ""
+
+msgid "이 번호를 삭제하시겠습니까?"
+msgstr ""
+
+msgid "전략 설명"
+msgstr ""
+
+msgid "새 당첨 번호 입력"
+msgstr ""
+
+msgid "추첨일"
+msgstr ""
+
+msgid "당첨 번호"
+msgstr ""
+
+msgid "보너스 번호"
+msgstr ""
+
+msgid "1등 당첨금"
+msgstr ""
+
+msgid "1등 당첨자 수"
+msgstr ""
+
+msgid "2등 당첨금"
+msgstr ""
+
+msgid "2등 당첨자 수"
+msgstr ""
+
+msgid "등수 간 중복 조합 상세 정보"
+msgstr ""
+
+msgid "조합:"
+msgstr ""
+
+msgid "전체 가능 조합"
+msgstr ""
+
+msgid "제외된 조합"
+msgstr ""
+
+msgid "등"
+msgstr ""
+
+msgid "중복된 숫자 개수"
+msgstr ""
+
+msgid "남은 조합"
+msgstr ""
+
+msgid "당첨 확률"
+msgstr ""
+
+msgid "일반 대비"
+msgstr ""
+
+msgid "배 향상"
+msgstr ""
+
+msgid "통계를 불러오는 중 오류가 발생했습니다"
+msgstr ""
+
+msgid "대시보드로 돌아가기"
+msgstr ""
+
+msgid "사용자 검색"
+msgstr ""
+
+msgid "Enter email or nickname..."
+msgstr ""
+
+msgid "Search"
+msgstr ""
+
+msgid "Enter a search query to find users"
+msgstr ""
+
+msgid "권한 변경"
+msgstr ""
+
+msgid "사용자"
+msgstr ""
+
+msgid "역할 선택"
+msgstr ""
+
+msgid "변경"
+msgstr ""
+
 #, python-format
 msgid "활성 신고 %(count)s건 누적으로 계정이 영구 정지되었습니다"
 msgstr ""
 
-#: chat/admin_actions.py:58 posts/admin_actions.py:58
 #, python-format
 msgid "활성 신고 %(count)s건 누적으로 계정이 7일간 정지되었습니다"
 msgstr ""
 
-#: chat/admin_actions.py:76 posts/admin_actions.py:76
 #, python-format
 msgid "활성 신고 %(count)s건 누적으로 계정이 3일간 정지되었습니다"
 msgstr ""
 
-#: chat/admin_actions.py:118
 msgid "채팅 신고가 승인되었습니다. 주의해 주세요."
 msgstr ""
 
-#: chat/admin_actions.py:127
 msgid "신고하신 채팅 내용이 검토되어 조치가 완료되었습니다."
 msgstr ""
 
-#: chat/admin_actions.py:167
 msgid "신고하신 채팅 내용이 검토되었으나 기각되었습니다."
 msgstr ""
 
-#: chat/views.py:827
 msgid "방장이 나가면 채팅방이 삭제됩니다. 계속하시겠습니까?"
 msgstr ""
 
-#: chat/views.py:839
 msgid "방이 삭제되었습니다"
 msgstr ""
 
-#: chat/views.py:849
 msgid "채팅방에서 나갔습니다"
 msgstr ""
 
-#: hypehere/settings.py:128
 msgid "English"
 msgstr ""
 
-#: hypehere/settings.py:129
 msgid "日本語"
 msgstr ""
 
-#: hypehere/settings.py:130
 msgid "Español"
 msgstr ""
 
-#: notifications/serializers.py:36 templates/learning/matching.html:361
-#: templates/notifications.html:15 templates/partials/header.html:49
 msgid "알림"
 msgstr ""
 
-#: notifications/serializers.py:41
 #, python-format
 msgid "%(sender)s님이 메시지를 보냈습니다"
 msgstr ""
 
-#: notifications/serializers.py:43
 #, python-format
 msgid "%(sender)s님이 팔로우했습니다"
 msgstr ""
 
-#: notifications/serializers.py:45
 #, python-format
 msgid "%(sender)s님이 새 게시글을 작성했습니다"
 msgstr ""
 
-#: notifications/serializers.py:47
 #, python-format
 msgid "%(sender)s님이 댓글을 남겼습니다"
 msgstr ""
 
-#: notifications/serializers.py:49
 #, python-format
 msgid "%(sender)s님이 좋아요를 눌렀습니다"
 msgstr ""
 
-#: notifications/serializers.py:51
 #, python-format
 msgid "%(sender)s님이 게시물을 신고했습니다"
 msgstr ""
 
-#: notifications/serializers.py:53
 msgid "새 알림"
 msgstr ""
 
-#: posts/admin_actions.py:124
 #, python-format
 msgid "신고로 인해 게시물이 삭제되었습니다 (%s)"
 msgstr ""
 
-#: posts/admin_actions.py:133
 #, python-format
 msgid "신고하신 게시물이 처리되었습니다 (%s)"
 msgstr ""
 
-#: posts/admin_actions.py:172
 msgid "신고가 검토되었으며 문제가 없다고 판단되었습니다"
 msgstr ""
 
-#: posts/admin_actions.py:181
 msgid "신고하신 내용이 검토되었으나 조치가 필요하지 않다고 판단되었습니다"
 msgstr ""
 
-#: posts/admin_actions.py:202
 #, python-format
 msgid "신고로 인해 삭제됨 (%s)"
 msgstr ""
 
-#: posts/admin_actions.py:227
 #, python-format
 msgid "신고로 인해 댓글이 삭제되었습니다 (%s)"
 msgstr ""
 
-#: posts/admin_actions.py:236
 #, python-format
 msgid "신고하신 댓글이 처리되었습니다 (%s)"
 msgstr ""
 
-#: posts/admin_actions.py:275
 msgid "댓글 신고가 검토되었으며 문제가 없다고 판단되었습니다"
 msgstr ""
 
-#: posts/admin_actions.py:284
 msgid "신고하신 댓글이 검토되었으나 조치가 필요하지 않다고 판단되었습니다"
 msgstr ""
 
-#: templates/accounts/favorites.html:55
 msgid "관심 있는 채팅방을 즐겨찾기에 추가해보세요!"
 msgstr ""
 
-#: templates/accounts/favorites.html:72
 msgid "즐겨찾기한 게시물이 없습니다"
 msgstr ""
 
-#: templates/accounts/favorites.html:73
 msgid "마음에 드는 게시물을 즐겨찾기에 추가해보세요!"
 msgstr ""
 
-#: templates/accounts/favorites.html:74
 msgid "피드 보러가기"
 msgstr ""
 
-#: templates/accounts/profile_update.html:5
 msgid "프로필 수정 - HypeHere"
 msgstr ""
 
-#: templates/accounts/profile_update.html:19
 msgid "프로필 수정 성공!"
 msgstr ""
 
-#: templates/accounts/profile_update.html:27
-#: templates/accounts/register.html:50
 msgid "이메일 (로그인 ID)"
 msgstr ""
 
-#: templates/accounts/profile_update.html:38
 msgid "이메일은 보안상 변경할 수 없습니다."
 msgstr ""
 
-#: templates/accounts/profile_update.html:43
 msgid "닉네임 (표시 이름) *"
 msgstr ""
 
-#: templates/accounts/profile_update.html:49
-#: templates/accounts/register.html:72
 msgid "홍길동"
 msgstr ""
 
-#: templates/accounts/profile_update.html:54
 msgid "다른 사용자에게 표시될 이름입니다."
 msgstr ""
 
-#: templates/accounts/profile_update.html:60
 msgid "생년월일"
 msgstr ""
 
-#: templates/accounts/profile_update.html:73
-msgid "자기소개"
-msgstr ""
-
-#: templates/accounts/profile_update.html:80
 msgid "자신을 소개해주세요..."
 msgstr ""
 
-#: templates/accounts/profile_update.html:82
-#: templates/accounts/profile_update.html:137
 msgid "자"
 msgstr ""
 
-#: templates/accounts/profile_update.html:88
-#: templates/learning/matching.html:73
-msgid "국가"
-msgstr ""
-
-#: templates/accounts/profile_update.html:96
-#: templates/learning/matching.html:58
-msgid "성별"
-msgstr ""
-
-#: templates/accounts/profile_update.html:99
 msgid "1:1 랜덤 매칭에 사용됩니다"
 msgstr ""
 
-#: templates/accounts/profile_update.html:105
 msgid "도시"
 msgstr ""
 
-#: templates/accounts/profile_update.html:111
 msgid "서울"
 msgstr ""
 
-#: templates/accounts/profile_update.html:121
 msgid "저장하기"
 msgstr ""
 
-#: templates/accounts/profile_update.html:138
 msgid "이미지 파일만 업로드 가능합니다."
 msgstr ""
 
-#: templates/accounts/profile_update.html:139
 msgid "파일 크기는 5MB 이하여야 합니다."
 msgstr ""
 
-#: templates/accounts/profile_update.html:140
 msgid "닉네임을 입력해주세요."
 msgstr ""
 
-#: templates/accounts/profile_update.html:141
 msgid "입력 정보를 확인해주세요."
 msgstr ""
 
-#: templates/accounts/profile_update.html:142
 msgid "닉네임은 최대 50자까지 가능합니다."
 msgstr ""
 
-#: templates/accounts/profile_update.html:143
 msgid "자기소개는 최대 200자까지 가능합니다."
 msgstr ""
 
-#: templates/accounts/profile_update.html:144
 msgid "프로필이 성공적으로 수정되었습니다!"
 msgstr ""
 
-#: templates/accounts/profile_update.html:145
 msgid "프로필 수정 중 오류가 발생했습니다."
 msgstr ""
 
-#: templates/accounts/profile_update.html:147
-#: templates/learning/matching.html:250
 msgid "선택하세요"
 msgstr ""
 
-#: templates/accounts/profile_update.html:148
 msgid "🔍 국가 검색..."
 msgstr ""
 
-#: templates/accounts/profile_update.html:150
 msgid "선택 안 함"
 msgstr ""
 
-#: templates/accounts/profile_update.html:151
-#: templates/learning/matching.html:289
 msgid "성별 선택"
 msgstr ""
 
-#: templates/accounts/register.html:15
 msgid "언어 교환 파트너를 만나보세요"
 msgstr ""
 
-#: templates/accounts/register.html:33
 msgid "회원가입 성공! 로그인 중..."
 msgstr ""
 
-#: templates/accounts/register.html:60
 msgid "이메일로 로그인합니다."
 msgstr ""
 
-#: templates/accounts/register.html:66
 msgid "닉네임 (표시 이름)"
 msgstr ""
 
-#: templates/accounts/register.html:77
 msgid "다른 사용자에게 표시될 이름입니다. 중복 가능합니다."
 msgstr ""
 
-#: templates/accounts/register.html:105
 msgid "8자 이상, 영문+숫자 조합"
 msgstr ""
 
-#: templates/accounts/register.html:110
 msgid "최소 8자 이상, 영문과 숫자를 포함해주세요."
 msgstr ""
 
-#: templates/accounts/register.html:132
 msgid "성별 (선택)"
 msgstr ""
 
-#: templates/accounts/register.html:140
 msgid "국가 (선택)"
 msgstr ""
 
-#: templates/accounts/register.html:148
 msgid "가입하기"
 msgstr ""
 
-#: templates/accounts/register.html:165
+#, python-format
 msgid ""
-"가입하시면 <a href=\"#\" class=\"text-primary\">이용약관</a> 및 <a href=\"#"
-"\" class=\"text-primary\">개인정보처리방침</a>에 동의하는 것으로 간주됩니다."
+"가입하시면 <a href=\"%(terms_url)s\" class=\"text-primary\">이용약관</a> 및 "
+"<a href=\"%(privacy_url)s\" class=\"text-primary\">개인정보처리방침</a>에 동"
+"의하는 것으로 간주됩니다."
 msgstr ""
 
-#: templates/base.html:9
 msgid "HypeHere - 친구를 사귀며 언어를 공부하는 SNS형 언어교환 플랫폼"
 msgstr ""
 
-#: templates/base.html:10
 msgid "언어교환, 언어학습, SNS, 친구만들기, Language Exchange"
 msgstr ""
 
-#: templates/base.html:11 templates/home.html:5
 msgid "HypeHere - 언어교환 플랫폼"
 msgstr ""
 
-#: templates/base.html:77 templates/partials/header.html:31
 msgid "홈"
 msgstr ""
 
-#: templates/base.html:86
 msgid "1:1매칭"
 msgstr ""
 
-#: templates/base.html:102
 msgid "오픈채팅"
 msgstr ""
 
-#: templates/base.html:487
 msgid "공유하기"
 msgstr ""
 
-#: templates/base.html:489
 msgid "링크 복사"
 msgstr ""
 
-#: templates/base.html:490
 msgid "게시물 링크를 클립보드에 복사"
 msgstr ""
 
-#: templates/base.html:491
 msgid "링크가 복사되었습니다"
 msgstr ""
 
-#: templates/base.html:492
 msgid "링크 복사에 실패했습니다"
 msgstr ""
 
-#: templates/conversation.html:7 templates/messages.html:5
 msgid "메시지 - HypeHere"
 msgstr ""
 
-#: templates/conversation.html:59
 msgid "방 나가기"
 msgstr ""
 
-#: templates/conversation.html:74 templates/learning/chat_room.html:102
-#: templates/learning/matching.html:213
 msgid "메시지를 입력하세요..."
 msgstr ""
 
-#: templates/conversation.html:90 templates/learning/matching.html:232
 msgid "대화방 나가기"
 msgstr ""
 
-#: templates/conversation.html:100 templates/home.html:196
 msgid "정말로 이 대화방을 나가시겠습니까?"
 msgstr ""
 
-#: templates/conversation.html:103 templates/home.html:196
 msgid "대화 기록이 모두 삭제됩니다."
 msgstr ""
 
-#: templates/conversation.html:107 templates/learning/chat_room.html:52
-#: templates/learning/chat_room.html:192 templates/learning/matching.html:163
-#: templates/learning/matching.html:236
 msgid "나가기"
 msgstr ""
 
-#: templates/explore.html:5
 msgid "탐색 - HypeHere"
 msgstr ""
 
-#: templates/explore.html:30 templates/home.html:41
 msgid "사용자 및 게시물 검색..."
 msgstr ""
 
-#: templates/explore.html:33 templates/learning/chat.html:44
 msgid "검색어 지우기"
 msgstr ""
 
-#: templates/explore.html:46
 msgid "게시물 검색"
 msgstr ""
 
-#: templates/explore.html:47
 msgid "관심 있는 주제나 해시태그를 검색해보세요"
 msgstr ""
 
-#: templates/explore.html:53
 msgid "검색 중..."
 msgstr ""
 
-#: templates/explore.html:62
 msgid "검색 결과 없음"
 msgstr ""
 
-#: templates/explore.html:63
 msgid "다른 검색어로 시도해보세요"
 msgstr ""
 
-#: templates/explore.html:68
-msgid "사용자"
-msgstr ""
-
-#: templates/home.html:23 templates/learning/chat.html:22
-#: templates/learning/matching.html:18
 msgid "계정을 재활성화하면 모든 기능을 다시 사용할 수 있습니다."
 msgstr ""
 
-#: templates/home.html:26 templates/learning/chat.html:25
-#: templates/learning/matching.html:21
 msgid "재활성화 하기"
 msgstr ""
 
-#: templates/home.html:134 templates/partials/post_view_modal.html:105
 msgid "댓글을 입력하세요..."
 msgstr ""
 
-#: templates/home.html:140 templates/partials/post_view_modal.html:110
 msgid "댓글 달기"
 msgstr ""
 
-#: templates/home.html:150
 msgid "첫 번째 게시물을 작성해보세요!"
 msgstr ""
 
-#: templates/home.html:165
 msgid ""
 "HypeHere는 전 세계 사람들과 언어를 교환하며<br>\n"
 "                진정한 친구 관계를 만드는 SNS형 플랫폼입니다."
 msgstr ""
 
-#: templates/home.html:172
 msgid "지금 바로 시작하세요!"
 msgstr ""
 
-#: templates/home.html:173
 msgid "가입하고 첫 번째 언어 교환 친구를 만나보세요."
 msgstr ""
 
-#: templates/home.html:175
 msgid "무료 회원가입"
 msgstr ""
 
-#: templates/home.html:190
-#: templates/partials/comment_owner_action_modal.html:20
-msgid "수정"
-msgstr ""
-
-#: templates/home.html:191
-#: templates/partials/comment_delete_confirm_modal.html:23
-#: templates/partials/comment_owner_action_modal.html:30
-#: templates/partials/post_delete_modal.html:28
-msgid "삭제"
-msgstr ""
-
-#: templates/home.html:192 templates/learning/chat_room.html:246
-#: templates/learning/matching.html:157
-#: templates/partials/block_user_modal.html:24
-#: templates/partials/message_action_modal.html:20
-#: templates/partials/post_action_modal.html:20
 msgid "차단"
 msgstr ""
 
-#: templates/home.html:193 templates/learning/matching.html:150
-#: templates/partials/message_action_modal.html:29
-#: templates/partials/post_action_modal.html:29
-msgid "신고"
-msgstr ""
-
-#: templates/home.html:197
 msgid "대화방을 나갔습니다."
 msgstr ""
 
-#: templates/home.html:198
 msgid "대화방 나가기 중 오류가 발생했습니다."
 msgstr ""
 
-#: templates/home.html:200
 msgid "차단하시겠습니까?"
 msgstr ""
 
-#: templates/home.html:201
 msgid "차단할 사용자의 아이디를 입력하세요"
 msgstr ""
 
-#: templates/home.html:202
 msgid "신고할 게시물 정보를 찾을 수 없습니다."
 msgstr ""
 
-#: templates/home.html:203
 msgid "신고 유형을 선택해주세요."
 msgstr ""
 
-#: templates/home.html:204 templates/learning/matching.html:376
 msgid "신고가 접수되었습니다."
 msgstr ""
 
-#: templates/home.html:204
 msgid "검토 후 조치하겠습니다."
 msgstr ""
 
-#: templates/home.html:205
 msgid "신고 접수 중 오류가 발생했습니다."
 msgstr ""
 
-#: templates/home.html:206
 msgid "수정 기능은 곧 구현될 예정입니다."
 msgstr ""
 
-#: templates/home.html:206
 msgid "게시물 수정 모달이 곧 추가됩니다."
 msgstr ""
 
-#: templates/home.html:207 templates/partials/post_delete_modal.html:18
 msgid "삭제된 게시물은 복구할 수 없습니다."
 msgstr ""
 
-#: templates/home.html:209
 msgid "게시물 삭제 중 오류가 발생했습니다."
 msgstr ""
 
-#: templates/home.html:214
 msgid "chars"
 msgstr ""
 
-#: templates/home.html:215
 msgid "게시물 내용을 입력해주세요."
 msgstr ""
 
-#: templates/home.html:216
 msgid "게시물은 최대 1000자까지 작성할 수 있습니다."
 msgstr ""
 
-#: templates/home.html:217
 msgid "게시물 작성 중 오류가 발생했습니다."
 msgstr ""
 
-#: templates/home.html:220 templates/partials/post_create_modal.html:50
-#: templates/partials/post_create_modal.html:65
 msgid "선택 안함"
 msgstr ""
 
-#: templates/home.html:221
 msgid "언어 검색"
 msgstr ""
 
-#: templates/learning/chat.html:5
 msgid "오픈채팅 - HypeHere"
 msgstr ""
 
-#: templates/learning/chat.html:41
 msgid "채팅방 검색..."
 msgstr ""
 
-#: templates/learning/chat.html:55
 msgid "즐겨찾기만 보기"
 msgstr ""
 
-#: templates/learning/chat.html:81
 msgid "다른 검색어나 필터를 사용해보세요"
 msgstr ""
 
-#: templates/learning/chat.html:90
 msgid "채팅방 만들기"
 msgstr ""
 
-#: templates/learning/chat.html:101
 msgid "새 채팅방 만들기"
 msgstr ""
 
-#: templates/learning/chat.html:114
 msgid "채팅방 이름"
 msgstr ""
 
-#: templates/learning/chat.html:142
 msgid "방 공개 설정"
 msgstr ""
 
-#: templates/learning/chat.html:146
 msgid "공개방"
 msgstr ""
 
-#: templates/learning/chat.html:150
 msgid "비밀방"
 msgstr ""
 
-#: templates/learning/chat.html:169
 msgid "만들기"
 msgstr ""
 
-#: templates/learning/chat_room.html:17
 msgid "뒤로 가기"
 msgstr ""
 
-#: templates/learning/chat_room.html:36
 msgid "강퇴된 사용자"
 msgstr ""
 
-#: templates/learning/chat_room.html:36 templates/learning/chat_room.html:158
 msgid "강퇴된 사용자 목록"
 msgstr ""
 
-#: templates/learning/chat_room.html:44 templates/learning/chat_room.html:65
 msgid "참여자 목록"
 msgstr ""
 
-#: templates/learning/chat_room.html:106
 msgid "전송"
 msgstr ""
 
-#: templates/learning/chat_room.html:120
 msgid "사용자 강퇴"
 msgstr ""
 
-#: templates/learning/chat_room.html:132
 msgid "강퇴 사유 (선택사항)"
 msgstr ""
 
-#: templates/learning/chat_room.html:133
 msgid "강퇴 사유를 입력하세요..."
 msgstr ""
 
-#: templates/learning/chat_room.html:137
 msgid "차단 기간"
 msgstr ""
 
-#: templates/learning/chat_room.html:139
 msgid "영구 차단"
 msgstr ""
 
-#: templates/learning/chat_room.html:140
 msgid "1시간"
 msgstr ""
 
-#: templates/learning/chat_room.html:141
 msgid "1일"
 msgstr ""
 
-#: templates/learning/chat_room.html:142
 msgid "1주일"
 msgstr ""
 
-#: templates/learning/chat_room.html:143
 msgid "1개월"
 msgstr ""
 
-#: templates/learning/chat_room.html:148
 msgid "강퇴하기"
 msgstr ""
 
-#: templates/learning/chat_room.html:178
 msgid "채팅방 나가기"
 msgstr ""
 
-#: templates/learning/chat_room.html:188
 msgid "정말로 채팅방을 나가시겠습니까?"
 msgstr ""
 
-#: templates/learning/chat_room.html:202 templates/learning/matching.html:245
-#: templates/partials/message_report_modal.html:7
-msgid "사용자 신고"
-msgstr ""
-
-#: templates/learning/chat_room.html:214
 msgid "신고 사유"
 msgstr ""
 
-#: templates/learning/chat_room.html:215
 msgid "신고 사유를 입력하세요..."
 msgstr ""
 
-#: templates/learning/chat_room.html:219 templates/learning/matching.html:264
-#: templates/partials/message_report_modal.html:82
-#: templates/partials/post_report_modal.html:82
 msgid "신고하기"
 msgstr ""
 
-#: templates/learning/chat_room.html:229 templates/learning/matching.html:318
-#: templates/partials/block_user_modal.html:7
 msgid "사용자 차단"
 msgstr ""
 
-#: templates/learning/chat_room.html:241
-#: templates/partials/block_user_modal.html:19
 msgid "차단하면 이 사용자의 게시물과 댓글이 보이지 않게 됩니다."
 msgstr ""
 
-#: templates/learning/chat_room.html:255
 msgid "관리자 권한 부여"
 msgstr ""
 
-#: templates/learning/chat_room.html:266
 msgid ""
 "관리자는 다른 사용자를 강퇴하거나 관리자 권한을 부여/해제할 수 있습니다."
 msgstr ""
 
-#: templates/learning/chat_room.html:270
 msgid "부여하기"
 msgstr ""
 
-#: templates/learning/chat_room.html:280
 msgid "관리자 권한 해제"
 msgstr ""
 
-#: templates/learning/chat_room.html:291
 msgid "관리자 권한을 해제하면 일반 참여자가 됩니다."
 msgstr ""
 
-#: templates/learning/chat_room.html:295 templates/learning/chat_room.html:320
 msgid "해제하기"
 msgstr ""
 
-#: templates/learning/chat_room.html:305
 msgid "차단 해제"
 msgstr ""
 
-#: templates/learning/chat_room.html:316
 msgid "차단을 해제하면 이 사용자가 다시 채팅방에 입장할 수 있게 됩니다."
 msgstr ""
 
-#: templates/learning/matching.html:5
 msgid "1:1 랜덤 채팅 - HypeHere"
 msgstr ""
 
-#: templates/learning/matching.html:38
 msgid "1:1 익명 랜덤 매칭"
 msgstr ""
 
-#: templates/learning/matching.html:39
 msgid "전 세계 사람들과 실시간 영상/채팅을 나눠보세요"
 msgstr ""
 
-#: templates/learning/matching.html:50
-msgid "원하는 채팅 모드를 선택하면 같은 모드를 선택한 사람과 매칭됩니다."
-msgstr ""
-
-#: templates/learning/matching.html:61 templates/learning/matching.html:295
 msgid "남성"
 msgstr ""
 
-#: templates/learning/matching.html:62 templates/learning/matching.html:296
 msgid "여성"
 msgstr ""
 
-#: templates/learning/matching.html:78
 msgid "채팅 모드"
 msgstr ""
 
-#: templates/learning/matching.html:83
 msgid "글 채팅"
 msgstr ""
 
-#: templates/learning/matching.html:88
 msgid "영상 채팅"
 msgstr ""
 
-#: templates/learning/matching.html:98
 msgid "매칭 시작"
 msgstr ""
 
-#: templates/learning/matching.html:111
 msgid "매칭 중..."
 msgstr ""
 
-#: templates/learning/matching.html:112
 msgid "대화 상대를 찾고 있습니다"
 msgstr ""
 
-#: templates/learning/matching.html:117
 msgid "대기열 순서"
 msgstr ""
 
-#: templates/learning/matching.html:121
 msgid "대기 인원"
 msgstr ""
 
-#: templates/learning/matching.html:127
 msgid "매칭 취소"
 msgstr ""
 
-#: templates/learning/matching.html:138
 msgid "익명 사용자"
 msgstr ""
 
-#: templates/learning/matching.html:139 templates/learning/matching.html:343
-#: templates/learning/matching.html:348
 msgid "연결됨"
 msgstr ""
 
-#: templates/learning/matching.html:142
 msgid "대화 상대와 연결"
 msgstr ""
 
-#: templates/learning/matching.html:179
 msgid "카메라 끄기/켜기"
 msgstr ""
 
-#: templates/learning/matching.html:185
 msgid "마이크 끄기/켜기"
 msgstr ""
 
-#: templates/learning/matching.html:204
 msgid "익명 채팅이 시작되었습니다. 대화 내용은 저장되지 않습니다."
 msgstr ""
 
-#: templates/learning/matching.html:233
 msgid "방을 나가면 대화 상대와 연결이 끊어집니다."
 msgstr ""
 
-#: templates/learning/matching.html:259
 msgid "상세 설명 (선택)"
 msgstr ""
 
-#: templates/learning/matching.html:274
 msgid "연결 요청"
 msgstr ""
 
-#: templates/learning/matching.html:275
 msgid "상대방이 나를 팔로우하고 싶습니다. 동의하십니까?"
 msgstr ""
 
-#: templates/learning/matching.html:277 templates/learning/matching.html:321
 msgid "아니오"
 msgstr ""
 
-#: templates/learning/matching.html:278 templates/learning/matching.html:322
 msgid "예"
 msgstr ""
 
-#: templates/learning/matching.html:319
 msgid "이 사용자를 차단하시겠습니까?"
 msgstr ""
 
-#: templates/learning/matching.html:340
 msgid "전체 국가"
 msgstr ""
 
-#: templates/learning/matching.html:341
 msgid "국가 검색..."
 msgstr ""
 
-#: templates/learning/matching.html:342
 msgid "국가 선택"
 msgstr ""
 
-#: templates/learning/matching.html:344
 msgid "상대방이 연결되었습니다"
 msgstr ""
 
-#: templates/learning/matching.html:345
 msgid "상대방이 나갔습니다"
 msgstr ""
 
-#: templates/learning/matching.html:349
 msgid "연결 오류"
 msgstr ""
 
-#: templates/learning/matching.html:352
 msgid "1:1 매칭하기"
 msgstr ""
 
-#: templates/learning/matching.html:353
 msgid "카메라 끄기"
 msgstr ""
 
-#: templates/learning/matching.html:354
 msgid "카메라 켜기"
 msgstr ""
 
-#: templates/learning/matching.html:355
 msgid "마이크 끄기"
 msgstr ""
 
-#: templates/learning/matching.html:356
 msgid "마이크 켜기"
 msgstr ""
 
-#: templates/learning/matching.html:364
 msgid "매칭 시작 중 오류가 발생했습니다."
 msgstr ""
 
-#: templates/learning/matching.html:365
 msgid "팔로우 요청 중 오류가 발생했습니다."
 msgstr ""
 
-#: templates/learning/matching.html:366
 msgid "오류가 발생했습니다."
 msgstr ""
 
-#: templates/learning/matching.html:367
 msgid "신고 중 오류가 발생했습니다."
 msgstr ""
 
-#: templates/learning/matching.html:368
 msgid "차단할 사용자 정보를 찾을 수 없습니다."
 msgstr ""
 
-#: templates/learning/matching.html:369
 msgid "차단에 실패했습니다."
 msgstr ""
 
-#: templates/learning/matching.html:370
 msgid "차단 중 오류가 발생했습니다."
 msgstr ""
 
-#: templates/learning/matching.html:373
 msgid "상대방이 팔로우 요청을 수락했습니다."
 msgstr ""
 
-#: templates/learning/matching.html:374
 msgid "팔로우 요청을 보냈습니다. 상대방의 응답을 기다리고 있습니다."
 msgstr ""
 
-#: templates/learning/matching.html:375
 msgid "연결 요청을 수락했습니다."
 msgstr ""
 
-#: templates/learning/matching.html:377
 msgid "사용자를 차단했습니다."
 msgstr ""
 
-#: templates/learning/matching.html:380
 msgid "이미 팔로우 되어있는 상대입니다."
 msgstr ""
 
-#: templates/learning/matching.html:381
 msgid "상대방이 팔로우를 거부하셨습니다."
 msgstr ""
 
-#: templates/learning/matching.html:382
 msgid "연결 요청을 거절했습니다."
 msgstr ""
 
-#: templates/messages.html:23
 msgid "메시지가 없습니다"
 msgstr ""
 
-#: templates/notifications.html:5
 msgid "알림 - HypeHere"
 msgstr ""
 
-#: templates/notifications.html:20
 msgid "모두 읽음"
 msgstr ""
 
-#: templates/notifications.html:32 templates/notifications.html:44
 msgid "알림이 없습니다"
 msgstr ""
 
-#: templates/notifications.html:42
 msgid "알림을 불러오는데 실패했습니다."
 msgstr ""
 
-#: templates/notifications.html:43
 msgid "알림을 읽음 처리하는데 실패했습니다."
 msgstr ""
 
-#: templates/notifications.html:45
 msgid "방금 전"
 msgstr ""
 
-#: templates/notifications.html:46
 msgid "분 전"
 msgstr ""
 
-#: templates/notifications.html:47
 msgid "시간 전"
 msgstr ""
 
-#: templates/notifications.html:48
 msgid "일 전"
 msgstr ""
 
-#: templates/partials/comment_delete_confirm_modal.html:6
 msgid "댓글 삭제"
 msgstr ""
 
-#: templates/partials/comment_delete_confirm_modal.html:16
 msgid "댓글을 삭제하시겠습니까?"
 msgstr ""
 
-#: templates/partials/comment_edit_modal.html:6
 msgid "댓글 수정"
 msgstr ""
 
-#: templates/partials/comment_edit_modal.html:23
 msgid "댓글 내용을 입력하세요"
 msgstr ""
 
-#: templates/partials/comment_edit_modal.html:36
-msgid "저장"
-msgstr ""
-
-#: templates/partials/header.html:19
 msgid "검색..."
 msgstr ""
 
-#: templates/partials/header.html:38 templates/partials/sidebar.html:53
 msgid "탐색"
 msgstr ""
 
-#: templates/partials/header.html:66
 msgid "설정"
 msgstr ""
 
-#: templates/partials/message_report_modal.html:67
-#: templates/partials/post_report_modal.html:67
-msgid "상세 설명"
-msgstr ""
-
-#: templates/partials/message_report_modal.html:67
-#: templates/partials/post_report_modal.html:67
 msgid "선택"
 msgstr ""
 
-#: templates/partials/message_report_modal.html:74
-#: templates/partials/post_report_modal.html:74
 msgid "신고 사유를 상세히 작성해주세요..."
 msgstr ""
 
-#: templates/partials/post_create_modal.html:8
+msgid "비밀번호 규칙"
+msgstr ""
+
+msgid "최소 8자 이상"
+msgstr ""
+
+msgid "영문 대문자 포함 권장"
+msgstr ""
+
+msgid "영문 소문자 포함 권장"
+msgstr ""
+
+msgid "숫자 포함 권장"
+msgstr ""
+
+msgid "특수문자 포함 권장"
+msgstr ""
+
+msgid "이메일과 유사하지 않아야 함"
+msgstr ""
+
+msgid "일반적인 단어 사용 불가"
+msgstr ""
+
 msgid "새 게시물"
 msgstr ""
 
-#: templates/partials/post_create_modal.html:33
 msgid ""
 "무슨 일이 일어나고 있나요?&#10;&#10;해시태그를 사용하려면 #을 앞에 붙이세요 "
 "(예: #한국어학습)"
 msgstr ""
 
-#: templates/partials/post_create_modal.html:37
 msgid "0 / 1000자"
 msgstr ""
 
-#: templates/partials/post_create_modal.html:39
 msgid "팁: #해시태그를 사용하여 게시물을 분류하세요"
 msgstr ""
 
-#: templates/partials/post_create_modal.html:47
 msgid "모국어"
 msgstr ""
 
-#: templates/partials/post_create_modal.html:62
 msgid "학습 언어"
 msgstr ""
 
-#: templates/partials/post_create_modal.html:82
 msgid "게시하기"
 msgstr ""
 
-#: templates/partials/post_report_modal.html:7
 msgid "게시물 신고"
 msgstr ""
 
-#: templates/partials/post_view_modal.html:16
 msgid "이전 포스트"
 msgstr ""
 
-#: templates/partials/post_view_modal.html:23
 msgid "다음 포스트"
 msgstr ""
 
-#: templates/partials/post_view_modal.html:84
 msgid "공유"
 msgstr ""
 
-#: templates/partials/sidebar.html:40
 msgid "메뉴"
 msgstr ""
 
-#: templates/partials/sidebar.html:46
 msgid "홈 피드"
 msgstr ""
 
-#: templates/partials/sidebar.html:62
 msgid "매칭"
 msgstr ""
 
-#: templates/partials/sidebar.html:63
 msgid "New"
 msgstr ""
 
-#: templates/partials/sidebar.html:76
 msgid "챌린지"
 msgstr ""
 
-#: templates/partials/sidebar.html:83
 msgid "내 프로필"
 msgstr ""
 
-#: templates/partials/sidebar.html:90
 msgid "학습 중인 언어"
 msgstr ""
 
-#: templates/partials/sidebar.html:97
 msgid "원어민"
 msgstr ""
 
-#: templates/partials/sidebar.html:111
 msgid "트렌딩 태그"
 msgstr ""
 
-#: templates/partials/sidebar.html:123
 msgid "추천 사용자"
+msgstr ""
+
+msgid "신고 유형을 선택하세요"
+msgstr ""
+
+msgid "선택사항"
+msgstr ""
+
+msgid "신고 사유를 자세히 설명해주세요"
 msgstr ""

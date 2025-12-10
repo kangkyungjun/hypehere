@@ -660,3 +660,168 @@ class UserReport(models.Model):
         self.resolved_by = admin_user
         self.admin_note = note
         self.save()
+
+
+class LegalDocument(models.Model):
+    """
+    Editable legal documents for Terms, Privacy Policy, Cookie Policy, and Community Guidelines.
+
+    Supports multi-language content with version control.
+    Editable by Prime users (is_prime=True) and Superusers.
+    """
+    DOCUMENT_TYPES = [
+        ('terms', _('이용약관')),
+        ('privacy', _('개인정보처리방침')),
+        ('cookies', _('쿠키 정책')),
+        ('community', _('커뮤니티 가이드라인')),
+    ]
+
+    LANGUAGE_CHOICES = [
+        ('ko', '한국어'),
+        ('en', 'English'),
+        ('ja', '日本語'),
+        ('es', 'Español'),
+    ]
+
+    document_type = models.CharField(
+        max_length=20,
+        choices=DOCUMENT_TYPES,
+        verbose_name=_('문서 유형')
+    )
+    language = models.CharField(
+        max_length=2,
+        choices=LANGUAGE_CHOICES,
+        verbose_name=_('언어')
+    )
+    title = models.CharField(
+        max_length=200,
+        verbose_name=_('제목')
+    )
+    content = models.TextField(
+        verbose_name=_('내용'),
+        help_text='HTML 형식으로 작성'
+    )
+    version = models.CharField(
+        max_length=20,
+        verbose_name=_('버전'),
+        help_text='예: 1.0, 1.1, 2.0'
+    )
+    is_active = models.BooleanField(
+        default=True,
+        verbose_name=_('활성 상태'),
+        help_text='언어별로 하나의 문서만 활성화 가능'
+    )
+    effective_date = models.DateField(
+        verbose_name=_('시행일'),
+        help_text='이 버전이 유효하게 되는 날짜'
+    )
+
+    # Tracking fields
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='legal_docs_created',
+        verbose_name=_('작성자')
+    )
+    modified_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='legal_docs_modified',
+        verbose_name=_('수정자')
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name=_('생성 시간')
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name=_('수정 시간')
+    )
+
+    class Meta:
+        ordering = ['-effective_date', '-created_at']
+        verbose_name = _('법적 문서')
+        verbose_name_plural = _('법적 문서')
+        indexes = [
+            models.Index(fields=['document_type', 'language', 'is_active']),
+            models.Index(fields=['document_type', '-effective_date']),
+        ]
+        # Ensure only one active document per type and language
+        constraints = [
+            models.UniqueConstraint(
+                fields=['document_type', 'language'],
+                condition=models.Q(is_active=True),
+                name='unique_active_legal_document'
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.get_document_type_display()} ({self.get_language_display()}) v{self.version}"
+
+    def save(self, *args, **kwargs):
+        """Override save to create version history"""
+        # If this is an update to an existing document, create version history
+        if self.pk:
+            try:
+                old_version = LegalDocument.objects.get(pk=self.pk)
+                # Only create history if content changed
+                if old_version.content != self.content:
+                    LegalDocumentVersion.objects.create(
+                        document=self,
+                        content=old_version.content,
+                        version=old_version.version,
+                        created_by=old_version.modified_by or old_version.created_by
+                    )
+            except LegalDocument.DoesNotExist:
+                pass
+
+        super().save(*args, **kwargs)
+
+    def get_version_history(self):
+        """Get all versions of this document"""
+        return self.versions.all().order_by('-created_at')
+
+
+class LegalDocumentVersion(models.Model):
+    """
+    Version history for legal documents.
+
+    Stores previous versions when documents are updated.
+    Allows rollback to previous versions.
+    """
+    document = models.ForeignKey(
+        LegalDocument,
+        on_delete=models.CASCADE,
+        related_name='versions',
+        verbose_name=_('문서')
+    )
+    content = models.TextField(
+        verbose_name=_('내용')
+    )
+    version = models.CharField(
+        max_length=20,
+        verbose_name=_('버전')
+    )
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        verbose_name=_('작성자')
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name=_('생성 시간')
+    )
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = _('법적 문서 버전')
+        verbose_name_plural = _('법적 문서 버전')
+        indexes = [
+            models.Index(fields=['document', '-created_at']),
+        ]
+
+    def __str__(self):
+        return f"{self.document.get_document_type_display()} v{self.version} ({self.created_at.strftime('%Y-%m-%d')})"

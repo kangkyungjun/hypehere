@@ -147,3 +147,16 @@ class LotteryView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         })
 
         return context
+
+
+class LotteryEditView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+    """
+    Lottery draw edit page - view and delete recent draws
+    GET /admin-dashboard/lottery/edit/
+    """
+    template_name = 'analytics/lottery_edit.html'
+    login_url = reverse_lazy('accounts:login')
+
+    def test_func(self):
+        """Check if user is Prime or Superuser (Staff는 접근 불가)"""
+        return self.request.user.is_prime or self.request.user.is_superuser

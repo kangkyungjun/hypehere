@@ -5,7 +5,19 @@
 {% block title %}{% trans "쿠키 정책" %} - HypeHere{% endblock %}
 
 {% block content %}
-{% if use_database %}
+<div class="legal-document-header-wrapper">
+    {% if user.is_superuser %}
+        <a href="{% url 'accounts:legal_document_edit_simple' document_type='cookies' %}" class="legal-edit-button">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+            </svg>
+            {% trans "편집" %}
+        </a>
+    {% endif %}
+</div>
+
+{% if document %}
     <!-- Database-driven content -->
     <div class="terms-container">
         <div class="terms-header">
@@ -21,234 +33,48 @@
         </div>
     </div>
 {% else %}
-    <!-- Template fallback content -->
-<div class="cookie-container">
-    <div class="cookie-header">
-        <h1>{% trans "쿠키 정책" %}</h1>
-        <p class="effective-date">{% trans "시행일" %}: 2025{% trans "년" %} 1{% trans "월" %} 1{% trans "일" %}</p>
-        <p class="last-updated">{% trans "최종 수정일" %}: 2025{% trans "년" %} 1{% trans "월" %} 1{% trans "일" %}</p>
-    </div>
-
-    <div class="cookie-intro">
-        <p>{% trans "HypeHere는 귀하의 개인정보를 소중히 여기며, 쿠키 사용에 대해 투명하게 공개합니다. 본 쿠키 정책은 HypeHere 서비스에서 사용하는 쿠키와 유사 기술에 대해 설명합니다." %}</p>
-    </div>
-
-    <!-- 제1장: 쿠키의 이해 -->
-    <div class="cookie-chapter">
-        <h2>{% trans "제1장: 쿠키의 이해" %}</h2>
-
-        <div class="cookie-article">
-            <h3>{% trans "제1조 (쿠키란 무엇인가)" %}</h3>
-            <p>{% trans "쿠키는 웹사이트가 귀하의 브라우저를 통해 컴퓨터나 모바일 기기에 저장하는 작은 텍스트 파일입니다. 쿠키는 웹사이트가 귀하의 방문 기록을 기억하고, 보다 나은 사용자 경험을 제공하는 데 도움을 줍니다." %}</p>
-            <ul>
-                <li>{% trans "쿠키는 귀하의 기기를 식별하는 고유 식별자를 포함할 수 있습니다" %}</li>
-                <li>{% trans "쿠키는 귀하를 개인적으로 식별하지 않으며, 귀하의 이름이나 이메일 주소를 포함하지 않습니다" %}</li>
-                <li>{% trans "쿠키는 악성 소프트웨어가 아니며, 귀하의 기기를 손상시키지 않습니다" %}</li>
-            </ul>
+    <!-- No document available message -->
+    <div class="terms-container">
+        <div class="terms-header">
+            <h1>{% trans "문서를 준비 중입니다" %}</h1>
         </div>
-
-        <div class="cookie-article">
-            <h3>{% trans "제2조 (HypeHere의 쿠키 사용 목적)" %}</h3>
-            <p>{% trans "HypeHere는 다음과 같은 목적으로 쿠키를 사용합니다:" %}</p>
-            <ul>
-                <li><strong>{% trans "서비스 제공" %}</strong>: {% trans "로그인 상태 유지, 세션 관리" %}</li>
-                <li><strong>{% trans "사용자 경험 개선" %}</strong>: {% trans "언어 설정, 사용자 선호도 저장" %}</li>
-                <li><strong>{% trans "보안" %}</strong>: {% trans "CSRF 공격 방지, 계정 보안" %}</li>
-                <li><strong>{% trans "서비스 분석" %}</strong>: {% trans "서비스 사용 패턴 분석 및 개선" %}</li>
-            </ul>
+        <div class="no-document-message">
+            <p>{% trans "쿠키 정책을 준비 중입니다. 관리자에게 문의하세요." %}</p>
         </div>
     </div>
-
-    <!-- 제2장: 쿠키의 종류 및 사용 목적 -->
-    <div class="cookie-chapter">
-        <h2>{% trans "제2장: 쿠키의 종류 및 사용 목적" %}</h2>
-
-        <div class="cookie-article">
-            <h3>{% trans "제3조 (사용하는 쿠키의 종류)" %}</h3>
-
-            <div class="cookie-type">
-                <h4>{% trans "1. 필수 쿠키 (Essential Cookies)" %}</h4>
-                <p>{% trans "서비스 제공에 필수적인 쿠키로, 거부 시 서비스 이용이 제한될 수 있습니다." %}</p>
-                <table class="cookie-table">
-                    <thead>
-                        <tr>
-                            <th>{% trans "쿠키 이름" %}</th>
-                            <th>{% trans "목적" %}</th>
-                            <th>{% trans "유효기간" %}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><code>sessionid</code></td>
-                            <td>{% trans "로그인 세션 유지, 사용자 인증 상태 관리" %}</td>
-                            <td>{% trans "브라우저 종료 시" %}</td>
-                        </tr>
-                        <tr>
-                            <td><code>csrftoken</code></td>
-                            <td>{% trans "크로스 사이트 요청 위조(CSRF) 공격 방지" %}</td>
-                            <td>{% trans "1년" %}</td>
-                        </tr>
-                        <tr>
-                            <td><code>django_language</code></td>
-                            <td>{% trans "사용자 언어 설정 저장" %}</td>
-                            <td>{% trans "1년" %}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="cookie-type">
-                <h4>{% trans "2. 기능 쿠키 (Functional Cookies)" %}</h4>
-                <p>{% trans "사용자 경험을 향상시키는 쿠키로, 거부 가능하나 일부 기능이 제한될 수 있습니다." %}</p>
-                <ul>
-                    <li><strong>{% trans "사용자 선호도" %}</strong>: {% trans "테마 설정, 화면 표시 옵션" %}</li>
-                    <li><strong>{% trans "자동 로그인" %}</strong>: {% trans "'로그인 상태 유지' 기능" %}</li>
-                </ul>
-            </div>
-
-            <div class="cookie-type">
-                <h4>{% trans "3. 분석 쿠키 (Analytics Cookies)" %}</h4>
-                <p>{% trans "서비스 사용 통계 수집을 위한 쿠키로, 서비스 개선에 활용됩니다. 개인을 식별하지 않으며, 익명화된 통계 데이터만 수집합니다." %}</p>
-                <ul>
-                    <li>{% trans "페이지 방문 횟수 및 사용 패턴" %}</li>
-                    <li>{% trans "기능 사용 빈도" %}</li>
-                    <li>{% trans "서비스 성능 및 오류 추적" %}</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-
-    <!-- 제3장: 쿠키 관리 방법 -->
-    <div class="cookie-chapter">
-        <h2>{% trans "제3장: 쿠키 관리 방법" %}</h2>
-
-        <div class="cookie-article">
-            <h3>{% trans "제4조 (쿠키 설정 및 거부)" %}</h3>
-            <p>{% trans "귀하는 언제든지 브라우저 설정을 통해 쿠키를 관리할 수 있습니다. 다만, 필수 쿠키를 거부하시는 경우 서비스 이용이 제한될 수 있습니다." %}</p>
-
-            <div class="browser-settings">
-                <h4>{% trans "브라우저별 쿠키 설정 방법" %}</h4>
-
-                <div class="browser-item">
-                    <h5>{% trans "Google Chrome" %}</h5>
-                    <ol>
-                        <li>{% trans "브라우저 우측 상단의 '설정' 메뉴(⋮) 클릭" %}</li>
-                        <li>{% trans "'개인정보 및 보안' → '쿠키 및 기타 사이트 데이터' 선택" %}</li>
-                        <li>{% trans "원하는 옵션 선택 (모든 쿠키 허용/차단, 시크릿 모드에서만 타사 쿠키 차단 등)" %}</li>
-                    </ol>
-                </div>
-
-                <div class="browser-item">
-                    <h5>{% trans "Mozilla Firefox" %}</h5>
-                    <ol>
-                        <li>{% trans "브라우저 우측 상단의 '설정' 메뉴(☰) 클릭" %}</li>
-                        <li>{% trans "'개인정보 및 보안' 선택" %}</li>
-                        <li>{% trans "'쿠키 및 사이트 데이터' 섹션에서 설정 변경" %}</li>
-                    </ol>
-                </div>
-
-                <div class="browser-item">
-                    <h5>{% trans "Safari" %}</h5>
-                    <ol>
-                        <li>{% trans "'Safari' → '환경설정' 메뉴 선택" %}</li>
-                        <li>{% trans "'개인정보 보호' 탭 클릭" %}</li>
-                        <li>{% trans "'쿠키 및 웹 사이트 데이터' 섹션에서 설정 변경" %}</li>
-                    </ol>
-                </div>
-
-                <div class="browser-item">
-                    <h5>{% trans "Microsoft Edge" %}</h5>
-                    <ol>
-                        <li>{% trans "브라우저 우측 상단의 '설정' 메뉴(...) 클릭" %}</li>
-                        <li>{% trans "'개인정보, 검색 및 서비스' 선택" %}</li>
-                        <li>{% trans "'쿠키 및 사이트 권한' → '쿠키 및 사이트 데이터' 선택" %}</li>
-                    </ol>
-                </div>
-
-                <div class="browser-item">
-                    <h5>{% trans "모바일 기기" %}</h5>
-                    <p><strong>{% trans "iOS" %}</strong>: {% trans "설정 → Safari → 개인정보 보호 및 보안 → 모든 쿠키 차단" %}</p>
-                    <p><strong>{% trans "Android" %}</strong>: {% trans "브라우저 앱 설정 → 사이트 설정 → 쿠키 → 쿠키 허용 여부 선택" %}</p>
-                </div>
-            </div>
-
-            <p class="warning-note">
-                <strong>{% trans "⚠️ 주의" %}</strong>: {% trans "쿠키를 차단하시는 경우 다음과 같은 기능이 제한될 수 있습니다:" %}
-            </p>
-            <ul>
-                <li>{% trans "자동 로그인 및 세션 유지 불가" %}</li>
-                <li>{% trans "언어 설정 등 사용자 선호도 저장 불가" %}</li>
-                <li>{% trans "일부 서비스 이용 제한" %}</li>
-            </ul>
-        </div>
-    </div>
-
-    <!-- 제4장: 제3자 쿠키 -->
-    <div class="cookie-chapter">
-        <h2>{% trans "제4장: 제3자 쿠키" %}</h2>
-
-        <div class="cookie-article">
-            <h3>{% trans "제5조 (제3자 서비스)" %}</h3>
-            <p>{% trans "HypeHere는 서비스 제공을 위해 다음과 같은 제3자 서비스를 이용할 수 있으며, 해당 서비스들은 자체 쿠키 정책을 적용합니다:" %}</p>
-            <ul>
-                <li><strong>{% trans "AWS (Amazon Web Services)" %}</strong>: {% trans "클라우드 호스팅 및 서비스 제공" %}</li>
-                <li><strong>{% trans "Redis" %}</strong>: {% trans "세션 및 캐시 관리" %}</li>
-            </ul>
-            <p>{% trans "제3자 서비스의 쿠키 정책은 해당 서비스 제공자의 웹사이트에서 확인하실 수 있습니다." %}</p>
-        </div>
-    </div>
-
-    <!-- 제5장: 개인정보 보호 -->
-    <div class="cookie-chapter">
-        <h2>{% trans "제5장: 개인정보 보호" %}</h2>
-
-        <div class="cookie-article">
-            <h3>{% trans "제6조 (개인정보보호법 준수)" %}</h3>
-            <p>{% trans "HypeHere의 쿠키 사용은 대한민국 개인정보보호법 제30조 제1항 제7호에 따라 다음을 준수합니다:" %}</p>
-            <ul>
-                <li>{% trans "쿠키의 설치 및 작동 방식 공개" %}</li>
-                <li>{% trans "쿠키를 통한 개인정보 수집 사실 고지" %}</li>
-                <li>{% trans "쿠키 거부 방법 안내" %}</li>
-                <li>{% trans "필수가 아닌 쿠키에 대한 사용자 동의 획득" %}</li>
-            </ul>
-        </div>
-
-        <div class="cookie-article">
-            <h3>{% trans "제7조 (사용자의 권리)" %}</h3>
-            <p>{% trans "귀하는 다음과 같은 권리를 보유합니다:" %}</p>
-            <ul>
-                <li>{% trans "쿠키 허용 또는 거부 선택권" %}</li>
-                <li>{% trans "저장된 쿠키의 삭제 요청" %}</li>
-                <li>{% trans "쿠키를 통해 수집된 정보에 대한 열람 및 정정 요구권" %}</li>
-                <li>{% trans "쿠키 처리에 대한 동의 철회권" %}</li>
-            </ul>
-            <p>{% trans "쿠키 관련 문의사항은 고객지원을 통해 연락주시기 바랍니다." %}</p>
-        </div>
-
-        <div class="cookie-article">
-            <h3>{% trans "제8조 (정책 변경)" %}</h3>
-            <p>{% trans "본 쿠키 정책은 관련 법령 및 서비스 정책 변경에 따라 수정될 수 있습니다. 중요한 변경 사항이 있는 경우 서비스 공지사항을 통해 사전 고지하며, 변경된 정책은 공지 후 7일 이후부터 효력이 발생합니다." %}</p>
-            <p>{% trans "정책이 변경되는 경우 변경 사유 및 내용을 명시하여 공지하겠습니다." %}</p>
-        </div>
-    </div>
-
-    <!-- 관련 문서 링크 -->
-    <div class="cookie-footer">
-        <h3>{% trans "관련 문서" %}</h3>
-        <ul class="related-links">
-            <li><a href="{% url 'accounts:terms_of_service' %}">{% trans "이용약관" %}</a></li>
-            <li><a href="{% url 'accounts:privacy_policy' %}">{% trans "개인정보처리방침" %}</a></li>
-            <li><a href="{% url 'accounts:support_list' %}">{% trans "고객지원" %}</a></li>
-        </ul>
-    </div>
-
-    <!-- 뒤로가기 버튼 -->
-    <div class="cookie-back">
-        <a href="javascript:history.back();" class="btn-back">{% trans "뒤로가기" %}</a>
-    </div>
-</div>
 
 <style>
+.legal-document-header-wrapper {
+    position: relative;
+    max-width: 900px;
+    margin: 0 auto;
+    margin-bottom: var(--space-md);
+}
+
+.legal-edit-button {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-sm) var(--space-md);
+    background: var(--color-primary);
+    color: white;
+    text-decoration: none;
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.legal-edit-button:hover {
+    background: var(--color-primary-dark, #4338ca);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+}
+
 .cookie-container {
     max-width: 900px;
     margin: 0 auto;

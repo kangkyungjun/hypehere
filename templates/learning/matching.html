@@ -27,30 +27,8 @@
     <div class="matching-screen" id="preferences-screen">
         <div class="matching-card">
             <div class="matching-header">
-                <div class="matching-icon">
-                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                        <circle cx="9" cy="7" r="4"/>
-                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                    </svg>
-                </div>
                 <h1>{% trans "1:1 익명 랜덤 매칭" %}</h1>
                 <p class="subtitle">{% trans "전 세계 사람들과 실시간 영상/채팅을 나눠보세요" %}</p>
-
-                <!-- 안내 메시지 -->
-                <div class="info-box" style="margin-top: var(--space-lg); padding: var(--space-md); background: rgba(102, 126, 234, 0.1); border-radius: 8px; border-left: 4px solid var(--color-primary);">
-                    <div style="display: flex; gap: var(--space-sm); align-items: start;">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2" style="flex-shrink: 0; margin-top: 2px;">
-                            <circle cx="12" cy="12" r="10"/>
-                            <line x1="12" y1="16" x2="12" y2="12"/>
-                            <line x1="12" y1="8" x2="12.01" y2="8"/>
-                        </svg>
-                        <p style="margin: 0; font-size: 0.875rem; color: var(--color-text-light); line-height: 1.5;">
-                            {% trans "원하는 채팅 모드를 선택하면 같은 모드를 선택한 사람과 매칭됩니다." %}
-                        </p>
-                    </div>
-                </div>
             </div>
 
             <form id="matching-form" class="matching-form">

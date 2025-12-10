@@ -1,0 +1,512 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "법적 문서 편집" %} - {{ document_type_display }} ({{ language_display }}) - HypeHere{% endblock %}
+
+{% block content %}
+<div class="legal-edit-container">
+    <!-- Header -->
+    <div class="legal-edit-header">
+        <div class="header-info">
+            <h1>{{ document_type_display }}</h1>
+            <p class="document-meta">{{ language_display }} | {% trans "버전" %}: {{ document.version }}</p>
+        </div>
+        <a href="{% url 'accounts:legal_document_list' %}" class="btn btn-secondary">
+            {% trans "목록으로 돌아가기" %}
+        </a>
+    </div>
+
+    <div class="legal-edit-grid">
+        <!-- Editor Panel -->
+        <div class="editor-panel">
+            <h2 class="panel-title">{% trans "편집기" %}</h2>
+
+            <form id="legal-document-form" class="legal-form">
+                {% csrf_token %}
+
+                <!-- Title -->
+                <div class="form-group">
+                    <label for="title" class="form-label">
+                        {% trans "제목" %}
+                    </label>
+                    <input type="text"
+                           id="title"
+                           name="title"
+                           value="{{ document.title }}"
+                           class="form-input"
+                           required>
+                </div>
+
+                <!-- Content (HTML Textarea) -->
+                <div class="form-group">
+                    <label for="content" class="form-label">
+                        {% trans "내용" %} (HTML)
+                    </label>
+                    <textarea id="content"
+                              name="content"
+                              rows="20"
+                              class="form-textarea"
+                              required>{{ document.content }}</textarea>
+                    <p class="form-hint">
+                        {% trans "HTML 태그를 사용하여 서식을 지정할 수 있습니다." %}
+                    </p>
+                </div>
+
+                <!-- Version -->
+                <div class="form-group">
+                    <label for="version" class="form-label">
+                        {% trans "버전" %}
+                    </label>
+                    <input type="text"
+                           id="version"
+                           name="version"
+                           value="{{ document.version }}"
+                           placeholder="예: 1.0, 1.1, 2.0"
+                           class="form-input"
+                           required>
+                </div>
+
+                <!-- Effective Date -->
+                <div class="form-group">
+                    <label for="effective_date" class="form-label">
+                        {% trans "시행일" %}
+                    </label>
+                    <input type="date"
+                           id="effective_date"
+                           name="effective_date"
+                           value="{{ document.effective_date|date:'Y-m-d' }}"
+                           class="form-input"
+                           required>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="form-actions">
+                    <button type="submit" id="save-btn" class="btn btn-primary btn-large">
+                        {% trans "저장" %}
+                    </button>
+                    <button type="button" id="preview-btn" class="btn btn-secondary btn-large">
+                        {% trans "미리보기" %}
+                    </button>
+                </div>
+            </form>
+
+            <!-- Status Message -->
+            <div id="status-message" class="status-message" style="display: none;">
+                <div id="status-content"></div>
+            </div>
+        </div>
+
+        <!-- Preview Panel -->
+        <div class="preview-panel">
+            <div class="preview-header">
+                <h2 class="panel-title">{% trans "미리보기" %}</h2>
+                <button id="refresh-preview-btn" class="btn-link">
+                    {% trans "새로고침" %}
+                </button>
+            </div>
+
+            <div id="preview-content" class="preview-content">
+                {{ document.content|safe }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Version History Link -->
+    <div class="version-history-link">
+        <a href="{% url 'accounts:legal_document_versions' document_type language %}"
+           class="link-primary">
+            {% trans "버전 이력 보기" %}
+        </a>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('legal-document-form');
+    const saveBtn = document.getElementById('save-btn');
+    const previewBtn = document.getElementById('preview-btn');
+    const refreshPreviewBtn = document.getElementById('refresh-preview-btn');
+    const contentTextarea = document.getElementById('content');
+    const previewContent = document.getElementById('preview-content');
+    const statusMessage = document.getElementById('status-message');
+    const statusContent = document.getElementById('status-content');
+
+    // Show status message
+    function showStatus(message, isError = false) {
+        statusContent.textContent = message;
+        statusContent.className = isError ? 'status-error' : 'status-success';
+        statusMessage.style.display = 'block';
+
+        setTimeout(() => {
+            statusMessage.style.display = 'none';
+        }, 5000);
+    }
+
+    // Update preview
+    function updatePreview() {
+        const htmlContent = contentTextarea.value;
+        previewContent.innerHTML = htmlContent;
+    }
+
+    // Preview button click
+    previewBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        updatePreview();
+        showStatus('{% trans "미리보기가 업데이트되었습니다." %}');
+    });
+
+    // Refresh preview button
+    refreshPreviewBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        updatePreview();
+    });
+
+    // Form submit (Save document)
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const formData = {
+            title: document.getElementById('title').value,
+            content: contentTextarea.value,
+            version: document.getElementById('version').value,
+            effective_date: document.getElementById('effective_date').value
+        };
+
+        // Disable save button during request
+        saveBtn.disabled = true;
+        saveBtn.textContent = '{% trans "저장 중..." %}';
+
+        // Get CSRF token
+        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        // Send AJAX request
+        fetch('{% url "accounts:legal_document_save" document_type language %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showStatus('{% trans "문서가 성공적으로 저장되었습니다." %} (v' + data.version + ')');
+
+                // Update version display
+                document.getElementById('version').value = data.version;
+            } else {
+                showStatus(data.message || '{% trans "저장 중 오류가 발생했습니다." %}', true);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showStatus('{% trans "저장 중 오류가 발생했습니다." %}', true);
+        })
+        .finally(() => {
+            // Re-enable save button
+            saveBtn.disabled = false;
+            saveBtn.textContent = '{% trans "저장" %}';
+        });
+    });
+
+    // Auto-update preview on content change (debounced)
+    let previewTimeout;
+    contentTextarea.addEventListener('input', function() {
+        clearTimeout(previewTimeout);
+        previewTimeout = setTimeout(updatePreview, 1000);
+    });
+});
+</script>
+
+<style>
+/* Container */
+.legal-edit-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: var(--space-xl) var(--space-md);
+}
+
+/* Header */
+.legal-edit-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-xl);
+    padding-bottom: var(--space-lg);
+    border-bottom: 2px solid var(--color-border);
+}
+
+.header-info h1 {
+    font-size: var(--font-size-3xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text);
+    margin: 0 0 var(--space-xs) 0;
+}
+
+.document-meta {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-light);
+    margin: 0;
+}
+
+/* Two-Column Grid */
+.legal-edit-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-xl);
+}
+
+@media (min-width: 1024px) {
+    .legal-edit-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+/* Panels */
+.editor-panel,
+.preview-panel {
+    background: var(--color-surface);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: var(--space-lg);
+}
+
+.panel-title {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text);
+    margin: 0 0 var(--space-lg) 0;
+}
+
+/* Form Styles */
+.legal-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+.form-label {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text);
+}
+
+.form-input,
+.form-textarea {
+    width: 100%;
+    padding: var(--space-sm) var(--space-md);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-base);
+    color: var(--color-text);
+    background: var(--color-background);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-input:focus,
+.form-textarea:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.form-textarea {
+    font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+    font-size: var(--font-size-sm);
+    resize: vertical;
+    min-height: 400px;
+}
+
+.form-hint {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-light);
+    margin: 0;
+}
+
+/* Form Actions */
+.form-actions {
+    display: flex;
+    gap: var(--space-sm);
+    margin-top: var(--space-md);
+}
+
+.btn-large {
+    flex: 1;
+    padding: var(--space-md) var(--space-lg);
+}
+
+/* Status Message */
+.status-message {
+    margin-top: var(--space-lg);
+    padding: var(--space-md);
+    border-radius: var(--radius-md);
+}
+
+.status-success {
+    background: #d1fae5;
+    color: #065f46;
+    padding: var(--space-md);
+    border-radius: var(--radius-md);
+    border-left: 4px solid #10b981;
+}
+
+.status-error {
+    background: #fee2e2;
+    color: #991b1b;
+    padding: var(--space-md);
+    border-radius: var(--radius-md);
+    border-left: 4px solid #ef4444;
+}
+
+/* Preview Panel */
+.preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-lg);
+}
+
+.btn-link {
+    background: none;
+    border: none;
+    color: var(--color-primary);
+    font-size: var(--font-size-sm);
+    cursor: pointer;
+    padding: 0;
+    text-decoration: underline;
+}
+
+.btn-link:hover {
+    color: var(--color-primary-dark);
+}
+
+.preview-content {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+    min-height: 600px;
+    max-height: 800px;
+    overflow-y: auto;
+    background: var(--color-background);
+}
+
+/* Preview Content Styling */
+.preview-content h1 {
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text);
+    margin: 0 0 var(--space-lg) 0;
+    line-height: 1.2;
+}
+
+.preview-content h2 {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text);
+    margin: var(--space-xl) 0 var(--space-md) 0;
+    padding-bottom: var(--space-sm);
+    border-bottom: 2px solid var(--color-border);
+}
+
+.preview-content h3 {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text);
+    margin: var(--space-lg) 0 var(--space-sm) 0;
+}
+
+.preview-content p {
+    line-height: 1.8;
+    color: var(--color-text);
+    margin: var(--space-md) 0;
+}
+
+.preview-content ul,
+.preview-content ol {
+    margin: var(--space-md) 0;
+    padding-left: var(--space-xl);
+}
+
+.preview-content li {
+    line-height: 1.8;
+    color: var(--color-text);
+    margin: var(--space-xs) 0;
+}
+
+.preview-content strong {
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text);
+}
+
+.preview-content a {
+    color: var(--color-primary);
+    text-decoration: underline;
+}
+
+.preview-content a:hover {
+    color: var(--color-primary-dark);
+}
+
+/* Version History Link */
+.version-history-link {
+    text-align: center;
+    margin-top: var(--space-xl);
+    padding-top: var(--space-lg);
+    border-top: 1px solid var(--color-border);
+}
+
+.link-primary {
+    color: var(--color-primary);
+    text-decoration: none;
+    font-weight: var(--font-weight-medium);
+    transition: color 0.2s;
+}
+
+.link-primary:hover {
+    color: var(--color-primary-dark);
+    text-decoration: underline;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .legal-edit-container {
+        padding: var(--space-md);
+    }
+
+    .legal-edit-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-md);
+    }
+
+    .header-info h1 {
+        font-size: var(--font-size-2xl);
+    }
+
+    .editor-panel,
+    .preview-panel {
+        padding: var(--space-md);
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .btn-large {
+        width: 100%;
+    }
+
+    .preview-content {
+        max-height: 400px;
+    }
+}
+</style>
+
+{% endblock %}

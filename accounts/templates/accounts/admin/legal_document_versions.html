@@ -1,0 +1,271 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "버전 이력" %} - {{ document.title }} - HypeHere{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-6xl mx-auto">
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <h1 class="text-3xl font-bold">{% trans "버전 이력" %}</h1>
+                <p class="text-gray-600 mt-1">
+                    {{ document.get_document_type_display }} - {{ document.get_language_display }}
+                </p>
+            </div>
+            <div class="space-x-3">
+                <a href="{% url 'accounts:legal_document_edit' document.document_type document.language %}"
+                   class="btn btn-secondary">
+                    {% trans "편집 페이지로" %}
+                </a>
+                <a href="{% url 'accounts:legal_document_list' %}"
+                   class="btn btn-secondary">
+                    {% trans "목록으로" %}
+                </a>
+            </div>
+        </div>
+
+        {% if document %}
+        <!-- Current Version Card -->
+        <div class="bg-blue-50 border-l-4 border-blue-500 p-6 mb-6 rounded-md">
+            <div class="flex justify-between items-start">
+                <div>
+                    <h2 class="text-xl font-bold text-blue-900 mb-2">
+                        {% trans "현재 버전" %}: {{ document.version }}
+                    </h2>
+                    <div class="text-sm text-blue-800 space-y-1">
+                        <p><strong>{% trans "제목" %}:</strong> {{ document.title }}</p>
+                        <p><strong>{% trans "시행일" %}:</strong> {{ document.effective_date|date:"Y년 m월 d일" }}</p>
+                        <p><strong>{% trans "최종 수정" %}:</strong> {{ document.updated_at|date:"Y-m-d H:i" }}</p>
+                        {% if document.modified_by %}
+                        <p><strong>{% trans "수정자" %}:</strong> {{ document.modified_by.nickname }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                <button onclick="showVersionContent('current', {{ document.id }})"
+                        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                    {% trans "내용 보기" %}
+                </button>
+            </div>
+        </div>
+
+        <!-- Version History Table -->
+        {% if versions %}
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="text-lg font-bold">{% trans "이전 버전" %} ({{ versions.count }}개)</h2>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                {% trans "버전" %}
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                {% trans "저장 일시" %}
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                {% trans "저장자" %}
+                            </th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                {% trans "작업" %}
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for version in versions %}
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="text-sm font-medium text-gray-900">v{{ version.version }}</span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="text-sm text-gray-600">
+                                    {{ version.created_at|date:"Y-m-d H:i:s" }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="text-sm text-gray-600">
+                                    {% if version.created_by %}
+                                        {{ version.created_by.nickname }}
+                                    {% else %}
+                                        {% trans "알 수 없음" %}
+                                    {% endif %}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-center">
+                                <button onclick="showVersionContent('version', {{ version.id }})"
+                                        class="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700">
+                                    {% trans "내용 보기" %}
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% else %}
+        <div class="bg-gray-50 border border-gray-200 rounded-md p-6 text-center">
+            <p class="text-gray-600">{% trans "이전 버전이 없습니다." %}</p>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-md">
+            <p class="text-red-800">{% trans "문서를 찾을 수 없습니다." %}</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Version Content Modal -->
+<div id="version-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+    <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white">
+        <!-- Modal Header -->
+        <div class="flex justify-between items-center pb-3 border-b">
+            <h3 id="modal-title" class="text-xl font-bold text-gray-900">{% trans "문서 내용" %}</h3>
+            <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="mt-4">
+            <div id="modal-content" class="prose max-w-none border border-gray-200 rounded-md p-4 max-h-96 overflow-y-auto">
+                <!-- Content will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="flex justify-end pt-4 border-t mt-4">
+            <button onclick="closeModal()"
+                    class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700">
+                {% trans "닫기" %}
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+// Version content data embedded from Django template
+const versionData = {
+    current: `{{ document.content|escapejs }}`,
+    versions: {
+        {% for version in versions %}
+        {{ version.id }}: `{{ version.content|escapejs }}`,
+        {% endfor %}
+    }
+};
+
+function showVersionContent(type, id) {
+    const modal = document.getElementById('version-modal');
+    const modalTitle = document.getElementById('modal-title');
+    const modalContent = document.getElementById('modal-content');
+
+    if (type === 'current') {
+        modalTitle.textContent = '{% trans "현재 버전" %}: v{{ document.version }}';
+        modalContent.innerHTML = versionData.current;
+    } else if (type === 'version') {
+        const content = versionData.versions[id];
+        if (content) {
+            // Find version info
+            const versionElement = event.target.closest('tr');
+            const versionNum = versionElement.querySelector('td:first-child').textContent.trim();
+            const versionDate = versionElement.querySelector('td:nth-child(2)').textContent.trim();
+
+            modalTitle.textContent = `${versionNum} (${versionDate})`;
+            modalContent.innerHTML = content;
+        }
+    }
+
+    modal.classList.remove('hidden');
+}
+
+function closeModal() {
+    const modal = document.getElementById('version-modal');
+    modal.classList.add('hidden');
+}
+
+// Close modal when clicking outside
+document.getElementById('version-modal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeModal();
+    }
+});
+
+// Close modal with Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeModal();
+    }
+});
+</script>
+
+<style>
+/* Prose styles for modal content (same as edit page) */
+.prose {
+    color: #374151;
+    max-width: 65ch;
+}
+
+.prose h1 {
+    font-size: 2.25em;
+    margin-top: 0;
+    margin-bottom: 0.8888889em;
+    line-height: 1.1111111;
+    font-weight: 800;
+}
+
+.prose h2 {
+    font-size: 1.5em;
+    margin-top: 2em;
+    margin-bottom: 1em;
+    line-height: 1.3333333;
+    font-weight: 700;
+}
+
+.prose h3 {
+    font-size: 1.25em;
+    margin-top: 1.6em;
+    margin-bottom: 0.6em;
+    line-height: 1.6;
+    font-weight: 600;
+}
+
+.prose p {
+    margin-top: 1.25em;
+    margin-bottom: 1.25em;
+    line-height: 1.75;
+}
+
+.prose ul, .prose ol {
+    margin-top: 1.25em;
+    margin-bottom: 1.25em;
+    padding-left: 1.625em;
+}
+
+.prose li {
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+}
+
+.prose strong {
+    font-weight: 600;
+}
+
+.prose a {
+    color: #2563eb;
+    text-decoration: underline;
+}
+
+.prose a:hover {
+    color: #1d4ed8;
+}
+</style>
+
+{% endblock %}

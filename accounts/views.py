@@ -39,6 +39,13 @@ from posts.admin_actions import (
     handle_comment_report_delete,
     handle_comment_report_dismiss
 )
+# Legal Document Management imports
+from .models import LegalDocument, LegalDocumentVersion
+from .decorators import prime_or_superuser_required
+from django.http import JsonResponse
+from django.utils.translation import get_language
+from django.utils.decorators import method_decorator
+import json
 
 User = get_user_model()
 
@@ -638,6 +645,38 @@ class AccountManagementTemplateView(LoginRequiredMixin, TemplateView):
     """
     template_name = 'accounts/account_management.html'
     login_url = reverse_lazy('accounts:login')
+
+
+class TermsOfServiceView(TemplateView):
+    """
+    HTML view for Terms of Service (public access, no login required)
+    GET /accounts/terms/
+    """
+    template_name = 'accounts/legal/terms_of_service.html'
+
+
+class PrivacyPolicyView(TemplateView):
+    """
+    HTML view for Privacy Policy (public access, no login required)
+    GET /accounts/privacy/
+    """
+    template_name = 'accounts/legal/privacy_policy.html'
+
+
+class CookiePolicyView(TemplateView):
+    """
+    HTML view for Cookie Policy (public access, no login required)
+    GET /accounts/cookies/
+    """
+    template_name = 'accounts/legal/cookie_policy.html'
+
+
+class CommunityGuidelinesView(TemplateView):
+    """
+    HTML view for Community Guidelines (public access, no login required)
+    GET /accounts/community-guidelines/
+    """
+    template_name = 'accounts/legal/community_guidelines.html'
 
 
 # ==========================================
@@ -1844,3 +1883,362 @@ class UserReportCreateView(generics.CreateAPIView):
     def perform_create(self, serializer):
         """Set the reporter to the current user"""
         serializer.save(reporter=self.request.user)
+
+
+# ========== Legal Document Management Views ==========
+
+class LegalDocumentListView(TemplateView):
+    """List all legal documents (Prime/Superuser only)"""
+    template_name = 'accounts/admin/legal_document_list.html'
+
+    @method_decorator(prime_or_superuser_required)
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Group documents by type and language
+        documents = {}
+        for doc_type, doc_name in LegalDocument.DOCUMENT_TYPES:
+            documents[doc_type] = {}
+            for lang_code, lang_name in LegalDocument.LANGUAGE_CHOICES:
+                doc = LegalDocument.objects.filter(
+                    document_type=doc_type,
+                    language=lang_code,
+                    is_active=True
+                ).first()
+                documents[doc_type][lang_code] = doc
+
+        context['documents'] = documents
+        context['document_types'] = LegalDocument.DOCUMENT_TYPES
+        context['languages'] = LegalDocument.LANGUAGE_CHOICES
+        return context
+
+
+class LegalDocumentEditView(TemplateView):
+    """Edit a legal document (Prime/Superuser only)"""
+    template_name = 'accounts/admin/legal_document_edit.html'
+
+    @method_decorator(prime_or_superuser_required)
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        doc_type = kwargs.get('document_type')
+        language = kwargs.get('language')
+
+        # Get or create document
+        document, created = LegalDocument.objects.get_or_create(
+            document_type=doc_type,
+            language=language,
+            is_active=True,
+            defaults={
+                'title': dict(LegalDocument.DOCUMENT_TYPES).get(doc_type, ''),
+                'content': '',
+                'version': '1.0',
+                'effective_date': timezone.now().date(),
+                'created_by': self.request.user
+            }
+        )
+
+        context['document'] = document
+        context['document_type_display'] = dict(LegalDocument.DOCUMENT_TYPES).get(doc_type)
+        context['language_display'] = dict(LegalDocument.LANGUAGE_CHOICES).get(language)
+        return context
+
+
+class LegalDocumentSaveView(View):
+    """Save legal document changes (POST only, Prime/Superuser only)"""
+
+    @method_decorator(prime_or_superuser_required)
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
+
+    def post(self, request, document_type, language):
+        try:
+            data = json.loads(request.body)
+
+            # Parse effective_date from string to date object
+            from datetime import datetime
+            effective_date_str = data.get('effective_date')
+            effective_date = datetime.strptime(effective_date_str, '%Y-%m-%d').date() if effective_date_str else timezone.now().date()
+
+            # Get or create document
+            document, created = LegalDocument.objects.get_or_create(
+                document_type=document_type,
+                language=language,
+                is_active=True,
+                defaults={
+                    'created_by': request.user,
+                    'title': data.get('title', ''),
+                    'content': data.get('content', ''),
+                    'version': data.get('version', '1.0'),
+                    'effective_date': effective_date
+                }
+            )
+
+            # Update fields
+            document.title = data.get('title', document.title)
+            document.content = data.get('content', '')
+            document.version = data.get('version', document.version)
+            document.effective_date = effective_date
+            document.modified_by = request.user
+
+            # Save (automatically creates version history via model's save method)
+            document.save()
+
+            return JsonResponse({
+                'success': True,
+                'message': '문서가 성공적으로 저장되었습니다.',
+                'version': document.version,
+                'updated_at': document.updated_at.isoformat()
+            })
+
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'message': f'저장 중 오류가 발생했습니다: {str(e)}'
+            }, status=400)
+
+
+class LegalDocumentVersionListView(TemplateView):
+    """View version history of a legal document (Prime/Superuser only)"""
+    template_name = 'accounts/admin/legal_document_versions.html'
+
+    @method_decorator(prime_or_superuser_required)
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        doc_type = kwargs.get('document_type')
+        language = kwargs.get('language')
+
+        document = LegalDocument.objects.filter(
+            document_type=doc_type,
+            language=language,
+            is_active=True
+        ).first()
+
+        if document:
+            context['document'] = document
+            context['versions'] = document.versions.all()
+
+        return context
+
+
+# ========== Modified Legal Document Views (load from DB first, fallback to templates) ==========
+
+class TermsOfServiceView(TemplateView):
+    template_name = 'accounts/legal/terms_of_service.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        lang = get_language()
+        document = LegalDocument.objects.filter(
+            document_type='terms',
+            language=lang,
+            is_active=True
+        ).first()
+        if document:
+            context['document'] = document
+            context['use_database'] = True
+        else:
+            context['use_database'] = False
+        return context
+
+
+class PrivacyPolicyView(TemplateView):
+    template_name = 'accounts/legal/privacy_policy.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        lang = get_language()
+        document = LegalDocument.objects.filter(
+            document_type='privacy',
+            language=lang,
+            is_active=True
+        ).first()
+        if document:
+            context['document'] = document
+            context['use_database'] = True
+        else:
+            context['use_database'] = False
+        return context
+
+
+class CookiePolicyView(TemplateView):
+    template_name = 'accounts/legal/cookie_policy.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        lang = get_language()
+        document = LegalDocument.objects.filter(
+            document_type='cookies',
+            language=lang,
+            is_active=True
+        ).first()
+        if document:
+            context['document'] = document
+            context['use_database'] = True
+        else:
+            context['use_database'] = False
+        return context
+
+
+class CommunityGuidelinesView(TemplateView):
+    template_name = 'accounts/legal/community_guidelines.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        lang = get_language()
+        document = LegalDocument.objects.filter(
+            document_type='community',
+            language=lang,
+            is_active=True
+        ).first()
+        if document:
+            context['document'] = document
+            context['use_database'] = True
+        else:
+            context['use_database'] = False
+        return context
+
+
+class LegalDocumentEditView(LoginRequiredMixin, UserPassesTestMixin, View):
+    """법적 문서 편집 뷰"""
+
+    def test_func(self):
+        """superuser만 접근 가능"""
+        return self.request.user.is_superuser
+
+    def get(self, request, document_type):
+        """편집 페이지 GET 요청"""
+        from accounts.forms import LegalDocumentForm
+
+        lang = get_language()
+
+        # Redirect old singular forms to correct forms for backwards compatibility
+        type_redirect_map = {
+            'cookie': 'cookies',
+        }
+        if document_type in type_redirect_map:
+            correct_type = type_redirect_map[document_type]
+            return redirect(f'/accounts/legal/{correct_type}/edit/')
+
+        # 기존 문서 조회
+        document = LegalDocument.objects.filter(
+            document_type=document_type,
+            language=lang,
+            is_active=True
+        ).first()
+
+        form = LegalDocumentForm(instance=document) if document else LegalDocumentForm()
+
+        # Document type display names
+        type_display_map = {
+            'terms': '이용약관',
+            'privacy': '개인정보처리방침',
+            'cookies': '쿠키 정책',
+            'community': '커뮤니티 가이드라인',
+        }
+
+        # Language display names
+        lang_display_map = {
+            'ko': '한국어',
+            'en': 'English',
+            'ja': '日本語',
+            'es': 'Español',
+        }
+
+        context = {
+            'form': form,
+            'document_type': document_type,
+            'document': document,
+            'language': lang,
+            'use_database': True if document else False,
+            'document_type_display': type_display_map.get(document_type, document_type),
+            'language_display': lang_display_map.get(lang, lang),
+        }
+
+        return render(request, 'accounts/admin/legal_document_edit.html', context)
+
+    def post(self, request, document_type):
+        """편집 페이지 POST 요청"""
+        from accounts.forms import LegalDocumentForm
+        from django.utils.translation import get_language
+        from decimal import Decimal
+
+        lang = get_language()
+
+        # 기존 문서 조회
+        existing_document = LegalDocument.objects.filter(
+            document_type=document_type,
+            language=lang,
+            is_active=True
+        ).first()
+
+        form = LegalDocumentForm(request.POST)
+
+        if form.is_valid():
+            # 새 문서 생성 (버전 관리)
+            new_document = form.save(commit=False)
+            new_document.document_type = document_type
+            new_document.language = lang
+            new_document.is_active = True
+
+            # 버전 자동 증가
+            if existing_document:
+                try:
+                    old_version = Decimal(existing_document.version)
+                    new_document.version = str(old_version + Decimal('0.1'))
+                except:
+                    new_document.version = '1.0'
+
+                # 기존 문서 비활성화
+                existing_document.is_active = False
+                existing_document.save()
+            else:
+                new_document.version = '1.0'
+
+            new_document.save()
+
+            messages.success(request, f'{document_type} 문서가 성공적으로 저장되었습니다.')
+
+            # 해당 문서 페이지로 리다이렉트
+            redirect_map = {
+                'terms': 'accounts:terms',
+                'privacy': 'accounts:privacy',
+                'cookies': 'accounts:cookies',
+                'community_guidelines': 'accounts:community_guidelines',
+                'community': 'accounts:community_guidelines',  # Backwards compatibility
+            }
+            return redirect(redirect_map.get(document_type, 'home'))
+
+        # Document type display names
+        type_display_map = {
+            'terms': '이용약관',
+            'privacy': '개인정보처리방침',
+            'cookies': '쿠키 정책',
+            'community': '커뮤니티 가이드라인',
+        }
+
+        # Language display names
+        lang_display_map = {
+            'ko': '한국어',
+            'en': 'English',
+            'ja': '日本語',
+            'es': 'Español',
+        }
+
+        context = {
+            'form': form,
+            'document_type': document_type,
+            'document': existing_document,
+            'language': lang,
+            'document_type_display': type_display_map.get(document_type, document_type),
+            'language_display': lang_display_map.get(lang, lang),
+        }
+
+        return render(request, 'accounts/admin/legal_document_edit.html', context)

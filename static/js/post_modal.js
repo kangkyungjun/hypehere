@@ -256,6 +256,7 @@ if (postForm) {
                     'Content-Type': 'application/json',
                     'X-CSRFToken': csrftoken
                 },
+                credentials: 'same-origin',
                 body: JSON.stringify(data)
             });
 
