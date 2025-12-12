@@ -63,8 +63,12 @@ INSTALLED_APPS = [
     "notifications",
     "learning",
     "analytics",  # Admin dashboard and analytics
-    "lotto",  # Lottery functionality (local only - excluded from AWS via .gitignore)
 ]
+
+# Conditionally add lotto app (only if directory exists - local development only)
+import os
+if os.path.exists(BASE_DIR / 'lotto'):
+    INSTALLED_APPS.append("lotto")  # Lottery functionality (local only - excluded from AWS via .gitignore)
 
 # Add django-storages only in production (when installed)
 if not DEBUG:
