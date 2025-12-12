@@ -63,6 +63,7 @@ INSTALLED_APPS = [
     "notifications",
     "learning",
     "analytics",  # Admin dashboard and analytics
+    "lotto",  # Lottery functionality (local only - excluded from AWS via .gitignore)
 ]
 
 # Add django-storages only in production (when installed)
