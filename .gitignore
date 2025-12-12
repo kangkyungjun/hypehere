@@ -45,3 +45,15 @@ staticfiles/
 .coverage
 htmlcov/
 .pytest_cache/
+
+# Lotto app - exclude from git and AWS deployment
+lotto/
+analytics/api_views.py
+
+# Lotto migration files
+**/migrations/*lotto*.py
+**/migrations/*lottery*.py
+
+# Lotto related files
+*lotto*
+*lottery*
