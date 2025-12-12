@@ -63,7 +63,6 @@ INSTALLED_APPS = [
     "notifications",
     "learning",
     "analytics",  # Admin dashboard and analytics
-    "lotto",  # Lotto number management system
 ]
 
 # Add django-storages only in production (when installed)
