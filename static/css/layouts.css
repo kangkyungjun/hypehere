@@ -840,8 +840,8 @@ body {
 
 /* 여러 이미지: 각 이미지가 약 48% 폭 차지 (2개 동시 표시) */
 .post-images-gallery.multiple-images .post-feed-image {
-  width: calc(50% - var(--space-xs) / 2);  /* 2개가 한 화면에 */
-  min-width: calc(50% - var(--space-xs) / 2);
+  width: calc((100% - var(--space-xs)) / 2);  /* 2개가 한 화면에 */
+  min-width: calc((100% - var(--space-xs)) / 2);
   height: 140px;  /* 고정 높이로 일관성 */
   max-height: 140px;
   object-fit: cover;

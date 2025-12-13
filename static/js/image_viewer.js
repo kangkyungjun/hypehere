@@ -254,9 +254,17 @@ class ImageViewer {
             this.currentIndex = 0;
         }
 
+        // Save scroll position
+        this.scrollY = window.scrollY || window.pageYOffset;
+
+        // iOS/Mobile compatible body scroll lock
+        document.body.style.overflow = 'hidden';
+        document.body.style.position = 'fixed';
+        document.body.style.top = `-${this.scrollY}px`;
+        document.body.style.width = '100%';
+
         // Show the modal
         this.modal.classList.remove('hidden');
-        document.body.style.overflow = 'hidden'; // Prevent body scroll
 
         // Display the image
         this.displayCurrentImage();
@@ -269,7 +277,15 @@ class ImageViewer {
         if (!this.modal) return;
 
         this.modal.classList.add('hidden');
-        document.body.style.overflow = ''; // Restore body scroll
+
+        // iOS/Mobile compatible body scroll restoration
+        document.body.style.overflow = '';
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+
+        // Restore scroll position
+        window.scrollTo(0, this.scrollY || 0);
 
         // Reset zoom
         this.resetZoom();
@@ -286,7 +302,7 @@ class ImageViewer {
         this.currentIndex = (this.currentIndex - 1 + this.images.length) % this.images.length;
         this.resetZoom();
         this.applyTransform();
-        this.displayCurrentImage();
+        this.displayCurrentImage('left'); // Slide from left
         this.updateNavigation();
     }
 
@@ -296,16 +312,44 @@ class ImageViewer {
         this.currentIndex = (this.currentIndex + 1) % this.images.length;
         this.resetZoom();
         this.applyTransform();
-        this.displayCurrentImage();
+        this.displayCurrentImage('right'); // Slide from right
         this.updateNavigation();
     }
 
-    displayCurrentImage() {
+    displayCurrentImage(direction = null) {
         if (!this.viewerImage || this.images.length === 0) return;
 
         const currentImage = this.images[this.currentIndex];
-        this.viewerImage.src = currentImage.src;
-        this.viewerImage.alt = currentImage.alt || 'Enlarged image';
+
+        // If no direction (initial load), just set image without animation
+        if (!direction) {
+            this.viewerImage.src = currentImage.src;
+            this.viewerImage.alt = currentImage.alt || 'Enlarged image';
+            return;
+        }
+
+        // Fade-out → swap → fade-in with slide animation
+        this.viewerImage.classList.add('fade-out');
+
+        setTimeout(() => {
+            // Swap image source
+            this.viewerImage.src = currentImage.src;
+            this.viewerImage.alt = currentImage.alt || 'Enlarged image';
+
+            // Wait for image to load, then fade-in with slide
+            this.viewerImage.onload = () => {
+                this.viewerImage.classList.remove('fade-out');
+
+                // Add directional slide animation
+                const slideClass = direction === 'left' ? 'slide-from-left' : 'slide-from-right';
+                this.viewerImage.classList.add(slideClass);
+
+                // Remove animation class after animation completes
+                setTimeout(() => {
+                    this.viewerImage.classList.remove(slideClass);
+                }, 400); // Match animation duration
+            };
+        }, 300); // Match fade-out transition duration
     }
 
     updateNavigation() {
