@@ -299,7 +299,7 @@
                          data-post-index="{{ forloop.counter0 }}"
                          data-author-username="{{ post.author.username }}">
                         <!-- Thumbnail Container -->
-                        <div class="post-thumbnail">
+                        <div class="post-thumbnail{% if post.images.exists %} has-image{% endif %}">
                             {% if is_own_profile %}
                             <!-- 게시물 옵션 버튼 (본인 프로필에서만 표시) -->
                             <button type="button"
@@ -313,6 +313,21 @@
                                     <circle cx="19" cy="12" r="2"/>
                                 </svg>
                             </button>
+                            {% endif %}
+
+                            {% if post.images.exists %}
+                            <!-- Image Thumbnail -->
+                            <div class="post-grid-image">
+                                <img src="{{ post.images.first.image.url }}" alt="Post image">
+                                {% if post.images.count > 1 %}
+                                <div class="post-grid-image-counter">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="3" y="3" width="18" height="18" rx="2"/><rect x="7" y="7" width="10" height="10" rx="1"/>
+                                    </svg>
+                                    {{ post.images.count }}
+                                </div>
+                                {% endif %}
+                            </div>
                             {% endif %}
 
                             <!-- Text Preview -->
@@ -698,6 +713,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 검색 기능 초기화
     PostSearch.init();
+
+    // 이미지 뷰어 클릭 기능 활성화
+    if (typeof attachImageViewers === 'function') {
+        attachImageViewers('.post-grid-image img');
+    }
 });
 </script>
 

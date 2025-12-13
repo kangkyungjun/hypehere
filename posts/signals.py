@@ -3,8 +3,12 @@ Signal handlers for post report moderation and post image optimization
 """
 from django.db.models.signals import post_save, pre_save, post_delete
 from django.dispatch import receiver
+from django.core.files.storage import default_storage
 from .models import PostReport
 import os
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 @receiver(pre_save, sender=PostReport)
@@ -82,16 +86,19 @@ def optimize_post_image_on_save(sender, instance, **kwargs):
 
             # Check if image is being changed
             if old_instance.image and old_instance.image != instance.image:
-                # Delete old file from storage
-                if os.path.isfile(old_instance.image.path):
-                    os.remove(old_instance.image.path)
+                # Delete old file from storage (S3-compatible)
+                try:
+                    if default_storage.exists(old_instance.image.name):
+                        default_storage.delete(old_instance.image.name)
+                except Exception as delete_error:
+                    logger.error(f"Error deleting old post image: {delete_error}")
 
         except sender.DoesNotExist:
             # New image being created, no old file to delete
             pass
         except Exception as e:
             # Log error but don't block save operation
-            print(f"Error deleting old post image: {e}")
+            logger.error(f"Error during post image replacement: {e}")
 
 
 @receiver(post_delete, sender='posts.PostImage')
@@ -105,9 +112,9 @@ def delete_post_image_on_delete(sender, instance, **kwargs):
     """
     try:
         if instance.image:
-            # Check if file exists before trying to delete
-            if os.path.isfile(instance.image.path):
-                os.remove(instance.image.path)
+            # Check if file exists before trying to delete (S3-compatible)
+            if default_storage.exists(instance.image.name):
+                default_storage.delete(instance.image.name)
     except Exception as e:
         # Log error but don't raise exception (image is already deleted from DB)
-        print(f"Error deleting post image file: {e}")
+        logger.error(f"Error deleting post image file: {e}")

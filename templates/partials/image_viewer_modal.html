@@ -1,0 +1,37 @@
+{% load static %}
+{% load i18n %}
+
+<!-- Image Viewer Modal -->
+<div id="image-viewer-modal" class="image-viewer-overlay hidden">
+    <!-- 닫기 버튼 -->
+    <button type="button" class="image-viewer-close" id="close-image-viewer" aria-label="{% trans '닫기' %}">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+    </button>
+
+    <!-- 이전 이미지 버튼 -->
+    <button type="button" class="image-nav-button image-nav-prev" id="prev-image-btn" aria-label="{% trans '이전 이미지' %}">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+            <polyline points="15 18 9 12 15 6"/>
+        </svg>
+    </button>
+
+    <!-- 다음 이미지 버튼 -->
+    <button type="button" class="image-nav-button image-nav-next" id="next-image-btn" aria-label="{% trans '다음 이미지' %}">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+            <polyline points="9 18 15 12 9 6"/>
+        </svg>
+    </button>
+
+    <!-- 이미지 컨테이너 -->
+    <div class="image-viewer-container">
+        <img id="viewer-image" src="" alt="{% trans '확대된 이미지' %}" class="viewer-image">
+
+        <!-- 이미지 카운터 (여러 이미지가 있을 때만 표시) -->
+        <div class="viewer-image-counter hidden" id="viewer-image-counter">
+            <span id="current-image-index">1</span> / <span id="total-images-count">1</span>
+        </div>
+    </div>
+</div>

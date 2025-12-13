@@ -21,6 +21,7 @@
     <link rel="stylesheet" href="{% static 'css/post_delete_modal.css' %}">
     <link rel="stylesheet" href="{% static 'css/alert_modal.css' %}">
     <link rel="stylesheet" href="{% static 'css/post_share.css' %}">
+    <link rel="stylesheet" href="{% static 'css/image_viewer_modal.css' %}">
     {% block extra_css %}{% endblock %}
 </head>
 <body class="{% block body_class %}{% endblock %}"{% if user.is_authenticated %} data-user-id="{{ user.id }}"{% endif %}>
@@ -68,6 +69,9 @@
 
     <!-- Block User Modal (always loaded for JavaScript) -->
     {% include 'partials/block_user_modal.html' %}
+
+    <!-- Image Viewer Modal -->
+    {% include 'partials/image_viewer_modal.html' %}
 
     <!-- Mobile Navigation -->
     <nav class="mobile-nav">
@@ -505,6 +509,9 @@
         };
     </script>
     <script src="{% static 'js/post_share.js' %}"></script>
+
+    <!-- Image Viewer Modal -->
+    <script src="{% static 'js/image_viewer.js' %}"></script>
 
     <!-- Post Interaction Tracker (for recommendation system) -->
     {% if user.is_authenticated %}

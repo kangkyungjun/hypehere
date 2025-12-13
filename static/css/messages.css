@@ -154,6 +154,16 @@
     z-index: 10;
 }
 
+/* Conversation Page: Fixed Header */
+.conversation-page .chat-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    height: 72px; /* 헤더 고정 높이 */
+}
+
 .back-button {
     display: flex;
     align-items: center;
@@ -279,6 +289,17 @@
     flex-direction: column;
     gap: var(--space-sm);
     background: #FAF9FC;
+}
+
+/* Conversation Page: Fixed Messages List */
+.conversation-page .messages-list {
+    position: fixed;
+    top: 72px; /* 헤더 높이 */
+    bottom: 72px; /* 입력창 높이 */
+    left: 0;
+    right: 0;
+    padding: var(--space-lg);
+    flex: none; /* flex: 1 제거 */
 }
 
 .message-item {
@@ -467,11 +488,7 @@
     will-change: transform;    /* ✅ 브라우저 최적화 힌트 */
 }
 
-/* 메시지가 입력창 아래로 가지 않도록 하단 여백 확보 */
-.conversation-page .messages-list {
-    padding-bottom: calc(3.5rem + env(safe-area-inset-bottom));
-    /* 3.5rem = 56px (입력창 실제 높이 최적화) */
-}
+/* Conversation Page: 기존 padding-bottom 보정 제거 (fixed 포지셔닝으로 해결됨) */
 
 /* conversation-page에서 body 상단 여백 제거 */
 body.conversation-page {

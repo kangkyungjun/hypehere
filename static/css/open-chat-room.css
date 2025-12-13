@@ -163,12 +163,13 @@
    Messages Container
    ========================================== */
 .messages-container {
-  flex: 1;
+  position: fixed;  /* 랜덤 1:1 채팅 방식 */
+  top: 72px;  /* 헤더 고정 높이 */
+  bottom: 72px;  /* 입력창 고정 높이 */
+  left: 0;
+  right: 0;
   overflow-y: auto;
   padding: var(--space-lg);
-  padding-top: 80px;  /* 헤더 높이(72px) + 여유(8px) */
-  /* 입력창 높이 + 세이프 에어리어 고려 */
-  padding-bottom: calc(80px + env(safe-area-inset-bottom));
   min-height: 0;
   overscroll-behavior: contain;
   display: flex;

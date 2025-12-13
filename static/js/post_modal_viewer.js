@@ -187,6 +187,36 @@ class PostModalViewer {
         }
         content.innerHTML = postContent.replace(/\n/g, '<br>');
 
+        // 이미지 렌더링
+        const imagesContainer = document.getElementById('modal-post-images');
+        const imagesGallery = document.getElementById('images-gallery');
+        const imageCounter = document.getElementById('image-counter');
+
+        imagesGallery.innerHTML = '';
+        imageCounter.innerHTML = '';
+
+        if (post.images && post.images.length > 0) {
+            // 이미지 컨테이너 표시
+            imagesContainer.classList.remove('hidden');
+
+            // 각 이미지 추가
+            post.images.forEach((imageObj, index) => {
+                const img = document.createElement('img');
+                img.src = imageObj.image;
+                img.alt = `Post image ${index + 1}`;
+                img.className = 'post-modal-image';
+                imagesGallery.appendChild(img);
+            });
+
+            // 이미지 개수 표시 (2개 이상일 때만)
+            if (post.images.length > 1) {
+                imageCounter.textContent = `1/${post.images.length}`;
+            }
+        } else {
+            // 이미지 없으면 숨김
+            imagesContainer.classList.add('hidden');
+        }
+
         // 해시태그
         const hashtagsContainer = document.getElementById('modal-hashtags');
         hashtagsContainer.innerHTML = '';

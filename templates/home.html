@@ -82,6 +82,22 @@
                 </div>
             </div>
 
+            <!-- Post Images (if any) -->
+            {% if post.images.exists %}
+            <div class="post-images-container">
+                <div class="post-images-gallery {% if post.images.count == 1 %}single-image{% else %}multiple-images{% endif %}">
+                    {% for image in post.images.all %}
+                    <img src="{{ image.image.url }}"
+                         alt="Post image {{ forloop.counter }}"
+                         class="post-feed-image">
+                    {% endfor %}
+                </div>
+                {% if post.images.count > 1 %}
+                <div class="image-counter">1/{{ post.images.count }}</div>
+                {% endif %}
+            </div>
+            {% endif %}
+
             <div class="post-content">
                 <p>{{ post.content|linebreaksbr }}</p>
                 {% if post.hashtags.exists %}
@@ -250,6 +266,11 @@
 
             // URL에서 쿼리 파라미터 제거 (뒤로가기 시 모달 재오픈 방지)
             window.history.replaceState({}, '', window.location.pathname);
+        }
+
+        // 이미지 뷰어 클릭 기능 활성화
+        if (typeof attachImageViewers === 'function') {
+            attachImageViewers('.post-feed-image');
         }
     });
 </script>
