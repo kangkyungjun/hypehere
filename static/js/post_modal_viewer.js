@@ -17,6 +17,10 @@ class PostModalViewer {
         this.currentUser = window.CURRENT_USER;  // 현재 로그인한 사용자
         this.currentAuthorUsername = null;  // 현재 게시물 작성자
 
+        // Performance optimization: Post data caching
+        this.postCache = new Map();  // Cache for API responses
+        this.imageCache = new Map();  // Cache for preloaded images
+
         this.init();
     }
 
@@ -111,11 +115,23 @@ class PostModalViewer {
     }
 
     /**
-     * API에서 포스트 상세 데이터 가져오기
+     * API에서 포스트 상세 데이터 가져오기 (캐싱 적용)
      * @param {number} postId - 포스트 ID
      */
     async loadPostContent(postId) {
         if (window.DEBUG) console.log('[PostModalViewer] loadPostContent 시작 - postId:', postId);
+
+        // Check cache first
+        if (this.postCache.has(postId)) {
+            if (window.DEBUG) console.log('[PostModalViewer] 캐시에서 불러옴:', postId);
+            const cachedPost = this.postCache.get(postId);
+            this.renderPost(cachedPost);
+            // Preload adjacent posts in background
+            this.preloadAdjacentPosts();
+            return;
+        }
+
+        // Cache miss - fetch from API
         try {
             const url = `/api/posts/${postId}/`;
             if (window.DEBUG) console.log('[PostModalViewer] API 호출:', url);
@@ -128,12 +144,84 @@ class PostModalViewer {
 
             const post = await response.json();
             if (window.DEBUG) console.log('[PostModalViewer] API 응답 데이터:', post);
+
+            // Store in cache
+            this.postCache.set(postId, post);
+
             this.renderPost(post);
+
+            // Preload adjacent posts in background
+            this.preloadAdjacentPosts();
         } catch (error) {
             console.error('[PostModalViewer] loadPostContent 오류:', error);
             alert('포스트를 불러오는 중 오류가 발생했습니다.');
             this.closeModal();
         }
+    }
+
+    /**
+     * 인접한 게시물 미리 로드 (백그라운드)
+     */
+    async preloadAdjacentPosts() {
+        const prevIndex = this.currentIndex - 1;
+        const nextIndex = this.currentIndex + 1;
+
+        // Preload previous post
+        if (prevIndex >= 0 && prevIndex < this.posts.length) {
+            const prevPostId = this.posts[prevIndex].id;
+            if (!this.postCache.has(prevPostId)) {
+                try {
+                    const response = await fetch(`/api/posts/${prevPostId}/`);
+                    if (response.ok) {
+                        const post = await response.json();
+                        this.postCache.set(prevPostId, post);
+                        this.preloadPostImages(post);
+                        if (window.DEBUG) console.log('[PostModalViewer] 이전 게시물 프리로드 완료:', prevPostId);
+                    }
+                } catch (error) {
+                    // Silent fail for background preloading
+                    if (window.DEBUG) console.log('[PostModalViewer] 이전 게시물 프리로드 실패:', error);
+                }
+            }
+        }
+
+        // Preload next post
+        if (nextIndex >= 0 && nextIndex < this.posts.length) {
+            const nextPostId = this.posts[nextIndex].id;
+            if (!this.postCache.has(nextPostId)) {
+                try {
+                    const response = await fetch(`/api/posts/${nextPostId}/`);
+                    if (response.ok) {
+                        const post = await response.json();
+                        this.postCache.set(nextPostId, post);
+                        this.preloadPostImages(post);
+                        if (window.DEBUG) console.log('[PostModalViewer] 다음 게시물 프리로드 완료:', nextPostId);
+                    }
+                } catch (error) {
+                    // Silent fail for background preloading
+                    if (window.DEBUG) console.log('[PostModalViewer] 다음 게시물 프리로드 실패:', error);
+                }
+            }
+        }
+    }
+
+    /**
+     * 게시물의 이미지들 미리 로드
+     * @param {Object} post - 포스트 데이터
+     */
+    preloadPostImages(post) {
+        if (!post.images || post.images.length === 0) return;
+
+        post.images.forEach(imageObj => {
+            if (!this.imageCache.has(imageObj.image)) {
+                const img = new Image();
+                img.src = imageObj.image;
+                img.onload = () => {
+                    this.imageCache.set(imageObj.image, true);
+                    if (window.DEBUG) console.log('[PostModalViewer] 이미지 프리로드 완료:', imageObj.image);
+                };
+            }
+        });
     }
 
     /**

@@ -50,9 +50,9 @@
 </div>
 {% else %}
 <div class="container" style="max-width: 800px; margin-top: var(--space-xl);">
-    <div class="card mb-lg">
+    <div class="card mb-0" style="border: none; box-shadow: none;">
         <div class="card-body">
-            <div class="flex items-center gap-lg mb-lg">
+            <div class="flex items-center gap-lg mb-sm">
                 <div class="avatar avatar-xl" id="profile-avatar"
                      {% if is_own_profile %}style="cursor: pointer; position: relative;" title="클릭하여 프로필 사진 변경"{% else %}style="position: relative;"{% endif %}>
                     {% if profile_user.profile_picture %}
@@ -70,7 +70,7 @@
                 <input type="file" id="profile-picture-input" accept="image/*" class="hidden">
                 <div class="flex-1">
                     <div class="flex items-center justify-between mb-xs" style="width: 100%;">
-                        <h1 class="mb-0" style="flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ profile_user.nickname }}</h1>
+                        <h1 class="mb-0" style="flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 1rem; font-weight: 600;">{{ profile_user.nickname }}</h1>
                         {% if is_own_profile %}
                         <a href="{% url 'accounts:update' %}"
                            class="btn btn-ghost btn-sm"
@@ -96,9 +96,37 @@
                         </button>
                         {% endif %}
                     </div>
-                    {% if profile_user.bio %}
-                        <p>{{ profile_user.bio }}</p>
-                    {% endif %}
+                    <div class="flex gap-sm mt-sm">
+                        {% if blocked %}
+                        <!-- 차단된 경우: 모든 통계를 "-"로 표시 -->
+                        <div class="flex flex-col items-center gap-xs">
+                            <div class="text-2xl font-bold" style="color: var(--color-text-lighter);">-</div>
+                            <div class="text-sm text-light">{% trans "팔로워" %}</div>
+                        </div>
+                        <div class="flex flex-col items-center gap-xs">
+                            <div class="text-2xl font-bold" style="color: var(--color-text-lighter);">-</div>
+                            <div class="text-sm text-light">{% trans "팔로잉" %}</div>
+                        </div>
+                        <div class="flex flex-col items-center gap-xs">
+                            <div class="text-2xl font-bold" style="color: var(--color-text-lighter);">-</div>
+                            <div class="text-sm text-light">{% trans "포스트" %}</div>
+                        </div>
+                        {% else %}
+                        <!-- 일반적인 경우: 정상 통계 표시 -->
+                        <a href="{% url 'accounts:followers_list' profile_user.username %}" class="flex flex-col items-center gap-xs stat-link">
+                            <div class="text-2xl font-bold" id="profile-follower-count">{{ profile_user.get_follower_count }}</div>
+                            <div class="text-sm text-light">{% trans "팔로워" %}</div>
+                        </a>
+                        <a href="{% url 'accounts:following_list' profile_user.username %}" class="flex flex-col items-center gap-xs stat-link">
+                            <div class="text-2xl font-bold" id="profile-following-count">{{ profile_user.get_following_count }}</div>
+                            <div class="text-sm text-light">{% trans "팔로잉" %}</div>
+                        </a>
+                        <div class="flex flex-col items-center gap-xs">
+                            <div class="text-2xl font-bold">{{ total_posts }}</div>
+                            <div class="text-sm text-light">{% trans "포스트" %}</div>
+                        </div>
+                        {% endif %}
+                    </div>
                     <div class="flex gap-sm mt-sm">
                         {% if profile_user.is_verified %}
                             <span class="badge badge-success">인증됨</span>
@@ -109,40 +137,17 @@
                     </div>
                 </div>
             </div>
-
-            <div class="flex justify-center gap-lg pt-lg pb-md" style="border-top: 1px solid var(--color-border);">
-                {% if blocked %}
-                <!-- 차단된 경우: 모든 통계를 "-"로 표시 -->
-                <div class="flex flex-col items-center gap-xs">
-                    <div class="text-2xl font-bold" style="color: var(--color-text-lighter);">-</div>
-                    <div class="text-sm text-light">{% trans "팔로워" %}</div>
-                </div>
-                <div class="flex flex-col items-center gap-xs">
-                    <div class="text-2xl font-bold" style="color: var(--color-text-lighter);">-</div>
-                    <div class="text-sm text-light">{% trans "팔로잉" %}</div>
-                </div>
-                <div class="flex flex-col items-center gap-xs">
-                    <div class="text-2xl font-bold" style="color: var(--color-text-lighter);">-</div>
-                    <div class="text-sm text-light">{% trans "포스트" %}</div>
-                </div>
-                {% else %}
-                <!-- 일반적인 경우: 정상 통계 표시 -->
-                <a href="{% url 'accounts:followers_list' profile_user.username %}" class="flex flex-col items-center gap-xs stat-link">
-                    <div class="text-2xl font-bold" id="profile-follower-count">{{ profile_user.get_follower_count }}</div>
-                    <div class="text-sm text-light">{% trans "팔로워" %}</div>
-                </a>
-                <a href="{% url 'accounts:following_list' profile_user.username %}" class="flex flex-col items-center gap-xs stat-link">
-                    <div class="text-2xl font-bold" id="profile-following-count">{{ profile_user.get_following_count }}</div>
-                    <div class="text-sm text-light">{% trans "팔로잉" %}</div>
-                </a>
-                <div class="flex flex-col items-center gap-xs">
-                    <div class="text-2xl font-bold">{{ total_posts }}</div>
-                    <div class="text-sm text-light">{% trans "포스트" %}</div>
-                </div>
-                {% endif %}
-            </div>
         </div>
     </div>
+
+    {% if profile_user.bio %}
+    <!-- Bio Section (moved below profile card) -->
+    <div class="card mb-lg" style="border: none; box-shadow: none;">
+        <div class="card-body">
+            <p>{{ profile_user.bio }}</p>
+        </div>
+    </div>
+    {% endif %}
 
     {% if suspension_info %}
     <!-- Suspension Alert (Own Profile) -->
@@ -264,7 +269,7 @@
 
     <!-- Posts Grid Section -->
     <div class="posts-grid-section" style="max-width: 1200px; width: 100%; margin-top: var(--space-lg);">
-        <div class="card">
+        <div class="card" style="border: none; box-shadow: none;">
             <div class="card-body" style="padding: var(--space-md);">
                 <!-- 검색바 섹션 -->
                 <div class="search-bar-container mb-md">
@@ -657,7 +662,23 @@ document.addEventListener('DOMContentLoaded', function() {
             div.dataset.postIndex = index;
             div.onclick = () => openPostModal(post.id, index);
 
+            // Generate image HTML if post has images
+            let imageHtml = '';
+            if (post.images && post.images.length > 0) {
+                const imageCountHtml = post.images.length > 1
+                    ? `<div class="post-grid-image-counter">${post.images.length}</div>`
+                    : '';
+
+                imageHtml = `
+                    <div class="post-grid-image">
+                        <img src="${post.images[0].image}" alt="Post image">
+                        ${imageCountHtml}
+                    </div>
+                `;
+            }
+
             div.innerHTML = `
+                ${imageHtml}
                 <div class="post-thumbnail">
                     <div class="post-thumbnail-content">
                         <p class="post-preview-text">${this.truncateText(post.content, 10)}</p>

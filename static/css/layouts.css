@@ -815,6 +815,8 @@ body {
   width: 100%;
   margin: var(--space-md) 0;
   position: relative;
+  max-height: 400px;
+  overflow: hidden;
 }
 
 .post-images-gallery {
@@ -824,6 +826,7 @@ body {
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
   border-radius: var(--radius-lg);
+  height: 100%;
 }
 
 /* 단일 이미지: 기존 스타일 유지 (100% 폭) */
@@ -842,8 +845,7 @@ body {
 .post-images-gallery.multiple-images .post-feed-image {
   width: calc((100% - var(--space-xs)) / 2);  /* 2개가 한 화면에 */
   min-width: calc((100% - var(--space-xs)) / 2);
-  height: 140px;  /* 고정 높이로 일관성 */
-  max-height: 140px;
+  height: 100%;  /* 컨테이너 높이에 맞춤 */
   object-fit: cover;
   flex-shrink: 0;
   scroll-snap-align: start;

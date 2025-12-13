@@ -182,6 +182,13 @@ class ImageViewer {
 
             // Apply transform
             this.applyTransform();
+        } else if (this.scale === 1 && e.touches.length === 1 && this.images.length > 1) {
+            // Live swipe preview for navigation (only when not zoomed and multiple images)
+            e.preventDefault();
+            const deltaX = e.touches[0].clientX - this.touchStartX;
+
+            // Apply live preview with resistance
+            this.updateSwipePosition(deltaX);
         }
     }
 
@@ -194,10 +201,25 @@ class ImageViewer {
             this.isDragging = false;
         }
 
-        // Handle swipe for navigation (only when not zoomed)
-        if (this.scale === 1 && e.changedTouches.length === 1) {
+        // Handle swipe for navigation (only when not zoomed and multiple images)
+        if (this.scale === 1 && e.changedTouches.length === 1 && this.images.length > 1) {
             this.touchEndX = e.changedTouches[0].clientX;
-            this.handleSwipe();
+            const deltaX = this.touchEndX - this.touchStartX;
+
+            // Determine if swipe is significant enough to change images
+            if (Math.abs(deltaX) >= this.minSwipeDistance) {
+                // Navigate to next/previous image
+                if (deltaX > 0) {
+                    this.showPrevious();
+                } else {
+                    this.showNext();
+                }
+            } else {
+                // Snap back to center
+                this.viewerImage.style.transform = 'translateX(0) scale(1)';
+                this.viewerImage.style.opacity = '1';
+                this.viewerImage.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+            }
         }
     }
 
@@ -233,6 +255,28 @@ class ImageViewer {
 
         this.viewerImage.style.transform = `translate(${this.posX}px, ${this.posY}px) scale(${this.scale})`;
         this.viewerImage.style.transition = this.isPinching || this.isDragging ? 'none' : 'transform 0.3s ease';
+    }
+
+    updateSwipePosition(deltaX) {
+        if (!this.viewerImage) return;
+
+        // Apply resistance for edge cases
+        const resistance = 0.4;
+        const maxSwipe = window.innerWidth;
+
+        // Calculate bounded deltaX with resistance
+        let boundedDelta = deltaX;
+        if (Math.abs(deltaX) > maxSwipe * 0.5) {
+            boundedDelta = deltaX > 0 ? maxSwipe * 0.5 : -maxSwipe * 0.5;
+        }
+
+        // Apply transform for live preview
+        this.viewerImage.style.transform = `translateX(${boundedDelta * resistance}px) scale(1)`;
+        this.viewerImage.style.transition = 'none';
+
+        // Calculate opacity based on swipe distance
+        const opacity = Math.max(0.5, 1 - Math.abs(deltaX) / maxSwipe);
+        this.viewerImage.style.opacity = opacity;
     }
 
     resetZoom() {
