@@ -150,10 +150,7 @@
     border-bottom: 1px solid var(--color-border);
     background: #FFFFFF;
     flex-shrink: 0;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
+    position: relative;
     z-index: 10;
 }
 
@@ -455,18 +452,23 @@
     position: relative;  /* Establish containing block for absolute children */
 }
 
-/* 채팅 입력창을 flex container 내에서 자연스럽게 배치 */
+/* 채팅 입력창을 화면 하단에 고정 (모바일 네비게이션과 동일한 방식) */
 .conversation-page .message-input-container {
-    position: relative;  /* fixed에서 relative로 변경 */
+    position: fixed;  /* ✅ 화면에 고정 */
+    bottom: 0;        /* ✅ 하단 고정 */
+    left: 0;          /* ✅ 전체 너비 */
+    right: 0;         /* ✅ 전체 너비 */
     z-index: var(--z-sticky);
-    padding: var(--space-sm) var(--space-lg);  /* 상하 패딩 줄이기 */
-    padding-bottom: calc(1.25rem + env(safe-area-inset-bottom)); /* 20px + safe-area for iPhone notch */
-    flex-shrink: 0;  /* 입력창이 축소되지 않도록 */
+    padding: var(--space-sm) var(--space-lg);
+    padding-bottom: calc(1.25rem + env(safe-area-inset-bottom));
+    box-shadow: var(--shadow-lg);  /* ✅ 깊이감 추가 */
+    flex-shrink: 0;
 }
 
-/* 메시지 리스트 하단 여백 최소화 (입력창이 flex 레이아웃 내에 있으므로) */
+/* 메시지가 입력창 아래로 가지 않도록 하단 여백 확보 */
 .conversation-page .messages-list {
-    padding-bottom: var(--space-lg); /* 최소한의 여백만 유지 */
+    padding-bottom: calc(3.5rem + env(safe-area-inset-bottom));
+    /* 3.5rem = 56px (입력창 실제 높이 최적화) */
 }
 
 /* conversation-page에서 body 상단 여백 제거 */

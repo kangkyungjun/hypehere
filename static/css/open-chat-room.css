@@ -43,7 +43,7 @@
   top: 0;
   left: 0;
   right: 0;
-  z-index: 10;
+  z-index: var(--z-sticky);  /* 홈 헤더와 동일한 우선순위 (1020) */
   display: flex;
   align-items: center;
   gap: var(--space-md);
@@ -166,6 +166,9 @@
   flex: 1;
   overflow-y: auto;
   padding: var(--space-lg);
+  padding-top: 80px;  /* 헤더 높이(72px) + 여유(8px) */
+  /* 입력창 높이 + 세이프 에어리어 고려 */
+  padding-bottom: calc(80px + env(safe-area-inset-bottom));
   min-height: 0;
   overscroll-behavior: contain;
   display: flex;
@@ -327,7 +330,14 @@
    Message Input
    ========================================== */
 .message-input-container {
+  position: fixed;  /* 화면에 고정 */
+  bottom: 0;  /* 화면 최하단 */
+  left: 0;
+  right: 0;
+  z-index: var(--z-sticky);  /* 우선순위 1020 (홈 하단 네비게이션과 동일) */
   padding: var(--space-md) var(--space-lg);
+  /* 모바일 노치 대응: 하단 세이프 에어리어만큼 추가 패딩 */
+  padding-bottom: calc(var(--space-md) + env(safe-area-inset-bottom));
   background-color: var(--color-bg);
   border-top: 1px solid var(--color-border-light);
   flex-shrink: 0;
