@@ -463,6 +463,8 @@
     padding-bottom: calc(1.25rem + env(safe-area-inset-bottom));
     box-shadow: var(--shadow-lg);  /* ✅ 깊이감 추가 */
     flex-shrink: 0;
+    transform: translateZ(0);  /* ✅ GPU acceleration (모바일 최적화) */
+    will-change: transform;    /* ✅ 브라우저 최적화 힌트 */
 }
 
 /* 메시지가 입력창 아래로 가지 않도록 하단 여백 확보 */
@@ -486,7 +488,7 @@ body.conversation-page {
 
 /* conversation-detail-container 전체 화면 */
 .conversation-page .conversation-detail-container {
-    position: absolute;
+    position: relative;  /* ✅ absolute → relative (모바일 fixed 지원) */
     top: 0;
     left: 0;
     right: 0;
