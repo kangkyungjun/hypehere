@@ -329,6 +329,19 @@ if not DEBUG:
     csrf_origins = os.environ.get('CSRF_TRUSTED_ORIGINS', '')
     if csrf_origins:
         CSRF_TRUSTED_ORIGINS = csrf_origins.split(',')
+else:
+    # Development CSRF settings - allow HTTP for mobile app testing
+    CSRF_COOKIE_SECURE = False
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_HTTPONLY = False
+    CSRF_COOKIE_SAMESITE = 'Lax'
+
+    # Allow HTTP origins for Flutter app testing
+    CSRF_TRUSTED_ORIGINS = [
+        'http://43.201.45.60',
+        'http://127.0.0.1:8000',
+        'http://localhost:8000',
+    ]
 
 # ==================== AWS S3 Configuration (for production - Phase 3) ====================
 
