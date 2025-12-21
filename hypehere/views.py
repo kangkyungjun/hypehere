@@ -78,6 +78,11 @@ class HomeView(TemplateView):
                 # Preserve recommendation order
                 post_dict = {post.id: post for post in annotated_posts}
                 posts = [post_dict[post.id] for post in recommended_posts if post.id in post_dict]
+
+                # Add permission flags for each post (admin can edit/delete any post)
+                for post in posts:
+                    post.can_edit = post.author == self.request.user or self.request.user.is_admin()
+                    post.can_delete = post.author == self.request.user or self.request.user.is_admin()
             else:
                 posts = []
 

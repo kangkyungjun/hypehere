@@ -31,6 +31,10 @@ class PostSerializer(serializers.ModelSerializer):
     comment_count = serializers.IntegerField(read_only=True)
     is_liked = serializers.SerializerMethodField()
     is_favorited = serializers.SerializerMethodField()
+    can_edit = serializers.SerializerMethodField()
+    can_delete = serializers.SerializerMethodField()
+    is_deleted_by_admin = serializers.SerializerMethodField()
+    deleted_info = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
@@ -38,6 +42,8 @@ class PostSerializer(serializers.ModelSerializer):
             'id', 'author', 'content',
             'native_language', 'target_language',
             'hashtags', 'images', 'like_count', 'comment_count', 'is_liked', 'is_favorited',
+            'can_edit', 'can_delete',
+            'is_deleted_by_admin', 'deleted_info',
             'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'author', 'created_at', 'updated_at']
@@ -55,6 +61,50 @@ class PostSerializer(serializers.ModelSerializer):
         if request and request.user.is_authenticated:
             return obj.favorited_by.filter(user=request.user).exists()
         return False
+
+    def get_can_edit(self, obj):
+        """Check if current user can edit this post (author or admin)"""
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return obj.author == request.user or request.user.is_admin()
+        return False
+
+    def get_can_delete(self, obj):
+        """Check if current user can delete this post (author or admin)"""
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return obj.author == request.user or request.user.is_admin()
+        return False
+
+    def get_is_deleted_by_admin(self, obj):
+        """관리자에 의해 삭제되었는지 여부"""
+        return obj.is_deleted_by_report
+
+    def get_deleted_info(self, obj):
+        """삭제 정보 반환 (관리자와 작성자에게만)"""
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            if obj.is_deleted_by_report:
+                content_data = obj.get_content_for_user(request.user)
+                return {
+                    'deleted_at': obj.deleted_at,
+                    'deleted_by': obj.deleted_by.nickname if obj.deleted_by else None,
+                    'deletion_reason': obj.get_deletion_reason_display() if obj.deletion_reason else None,
+                    'admin_view': content_data.get('admin_view', False)
+                }
+        return None
+
+    def to_representation(self, instance):
+        """content 필드를 사용자 역할에 따라 조건부 반환"""
+        representation = super().to_representation(instance)
+
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            if instance.is_deleted_by_report:
+                content_data = instance.get_content_for_user(request.user)
+                representation['content'] = content_data['content']
+
+        return representation
 
 
 class PostCreateSerializer(serializers.ModelSerializer):

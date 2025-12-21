@@ -66,6 +66,8 @@ class PostActionsManager {
         this.currentAuthorUsername = null;
         this.currentNickname = null;
         this.deleteCallback = null;
+        this.canEdit = false;  // Permission to edit (author or admin)
+        this.canDelete = false;  // Permission to delete (author or admin)
 
         // Leave conversation modal elements
         this.leaveConversationModal = document.getElementById('leave-conversation-modal');
@@ -197,7 +199,24 @@ class PostActionsManager {
         this.currentPostId = postCard.dataset.postId;
         this.currentAuthorUsername = postCard.dataset.authorUsername;  // Direct attribute
 
-        console.log('Opening modal for post:', this.currentPostId, 'by', this.currentAuthorUsername);
+        // Check for permission data attributes (set by backend template or API)
+        // These should be 'true' or 'false' strings from data attributes
+        if (postCard.dataset.canEdit !== undefined) {
+            this.canEdit = postCard.dataset.canEdit === 'true';
+        } else {
+            // Fallback: use ownership check
+            this.canEdit = this.isOwnPost();
+        }
+
+        if (postCard.dataset.canDelete !== undefined) {
+            this.canDelete = postCard.dataset.canDelete === 'true';
+        } else {
+            // Fallback: use ownership check
+            this.canDelete = this.isOwnPost();
+        }
+
+        console.log('Opening modal for post:', this.currentPostId, 'by', this.currentAuthorUsername,
+                    'canEdit:', this.canEdit, 'canDelete:', this.canDelete);
         this.openModal();
     }
 
@@ -291,9 +310,10 @@ class PostActionsManager {
 
     updateModalContent() {
         /**
-         * Dynamically update modal content based on ownership
-         * Own posts: Edit, Delete
-         * Other's posts: Block, Report
+         * Dynamically update modal content based on permissions
+         * - Own post: Edit, Delete (author only)
+         * - Admin's other post: Edit, Delete, Block, Report (admin viewing others)
+         * - Other's post: Block, Report (regular user)
          */
         const actionBody = this.modal.querySelector('.post-action-body');
         if (!actionBody) {
@@ -301,29 +321,68 @@ class PostActionsManager {
             return;
         }
 
-        if (this.isOwnPost()) {
-            // Own post: Edit/Delete
-            actionBody.innerHTML = `
-                <button class="action-item action-edit" data-action="edit" type="button">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                    </svg>
-                    <span>${window.POST_ACTIONS_I18N?.edit || 'Edit'}</span>
-                </button>
-                <button class="action-item action-delete" data-action="delete" type="button">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="3 6 5 6 21 6"/>
-                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                        <line x1="10" y1="11" x2="10" y2="17"/>
-                        <line x1="14" y1="11" x2="14" y2="17"/>
-                    </svg>
-                    <span>${window.POST_ACTIONS_I18N?.delete || 'Delete'}</span>
-                </button>
-            `;
-        } else {
-            // Other's post: Block/Report
-            actionBody.innerHTML = `
+        const isOwn = this.isOwnPost();
+        const isAdmin = (this.canEdit || this.canDelete) && !isOwn;
+
+        let buttons = '';
+
+        // Case 1: Own post - Show Edit/Delete only
+        if (isOwn) {
+            if (this.canEdit) {
+                buttons += `
+                    <button class="action-item action-edit" data-action="edit" type="button">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                        </svg>
+                        <span>${window.POST_ACTIONS_I18N?.edit || 'Edit'}</span>
+                    </button>
+                `;
+            }
+
+            if (this.canDelete) {
+                buttons += `
+                    <button class="action-item action-delete" data-action="delete" type="button">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="3 6 5 6 21 6"/>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                            <line x1="10" y1="11" x2="10" y2="17"/>
+                            <line x1="14" y1="11" x2="14" y2="17"/>
+                        </svg>
+                        <span>${window.POST_ACTIONS_I18N?.delete || 'Delete'}</span>
+                    </button>
+                `;
+            }
+        }
+        // Case 2: Admin viewing other's post - Show Edit/Delete/Block/Report (all 4)
+        else if (isAdmin) {
+            if (this.canEdit) {
+                buttons += `
+                    <button class="action-item action-edit" data-action="edit" type="button">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                        </svg>
+                        <span>${window.POST_ACTIONS_I18N?.edit || 'Edit'}</span>
+                    </button>
+                `;
+            }
+
+            if (this.canDelete) {
+                buttons += `
+                    <button class="action-item action-delete" data-action="delete" type="button">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="3 6 5 6 21 6"/>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                            <line x1="10" y1="11" x2="10" y2="17"/>
+                            <line x1="14" y1="11" x2="14" y2="17"/>
+                        </svg>
+                        <span>${window.POST_ACTIONS_I18N?.delete || 'Delete'}</span>
+                    </button>
+                `;
+            }
+
+            buttons += `
                 <button class="action-item action-block" data-action="block" type="button">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="12" cy="12" r="10"/>
@@ -341,6 +400,28 @@ class PostActionsManager {
                 </button>
             `;
         }
+        // Case 3: Regular user viewing other's post - Show Block/Report only
+        else {
+            buttons += `
+                <button class="action-item action-block" data-action="block" type="button">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+                    </svg>
+                    <span>${window.POST_ACTIONS_I18N?.block || 'Block'}</span>
+                </button>
+                <button class="action-item action-report" data-action="report" type="button">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                        <line x1="12" y1="9" x2="12" y2="13"/>
+                        <line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                    <span>${window.POST_ACTIONS_I18N?.report || 'Report'}</span>
+                </button>
+            `;
+        }
+
+        actionBody.innerHTML = buttons;
     }
 
     openModal() {
@@ -359,6 +440,8 @@ class PostActionsManager {
             document.body.classList.remove('modal-open');
             this.currentPostId = null;
             this.currentAuthorUsername = null;
+            this.canEdit = false;
+            this.canDelete = false;
         }
     }
 

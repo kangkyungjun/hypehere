@@ -140,18 +140,23 @@
 
 {% block extra_css %}
 <style>
+/* Override main-content padding for notification settings page */
+.main-content {
+    padding: 20px !important;
+}
+
 /* 컨테이너 */
 .notification-settings-container {
     max-width: 600px;
     margin: 0 auto;
-    padding: var(--space-xl) var(--space-md);
+    padding: 0;
     min-height: calc(100vh - 200px);
 }
 
 .notification-settings-card {
     background: var(--color-surface);
     border-radius: var(--radius-lg);
-    padding: var(--space-xl);
+    padding: 0;
     box-shadow: var(--shadow-sm);
 }
 
@@ -186,6 +191,7 @@
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
+    margin-bottom: 0;
 }
 
 .save-indicator {
@@ -324,11 +330,11 @@ input:disabled + .toggle-slider {
 /* 모바일 반응형 */
 @media (max-width: 768px) {
     .notification-settings-container {
-        padding: var(--space-md);
+        padding: 0;
     }
 
     .notification-settings-card {
-        padding: var(--space-lg);
+        padding: 0;
     }
 
     .notification-settings-title {

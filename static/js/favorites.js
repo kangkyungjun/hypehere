@@ -248,6 +248,8 @@ class FavoritesManager {
     card.className = 'post-card';
     card.dataset.postId = post.id;
     card.dataset.authorUsername = post.author.username;
+    card.dataset.canEdit = post.can_edit;
+    card.dataset.canDelete = post.can_delete;
 
     // Format time
     const createdAt = new Date(post.created_at);
@@ -300,12 +302,28 @@ class FavoritesManager {
       <div class="post-content">
         <p>${(() => {
           let content = post.content;
-          if (content === '게시물은 신고에 의해 삭제되었습니다.') {
+          if (post.is_deleted_by_admin) {
+            // Translate deleted post message if needed
+            if (content === '게시물은 관리자에 의해 삭제되었습니다.') {
+              content = window.APP_I18N.deletedByAdminMessage || content;
+            }
+          } else if (content === '게시물은 신고에 의해 삭제되었습니다.') {
+            // Legacy: translate old deletion message
             content = window.APP_I18N.deletedPostMessage || content;
           }
-          return this.escapeHtml(content).replace(/\n/g, '<br>');
+          return this.escapeHtml(content || '').replace(/\n/g, '<br>');
         })()}</p>
         ${hashtagsHTML}
+        ${post.is_deleted_by_admin && post.deleted_info && post.deleted_info.admin_view ? `
+          <div class="alert alert-warning mt-sm" style="background-color: var(--color-warning-light); border-left: 4px solid var(--color-warning); padding: var(--space-sm); margin-top: var(--space-sm);">
+            <p style="margin: 0; font-weight: 600; color: var(--color-warning-dark);">⚠️ 관리자 전용: 삭제된 게시물</p>
+            <p style="margin: var(--space-xs) 0 0 0; font-size: 0.9em;">
+              삭제 시각: ${new Date(post.deleted_info.deleted_at).toLocaleString('ko-KR')}<br>
+              삭제한 관리자: ${post.deleted_info.deleted_by || '알 수 없음'}<br>
+              삭제 사유: ${post.deleted_info.deletion_reason || '알 수 없음'}
+            </p>
+          </div>
+        ` : ''}
       </div>
 
       <div class="post-actions">

@@ -5,7 +5,7 @@
 {% block title %}{% trans "프로필 수정 - HypeHere" %}{% endblock %}
 
 {% block content %}
-<div class="container" style="max-width: 480px; margin: 0 auto; padding: var(--space-lg);">
+<div class="container profile-update-compact" style="max-width: 480px; margin: 0 auto; padding: 0;">
     <!-- Profile Update Form Card -->
     <div class="card">
         <div class="card-body">
@@ -35,7 +35,6 @@
                         disabled
                         style="background-color: var(--color-bg-secondary); cursor: not-allowed;"
                     >
-                    <span class="form-text">{% trans "이메일은 보안상 변경할 수 없습니다." %}</span>
                 </div>
 
                 <!-- Nickname (Display Name) -->
@@ -116,7 +115,7 @@
                 </div>
 
                 <!-- Action Buttons -->
-                <div style="display: flex; gap: var(--space-sm); margin-top: var(--space-lg);">
+                <div class="btn-group" style="display: flex; gap: var(--space-sm); margin-top: var(--space-lg);">
                     <button type="submit" class="btn btn-primary" id="submit-btn" style="flex: 1;">
                         <span id="submit-text">{% trans "저장하기" %}</span>
                         <span id="submit-loading" class="spinner spinner-primary hidden"></span>

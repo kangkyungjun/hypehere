@@ -114,8 +114,8 @@
 }
 
 .btn-icon {
-  width: 40px;
-  height: 40px;
+  width: 30px;
+  height: 30px;
   border: none;
   background: none;
   color: var(--color-text);
@@ -133,8 +133,8 @@
 }
 
 .btn-icon svg {
-  width: 24px;
-  height: 24px;
+  width: 18px;
+  height: 18px;
 }
 
 .btn-icon.favorited {

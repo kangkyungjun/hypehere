@@ -98,6 +98,14 @@ class Post(models.Model):
         blank=True,
         verbose_name='삭제 사유'
     )
+    deleted_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='deleted_posts',
+        verbose_name='삭제한 관리자'
+    )
 
     class Meta:
         ordering = ['-created_at']
@@ -109,23 +117,24 @@ class Post(models.Model):
 
     def delete_by_report(self, report_type, admin_user=None):
         """
-        신고로 인한 소프트 삭제 - 원본 보존
+        관리자에 의한 소프트 삭제 - 원본 보존
         """
         if not self.is_deleted_by_report:
             # 원본 내용 보존
             self.original_content = self.content
 
             # 내용을 삭제 메시지로 변경
-            self.content = "게시물은 신고에 의해 삭제되었습니다."
+            self.content = "게시물은 관리자에 의해 삭제되었습니다."
 
             # 삭제 메타데이터 설정
             self.is_deleted_by_report = True
             self.deleted_at = timezone.now()
             self.deletion_reason = report_type
+            self.deleted_by = admin_user
 
             self.save(update_fields=[
                 'content', 'original_content',
-                'is_deleted_by_report', 'deleted_at', 'deletion_reason'
+                'is_deleted_by_report', 'deleted_at', 'deletion_reason', 'deleted_by'
             ])
 
             return True
@@ -134,25 +143,38 @@ class Post(models.Model):
     def get_content_for_user(self, user):
         """
         사용자 역할에 따른 적절한 내용 반환
-        - Admin/staff: original_content with deletion flag
-        - Regular user: deletion message
+        - 관리자: original_content + 삭제 정보
+        - 작성자: 삭제 메시지 표시
+        - 일반 사용자: 접근 불가 (view에서 필터링)
         """
         if self.is_deleted_by_report:
             if user and (user.is_staff or user.is_superuser):
+                # 관리자: 원본 + 삭제 정보
                 return {
                     'content': self.original_content,
                     'is_deleted': True,
                     'deleted_at': self.deleted_at,
+                    'deleted_by': self.deleted_by.nickname if self.deleted_by else None,
                     'deletion_reason': self.get_deletion_reason_display() if self.deletion_reason else None,
                     'admin_view': True
                 }
-            else:
+            elif user and user == self.author:
+                # 작성자: 삭제 메시지
                 return {
-                    'content': self.content,  # "게시물은 신고에 의해 삭제되었습니다."
+                    'content': self.content,  # "게시물은 관리자에 의해 삭제되었습니다."
+                    'is_deleted': True,
+                    'deleted_at': self.deleted_at,
+                    'admin_view': False
+                }
+            else:
+                # 일반 사용자: 접근 불가
+                return {
+                    'content': None,
                     'is_deleted': True,
                     'admin_view': False
                 }
         else:
+            # 정상 게시물
             return {
                 'content': self.content,
                 'is_deleted': False

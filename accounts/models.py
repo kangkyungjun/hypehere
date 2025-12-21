@@ -400,6 +400,10 @@ class User(AbstractUser):
         return post_reports + comment_reports + chat_reports
 
     # Permission management methods
+    def is_admin(self):
+        """관리자 권한 체크 (Staff 이상: staff, prime, superuser)"""
+        return self.is_staff or self.is_prime or self.is_superuser
+
     @property
     def has_gold_features(self):
         """유료 기능 접근 권한 (GoldUser, Staff, Prime, Superuser 모두 포함)"""

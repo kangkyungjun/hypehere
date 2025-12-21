@@ -47,7 +47,7 @@
                             </div>
                         </div>
                     </div>
-                    <button id="btn-change-password" class="btn-primary">{% trans "비밀번호 변경" %}</button>
+                    <button id="btn-change-password" class="btn-deactivate">{% trans "비밀번호 변경" %}</button>
                 </div>
             </div>
 
@@ -326,6 +326,7 @@ window.PASSWORD_CHANGE_I18N = {
     font-size: 1.5rem;
     font-weight: 700;
     color: var(--color-text);
+    margin: 0;
 }
 
 /* 계정 섹션 그리드 레이아웃 */
@@ -339,16 +340,17 @@ window.PASSWORD_CHANGE_I18N = {
 /* 현대적 카드 스타일 */
 .privacy-settings-section {
     background: white;
-    border-radius: 16px;
     padding: var(--space-xl);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
     border: none;
+    border-bottom: 1px solid var(--color-border);
 }
 
 .privacy-settings-section:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    /* 호버 효과 제거 */
+}
+
+.privacy-settings-section:last-child {
+    border-bottom: none;
 }
 
 /* 타이틀 단색 */

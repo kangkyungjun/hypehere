@@ -30,14 +30,25 @@ class PostListCreateAPIView(generics.ListCreateAPIView):
     pagination_class = PostPagination
 
     def get_queryset(self):
-        """Return posts with like and comment counts, excluding blocked users"""
-        queryset = Post.objects.select_related('author').prefetch_related('hashtags').annotate(
+        """Return posts with like and comment counts, excluding blocked users and deleted posts"""
+        queryset = Post.objects.select_related('author', 'deleted_by').prefetch_related('hashtags').annotate(
             like_count=Count('likes', distinct=True),
             comment_count=Count('comments', distinct=True)
         ).exclude(author__is_deactivated=True)
 
-        # 차단 관계 필터링 (로그인한 경우)
+        # Filter deleted posts based on user role
         if self.request.user.is_authenticated:
+            if self.request.user.is_admin():
+                # Admins see all posts (including deleted ones)
+                pass
+            else:
+                # Regular users: see non-deleted posts + their own deleted posts
+                # 작성자는 자신의 삭제된 게시물을 리스트에서 보지만 내용은 삭제 메시지로 표시
+                queryset = queryset.filter(
+                    Q(is_deleted_by_report=False) | Q(author=self.request.user)
+                )
+
+            # 차단 관계 필터링
             from accounts.models import Block
             # 내가 차단한 사용자의 게시물 제외
             blocked_users = Block.objects.filter(blocker=self.request.user, is_active=True).values_list('blocked', flat=True)
@@ -46,6 +57,9 @@ class PostListCreateAPIView(generics.ListCreateAPIView):
             # 나를 차단한 사용자의 게시물 제외
             blocking_users = Block.objects.filter(blocked=self.request.user, is_active=True).values_list('blocker', flat=True)
             queryset = queryset.exclude(author__in=blocking_users)
+        else:
+            # Not authenticated: only show non-deleted posts
+            queryset = queryset.filter(is_deleted_by_report=False)
 
         return queryset
 
@@ -95,26 +109,48 @@ class PostDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def get_queryset(self):
-        """Return post with like and comment counts
+        """Return post with like and comment counts, with proper deletion filtering
 
         Note: Does not exclude deactivated authors to allow them to manage their own posts
         """
-        return Post.objects.select_related('author').prefetch_related('hashtags').annotate(
+        queryset = Post.objects.select_related('author', 'deleted_by').prefetch_related('hashtags').annotate(
             like_count=Count('likes', distinct=True),
             comment_count=Count('comments', distinct=True)
         )
 
+        # Filter deleted posts based on user role
+        if self.request.user.is_authenticated:
+            if self.request.user.is_admin():
+                # Admins see all posts
+                pass
+            else:
+                # Regular users: see non-deleted posts + their own deleted posts
+                queryset = queryset.filter(
+                    Q(is_deleted_by_report=False) | Q(author=self.request.user)
+                )
+        else:
+            # Not authenticated: only show non-deleted posts
+            queryset = queryset.filter(is_deleted_by_report=False)
+
+        return queryset
+
     def perform_update(self, serializer):
-        """Only allow author to update"""
-        if serializer.instance.author != self.request.user:
+        """Allow author or admin to update"""
+        if serializer.instance.author != self.request.user and not self.request.user.is_admin():
             raise permissions.PermissionDenied("본인 게시물만 수정할 수 있습니다")
         serializer.save()
 
     def perform_destroy(self, instance):
-        """Only allow author to delete"""
-        if instance.author != self.request.user:
+        """Allow author or admin to delete. Admins use soft deletion, authors use hard deletion."""
+        if instance.author != self.request.user and not self.request.user.is_admin():
             raise permissions.PermissionDenied("본인 게시물만 삭제할 수 있습니다")
-        instance.delete()
+
+        # Admin deleting someone else's post - use soft deletion
+        if self.request.user.is_admin() and instance.author != self.request.user:
+            instance.delete_by_report(report_type='admin_delete', admin_user=self.request.user)
+        else:
+            # Author deleting their own post - hard delete
+            instance.delete()
 
 
 @api_view(['POST'])

@@ -158,17 +158,39 @@
             `;
         }
 
-        // Translate deleted post message if needed
+        // Handle deleted posts
         let content = post.content;
-        if (content === '게시물은 신고에 의해 삭제되었습니다.') {
+        let deletedInfoHTML = '';
+
+        if (post.is_deleted_by_admin && post.deleted_info) {
+            // Translate deleted post message if needed
+            if (content === '게시물은 관리자에 의해 삭제되었습니다.') {
+                content = window.APP_I18N.deletedByAdminMessage || content;
+            }
+
+            // Admin view: show deletion details
+            if (post.deleted_info.admin_view) {
+                deletedInfoHTML = `
+                    <div class="alert alert-warning mt-sm" style="background-color: var(--color-warning-light); border-left: 4px solid var(--color-warning); padding: var(--space-sm); margin-top: var(--space-sm);">
+                        <p style="margin: 0; font-weight: 600; color: var(--color-warning-dark);">⚠️ 관리자 전용: 삭제된 게시물</p>
+                        <p style="margin: var(--space-xs) 0 0 0; font-size: 0.9em;">
+                            삭제 시각: ${new Date(post.deleted_info.deleted_at).toLocaleString('ko-KR')}<br>
+                            삭제한 관리자: ${post.deleted_info.deleted_by || '알 수 없음'}<br>
+                            삭제 사유: ${post.deleted_info.deletion_reason || '알 수 없음'}
+                        </p>
+                    </div>
+                `;
+            }
+        } else if (content === '게시물은 신고에 의해 삭제되었습니다.') {
+            // Legacy: translate old deletion message
             content = window.APP_I18N.deletedPostMessage || content;
         }
 
         // Format content (convert newlines to <br>)
-        const formattedContent = content.replace(/\n/g, '<br>');
+        const formattedContent = content ? content.replace(/\n/g, '<br>') : '';
 
         return `
-            <div class="post-card mb-md" style="border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-md);">
+            <div class="post-card mb-md" data-post-id="${post.id}" data-author-username="${post.author.username}" data-can-edit="${post.can_edit}" data-can-delete="${post.can_delete}" style="border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-md);">
                 <div class="post-header">
                     <div class="avatar">
                         ${avatarHTML}
@@ -185,6 +207,7 @@
                 <div class="post-content">
                     <p>${formattedContent}</p>
                     ${hashtagsHTML}
+                    ${deletedInfoHTML}
                 </div>
 
                 <div class="post-actions">

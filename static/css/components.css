@@ -92,14 +92,14 @@
   max-width: 100%;
   background-color: var(--color-bg);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
-  border: 1px solid var(--color-border-light);
+  box-shadow: none;
+  border: none;
   overflow: hidden;
   transition: box-shadow var(--transition-fast);
 }
 
 .card:hover {
-  box-shadow: var(--shadow-lg);
+  box-shadow: none;
 }
 
 .card-header {
@@ -115,6 +115,23 @@
   padding: var(--space-lg);
   border-top: 1px solid var(--color-border);
   background-color: var(--color-bg-secondary);
+}
+
+/* Profile Update - Compact Spacing (50% reduction) */
+.profile-update-compact .card-body {
+  padding: 0.75rem;  /* 50% of 1.5rem */
+}
+
+.profile-update-compact .form-group {
+  margin-bottom: 0.75rem;  /* 50% of 1.5rem */
+}
+
+.profile-update-compact .alert {
+  margin-bottom: 0.5rem;  /* 50% of 1rem */
+}
+
+.profile-update-compact .btn-group {
+  margin-top: 0.75rem;  /* 50% of 1.5rem */
 }
 
 /* ===== Form Elements ===== */

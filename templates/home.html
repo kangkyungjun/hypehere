@@ -49,7 +49,7 @@
         {% if posts %}
             {% for post in posts %}
             <!-- Post Card -->
-            <div class="post-card" data-post-id="{{ post.id }}" data-author-username="{{ post.author.username }}" style="border: none; box-shadow: none; border-bottom: 1px solid rgba(0, 0, 0, 0.06);">
+            <div class="post-card" data-post-id="{{ post.id }}" data-author-username="{{ post.author.username }}" data-can-edit="{{ post.can_edit|yesno:'true,false' }}" data-can-delete="{{ post.can_delete|yesno:'true,false' }}" style="border: none; box-shadow: none; border-bottom: 1px solid rgba(0, 0, 0, 0.06);">
             <div class="post-header">
                 <div class="avatar">
                     {% if post.author.profile_picture %}

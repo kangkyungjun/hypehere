@@ -1,7 +1,7 @@
 /* Home Search Section */
 .home-search-section {
-    padding: var(--space-lg) 0;
-    margin-bottom: var(--space-md);
+    padding: 0;
+    margin-bottom: 0;
 }
 
 .home-search-container {
@@ -44,7 +44,7 @@
 /* Mobile Responsive */
 @media (max-width: 767px) {
     .home-search-section {
-        padding: var(--space-md) var(--space-sm);
+        padding: 0 var(--space-sm);
     }
 
     .home-search-input {

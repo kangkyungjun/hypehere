@@ -284,14 +284,20 @@ class ExploreManager {
     }
 
     createPostHTML(post, index) {
-        // Translate deleted post message if needed
+        // Handle deleted posts
         let content = post.content;
-        if (content === '게시물은 신고에 의해 삭제되었습니다.') {
+        if (post.is_deleted_by_admin) {
+            // Translate deleted post message if needed
+            if (content === '게시물은 관리자에 의해 삭제되었습니다.') {
+                content = window.APP_I18N.deletedByAdminMessage || content;
+            }
+        } else if (content === '게시물은 신고에 의해 삭제되었습니다.') {
+            // Legacy: translate old deletion message
             content = window.APP_I18N.deletedPostMessage || content;
         }
 
         // Format content (limit for grid preview)
-        let contentPreview = content;
+        let contentPreview = content || '';
         if (contentPreview.length > 100) {
             contentPreview = contentPreview.substring(0, 100) + '...';
         }

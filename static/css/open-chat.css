@@ -199,10 +199,8 @@
    Room Grid
    ========================================== */
 .chat-room-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 12px;
-  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
   max-width: 1200px;
   margin: 0 auto;
 }
@@ -212,24 +210,21 @@
    ========================================== */
 .chat-room-card {
   background-color: var(--color-bg);
-  border: 1px solid var(--color-border-light);
-  border-radius: var(--radius-lg);
-  padding: var(--space-sm) var(--space-md) 0.3rem var(--space-md);
+  border-bottom: 1px solid var(--color-border-light);
+  padding: 5px;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: background-color var(--transition-fast);
   display: flex;
   flex-direction: column;
-  gap: var(--space-xs);
+  gap: 1px;
 }
 
 .chat-room-card:hover {
-  border-color: var(--color-primary);
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-2px);
+  background-color: var(--color-surface);
 }
 
-.chat-room-card:active {
-  transform: translateY(0);
+.chat-room-card:last-child {
+  border-bottom: none;
 }
 
 .room-header {
