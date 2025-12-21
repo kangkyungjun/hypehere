@@ -35,7 +35,7 @@ class _WebViewScreenState extends State<WebViewScreen> {
   }
 
   /// Initialize WebView controller with settings
-  void _initializeWebView() async {
+  Future<void> _initializeWebView() async {
     print('[WEBVIEW] Initializing with base URL: ${AppConfig.baseUrl}');
 
     // Platform-specific configurations for cookie support
