@@ -20,12 +20,18 @@ class _WebViewScreenState extends State<WebViewScreen> {
   bool _hasError = false;
   String _errorMessage = '';
   double _loadingProgress = 0.0;
+  late Future<void> _initializationFuture;
 
   @override
   void initState() {
     super.initState();
-    _initializeWebView();
-    _checkNetworkConnection();
+    _initializationFuture = _initializeApp();
+  }
+
+  /// Initialize app components
+  Future<void> _initializeApp() async {
+    await _initializeWebView();
+    await _checkNetworkConnection();
   }
 
   /// Initialize WebView controller with settings
@@ -139,12 +145,59 @@ class _WebViewScreenState extends State<WebViewScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: RefreshIndicator(
-          onRefresh: _reload,
-          child: Stack(
-            children: [
+    return FutureBuilder<void>(
+      future: _initializationFuture,
+      builder: (context, snapshot) {
+        // Show loading screen while initializing
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 16),
+                  Text('Loading HypeHere...'),
+                ],
+              ),
+            ),
+          );
+        }
+
+        // Show error if initialization failed
+        if (snapshot.hasError) {
+          return Scaffold(
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                  const SizedBox(height: 16),
+                  Text('Initialization Error', style: Theme.of(context).textTheme.headlineSmall),
+                  const SizedBox(height: 8),
+                  Text('${snapshot.error}', textAlign: TextAlign.center),
+                  const SizedBox(height: 24),
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        _initializationFuture = _initializeApp();
+                      });
+                    },
+                    child: const Text('Retry'),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        // Show main app UI after successful initialization
+        return Scaffold(
+          body: SafeArea(
+            child: RefreshIndicator(
+              onRefresh: _reload,
+              child: Stack(
+                children: [
           // WebView
           if (!_hasError)
             WebViewWidget(controller: _controller),
@@ -214,10 +267,12 @@ class _WebViewScreenState extends State<WebViewScreen> {
                 ),
               ),
             ),
-          ],
+                ],
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
