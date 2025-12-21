@@ -37,14 +37,17 @@ class NetworkUtils {
       final response = await _dio.get(
         '/',
         options: Options(
-          validateStatus: (status) => status != null && status < 500,
+          validateStatus: (status) => status != null,
+          sendTimeout: const Duration(seconds: 5),
+          receiveTimeout: const Duration(seconds: 5),
         ),
       );
 
-      return response.statusCode != null && response.statusCode! < 500;
+      print('[NetworkUtils] Server check succeeded: ${response.statusCode}');
+      return true;  // Any response means server is reachable
     } catch (e) {
-      print('Error reaching server: $e');
-      return false;
+      print('[NetworkUtils] Server check failed (non-critical): $e');
+      return true;  // Let WebView try anyway - it has better error handling
     }
   }
 
