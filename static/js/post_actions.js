@@ -76,6 +76,9 @@ class PostActionsManager {
         this.closeLeaveConversationBtn = document.getElementById('close-leave-conversation-modal');
         this.currentConversationId = null;
 
+        // Follow status tracking
+        this.currentIsFollowing = false;
+
         // Block user modal elements (support both main page and chat room)
         this.blockUserModal = document.getElementById('block-user-modal') || document.getElementById('block-user-modal-chat');
         this.confirmBlockUserBtn = document.getElementById('confirm-block-user') || document.getElementById('confirm-block-user-chat');
@@ -308,6 +311,56 @@ class PostActionsManager {
         return this.currentAuthorUsername === window.CURRENT_USER;
     }
 
+    async fetchFollowStatus(username) {
+        /**
+         * Fetch follow status for a user
+         * @param {string} username - Username to check follow status
+         * @returns {boolean} True if following, false otherwise
+         */
+        try {
+            const response = await fetch(`/api/accounts/${username}/follow-status/`, {
+                credentials: 'same-origin'
+            });
+            if (response.ok) {
+                const data = await response.json();
+                return data.is_following;
+            }
+        } catch (error) {
+            console.error('[PostActions] Follow status fetch error:', error);
+        }
+        return false;
+    }
+
+    getFollowButtonText(isFollowing) {
+        /**
+         * Get follow button text based on current language
+         * @param {boolean} isFollowing - Whether currently following the user
+         * @returns {string} Localized button text
+         */
+        const lang = document.documentElement.lang || 'ko';
+        const translations = {
+            'ko': {
+                follow: '팔로우',
+                unfollow: '언팔로우'
+            },
+            'en': {
+                follow: 'Follow',
+                unfollow: 'Unfollow'
+            },
+            'ja': {
+                follow: 'フォロー',
+                unfollow: 'フォロー解除'
+            },
+            'es': {
+                follow: 'Seguir',
+                unfollow: 'Dejar de seguir'
+            }
+        };
+
+        const langTranslations = translations[lang] || translations['en'];
+        return isFollowing ? langTranslations.unfollow : langTranslations.follow;
+    }
+
     updateModalContent() {
         /**
          * Dynamically update modal content based on permissions
@@ -354,7 +407,7 @@ class PostActionsManager {
                 `;
             }
         }
-        // Case 2: Admin viewing other's post - Show Edit/Delete/Block/Report (all 4)
+        // Case 2: Admin viewing other's post - Show Edit/Delete/Follow/Block/Report
         else if (isAdmin) {
             if (this.canEdit) {
                 buttons += `
@@ -382,6 +435,19 @@ class PostActionsManager {
                 `;
             }
 
+            // Follow button at the top (before Block/Report)
+            buttons += `
+                <button class="action-item action-follow" data-action="follow" type="button">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="8.5" cy="7" r="4"/>
+                        <line x1="20" y1="8" x2="20" y2="14"/>
+                        <line x1="23" y1="11" x2="17" y2="11"/>
+                    </svg>
+                    <span>${this.getFollowButtonText(this.currentIsFollowing)}</span>
+                </button>
+            `;
+
             buttons += `
                 <button class="action-item action-block" data-action="block" type="button">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -400,9 +466,19 @@ class PostActionsManager {
                 </button>
             `;
         }
-        // Case 3: Regular user viewing other's post - Show Block/Report only
+        // Case 3: Regular user viewing other's post - Show Follow/Block/Report
         else {
+            // Follow button at the top (before Block/Report)
             buttons += `
+                <button class="action-item action-follow" data-action="follow" type="button">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="8.5" cy="7" r="4"/>
+                        <line x1="20" y1="8" x2="20" y2="14"/>
+                        <line x1="23" y1="11" x2="17" y2="11"/>
+                    </svg>
+                    <span>${this.getFollowButtonText(this.currentIsFollowing)}</span>
+                </button>
                 <button class="action-item action-block" data-action="block" type="button">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="12" cy="12" r="10"/>
@@ -424,7 +500,12 @@ class PostActionsManager {
         actionBody.innerHTML = buttons;
     }
 
-    openModal() {
+    async openModal() {
+        // Fetch follow status for other's posts
+        if (!this.isOwnPost() && this.currentAuthorUsername) {
+            this.currentIsFollowing = await this.fetchFollowStatus(this.currentAuthorUsername);
+        }
+
         if (this.modal) {
             this.updateModalContent();  // Update content before showing
             this.modal.classList.remove('hidden');
@@ -460,6 +541,9 @@ class PostActionsManager {
             case 'delete':
                 this.handleDelete();
                 break;
+            case 'follow':
+                this.handleFollow();
+                break;
             case 'block':
                 this.handleBlock();
                 break;
@@ -468,6 +552,45 @@ class PostActionsManager {
                 break;
             default:
                 console.warn('Unknown action:', action);
+        }
+    }
+
+    async handleFollow() {
+        console.log('[PostActions] Follow action triggered');
+        console.log('[PostActions] Author username:', this.currentAuthorUsername);
+        console.log('[PostActions] Current is following:', this.currentIsFollowing);
+
+        if (!this.currentAuthorUsername) {
+            console.error('[PostActions] No author username available');
+            alert('사용자 정보를 찾을 수 없습니다.');
+            return;
+        }
+
+        // Save username and follow status before closing modal
+        const username = this.currentAuthorUsername;
+        const isFollowing = this.currentIsFollowing;
+
+        // Close action modal
+        this.closeModal();
+
+        // Create temporary button element for toggleFollow function
+        const tempBtn = document.createElement('button');
+        tempBtn.textContent = isFollowing ?
+            (window.APP_I18N?.following || 'Following') :
+            (window.APP_I18N?.follow || 'Follow');
+        tempBtn.className = isFollowing ? 'btn-ghost' : 'btn-primary';
+
+        // Call existing toggleFollow function from follow.js
+        if (window.toggleFollow) {
+            await window.toggleFollow(username, tempBtn);
+
+            // Update local state based on result
+            this.currentIsFollowing = tempBtn.classList.contains('btn-ghost');
+
+            console.log('[PostActions] Follow status updated:', this.currentIsFollowing);
+        } else {
+            console.error('[PostActions] toggleFollow function not found');
+            alert('팔로우 기능을 사용할 수 없습니다.');
         }
     }
 
