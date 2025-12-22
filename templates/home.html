@@ -199,7 +199,7 @@
 <script>
     // Current logged-in user information for JavaScript
     window.CURRENT_USER = "{{ user.username }}";
-    window.CURRENT_USER_ID = {{ user.id }};
+    window.CURRENT_USER_ID = {{ user.id|default:"null" }};
 
     // i18n translations for post actions JavaScript
     window.POST_ACTIONS_I18N = {
