@@ -134,8 +134,47 @@ class NotificationsApp {
 
         // Navigate to target URL
         if (targetUrl && targetUrl !== '#') {
+            // Check for error parameter
+            try {
+                const url = new URL(targetUrl, window.location.origin);
+                if (url.searchParams.get('error') === 'user_unavailable') {
+                    this.showToast('해당 사용자를 찾을 수 없습니다.', 'warning');
+                    setTimeout(() => {
+                        window.location.href = '/notifications/';
+                    }, 1500);
+                    return;
+                }
+            } catch (e) {
+                // Relative URL, proceed normally
+            }
             window.location.href = targetUrl;
         }
+    }
+
+    showToast(message, type = 'info') {
+        // Create toast element
+        const toast = document.createElement('div');
+        toast.className = `alert alert-${type} notification-toast`;
+        toast.style.cssText = `
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 9999;
+            min-width: 250px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            animation: slideInRight 0.3s ease-out;
+        `;
+        toast.textContent = message;
+
+        document.body.appendChild(toast);
+
+        // Auto remove after 3 seconds
+        setTimeout(() => {
+            toast.style.animation = 'slideOutRight 0.3s ease-in';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
     }
 
     async markAsRead(notificationId) {

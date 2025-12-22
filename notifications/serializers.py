@@ -67,7 +67,10 @@ class NotificationSerializer(serializers.ModelSerializer):
         # FOLLOW 타입: 발신자 프로필로 이동
         elif obj.notification_type == 'FOLLOW':
             if obj.sender:
-                return f"/accounts/profile/{obj.sender.id}/"
+                # 비활성화/삭제 예정 사용자 처리
+                if obj.sender.is_deactivated or obj.sender.deletion_requested_at:
+                    return "/notifications/?error=user_unavailable"
+                return f"/accounts/profile/{obj.sender.username}/"
 
         # POST 타입: 홈페이지로 이동 + 쿼리 파라미터로 모달 오픈
         elif obj.notification_type == 'POST':
