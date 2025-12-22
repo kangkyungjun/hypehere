@@ -23,6 +23,33 @@ html {
   max-width: 100%;
   -webkit-text-size-adjust: 100%; /* Prevent iOS auto-zoom */
   -ms-text-size-adjust: 100%; /* Prevent IE auto-zoom */
+  scroll-behavior: smooth; /* Smooth scrolling */
+  -webkit-overflow-scrolling: touch; /* iOS momentum scrolling */
+}
+
+/* ===== Hide scrollbars for native app feel ===== */
+/* Webkit browsers (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 0px;
+  height: 0px;
+  background: transparent;
+}
+
+/* Firefox */
+* {
+  scrollbar-width: none;
+}
+
+/* IE, Edge (Legacy) */
+body {
+  -ms-overflow-style: none;
+  overscroll-behavior-y: contain; /* Prevent overscroll bounce */
+}
+
+/* Touch optimization */
+* {
+  -webkit-tap-highlight-color: transparent; /* Remove tap highlight on iOS */
+  touch-action: manipulation; /* Prevent double-tap zoom */
 }
 
 /* Responsive font scaling - Mobile to Desktop */
