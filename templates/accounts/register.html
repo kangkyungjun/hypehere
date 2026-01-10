@@ -180,6 +180,44 @@
                     <span class="form-error" id="country-error"></span>
                 </div>
 
+                <!-- Terms and Privacy Consent (Required) -->
+                <div class="form-group" style="margin-top: var(--space-lg); padding-top: var(--space-lg); border-top: 1px solid var(--color-border);">
+                    <div style="margin-bottom: var(--space-md);">
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="terms-consent" name="terms_consent" required>
+                            <span class="checkmark"></span>
+                            <span class="checkbox-label">
+                                {% url 'accounts:terms_of_service' as terms_url %}
+                                {% blocktrans with terms_url=terms_url %}<a href="{{ terms_url }}" target="_blank" class="text-primary">이용약관</a>에 동의합니다 (필수){% endblocktrans %} *
+                            </span>
+                        </label>
+                        <span class="form-error" id="terms-consent-error"></span>
+                    </div>
+
+                    <div style="margin-bottom: var(--space-md);">
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="privacy-consent" name="privacy_consent" required>
+                            <span class="checkmark"></span>
+                            <span class="checkbox-label">
+                                {% url 'accounts:privacy_policy' as privacy_url %}
+                                {% blocktrans with privacy_url=privacy_url %}<a href="{{ privacy_url }}" target="_blank" class="text-primary">개인정보처리방침</a>에 동의합니다 (필수){% endblocktrans %} *
+                            </span>
+                        </label>
+                        <span class="form-error" id="privacy-consent-error"></span>
+                    </div>
+
+                    <div>
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="age-consent" name="age_consent" required>
+                            <span class="checkmark"></span>
+                            <span class="checkbox-label">
+                                {% trans "만 14세 이상입니다 (필수)" %} *
+                            </span>
+                        </label>
+                        <span class="form-error" id="age-consent-error"></span>
+                    </div>
+                </div>
+
                 <!-- Submit Button -->
                 <button type="submit" class="btn btn-primary btn-block" id="submit-btn">
                     <span id="submit-text">{% trans "가입하기" %}</span>
