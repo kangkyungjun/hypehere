@@ -4,6 +4,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import get_user_model, login, logout
+from django_ratelimit.decorators import ratelimit
+from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView, FormView, ListView, CreateView, DetailView, View
 from django.contrib.auth.views import LoginView as DjangoLoginView, LogoutView as DjangoLogoutView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
@@ -50,10 +52,13 @@ import json
 User = get_user_model()
 
 
+@method_decorator(ratelimit(key='ip', rate='5/h', method='POST', block=True), name='create')
 class UserRegistrationView(generics.CreateAPIView):
     """
     API view for user registration
     POST /api/accounts/register/
+
+    Rate Limit: 5 registrations per hour per IP (prevent spam accounts)
     """
     queryset = User.objects.all()
     serializer_class = UserRegistrationSerializer
@@ -74,10 +79,13 @@ class UserRegistrationView(generics.CreateAPIView):
         }, status=status.HTTP_201_CREATED)
 
 
+@method_decorator(ratelimit(key='ip', rate='10/h', method='POST', block=True), name='post')
 class UserLoginView(APIView):
     """
     API view for user login
     POST /api/accounts/login/
+
+    Rate Limit: 10 login attempts per hour per IP (prevent brute force attacks)
     """
     permission_classes = [permissions.AllowAny]
     serializer_class = UserLoginSerializer
@@ -177,10 +185,13 @@ class UserUpdateView(generics.UpdateAPIView):
         }, status=status.HTTP_200_OK)
 
 
+@method_decorator(ratelimit(key='user', rate='5/h', method='POST', block=True), name='post')
 class PasswordChangeView(APIView):
     """
     API view for changing password
     POST /api/accounts/change-password/
+
+    Rate Limit: 5 password changes per hour per user (prevent abuse)
     """
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = PasswordChangeSerializer
@@ -1752,6 +1763,7 @@ def password_reset_request_view(request):
     return render(request, 'accounts/password_reset/request.html')
 
 
+@method_decorator(ratelimit(key='ip', rate='3/h', method='POST', block=True), name='post')
 class PasswordResetRequestAPIView(APIView):
     """
     API endpoint to process password reset requests.
@@ -1760,7 +1772,7 @@ class PasswordResetRequestAPIView(APIView):
     Body: { "email": "user@example.com" }
 
     Features:
-    - Rate limiting: Max 3 attempts per email per hour
+    - Rate limiting: Max 3 attempts per IP per hour (prevent abuse)
     - Generates temporary password
     - Sends email with temp password
     - Returns success/error response
@@ -1871,10 +1883,13 @@ class ProfilePictureDeleteView(APIView):
         }, status=status.HTTP_200_OK)
 
 
+@method_decorator(ratelimit(key='user', rate='5/h', method='POST', block=True), name='create')
 class UserReportCreateView(generics.CreateAPIView):
     """
     API view for creating user reports
     POST /api/accounts/users/report/
+
+    Rate Limit: 5 user reports per hour per user (prevent abuse)
     """
     queryset = UserReport.objects.all()
     serializer_class = UserReportSerializer

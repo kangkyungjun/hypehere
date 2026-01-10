@@ -8,6 +8,8 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.utils.translation import gettext as _
+from django.utils.decorators import method_decorator
+from django_ratelimit.decorators import ratelimit
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 
@@ -73,9 +75,12 @@ def conversation_detail_view(request, conversation_id):
 
 
 # REST API ViewSets
+@method_decorator(ratelimit(key='user', rate='20/h', method='POST', block=True), name='create')
 class ConversationViewSet(viewsets.ModelViewSet):
     """
     ViewSet for managing conversations
+
+    Rate Limit: 20 conversation creations per hour per user (prevent spam)
     """
     permission_classes = [IsAuthenticated]
 
@@ -600,6 +605,7 @@ def connection_respond_view(request):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
+@ratelimit(key='user', rate='5/h', method='POST', block=True)
 def report_user_view(request):
     """
     사용자 신고 API with Evidence Capture
@@ -612,6 +618,8 @@ def report_user_view(request):
         "description": "설명",
         "video_frame": <file> (optional - for video chat reports)
     }
+
+    Rate Limit: 5 chat reports per hour per user (prevent abuse)
     """
     from .models import ConversationBuffer
 
@@ -734,6 +742,7 @@ def open_chat_room_view(request, room_id):
     })
 
 
+@method_decorator(ratelimit(key='user', rate='10/h', method='POST', block=True), name='create')
 class OpenChatRoomViewSet(viewsets.ModelViewSet):
     """
     ViewSet for managing open chat rooms
@@ -743,6 +752,8 @@ class OpenChatRoomViewSet(viewsets.ModelViewSet):
     create: Create a new room
     join: Join a room
     leave: Leave a room
+
+    Rate Limit: 10 room creations per hour per user (prevent spam)
     """
     permission_classes = [IsAuthenticated]
 

@@ -5,6 +5,8 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.serializers import ValidationError
 from django.shortcuts import get_object_or_404
 from django.db.models import Count, Q
+from django_ratelimit.decorators import ratelimit
+from django.utils.decorators import method_decorator
 from .models import Post, Like, Comment, PostFavorite, PostReport, CommentReport, UserInteraction
 from .serializers import (
     PostSerializer, PostCreateSerializer,
@@ -21,10 +23,13 @@ class PostPagination(PageNumberPagination):
     max_page_size = 50
 
 
+@method_decorator(ratelimit(key='user', rate='10/h', method='POST', block=True), name='create')
 class PostListCreateAPIView(generics.ListCreateAPIView):
     """
     GET /api/posts/ - List all posts with pagination
     POST /api/posts/ - Create a new post
+
+    Rate Limit: 10 posts per hour per user (Google Play Store compliance)
     """
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     pagination_class = PostPagination
@@ -178,10 +183,13 @@ def post_like_toggle(request, pk):
     })
 
 
+@method_decorator(ratelimit(key='user', rate='30/h', method='POST', block=True), name='create')
 class PostCommentListCreateAPIView(generics.ListCreateAPIView):
     """
     GET /api/posts/<post_id>/comments/ - List all comments for a post
     POST /api/posts/<post_id>/comments/ - Create a new comment
+
+    Rate Limit: 30 comments per hour per user (Google Play Store compliance)
     """
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     pagination_class = PostPagination
@@ -331,10 +339,13 @@ def post_favorite_toggle(request, pk):
 
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
+@ratelimit(key='user', rate='5/h', method='POST', block=True)
 def post_report_view(request, pk):
     """
     POST /api/posts/<id>/report/ - Report a post
     Returns: Report data with 201 status
+
+    Rate Limit: 5 reports per hour per user (prevent abuse)
     """
     post = get_object_or_404(Post, pk=pk)
 
@@ -357,10 +368,13 @@ def post_report_view(request, pk):
 
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
+@ratelimit(key='user', rate='5/h', method='POST', block=True)
 def comment_report_view(request, post_id, comment_id):
     """
     POST /api/posts/<post_id>/comments/<comment_id>/report/ - Report a comment
     Returns: Report data with 201 status
+
+    Rate Limit: 5 reports per hour per user (prevent abuse)
     """
     comment = get_object_or_404(Comment, pk=comment_id, post_id=post_id)
 
