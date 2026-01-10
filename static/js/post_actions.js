@@ -1129,6 +1129,15 @@ class PostActionsManager {
             });
         }
 
+        // Close button (X)
+        const closeDeleteBtn = document.getElementById('close-delete-modal');
+        if (closeDeleteBtn) {
+            closeDeleteBtn.addEventListener('click', () => {
+                this.deleteCallback = null;
+                this.closeDeleteModal();
+            });
+        }
+
         // Click outside to close
         this.deleteModal.addEventListener('click', (e) => {
             if (e.target === this.deleteModal) {
@@ -1453,6 +1462,19 @@ class PostActionsManager {
                 callback();
             }
         });
+
+        // Close button (X) click handler
+        const closeAlertBtn = document.getElementById('close-alert-modal');
+        if (closeAlertBtn) {
+            closeAlertBtn.addEventListener('click', () => {
+                this.closeAlertModal();
+                if (this.alertCallback) {
+                    const callback = this.alertCallback;
+                    this.alertCallback = null;
+                    callback();
+                }
+            });
+        }
 
         // Click outside to close
         this.alertModal.addEventListener('click', (e) => {
