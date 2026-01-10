@@ -6,7 +6,7 @@
 .modal-overlay.post-action-overlay {
     align-items: flex-end;
     background: rgba(0, 0, 0, 0.3);  /* 30% opacity overlay */
-    z-index: 2010 !important;  /* Above post viewer modal (2000) */
+    z-index: 3000 !important;  /* Above mobile nav (1020) and post viewer modal (2000) */
 }
 
 .modal-container.post-action-sheet {
@@ -18,7 +18,7 @@
     animation: slideUpMobile 0.3s ease;
     margin: 0;
     background: var(--color-bg);  /* Solid white background */
-    z-index: 2020 !important;  /* Above post viewer overlay (2010) */
+    z-index: 3010 !important;  /* Above overlay (3000) */
 }
 
 /* Modal Header - Close button only */
@@ -143,7 +143,7 @@ body.modal-open .mobile-nav {
 
 /* CRITICAL FIX: Override matching.css z-index conflicts */
 .modal#post-report-modal {
-    z-index: 2030 !important;  /* Above post action modal (2020) */
+    z-index: 3020 !important;  /* Above post action modal (3010) */
     position: fixed;
     display: flex;
     align-items: center;
@@ -157,13 +157,13 @@ body.modal-open .mobile-nav {
     right: 0;
     bottom: 0;
     background: rgba(0, 0, 0, 0.6);
-    z-index: 2030;
+    z-index: 3020;
     pointer-events: auto;
 }
 
 .modal#post-report-modal .modal-content {
     position: relative;
-    z-index: 2031 !important;  /* Above overlay */
+    z-index: 3021 !important;  /* Above overlay */
     pointer-events: auto;
     background: var(--color-bg);
 }
@@ -173,7 +173,7 @@ body.modal-open .mobile-nav {
 .modal#post-report-modal .form-textarea,
 .modal#post-report-modal .btn {
     position: relative;
-    z-index: 2032;
+    z-index: 3022;
     pointer-events: auto;
 }
 
@@ -188,7 +188,7 @@ body.modal-open .mobile-nav {
     inset: 0;
     background: rgba(0, 0, 0, 0.6);
     backdrop-filter: blur(4px);
-    z-index: 2030;
+    z-index: 3020;
     display: flex;
     align-items: flex-end;
     justify-content: center;
