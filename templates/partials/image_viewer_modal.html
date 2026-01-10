@@ -25,9 +25,11 @@
         </svg>
     </button>
 
-    <!-- 이미지 컨테이너 -->
+    <!-- 이미지 컨테이너 (Instagram 스타일 캐러셀) -->
     <div class="image-viewer-container">
-        <img id="viewer-image" src="" alt="{% trans '확대된 이미지' %}" class="viewer-image">
+        <div class="viewer-carousel" id="viewer-carousel">
+            <!-- 이미지들이 JavaScript로 동적 생성됨 -->
+        </div>
 
         <!-- 이미지 카운터 (여러 이미지가 있을 때만 표시) -->
         <div class="viewer-image-counter hidden" id="viewer-image-counter">

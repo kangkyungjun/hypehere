@@ -105,63 +105,47 @@
 /* ===== Image Container ===== */
 .image-viewer-container {
   position: relative;
-  max-width: 98vw;
+  width: 100vw;
   max-height: 90vh;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: default;
+  overflow: hidden;
+}
+
+/* Instagram-style carousel */
+.viewer-carousel {
+  display: flex;
+  width: 100%;
+  height: 90vh;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  touch-action: pan-x;
+  scrollbar-width: none;
+  gap: 1rem;
+}
+
+.viewer-carousel::-webkit-scrollbar {
+  display: none;
 }
 
 .viewer-image {
-  max-width: 100%;
+  flex: 0 0 100%;
+  width: 100%;
   max-height: 90vh;
-  width: auto;
-  height: auto;
   object-fit: contain;
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
   border-radius: var(--radius-lg);
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  opacity: 1;
-  transform: translateX(0) scale(1);
-  will-change: transform, opacity;
-}
-
-/* Fade out state for image transition */
-.viewer-image.fade-out {
-  opacity: 0;
-}
-
-/* Slide from left animation */
-.viewer-image.slide-from-left {
-  animation: slideFromLeft 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Slide from right animation */
-.viewer-image.slide-from-right {
-  animation: slideFromRight 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-@keyframes slideFromLeft {
-  0% {
-    opacity: 0;
-    transform: translateX(-30px) scale(0.95);
-  }
-  100% {
-    opacity: 1;
-    transform: translateX(0) scale(1);
-  }
-}
-
-@keyframes slideFromRight {
-  0% {
-    opacity: 0;
-    transform: translateX(30px) scale(0.95);
-  }
-  100% {
-    opacity: 1;
-    transform: translateX(0) scale(1);
-  }
+  user-select: none;
+  -webkit-user-drag: none;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 /* ===== Image Counter ===== */
@@ -199,45 +183,16 @@
   }
 
   .image-viewer-container {
-    max-width: 100vw;
     max-height: 100vh;
+  }
+
+  .viewer-carousel {
+    height: 100vh;
   }
 
   .viewer-image {
     max-height: 100vh;
     border-radius: 0;
-    /* Faster animations for mobile */
-    transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1), transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .viewer-image.slide-from-left {
-    animation: slideFromLeft 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .viewer-image.slide-from-right {
-    animation: slideFromRight 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  @keyframes slideFromLeft {
-    0% {
-      opacity: 0;
-      transform: translateX(-20px) scale(0.97);
-    }
-    100% {
-      opacity: 1;
-      transform: translateX(0) scale(1);
-    }
-  }
-
-  @keyframes slideFromRight {
-    0% {
-      opacity: 0;
-      transform: translateX(20px) scale(0.97);
-    }
-    100% {
-      opacity: 1;
-      transform: translateX(0) scale(1);
-    }
   }
 
   .viewer-image-counter {

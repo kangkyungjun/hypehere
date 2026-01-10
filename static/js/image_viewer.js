@@ -1,12 +1,12 @@
 /**
- * HypeHere - Image Viewer Modal
- * Simple click-to-enlarge image viewer with navigation and keyboard/mobile support
+ * HypeHere - Image Viewer Modal (Instagram-style carousel)
+ * Click-to-enlarge image viewer with smooth carousel navigation
  */
 
 class ImageViewer {
     constructor() {
         this.modal = null;
-        this.viewerImage = null;
+        this.carousel = null;
         this.closeBtn = null;
         this.prevBtn = null;
         this.nextBtn = null;
@@ -16,25 +16,7 @@ class ImageViewer {
 
         this.images = [];
         this.currentIndex = 0;
-
-        // Touch/swipe support for mobile
-        this.touchStartX = 0;
-        this.touchEndX = 0;
-        this.minSwipeDistance = 50;
-
-        // Pinch-to-zoom support
-        this.scale = 1;
-        this.minScale = 0.5;
-        this.maxScale = 3;
-        this.posX = 0;
-        this.posY = 0;
-        this.initialDistance = 0;
-        this.lastScale = 1;
-        this.lastPosX = 0;
-        this.lastPosY = 0;
-        this.isPinching = false;
-        this.isDragging = false;
-        this.lastTapTime = 0;
+        this.scrollTimeout = null;
 
         this.init();
     }
@@ -42,7 +24,7 @@ class ImageViewer {
     init() {
         // Get modal elements
         this.modal = document.getElementById('image-viewer-modal');
-        this.viewerImage = document.getElementById('viewer-image');
+        this.carousel = document.getElementById('viewer-carousel');
         this.closeBtn = document.getElementById('close-image-viewer');
         this.prevBtn = document.getElementById('prev-image-btn');
         this.nextBtn = document.getElementById('next-image-btn');
@@ -50,8 +32,8 @@ class ImageViewer {
         this.currentIndexSpan = document.getElementById('current-image-index');
         this.totalImagesSpan = document.getElementById('total-images-count');
 
-        if (!this.modal) {
-            console.warn('[ImageViewer] Modal element not found');
+        if (!this.modal || !this.carousel) {
+            console.warn('[ImageViewer] Modal or carousel element not found');
             return;
         }
 
@@ -99,190 +81,33 @@ class ImageViewer {
             }
         });
 
-        // Mobile touch support (swipe + pinch-to-zoom)
-        if (this.viewerImage) {
-            this.viewerImage.addEventListener('touchstart', (e) => this.handleTouchStart(e), { passive: false });
-            this.viewerImage.addEventListener('touchmove', (e) => this.handleTouchMove(e), { passive: false });
-            this.viewerImage.addEventListener('touchend', (e) => this.handleTouchEnd(e), { passive: false });
+        // Scroll event for updating counter
+        if (this.carousel) {
+            this.carousel.addEventListener('scroll', () => this.handleScroll(), { passive: true });
         }
     }
 
-    handleSwipe() {
-        const swipeDistance = this.touchEndX - this.touchStartX;
-
-        if (Math.abs(swipeDistance) < this.minSwipeDistance) {
-            return; // Not a significant swipe
-        }
-
-        if (swipeDistance > 0) {
-            // Swipe right → show previous image
-            this.showPrevious();
-        } else {
-            // Swipe left → show next image
-            this.showNext();
-        }
+    handleScroll() {
+        // Debounced scroll handler
+        clearTimeout(this.scrollTimeout);
+        this.scrollTimeout = setTimeout(() => {
+            this.updateCurrentIndex();
+            this.updateCounter();
+        }, 100);
     }
 
-    handleTouchStart(e) {
-        // Two-finger pinch detection
-        if (e.touches.length === 2) {
-            e.preventDefault();
-            this.isPinching = true;
-            this.initialDistance = this.getDistance(e.touches[0], e.touches[1]);
-            this.lastScale = this.scale;
-            this.lastPosX = this.posX;
-            this.lastPosY = this.posY;
-        } else if (e.touches.length === 1) {
-            // Single finger - could be swipe or drag when zoomed
-            this.touchStartX = e.touches[0].clientX;
-            this.touchStartY = e.touches[0].clientY;
+    updateCurrentIndex() {
+        if (!this.carousel) return;
 
-            // Check for double-tap to zoom
-            const currentTime = new Date().getTime();
-            const tapGap = currentTime - this.lastTapTime;
-
-            if (tapGap < 300 && tapGap > 0) {
-                // Double tap detected - toggle zoom
-                e.preventDefault();
-                this.handleDoubleTap(e.touches[0]);
-                this.lastTapTime = 0;
-            } else {
-                this.lastTapTime = currentTime;
-
-                // If zoomed, prepare for dragging
-                if (this.scale > 1) {
-                    this.isDragging = true;
-                    this.lastPosX = this.posX;
-                    this.lastPosY = this.posY;
-                }
-            }
-        }
+        const scrollLeft = this.carousel.scrollLeft;
+        const slideWidth = this.carousel.offsetWidth;
+        this.currentIndex = Math.round(scrollLeft / slideWidth);
     }
 
-    handleTouchMove(e) {
-        if (this.isPinching && e.touches.length === 2) {
-            e.preventDefault();
-
-            // Calculate new scale
-            const currentDistance = this.getDistance(e.touches[0], e.touches[1]);
-            const scaleChange = currentDistance / this.initialDistance;
-            this.scale = Math.max(this.minScale, Math.min(this.maxScale, this.lastScale * scaleChange));
-
-            // Apply transform
-            this.applyTransform();
-        } else if (this.isDragging && e.touches.length === 1 && this.scale > 1) {
-            e.preventDefault();
-
-            // Calculate pan offset
-            const deltaX = e.touches[0].clientX - this.touchStartX;
-            const deltaY = e.touches[0].clientY - this.touchStartY;
-
-            this.posX = this.lastPosX + deltaX;
-            this.posY = this.lastPosY + deltaY;
-
-            // Apply transform
-            this.applyTransform();
-        } else if (this.scale === 1 && e.touches.length === 1 && this.images.length > 1) {
-            // Live swipe preview for navigation (only when not zoomed and multiple images)
-            e.preventDefault();
-            const deltaX = e.touches[0].clientX - this.touchStartX;
-
-            // Apply live preview with resistance
-            this.updateSwipePosition(deltaX);
+    updateCounter() {
+        if (this.currentIndexSpan) {
+            this.currentIndexSpan.textContent = this.currentIndex + 1;
         }
-    }
-
-    handleTouchEnd(e) {
-        if (this.isPinching) {
-            this.isPinching = false;
-        }
-
-        if (this.isDragging) {
-            this.isDragging = false;
-        }
-
-        // Handle swipe for navigation (only when not zoomed and multiple images)
-        if (this.scale === 1 && e.changedTouches.length === 1 && this.images.length > 1) {
-            this.touchEndX = e.changedTouches[0].clientX;
-            const deltaX = this.touchEndX - this.touchStartX;
-
-            // Determine if swipe is significant enough to change images
-            if (Math.abs(deltaX) >= this.minSwipeDistance) {
-                // Navigate to next/previous image
-                if (deltaX > 0) {
-                    this.showPrevious();
-                } else {
-                    this.showNext();
-                }
-            } else {
-                // Snap back to center
-                this.viewerImage.style.transform = 'translateX(0) scale(1)';
-                this.viewerImage.style.opacity = '1';
-                this.viewerImage.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
-            }
-        }
-    }
-
-    handleDoubleTap(touch) {
-        if (this.scale === 1) {
-            // Zoom in to 2x centered on tap position
-            this.scale = 2;
-
-            // Calculate position to center zoom on tap point
-            const rect = this.viewerImage.getBoundingClientRect();
-            const tapX = touch.clientX - rect.left;
-            const tapY = touch.clientY - rect.top;
-
-            // Adjust position to zoom toward tap point
-            this.posX = (rect.width / 2 - tapX) * (this.scale - 1);
-            this.posY = (rect.height / 2 - tapY) * (this.scale - 1);
-        } else {
-            // Zoom out to reset
-            this.resetZoom();
-        }
-
-        this.applyTransform();
-    }
-
-    getDistance(touch1, touch2) {
-        const dx = touch2.clientX - touch1.clientX;
-        const dy = touch2.clientY - touch1.clientY;
-        return Math.sqrt(dx * dx + dy * dy);
-    }
-
-    applyTransform() {
-        if (!this.viewerImage) return;
-
-        this.viewerImage.style.transform = `translate(${this.posX}px, ${this.posY}px) scale(${this.scale})`;
-        this.viewerImage.style.transition = this.isPinching || this.isDragging ? 'none' : 'transform 0.3s ease';
-    }
-
-    updateSwipePosition(deltaX) {
-        if (!this.viewerImage) return;
-
-        // Apply resistance for edge cases
-        const resistance = 0.4;
-        const maxSwipe = window.innerWidth;
-
-        // Calculate bounded deltaX with resistance
-        let boundedDelta = deltaX;
-        if (Math.abs(deltaX) > maxSwipe * 0.5) {
-            boundedDelta = deltaX > 0 ? maxSwipe * 0.5 : -maxSwipe * 0.5;
-        }
-
-        // Apply transform for live preview
-        this.viewerImage.style.transform = `translateX(${boundedDelta * resistance}px) scale(1)`;
-        this.viewerImage.style.transition = 'none';
-
-        // Calculate opacity based on swipe distance
-        const opacity = Math.max(0.5, 1 - Math.abs(deltaX) / maxSwipe);
-        this.viewerImage.style.opacity = opacity;
-    }
-
-    resetZoom() {
-        this.scale = 1;
-        this.posX = 0;
-        this.posY = 0;
     }
 
     open(imageElement, allImageElements = null) {
@@ -307,14 +132,37 @@ class ImageViewer {
         document.body.style.top = `-${this.scrollY}px`;
         document.body.style.width = '100%';
 
+        // Build carousel
+        this.buildCarousel();
+
         // Show the modal
         this.modal.classList.remove('hidden');
 
-        // Display the image
-        this.displayCurrentImage();
+        // Scroll to current image after DOM update
+        setTimeout(() => {
+            this.scrollToImage(this.currentIndex, false);
+        }, 0);
 
         // Update navigation buttons and counter
         this.updateNavigation();
+    }
+
+    buildCarousel() {
+        if (!this.carousel) return;
+
+        // Clear existing content
+        this.carousel.innerHTML = '';
+
+        // Add all images to carousel
+        this.images.forEach((img, index) => {
+            const viewerImg = document.createElement('img');
+            viewerImg.src = img.src;
+            viewerImg.alt = img.alt || `Image ${index + 1}`;
+            viewerImg.className = 'viewer-image';
+            viewerImg.dataset.index = index;
+
+            this.carousel.appendChild(viewerImg);
+        });
     }
 
     close() {
@@ -331,10 +179,6 @@ class ImageViewer {
         // Restore scroll position
         window.scrollTo(0, this.scrollY || 0);
 
-        // Reset zoom
-        this.resetZoom();
-        this.applyTransform();
-
         // Clear state
         this.images = [];
         this.currentIndex = 0;
@@ -344,9 +188,7 @@ class ImageViewer {
         if (this.images.length <= 1) return;
 
         this.currentIndex = (this.currentIndex - 1 + this.images.length) % this.images.length;
-        this.resetZoom();
-        this.applyTransform();
-        this.displayCurrentImage('left'); // Slide from left
+        this.scrollToImage(this.currentIndex);
         this.updateNavigation();
     }
 
@@ -354,46 +196,24 @@ class ImageViewer {
         if (this.images.length <= 1) return;
 
         this.currentIndex = (this.currentIndex + 1) % this.images.length;
-        this.resetZoom();
-        this.applyTransform();
-        this.displayCurrentImage('right'); // Slide from right
+        this.scrollToImage(this.currentIndex);
         this.updateNavigation();
     }
 
-    displayCurrentImage(direction = null) {
-        if (!this.viewerImage || this.images.length === 0) return;
+    scrollToImage(index, smooth = true) {
+        if (!this.carousel) return;
 
-        const currentImage = this.images[this.currentIndex];
+        const slideWidth = this.carousel.offsetWidth;
+        const scrollLeft = index * slideWidth;
 
-        // If no direction (initial load), just set image without animation
-        if (!direction) {
-            this.viewerImage.src = currentImage.src;
-            this.viewerImage.alt = currentImage.alt || 'Enlarged image';
-            return;
+        if (smooth) {
+            this.carousel.scrollTo({
+                left: scrollLeft,
+                behavior: 'smooth'
+            });
+        } else {
+            this.carousel.scrollLeft = scrollLeft;
         }
-
-        // Fade-out → swap → fade-in with slide animation
-        this.viewerImage.classList.add('fade-out');
-
-        setTimeout(() => {
-            // Swap image source
-            this.viewerImage.src = currentImage.src;
-            this.viewerImage.alt = currentImage.alt || 'Enlarged image';
-
-            // Wait for image to load, then fade-in with slide
-            this.viewerImage.onload = () => {
-                this.viewerImage.classList.remove('fade-out');
-
-                // Add directional slide animation
-                const slideClass = direction === 'left' ? 'slide-from-left' : 'slide-from-right';
-                this.viewerImage.classList.add(slideClass);
-
-                // Remove animation class after animation completes
-                setTimeout(() => {
-                    this.viewerImage.classList.remove(slideClass);
-                }, 400); // Match animation duration
-            };
-        }, 300); // Match fade-out transition duration
     }
 
     updateNavigation() {
