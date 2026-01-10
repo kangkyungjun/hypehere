@@ -2,11 +2,11 @@
 {% load i18n %}
 
 <!-- Post Delete Confirmation Modal -->
-<div id="post-delete-modal" class="modal-overlay delete-modal-overlay hidden">
+<div id="post-delete-modal" class="modal-overlay delete-modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="delete-modal-title" aria-describedby="delete-warning-text">
     <div class="modal-container delete-modal-container">
         <!-- Header -->
         <div class="modal-header delete-modal-header">
-            <h3 class="delete-modal-title">Delete Post</h3>
+            <h3 class="delete-modal-title" id="delete-modal-title">Delete Post</h3>
             <button type="button" class="modal-close" id="close-delete-modal" aria-label="{% trans '닫기' %}">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <line x1="18" y1="6" x2="6" y2="18"/>
@@ -17,7 +17,7 @@
 
         <!-- Body with warning message -->
         <div class="modal-body delete-modal-body">
-            <p class="delete-warning-text">
+            <p class="delete-warning-text" id="delete-warning-text">
                 {% trans "정말로 이 게시물을 삭제하시겠습니까?" %}
             </p>
             <p class="delete-warning-subtext">
