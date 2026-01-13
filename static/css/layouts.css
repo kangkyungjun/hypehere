@@ -118,13 +118,16 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 2.75rem;           /* 44px base (38.5px mobile ~ 49.5px desktop) */
+  height: 2.75rem;
+  min-width: 44px;          /* 절대 최소값 보장 */
+  min-height: 44px;
   border-radius: var(--radius-full);
   color: var(--color-text);
   background: none;
   border: none;
   cursor: pointer;
+  flex-shrink: 0;           /* 작은 화면에서 크기 축소 방지 */
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
 }

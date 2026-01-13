@@ -471,6 +471,8 @@
         };
     })();
     </script>
+    <!-- History Manager - MUST load first to prevent app exit on back button -->
+    <script src="{% static 'js/history_manager.js' %}"></script>
     <script src="{% static 'js/main.js' %}"></script>
     <script src="{% static 'js/header_scroll.js' %}"></script>
     <script src="{% static 'js/utils.js' %}"></script>

@@ -215,9 +215,11 @@ textarea.form-control {
 }
 
 .form-check-input {
-  width: 18px;
+  width: 18px;           /* 시각적 크기 유지 */
   height: 18px;
   cursor: pointer;
+  position: relative;
+  margin: 8px;           /* 주변 여백으로 터치 영역 확보 (18px + 16px = 34px) */
 }
 
 .form-check-label {

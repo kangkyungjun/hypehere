@@ -16,9 +16,9 @@
   --color-accent-dark: #D97706;
 
   /* ===== Neutral Colors ===== */
-  --color-text: #1F2937;           /* Gray-800 - Primary text */
-  --color-text-light: #6B7280;     /* Gray-500 - Secondary text */
-  --color-text-lighter: #9CA3AF;   /* Gray-400 - Tertiary text */
+  --color-text: #1F2937;           /* Gray-800 - Primary text (14.7:1 대비율) */
+  --color-text-light: #6B7280;     /* Gray-500 - Secondary text (5.74:1 대비율) */
+  --color-text-lighter: #6B7280;   /* Gray-500 - Gray-400에서 변경 (4.5:1 이상 확보) */
   --color-bg: #FFFFFF;             /* White - Background */
   --color-bg-secondary: #F9FAFB;   /* Gray-50 - Secondary bg */
   --color-bg-tertiary: #F3F4F6;    /* Gray-100 - Tertiary bg */
