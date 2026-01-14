@@ -40,39 +40,58 @@
 
             const state = event.state;
 
-            // Handle modal close
-            if (state.modal) {
-                const modal = document.getElementById(state.modal);
-                if (modal && modal.classList.contains('show')) {
-                    this.closeModal(modal, false); // Don't add to history
+            // Priority 1: Check if any modal is open - close it first
+            const openModals = document.querySelectorAll('.modal.show');
+            if (openModals.length > 0) {
+                // If modal is open, close it and don't navigate
+                if (state.modal) {
+                    const modal = document.getElementById(state.modal);
+                    if (modal && modal.classList.contains('show')) {
+                        this.closeModal(modal, false);
+                        return;
+                    }
                 }
+
+                // Handle specific modal types
+                if (state.type === 'post-view') {
+                    const postModal = document.getElementById('postViewModal');
+                    if (postModal && postModal.classList.contains('show')) {
+                        this.closeModal(postModal, false);
+                        return;
+                    }
+                }
+
+                if (state.type === 'image-viewer') {
+                    const imageViewer = document.getElementById('imageViewerModal');
+                    if (imageViewer && imageViewer.classList.contains('show')) {
+                        this.closeModal(imageViewer, false);
+                        return;
+                    }
+                }
+
+                if (state.type === 'create-post') {
+                    const createModal = document.getElementById('postCreateModal');
+                    if (createModal && createModal.classList.contains('show')) {
+                        this.closeModal(createModal, false);
+                        return;
+                    }
+                }
+
+                // Close any remaining open modals
+                this.closeAllModals(false);
+                return;
             }
 
-            // Handle post view modal
-            if (state.type === 'post-view') {
-                const postModal = document.getElementById('postViewModal');
-                if (postModal && postModal.classList.contains('show')) {
-                    this.closeModal(postModal, false);
-                }
+            // Priority 2: Handle page navigation
+            if (state.page && state.page !== window.location.pathname) {
+                // User pressed back to go to a different page
+                // Allow normal navigation by reloading
+                console.log('[HistoryManager] Navigating to:', state.page);
+                window.location.href = state.page;
+                return;
             }
 
-            // Handle image viewer
-            if (state.type === 'image-viewer') {
-                const imageViewer = document.getElementById('imageViewerModal');
-                if (imageViewer && imageViewer.classList.contains('show')) {
-                    this.closeModal(imageViewer, false);
-                }
-            }
-
-            // Handle create post modal
-            if (state.type === 'create-post') {
-                const createModal = document.getElementById('postCreateModal');
-                if (createModal && createModal.classList.contains('show')) {
-                    this.closeModal(createModal, false);
-                }
-            }
-
-            // Handle any other modals
+            // Handle any other cases
             if (state.page === 'home' || state.page === 'initial') {
                 this.closeAllModals(false);
             }
@@ -136,13 +155,41 @@
             return lastState.modal === modalId && (Date.now() - lastState.timestamp) < 500;
         },
 
-        // Intercept tab/view changes (for future SPA-like navigation)
+        // Intercept tab/view changes for app-like navigation
         interceptTabChanges: function() {
+            const self = this;
             // Mobile navigation links
             const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+
             mobileNavLinks.forEach(link => {
-                // Don't intercept for now - let normal navigation work
-                // This is for future SPA implementation
+                link.addEventListener('click', function(e) {
+                    const href = this.getAttribute('href');
+
+                    // Skip if it's a hash link or empty
+                    if (!href || href === '#' || href.startsWith('#')) {
+                        return;
+                    }
+
+                    // Skip if it's the current page
+                    if (href === window.location.pathname) {
+                        e.preventDefault();
+                        return;
+                    }
+
+                    // Don't intercept - let normal navigation work
+                    // But ensure we add to history properly
+                    const currentPath = window.location.pathname;
+
+                    // Add current page to history stack if not already there
+                    if (!window.history.state || window.history.state.page !== currentPath) {
+                        window.history.replaceState({
+                            page: currentPath,
+                            timestamp: Date.now()
+                        }, '', currentPath);
+                    }
+
+                    console.log('[HistoryManager] Navigation:', currentPath, '→', href);
+                });
             });
         },
 
@@ -197,16 +244,24 @@
     window.HistoryManager = HistoryManager;
 
     // Prevent exit on initial back press
-    // Add a dummy history entry on first load
+    // Add proper history state on first load
     window.addEventListener('load', function() {
-        // Check if we're on the main pages
-        const isMainPage = ['/', '/home/', '/explore/'].some(path =>
-            window.location.pathname === path || window.location.pathname.endsWith(path)
-        );
+        const currentPath = window.location.pathname;
 
-        if (isMainPage) {
-            // Add initial history entry to prevent immediate exit
-            window.history.pushState({ page: 'home' }, '', window.location.href);
+        // Always set initial state with current page path
+        if (!window.history.state || !window.history.state.page) {
+            window.history.replaceState({
+                page: currentPath,
+                timestamp: Date.now()
+            }, '', currentPath);
+
+            // Add one more entry to prevent immediate exit
+            window.history.pushState({
+                page: currentPath,
+                timestamp: Date.now()
+            }, '', currentPath);
+
+            console.log('[HistoryManager] Initial history state set for:', currentPath);
         }
     });
 
