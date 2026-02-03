@@ -1,4 +1,5 @@
 from sqlalchemy import Column, String, Date, Float, TIMESTAMP, text
+from sqlalchemy.dialects.postgresql import JSONB
 from app.database import Base
 
 
@@ -40,4 +41,4 @@ class Ticker(Base):
     ticker_name = Column(String(200), index=True)  # Searchable name
     name = Column(String(200))  # Display name
     category = Column(String(50))  # Category/sector
-    extra_data = Column("metadata", text('JSONB'))  # Additional JSON data
+    extra_data = Column("metadata", JSONB)  # Additional JSON data
