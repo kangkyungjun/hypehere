@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import scores, tickers
+from app.routers import scores, tickers, internal_ingest
 from app.config import settings
 from app.schemas import HealthCheck
 
@@ -18,7 +18,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # TODO: Restrict in production
     allow_credentials=True,
-    allow_methods=["GET"],  # Read-only API
+    allow_methods=["GET", "POST"],  # GET for public API, POST for internal ingest
     allow_headers=["*"],
 )
 
@@ -34,6 +34,9 @@ app.include_router(
     prefix="/api/v1/tickers",
     tags=["Ticker Metadata ⭐"]
 )
+
+# Internal router (Mac mini ingest)
+app.include_router(internal_ingest.router)
 
 
 @app.get("/", tags=["Root"])
