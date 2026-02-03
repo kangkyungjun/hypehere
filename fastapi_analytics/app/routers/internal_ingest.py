@@ -1,17 +1,17 @@
 from fastapi import APIRouter, Header, HTTPException, Depends
 from sqlalchemy.orm import Session
 from datetime import date
-import os
 
 from app.database import get_db
 from app.models import TickerScore
+from app.config import settings
 
 router = APIRouter(
     prefix="/api/v1/internal/ingest",
     tags=["Internal"],
 )
 
-EXPECTED_API_KEY = os.getenv("ANALYTICS_API_KEY")
+EXPECTED_API_KEY = settings.ANALYTICS_API_KEY
 
 
 # ============================
