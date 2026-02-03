@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Header, HTTPException, Depends
 from sqlalchemy.orm import Session
+from sqlalchemy import text
 from datetime import date
 
 from app.database import get_db
@@ -133,10 +134,10 @@ def ingest_scores(payload: dict, db: Session = Depends(get_db)):
     # 3년 초과 데이터 자동 삭제
     # ----------------------------
     db.execute(
-        """
+        text("""
         DELETE FROM analytics.ticker_scores
         WHERE date < CURRENT_DATE - INTERVAL '3 years'
-        """
+        """)
     )
     db.commit()
 
