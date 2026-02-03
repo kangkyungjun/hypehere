@@ -140,3 +140,108 @@ def get_top_scores(
         }
         for r in results
     ]
+
+
+@router.get("/insights")
+def get_market_insights(
+    target_date: date = Query(None, alias="date", description="Date (default: today)"),
+    top: int = Query(5, ge=1, le=20, description="Number of top movers (max 20)"),
+    bottom: int = Query(5, ge=1, le=20, description="Number of bottom movers (max 20)"),
+    db: Session = Depends(get_db)
+):
+    """
+    Get market insights with top and bottom performers.
+
+    **대시보드용** ⭐⭐⭐
+    - 강세 종목 (점수 높은 순)
+    - 약세 종목 (점수 낮은 순)
+    - 매수/매도 후보 파악
+
+    Example:
+    ```
+    GET /api/v1/scores/insights?date=2026-02-03&top=5&bottom=5
+    ```
+
+    Response:
+    ```json
+    {
+        "date": "2026-02-03",
+        "top_movers": [
+            {
+                "ticker": "NVDA",
+                "score": 95.2,
+                "signal": "BUY",
+                "name": "NVIDIA Corporation"
+            }
+        ],
+        "bottom_movers": [
+            {
+                "ticker": "INTC",
+                "score": 32.1,
+                "signal": "SELL",
+                "name": "Intel Corporation"
+            }
+        ]
+    }
+    ```
+    """
+    if target_date is None:
+        target_date = date.today()
+
+    # Query top movers (highest scores)
+    top_results = db.query(
+        TickerScore.ticker,
+        TickerScore.score,
+        TickerScore.signal,
+        Ticker.name
+    ).outerjoin(
+        Ticker,
+        TickerScore.ticker == Ticker.ticker
+    ).filter(
+        TickerScore.date == target_date
+    ).order_by(
+        desc(TickerScore.score)
+    ).limit(top).all()
+
+    # Query bottom movers (lowest scores)
+    bottom_results = db.query(
+        TickerScore.ticker,
+        TickerScore.score,
+        TickerScore.signal,
+        Ticker.name
+    ).outerjoin(
+        Ticker,
+        TickerScore.ticker == Ticker.ticker
+    ).filter(
+        TickerScore.date == target_date
+    ).order_by(
+        TickerScore.score.asc()
+    ).limit(bottom).all()
+
+    if not top_results and not bottom_results:
+        raise HTTPException(
+            404,
+            f"No scores found for date {target_date}"
+        )
+
+    return {
+        "date": str(target_date),
+        "top_movers": [
+            {
+                "ticker": r.ticker,
+                "score": r.score,
+                "signal": r.signal,
+                "name": r.name
+            }
+            for r in top_results
+        ],
+        "bottom_movers": [
+            {
+                "ticker": r.ticker,
+                "score": r.score,
+                "signal": r.signal,
+                "name": r.name
+            }
+            for r in bottom_results
+        ]
+    }

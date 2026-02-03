@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import scores, tickers, internal_ingest
+from fastapi.staticfiles import StaticFiles
+from app.routers import scores, tickers, internal_ingest, dashboard
 from app.config import settings
 from app.schemas import HealthCheck
 
@@ -22,6 +23,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Mount static files
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
+
 # Include routers
 app.include_router(
     scores.router,
@@ -37,6 +41,9 @@ app.include_router(
 
 # Internal router (Mac mini ingest)
 app.include_router(internal_ingest.router)
+
+# Dashboard router (public web interface)
+app.include_router(dashboard.router)
 
 
 @app.get("/", tags=["Root"])
