@@ -90,9 +90,16 @@ def ingest_scores(payload: dict, db: Session = Depends(get_db)):
             continue
 
         ticker = item["ticker"]
-        score_date = item["date"]
+        score_date_str = item["date"]
         score_value = item["score"]
         signal = item.get("signal")
+
+        # Convert date string to date object
+        if isinstance(score_date_str, str):
+            from datetime import datetime
+            score_date = datetime.strptime(score_date_str, "%Y-%m-%d").date()
+        else:
+            score_date = score_date_str
 
         # UPSERT 로직: ticker + date 기준
         obj = (
