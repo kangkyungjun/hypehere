@@ -4,9 +4,69 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**HypeHere** is a language learning social platform built with Django 5.1.11 and Django REST Framework. The platform combines social networking features (posts, comments, likes, follows) with real-time chat functionality (both regular and anonymous matching-based chat) using Django Channels for WebSocket support.
+**HypeHere** is a language learning social platform with a dual-server architecture:
+
+- **Django 5.1.11**: Main application server handling social features, real-time chat, and WebSocket connections
+- **FastAPI** (planned): Read-only analytics API serving pre-computed analytics data
+
+The Django platform combines social networking features (posts, comments, likes, follows) with real-time chat functionality (both regular and anonymous matching-based chat) using Django Channels for WebSocket support.
+
+## Architecture Overview
+
+### Dual-Server Architecture
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                   Nginx Reverse Proxy                    │
+│  example.com/          → Django (Daphne ASGI)            │
+│  example.com/api/v1/   → FastAPI (Uvicorn) [planned]     │
+└─────────────────────────────────────────────────────────┘
+           │                              │
+           ▼                              ▼
+    ┌──────────────┐            ┌──────────────────┐
+    │   Django     │            │    FastAPI       │
+    │   Port 8000  │            │    Port 8001     │
+    │   (Daphne)   │            │    (Uvicorn)     │
+    └──────────────┘            └──────────────────┘
+           │                              │
+           └──────────────┬───────────────┘
+                          ▼
+              ┌────────────────────────┐
+              │  PostgreSQL RDS        │
+              │  public.* → Django     │
+              │  analytics.* → FastAPI │
+              └────────────────────────┘
+```
+
+### Component Responsibilities
+
+**Django Server** (Read-Write):
+- User management, authentication, social features
+- Real-time chat (WebSocket via Django Channels)
+- Content management (posts, comments, likes)
+- Learning modules and situation-based lessons
+- Admin panel and moderation system
+
+**FastAPI Server** (Read-Only, Planned):
+- Analytics query API
+- Pre-computed statistics serving
+- Daily aggregated metrics from Mac mini
+- No database writes (consumes analytics.* schema only)
+
+**Data Flow**:
+```
+Mac mini (daily AI analysis)
+    ↓
+PostgreSQL analytics.* schema (write results)
+    ↓
+FastAPI (read-only queries)
+    ↓
+Mobile App (analytics consumption)
+```
 
 ## Development Commands
+
+### Django Development
 
 ### Setup and Environment
 ```bash
@@ -51,11 +111,66 @@ python manage.py shell
 python manage.py shell_plus
 ```
 
+### FastAPI Development (Planned)
+
+```bash
+# Setup
+cd fastapi_analytics
+pip install -r requirements.txt
+
+# Run FastAPI server
+uvicorn app.main:app --reload --port 8001
+
+# Access interactive API docs
+# http://localhost:8001/docs (Swagger UI)
+# http://localhost:8001/redoc (ReDoc)
+```
+
+### Dual-Server Local Testing
+
+```bash
+# Terminal 1: Django server
+python manage.py runserver
+
+# Terminal 2: FastAPI server (once implemented)
+cd fastapi_analytics && uvicorn app.main:app --reload --port 8001
+```
+
+Both servers can run simultaneously for local development.
+
+## Database Architecture
+
+### Schema Separation Strategy
+
+**Production PostgreSQL RDS**:
+- Single RDS instance with logical schema separation
+- `public.*` → Django ORM (read-write access)
+- `analytics.*` → FastAPI (read-only access)
+
+**Development**:
+- Django: SQLite (`db.sqlite3`)
+- FastAPI: PostgreSQL analytics schema (via DATABASE_ANALYTICS_URL)
+
+### Database Connection Patterns
+
+```bash
+# Django (.env)
+DATABASE_URL=postgresql://user:pass@host:5432/hypehere
+
+# FastAPI (.env in fastapi_analytics/)
+DATABASE_ANALYTICS_URL=postgresql://analytics_user:pass@host:5432/hypehere?options=-c%20search_path=analytics
+```
+
+**Connection Strategy**:
+- Django connects with full database access (default search_path=public)
+- FastAPI connects with read-only access to analytics schema
+- Mac mini uploader has write-only access to analytics.* tables
+
 ## Core Architecture
 
-### Apps Structure
+### Django Apps Structure
 
-The project follows Django's app-based architecture with 6 main apps:
+The project follows Django's app-based architecture with 7 main apps:
 
 1. **accounts**: Custom user authentication and social relationships
    - Custom User model with email-based authentication (not username)
@@ -92,7 +207,13 @@ The project follows Django's app-based architecture with 6 main apps:
    - Vocabulary storage in JSON fields
    - Learning statistics and progress tracking
 
-6. **specs**: Development notes and requirements tracking
+6. **analytics**: Visitor tracking and usage statistics
+   - DailyVisitor, UserActivityLog models for tracking
+   - AnonymousChatUsageStats for chat analytics
+   - Admin dashboard at `/admin-dashboard/`
+   - VisitorTrackingMiddleware for automatic page view tracking
+
+7. **specs**: Development notes and requirements tracking
    - Internal project management for specifications
    - Categories: feature, design, architecture, api, database, testing, deployment, documentation, bug, enhancement
    - Status tracking: draft, review, approved, implemented, deprecated
@@ -257,6 +378,161 @@ LANGUAGES = [
 - Media uploads directory: `media/` (profile pictures, etc.)
 - Templates directory: `templates/` at project root
 
+## Analytics Integration
+
+### Current Django Analytics
+
+**Django App**: `analytics`
+- **Models**: DailyVisitor, UserActivityLog, AnonymousChatUsageStats, DailySummary
+- **Middleware**: VisitorTrackingMiddleware automatically tracks page views
+- **Dashboard**: Admin-only analytics at `/admin-dashboard/`
+- **Purpose**: Track platform usage and user behavior
+
+### Planned FastAPI Analytics API
+
+**Directory Structure**:
+```
+fastapi_analytics/
+├── app/
+│   ├── main.py              # FastAPI application entry point
+│   ├── routers/             # API route handlers
+│   │   └── analytics.py
+│   ├── models.py            # SQLAlchemy models for analytics schema
+│   ├── schemas.py           # Pydantic request/response schemas
+│   ├── database.py          # Database connection configuration
+│   └── services/            # Business logic layer
+├── venv/                    # FastAPI virtual environment
+└── requirements.txt         # FastAPI dependencies
+```
+
+**Purpose**: Read-only API for pre-computed analytics data
+
+**Data Source**: PostgreSQL analytics schema (analytics.*)
+
+**Update Frequency**: Mac mini uploads daily analysis results
+
+**Example API Endpoints** (planned):
+```
+GET /api/v1/analytics/daily-users?start=2025-01-01&end=2025-01-31
+GET /api/v1/analytics/chat-usage?granularity=weekly
+GET /api/v1/analytics/user-growth
+GET /api/v1/analytics/trending-posts
+```
+
+### Mac Mini Integration Workflow
+
+```
+┌──────────────────────────────────────────────────┐
+│ Mac mini (Daily Cron Job)                        │
+│  1. Query Django database (public schema)        │
+│  2. Run AI-based analytics computations          │
+│  3. Generate aggregated statistics               │
+│  4. Upload results to analytics.* schema         │
+└──────────────────────────────────────────────────┘
+                      ↓
+┌──────────────────────────────────────────────────┐
+│ PostgreSQL (analytics schema)                    │
+│  - analytics.scores                              │
+│  - analytics.tickers                             │
+│  - analytics.likes                               │
+│  - analytics.daily_metrics                       │
+└──────────────────────────────────────────────────┘
+                      ↓
+┌──────────────────────────────────────────────────┐
+│ FastAPI (Read-Only Queries)                      │
+│  - Serves fresh analytics data                   │
+│  - High-performance async queries                │
+│  - No database writes                            │
+└──────────────────────────────────────────────────┘
+                      ↓
+┌──────────────────────────────────────────────────┐
+│ Mobile App                                       │
+│  - Consumes analytics via /api/v1/ endpoints     │
+└──────────────────────────────────────────────────┘
+```
+
+## Deployment Architecture
+
+### Nginx Routing Configuration
+
+```nginx
+server {
+    listen 80;
+    server_name example.com;
+
+    # Django (main application + WebSocket)
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+
+    # WebSocket upgrade for Django Channels
+    location /ws/ {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+
+    # FastAPI analytics API (planned)
+    location /api/v1/ {
+        proxy_pass http://127.0.0.1:8001;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+
+    # Static files
+    location /static/ {
+        alias /home/django/hypehere/staticfiles/;
+    }
+
+    # Media files
+    location /media/ {
+        alias /home/django/hypehere/media/;
+    }
+}
+```
+
+### Service Management
+
+**Systemd Services**:
+
+```bash
+# Django service (Daphne ASGI server)
+sudo systemctl status hypehere
+sudo systemctl restart hypehere
+sudo systemctl stop hypehere
+
+# FastAPI service (Uvicorn, planned)
+sudo systemctl status fastapi-analytics
+sudo systemctl restart fastapi-analytics
+sudo systemctl stop fastapi-analytics
+
+# Nginx web server
+sudo systemctl restart nginx
+sudo systemctl status nginx
+```
+
+### Deployment Scripts
+
+```bash
+# Deploy Django changes (existing)
+bash scripts/deploy.sh "commit message"
+
+# Deploy FastAPI changes (planned)
+bash scripts/deploy_fastapi.sh "commit message"
+
+# Update server with git pull (existing)
+bash scripts/update_server.sh
+```
+
+**Deployment Independence**:
+- Django and FastAPI deploy independently
+- FastAPI deployment does NOT restart Django
+- Both services can scale independently
+- Database schema separation prevents conflicts
+
 ## Important Implementation Notes
 
 ### User Model Queries
@@ -295,10 +571,37 @@ When testing WebSocket consumers, remember:
 3. For anonymous chats, conversation must have `is_anonymous=True`
 
 ### Database Considerations
-- SQLite in development (db.sqlite3)
+- Development: SQLite (db.sqlite3) for Django, PostgreSQL for FastAPI analytics
+- Production: PostgreSQL RDS with schema separation (public.* vs analytics.*)
 - All timestamp fields use `auto_now_add=True` or `auto_now=True`
 - Indexes are optimized for common queries (see model Meta classes)
 - `unique_together` constraints prevent duplicate follows/blocks/likes
+
+### Database Access Patterns
+
+```python
+# Django (ORM, read-write on public schema)
+from posts.models import Post
+Post.objects.create(content='Hello', author=user)
+
+# FastAPI (SQLAlchemy, read-only on analytics schema, planned)
+# Example: Query pre-computed analytics tables
+# from app.models import DailyMetrics
+# metrics = session.query(DailyMetrics).filter(date >= start_date).all()
+```
+
+### Schema Migration Strategy
+
+```bash
+# Django migrations (public schema only)
+python manage.py makemigrations
+python manage.py migrate
+
+# Analytics schema (managed by Mac mini uploader)
+# No Django migrations for analytics.*
+# FastAPI only reads, never writes
+# Schema created/updated by Mac mini upload scripts
+```
 
 ### REST Framework Configuration
 - TokenAuthentication and SessionAuthentication enabled
@@ -384,22 +687,58 @@ if room.is_full():
 
 ## Technology Stack
 
+### Django Server
 - **Backend**: Django 5.1.11
 - **API**: Django REST Framework 3.14.0+
 - **WebSockets**: Django Channels with Daphne
 - **Image Processing**: Pillow 10.0.0+
-- **Database**: SQLite (development), ready for PostgreSQL (production)
-- **Channel Layer**: In-memory (development), Redis (production)
+- **Database ORM**: Django ORM
+- **Channel Layer**: In-memory (development), Redis/ElastiCache (production)
+
+### FastAPI Server (Planned)
+- **Framework**: FastAPI 0.109+
+- **Server**: Uvicorn (ASGI)
+- **ORM**: SQLAlchemy 2.0+ (read-only)
+- **Database**: PostgreSQL (analytics schema)
+- **Validation**: Pydantic v2
+- **Async**: Native async/await support
+
+### Infrastructure
+- **Database**: PostgreSQL RDS (dual schema: public + analytics)
+- **Cache**: ElastiCache Redis (Django Channels)
+- **Storage**: S3 (static/media files in production)
+- **Web Server**: Nginx (reverse proxy + path-based routing)
+- **ASGI Servers**: Daphne (Django), Uvicorn (FastAPI)
 
 ## Key Files to Reference
 
+### Django Files
 - `hypehere/settings.py` - Django configuration, app registration, channel layers
 - `hypehere/urls.py` - Main URL routing
 - `hypehere/asgi.py` - ASGI configuration for WebSocket support
+- `hypehere/views.py` - Main views including admin dashboard
 - `accounts/models.py` - Custom User model and authentication
-- `chat/consumers.py` - WebSocket consumer implementations
+- `chat/consumers.py` - WebSocket consumer implementations (5 consumers)
 - `chat/routing.py` - WebSocket URL routing
 - `notifications/models.py` - Polymorphic notification system
+- `analytics/models.py` - Django analytics models (DailyVisitor, etc.)
+- `analytics/middleware.py` - VisitorTrackingMiddleware
+
+### FastAPI Files (Planned)
+- `fastapi_analytics/app/main.py` - FastAPI application entry point
+- `fastapi_analytics/app/routers/analytics.py` - API route handlers
+- `fastapi_analytics/app/models.py` - SQLAlchemy models for analytics schema
+- `fastapi_analytics/app/schemas.py` - Pydantic request/response models
+- `fastapi_analytics/app/database.py` - Database connection configuration
+- `fastapi_analytics/requirements.txt` - FastAPI dependencies
+
+### Deployment Files
+- `scripts/deploy.sh` - Django deployment automation
+- `scripts/update_server.sh` - Server update script (git pull)
+- `scripts/deploy_fastapi.sh` - FastAPI deployment (planned)
+- `/etc/nginx/sites-available/hypehere` - Nginx configuration
+- `/etc/systemd/system/hypehere.service` - Django systemd service (Daphne)
+- `/etc/systemd/system/fastapi-analytics.service` - FastAPI systemd service (planned)
 
 ## Migration Notes
 
@@ -412,6 +751,8 @@ When creating or modifying models:
 ## Architecture Patterns Summary
 
 **Key Patterns Used**:
+
+### Django Patterns
 1. **Email-based authentication** - USERNAME_FIELD='email', not username-based
 2. **Through models for state tracking** - ConversationParticipant, OpenChatParticipant track per-user state
 3. **Polymorphic relationships** - Django ContentTypes for flexible Notification.content_object
@@ -420,3 +761,29 @@ When creating or modifying models:
 6. **Auto-rejoin logic** - Inactive users automatically re-added to conversations on message receipt
 7. **Report aggregation** - Multiple report types feeding user.report_count for moderation
 8. **Middleware-based suspension** - SuspensionCheckMiddleware auto-lifts expired suspensions
+
+### Dual-Server Architecture Patterns
+1. **Path-based routing** - Nginx routes by URL path prefix (/ → Django, /api/v1/ → FastAPI)
+2. **Schema separation** - Single database with logical schema isolation (public vs analytics)
+3. **Read-write isolation** - Django writes, FastAPI only reads analytics data
+4. **Independent deployment** - Each server deploys and scales independently
+5. **Async optimization** - FastAPI uses async/await for high-throughput read queries
+6. **External data pipeline** - Mac mini computes and uploads analytics daily
+7. **Service independence** - No shared code or direct communication between Django and FastAPI
+
+### Database Schema Organization
+```
+PostgreSQL RDS (hypehere database)
+├── public schema (Django read-write)
+│   ├── accounts_user
+│   ├── posts_post
+│   ├── chat_conversation
+│   ├── analytics_dailyvisitor
+│   └── ... (all Django models)
+│
+└── analytics schema (FastAPI read-only)
+    ├── scores
+    ├── tickers
+    ├── likes
+    └── daily_metrics
+```
