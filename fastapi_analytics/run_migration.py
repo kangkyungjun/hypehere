@@ -13,7 +13,7 @@ from app.config import settings
 
 def run_migration():
     """Execute migration SQL"""
-    engine = create_engine(settings.DATABASE_URL)
+    engine = create_engine(settings.DATABASE_ANALYTICS_URL)
 
     migration_sql = """
     -- Create ticker_prices table
