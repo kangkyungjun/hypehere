@@ -57,6 +57,13 @@ body {
     opacity: 0.95;
 }
 
+.data-date {
+    font-size: 0.95rem;
+    opacity: 0.85;
+    margin-top: 8px;
+    font-weight: 500;
+}
+
 /* ----- Sections ----- */
 .section {
     margin: 40px 0;
@@ -78,12 +85,15 @@ body {
 
 .ticker-card {
     background: white;
-    padding: 24px;
-    border-radius: 12px;
+    padding: 12px 16px;
+    border-radius: 8px;
     box-shadow: var(--card-shadow);
     cursor: pointer;
     transition: all 0.3s ease;
     border-left: 4px solid var(--primary-color);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 }
 
 .ticker-card:hover {
@@ -99,33 +109,49 @@ body {
     border-left-color: var(--danger-color);
 }
 
+.ticker-card .card-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
 .ticker-card .ticker {
-    font-size: 1.5rem;
+    font-size: 1.1rem;
     font-weight: 700;
-    margin-bottom: 8px;
     color: var(--primary-color);
 }
 
 .ticker-card .name {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     color: var(--text-muted);
-    margin-bottom: 12px;
-    height: 40px;
     overflow: hidden;
     text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ticker-card .card-stats {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.9rem;
+}
+
+.ticker-card .score-label {
+    color: var(--text-muted);
+    font-weight: 500;
 }
 
 .ticker-card .score {
-    font-size: 2rem;
+    font-size: 1.2rem;
     font-weight: 700;
-    margin-bottom: 8px;
+    color: var(--text-color);
 }
 
 .ticker-card .signal {
     display: inline-block;
-    padding: 4px 12px;
-    border-radius: 6px;
-    font-size: 0.85rem;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.8rem;
     font-weight: 600;
 }
 

@@ -47,6 +47,12 @@ async function loadInsights() {
         }
 
         const data = await response.json();
+
+        // Update date display
+        if (data.date) {
+            document.getElementById('data-date').textContent = `${data.date} 기준`;
+        }
+
         renderTopMovers(data.top_movers);
         renderBottomMovers(data.bottom_movers);
     } catch (error) {
@@ -66,10 +72,15 @@ function renderTopMovers(movers) {
 
     container.innerHTML = movers.map(m => `
         <div class="ticker-card top-mover" onclick="handleCardClick('${m.ticker}')">
-            <div class="ticker">${m.ticker}</div>
-            <div class="name">${m.name || '정보 없음'}</div>
-            <div class="score">${m.score.toFixed(1)}</div>
-            <span class="signal ${m.signal || 'HOLD'}">${m.signal || 'HOLD'}</span>
+            <div class="card-header">
+                <span class="ticker">${m.ticker}</span>
+                <span class="name">${m.name || '정보 없음'}</span>
+            </div>
+            <div class="card-stats">
+                <span class="score-label">점수:</span>
+                <span class="score">${m.score.toFixed(1)}</span>
+                <span class="signal ${m.signal || 'HOLD'}">${m.signal || 'HOLD'}</span>
+            </div>
         </div>
     `).join('');
 }
@@ -84,10 +95,15 @@ function renderBottomMovers(movers) {
 
     container.innerHTML = movers.map(m => `
         <div class="ticker-card bottom-mover" onclick="handleCardClick('${m.ticker}')">
-            <div class="ticker">${m.ticker}</div>
-            <div class="name">${m.name || '정보 없음'}</div>
-            <div class="score">${m.score.toFixed(1)}</div>
-            <span class="signal ${m.signal || 'HOLD'}">${m.signal || 'HOLD'}</span>
+            <div class="card-header">
+                <span class="ticker">${m.ticker}</span>
+                <span class="name">${m.name || '정보 없음'}</span>
+            </div>
+            <div class="card-stats">
+                <span class="score-label">점수:</span>
+                <span class="score">${m.score.toFixed(1)}</span>
+                <span class="signal ${m.signal || 'HOLD'}">${m.signal || 'HOLD'}</span>
+            </div>
         </div>
     `).join('');
 }
@@ -241,7 +257,9 @@ function renderTable(scores) {
     }
 
     const tbody = document.querySelector('#score-table tbody');
-    tbody.innerHTML = scores.map(s => `
+    // Reverse sorting: latest date first
+    const sortedScores = [...scores].reverse();
+    tbody.innerHTML = sortedScores.map(s => `
         <tr>
             <td>${s.date}</td>
             <td><strong>${s.score.toFixed(1)}</strong></td>
