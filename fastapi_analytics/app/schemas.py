@@ -62,3 +62,26 @@ class HealthCheck(BaseModel):
 class ErrorResponse(BaseModel):
     """Error response schema"""
     detail: str
+
+
+# ============================================================
+# Ticker Price Schemas (⭐⭐ 차트용)
+# ============================================================
+
+class TickerPriceResponse(BaseModel):
+    """Single ticker price data point (OHLCV)"""
+    date: Date = Field(..., description="Price data date")
+    open: Optional[float] = Field(None, description="Open price")
+    high: Optional[float] = Field(None, description="High price")
+    low: Optional[float] = Field(None, description="Low price")
+    close: Optional[float] = Field(None, description="Close price")
+    volume: Optional[int] = Field(None, description="Trading volume")
+
+    class Config:
+        from_attributes = True
+
+
+class TickerPriceListResponse(BaseModel):
+    """Ticker with price history (for charting)"""
+    ticker: str = Field(..., description="Ticker symbol")
+    prices: List[TickerPriceResponse] = Field(..., description="Historical OHLCV data")

@@ -4,7 +4,7 @@ from sqlalchemy import text
 from datetime import date
 
 from app.database import get_db
-from app.models import TickerScore
+from app.models import TickerScore, TickerPrice
 from app.config import settings
 
 router = APIRouter(
@@ -87,13 +87,11 @@ def ingest_scores(payload: dict, db: Session = Depends(get_db)):
 
     for item in items:
         # Validate required fields
-        if not all(k in item for k in ("ticker", "date", "score")):
+        if not all(k in item for k in ("ticker", "date")):
             continue
 
         ticker = item["ticker"]
         score_date_str = item["date"]
-        score_value = item["score"]
-        signal = item.get("signal")
 
         # Convert date string to date object
         if isinstance(score_date_str, str):
@@ -102,29 +100,68 @@ def ingest_scores(payload: dict, db: Session = Depends(get_db)):
         else:
             score_date = score_date_str
 
-        # UPSERT 로직: ticker + date 기준
-        obj = (
-            db.query(TickerScore)
+        # ==========================================
+        # 1) UPSERT to ticker_prices (OHLCV data)
+        # ==========================================
+        price_obj = (
+            db.query(TickerPrice)
             .filter(
-                TickerScore.ticker == ticker,
-                TickerScore.date == score_date,
+                TickerPrice.ticker == ticker,
+                TickerPrice.date == score_date,
             )
             .first()
         )
 
-        if obj:
-            # Update existing record
-            obj.score = score_value
-            obj.signal = signal
+        if price_obj:
+            # Update existing price record
+            price_obj.open = item.get("open")
+            price_obj.high = item.get("high")
+            price_obj.low = item.get("low")
+            price_obj.close = item.get("close")
+            price_obj.volume = item.get("volume")
         else:
-            # Insert new record
-            obj = TickerScore(
+            # Insert new price record
+            price_obj = TickerPrice(
                 ticker=ticker,
                 date=score_date,
-                score=score_value,
-                signal=signal,
+                open=item.get("open"),
+                high=item.get("high"),
+                low=item.get("low"),
+                close=item.get("close"),
+                volume=item.get("volume"),
             )
-            db.add(obj)
+            db.add(price_obj)
+
+        # ==========================================
+        # 2) UPSERT to ticker_scores (score data)
+        # ==========================================
+        score_value = item.get("score")
+        signal = item.get("signal")
+
+        # Only process score if provided
+        if score_value is not None:
+            score_obj = (
+                db.query(TickerScore)
+                .filter(
+                    TickerScore.ticker == ticker,
+                    TickerScore.date == score_date,
+                )
+                .first()
+            )
+
+            if score_obj:
+                # Update existing score record
+                score_obj.score = score_value
+                score_obj.signal = signal
+            else:
+                # Insert new score record
+                score_obj = TickerScore(
+                    ticker=ticker,
+                    date=score_date,
+                    score=score_value,
+                    signal=signal,
+                )
+                db.add(score_obj)
 
         upserted += 1
 

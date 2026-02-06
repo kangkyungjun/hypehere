@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Date, Float, TIMESTAMP, text
+from sqlalchemy import Column, String, Date, Float, BigInteger, TIMESTAMP, text
 from sqlalchemy.dialects.postgresql import JSONB
 from app.database import Base
 
@@ -42,3 +42,29 @@ class Ticker(Base):
     name = Column(String(200))  # Display name
     category = Column(String(50))  # Category/sector
     extra_data = Column("metadata", JSONB)  # Additional JSON data
+
+
+class TickerPrice(Base):
+    """
+    Ticker daily OHLCV price data for charting.
+
+    **Price Layer** - Read-only for FastAPI
+    Mac mini uploads daily price data here.
+
+    Fields:
+    - ticker: Stock symbol
+    - date: Price data date
+    - open/high/low/close: OHLC prices
+    - volume: Trading volume
+    """
+    __tablename__ = "ticker_prices"
+    __table_args__ = {'schema': 'analytics'}
+
+    ticker = Column(String(10), primary_key=True, index=True)
+    date = Column(Date, primary_key=True, index=True)
+    open = Column(Float)
+    high = Column(Float)
+    low = Column(Float)
+    close = Column(Float)
+    volume = Column(BigInteger)
+    created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))

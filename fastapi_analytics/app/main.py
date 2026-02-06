@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from app.routers import scores, tickers, internal_ingest, dashboard
+from app.routers import scores, tickers, prices, internal_ingest, dashboard
 from app.config import settings
 from app.schemas import HealthCheck
 
@@ -37,6 +37,12 @@ app.include_router(
     tickers.router,
     prefix="/api/v1/tickers",
     tags=["Ticker Metadata ⭐"]
+)
+
+app.include_router(
+    prices.router,
+    prefix="/api/v1/prices",
+    tags=["Ticker Prices ⭐⭐"]
 )
 
 # Internal router (Mac mini ingest)
