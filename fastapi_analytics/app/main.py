@@ -23,8 +23,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Mount static files
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
+# Mount static files (using /analytics-static to avoid conflict with Django static files)
+app.mount("/analytics-static", StaticFiles(directory="app/static"), name="static")
 
 # Include routers
 app.include_router(

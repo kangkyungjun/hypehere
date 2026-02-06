@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy.orm import Session
-from sqlalchemy import desc
+from sqlalchemy import desc, func
 from datetime import date, timedelta
 from typing import List
 from app.database import get_db
@@ -48,7 +48,11 @@ def get_top_scores(
     ```
     """
     if target_date is None:
-        target_date = date.today()
+        # Use latest available date instead of today (fallback for missing data)
+        latest_date = db.query(func.max(TickerScore.date)).scalar()
+        if latest_date is None:
+            raise HTTPException(404, "No score data available in database")
+        target_date = latest_date
 
     # Join with ticker metadata for names
     results = db.query(
@@ -126,7 +130,11 @@ def get_market_insights(
     ```
     """
     if target_date is None:
-        target_date = date.today()
+        # Use latest available date instead of today (fallback for missing data)
+        latest_date = db.query(func.max(TickerScore.date)).scalar()
+        if latest_date is None:
+            raise HTTPException(404, "No score data available in database")
+        target_date = latest_date
 
     # Query top movers (highest scores)
     top_results = db.query(
