@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy.orm import Session
-from sqlalchemy import or_
+from sqlalchemy import or_, distinct
 from typing import List
 from app.database import get_db
-from app.models import Ticker
+from app.models import Ticker, TickerScore
 from app.schemas import TickerMetadata
 
 router = APIRouter()
@@ -20,7 +20,8 @@ def search_tickers(
 
     **검색 기능** ⭐
     - 심볼 또는 이름으로 검색
-    - 메타데이터만 반환
+    - **실제 분석 대상 종목 기준** (TickerScore 테이블)
+    - 메타데이터는 Ticker 테이블과 LEFT JOIN
 
     Example:
     ```
@@ -38,17 +39,34 @@ def search_tickers(
     ]
     ```
     """
-    # Search by ticker symbol or name
-    tickers = db.query(Ticker).filter(
+    # Search from actual analyzed tickers (TickerScore) with metadata (Ticker)
+    # LEFT JOIN으로 TickerScore에 있는 모든 ticker를 검색하되
+    # Ticker 테이블에 메타데이터가 있으면 함께 반환
+    results = db.query(
+        TickerScore.ticker,
+        Ticker.name,
+        Ticker.category
+    ).outerjoin(
+        Ticker,
+        TickerScore.ticker == Ticker.ticker
+    ).filter(
         or_(
-            Ticker.ticker.ilike(f"%{q}%"),
-            Ticker.ticker_name.ilike(f"%{q}%"),
+            TickerScore.ticker.ilike(f"%{q}%"),
             Ticker.name.ilike(f"%{q}%")
         )
+    ).distinct(
+        TickerScore.ticker
     ).limit(limit).all()
 
     # 검색 결과 0개도 정상 응답 (200 OK + 빈 배열)
-    return tickers
+    return [
+        {
+            "ticker": r.ticker,
+            "name": r.name,
+            "category": r.category
+        }
+        for r in results
+    ]
 
 
 @router.get("/{ticker}", response_model=TickerMetadata)
