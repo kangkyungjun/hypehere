@@ -10,6 +10,37 @@ from app.schemas import TickerScoreListResponse, TopTickerResponse
 router = APIRouter()
 
 
+# Signal translation mapping (Korean → English)
+SIGNAL_MAPPING = {
+    "🔥강력매수": "BUY",
+    "매수권고": "BUY",
+    "보유": "HOLD",
+    "중립": "HOLD",
+    "매도권고": "SELL",
+    "🔥강력매도": "SELL",
+}
+
+
+def translate_signal(korean_signal: str | None) -> str | None:
+    """
+    Translate Korean signals to English codes for API response.
+
+    Internal logic codes (stable):
+    - "BUY": Strong buy signal
+    - "SELL": Strong sell signal
+    - "HOLD": Neutral or hold signal
+
+    Args:
+        korean_signal: Korean signal from Mac mini DB (e.g., "🔥강력매수")
+
+    Returns:
+        English code: "BUY", "SELL", "HOLD", or None
+    """
+    if korean_signal is None:
+        return None
+    return SIGNAL_MAPPING.get(korean_signal, "HOLD")
+
+
 @router.get("/top", response_model=List[TopTickerResponse])
 def get_top_scores(
     target_date: date = Query(None, alias="date", description="Date (default: today)"),
@@ -75,7 +106,7 @@ def get_top_scores(
         {
             "ticker": r.ticker,
             "score": r.score,
-            "signal": r.signal,
+            "signal": translate_signal(r.signal),  # Korean → English translation
             "name": r.name
         }
         for r in results
@@ -170,7 +201,7 @@ def get_market_insights(
             {
                 "ticker": r.ticker,
                 "score": r.score,
-                "signal": r.signal,
+                "signal": translate_signal(r.signal),  # Korean → English translation
                 "name": r.name
             }
             for r in top_results
@@ -179,7 +210,7 @@ def get_market_insights(
             {
                 "ticker": r.ticker,
                 "score": r.score,
-                "signal": r.signal,
+                "signal": translate_signal(r.signal),  # Korean → English translation
                 "name": r.name
             }
             for r in bottom_results
