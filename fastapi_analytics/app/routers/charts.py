@@ -1,0 +1,228 @@
+from fastapi import APIRouter, Depends, Query, HTTPException
+from sqlalchemy.orm import Session
+from sqlalchemy import func
+from datetime import date, timedelta
+from app.database import get_db
+from app.models import (
+    TickerPrice, TickerScore, TickerIndicator, TickerTarget,
+    TickerTrendline, TickerInstitution, TickerShort
+)
+from app.schemas import CompleteChartResponse, ChartDataPoint
+
+router = APIRouter()
+
+
+@router.get("/{ticker}", response_model=CompleteChartResponse)
+def get_complete_chart_data(
+    ticker: str,
+    from_date: date = Query(None, alias="from", description="Start date (default: 90 days ago)"),
+    to_date: date = Query(None, alias="to", description="End date (default: latest available)"),
+    db: Session = Depends(get_db)
+):
+    """
+    **Flutter 앱 차트용 통합 API** ⭐⭐⭐
+
+    1번의 API 호출로 모든 차트 데이터 반환:
+    - ✅ OHLCV 가격 (Candlestick 차트)
+    - ✅ 점수/시그널 (Score 라인 차트)
+    - ✅ 목표가/손절가 (수평선 오버레이)
+    - ✅ RSI, MACD (보조 지표 차트)
+    - ✅ Bollinger Bands (가격 차트 오버레이)
+    - ✅ 추세선 계수 (선형 추세선 렌더링)
+    - ✅ 기관/외인 보유율 변화 (별도 차트)
+    - ✅ 공매도 데이터 (베어 센티먼트 지표)
+
+    **Example**:
+    ```
+    GET /api/v1/charts/AAPL?from=2026-01-01&to=2026-02-06
+    ```
+
+    **Response**:
+    ```json
+    {
+      "ticker": "AAPL",
+      "data": [
+        {
+          "date": "2026-01-15",
+          "open": 182.3, "high": 185.1, "low": 181.9, "close": 184.7,
+          "volume": 53200000,
+          "score": 85.7, "signal": "BUY",
+          "target_price": 190.0, "stop_loss": 178.0,
+          "rsi": 67.3, "macd": 2.1, "macd_hist": 0.3,
+          "inst_ownership": 65.2, "foreign_ownership": 28.1,
+          "short_percent_float": 1.2
+        }
+      ],
+      "high_slope": 0.15, "high_intercept": 180.0,
+      "low_slope": 0.12, "low_intercept": 175.0
+    }
+    ```
+    """
+    # Date range defaults
+    if to_date is None:
+        # Use latest available date instead of today
+        latest_date = db.query(func.max(TickerPrice.date)).scalar()
+        if latest_date is None:
+            # DB 전체가 비어있으면 빈 구조 반환 (404 금지)
+            return CompleteChartResponse(
+                ticker=ticker,
+                data=[],
+                high_slope=None,
+                high_intercept=None,
+                high_r_squared=None,
+                low_slope=None,
+                low_intercept=None,
+                low_r_squared=None,
+            )
+        to_date = latest_date
+
+    if from_date is None:
+        from_date = to_date - timedelta(days=90)  # 3 months default
+
+    # Validate date range
+    if from_date > to_date:
+        raise HTTPException(400, "from_date must be before to_date")
+
+    ticker = ticker.upper()
+
+    # ========================================
+    # Query all data sources
+    # ========================================
+
+    # 1) Prices (required)
+    prices = db.query(TickerPrice).filter(
+        TickerPrice.ticker == ticker,
+        TickerPrice.date >= from_date,
+        TickerPrice.date <= to_date
+    ).order_by(TickerPrice.date.asc()).all()
+
+    if not prices:
+        # 특정 티커에 데이터 없으면 빈 구조 반환 (404 금지)
+        return CompleteChartResponse(
+            ticker=ticker,
+            data=[],
+            high_slope=None,
+            high_intercept=None,
+            high_r_squared=None,
+            low_slope=None,
+            low_intercept=None,
+            low_r_squared=None,
+        )
+
+    # 2) Scores (optional)
+    scores = db.query(TickerScore).filter(
+        TickerScore.ticker == ticker,
+        TickerScore.date >= from_date,
+        TickerScore.date <= to_date
+    ).all()
+
+    # 3) Indicators (optional)
+    indicators = db.query(TickerIndicator).filter(
+        TickerIndicator.ticker == ticker,
+        TickerIndicator.date >= from_date,
+        TickerIndicator.date <= to_date
+    ).all()
+
+    # 4) Targets (optional)
+    targets = db.query(TickerTarget).filter(
+        TickerTarget.ticker == ticker,
+        TickerTarget.date >= from_date,
+        TickerTarget.date <= to_date
+    ).all()
+
+    # 5) Institutions (optional)
+    institutions = db.query(TickerInstitution).filter(
+        TickerInstitution.ticker == ticker,
+        TickerInstitution.date >= from_date,
+        TickerInstitution.date <= to_date
+    ).all()
+
+    # 6) Shorts (optional)
+    shorts = db.query(TickerShort).filter(
+        TickerShort.ticker == ticker,
+        TickerShort.date >= from_date,
+        TickerShort.date <= to_date
+    ).all()
+
+    # 7) Latest trendline (optional)
+    trendline = db.query(TickerTrendline).filter(
+        TickerTrendline.ticker == ticker
+    ).order_by(TickerTrendline.date.desc()).first()
+
+    # ========================================
+    # Build lookup dictionaries by date
+    # ========================================
+    score_dict = {s.date: s for s in scores}
+    indicator_dict = {i.date: i for i in indicators}
+    target_dict = {t.date: t for t in targets}
+    institution_dict = {inst.date: inst for inst in institutions}
+    short_dict = {sh.date: sh for sh in shorts}
+
+    # ========================================
+    # Merge all data by date
+    # ========================================
+    chart_data = []
+    for price in prices:
+        d = price.date
+        score_obj = score_dict.get(d)
+        indicator_obj = indicator_dict.get(d)
+        target_obj = target_dict.get(d)
+        inst_obj = institution_dict.get(d)
+        short_obj = short_dict.get(d)
+
+        chart_data.append(ChartDataPoint(
+            date=d,
+
+            # Price
+            open=price.open,
+            high=price.high,
+            low=price.low,
+            close=price.close,
+            volume=price.volume,
+
+            # Score
+            score=score_obj.score if score_obj else None,
+            signal=score_obj.signal if score_obj else None,
+
+            # Target
+            target_price=target_obj.target_price if target_obj else None,
+            stop_loss=target_obj.stop_loss if target_obj else None,
+
+            # Indicators
+            rsi=indicator_obj.rsi if indicator_obj else None,
+            macd=indicator_obj.macd if indicator_obj else None,
+            macd_signal=indicator_obj.macd_signal if indicator_obj else None,
+            macd_hist=indicator_obj.macd_hist if indicator_obj else None,
+            bb_width=indicator_obj.bb_width if indicator_obj else None,
+            bb_upper=indicator_obj.bb_upper if indicator_obj else None,
+            bb_lower=indicator_obj.bb_lower if indicator_obj else None,
+            bb_middle=indicator_obj.bb_middle if indicator_obj else None,
+
+            # Institutions
+            inst_ownership=inst_obj.inst_ownership if inst_obj else None,
+            foreign_ownership=inst_obj.foreign_ownership if inst_obj else None,
+            inst_chg_1d=inst_obj.inst_chg_1d if inst_obj else None,
+            inst_chg_5d=inst_obj.inst_chg_5d if inst_obj else None,
+            foreign_chg_1d=inst_obj.foreign_chg_1d if inst_obj else None,
+            foreign_chg_5d=inst_obj.foreign_chg_5d if inst_obj else None,
+
+            # Shorts
+            short_ratio=short_obj.short_ratio if short_obj else None,
+            short_percent_float=short_obj.short_percent_float if short_obj else None,
+        ))
+
+    # ========================================
+    # Return complete chart response
+    # ========================================
+    return CompleteChartResponse(
+        ticker=ticker,
+        data=chart_data,
+
+        # Trendlines (latest calculation)
+        high_slope=trendline.high_slope if trendline else None,
+        high_intercept=trendline.high_intercept if trendline else None,
+        high_r_squared=trendline.high_r_squared if trendline else None,
+        low_slope=trendline.low_slope if trendline else None,
+        low_intercept=trendline.low_intercept if trendline else None,
+        low_r_squared=trendline.low_r_squared if trendline else None,
+    )

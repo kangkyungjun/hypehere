@@ -51,7 +51,8 @@ def get_top_scores(
         # Use latest available date instead of today (fallback for missing data)
         latest_date = db.query(func.max(TickerScore.date)).scalar()
         if latest_date is None:
-            raise HTTPException(404, "No score data available in database")
+            # DB 전체가 비어있으면 빈 배열 반환 (404 금지)
+            return []
         target_date = latest_date
 
     # Join with ticker metadata for names
@@ -69,12 +70,7 @@ def get_top_scores(
         desc(TickerScore.score)
     ).limit(limit).all()
 
-    if not results:
-        raise HTTPException(
-            404,
-            f"No scores found for date {target_date}"
-        )
-
+    # 결과 없어도 빈 배열 반환 (404 금지)
     return [
         {
             "ticker": r.ticker,
@@ -133,7 +129,8 @@ def get_market_insights(
         # Use latest available date instead of today (fallback for missing data)
         latest_date = db.query(func.max(TickerScore.date)).scalar()
         if latest_date is None:
-            raise HTTPException(404, "No score data available in database")
+            # DB 전체가 비어있으면 빈 구조 반환 (404 금지)
+            return {"date": None, "top_movers": [], "bottom_movers": []}
         target_date = latest_date
 
     # Query top movers (highest scores)
@@ -166,12 +163,7 @@ def get_market_insights(
         TickerScore.score.asc()
     ).limit(bottom).all()
 
-    if not top_results and not bottom_results:
-        raise HTTPException(
-            404,
-            f"No scores found for date {target_date}"
-        )
-
+    # 결과 없어도 빈 배열 반환 (404 금지)
     return {
         "date": str(target_date),
         "top_movers": [
