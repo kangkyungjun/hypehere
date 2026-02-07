@@ -116,8 +116,8 @@ def get_top_scores(
 @router.get("/insights")
 def get_market_insights(
     target_date: date = Query(None, alias="date", description="Date (default: today)"),
-    top: int = Query(5, ge=1, le=20, description="Number of top movers (max 20)"),
-    bottom: int = Query(5, ge=1, le=20, description="Number of bottom movers (max 20)"),
+    top: int = Query(5, ge=1, le=50, description="Number of top movers (max 50)"),
+    bottom: int = Query(5, ge=1, le=50, description="Number of bottom movers (max 50)"),
     db: Session = Depends(get_db)
 ):
     """
