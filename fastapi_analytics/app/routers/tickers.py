@@ -47,12 +47,7 @@ def search_tickers(
         )
     ).limit(limit).all()
 
-    if not tickers:
-        raise HTTPException(
-            404,
-            f"No tickers found matching '{q}'"
-        )
-
+    # 검색 결과 0개도 정상 응답 (200 OK + 빈 배열)
     return tickers
 
 
