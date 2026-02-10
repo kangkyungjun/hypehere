@@ -60,9 +60,15 @@ def get_complete_chart_data(
     """
     # Date range defaults
     if to_date is None:
-        # Use latest available date instead of today
-        latest_date = db.query(func.max(TickerPrice.date)).scalar()
-        if latest_date is None:
+        # ⭐ Phase 1: Check ALL tables for latest date (not just ticker_prices)
+        # This prevents data loss when ticker_prices lags behind ticker_scores/indicators
+        latest_price = db.query(func.max(TickerPrice.date)).scalar()
+        latest_score = db.query(func.max(TickerScore.date)).scalar()
+        latest_indicator = db.query(func.max(TickerIndicator.date)).scalar()
+
+        # Get maximum date across all tables
+        all_dates = [d for d in [latest_price, latest_score, latest_indicator] if d is not None]
+        if not all_dates:
             # DB 전체가 비어있으면 빈 구조 반환 (404 금지)
             return CompleteChartResponse(
                 ticker=ticker,
@@ -74,7 +80,28 @@ def get_complete_chart_data(
                 low_intercept=None,
                 low_r_squared=None,
             )
-        to_date = latest_date
+
+        candidate_date = max(all_dates)
+
+        # Validate against trading calendar
+        from app.utils.trading_calendar import is_trading_day, get_latest_trading_date
+
+        if is_trading_day(candidate_date):
+            to_date = candidate_date
+        else:
+            # If weekend/holiday, find most recent trading day
+            to_date = get_latest_trading_date(db, check_all_tables=True)
+            if to_date is None:
+                return CompleteChartResponse(
+                    ticker=ticker,
+                    data=[],
+                    high_slope=None,
+                    high_intercept=None,
+                    high_r_squared=None,
+                    low_slope=None,
+                    low_intercept=None,
+                    low_r_squared=None,
+                )
 
     if from_date is None:
         from_date = to_date - timedelta(days=90)  # 3 months default
@@ -152,6 +179,7 @@ def get_complete_chart_data(
     # ========================================
     # Build lookup dictionaries by date
     # ========================================
+    price_dict = {p.date: p for p in prices}
     score_dict = {s.date: s for s in scores}
     indicator_dict = {i.date: i for i in indicators}
     target_dict = {t.date: t for t in targets}
@@ -159,11 +187,26 @@ def get_complete_chart_data(
     short_dict = {sh.date: sh for sh in shorts}
 
     # ========================================
-    # Merge all data by date
+    # ⭐ Phase 2-Debug: Merge all data by date UNION
+    # (Temporary fix - allows displaying scores/indicators even without price data)
+    # TODO: Remove this after ticker_prices backfill is complete (use price-based loop)
     # ========================================
+
+    # Collect ALL dates from all tables
+    all_dates = set()
+    all_dates.update(p.date for p in prices)
+    all_dates.update(score_dict.keys())
+    all_dates.update(indicator_dict.keys())
+    all_dates.update(target_dict.keys())
+    all_dates.update(institution_dict.keys())
+    all_dates.update(short_dict.keys())
+
+    # Sort dates chronologically
+    sorted_dates = sorted(all_dates)
+
     chart_data = []
-    for price in prices:
-        d = price.date
+    for d in sorted_dates:
+        price_obj = price_dict.get(d)
         score_obj = score_dict.get(d)
         indicator_obj = indicator_dict.get(d)
         target_obj = target_dict.get(d)
@@ -173,12 +216,12 @@ def get_complete_chart_data(
         chart_data.append(ChartDataPoint(
             date=d,
 
-            # Price
-            open=price.open,
-            high=price.high,
-            low=price.low,
-            close=price.close,
-            volume=price.volume,
+            # Price (nullable - allows chart points without OHLCV)
+            open=price_obj.open if price_obj else None,
+            high=price_obj.high if price_obj else None,
+            low=price_obj.low if price_obj else None,
+            close=price_obj.close if price_obj else None,
+            volume=price_obj.volume if price_obj else None,
 
             # Score
             score=score_obj.score if score_obj else None,

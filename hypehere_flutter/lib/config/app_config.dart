@@ -3,10 +3,10 @@
 
 class AppConfig {
   // Base URL Configuration
-  static const String baseUrl = 'http://43.201.45.60';
+  static const String baseUrl = 'https://hypehere.net';
 
   // WebSocket URL (for Django Channels support)
-  static const String wsBaseUrl = 'ws://43.201.45.60';
+  static const String wsBaseUrl = 'wss://hypehere.net';
 
   // App Information
   static const String appName = 'HypeHere';

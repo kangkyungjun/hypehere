@@ -1,19 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
-    <!-- 개발 서버(http://43.201.45.60) - HTTP 허용 -->
+    <!-- 디버그 빌드에서 모든 인증서 허용 (개발용) -->
+    <debug-overrides>
+        <trust-anchors>
+            <!-- 시스템 인증서 -->
+            <certificates src="system" />
+            <!-- 사용자가 설치한 인증서 -->
+            <certificates src="user" />
+        </trust-anchors>
+    </debug-overrides>
+
+    <!-- 개발 서버(43.201.45.60) - HTTP와 self-signed HTTPS 모두 허용 -->
     <domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="true">43.201.45.60</domain>
         <trust-anchors>
             <certificates src="system" />
             <certificates src="user" />
         </trust-anchors>
-        <!-- 디버그 빌드에서 모든 인증서 허용 (개발용) -->
-        <debug-overrides>
-            <trust-anchors>
-                <certificates src="system" />
-                <certificates src="user" />
-            </trust-anchors>
-        </debug-overrides>
     </domain-config>
 
     <!-- 기본값: HTTPS만 허용 -->

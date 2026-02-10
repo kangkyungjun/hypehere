@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """
-Run database migration: Create ticker_prices table
+Run database migrations
 """
 import sys
 import os
+from pathlib import Path
 
 # Add app directory to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'app'))
@@ -11,48 +12,41 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'app'))
 from sqlalchemy import create_engine, text
 from app.config import settings
 
-def run_migration():
-    """Execute migration SQL"""
+def run_migration(migration_file):
+    """Execute migration SQL from file"""
     engine = create_engine(settings.DATABASE_ANALYTICS_URL)
 
-    migration_sql = """
-    -- Create ticker_prices table
-    CREATE TABLE IF NOT EXISTS analytics.ticker_prices (
-        ticker VARCHAR(10) NOT NULL,
-        date DATE NOT NULL,
-        open REAL,
-        high REAL,
-        low REAL,
-        close REAL,
-        volume BIGINT,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        PRIMARY KEY (ticker, date)
-    );
+    # Read migration SQL
+    migration_path = Path(__file__).parent / "migrations" / migration_file
+    with open(migration_path, 'r') as f:
+        migration_sql = f.read()
 
-    -- Create indexes
-    CREATE INDEX IF NOT EXISTS idx_ticker_prices_date
-        ON analytics.ticker_prices (date);
-
-    CREATE INDEX IF NOT EXISTS idx_ticker_prices_ticker_date
-        ON analytics.ticker_prices (ticker, date);
-
-    -- Add comments
-    COMMENT ON TABLE analytics.ticker_prices IS 'Daily OHLCV price data for charting';
-    COMMENT ON COLUMN analytics.ticker_prices.ticker IS 'Stock symbol (e.g. AAPL)';
-    COMMENT ON COLUMN analytics.ticker_prices.date IS 'Price data date';
-    COMMENT ON COLUMN analytics.ticker_prices.open IS 'Opening price';
-    COMMENT ON COLUMN analytics.ticker_prices.high IS 'Highest price of the day';
-    COMMENT ON COLUMN analytics.ticker_prices.low IS 'Lowest price of the day';
-    COMMENT ON COLUMN analytics.ticker_prices.close IS 'Closing price';
-    COMMENT ON COLUMN analytics.ticker_prices.volume IS 'Trading volume';
-    """
-
+    # Execute
     with engine.connect() as conn:
         conn.execute(text(migration_sql))
         conn.commit()
-        print("✅ Migration completed successfully!")
-        print("   - Table: analytics.ticker_prices created")
-        print("   - Indexes: created")
+        print(f"✅ Migration {migration_file} completed successfully!")
+
+def run_all_migrations():
+    """Run all migrations in order"""
+    migrations = [
+        "001_add_ticker_prices.sql",
+        "002_add_chart_tables.sql",
+    ]
+
+    for migration_file in migrations:
+        migration_path = Path(__file__).parent / "migrations" / migration_file
+        if migration_path.exists():
+            print(f"\n🔄 Running migration: {migration_file}")
+            run_migration(migration_file)
+        else:
+            print(f"⚠️  Migration file not found: {migration_file}")
 
 if __name__ == "__main__":
-    run_migration()
+    if len(sys.argv) > 1:
+        # Run specific migration
+        run_migration(sys.argv[1])
+    else:
+        # Run all migrations
+        run_all_migrations()
+        print("\n✅ All migrations completed!")

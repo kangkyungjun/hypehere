@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from app.routers import scores, tickers, prices, internal_ingest, dashboard
+from app.routers import scores, tickers, prices, internal_ingest, dashboard, charts
 from app.config import settings
 from app.schemas import HealthCheck
 
@@ -43,6 +43,13 @@ app.include_router(
     prices.router,
     prefix="/api/v1/prices",
     tags=["Ticker Prices ⭐⭐"]
+)
+
+# Complete chart data router (Flutter app)
+app.include_router(
+    charts.router,
+    prefix="/api/v1/charts",
+    tags=["Complete Chart Data ⭐⭐⭐"]
 )
 
 # Internal router (Mac mini ingest)

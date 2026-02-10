@@ -6,6 +6,7 @@ from typing import List
 from app.database import get_db
 from app.models import TickerScore, Ticker
 from app.schemas import TickerScoreListResponse, TopTickerResponse
+from app.utils.trading_calendar import get_latest_trading_date
 
 router = APIRouter()
 
@@ -44,7 +45,7 @@ def translate_signal(korean_signal: str | None) -> str | None:
 @router.get("/top", response_model=List[TopTickerResponse])
 def get_top_scores(
     target_date: date = Query(None, alias="date", description="Date (default: today)"),
-    limit: int = Query(10, le=50, ge=1, description="Number of results (max 50)"),
+    limit: int = Query(10, le=500, ge=1, description="Number of results (max 500)"),
     db: Session = Depends(get_db)
 ):
     """
@@ -79,8 +80,8 @@ def get_top_scores(
     ```
     """
     if target_date is None:
-        # Use latest available date instead of today (fallback for missing data)
-        latest_date = db.query(func.max(TickerScore.date)).scalar()
+        # Use latest trading day instead of raw MAX(date) to skip weekends/holidays
+        latest_date = get_latest_trading_date(db)
         if latest_date is None:
             # DB 전체가 비어있으면 빈 배열 반환 (404 금지)
             return []
@@ -116,8 +117,8 @@ def get_top_scores(
 @router.get("/insights")
 def get_market_insights(
     target_date: date = Query(None, alias="date", description="Date (default: today)"),
-    top: int = Query(5, ge=1, le=50, description="Number of top movers (max 50)"),
-    bottom: int = Query(5, ge=1, le=50, description="Number of bottom movers (max 50)"),
+    top: int = Query(5, ge=1, le=500, description="Number of top movers (max 500)"),
+    bottom: int = Query(5, ge=1, le=500, description="Number of bottom movers (max 500)"),
     db: Session = Depends(get_db)
 ):
     """
@@ -157,8 +158,8 @@ def get_market_insights(
     ```
     """
     if target_date is None:
-        # Use latest available date instead of today (fallback for missing data)
-        latest_date = db.query(func.max(TickerScore.date)).scalar()
+        # Use latest trading day instead of raw MAX(date) to skip weekends/holidays
+        latest_date = get_latest_trading_date(db)
         if latest_date is None:
             # DB 전체가 비어있으면 빈 구조 반환 (404 금지)
             return {"date": None, "top_movers": [], "bottom_movers": []}

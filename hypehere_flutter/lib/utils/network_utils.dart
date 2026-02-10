@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
+import 'package:dio/io.dart';
 import '../config/app_config.dart';
 
 /// Network Utility Functions
@@ -15,7 +17,17 @@ class NetworkUtils {
         'User-Agent': AppConfig.userAgent,
       },
     ),
-  );
+  )..httpClientAdapter = IOHttpClientAdapter(
+      createHttpClient: () {
+        final client = HttpClient();
+        // Accept self-signed certificates for development
+        client.badCertificateCallback = (cert, host, port) {
+          print('[NetworkUtils] Accepting certificate for $host:$port');
+          return true; // Accept all certificates in development
+        };
+        return client;
+      },
+    );
 
   /// Check if device has network connectivity
   static Future<bool> hasNetworkConnection() async {
