@@ -5,7 +5,7 @@ from datetime import date, timedelta
 from app.database import get_db
 from app.models import (
     TickerPrice, TickerScore, TickerIndicator, TickerTarget,
-    TickerTrendline, TickerInstitution, TickerShort
+    TickerTrendline, TickerInstitution, TickerShort, TickerAIAnalysis
 )
 from app.schemas import CompleteChartResponse, ChartDataPoint
 
@@ -176,6 +176,13 @@ def get_complete_chart_data(
         TickerTrendline.ticker == ticker
     ).order_by(TickerTrendline.date.desc()).first()
 
+    # 8) AI Analysis (optional)
+    ai_analyses = db.query(TickerAIAnalysis).filter(
+        TickerAIAnalysis.ticker == ticker,
+        TickerAIAnalysis.date >= from_date,
+        TickerAIAnalysis.date <= to_date
+    ).all()
+
     # ========================================
     # Build lookup dictionaries by date
     # ========================================
@@ -185,6 +192,7 @@ def get_complete_chart_data(
     target_dict = {t.date: t for t in targets}
     institution_dict = {inst.date: inst for inst in institutions}
     short_dict = {sh.date: sh for sh in shorts}
+    ai_dict = {ai.date: ai for ai in ai_analyses}
 
     # ========================================
     # ⭐ Phase 2-Debug: Merge all data by date UNION
@@ -200,6 +208,7 @@ def get_complete_chart_data(
     all_dates.update(target_dict.keys())
     all_dates.update(institution_dict.keys())
     all_dates.update(short_dict.keys())
+    all_dates.update(ai_dict.keys())
 
     # Sort dates chronologically
     sorted_dates = sorted(all_dates)
@@ -212,6 +221,7 @@ def get_complete_chart_data(
         target_obj = target_dict.get(d)
         inst_obj = institution_dict.get(d)
         short_obj = short_dict.get(d)
+        ai_obj = ai_dict.get(d)
 
         chart_data.append(ChartDataPoint(
             date=d,
@@ -252,6 +262,13 @@ def get_complete_chart_data(
             # Shorts
             short_ratio=short_obj.short_ratio if short_obj else None,
             short_percent_float=short_obj.short_percent_float if short_obj else None,
+
+            # AI Analysis
+            ai_probability=ai_obj.probability if ai_obj else None,
+            ai_summary=ai_obj.summary if ai_obj else None,
+            ai_bullish_reasons=ai_obj.bullish_reasons if ai_obj else None,
+            ai_bearish_reasons=ai_obj.bearish_reasons if ai_obj else None,
+            ai_final_comment=ai_obj.final_comment if ai_obj else None,
         ))
 
     # ========================================

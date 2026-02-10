@@ -98,6 +98,12 @@ def ingest_scores(payload: IngestPayload, db: Session = Depends(get_db)):
         ticker = item.ticker
         score_date = item.date
 
+        # Debug: Log type detection and AI data presence
+        logger.info(
+            f"Processing {ticker} on {score_date}: "
+            f"is_extended={is_extended}, has_ai_analysis={hasattr(item, 'ai_analysis')}"
+        )
+
         # ==========================================
         # Trading Day Validation (skip weekends/holidays)
         # ==========================================
@@ -260,7 +266,8 @@ def ingest_scores(payload: IngestPayload, db: Session = Depends(get_db)):
         # 4) UPSERT to ticker_ai_analysis (AI predictions)
         # ==========================================
         # AI analysis only available in extended format
-        if is_extended:
+        # Robust detection: check both isinstance and hasattr to handle Union type edge cases
+        if is_extended and hasattr(item, 'ai_analysis'):
             ai_analysis = item.ai_analysis
 
             ai_obj = (
@@ -291,6 +298,12 @@ def ingest_scores(payload: IngestPayload, db: Session = Depends(get_db)):
                     final_comment=ai_analysis.final_comment,
                 )
                 db.add(ai_obj)
+
+            # Debug: Log successful AI analysis storage
+            logger.info(
+                f"Stored AI analysis for {ticker} on {score_date}: "
+                f"probability={ai_analysis.probability:.3f}, summary='{ai_analysis.summary[:50]}...'"
+            )
 
         # ==========================================
         # 5) UPSERT to ticker_targets (target/stop)

@@ -135,6 +135,13 @@ class ChartDataPoint(BaseModel):
     short_ratio: Optional[float] = Field(None, description="Days to cover")
     short_percent_float: Optional[float] = Field(None, description="Short % of float")
 
+    # AI Analysis data
+    ai_probability: Optional[float] = Field(None, description="AI prediction confidence (0.0-1.0)")
+    ai_summary: Optional[str] = Field(None, description="AI analysis summary")
+    ai_bullish_reasons: Optional[List[str]] = Field(None, description="Bullish factors")
+    ai_bearish_reasons: Optional[List[str]] = Field(None, description="Bearish factors")
+    ai_final_comment: Optional[str] = Field(None, description="AI final recommendation")
+
 
 class CompleteChartResponse(BaseModel):
     """
