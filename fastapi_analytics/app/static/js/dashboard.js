@@ -170,8 +170,28 @@ function renderChart(ticker, scores) {
     // Update chart title
     document.getElementById('chart-title').textContent = `📈 ${ticker} - 점수 변화`;
 
-    const labels = scores.map(s => s.date);
-    const values = scores.map(s => s.score);
+    // 1. 날짜를 Date 객체로 변환하여 {x, y} 형식으로 준비
+    const dataPoints = scores.map(s => ({
+        x: new Date(s.date),
+        y: s.score
+    }));
+
+    // 2. 과거 데이터 기간 계산
+    const firstDate = new Date(scores[0].date);
+    const lastDate = new Date(scores[scores.length - 1].date);
+    const pastDays = Math.ceil((lastDate - firstDate) / (1000 * 60 * 60 * 24));
+
+    // 3. 미래 확장 길이 계산 (40% 영역 확보)
+    const futureDays = Math.round(pastDays * (40 / 60));
+
+    // 4. 최대 날짜 설정 (미래 포함)
+    const maxDate = new Date(lastDate);
+    maxDate.setDate(maxDate.getDate() + futureDays);
+
+    // 비율 검증 (개발용 - 콘솔에 출력)
+    const totalDays = pastDays + futureDays;
+    const ratio = (pastDays / totalDays * 100).toFixed(1);
+    console.log(`📊 Chart Viewport: Past=${pastDays}d, Future=${futureDays}d, Total=${totalDays}d, Ratio=${ratio}% (목표: 60.0%)`);
 
     // Destroy previous chart
     if (chart) {
@@ -183,10 +203,9 @@ function renderChart(ticker, scores) {
     chart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: labels,
             datasets: [{
                 label: '점수',
-                data: values,
+                data: dataPoints,  // ✅ {x, y} 객체 배열
                 borderColor: '#4f46e5',
                 backgroundColor: 'rgba(79, 70, 229, 0.1)',
                 borderWidth: 3,
@@ -216,17 +235,78 @@ function renderChart(ticker, scores) {
                     },
                     bodyFont: {
                         size: 13
+                    },
+                    callbacks: {
+                        title: function(context) {
+                            const date = new Date(context[0].parsed.x);
+                            return date.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+                        },
+                        label: function(context) {
+                            return '점수: ' + context.parsed.y.toFixed(1);
+                        }
+                    }
+                },
+                // ✅ 현재 날짜 수직선 추가
+                annotation: {
+                    annotations: {
+                        todayLine: {
+                            type: 'line',
+                            xMin: new Date(),
+                            xMax: new Date(),
+                            borderColor: 'rgba(255, 99, 132, 0.7)',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            label: {
+                                display: true,
+                                content: '오늘',
+                                position: 'start',
+                                backgroundColor: 'rgba(255, 99, 132, 0.7)',
+                                color: '#fff',
+                                padding: 4,
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        }
                     }
                 }
             },
             scales: {
                 x: {
-                    grid: {
-                        display: false
+                    type: 'time',  // ✅ time scale로 변경
+                    min: firstDate,  // ✅ 시작일 명시
+                    max: maxDate,    // ✅ 종료일 (미래 포함)
+
+                    time: {
+                        unit: 'day',
+                        displayFormats: {
+                            day: 'MM/dd'  // 월/일 형식
+                        },
+                        tooltipFormat: 'yyyy-MM-dd'
                     },
+
+                    grid: {
+                        display: true,
+                        color: 'rgba(0, 0, 0, 0.05)',
+                        drawOnChartArea: true
+                    },
+
                     ticks: {
                         maxRotation: 45,
-                        minRotation: 45
+                        minRotation: 45,
+                        autoSkip: true,
+                        maxTicksLimit: 10,  // 최대 10개 라벨
+
+                        // 미래 날짜는 연한 색으로 표시
+                        color: function(context) {
+                            const tickDate = new Date(context.tick.value);
+                            return tickDate > lastDate ? '#999999' : '#666666';
+                        }
+                    },
+
+                    border: {
+                        display: true,
+                        color: '#ddd'
                     }
                 },
                 y: {
