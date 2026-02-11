@@ -29,6 +29,7 @@ class TopTickerResponse(BaseModel):
     score: float = Field(..., description="Latest score")
     signal: Optional[str] = Field(None, description="Trading signal")
     name: Optional[str] = Field(None, description="Human-readable name")
+    name_ko: Optional[str] = Field(None, description="Korean name (e.g., '애플')")
 
     class Config:
         from_attributes = True
