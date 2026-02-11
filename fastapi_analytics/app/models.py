@@ -155,6 +155,8 @@ class TickerTrendline(Base):
     low_intercept = Column(Float)
     low_r_squared = Column(Float)
     trend_period_days = Column(Integer, default=30)
+    high_values = Column(JSONB)  # Pre-calculated y-values: [{"date": "2024-10-20", "y": 148.20}, ...]
+    low_values = Column(JSONB)   # Pre-calculated y-values: [{"date": "2024-10-20", "y": 130.15}, ...]
     created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
 
 

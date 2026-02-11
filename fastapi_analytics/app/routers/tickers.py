@@ -45,7 +45,8 @@ def search_tickers(
     results = db.query(
         TickerScore.ticker,
         Ticker.name,
-        Ticker.category
+        Ticker.category,
+        Ticker.extra_data  # JSONB metadata (contains name_ko)
     ).outerjoin(
         Ticker,
         TickerScore.ticker == Ticker.ticker
@@ -63,6 +64,7 @@ def search_tickers(
         {
             "ticker": r.ticker,
             "name": r.name,
+            "name_ko": r.extra_data.get("name_ko") if r.extra_data else None,
             "category": r.category
         }
         for r in results
@@ -101,4 +103,10 @@ def get_ticker_info(
             f"Ticker not found: {ticker}"
         )
 
-    return result
+    # Extract name_ko from JSONB metadata and return as dict
+    return {
+        "ticker": result.ticker,
+        "name": result.name,
+        "name_ko": result.extra_data.get("name_ko") if result.extra_data else None,
+        "category": result.category
+    }

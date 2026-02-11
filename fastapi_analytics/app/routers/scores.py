@@ -92,7 +92,8 @@ def get_top_scores(
         TickerScore.ticker,
         TickerScore.score,
         TickerScore.signal,
-        Ticker.name
+        Ticker.name,
+        Ticker.extra_data  # JSONB metadata (contains name_ko)
     ).outerjoin(
         Ticker,
         TickerScore.ticker == Ticker.ticker
@@ -108,7 +109,8 @@ def get_top_scores(
             "ticker": r.ticker,
             "score": r.score,
             "signal": translate_signal(r.signal),  # Korean → English translation
-            "name": r.name
+            "name": r.name,
+            "name_ko": r.extra_data.get("name_ko") if r.extra_data else None
         }
         for r in results
     ]
@@ -170,7 +172,8 @@ def get_market_insights(
         TickerScore.ticker,
         TickerScore.score,
         TickerScore.signal,
-        Ticker.name
+        Ticker.name,
+        Ticker.extra_data  # JSONB metadata (contains name_ko)
     ).outerjoin(
         Ticker,
         TickerScore.ticker == Ticker.ticker
@@ -185,7 +188,8 @@ def get_market_insights(
         TickerScore.ticker,
         TickerScore.score,
         TickerScore.signal,
-        Ticker.name
+        Ticker.name,
+        Ticker.extra_data  # JSONB metadata (contains name_ko)
     ).outerjoin(
         Ticker,
         TickerScore.ticker == Ticker.ticker
@@ -203,7 +207,8 @@ def get_market_insights(
                 "ticker": r.ticker,
                 "score": r.score,
                 "signal": translate_signal(r.signal),  # Korean → English translation
-                "name": r.name
+                "name": r.name,
+                "name_ko": r.extra_data.get("name_ko") if r.extra_data else None
             }
             for r in top_results
         ],
@@ -212,7 +217,8 @@ def get_market_insights(
                 "ticker": r.ticker,
                 "score": r.score,
                 "signal": translate_signal(r.signal),  # Korean → English translation
-                "name": r.name
+                "name": r.name,
+                "name_ko": r.extra_data.get("name_ko") if r.extra_data else None
             }
             for r in bottom_results
         ]

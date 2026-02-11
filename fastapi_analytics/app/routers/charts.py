@@ -7,7 +7,7 @@ from app.models import (
     TickerPrice, TickerScore, TickerIndicator, TickerTarget,
     TickerTrendline, TickerInstitution, TickerShort, TickerAIAnalysis
 )
-from app.schemas import CompleteChartResponse, ChartDataPoint
+from app.schemas import CompleteChartResponse, ChartDataPoint, TrendlineValue
 
 router = APIRouter()
 
@@ -274,6 +274,15 @@ def get_complete_chart_data(
     # ========================================
     # Return complete chart response
     # ========================================
+    # Convert JSONB high_values/low_values to TrendlineValue objects
+    high_values_list = None
+    low_values_list = None
+    if trendline:
+        if trendline.high_values:
+            high_values_list = [TrendlineValue(**v) for v in trendline.high_values]
+        if trendline.low_values:
+            low_values_list = [TrendlineValue(**v) for v in trendline.low_values]
+
     return CompleteChartResponse(
         ticker=ticker,
         data=chart_data,
@@ -282,7 +291,9 @@ def get_complete_chart_data(
         high_slope=trendline.high_slope if trendline else None,
         high_intercept=trendline.high_intercept if trendline else None,
         high_r_squared=trendline.high_r_squared if trendline else None,
+        high_values=high_values_list,
         low_slope=trendline.low_slope if trendline else None,
         low_intercept=trendline.low_intercept if trendline else None,
         low_r_squared=trendline.low_r_squared if trendline else None,
+        low_values=low_values_list,
     )

@@ -41,7 +41,8 @@ class TopTickerResponse(BaseModel):
 class TickerMetadata(BaseModel):
     """Ticker basic information"""
     ticker: str = Field(..., description="Ticker symbol")
-    name: Optional[str] = Field(None, description="Display name")
+    name: Optional[str] = Field(None, description="Display name (English)")
+    name_ko: Optional[str] = Field(None, description="Korean name (e.g., '애플')")
     category: Optional[str] = Field(None, description="Category/sector")
 
     class Config:
@@ -143,6 +144,12 @@ class ChartDataPoint(BaseModel):
     ai_final_comment: Optional[str] = Field(None, description="AI final recommendation")
 
 
+class TrendlineValue(BaseModel):
+    """Single trendline data point with date and y-value"""
+    date: str = Field(..., description="Date in YYYY-MM-DD format")
+    y: float = Field(..., description="Trendline y-value for this date")
+
+
 class CompleteChartResponse(BaseModel):
     """
     Complete chart data for Flutter app (1 API call gets everything).
@@ -165,9 +172,11 @@ class CompleteChartResponse(BaseModel):
     high_slope: Optional[float] = Field(None, description="High trendline slope")
     high_intercept: Optional[float] = Field(None, description="High trendline intercept")
     high_r_squared: Optional[float] = Field(None, description="High trendline R²")
+    high_values: Optional[List[TrendlineValue]] = Field(None, description="Pre-calculated high trendline y-values")
     low_slope: Optional[float] = Field(None, description="Low trendline slope")
     low_intercept: Optional[float] = Field(None, description="Low trendline intercept")
     low_r_squared: Optional[float] = Field(None, description="Low trendline R²")
+    low_values: Optional[List[TrendlineValue]] = Field(None, description="Pre-calculated low trendline y-values")
 
 
 # ============================================================
@@ -209,18 +218,35 @@ class AIAnalysisData(BaseModel):
     final_comment: str = Field(..., max_length=500, description="Final recommendation")
 
 
+class TrendlineCoefficients(BaseModel):
+    """Trendline coefficients and pre-calculated values"""
+    slope: Optional[float] = Field(None, description="Trendline slope")
+    intercept: Optional[float] = Field(None, description="Trendline intercept")
+    r_sq: Optional[float] = Field(None, description="R² coefficient")
+    values: Optional[List[TrendlineValue]] = Field(None, description="Pre-calculated y-values")
+
+
+class TrendData(BaseModel):
+    """Trendline data (nested structure from Mac mini)"""
+    high: Optional[TrendlineCoefficients] = Field(None, description="High price trendline")
+    low: Optional[TrendlineCoefficients] = Field(None, description="Low price trendline")
+
+
 class ExtendedItemIngest(BaseModel):
     """
     Extended payload format from Mac mini (nested structure).
 
-    Supports nested objects: price, score, indicators, ai_analysis
+    Supports nested objects: price, score, indicators, ai_analysis, trend
     """
     date: Date = Field(..., description="Data date")
     ticker: str = Field(..., max_length=10, description="Ticker symbol")
+    name_en: Optional[str] = Field(None, max_length=200, description="English ticker name (e.g., 'Apple Inc.')")
+    name_ko: Optional[str] = Field(None, max_length=200, description="Korean ticker name (e.g., '애플')")
     price: PriceData = Field(..., description="OHLCV price data")
     score: ScoreData = Field(..., description="Score and signal")
     indicators: IndicatorData = Field(..., description="Technical indicators")
     ai_analysis: AIAnalysisData = Field(..., description="AI analysis results")
+    trend: Optional[TrendData] = Field(None, description="Trendline data with pre-calculated values")
 
 
 class SimpleItemIngest(BaseModel):
@@ -231,6 +257,8 @@ class SimpleItemIngest(BaseModel):
     """
     date: Date = Field(..., description="Data date")
     ticker: str = Field(..., max_length=10, description="Ticker symbol")
+    name_en: Optional[str] = Field(None, max_length=200, description="English ticker name (e.g., 'Apple Inc.')")
+    name_ko: Optional[str] = Field(None, max_length=200, description="Korean ticker name (e.g., '애플')")
     score: float = Field(..., ge=0, le=100, description="Score value")
     signal: str = Field(..., description="Trading signal")
 

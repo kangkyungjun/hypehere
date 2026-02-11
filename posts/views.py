@@ -517,3 +517,40 @@ class RecommendedPostListAPIView(generics.ListAPIView):
             'count': len(posts),
             'results': serializer.data
         })
+
+
+class MyPostsAPIView(generics.ListAPIView):
+    """
+    GET /api/community/posts/my/ - List current user's posts
+
+    MarketLens용: 내가 작성한 게시글 목록 조회
+    """
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = PostSerializer
+    pagination_class = PostPagination
+
+    def get_queryset(self):
+        """Return current user's posts with counts"""
+        return Post.objects.filter(
+            author=self.request.user
+        ).select_related('author', 'deleted_by').prefetch_related('hashtags').annotate(
+            like_count=Count('likes', distinct=True),
+            comment_count=Count('comments', distinct=True)
+        ).order_by('-created_at')
+
+
+class MyCommentsAPIView(generics.ListAPIView):
+    """
+    GET /api/community/comments/my/ - List current user's comments
+
+    MarketLens용: 내가 작성한 댓글 목록 조회
+    """
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = CommentSerializer
+    pagination_class = PostPagination
+
+    def get_queryset(self):
+        """Return current user's comments"""
+        return Comment.objects.filter(
+            author=self.request.user
+        ).select_related('author', 'post', 'post__author').order_by('-created_at')
