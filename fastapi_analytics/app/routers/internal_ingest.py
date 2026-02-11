@@ -341,12 +341,78 @@ def ingest_scores(payload: IngestPayload, db: Session = Depends(get_db)):
             )
 
         # ==========================================
-        # 5) UPSERT to ticker_targets (target/stop)
+        # 5) UPSERT to ticker_trendlines (trendline coefficients + values)
         # ==========================================
-        # Note: Targets, trendlines, institutions, and shorts are only
-        # available in legacy flat payloads (not in extended nested format).
-        # These sections are kept for backward compatibility but will be
-        # skipped for extended payloads.
+        # Extract trendline data based on payload type
+        if is_extended and hasattr(item, 'trend') and item.trend:
+            # Extended nested structure with trend.high/low.slope/intercept/r_sq/values
+            trend = item.trend
+            high_slope = trend.high.slope if trend.high else None
+            high_intercept = trend.high.intercept if trend.high else None
+            high_r_squared = trend.high.r_sq if trend.high else None
+            high_values = [v.dict() for v in trend.high.values] if (trend.high and trend.high.values) else None
+
+            low_slope = trend.low.slope if trend.low else None
+            low_intercept = trend.low.intercept if trend.low else None
+            low_r_squared = trend.low.r_sq if trend.low else None
+            low_values = [v.dict() for v in trend.low.values] if (trend.low and trend.low.values) else None
+        else:
+            # Simple flat structure (backward compatibility) - no values
+            high_slope = getattr(item, 'high_slope', None)
+            high_intercept = getattr(item, 'high_intercept', None)
+            high_r_squared = getattr(item, 'high_r_squared', None)
+            high_values = None
+
+            low_slope = getattr(item, 'low_slope', None)
+            low_intercept = getattr(item, 'low_intercept', None)
+            low_r_squared = getattr(item, 'low_r_squared', None)
+            low_values = None
+
+        if high_slope is not None or low_slope is not None:
+            trendline_obj = (
+                db.query(TickerTrendline)
+                .filter(
+                    TickerTrendline.ticker == ticker,
+                    TickerTrendline.date == score_date,
+                )
+                .first()
+            )
+
+            if trendline_obj:
+                # Update existing trendline record
+                trendline_obj.high_slope = high_slope
+                trendline_obj.high_intercept = high_intercept
+                trendline_obj.high_r_squared = high_r_squared
+                trendline_obj.high_values = high_values
+                trendline_obj.low_slope = low_slope
+                trendline_obj.low_intercept = low_intercept
+                trendline_obj.low_r_squared = low_r_squared
+                trendline_obj.low_values = low_values
+                trendline_obj.trend_period_days = getattr(item, 'trend_period_days', 30)
+            else:
+                # Insert new trendline record
+                trendline_obj = TickerTrendline(
+                    ticker=ticker,
+                    date=score_date,
+                    high_slope=high_slope,
+                    high_intercept=high_intercept,
+                    high_r_squared=high_r_squared,
+                    high_values=high_values,
+                    low_slope=low_slope,
+                    low_intercept=low_intercept,
+                    low_r_squared=low_r_squared,
+                    low_values=low_values,
+                    trend_period_days=getattr(item, 'trend_period_days', 30),
+                )
+                db.add(trendline_obj)
+
+        # ==========================================
+        # 6) UPSERT to ticker_targets (target/stop)
+        # ==========================================
+        # Note: Targets, institutions, and shorts are only available in legacy
+        # flat payloads (not in extended nested format). Trendlines are available
+        # in both extended (nested trend.high/low) and legacy flat formats.
+        # These sections are kept for backward compatibility.
         if not is_extended:
             # Simple flat format may have optional target fields
             target_price = getattr(item, 'target_price', None)
@@ -378,72 +444,6 @@ def ingest_scores(payload: IngestPayload, db: Session = Depends(get_db)):
                         risk_reward_ratio=risk_reward_ratio,
                     )
                     db.add(target_obj)
-
-            # ==========================================
-            # 6) UPSERT to ticker_trendlines (trendline coefficients + values)
-            # ==========================================
-            # Extract trendline data based on payload type
-            if is_extended and hasattr(item, 'trend') and item.trend:
-                # Extended nested structure with trend.high/low.slope/intercept/r_sq/values
-                trend = item.trend
-                high_slope = trend.high.slope if trend.high else None
-                high_intercept = trend.high.intercept if trend.high else None
-                high_r_squared = trend.high.r_sq if trend.high else None
-                high_values = [v.dict() for v in trend.high.values] if (trend.high and trend.high.values) else None
-
-                low_slope = trend.low.slope if trend.low else None
-                low_intercept = trend.low.intercept if trend.low else None
-                low_r_squared = trend.low.r_sq if trend.low else None
-                low_values = [v.dict() for v in trend.low.values] if (trend.low and trend.low.values) else None
-            else:
-                # Simple flat structure (backward compatibility) - no values
-                high_slope = getattr(item, 'high_slope', None)
-                high_intercept = getattr(item, 'high_intercept', None)
-                high_r_squared = getattr(item, 'high_r_squared', None)
-                high_values = None
-
-                low_slope = getattr(item, 'low_slope', None)
-                low_intercept = getattr(item, 'low_intercept', None)
-                low_r_squared = getattr(item, 'low_r_squared', None)
-                low_values = None
-
-            if high_slope is not None or low_slope is not None:
-                trendline_obj = (
-                    db.query(TickerTrendline)
-                    .filter(
-                        TickerTrendline.ticker == ticker,
-                        TickerTrendline.date == score_date,
-                    )
-                    .first()
-                )
-
-                if trendline_obj:
-                    # Update existing trendline record
-                    trendline_obj.high_slope = high_slope
-                    trendline_obj.high_intercept = high_intercept
-                    trendline_obj.high_r_squared = high_r_squared
-                    trendline_obj.high_values = high_values
-                    trendline_obj.low_slope = low_slope
-                    trendline_obj.low_intercept = low_intercept
-                    trendline_obj.low_r_squared = low_r_squared
-                    trendline_obj.low_values = low_values
-                    trendline_obj.trend_period_days = getattr(item, 'trend_period_days', 30)
-                else:
-                    # Insert new trendline record
-                    trendline_obj = TickerTrendline(
-                        ticker=ticker,
-                        date=score_date,
-                        high_slope=high_slope,
-                        high_intercept=high_intercept,
-                        high_r_squared=high_r_squared,
-                        high_values=high_values,
-                        low_slope=low_slope,
-                        low_intercept=low_intercept,
-                        low_r_squared=low_r_squared,
-                        low_values=low_values,
-                        trend_period_days=getattr(item, 'trend_period_days', 30),
-                    )
-                    db.add(trendline_obj)
 
             # ==========================================
             # 7) UPSERT to ticker_institutions (inst/foreign ownership)
