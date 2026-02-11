@@ -7,7 +7,8 @@ import logging
 from app.database import get_db
 from app.models import (
     TickerScore, TickerPrice, TickerIndicator, TickerTarget,
-    TickerTrendline, TickerInstitution, TickerShort, TickerAIAnalysis
+    TickerTrendline, TickerInstitution, TickerShort, TickerAIAnalysis,
+    Ticker
 )
 from app.schemas import IngestPayload, ExtendedItemIngest
 from app.config import settings
@@ -350,12 +351,12 @@ def ingest_scores(payload: IngestPayload, db: Session = Depends(get_db)):
             high_slope = trend.high.slope if trend.high else None
             high_intercept = trend.high.intercept if trend.high else None
             high_r_squared = trend.high.r_sq if trend.high else None
-            high_values = [v.dict() for v in trend.high.values] if (trend.high and trend.high.values) else None
+            high_values = [v.model_dump() for v in trend.high.values] if (trend.high and trend.high.values) else None
 
             low_slope = trend.low.slope if trend.low else None
             low_intercept = trend.low.intercept if trend.low else None
             low_r_squared = trend.low.r_sq if trend.low else None
-            low_values = [v.dict() for v in trend.low.values] if (trend.low and trend.low.values) else None
+            low_values = [v.model_dump() for v in trend.low.values] if (trend.low and trend.low.values) else None
         else:
             # Simple flat structure (backward compatibility) - no values
             high_slope = getattr(item, 'high_slope', None)
