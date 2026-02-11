@@ -53,7 +53,8 @@ def search_tickers(
     ).filter(
         or_(
             TickerScore.ticker.ilike(f"%{q}%"),
-            Ticker.name.ilike(f"%{q}%")
+            Ticker.name.ilike(f"%{q}%"),
+            Ticker.extra_data['name_ko'].astext.ilike(f"%{q}%")  # Korean name search
         )
     ).distinct(
         TickerScore.ticker
