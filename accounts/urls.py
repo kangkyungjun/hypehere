@@ -39,6 +39,10 @@ from .views import (
     LegalDocumentEditView,
     LegalDocumentSaveView,
     LegalDocumentVersionListView,
+    # MarketLens Role-Based Permission APIs
+    UserSearchAPIView,
+    PromoteToGoldAPIView,
+    PromoteToManagerAPIView,
 )
 
 app_name = 'accounts'
@@ -106,4 +110,9 @@ urlpatterns = [
 
     # User Report API
     path('api/users/report/', UserReportCreateView.as_view(), name='user_report_create'),
+
+    # MarketLens Role-Based Permission APIs
+    path('api/users/search/', UserSearchAPIView.as_view(), name='user_search'),
+    path('api/users/<int:user_id>/promote-to-gold/', PromoteToGoldAPIView.as_view(), name='promote_to_gold'),
+    path('api/users/<int:user_id>/promote-to-manager/', PromoteToManagerAPIView.as_view(), name='promote_to_manager'),
 ]

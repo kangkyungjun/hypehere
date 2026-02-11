@@ -2241,3 +2241,134 @@ class LegalDocumentEditView(LoginRequiredMixin, UserPassesTestMixin, View):
         }
 
         return render(request, 'accounts/admin/legal_document_edit.html', context)
+
+
+# ========================================
+# MarketLens Role-Based Permission APIs
+# ========================================
+
+class UserSearchAPIView(APIView):
+    """
+    사용자 검색 API (Manager/Master만 접근 가능)
+    GET /api/accounts/users/search/?q=<query>
+
+    Query로 이메일 또는 닉네임으로 사용자 검색
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        # Manager 이상 권한 체크
+        if not request.user.is_manager_or_above():
+            return Response(
+                {'error': '권한이 없습니다. Manager 이상만 접근 가능합니다.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        query = request.GET.get('q', '').strip()
+
+        if not query:
+            return Response(
+                {'error': '검색어를 입력해주세요.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # 이메일 또는 닉네임으로 검색 (대소문자 무시)
+        users = User.objects.filter(
+            Q(email__icontains=query) | Q(nickname__icontains=query)
+        ).exclude(
+            id=request.user.id  # 자기 자신 제외
+        )[:20]  # 최대 20명
+
+        # 사용자 정보 직렬화 (role 포함)
+        users_data = []
+        for user in users:
+            users_data.append({
+                'id': user.id,
+                'email': user.email,
+                'nickname': user.nickname,
+                'role': user.role,
+                'created_at': user.created_at.isoformat(),
+                'profile_picture': request.build_absolute_uri(user.profile_picture.url) if user.profile_picture else None,
+            })
+
+        return Response(users_data, status=status.HTTP_200_OK)
+
+
+class PromoteToGoldAPIView(APIView):
+    """
+    사용자를 Gold로 승급 (Manager/Master만 가능)
+    PATCH /api/accounts/users/<id>/promote-to-gold/
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def patch(self, request, user_id):
+        # Manager 이상 권한 체크
+        if not request.user.can_promote_to_gold():
+            return Response(
+                {'error': '권한이 없습니다. Manager 이상만 Gold로 승급할 수 있습니다.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        # 대상 사용자 조회
+        target_user = get_object_or_404(User, id=user_id)
+
+        # 이미 Gold 이상이면 에러
+        if target_user.is_gold_or_above():
+            return Response(
+                {'error': f'{target_user.nickname}님은 이미 {target_user.get_role_display()} 권한입니다.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Gold로 승급
+        target_user.role = 'gold'
+        target_user.save(update_fields=['role'])
+
+        return Response({
+            'message': f'{target_user.nickname}님을 Gold로 승급했습니다.',
+            'user': {
+                'id': target_user.id,
+                'email': target_user.email,
+                'nickname': target_user.nickname,
+                'role': target_user.role,
+            }
+        }, status=status.HTTP_200_OK)
+
+
+class PromoteToManagerAPIView(APIView):
+    """
+    사용자를 Manager로 승급 (Master만 가능)
+    PATCH /api/accounts/users/<id>/promote-to-manager/
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def patch(self, request, user_id):
+        # Master 권한 체크
+        if not request.user.can_promote_to_manager():
+            return Response(
+                {'error': '권한이 없습니다. Master만 Manager로 승급할 수 있습니다.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        # 대상 사용자 조회
+        target_user = get_object_or_404(User, id=user_id)
+
+        # 이미 Manager 이상이면 에러
+        if target_user.is_manager_or_above():
+            return Response(
+                {'error': f'{target_user.nickname}님은 이미 {target_user.get_role_display()} 권한입니다.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Manager로 승격
+        target_user.role = 'manager'
+        target_user.save(update_fields=['role'])
+
+        return Response({
+            'message': f'{target_user.nickname}님을 Manager로 임명했습니다.',
+            'user': {
+                'id': target_user.id,
+                'email': target_user.email,
+                'nickname': target_user.nickname,
+                'role': target_user.role,
+            }
+        }, status=status.HTTP_200_OK)

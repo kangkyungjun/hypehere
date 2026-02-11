@@ -164,6 +164,21 @@ class User(AbstractUser):
     is_prime = models.BooleanField(default=False, verbose_name='프리미엄 관리자')
     is_gold = models.BooleanField(default=False, verbose_name='골드 사용자')
 
+    # Role-based permission system (MarketLens)
+    ROLE_CHOICES = [
+        ('master', 'Master'),      # 오너 (최고 권한)
+        ('manager', 'Manager'),    # 직원 (관리자)
+        ('gold', 'Gold User'),     # 유료 회원 (광고 제거)
+        ('regular', 'Regular'),    # 일반 회원
+    ]
+    role = models.CharField(
+        max_length=10,
+        choices=ROLE_CHOICES,
+        default='regular',
+        verbose_name='사용자 역할',
+        help_text='MarketLens 권한 시스템: master > manager > gold > regular'
+    )
+
     # Moderation tracking
     report_count = models.IntegerField(
         default=0,
@@ -408,6 +423,39 @@ class User(AbstractUser):
     def has_gold_features(self):
         """유료 기능 접근 권한 (GoldUser, Staff, Prime, Superuser 모두 포함)"""
         return self.is_gold or self.is_staff or self.is_superuser
+
+    # MarketLens role-based permission methods
+    def is_master(self):
+        """Master 권한 체크 (오너)"""
+        return self.role == 'master'
+
+    def is_manager_or_above(self):
+        """Manager 이상 권한 체크 (Manager, Master)"""
+        return self.role in ['master', 'manager']
+
+    def is_gold_or_above(self):
+        """Gold 이상 권한 체크 (Gold, Manager, Master)"""
+        return self.role in ['master', 'manager', 'gold']
+
+    def has_ad_free_access(self):
+        """광고 제거 권한 (Gold 이상)"""
+        return self.is_gold_or_above()
+
+    def can_delete_any_post(self):
+        """모든 게시글 삭제 권한 (Manager 이상)"""
+        return self.is_manager_or_above()
+
+    def can_promote_to_gold(self):
+        """Gold로 승급 권한 (Manager 이상)"""
+        return self.is_manager_or_above()
+
+    def can_promote_to_manager(self):
+        """Manager로 승급 권한 (Master만)"""
+        return self.is_master()
+
+    def can_manage_users(self):
+        """사용자 관리 권한 (Manager 이상)"""
+        return self.is_manager_or_above()
 
     def can_assign_role(self, target_role):
         """현재 사용자가 target_role을 부여할 수 있는지 검증
