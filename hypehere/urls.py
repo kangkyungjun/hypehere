@@ -20,6 +20,7 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.i18n import JavaScriptCatalog
+from django.views.generic import TemplateView
 from .views import (
     HomeView, ExploreView,
     LearningMatchingView, LearningChatView
@@ -44,6 +45,10 @@ urlpatterns = [
     path("admin-dashboard/", include("analytics.urls")),  # Admin dashboard and analytics
     path("i18n/", include("django.conf.urls.i18n")),  # Language selection
     path("jsi18n/", JavaScriptCatalog.as_view(), name='javascript-catalog'),  # JavaScript i18n
+
+    # MarketLens: Privacy Policy & Terms of Service
+    path("marketlens/privacy/", TemplateView.as_view(template_name="marketlens/privacy.html"), name='marketlens_privacy'),
+    path("marketlens/terms/", TemplateView.as_view(template_name="marketlens/terms.html"), name='marketlens_terms'),
 ]
 
 # Media files (development only)
