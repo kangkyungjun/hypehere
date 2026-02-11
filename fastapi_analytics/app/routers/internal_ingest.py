@@ -410,11 +410,35 @@ def ingest_scores(payload: IngestPayload, db: Session = Depends(get_db)):
         # ==========================================
         # 6) UPSERT to ticker_targets (target/stop)
         # ==========================================
-        # Note: Targets, institutions, and shorts are only available in legacy
-        # flat payloads (not in extended nested format). Trendlines are available
-        # in both extended (nested trend.high/low) and legacy flat formats.
-        # These sections are kept for backward compatibility.
-        if not is_extended:
+        # Handle Extended format strategy (nested object)
+        if is_extended and hasattr(item, 'strategy') and item.strategy:
+            target_obj = (
+                db.query(TickerTarget)
+                .filter(
+                    TickerTarget.ticker == ticker,
+                    TickerTarget.date == score_date,
+                )
+                .first()
+            )
+
+            if target_obj:
+                # Update existing target record
+                target_obj.target_price = item.strategy.target_price
+                target_obj.stop_loss = item.strategy.stop_loss
+                target_obj.risk_reward_ratio = item.strategy.risk_reward_ratio
+            else:
+                # Insert new target record
+                target_obj = TickerTarget(
+                    ticker=ticker,
+                    date=score_date,
+                    target_price=item.strategy.target_price,
+                    stop_loss=item.strategy.stop_loss,
+                    risk_reward_ratio=item.strategy.risk_reward_ratio,
+                )
+                db.add(target_obj)
+
+        # Handle Simple flat format (backward compatibility)
+        elif not is_extended:
             # Simple flat format may have optional target fields
             target_price = getattr(item, 'target_price', None)
             stop_loss = getattr(item, 'stop_loss', None)

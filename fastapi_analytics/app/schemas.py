@@ -233,11 +233,18 @@ class TrendData(BaseModel):
     low: Optional[TrendlineCoefficients] = Field(None, description="Low price trendline")
 
 
+class StrategyData(BaseModel):
+    """Target price and stop loss strategy"""
+    target_price: Optional[float] = Field(None, description="AI target price")
+    stop_loss: Optional[float] = Field(None, description="AI stop loss")
+    risk_reward_ratio: Optional[float] = Field(None, description="Risk/reward ratio")
+
+
 class ExtendedItemIngest(BaseModel):
     """
     Extended payload format from Mac mini (nested structure).
 
-    Supports nested objects: price, score, indicators, ai_analysis, trend
+    Supports nested objects: price, score, indicators, ai_analysis, trend, strategy
     """
     date: Date = Field(..., description="Data date")
     ticker: str = Field(..., max_length=10, description="Ticker symbol")
@@ -248,6 +255,7 @@ class ExtendedItemIngest(BaseModel):
     indicators: IndicatorData = Field(..., description="Technical indicators")
     ai_analysis: AIAnalysisData = Field(..., description="AI analysis results")
     trend: Optional[TrendData] = Field(None, description="Trendline data with pre-calculated values")
+    strategy: Optional[StrategyData] = Field(None, description="Target/stop strategy")
 
 
 class SimpleItemIngest(BaseModel):
