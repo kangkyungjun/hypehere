@@ -125,6 +125,9 @@ def ingest_scores(payload: IngestPayload, db: Session = Depends(get_db)):
             low_price = item.price.low
             close_price = item.price.close
             volume = item.price.volume
+            # Treemap market data (nested)
+            change_pct = item.market_data.change_pct if item.market_data else None
+            trading_value = item.market_data.trading_value if item.market_data else None
         else:
             # Simple flat structure (backward compatibility)
             open_price = item.open
@@ -132,6 +135,9 @@ def ingest_scores(payload: IngestPayload, db: Session = Depends(get_db)):
             low_price = item.low
             close_price = item.close
             volume = item.volume
+            # Treemap market data (flat)
+            change_pct = getattr(item, 'change_pct', None)
+            trading_value = getattr(item, 'trading_value', None)
 
         price_obj = (
             db.query(TickerPrice)
@@ -149,6 +155,8 @@ def ingest_scores(payload: IngestPayload, db: Session = Depends(get_db)):
             price_obj.low = low_price
             price_obj.close = close_price
             price_obj.volume = volume
+            price_obj.change_pct = change_pct
+            price_obj.trading_value = trading_value
         else:
             # Insert new price record
             price_obj = TickerPrice(
@@ -159,6 +167,8 @@ def ingest_scores(payload: IngestPayload, db: Session = Depends(get_db)):
                 low=low_price,
                 close=close_price,
                 volume=volume,
+                change_pct=change_pct,
+                trading_value=trading_value,
             )
             db.add(price_obj)
 
@@ -204,8 +214,10 @@ def ingest_scores(payload: IngestPayload, db: Session = Depends(get_db)):
         # Extract ticker names if provided (optional fields)
         name_en = getattr(item, 'name_en', None)
         name_ko = getattr(item, 'name_ko', None)
+        sector = getattr(item, 'sector', None)
+        sub_industry = getattr(item, 'sub_industry', None)
 
-        if name_en:  # Only process if English name is provided
+        if name_en or sector or sub_industry:
             ticker_obj = (
                 db.query(Ticker)
                 .filter(Ticker.ticker == ticker)
@@ -214,21 +226,30 @@ def ingest_scores(payload: IngestPayload, db: Session = Depends(get_db)):
 
             if ticker_obj:
                 # Update existing ticker metadata
-                ticker_obj.name = name_en
-                ticker_obj.ticker_name = name_en  # For search ILIKE queries
+                if name_en:
+                    ticker_obj.name = name_en
+                    ticker_obj.ticker_name = name_en  # For search ILIKE queries
 
                 # Update Korean name in JSONB metadata
                 if name_ko:
                     existing_metadata = ticker_obj.extra_data or {}
                     existing_metadata['name_ko'] = name_ko
                     ticker_obj.extra_data = existing_metadata
+
+                # Update sector/sub_industry only if provided (preserve existing)
+                if sector is not None:
+                    ticker_obj.sector = sector
+                if sub_industry is not None:
+                    ticker_obj.sub_industry = sub_industry
             else:
                 # Insert new ticker metadata
                 metadata = {'name_ko': name_ko} if name_ko else None
                 ticker_obj = Ticker(
                     ticker=ticker,
                     name=name_en,
-                    ticker_name=name_en,  # For search
+                    ticker_name=name_en if name_en else None,  # For search
+                    sector=sector,
+                    sub_industry=sub_industry,
                     extra_data=metadata,
                 )
                 db.add(ticker_obj)

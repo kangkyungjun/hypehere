@@ -41,6 +41,8 @@ class Ticker(Base):
     ticker_name = Column(String(200), index=True)  # Searchable name
     name = Column(String(200))  # Display name
     category = Column(String(50))  # Category/sector
+    sector = Column(String(100))  # GICS sector
+    sub_industry = Column(String(200))  # GICS sub-industry
     extra_data = Column("metadata", JSONB)  # Additional JSON data
 
 
@@ -67,6 +69,8 @@ class TickerPrice(Base):
     low = Column(Float)
     close = Column(Float)
     volume = Column(BigInteger)
+    change_pct = Column(Float)  # Daily price change %
+    trading_value = Column(Float)  # close * volume (USD)
     created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
 
 

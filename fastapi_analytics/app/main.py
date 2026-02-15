@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from app.routers import scores, tickers, prices, internal_ingest, dashboard, charts
+from app.routers import scores, tickers, prices, internal_ingest, dashboard, charts, market
 from app.config import settings
 from app.schemas import HealthCheck
 
@@ -52,6 +52,13 @@ app.include_router(
     tags=["Complete Chart Data ⭐⭐⭐"]
 )
 
+# Market overview router (treemap)
+app.include_router(
+    market.router,
+    prefix="/api/v1/market",
+    tags=["Market Overview"]
+)
+
 # Internal router (Mac mini ingest)
 app.include_router(internal_ingest.router)
 
@@ -72,7 +79,8 @@ def root():
             "scores": "/api/v1/scores/{ticker}?from=2026-01-01&to=2026-02-02",
             "top": "/api/v1/scores/top?date=2026-02-02&limit=10",
             "search": "/api/v1/tickers/search?q=AAPL",
-            "ticker_info": "/api/v1/tickers/{ticker}"
+            "ticker_info": "/api/v1/tickers/{ticker}",
+            "treemap": "/api/v1/market/treemap?date=2026-02-14"
         },
         "docs": {
             "swagger": "/docs",

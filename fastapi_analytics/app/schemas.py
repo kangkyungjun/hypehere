@@ -233,6 +233,12 @@ class TrendData(BaseModel):
     low: Optional[TrendlineCoefficients] = Field(None, description="Low price trendline")
 
 
+class MarketData(BaseModel):
+    """Daily market data for treemap (nested structure)"""
+    change_pct: Optional[float] = Field(None, description="Daily price change %")
+    trading_value: Optional[float] = Field(None, description="close * volume (USD)")
+
+
 class StrategyData(BaseModel):
     """Target price and stop loss strategy"""
     target_price: Optional[float] = Field(None, description="AI target price")
@@ -256,6 +262,9 @@ class ExtendedItemIngest(BaseModel):
     ai_analysis: AIAnalysisData = Field(..., description="AI analysis results")
     trend: Optional[TrendData] = Field(None, description="Trendline data with pre-calculated values")
     strategy: Optional[StrategyData] = Field(None, description="Target/stop strategy")
+    sector: Optional[str] = Field(None, max_length=100, description="GICS sector name")
+    sub_industry: Optional[str] = Field(None, max_length=200, description="GICS sub-industry name")
+    market_data: Optional[MarketData] = Field(None, description="Daily market data (change_pct, trading_value)")
 
 
 class SimpleItemIngest(BaseModel):
@@ -288,6 +297,12 @@ class SimpleItemIngest(BaseModel):
     bb_lower: Optional[float] = Field(None, description="BB lower")
     bb_middle: Optional[float] = Field(None, description="BB middle")
 
+    # Treemap fields (flat)
+    sector: Optional[str] = Field(None, max_length=100, description="GICS sector name")
+    sub_industry: Optional[str] = Field(None, max_length=200, description="GICS sub-industry name")
+    change_pct: Optional[float] = Field(None, description="Daily price change %")
+    trading_value: Optional[float] = Field(None, description="close * volume (USD)")
+
 
 class IngestPayload(BaseModel):
     """
@@ -300,3 +315,40 @@ class IngestPayload(BaseModel):
         ...,
         description="List of ticker data items (extended or simple format)"
     )
+
+
+# ============================================================
+# Treemap Response Schemas (섹터별 트리맵)
+# ============================================================
+
+class TreemapItem(BaseModel):
+    """Individual ticker in treemap"""
+    ticker: str = Field(..., description="Ticker symbol")
+    name: Optional[str] = Field(None, description="Display name")
+    sector: Optional[str] = Field(None, description="GICS sector")
+    sub_industry: Optional[str] = Field(None, description="GICS sub-industry")
+    change_pct: Optional[float] = Field(None, description="Daily price change %")
+    trading_value: Optional[float] = Field(None, description="Trading value (close * volume, USD)")
+    close: Optional[float] = Field(None, description="Close price")
+    volume: Optional[int] = Field(None, description="Trading volume")
+    score: Optional[float] = Field(None, description="AI score")
+    signal: Optional[str] = Field(None, description="Trading signal")
+
+    class Config:
+        from_attributes = True
+
+
+class TreemapSector(BaseModel):
+    """Sector group in treemap"""
+    sector: str = Field(..., description="GICS sector name")
+    ticker_count: int = Field(..., description="Number of tickers in sector")
+    avg_change_pct: Optional[float] = Field(None, description="Average change % in sector")
+    total_trading_value: Optional[float] = Field(None, description="Total trading value in sector")
+    items: List[TreemapItem] = Field(..., description="Tickers in this sector")
+
+
+class TreemapResponse(BaseModel):
+    """Treemap API response"""
+    date: Date = Field(..., description="Data date")
+    total_tickers: int = Field(..., description="Total number of tickers")
+    sectors: List[TreemapSector] = Field(..., description="Sector groups")
