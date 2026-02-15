@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from datetime import date as Date
-from typing import Optional, List, Union
+from typing import Optional, List, Union, Dict
 
 
 # ============================================================
@@ -117,6 +117,7 @@ class ChartDataPoint(BaseModel):
 
     # Technical indicators
     rsi: Optional[float] = Field(None, description="RSI (0-100)")
+    mfi: Optional[float] = Field(None, description="MFI (0-100)")
     macd: Optional[float] = Field(None, description="MACD line")
     macd_signal: Optional[float] = Field(None, description="MACD signal line")
     macd_hist: Optional[float] = Field(None, description="MACD histogram")
@@ -170,6 +171,210 @@ class AnalystRatingItem(BaseModel):
     target_to: Optional[float] = Field(None, description="New target price")
 
 
+class CompanyProfileResponse(BaseModel):
+    """Company profile data (non-time-series)"""
+    long_name: Optional[str] = None
+    industry: Optional[str] = None
+    website: Optional[str] = None
+    country: Optional[str] = None
+    employees: Optional[int] = None
+    summary: Optional[str] = None
+
+
+class KeyMetricsResponse(BaseModel):
+    """Key valuation and financial metrics (latest snapshot)"""
+    market_cap: Optional[float] = None
+    pe: Optional[float] = None
+    forward_pe: Optional[float] = None
+    peg: Optional[float] = None
+    pb: Optional[float] = None
+    ps: Optional[float] = None
+    ev_revenue: Optional[float] = None
+    ev_ebitda: Optional[float] = None
+    profit_margin: Optional[float] = None
+    operating_margin: Optional[float] = None
+    gross_margin: Optional[float] = None
+    roe: Optional[float] = None
+    roa: Optional[float] = None
+    debt_to_equity: Optional[float] = None
+    current_ratio: Optional[float] = None
+    beta: Optional[float] = None
+    dividend_yield: Optional[float] = None
+    payout_ratio: Optional[float] = None
+    earnings_growth: Optional[float] = None
+    revenue_growth: Optional[float] = None
+
+
+class FinancialsResponse(BaseModel):
+    """Financial statements (JSONB snapshots)"""
+    latest_quarter: Optional[str] = None
+    income: Optional[dict] = None
+    balance_sheet: Optional[dict] = None
+    cash_flow: Optional[dict] = None
+
+
+class DividendEntry(BaseModel):
+    """Single dividend payment entry"""
+    ex_date: str
+    amount: Optional[float] = None
+
+
+# ============================================================
+# Macro Indicator Schemas
+# ============================================================
+
+class MacroIndicatorItem(BaseModel):
+    """Single macro indicator value from Mac mini"""
+    value: float
+    observation_date: Optional[str] = None
+    name: Optional[str] = None
+
+
+class MacroSignalItem(BaseModel):
+    """시장레이더/머니프린팅 신호 (signals.yield_curve, signals.m2_liquidity)"""
+    value: float
+    risk_level: Optional[str] = None       # CRITICAL/WARNING/NORMAL
+    liquidity_status: Optional[str] = None  # EXPANDING/CONTRACTING/NEUTRAL
+    message: Optional[str] = None           # 한국어 설명
+
+
+class MacroChartPoint(BaseModel):
+    """차트 시계열 포인트"""
+    date: str
+    value: float
+
+
+class MacroIngestPayload(BaseModel):
+    """
+    Macro indicators ingest payload from Mac mini.
+
+    Supports both legacy flat indicators and new signals+charts:
+    - indicators: {code: {value, observation_date, name}} (기존 FRED 지표)
+    - signals: {yield_curve: {...}, m2_liquidity: {...}} (시장레이더/머니프린팅)
+    - charts: {t10y2y: [{date, value}], m2_growth: [{date, value}]} (시계열 차트)
+    """
+    date: str
+    indicators: Optional[Dict[str, MacroIndicatorItem]] = None  # 기존 호환
+    signals: Optional[Dict[str, MacroSignalItem]] = None         # 신규
+    charts: Optional[Dict[str, List[MacroChartPoint]]] = None    # 신규
+
+
+class MacroIndicatorResponse(BaseModel):
+    """Single macro indicator in API response"""
+    indicator_code: str
+    indicator_name: Optional[str] = None
+    value: float
+    observation_date: Optional[str] = None
+    previous_value: Optional[float] = None
+    change_pct: Optional[float] = None
+    risk_level: Optional[str] = None
+    liquidity_status: Optional[str] = None
+    signal_message: Optional[str] = None
+
+
+class MacroIndicatorsResponse(BaseModel):
+    """Macro indicators API response"""
+    date: str
+    indicators: List[MacroIndicatorResponse]
+
+
+class MacroSignalResponse(BaseModel):
+    """Single macro signal in API response"""
+    signal_code: str
+    value: float
+    risk_level: Optional[str] = None
+    liquidity_status: Optional[str] = None
+    message: Optional[str] = None
+    date: str
+
+
+class MacroSignalsResponse(BaseModel):
+    """Macro signals API response"""
+    date: str
+    signals: List[MacroSignalResponse]
+
+
+class MacroChartPointResponse(BaseModel):
+    """Single chart data point"""
+    date: str
+    value: float
+
+
+class MacroChartResponse(BaseModel):
+    """Macro chart time-series API response"""
+    series_id: str
+    count: int
+    data: List[MacroChartPointResponse]
+
+
+# ============================================================
+# Calendar & Earnings Schemas
+# ============================================================
+
+class CalendarData(BaseModel):
+    """Calendar data from Mac mini ingest"""
+    next_earnings_date: Optional[str] = None
+    next_earnings_date_end: Optional[str] = None
+    earnings_confirmed: Optional[bool] = None
+    d_day: Optional[int] = None
+    ex_dividend_date: Optional[str] = None
+    dividend_date: Optional[str] = None
+    earnings_estimate: Optional[dict] = None
+    revenue_estimate: Optional[dict] = None
+
+class EarningsHistoryEntry(BaseModel):
+    """Single earnings history entry from Mac mini"""
+    date: str
+    eps_estimate: Optional[float] = None
+    reported_eps: Optional[float] = None
+    surprise_pct: Optional[float] = None
+
+class CalendarResponse(BaseModel):
+    """Calendar data in chart API response"""
+    next_earnings_date: Optional[str] = None
+    next_earnings_date_end: Optional[str] = None
+    earnings_confirmed: Optional[bool] = None
+    d_day: Optional[int] = None
+    urgency: Optional[str] = None
+    earnings_days_remaining: Optional[int] = None
+    ex_dividend_date: Optional[str] = None
+    dividend_date: Optional[str] = None
+    earnings_estimate: Optional[dict] = None
+    revenue_estimate: Optional[dict] = None
+
+class EarningsHistoryItem(BaseModel):
+    """Earnings history item in chart API response"""
+    date: str
+    eps_estimate: Optional[float] = None
+    reported_eps: Optional[float] = None
+    surprise_pct: Optional[float] = None
+
+
+class DefenseLineResponse(BaseModel):
+    """이동평균 방어선 (response용)"""
+    period: int
+    price: float
+    label: Optional[str] = None
+    distance_pct: Optional[float] = None
+
+
+class RecommendationsResponse(BaseModel):
+    """애널리스트 의견분포 (response용)"""
+    strong_buy: int = 0
+    buy: int = 0
+    hold: int = 0
+    sell: int = 0
+    strong_sell: int = 0
+    consensus_score: Optional[float] = None
+
+
+class InstitutionalHolderResponse(BaseModel):
+    """Individual institutional holder in API response"""
+    holder: str
+    pct_held: Optional[float] = None
+    pct_change: Optional[float] = None
+
+
 class CompleteChartResponse(BaseModel):
     """
     Complete chart data for Flutter app (1 API call gets everything).
@@ -182,6 +387,7 @@ class CompleteChartResponse(BaseModel):
     - 추세선 (오버레이)
     - 기관/외인 데이터
     - 공매도 데이터
+    - 기업 프로필/밸류에이션/재무/배당
 
     모두 렌더링 가능.
     """
@@ -201,6 +407,19 @@ class CompleteChartResponse(BaseModel):
     # Analyst data (latest snapshot, not time-series)
     analyst_consensus: Optional[AnalystConsensus] = Field(None, description="Analyst consensus target prices")
     analyst_ratings: Optional[List[AnalystRatingItem]] = Field(None, description="Individual analyst ratings")
+
+    # Fundamentals (latest snapshot, not time-series)
+    profile: Optional[CompanyProfileResponse] = Field(None, description="Company profile")
+    key_metrics: Optional[KeyMetricsResponse] = Field(None, description="Key valuation metrics")
+    financials: Optional[FinancialsResponse] = Field(None, description="Financial statements")
+    dividends: Optional[List[DividendEntry]] = Field(None, description="Recent dividend history")
+    calendar: Optional[CalendarResponse] = Field(None, description="Calendar events (earnings, dividends)")
+    earnings_history: Optional[List[EarningsHistoryItem]] = Field(None, description="Earnings history (EPS estimate vs reported)")
+
+    # Phase 2: New data sources
+    defense_lines: Optional[List[DefenseLineResponse]] = Field(None, description="Moving average defense lines")
+    recommendations: Optional[RecommendationsResponse] = Field(None, description="Analyst recommendations distribution")
+    institutional_holders: Optional[List[InstitutionalHolderResponse]] = Field(None, description="Top institutional holders")
 
 
 # ============================================================
@@ -231,6 +450,8 @@ class IndicatorData(BaseModel):
     bb_upper: Optional[float] = Field(None, description="BB upper band")
     bb_middle: Optional[float] = Field(None, description="BB middle band")
     bb_lower: Optional[float] = Field(None, description="BB lower band")
+    bb_width: Optional[float] = Field(None, description="BB width")
+    mfi: Optional[float] = Field(None, description="MFI (0-100)")
 
 
 class AIAnalysisData(BaseModel):
@@ -262,6 +483,24 @@ class MarketData(BaseModel):
     trading_value: Optional[float] = Field(None, description="close * volume (USD)")
 
 
+class DefenseLine(BaseModel):
+    """이동평균 방어선 데이터"""
+    period: int = Field(..., description="Moving average period (e.g., 20, 50, 200)")
+    price: float = Field(..., description="Moving average price")
+    label: Optional[str] = Field(None, description="Display label (e.g., 'MA20')")
+    distance_pct: Optional[float] = Field(None, description="Distance from current price %")
+
+
+class RecommendationsData(BaseModel):
+    """애널리스트 의견분포"""
+    strong_buy: int = 0
+    buy: int = 0
+    hold: int = 0
+    sell: int = 0
+    strong_sell: int = 0
+    consensus_score: Optional[float] = None
+
+
 class StrategyData(BaseModel):
     """Target price and stop loss strategy"""
     target_price: Optional[float] = Field(None, description="AI target price")
@@ -269,13 +508,71 @@ class StrategyData(BaseModel):
     risk_reward_ratio: Optional[float] = Field(None, description="Risk/reward ratio")
     analyst_consensus: Optional[AnalystConsensus] = Field(None, description="Analyst consensus data")
     analyst_ratings: Optional[List[AnalystRatingItem]] = Field(None, description="Individual analyst ratings")
+    defense_lines: Optional[List[DefenseLine]] = Field(None, description="Moving average defense lines")
+    recommendations: Optional[RecommendationsData] = Field(None, description="Analyst recommendations distribution")
+
+
+class CompanyProfileData(BaseModel):
+    """Company profile ingest data"""
+    long_name: Optional[str] = None
+    industry: Optional[str] = None
+    website: Optional[str] = None
+    country: Optional[str] = None
+    employees: Optional[int] = None
+    summary: Optional[str] = None
+
+
+class KeyMetricsData(BaseModel):
+    """Key metrics ingest data"""
+    market_cap: Optional[float] = None
+    pe: Optional[float] = None
+    forward_pe: Optional[float] = None
+    peg: Optional[float] = None
+    pb: Optional[float] = None
+    ps: Optional[float] = None
+    ev_revenue: Optional[float] = None
+    ev_ebitda: Optional[float] = None
+    profit_margin: Optional[float] = None
+    operating_margin: Optional[float] = None
+    gross_margin: Optional[float] = None
+    roe: Optional[float] = None
+    roa: Optional[float] = None
+    debt_to_equity: Optional[float] = None
+    current_ratio: Optional[float] = None
+    beta: Optional[float] = None
+    dividend_yield: Optional[float] = None
+    payout_ratio: Optional[float] = None
+    earnings_growth: Optional[float] = None
+    revenue_growth: Optional[float] = None
+
+
+class FundamentalsData(BaseModel):
+    """Fundamentals ingest wrapper"""
+    profile: Optional[CompanyProfileData] = None
+    metrics: Optional[KeyMetricsData] = None
+    financials: Optional[dict] = None    # {latest_quarter, income, balance_sheet, cash_flow}
+    dividends: Optional[dict] = None     # {recent: [{date, amount}], annual_total}
+
+
+class OwnershipData(BaseModel):
+    """기관/내부자/공매도 보유율 통합 객체"""
+    institution: Optional[float] = Field(None, description="Institutional ownership %")
+    insider: Optional[float] = Field(None, description="Insider ownership %")
+    short_float: Optional[float] = Field(None, description="Short % of float")
+
+
+class InstitutionalHolder(BaseModel):
+    """개별 기관투자자 보유 현황"""
+    holder: str = Field(..., description="Institution name")
+    pct_held: Optional[float] = Field(None, description="Holding %")
+    pct_change: Optional[float] = Field(None, description="Change in holding %")
 
 
 class ExtendedItemIngest(BaseModel):
     """
     Extended payload format from Mac mini (nested structure).
 
-    Supports nested objects: price, score, indicators, ai_analysis, trend, strategy
+    Supports nested objects: price, score, indicators, ai_analysis, trend, strategy, fundamentals
     """
     date: Date = Field(..., description="Data date")
     ticker: str = Field(..., max_length=10, description="Ticker symbol")
@@ -290,6 +587,11 @@ class ExtendedItemIngest(BaseModel):
     sector: Optional[str] = Field(None, max_length=100, description="GICS sector name")
     sub_industry: Optional[str] = Field(None, max_length=200, description="GICS sub-industry name")
     market_data: Optional[MarketData] = Field(None, description="Daily market data (change_pct, trading_value)")
+    fundamentals: Optional[FundamentalsData] = Field(None, description="Company fundamentals (profile, metrics, financials, dividends)")
+    calendar: Optional[CalendarData] = Field(None, description="Calendar events (earnings date, dividends)")
+    earnings_history: Optional[List[EarningsHistoryEntry]] = Field(None, description="Earnings history (EPS estimate vs reported)")
+    ownership: Optional[OwnershipData] = Field(None, description="Ownership data (institution, insider, short_float)")
+    institutional_holders: Optional[List[InstitutionalHolder]] = Field(None, description="Individual institutional holders")
 
 
 class SimpleItemIngest(BaseModel):
@@ -321,6 +623,7 @@ class SimpleItemIngest(BaseModel):
     bb_upper: Optional[float] = Field(None, description="BB upper")
     bb_lower: Optional[float] = Field(None, description="BB lower")
     bb_middle: Optional[float] = Field(None, description="BB middle")
+    mfi: Optional[float] = Field(None, description="MFI (0-100)")
 
     # Treemap fields (flat)
     sector: Optional[str] = Field(None, max_length=100, description="GICS sector name")
@@ -377,3 +680,48 @@ class TreemapResponse(BaseModel):
     date: Date = Field(..., description="Data date")
     total_tickers: int = Field(..., description="Total number of tickers")
     sectors: List[TreemapSector] = Field(..., description="Sector groups")
+
+
+# ============================================================
+# Earnings Week Schemas (이번 주 실적 일정)
+# ============================================================
+
+class EarningsWeekItem(BaseModel):
+    """Single earnings event for weekly calendar ingest"""
+    ticker: str
+    earnings_date: str
+    earnings_time: Optional[str] = None
+    eps_estimate: Optional[float] = None
+    revenue_estimate: Optional[float] = None
+    market_cap: Optional[float] = None
+    sector: Optional[str] = None
+    name_en: Optional[str] = None
+    name_ko: Optional[str] = None
+
+
+class EarningsWeekIngestPayload(BaseModel):
+    """Earnings week ingest payload from Mac mini"""
+    week_start: str
+    week_end: str
+    events: List[EarningsWeekItem]
+
+
+class EarningsWeekEventResponse(BaseModel):
+    """Single earnings event in API response"""
+    ticker: str
+    earnings_date: str
+    earnings_time: Optional[str] = None
+    eps_estimate: Optional[float] = None
+    revenue_estimate: Optional[float] = None
+    market_cap: Optional[float] = None
+    sector: Optional[str] = None
+    name_en: Optional[str] = None
+    name_ko: Optional[str] = None
+
+
+class EarningsUpcomingResponse(BaseModel):
+    """Upcoming earnings API response (grouped by date)"""
+    week_start: str
+    week_end: str
+    total_count: int
+    by_date: Dict[str, List[EarningsWeekEventResponse]]

@@ -6,14 +6,35 @@ from app.database import get_db
 from app.models import (
     TickerPrice, TickerScore, TickerIndicator, TickerTarget,
     TickerTrendline, TickerInstitution, TickerShort, TickerAIAnalysis,
-    TickerAnalystRating
+    TickerAnalystRating,
+    CompanyProfile, TickerKeyMetrics, TickerFinancials, TickerDividend,
+    TickerCalendar, TickerEarningsHistory,
+    TickerDefenseLine, TickerRecommendation, TickerInstitutionalHolder
 )
 from app.schemas import (
     CompleteChartResponse, ChartDataPoint, TrendlineValue,
-    AnalystConsensus, AnalystRatingItem
+    AnalystConsensus, AnalystRatingItem,
+    CompanyProfileResponse, KeyMetricsResponse, FinancialsResponse, DividendEntry,
+    CalendarResponse, EarningsHistoryItem,
+    DefenseLineResponse, RecommendationsResponse, InstitutionalHolderResponse
 )
 
 router = APIRouter()
+
+
+def _compute_urgency(d_day: int | None) -> str | None:
+    """Compute urgency level from D-Day value."""
+    if d_day is None:
+        return None
+    if d_day <= 0:
+        return "imminent"   # D-Day or past
+    if d_day <= 3:
+        return "urgent"     # 1~3 days
+    if d_day <= 7:
+        return "soon"       # 4~7 days
+    if d_day <= 14:
+        return "upcoming"   # 8~14 days
+    return "scheduled"      # 15+ days
 
 
 @router.get("/{ticker}", response_model=CompleteChartResponse)
@@ -201,6 +222,63 @@ def get_complete_chart_data(
             TickerAnalystRating.date == latest_analyst_target.date,
         ).order_by(TickerAnalystRating.rating_date.desc()).all()
 
+    # 11) Company Profile (ticker PK, non-time-series)
+    profile_obj = db.query(CompanyProfile).filter(
+        CompanyProfile.ticker == ticker
+    ).first()
+
+    # 12) Latest Key Metrics (most recent date)
+    metrics_obj = db.query(TickerKeyMetrics).filter(
+        TickerKeyMetrics.ticker == ticker
+    ).order_by(TickerKeyMetrics.date.desc()).first()
+
+    # 13) Financials (ticker PK, non-time-series)
+    financials_obj = db.query(TickerFinancials).filter(
+        TickerFinancials.ticker == ticker
+    ).first()
+
+    # 14) Recent Dividends (last 8 entries)
+    dividend_objs = db.query(TickerDividend).filter(
+        TickerDividend.ticker == ticker
+    ).order_by(TickerDividend.ex_date.desc()).limit(8).all()
+
+    # 15) Latest calendar (most recent upload)
+    calendar_obj = db.query(TickerCalendar).filter(
+        TickerCalendar.ticker == ticker
+    ).order_by(TickerCalendar.date.desc()).first()
+
+    # 16) Earnings history (last 8 quarters)
+    earnings_objs = db.query(TickerEarningsHistory).filter(
+        TickerEarningsHistory.ticker == ticker
+    ).order_by(TickerEarningsHistory.earnings_date.desc()).limit(8).all()
+
+    # 17) Latest defense lines (most recent upload)
+    latest_dl_date = db.query(func.max(TickerDefenseLine.date)).filter(
+        TickerDefenseLine.ticker == ticker
+    ).scalar()
+    defense_line_objs = []
+    if latest_dl_date:
+        defense_line_objs = db.query(TickerDefenseLine).filter(
+            TickerDefenseLine.ticker == ticker,
+            TickerDefenseLine.date == latest_dl_date,
+        ).order_by(TickerDefenseLine.period.asc()).all()
+
+    # 18) Latest recommendations (most recent upload)
+    recommendation_obj = db.query(TickerRecommendation).filter(
+        TickerRecommendation.ticker == ticker
+    ).order_by(TickerRecommendation.date.desc()).first()
+
+    # 19) Latest institutional holders (most recent upload)
+    latest_ih_date = db.query(func.max(TickerInstitutionalHolder.date)).filter(
+        TickerInstitutionalHolder.ticker == ticker
+    ).scalar()
+    institutional_holder_objs = []
+    if latest_ih_date:
+        institutional_holder_objs = db.query(TickerInstitutionalHolder).filter(
+            TickerInstitutionalHolder.ticker == ticker,
+            TickerInstitutionalHolder.date == latest_ih_date,
+        ).order_by(TickerInstitutionalHolder.pct_held.desc()).limit(20).all()
+
     # ========================================
     # Build lookup dictionaries by date
     # ========================================
@@ -261,6 +339,7 @@ def get_complete_chart_data(
 
             # Indicators
             rsi=indicator_obj.rsi if indicator_obj else None,
+            mfi=indicator_obj.mfi if indicator_obj else None,
             macd=indicator_obj.macd if indicator_obj else None,
             macd_signal=indicator_obj.macd_signal if indicator_obj else None,
             macd_hist=indicator_obj.macd_hist if indicator_obj else None,
@@ -341,4 +420,99 @@ def get_complete_chart_data(
         # Analyst data (latest snapshot)
         analyst_consensus=analyst_consensus,
         analyst_ratings=analyst_ratings_list,
+
+        # Fundamentals (latest snapshot)
+        profile=CompanyProfileResponse(
+            long_name=profile_obj.long_name,
+            industry=profile_obj.industry,
+            website=profile_obj.website,
+            country=profile_obj.country,
+            employees=profile_obj.employees,
+            summary=profile_obj.summary,
+        ) if profile_obj else None,
+        key_metrics=KeyMetricsResponse(
+            market_cap=metrics_obj.market_cap,
+            pe=metrics_obj.pe,
+            forward_pe=metrics_obj.forward_pe,
+            peg=metrics_obj.peg,
+            pb=metrics_obj.pb,
+            ps=metrics_obj.ps,
+            ev_revenue=metrics_obj.ev_revenue,
+            ev_ebitda=metrics_obj.ev_ebitda,
+            profit_margin=metrics_obj.profit_margin,
+            operating_margin=metrics_obj.operating_margin,
+            gross_margin=metrics_obj.gross_margin,
+            roe=metrics_obj.roe,
+            roa=metrics_obj.roa,
+            debt_to_equity=metrics_obj.debt_to_equity,
+            current_ratio=metrics_obj.current_ratio,
+            beta=metrics_obj.beta,
+            dividend_yield=metrics_obj.dividend_yield,
+            payout_ratio=metrics_obj.payout_ratio,
+            earnings_growth=metrics_obj.earnings_growth,
+            revenue_growth=metrics_obj.revenue_growth,
+        ) if metrics_obj else None,
+        financials=FinancialsResponse(
+            latest_quarter=financials_obj.latest_quarter,
+            income=financials_obj.income,
+            balance_sheet=financials_obj.balance_sheet,
+            cash_flow=financials_obj.cash_flow,
+        ) if financials_obj else None,
+        dividends=[
+            DividendEntry(ex_date=str(d.ex_date), amount=d.amount)
+            for d in dividend_objs
+        ] or None,
+        calendar=CalendarResponse(
+            next_earnings_date=str(calendar_obj.next_earnings_date) if calendar_obj.next_earnings_date else None,
+            next_earnings_date_end=str(calendar_obj.next_earnings_date_end) if calendar_obj.next_earnings_date_end else None,
+            earnings_confirmed=calendar_obj.earnings_confirmed,
+            d_day=calendar_obj.d_day,
+            urgency=_compute_urgency(calendar_obj.d_day),
+            earnings_days_remaining=(calendar_obj.next_earnings_date - date.today()).days if calendar_obj.next_earnings_date else None,
+            ex_dividend_date=str(calendar_obj.ex_dividend_date) if calendar_obj.ex_dividend_date else None,
+            dividend_date=str(calendar_obj.dividend_date) if calendar_obj.dividend_date else None,
+            earnings_estimate={
+                "high": calendar_obj.earnings_high,
+                "low": calendar_obj.earnings_low,
+                "avg": calendar_obj.earnings_avg,
+            } if calendar_obj.earnings_avg else None,
+            revenue_estimate={
+                "high": calendar_obj.revenue_high,
+                "low": calendar_obj.revenue_low,
+                "avg": calendar_obj.revenue_avg,
+            } if calendar_obj.revenue_avg else None,
+        ) if calendar_obj else None,
+        earnings_history=[
+            EarningsHistoryItem(
+                date=str(e.earnings_date),
+                eps_estimate=e.eps_estimate,
+                reported_eps=e.reported_eps,
+                surprise_pct=e.surprise_pct,
+            ) for e in reversed(earnings_objs)
+        ] or None,
+
+        # Phase 2: New data sources
+        defense_lines=[
+            DefenseLineResponse(
+                period=dl.period,
+                price=dl.price,
+                label=dl.label,
+                distance_pct=dl.distance_pct,
+            ) for dl in defense_line_objs
+        ] or None,
+        recommendations=RecommendationsResponse(
+            strong_buy=recommendation_obj.strong_buy,
+            buy=recommendation_obj.buy,
+            hold=recommendation_obj.hold,
+            sell=recommendation_obj.sell,
+            strong_sell=recommendation_obj.strong_sell,
+            consensus_score=recommendation_obj.consensus_score,
+        ) if recommendation_obj else None,
+        institutional_holders=[
+            InstitutionalHolderResponse(
+                holder=ih.holder,
+                pct_held=ih.pct_held,
+                pct_change=ih.pct_change,
+            ) for ih in institutional_holder_objs
+        ] or None,
     )

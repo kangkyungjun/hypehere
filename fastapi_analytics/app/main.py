@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from app.routers import scores, tickers, prices, internal_ingest, dashboard, charts, market
+from app.routers import scores, tickers, prices, internal_ingest, dashboard, charts, market, macro, earnings
 from app.config import settings
 from app.schemas import HealthCheck
 
@@ -57,6 +57,20 @@ app.include_router(
     market.router,
     prefix="/api/v1/market",
     tags=["Market Overview"]
+)
+
+# Macro indicators router (Dashboard)
+app.include_router(
+    macro.router,
+    prefix="/api/v1/macro",
+    tags=["Macro Indicators"]
+)
+
+# Earnings calendar router (Flutter app)
+app.include_router(
+    earnings.router,
+    prefix="/api/v1/earnings",
+    tags=["Earnings Calendar"]
 )
 
 # Internal router (Mac mini ingest)

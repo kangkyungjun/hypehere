@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Date, Float, BigInteger, Integer, TIMESTAMP, text
+from sqlalchemy import Column, String, Date, Float, BigInteger, Integer, Boolean, TIMESTAMP, text
 from sqlalchemy.dialects.postgresql import JSONB
 from app.database import Base
 
@@ -76,7 +76,7 @@ class TickerPrice(Base):
 
 class TickerIndicator(Base):
     """
-    Technical indicators (RSI, MACD, Bollinger Bands).
+    Technical indicators (RSI, MFI, MACD, Bollinger Bands).
 
     **Indicator Layer** - Read-only for FastAPI
     Mac mini uploads calculated indicators here.
@@ -85,6 +85,7 @@ class TickerIndicator(Base):
     - ticker: Stock symbol
     - date: Indicator calculation date
     - rsi: Relative Strength Index (0-100)
+    - mfi: Money Flow Index (0-100, volume-weighted RSI)
     - macd: MACD line value
     - macd_signal: MACD signal line
     - macd_hist: MACD histogram
@@ -104,6 +105,7 @@ class TickerIndicator(Base):
     bb_upper = Column(Float)
     bb_lower = Column(Float)
     bb_middle = Column(Float)
+    mfi = Column(Float)  # Money Flow Index (0-100)
     created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
 
 
@@ -191,6 +193,7 @@ class TickerInstitution(Base):
     date = Column(Date, primary_key=True, index=True)
     inst_ownership = Column(Float)
     foreign_ownership = Column(Float)
+    insider_ownership = Column(Float)  # Insider ownership %
     inst_chg_1d = Column(Float)
     inst_chg_5d = Column(Float)
     inst_chg_15d = Column(Float)
@@ -258,6 +261,94 @@ class TickerAIAnalysis(Base):
     created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
 
 
+class CompanyProfile(Base):
+    """
+    Company profile data (one row per ticker, non-time-series).
+
+    **Profile Layer** - Read-only for FastAPI
+    Mac mini uploads company fundamentals from yfinance here.
+    """
+    __tablename__ = "company_profile"
+    __table_args__ = {'schema': 'analytics'}
+
+    ticker = Column(String(10), primary_key=True, index=True)
+    long_name = Column(String(255))
+    industry = Column(String(100))
+    website = Column(String(255))
+    country = Column(String(50))
+    employees = Column(Integer)
+    summary = Column(String)
+    updated_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class TickerKeyMetrics(Base):
+    """
+    Key valuation and financial metrics (daily time-series).
+
+    **Metrics Layer** - Read-only for FastAPI
+    Mac mini uploads daily fundamental metrics from yfinance here.
+    """
+    __tablename__ = "ticker_key_metrics"
+    __table_args__ = {'schema': 'analytics'}
+
+    date = Column(Date, primary_key=True, index=True)
+    ticker = Column(String(10), primary_key=True, index=True)
+    market_cap = Column(Float)
+    pe = Column(Float)
+    forward_pe = Column(Float)
+    peg = Column(Float)
+    pb = Column(Float)
+    ps = Column(Float)
+    ev_revenue = Column(Float)
+    ev_ebitda = Column(Float)
+    profit_margin = Column(Float)
+    operating_margin = Column(Float)
+    gross_margin = Column(Float)
+    roe = Column(Float)
+    roa = Column(Float)
+    debt_to_equity = Column(Float)
+    current_ratio = Column(Float)
+    beta = Column(Float)
+    dividend_yield = Column(Float)
+    payout_ratio = Column(Float)
+    earnings_growth = Column(Float)
+    revenue_growth = Column(Float)
+    created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class TickerFinancials(Base):
+    """
+    Financial statements stored as JSONB (one row per ticker).
+
+    **Financials Layer** - Read-only for FastAPI
+    Mac mini uploads income/balance_sheet/cash_flow from yfinance here.
+    """
+    __tablename__ = "ticker_financials"
+    __table_args__ = {'schema': 'analytics'}
+
+    ticker = Column(String(10), primary_key=True, index=True)
+    latest_quarter = Column(String(10))
+    income = Column(JSONB)
+    balance_sheet = Column(JSONB)
+    cash_flow = Column(JSONB)
+    updated_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class TickerDividend(Base):
+    """
+    Dividend history (ticker + ex_date composite key).
+
+    **Dividend Layer** - Read-only for FastAPI
+    Mac mini uploads dividend history from yfinance here.
+    """
+    __tablename__ = "ticker_dividends"
+    __table_args__ = {'schema': 'analytics'}
+
+    ticker = Column(String(10), primary_key=True, index=True)
+    ex_date = Column(Date, primary_key=True)
+    amount = Column(Float)
+
+
 class TickerAnalystRating(Base):
     """
     Individual analyst ratings from financial institutions (finvizfinance).
@@ -287,3 +378,128 @@ class TickerAnalystRating(Base):
     target_from = Column(Float)
     target_to = Column(Float)
     created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class MacroIndicator(Base):
+    """Macro economic indicators from FRED + signals (yield_curve, m2_liquidity)."""
+    __tablename__ = "macro_indicators"
+    __table_args__ = {'schema': 'analytics'}
+
+    date = Column(Date, primary_key=True)
+    indicator_code = Column(String(30), primary_key=True)
+    indicator_name = Column(String(100))
+    observation_date = Column(Date)
+    value = Column(Float, nullable=False)
+    previous_value = Column(Float)
+    change_pct = Column(Float)
+    source = Column(String(30))
+    risk_level = Column(String(20))       # CRITICAL/WARNING/NORMAL (시장레이더)
+    signal_message = Column(String)       # 한국어 설명 메시지
+    liquidity_status = Column(String(20)) # EXPANDING/CONTRACTING/NEUTRAL (머니프린팅)
+    updated_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class MacroChartData(Base):
+    """Macro chart time-series data (t10y2y, m2_growth etc.)."""
+    __tablename__ = "macro_chart_data"
+    __table_args__ = {'schema': 'analytics'}
+
+    series_id = Column(String(30), primary_key=True)  # t10y2y, m2_growth
+    date = Column(Date, primary_key=True)
+    value = Column(Float, nullable=False)
+    created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class TickerCalendar(Base):
+    """Ticker calendar events (earnings date, dividends)."""
+    __tablename__ = "ticker_calendar"
+    __table_args__ = {'schema': 'analytics'}
+
+    ticker = Column(String(10), primary_key=True, index=True)
+    date = Column(Date, primary_key=True, index=True)
+    next_earnings_date = Column(Date)
+    next_earnings_date_end = Column(Date)
+    earnings_confirmed = Column(Boolean, default=False)
+    d_day = Column(Integer)
+    ex_dividend_date = Column(Date)
+    dividend_date = Column(Date)
+    earnings_high = Column(Float)
+    earnings_low = Column(Float)
+    earnings_avg = Column(Float)
+    revenue_high = Column(Float)
+    revenue_low = Column(Float)
+    revenue_avg = Column(Float)
+    updated_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class TickerEarningsHistory(Base):
+    """Ticker earnings history (EPS estimate vs reported)."""
+    __tablename__ = "ticker_earnings_history"
+    __table_args__ = {'schema': 'analytics'}
+
+    ticker = Column(String(10), primary_key=True, index=True)
+    earnings_date = Column(Date, primary_key=True)
+    eps_estimate = Column(Float)
+    reported_eps = Column(Float)
+    surprise_pct = Column(Float)
+    updated_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class TickerDefenseLine(Base):
+    """이동평균 방어선 (period별 MA 가격)."""
+    __tablename__ = "ticker_defense_lines"
+    __table_args__ = {'schema': 'analytics'}
+
+    ticker = Column(String(10), primary_key=True, index=True)
+    date = Column(Date, primary_key=True, index=True)
+    period = Column(Integer, primary_key=True)  # 20, 50, 200 etc.
+    price = Column(Float, nullable=False)
+    label = Column(String(20))
+    distance_pct = Column(Float)
+    created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class TickerRecommendation(Base):
+    """애널리스트 의견분포 (strong_buy ~ strong_sell)."""
+    __tablename__ = "ticker_recommendations"
+    __table_args__ = {'schema': 'analytics'}
+
+    ticker = Column(String(10), primary_key=True, index=True)
+    date = Column(Date, primary_key=True, index=True)
+    strong_buy = Column(Integer, default=0)
+    buy = Column(Integer, default=0)
+    hold = Column(Integer, default=0)
+    sell = Column(Integer, default=0)
+    strong_sell = Column(Integer, default=0)
+    consensus_score = Column(Float)
+    created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class TickerInstitutionalHolder(Base):
+    """개별 기관투자자 보유 현황."""
+    __tablename__ = "ticker_institutional_holders"
+    __table_args__ = {'schema': 'analytics'}
+
+    ticker = Column(String(10), primary_key=True, index=True)
+    date = Column(Date, primary_key=True, index=True)
+    holder = Column(String(100), primary_key=True)
+    pct_held = Column(Float)
+    pct_change = Column(Float)
+    created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class EarningsWeekEvent(Base):
+    """이번 주 실적 발표 일정 (Flutter 캘린더용)."""
+    __tablename__ = "earnings_week_events"
+    __table_args__ = {'schema': 'analytics'}
+
+    ticker = Column(String(10), primary_key=True, index=True)
+    earnings_date = Column(Date, primary_key=True)
+    earnings_time = Column(String(10))  # BMO/AMC/TAS/Unknown
+    eps_estimate = Column(Float)
+    revenue_estimate = Column(Float)
+    market_cap = Column(Float)
+    sector = Column(String(50))
+    name_en = Column(String(100))
+    name_ko = Column(String(100))
+    updated_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))

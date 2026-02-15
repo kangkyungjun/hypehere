@@ -8,9 +8,16 @@ from app.database import get_db
 from app.models import (
     TickerScore, TickerPrice, TickerIndicator, TickerTarget,
     TickerTrendline, TickerInstitution, TickerShort, TickerAIAnalysis,
-    TickerAnalystRating, Ticker
+    TickerAnalystRating, Ticker,
+    CompanyProfile, TickerKeyMetrics, TickerFinancials, TickerDividend,
+    MacroIndicator, MacroChartData, TickerCalendar, TickerEarningsHistory,
+    TickerDefenseLine, TickerRecommendation, TickerInstitutionalHolder,
+    EarningsWeekEvent
 )
-from app.schemas import IngestPayload, ExtendedItemIngest
+from app.schemas import (
+    IngestPayload, ExtendedItemIngest, MacroIngestPayload,
+    EarningsWeekIngestPayload
+)
 from app.config import settings
 from app.utils.trading_calendar import is_trading_day
 
@@ -46,6 +53,136 @@ def verify_api_key(x_api_key: str = Header(None)):
             status_code=403,
             detail="Invalid API key"
         )
+
+
+# ============================
+# 거시경제 지표 Ingest 엔드포인트
+# ============================
+@router.post("/macro", dependencies=[Depends(verify_api_key)])
+def ingest_macro_indicators(payload: MacroIngestPayload, db: Session = Depends(get_db)):
+    """거시경제 지표 + 시장레이더/머니프린팅 신호 + 차트 시계열 업로드 (Mac mini → AWS)"""
+    ingest_date = datetime.strptime(payload.date, "%Y-%m-%d").date()
+    upserted = 0
+    chart_points = 0
+
+    # ==========================================
+    # 1) 기존 indicators (FRED 지표) 처리
+    # ==========================================
+    if payload.indicators:
+        for code, item in payload.indicators.items():
+            prev = db.query(MacroIndicator).filter(
+                MacroIndicator.indicator_code == code,
+                MacroIndicator.date < ingest_date,
+            ).order_by(MacroIndicator.date.desc()).first()
+
+            previous_value = prev.value if prev else None
+            change_pct = (
+                round((item.value - previous_value) / previous_value * 100, 4)
+                if previous_value else None
+            )
+
+            obs_date = (
+                datetime.strptime(item.observation_date, "%Y-%m-%d").date()
+                if item.observation_date else None
+            )
+
+            obj = db.query(MacroIndicator).filter(
+                MacroIndicator.date == ingest_date,
+                MacroIndicator.indicator_code == code,
+            ).first()
+
+            if obj:
+                obj.value = item.value
+                obj.indicator_name = item.name
+                obj.observation_date = obs_date
+                obj.previous_value = previous_value
+                obj.change_pct = change_pct
+            else:
+                db.add(MacroIndicator(
+                    date=ingest_date, indicator_code=code,
+                    indicator_name=item.name, observation_date=obs_date,
+                    value=item.value, previous_value=previous_value,
+                    change_pct=change_pct, source='FRED',
+                ))
+            upserted += 1
+
+    # ==========================================
+    # 2) signals (시장레이더/머니프린팅) 처리
+    # ==========================================
+    if payload.signals:
+        for code, sig in payload.signals.items():
+            prev = db.query(MacroIndicator).filter(
+                MacroIndicator.indicator_code == code,
+                MacroIndicator.date < ingest_date,
+            ).order_by(MacroIndicator.date.desc()).first()
+
+            previous_value = prev.value if prev else None
+            change_pct = (
+                round((sig.value - previous_value) / previous_value * 100, 4)
+                if previous_value and previous_value != 0 else None
+            )
+
+            obj = db.query(MacroIndicator).filter(
+                MacroIndicator.date == ingest_date,
+                MacroIndicator.indicator_code == code,
+            ).first()
+
+            if obj:
+                obj.value = sig.value
+                obj.risk_level = sig.risk_level
+                obj.signal_message = sig.message
+                obj.liquidity_status = sig.liquidity_status
+                obj.previous_value = previous_value
+                obj.change_pct = change_pct
+            else:
+                db.add(MacroIndicator(
+                    date=ingest_date, indicator_code=code,
+                    value=sig.value,
+                    risk_level=sig.risk_level,
+                    signal_message=sig.message,
+                    liquidity_status=sig.liquidity_status,
+                    previous_value=previous_value,
+                    change_pct=change_pct,
+                    source='SIGNAL',
+                ))
+            upserted += 1
+
+    # ==========================================
+    # 3) charts (시계열 차트 데이터) 처리
+    # ==========================================
+    if payload.charts:
+        for series_id, points in payload.charts.items():
+            for pt in points:
+                pt_date = datetime.strptime(pt.date, "%Y-%m-%d").date()
+                obj = db.query(MacroChartData).filter(
+                    MacroChartData.series_id == series_id,
+                    MacroChartData.date == pt_date,
+                ).first()
+
+                if obj:
+                    obj.value = pt.value
+                else:
+                    db.add(MacroChartData(
+                        series_id=series_id,
+                        date=pt_date,
+                        value=pt.value,
+                    ))
+                chart_points += 1
+
+    db.commit()
+
+    # 3년 cleanup
+    db.execute(text(
+        "DELETE FROM analytics.macro_indicators "
+        "WHERE date < CURRENT_DATE - INTERVAL '3 years'"
+    ))
+    db.execute(text(
+        "DELETE FROM analytics.macro_chart_data "
+        "WHERE date < CURRENT_DATE - INTERVAL '3 years'"
+    ))
+    db.commit()
+
+    return {"status": "ok", "upserted": upserted, "chart_points": chart_points}
 
 
 # ============================
@@ -268,7 +405,8 @@ def ingest_scores(payload: IngestPayload, db: Session = Depends(get_db)):
             bb_upper = indicators.bb_upper
             bb_middle = indicators.bb_middle
             bb_lower = indicators.bb_lower
-            bb_width = None  # Not provided in extended format
+            bb_width = indicators.bb_width
+            mfi = indicators.mfi
             has_indicators = True  # Extended format always includes indicators
         else:
             # Simple flat structure (backward compatibility)
@@ -280,8 +418,9 @@ def ingest_scores(payload: IngestPayload, db: Session = Depends(get_db)):
             bb_upper = item.bb_upper
             bb_lower = item.bb_lower
             bb_middle = item.bb_middle
+            mfi = item.mfi
             # Only save if at least one indicator is present
-            has_indicators = any([rsi, macd, bb_width])
+            has_indicators = any([rsi, macd, bb_width, mfi])
 
         if has_indicators:
             indicator_obj = (
@@ -303,6 +442,7 @@ def ingest_scores(payload: IngestPayload, db: Session = Depends(get_db)):
                 indicator_obj.bb_upper = bb_upper
                 indicator_obj.bb_lower = bb_lower
                 indicator_obj.bb_middle = bb_middle
+                indicator_obj.mfi = mfi
             else:
                 # Insert new indicator record
                 indicator_obj = TickerIndicator(
@@ -316,6 +456,7 @@ def ingest_scores(payload: IngestPayload, db: Session = Depends(get_db)):
                     bb_upper=bb_upper,
                     bb_lower=bb_lower,
                     bb_middle=bb_middle,
+                    mfi=mfi,
                 )
                 db.add(indicator_obj)
 
@@ -504,6 +645,114 @@ def ingest_scores(payload: IngestPayload, db: Session = Depends(get_db)):
                         )
                         db.add(rating_obj)
 
+            # ==========================================
+            # 6.6) UPSERT to ticker_defense_lines (이평선 방어선)
+            # ==========================================
+            if item.strategy.defense_lines:
+                # Delete existing defense lines for this ticker+date, then re-insert
+                db.query(TickerDefenseLine).filter(
+                    TickerDefenseLine.ticker == ticker,
+                    TickerDefenseLine.date == score_date,
+                ).delete()
+
+                for dl in item.strategy.defense_lines:
+                    db.add(TickerDefenseLine(
+                        ticker=ticker,
+                        date=score_date,
+                        period=dl.period,
+                        price=dl.price,
+                        label=dl.label,
+                        distance_pct=dl.distance_pct,
+                    ))
+
+            # ==========================================
+            # 6.7) UPSERT to ticker_recommendations (의견분포)
+            # ==========================================
+            if item.strategy.recommendations:
+                recs = item.strategy.recommendations
+                rec_obj = db.query(TickerRecommendation).filter(
+                    TickerRecommendation.ticker == ticker,
+                    TickerRecommendation.date == score_date,
+                ).first()
+
+                if rec_obj:
+                    rec_obj.strong_buy = recs.strong_buy
+                    rec_obj.buy = recs.buy
+                    rec_obj.hold = recs.hold
+                    rec_obj.sell = recs.sell
+                    rec_obj.strong_sell = recs.strong_sell
+                    rec_obj.consensus_score = recs.consensus_score
+                else:
+                    db.add(TickerRecommendation(
+                        ticker=ticker,
+                        date=score_date,
+                        strong_buy=recs.strong_buy,
+                        buy=recs.buy,
+                        hold=recs.hold,
+                        sell=recs.sell,
+                        strong_sell=recs.strong_sell,
+                        consensus_score=recs.consensus_score,
+                    ))
+
+        # ==========================================
+        # 6.8) UPSERT ownership data (Extended format)
+        # ==========================================
+        if is_extended and hasattr(item, 'ownership') and item.ownership:
+            own = item.ownership
+            inst_obj = db.query(TickerInstitution).filter(
+                TickerInstitution.ticker == ticker,
+                TickerInstitution.date == score_date,
+            ).first()
+
+            if inst_obj:
+                if own.institution is not None:
+                    inst_obj.inst_ownership = own.institution
+                if own.insider is not None:
+                    inst_obj.insider_ownership = own.insider
+            else:
+                inst_obj = TickerInstitution(
+                    ticker=ticker,
+                    date=score_date,
+                    inst_ownership=own.institution,
+                    insider_ownership=own.insider,
+                )
+                db.add(inst_obj)
+
+            # Also update short_float in ticker_shorts if provided
+            if own.short_float is not None:
+                short_obj = db.query(TickerShort).filter(
+                    TickerShort.ticker == ticker,
+                    TickerShort.date == score_date,
+                ).first()
+
+                if short_obj:
+                    short_obj.short_percent_float = own.short_float
+                else:
+                    db.add(TickerShort(
+                        ticker=ticker,
+                        date=score_date,
+                        short_percent_float=own.short_float,
+                    ))
+
+        # ==========================================
+        # 6.9) UPSERT institutional_holders (Extended format)
+        # ==========================================
+        if is_extended and hasattr(item, 'institutional_holders') and item.institutional_holders:
+            # Delete existing holders for this ticker+date, then re-insert
+            db.query(TickerInstitutionalHolder).filter(
+                TickerInstitutionalHolder.ticker == ticker,
+                TickerInstitutionalHolder.date == score_date,
+            ).delete()
+
+            for ih in item.institutional_holders:
+                db.add(TickerInstitutionalHolder(
+                    ticker=ticker,
+                    date=score_date,
+                    holder=ih.holder,
+                    pct_held=ih.pct_held,
+                    pct_change=ih.pct_change,
+                ))
+
         # Handle Simple flat format (backward compatibility)
         elif not is_extended:
             # Simple flat format may have optional target fields
@@ -617,6 +866,175 @@ def ingest_scores(payload: IngestPayload, db: Session = Depends(get_db)):
                     )
                     db.add(short_obj)
 
+        # ==========================================
+        # 9) UPSERT fundamentals (Extended format only)
+        # ==========================================
+        if is_extended and hasattr(item, 'fundamentals') and item.fundamentals:
+            fund = item.fundamentals
+
+            # 9a) Company Profile (ticker PK, non-time-series)
+            if fund.profile:
+                profile_obj = db.query(CompanyProfile).filter(
+                    CompanyProfile.ticker == ticker
+                ).first()
+                if profile_obj:
+                    for field in ['long_name', 'industry', 'website', 'country', 'employees', 'summary']:
+                        val = getattr(fund.profile, field, None)
+                        if val is not None:
+                            setattr(profile_obj, field, val)
+                else:
+                    profile_obj = CompanyProfile(
+                        ticker=ticker,
+                        **fund.profile.model_dump(exclude_none=True)
+                    )
+                    db.add(profile_obj)
+
+            # 9b) Key Metrics (date + ticker PK, time-series)
+            if fund.metrics:
+                metrics_obj = db.query(TickerKeyMetrics).filter(
+                    TickerKeyMetrics.ticker == ticker,
+                    TickerKeyMetrics.date == score_date,
+                ).first()
+                metrics_data = fund.metrics.model_dump(exclude_none=True)
+                if metrics_obj:
+                    for k, v in metrics_data.items():
+                        setattr(metrics_obj, k, v)
+                else:
+                    metrics_obj = TickerKeyMetrics(
+                        ticker=ticker,
+                        date=score_date,
+                        **metrics_data
+                    )
+                    db.add(metrics_obj)
+
+            # 9c) Financials (ticker PK, JSONB)
+            if fund.financials:
+                fin_obj = db.query(TickerFinancials).filter(
+                    TickerFinancials.ticker == ticker
+                ).first()
+                if fin_obj:
+                    fin_obj.latest_quarter = fund.financials.get('latest_quarter')
+                    fin_obj.income = fund.financials.get('income')
+                    fin_obj.balance_sheet = fund.financials.get('balance_sheet')
+                    fin_obj.cash_flow = fund.financials.get('cash_flow')
+                else:
+                    fin_obj = TickerFinancials(
+                        ticker=ticker,
+                        latest_quarter=fund.financials.get('latest_quarter'),
+                        income=fund.financials.get('income'),
+                        balance_sheet=fund.financials.get('balance_sheet'),
+                        cash_flow=fund.financials.get('cash_flow'),
+                    )
+                    db.add(fin_obj)
+
+            # 9d) Dividends (ticker + ex_date PK)
+            if fund.dividends and fund.dividends.get('recent'):
+                for div in fund.dividends['recent']:
+                    div_date = div.get('date')
+                    div_amount = div.get('amount')
+                    if div_date:
+                        ex_date_val = (
+                            datetime.strptime(div_date, "%Y-%m-%d").date()
+                            if isinstance(div_date, str)
+                            else div_date
+                        )
+                        existing = db.query(TickerDividend).filter(
+                            TickerDividend.ticker == ticker,
+                            TickerDividend.ex_date == ex_date_val,
+                        ).first()
+                        if existing:
+                            existing.amount = div_amount
+                        else:
+                            db.add(TickerDividend(
+                                ticker=ticker,
+                                ex_date=ex_date_val,
+                                amount=div_amount,
+                            ))
+
+        # ==========================================
+        # 10) UPSERT ticker_calendar (Extended format only)
+        # ==========================================
+        if is_extended and hasattr(item, 'calendar') and item.calendar:
+            cal = item.calendar
+
+            next_earn = (
+                datetime.strptime(cal.next_earnings_date, "%Y-%m-%d").date()
+                if cal.next_earnings_date else None
+            )
+            next_earn_end = (
+                datetime.strptime(cal.next_earnings_date_end, "%Y-%m-%d").date()
+                if cal.next_earnings_date_end else None
+            )
+            ex_div = (
+                datetime.strptime(cal.ex_dividend_date, "%Y-%m-%d").date()
+                if cal.ex_dividend_date else None
+            )
+            div_date = (
+                datetime.strptime(cal.dividend_date, "%Y-%m-%d").date()
+                if cal.dividend_date else None
+            )
+
+            earn_est = cal.earnings_estimate or {}
+            rev_est = cal.revenue_estimate or {}
+
+            cal_obj = db.query(TickerCalendar).filter(
+                TickerCalendar.ticker == ticker,
+                TickerCalendar.date == score_date,
+            ).first()
+
+            if cal_obj:
+                cal_obj.next_earnings_date = next_earn
+                cal_obj.next_earnings_date_end = next_earn_end
+                cal_obj.earnings_confirmed = cal.earnings_confirmed
+                cal_obj.d_day = cal.d_day
+                cal_obj.ex_dividend_date = ex_div
+                cal_obj.dividend_date = div_date
+                cal_obj.earnings_high = earn_est.get('high')
+                cal_obj.earnings_low = earn_est.get('low')
+                cal_obj.earnings_avg = earn_est.get('avg')
+                cal_obj.revenue_high = rev_est.get('high')
+                cal_obj.revenue_low = rev_est.get('low')
+                cal_obj.revenue_avg = rev_est.get('avg')
+            else:
+                db.add(TickerCalendar(
+                    ticker=ticker, date=score_date,
+                    next_earnings_date=next_earn,
+                    next_earnings_date_end=next_earn_end,
+                    earnings_confirmed=cal.earnings_confirmed,
+                    d_day=cal.d_day,
+                    ex_dividend_date=ex_div,
+                    dividend_date=div_date,
+                    earnings_high=earn_est.get('high'),
+                    earnings_low=earn_est.get('low'),
+                    earnings_avg=earn_est.get('avg'),
+                    revenue_high=rev_est.get('high'),
+                    revenue_low=rev_est.get('low'),
+                    revenue_avg=rev_est.get('avg'),
+                ))
+
+        # ==========================================
+        # 11) UPSERT ticker_earnings_history (Extended format only)
+        # ==========================================
+        if is_extended and hasattr(item, 'earnings_history') and item.earnings_history:
+            for eh in item.earnings_history:
+                earn_date = datetime.strptime(eh.date, "%Y-%m-%d").date()
+                eh_obj = db.query(TickerEarningsHistory).filter(
+                    TickerEarningsHistory.ticker == ticker,
+                    TickerEarningsHistory.earnings_date == earn_date,
+                ).first()
+
+                if eh_obj:
+                    eh_obj.eps_estimate = eh.eps_estimate
+                    eh_obj.reported_eps = eh.reported_eps
+                    eh_obj.surprise_pct = eh.surprise_pct
+                else:
+                    db.add(TickerEarningsHistory(
+                        ticker=ticker, earnings_date=earn_date,
+                        eps_estimate=eh.eps_estimate,
+                        reported_eps=eh.reported_eps,
+                        surprise_pct=eh.surprise_pct,
+                    ))
+
         upserted += 1
 
     db.commit()
@@ -633,10 +1051,69 @@ def ingest_scores(payload: IngestPayload, db: Session = Depends(get_db)):
     db.execute(text("DELETE FROM analytics.ticker_institutions WHERE date < CURRENT_DATE - INTERVAL '3 years'"))
     db.execute(text("DELETE FROM analytics.ticker_shorts WHERE date < CURRENT_DATE - INTERVAL '3 years'"))
     db.execute(text("DELETE FROM analytics.ticker_analyst_ratings WHERE date < CURRENT_DATE - INTERVAL '3 years'"))
+    db.execute(text("DELETE FROM analytics.ticker_key_metrics WHERE date < CURRENT_DATE - INTERVAL '3 years'"))
+    db.execute(text("DELETE FROM analytics.ticker_dividends WHERE ex_date < CURRENT_DATE - INTERVAL '3 years'"))
+    db.execute(text("DELETE FROM analytics.ticker_calendar WHERE date < CURRENT_DATE - INTERVAL '3 years'"))
+    db.execute(text("DELETE FROM analytics.ticker_earnings_history WHERE earnings_date < CURRENT_DATE - INTERVAL '3 years'"))
+    db.execute(text("DELETE FROM analytics.ticker_defense_lines WHERE date < CURRENT_DATE - INTERVAL '3 years'"))
+    db.execute(text("DELETE FROM analytics.ticker_recommendations WHERE date < CURRENT_DATE - INTERVAL '3 years'"))
+    db.execute(text("DELETE FROM analytics.ticker_institutional_holders WHERE date < CURRENT_DATE - INTERVAL '3 years'"))
     db.commit()
 
     return {
         "status": "ok",
         "received": len(items),
         "upserted": upserted,
+    }
+
+
+# ============================
+# 이번 주 실적 일정 Ingest 엔드포인트
+# ============================
+@router.post("/earnings-week", dependencies=[Depends(verify_api_key)])
+def ingest_earnings_week(payload: EarningsWeekIngestPayload, db: Session = Depends(get_db)):
+    """
+    이번 주 실적 발표 일정 업로드 (Mac mini → AWS).
+
+    주 단위 교체: week_start~week_end 범위 기존 데이터 DELETE → INSERT.
+    """
+    week_start = datetime.strptime(payload.week_start, "%Y-%m-%d").date()
+    week_end = datetime.strptime(payload.week_end, "%Y-%m-%d").date()
+
+    # Delete existing data for this week range
+    db.query(EarningsWeekEvent).filter(
+        EarningsWeekEvent.earnings_date >= week_start,
+        EarningsWeekEvent.earnings_date <= week_end,
+    ).delete()
+
+    inserted = 0
+    for event in payload.events:
+        earn_date = datetime.strptime(event.earnings_date, "%Y-%m-%d").date()
+        db.add(EarningsWeekEvent(
+            ticker=event.ticker,
+            earnings_date=earn_date,
+            earnings_time=event.earnings_time,
+            eps_estimate=event.eps_estimate,
+            revenue_estimate=event.revenue_estimate,
+            market_cap=event.market_cap,
+            sector=event.sector,
+            name_en=event.name_en,
+            name_ko=event.name_ko,
+        ))
+        inserted += 1
+
+    db.commit()
+
+    # Cleanup: remove events older than 30 days
+    db.execute(text(
+        "DELETE FROM analytics.earnings_week_events "
+        "WHERE earnings_date < CURRENT_DATE - INTERVAL '30 days'"
+    ))
+    db.commit()
+
+    return {
+        "status": "ok",
+        "week_start": payload.week_start,
+        "week_end": payload.week_end,
+        "inserted": inserted,
     }
