@@ -129,6 +129,11 @@ class TickerTarget(Base):
     target_price = Column(Float)
     stop_loss = Column(Float)
     risk_reward_ratio = Column(Float)
+    analyst_target_mean = Column(Float)
+    analyst_target_high = Column(Float)
+    analyst_target_low = Column(Float)
+    analyst_count = Column(Integer)
+    recommendation = Column(String(20))
     created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
 
 
@@ -250,4 +255,35 @@ class TickerAIAnalysis(Base):
     bullish_reasons = Column(JSONB)  # Array of strings
     bearish_reasons = Column(JSONB)  # Array of strings
     final_comment = Column(String(500))
+    created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class TickerAnalystRating(Base):
+    """
+    Individual analyst ratings from financial institutions (finvizfinance).
+
+    **Analyst Rating Layer** - Read-only for FastAPI
+    Mac mini uploads institutional analyst ratings here.
+
+    Fields:
+    - ticker: Stock symbol
+    - date: Data upload date (score date)
+    - rating_date: Report publication date
+    - firm: Institution name (e.g., 'Barclays', 'Morgan Stanley')
+    - status: Rating change type (Upgrade/Downgrade/Reiterated/Initiated)
+    - rating: Investment opinion (Overweight/Equal-Weight/Buy/Hold/Sell)
+    - target_from: Previous target price
+    - target_to: New target price
+    """
+    __tablename__ = "ticker_analyst_ratings"
+    __table_args__ = {'schema': 'analytics'}
+
+    ticker = Column(String(10), primary_key=True, index=True)
+    date = Column(Date, primary_key=True, index=True)
+    rating_date = Column(Date, primary_key=True)
+    firm = Column(String(100), primary_key=True)
+    status = Column(String(30))
+    rating = Column(String(50))
+    target_from = Column(Float)
+    target_to = Column(Float)
     created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))

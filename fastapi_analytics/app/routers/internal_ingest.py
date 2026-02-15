@@ -1,14 +1,14 @@
 from fastapi import APIRouter, Header, HTTPException, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import text
-from datetime import date
+from datetime import date, datetime
 import logging
 
 from app.database import get_db
 from app.models import (
     TickerScore, TickerPrice, TickerIndicator, TickerTarget,
     TickerTrendline, TickerInstitution, TickerShort, TickerAIAnalysis,
-    Ticker
+    TickerAnalystRating, Ticker
 )
 from app.schemas import IngestPayload, ExtendedItemIngest
 from app.config import settings
@@ -442,11 +442,19 @@ def ingest_scores(payload: IngestPayload, db: Session = Depends(get_db)):
                 .first()
             )
 
+            # Extract analyst consensus if present
+            consensus = item.strategy.analyst_consensus
+
             if target_obj:
                 # Update existing target record
                 target_obj.target_price = item.strategy.target_price
                 target_obj.stop_loss = item.strategy.stop_loss
                 target_obj.risk_reward_ratio = item.strategy.risk_reward_ratio
+                target_obj.analyst_target_mean = consensus.mean if consensus else None
+                target_obj.analyst_target_high = consensus.high if consensus else None
+                target_obj.analyst_target_low = consensus.low if consensus else None
+                target_obj.analyst_count = consensus.count if consensus else None
+                target_obj.recommendation = consensus.recommendation if consensus else None
             else:
                 # Insert new target record
                 target_obj = TickerTarget(
@@ -455,8 +463,46 @@ def ingest_scores(payload: IngestPayload, db: Session = Depends(get_db)):
                     target_price=item.strategy.target_price,
                     stop_loss=item.strategy.stop_loss,
                     risk_reward_ratio=item.strategy.risk_reward_ratio,
+                    analyst_target_mean=consensus.mean if consensus else None,
+                    analyst_target_high=consensus.high if consensus else None,
+                    analyst_target_low=consensus.low if consensus else None,
+                    analyst_count=consensus.count if consensus else None,
+                    recommendation=consensus.recommendation if consensus else None,
                 )
                 db.add(target_obj)
+
+            # ==========================================
+            # 6.5) UPSERT to ticker_analyst_ratings (institutional ratings)
+            # ==========================================
+            if item.strategy.analyst_ratings:
+                # Delete existing ratings for this ticker+date, then re-insert
+                db.query(TickerAnalystRating).filter(
+                    TickerAnalystRating.ticker == ticker,
+                    TickerAnalystRating.date == score_date,
+                ).delete()
+
+                for r in item.strategy.analyst_ratings:
+                    # Parse rating_date string to date object
+                    rating_date_val = None
+                    if r.date:
+                        try:
+                            rating_date_val = datetime.strptime(r.date, "%Y-%m-%d").date()
+                        except ValueError:
+                            logger.warning(f"Invalid rating_date format: {r.date}")
+                            continue
+
+                    if rating_date_val and r.firm:
+                        rating_obj = TickerAnalystRating(
+                            ticker=ticker,
+                            date=score_date,
+                            rating_date=rating_date_val,
+                            status=r.status,
+                            firm=r.firm,
+                            rating=r.rating,
+                            target_from=r.target_from,
+                            target_to=r.target_to,
+                        )
+                        db.add(rating_obj)
 
         # Handle Simple flat format (backward compatibility)
         elif not is_extended:
@@ -586,6 +632,7 @@ def ingest_scores(payload: IngestPayload, db: Session = Depends(get_db)):
     db.execute(text("DELETE FROM analytics.ticker_trendlines WHERE date < CURRENT_DATE - INTERVAL '3 years'"))
     db.execute(text("DELETE FROM analytics.ticker_institutions WHERE date < CURRENT_DATE - INTERVAL '3 years'"))
     db.execute(text("DELETE FROM analytics.ticker_shorts WHERE date < CURRENT_DATE - INTERVAL '3 years'"))
+    db.execute(text("DELETE FROM analytics.ticker_analyst_ratings WHERE date < CURRENT_DATE - INTERVAL '3 years'"))
     db.commit()
 
     return {

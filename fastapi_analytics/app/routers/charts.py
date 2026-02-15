@@ -5,9 +5,13 @@ from datetime import date, timedelta
 from app.database import get_db
 from app.models import (
     TickerPrice, TickerScore, TickerIndicator, TickerTarget,
-    TickerTrendline, TickerInstitution, TickerShort, TickerAIAnalysis
+    TickerTrendline, TickerInstitution, TickerShort, TickerAIAnalysis,
+    TickerAnalystRating
 )
-from app.schemas import CompleteChartResponse, ChartDataPoint, TrendlineValue
+from app.schemas import (
+    CompleteChartResponse, ChartDataPoint, TrendlineValue,
+    AnalystConsensus, AnalystRatingItem
+)
 
 router = APIRouter()
 
@@ -183,6 +187,20 @@ def get_complete_chart_data(
         TickerAIAnalysis.date <= to_date
     ).all()
 
+    # 9) Latest analyst consensus (from ticker_targets where analyst data exists)
+    latest_analyst_target = db.query(TickerTarget).filter(
+        TickerTarget.ticker == ticker,
+        TickerTarget.analyst_target_mean.isnot(None),
+    ).order_by(TickerTarget.date.desc()).first()
+
+    # 10) Analyst ratings (from ticker_analyst_ratings, matching latest analyst date)
+    analyst_ratings_objs = []
+    if latest_analyst_target:
+        analyst_ratings_objs = db.query(TickerAnalystRating).filter(
+            TickerAnalystRating.ticker == ticker,
+            TickerAnalystRating.date == latest_analyst_target.date,
+        ).order_by(TickerAnalystRating.rating_date.desc()).all()
+
     # ========================================
     # Build lookup dictionaries by date
     # ========================================
@@ -283,6 +301,29 @@ def get_complete_chart_data(
         if trendline.low_values:
             low_values_list = [TrendlineValue(**v) for v in trendline.low_values]
 
+    # Build analyst consensus
+    analyst_consensus = None
+    if latest_analyst_target and latest_analyst_target.analyst_target_mean is not None:
+        analyst_consensus = AnalystConsensus(
+            mean=latest_analyst_target.analyst_target_mean,
+            high=latest_analyst_target.analyst_target_high,
+            low=latest_analyst_target.analyst_target_low,
+            count=latest_analyst_target.analyst_count,
+            recommendation=latest_analyst_target.recommendation,
+        )
+
+    # Build analyst ratings list
+    analyst_ratings_list = [
+        AnalystRatingItem(
+            date=str(r.rating_date) if r.rating_date else None,
+            status=r.status,
+            firm=r.firm,
+            rating=r.rating,
+            target_from=r.target_from,
+            target_to=r.target_to,
+        ) for r in analyst_ratings_objs
+    ] or None
+
     return CompleteChartResponse(
         ticker=ticker,
         data=chart_data,
@@ -296,4 +337,8 @@ def get_complete_chart_data(
         low_intercept=trendline.low_intercept if trendline else None,
         low_r_squared=trendline.low_r_squared if trendline else None,
         low_values=low_values_list,
+
+        # Analyst data (latest snapshot)
+        analyst_consensus=analyst_consensus,
+        analyst_ratings=analyst_ratings_list,
     )

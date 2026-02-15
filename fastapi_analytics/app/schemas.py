@@ -151,6 +151,25 @@ class TrendlineValue(BaseModel):
     y: float = Field(..., description="Trendline y-value for this date")
 
 
+class AnalystConsensus(BaseModel):
+    """yfinance analyst consensus target prices"""
+    mean: Optional[float] = Field(None, description="Mean target price")
+    high: Optional[float] = Field(None, description="Highest target price")
+    low: Optional[float] = Field(None, description="Lowest target price")
+    count: Optional[int] = Field(None, description="Number of covering analysts")
+    recommendation: Optional[str] = Field(None, description="Consensus recommendation (buy/hold/sell)")
+
+
+class AnalystRatingItem(BaseModel):
+    """Individual institutional analyst report"""
+    date: Optional[str] = Field(None, description="Report publication date")
+    status: Optional[str] = Field(None, description="Upgrade/Downgrade/Reiterated/Initiated")
+    firm: Optional[str] = Field(None, description="Institution name")
+    rating: Optional[str] = Field(None, description="Investment opinion")
+    target_from: Optional[float] = Field(None, description="Previous target price")
+    target_to: Optional[float] = Field(None, description="New target price")
+
+
 class CompleteChartResponse(BaseModel):
     """
     Complete chart data for Flutter app (1 API call gets everything).
@@ -178,6 +197,10 @@ class CompleteChartResponse(BaseModel):
     low_intercept: Optional[float] = Field(None, description="Low trendline intercept")
     low_r_squared: Optional[float] = Field(None, description="Low trendline R²")
     low_values: Optional[List[TrendlineValue]] = Field(None, description="Pre-calculated low trendline y-values")
+
+    # Analyst data (latest snapshot, not time-series)
+    analyst_consensus: Optional[AnalystConsensus] = Field(None, description="Analyst consensus target prices")
+    analyst_ratings: Optional[List[AnalystRatingItem]] = Field(None, description="Individual analyst ratings")
 
 
 # ============================================================
@@ -244,6 +267,8 @@ class StrategyData(BaseModel):
     target_price: Optional[float] = Field(None, description="AI target price")
     stop_loss: Optional[float] = Field(None, description="AI stop loss")
     risk_reward_ratio: Optional[float] = Field(None, description="Risk/reward ratio")
+    analyst_consensus: Optional[AnalystConsensus] = Field(None, description="Analyst consensus data")
+    analyst_ratings: Optional[List[AnalystRatingItem]] = Field(None, description="Individual analyst ratings")
 
 
 class ExtendedItemIngest(BaseModel):
