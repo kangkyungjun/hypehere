@@ -228,6 +228,8 @@ class MacroIndicatorItem(BaseModel):
     value: float
     observation_date: Optional[str] = None
     name: Optional[str] = None
+    risk_level: Optional[str] = None       # BULLISH/POSITIVE/NEUTRAL/CAUTIOUS/BEARISH
+    message: Optional[str] = None          # 한국어 설명 (e.g., "금리 긴축적")
 
 
 class MacroSignalItem(BaseModel):

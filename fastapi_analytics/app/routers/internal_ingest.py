@@ -97,12 +97,16 @@ def ingest_macro_indicators(payload: MacroIngestPayload, db: Session = Depends(g
                 obj.observation_date = obs_date
                 obj.previous_value = previous_value
                 obj.change_pct = change_pct
+                obj.risk_level = item.risk_level
+                obj.signal_message = item.message
             else:
                 db.add(MacroIndicator(
                     date=ingest_date, indicator_code=code,
                     indicator_name=item.name, observation_date=obs_date,
                     value=item.value, previous_value=previous_value,
                     change_pct=change_pct, source='FRED',
+                    risk_level=item.risk_level,
+                    signal_message=item.message,
                 ))
             upserted += 1
 
