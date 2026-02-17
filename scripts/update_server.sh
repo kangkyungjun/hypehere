@@ -34,15 +34,24 @@ echo ""
 echo "📁 Step 5: Collecting Static Files..."
 python manage.py collectstatic --noinput
 
-# Step 6: Restart Django Service
+# Step 6: Restart Django Service (Daphne)
 echo ""
-echo "🔄 Step 6: Restarting Django Service (hypehere)..."
-sudo systemctl restart hypehere
+echo "🔄 Step 6: Restarting Django Service (daphne)..."
+sudo systemctl restart daphne
 
-# Step 7: Check Service Status
+# Step 7: Restart MarketLens Django Service
 echo ""
-echo "✅ Step 7: Checking Service Status..."
-sudo systemctl status hypehere --no-pager | head -n 10
+echo "🔄 Step 7: Restarting MarketLens Django Service..."
+sudo systemctl restart marketlens-django
+
+# Step 8: Check Service Status
+echo ""
+echo "✅ Step 8: Checking Service Status..."
+echo "--- daphne ---"
+sudo systemctl status daphne --no-pager | head -n 10
+echo ""
+echo "--- marketlens-django ---"
+sudo systemctl status marketlens-django --no-pager | head -n 10
 
 echo ""
 echo "✅ 서버 업데이트 완료!"
