@@ -3,7 +3,7 @@ from .views import (
     PostListCreateAPIView, PostDetailAPIView,
     post_like_toggle, post_favorite_toggle, PostCommentListCreateAPIView,
     CommentDetailAPIView, PostSearchAPIView, post_report_view, comment_report_view,
-    log_interaction, RecommendedPostListAPIView,
+    comment_like_toggle, log_interaction, RecommendedPostListAPIView,
     MyPostsAPIView, MyCommentsAPIView
 )
 
@@ -20,6 +20,7 @@ urlpatterns = [
     path('<int:pk>/report/', post_report_view, name='post_report'),
     path('<int:post_id>/comments/', PostCommentListCreateAPIView.as_view(), name='post_comments'),
     path('<int:post_id>/comments/<int:pk>/', CommentDetailAPIView.as_view(), name='comment_detail'),
+    path('<int:post_id>/comments/<int:comment_id>/like/', comment_like_toggle, name='comment_like_toggle'),
     path('<int:post_id>/comments/<int:comment_id>/report/', comment_report_view, name='comment_report'),
     path('comments/my/', MyCommentsAPIView.as_view(), name='my_comments'),  # MarketLens: 내 댓글
     path('log-interaction/', log_interaction, name='log_interaction'),

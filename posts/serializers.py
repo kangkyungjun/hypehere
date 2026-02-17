@@ -63,17 +63,17 @@ class PostSerializer(serializers.ModelSerializer):
         return False
 
     def get_can_edit(self, obj):
-        """Check if current user can edit this post (author or admin)"""
+        """Check if current user can edit this post (author, admin, or manager)"""
         request = self.context.get('request')
         if request and request.user.is_authenticated:
-            return obj.author == request.user or request.user.is_admin()
+            return obj.author == request.user or request.user.is_admin() or request.user.is_manager_or_above()
         return False
 
     def get_can_delete(self, obj):
-        """Check if current user can delete this post (author or admin)"""
+        """Check if current user can delete this post (author, admin, or manager)"""
         request = self.context.get('request')
         if request and request.user.is_authenticated:
-            return obj.author == request.user or request.user.is_admin()
+            return obj.author == request.user or request.user.is_admin() or request.user.is_manager_or_above()
         return False
 
     def get_is_deleted_by_admin(self, obj):
@@ -169,11 +169,36 @@ class LikeSerializer(serializers.ModelSerializer):
 class CommentSerializer(serializers.ModelSerializer):
     """Serializer for reading Comment data"""
     author = UserSerializer(read_only=True)
+    like_count = serializers.SerializerMethodField()
+    is_liked = serializers.SerializerMethodField()
+    can_edit = serializers.SerializerMethodField()
+    can_delete = serializers.SerializerMethodField()
 
     class Meta:
         model = Comment
-        fields = ['id', 'post', 'author', 'content', 'created_at', 'updated_at']
+        fields = ['id', 'post', 'author', 'content', 'like_count', 'is_liked', 'can_edit', 'can_delete', 'created_at', 'updated_at']
         read_only_fields = ['id', 'post', 'author', 'created_at', 'updated_at']
+
+    def get_like_count(self, obj):
+        return obj.comment_likes.count()
+
+    def get_is_liked(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return obj.comment_likes.filter(user=request.user).exists()
+        return False
+
+    def get_can_edit(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return obj.author == request.user or request.user.is_admin() or request.user.is_manager_or_above()
+        return False
+
+    def get_can_delete(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return obj.author == request.user or request.user.is_admin() or request.user.is_manager_or_above()
+        return False
 
 
 class CommentCreateSerializer(serializers.ModelSerializer):

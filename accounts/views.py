@@ -1,4 +1,5 @@
 from rest_framework import status, generics, permissions
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -2247,12 +2248,20 @@ class LegalDocumentEditView(LoginRequiredMixin, UserPassesTestMixin, View):
 # MarketLens Role-Based Permission APIs
 # ========================================
 
+class UserPagination(PageNumberPagination):
+    """사용자 목록 페이지네이션"""
+    page_size = 10
+    page_size_query_param = 'page_size'
+    max_page_size = 50
+
+
 class UserSearchAPIView(APIView):
     """
-    사용자 검색 API (Manager/Master만 접근 가능)
-    GET /api/accounts/users/search/?q=<query>
+    사용자 검색/목록 API (Manager/Master만 접근 가능)
+    GET /api/accounts/users/search/          → 전체 사용자 목록 (최신 가입순)
+    GET /api/accounts/users/search/?q=<query> → 이메일/닉네임으로 검색
 
-    Query로 이메일 또는 닉네임으로 사용자 검색
+    페이지네이션: {count, next, previous, results}
     """
     permission_classes = [permissions.IsAuthenticated]
 
@@ -2266,22 +2275,26 @@ class UserSearchAPIView(APIView):
 
         query = request.GET.get('q', '').strip()
 
-        if not query:
-            return Response(
-                {'error': '검색어를 입력해주세요.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        if query:
+            # 검색 모드: 이메일 또는 닉네임으로 검색 (대소문자 무시)
+            users = User.objects.filter(
+                Q(email__icontains=query) | Q(nickname__icontains=query)
+            ).exclude(
+                id=request.user.id
+            ).order_by('-created_at')
+        else:
+            # 목록 모드: 전체 사용자 (최신 가입순)
+            users = User.objects.exclude(
+                id=request.user.id
+            ).order_by('-created_at')
 
-        # 이메일 또는 닉네임으로 검색 (대소문자 무시)
-        users = User.objects.filter(
-            Q(email__icontains=query) | Q(nickname__icontains=query)
-        ).exclude(
-            id=request.user.id  # 자기 자신 제외
-        )[:20]  # 최대 20명
+        # 페이지네이션 적용
+        paginator = UserPagination()
+        page = paginator.paginate_queryset(users, request)
 
         # 사용자 정보 직렬화 (role 포함)
         users_data = []
-        for user in users:
+        for user in page:
             users_data.append({
                 'id': user.id,
                 'email': user.email,
@@ -2291,7 +2304,7 @@ class UserSearchAPIView(APIView):
                 'profile_picture': request.build_absolute_uri(user.profile_picture.url) if user.profile_picture else None,
             })
 
-        return Response(users_data, status=status.HTTP_200_OK)
+        return paginator.get_paginated_response(users_data)
 
 
 class PromoteToGoldAPIView(APIView):

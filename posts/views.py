@@ -5,7 +5,7 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.serializers import ValidationError
 from django.shortcuts import get_object_or_404
 from django.db.models import Count, Q
-from .models import Post, Like, Comment, PostFavorite, PostReport, CommentReport, UserInteraction
+from .models import Post, Like, Comment, CommentLike, PostFavorite, PostReport, CommentReport, UserInteraction
 from .serializers import (
     PostSerializer, PostCreateSerializer,
     CommentSerializer, CommentCreateSerializer,
@@ -38,8 +38,8 @@ class PostListCreateAPIView(generics.ListCreateAPIView):
 
         # Filter deleted posts based on user role
         if self.request.user.is_authenticated:
-            if self.request.user.is_admin():
-                # Admins see all posts (including deleted ones)
+            if self.request.user.is_admin() or self.request.user.is_manager_or_above():
+                # Admins/managers see all posts (including deleted ones)
                 pass
             else:
                 # Regular users: see non-deleted posts + their own deleted posts
@@ -125,8 +125,8 @@ class PostDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
 
         # Filter deleted posts based on user role
         if self.request.user.is_authenticated:
-            if self.request.user.is_admin():
-                # Admins see all posts
+            if self.request.user.is_admin() or self.request.user.is_manager_or_above():
+                # Admins/managers see all posts
                 pass
             else:
                 # Regular users: see non-deleted posts + their own deleted posts
@@ -140,18 +140,18 @@ class PostDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
         return queryset
 
     def perform_update(self, serializer):
-        """Allow author or admin to update"""
-        if serializer.instance.author != self.request.user and not self.request.user.is_admin():
+        """Allow author, admin, or manager to update"""
+        if serializer.instance.author != self.request.user and not self.request.user.is_admin() and not self.request.user.is_manager_or_above():
             raise permissions.PermissionDenied("본인 게시물만 수정할 수 있습니다")
         serializer.save()
 
     def perform_destroy(self, instance):
-        """Allow author or admin to delete. Admins use soft deletion, authors use hard deletion."""
-        if instance.author != self.request.user and not self.request.user.is_admin():
+        """Allow author, admin, or manager to delete. Admin/manager use soft deletion, authors use hard deletion."""
+        if instance.author != self.request.user and not self.request.user.is_admin() and not self.request.user.is_manager_or_above():
             raise permissions.PermissionDenied("본인 게시물만 삭제할 수 있습니다")
 
-        # Admin deleting someone else's post - use soft deletion
-        if self.request.user.is_admin() and instance.author != self.request.user:
+        # Admin/manager deleting someone else's post - use soft deletion
+        if (self.request.user.is_admin() or self.request.user.is_manager_or_above()) and instance.author != self.request.user:
             instance.delete_by_report(report_type='admin_delete', admin_user=self.request.user)
         else:
             # Author deleting their own post - hard delete
@@ -176,6 +176,30 @@ def post_like_toggle(request, pk):
         liked = True
 
     like_count = post.likes.count()
+
+    return Response({
+        'liked': liked,
+        'like_count': like_count
+    })
+
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def comment_like_toggle(request, post_id, comment_id):
+    """
+    POST /api/posts/<post_id>/comments/<comment_id>/like/ - Toggle like on a comment
+    Returns: {'liked': bool, 'like_count': int}
+    """
+    comment = get_object_or_404(Comment, pk=comment_id, post_id=post_id)
+    like, created = CommentLike.objects.get_or_create(user=request.user, comment=comment)
+
+    if not created:
+        like.delete()
+        liked = False
+    else:
+        liked = True
+
+    like_count = comment.comment_likes.count()
 
     return Response({
         'liked': liked,
@@ -262,14 +286,14 @@ class CommentDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
         return Comment.objects.filter(post_id=post_id).select_related('author')
 
     def perform_update(self, serializer):
-        # Only allow author to update
-        if serializer.instance.author != self.request.user:
+        # Allow author, admin, or manager to update
+        if serializer.instance.author != self.request.user and not self.request.user.is_admin() and not self.request.user.is_manager_or_above():
             raise permissions.PermissionDenied("You can only edit your own comments")
         serializer.save()
 
     def perform_destroy(self, instance):
-        # Only allow author to delete
-        if instance.author != self.request.user:
+        # Allow author, admin, or manager to delete
+        if instance.author != self.request.user and not self.request.user.is_admin() and not self.request.user.is_manager_or_above():
             raise permissions.PermissionDenied("You can only delete your own comments")
         instance.delete()
 
@@ -290,13 +314,18 @@ class PostSearchAPIView(generics.ListAPIView):
             # Return empty queryset if no query
             return Post.objects.none()
 
-        # Search in post content and hashtag names
+        # Search in post title, content, and hashtag names
         queryset = Post.objects.select_related('author').prefetch_related('hashtags').annotate(
             like_count=Count('likes', distinct=True),
             comment_count=Count('comments', distinct=True)
         ).filter(
-            Q(content__icontains=query) | Q(hashtags__name__icontains=query)
+            Q(title__icontains=query) | Q(content__icontains=query) | Q(hashtags__name__icontains=query)
         ).exclude(author__is_deactivated=True).distinct()
+
+        # Filter by ticker if provided
+        ticker = self.request.query_params.get('ticker')
+        if ticker:
+            queryset = queryset.filter(ticker__iexact=ticker)
 
         # 차단 관계 필터링 (로그인한 경우)
         if self.request.user.is_authenticated:

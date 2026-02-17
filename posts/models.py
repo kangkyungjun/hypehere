@@ -267,6 +267,30 @@ class Comment(models.Model):
         return False
 
 
+class CommentLike(models.Model):
+    """Like model for comment likes"""
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='comment_likes'
+    )
+    comment = models.ForeignKey(
+        Comment,
+        on_delete=models.CASCADE,
+        related_name='comment_likes'
+    )
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        unique_together = ['user', 'comment']
+        verbose_name = 'Comment Like'
+        verbose_name_plural = 'Comment Likes'
+
+    def __str__(self):
+        return f"{self.user.nickname} likes Comment {self.comment.id}"
+
+
 class PostFavorite(models.Model):
     """User's favorite posts for bookmarking"""
     user = models.ForeignKey(
