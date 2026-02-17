@@ -1,6 +1,7 @@
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.authentication import TokenAuthentication, SessionAuthentication
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.serializers import ValidationError
 from django.shortcuts import get_object_or_404
@@ -159,6 +160,7 @@ class PostDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
 
 
 @api_view(['POST'])
+@authentication_classes([TokenAuthentication, SessionAuthentication])
 @permission_classes([permissions.IsAuthenticated])
 def post_like_toggle(request, pk):
     """
@@ -184,6 +186,7 @@ def post_like_toggle(request, pk):
 
 
 @api_view(['POST'])
+@authentication_classes([TokenAuthentication, SessionAuthentication])
 @permission_classes([permissions.IsAuthenticated])
 def comment_like_toggle(request, post_id, comment_id):
     """

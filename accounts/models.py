@@ -453,6 +453,10 @@ class User(AbstractUser):
         """Manager로 승급 권한 (Master만)"""
         return self.is_master()
 
+    def can_demote_to_regular(self):
+        """Regular로 강등 권한 (Manager 이상)"""
+        return self.is_manager_or_above()
+
     def can_manage_users(self):
         """사용자 관리 권한 (Manager 이상)"""
         return self.is_manager_or_above()

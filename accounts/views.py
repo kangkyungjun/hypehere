@@ -2,6 +2,7 @@ from rest_framework import status, generics, permissions
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from rest_framework.authentication import TokenAuthentication
 from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import get_user_model, login, logout
@@ -2313,6 +2314,7 @@ class PromoteToGoldAPIView(APIView):
     PATCH /api/accounts/users/<id>/promote-to-gold/
     """
     permission_classes = [permissions.IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
 
     def patch(self, request, user_id):
         # Manager 이상 권한 체크
@@ -2353,6 +2355,7 @@ class PromoteToManagerAPIView(APIView):
     PATCH /api/accounts/users/<id>/promote-to-manager/
     """
     permission_classes = [permissions.IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
 
     def patch(self, request, user_id):
         # Master 권한 체크
@@ -2393,40 +2396,41 @@ class DemoteToRegularAPIView(APIView):
     PATCH /api/accounts/users/<id>/demote-to-regular/
     """
     permission_classes = [permissions.IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
 
     def patch(self, request, user_id):
+        # 1. 권한 사전 체크 (Manager 이상만 접근 가능)
+        if not request.user.can_demote_to_regular():
+            return Response(
+                {'error': '권한이 없습니다. Manager 이상만 강등할 수 있습니다.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        # 2. 대상 사용자 조회
         target_user = get_object_or_404(User, id=user_id)
 
-        # Master는 강등 불가
+        # 3. Master는 강등 불가
         if target_user.role == 'master':
             return Response(
                 {'error': 'Master는 강등할 수 없습니다.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # 이미 Regular면 에러
+        # 4. 이미 Regular면 에러
         if target_user.role == 'regular':
             return Response(
                 {'error': f'{target_user.nickname}님은 이미 Regular입니다.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Manager 강등은 Master만 가능
-        if target_user.role == 'manager':
-            if request.user.role != 'master':
-                return Response(
-                    {'error': 'Manager 강등은 Master만 가능합니다.'},
-                    status=status.HTTP_403_FORBIDDEN
-                )
+        # 5. Manager 강등은 Master만 가능
+        if target_user.role == 'manager' and not request.user.is_master():
+            return Response(
+                {'error': 'Manager 강등은 Master만 가능합니다.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
 
-        # Gold 강등은 Manager 이상 가능
-        if target_user.role == 'gold':
-            if not request.user.is_manager_or_above():
-                return Response(
-                    {'error': '권한이 없습니다. Manager 이상만 강등할 수 있습니다.'},
-                    status=status.HTTP_403_FORBIDDEN
-                )
-
+        # 6. 강등 실행
         previous_role = target_user.get_role_display()
         target_user.role = 'regular'
         target_user.save(update_fields=['role'])
