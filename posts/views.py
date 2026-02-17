@@ -179,10 +179,23 @@ def post_like_toggle(request, pk):
 
     like_count = post.likes.count()
 
+    response_status = status.HTTP_201_CREATED if liked else status.HTTP_200_OK
     return Response({
         'liked': liked,
         'like_count': like_count
-    })
+    }, status=response_status)
+
+
+@api_view(['DELETE'])
+@authentication_classes([TokenAuthentication, SessionAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def post_unlike(request, pk):
+    """DELETE /api/posts/<id>/unlike/ — Remove like from a post"""
+    post = get_object_or_404(Post, pk=pk)
+    deleted_count, _ = Like.objects.filter(user=request.user, post=post).delete()
+    if deleted_count:
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    return Response({'error': 'Not liked'}, status=status.HTTP_404_NOT_FOUND)
 
 
 @api_view(['POST'])
@@ -204,10 +217,23 @@ def comment_like_toggle(request, post_id, comment_id):
 
     like_count = comment.comment_likes.count()
 
+    response_status = status.HTTP_201_CREATED if liked else status.HTTP_200_OK
     return Response({
         'liked': liked,
         'like_count': like_count
-    })
+    }, status=response_status)
+
+
+@api_view(['DELETE'])
+@authentication_classes([TokenAuthentication, SessionAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def comment_unlike(request, post_id, comment_id):
+    """DELETE /api/posts/<post_id>/comments/<comment_id>/unlike/ — Remove like from a comment"""
+    comment = get_object_or_404(Comment, pk=comment_id, post_id=post_id)
+    deleted_count, _ = CommentLike.objects.filter(user=request.user, comment=comment).delete()
+    if deleted_count:
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    return Response({'error': 'Not liked'}, status=status.HTTP_404_NOT_FOUND)
 
 
 class PostCommentListCreateAPIView(generics.ListCreateAPIView):
