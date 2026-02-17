@@ -19,6 +19,18 @@ urlpatterns = [
         name='post-comments-list'
     ),
 
+    # Nested route: 개별 댓글 조회/수정/삭제
+    path(
+        'posts/<int:post_pk>/comments/<int:pk>/',
+        CommentViewSet.as_view({
+            'get': 'retrieve',
+            'put': 'update',
+            'patch': 'partial_update',
+            'delete': 'destroy'
+        }),
+        name='post-comment-detail'
+    ),
+
     # 내 댓글 목록
     path('posts/comments/my/', my_comments_view, name='my-comments'),
 ]

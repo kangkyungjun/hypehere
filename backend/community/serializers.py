@@ -132,6 +132,14 @@ class CommentSerializer(serializers.ModelSerializer):
         validated_data['content'] = self.initial_data.get('content')
         return super().create(validated_data)
 
+    def update(self, instance, validated_data):
+        """댓글 수정 - content는 SerializerMethodField이므로 직접 처리"""
+        content = self.initial_data.get('content')
+        if content is not None:
+            instance.content = content
+        instance.save()
+        return instance
+
 
 class PostLikeSerializer(serializers.ModelSerializer):
     """게시글 좋아요 Serializer"""
