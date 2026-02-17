@@ -23,7 +23,11 @@ from .views import (
     DeactivateAccountView,
     ReactivateAccountView,
     RequestAccountDeletionView,
-    CancelAccountDeletionView
+    CancelAccountDeletionView,
+    UserSearchAPIView,
+    PromoteToGoldAPIView,
+    PromoteToManagerAPIView,
+    DemoteToRegularAPIView,
 )
 
 app_name = 'accounts_api'
@@ -70,4 +74,10 @@ urlpatterns = [
     # User posts
     path('<str:username>/posts/', UserPostsAPIView.as_view(), name='user_posts'),
     path('<str:username>/posts/search/', UserPostsSearchAPIView.as_view(), name='user_posts_search'),
+
+    # MarketLens Admin Management (Flutter app)
+    path('users/search/', UserSearchAPIView.as_view(), name='api_user_search'),
+    path('users/<int:user_id>/promote-to-gold/', PromoteToGoldAPIView.as_view(), name='api_promote_to_gold'),
+    path('users/<int:user_id>/promote-to-manager/', PromoteToManagerAPIView.as_view(), name='api_promote_to_manager'),
+    path('users/<int:user_id>/demote-to-regular/', DemoteToRegularAPIView.as_view(), name='api_demote_to_regular'),
 ]
