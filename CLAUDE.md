@@ -52,21 +52,28 @@ These are **completely separate products** with separate user bases. They share 
             └────────────────────────┘
 ```
 
-### Data Flow (MarketLens)
-
-Mac mini collects data (yfinance, finvizfinance, FRED) → processes/analyzes → POSTs to FastAPI `/api/v1/internal/ingest/` (API key protected) → FastAPI stores in `analytics.*` schema → Flutter app GETs from FastAPI public endpoints.
-
 **CRITICAL**: FastAPI does NOT fetch external data. All data collection and AI analysis happens on Mac mini only. FastAPI is receive + serve.
 
-## Development Commands
+## Development Setup
+
+### Environment
+
+Copy `.env.example` to `.env` and fill in values. Generate a Django secret key:
+```bash
+python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())'
+```
+
+**Dev vs Production differences**:
+- Dev: `DEBUG=True`, SQLite database, in-memory channel layer, local static/media files
+- Prod: `DEBUG=False`, PostgreSQL RDS, Redis/ElastiCache channels, S3 storage
 
 ### Django (HypeHere)
 ```bash
 pip install -r requirements.txt
 python manage.py migrate
-python manage.py runserver                    # Port 8000
+python manage.py runserver                    # Port 8000 (Daphne ASGI)
 python manage.py createsuperuser              # Uses email, not username
-python manage.py create_master                # Create MarketLens master account
+python manage.py create_master <email> <nickname> <password>  # MarketLens master account
 ```
 
 ### FastAPI (MarketLens)
@@ -81,22 +88,35 @@ uvicorn app.main:app --reload --port 8001     # Dev server
 ### Analytics Schema Migrations (Manual SQL)
 ```bash
 # FastAPI uses raw SQL migrations, NOT Django ORM
-# Apply manually to PostgreSQL RDS:
 psql -h <rds-host> -U <user> -d hypehere -f fastapi_analytics/migrations/<filename>.sql
 ```
 
+### Testing & Linting
+
+No test framework or linting tools are configured. All `tests.py` files are empty placeholders.
+
 ### Deployment
 ```bash
-bash scripts/deploy.sh "commit message"           # Django
-bash scripts/deploy_fastapi.sh "commit message"    # FastAPI
-bash scripts/update_server.sh                      # Git pull on server
+bash scripts/deploy.sh "commit message"           # Django: git push + SSH to AWS + update_server.sh
+bash scripts/deploy_fastapi.sh "commit message"    # FastAPI: separate deployment
+bash scripts/update_server.sh                      # Runs on AWS: pull, install deps, migrate, collectstatic, restart
+```
+
+Systemd services on AWS:
+```bash
+sudo systemctl restart daphne                # Django (HypeHere)
+sudo systemctl restart marketlens-django     # Django (MarketLens-specific)
+sudo systemctl restart fastapi-analytics     # FastAPI
+sudo systemctl restart nginx
 ```
 
 ## Database Schema
 
 **Single PostgreSQL RDS, dual schema**:
 - `public.*` → Django ORM (HypeHere social features + shared auth)
-- `analytics.*` → SQLAlchemy (MarketLens stock data, read-only from FastAPI except ingest)
+- `analytics.*` → SQLAlchemy (MarketLens stock data)
+
+**Schema boundary rule**: FastAPI never writes to `public.*`; Django never reads from `analytics.*`.
 
 ```bash
 # Django .env
@@ -110,30 +130,6 @@ ANALYTICS_API_KEY=<key-for-mac-mini-ingest>
 ---
 
 ## MarketLens (FastAPI) Details
-
-### FastAPI File Structure
-```
-fastapi_analytics/
-├── app/
-│   ├── main.py                    # App entry, 8 routers mounted
-│   ├── config.py                  # Settings (DB URL, API key)
-│   ├── database.py                # SQLAlchemy engine, SessionLocal, get_db()
-│   ├── models.py                  # 17 SQLAlchemy models (analytics schema)
-│   ├── schemas.py                 # Pydantic v2 request/response schemas
-│   ├── utils/
-│   │   └── trading_calendar.py    # is_trading_day() helper
-│   ├── routers/
-│   │   ├── scores.py              # /api/v1/scores/
-│   │   ├── tickers.py             # /api/v1/tickers/
-│   │   ├── prices.py              # /api/v1/prices/
-│   │   ├── charts.py              # /api/v1/charts/ (all-in-one for Flutter)
-│   │   ├── market.py              # /api/v1/market/
-│   │   ├── macro.py               # /api/v1/macro/
-│   │   ├── internal_ingest.py     # /api/v1/internal/ingest/ (Mac mini → AWS)
-│   │   └── dashboard.py           # /dashboard (web UI)
-│   └── services/                  # Business logic (empty for now)
-└── migrations/                    # Raw SQL migration files
-```
 
 ### API Endpoints
 
@@ -149,8 +145,9 @@ fastapi_analytics/
 | `GET /api/v1/charts/{ticker}` | **Complete chart data** (16 data sources in one response) |
 | `GET /api/v1/market/treemap` | S&P 500 sector treemap |
 | `GET /api/v1/macro/indicators` | Macro economic indicators (FRED) |
+| `GET /api/v1/earnings/...` | Earnings calendar data |
 
-**Internal (Mac mini → AWS, API key required)**:
+**Internal (Mac mini → AWS, `X-API-Key` header required)**:
 | Endpoint | Purpose |
 |----------|---------|
 | `POST /api/v1/internal/ingest/scores` | Ingest all ticker data |
@@ -176,33 +173,18 @@ Mac mini sends two payload formats (both supported):
 
 The ingest endpoint does UPSERT into 11+ tables per item with trading day validation (skips weekends/holidays).
 
-### Charts Endpoint (Key for Flutter)
+### Charts Endpoint (Primary Flutter Endpoint)
 
-`GET /api/v1/charts/{ticker}` returns ALL data in one response:
-- OHLCV prices, scores/signals, technical indicators
-- Trendlines (pre-calculated JSONB arrays for rendering)
-- Targets (stop-loss, target price, analyst consensus)
-- Institutional/foreign ownership with change deltas
-- Short interest data
-- AI analysis (probability, reasons, comment)
-- Company profile, fundamentals, financials
-- Calendar events, earnings history
+`GET /api/v1/charts/{ticker}` returns ALL data in one response: OHLCV prices, scores/signals, technical indicators, trendlines (pre-calculated JSONB arrays), targets, institutional/foreign ownership, short interest, AI analysis, company profile, fundamentals, financials, calendar events, earnings history.
 
-This is the **primary endpoint** the Flutter app uses for the stock detail screen.
+### Key Conventions
 
-### MarketLens Role System (in Django accounts app)
-
-5-tier hierarchy shared through Django auth:
-- **Master**: Full admin (created via `python manage.py create_master`)
-- **Manager**: User management (promote to Gold)
-- **Gold**: Premium features
-- **Regular**: Default new user
-- **Guest**: Limited access
-
-Relevant Django API endpoints:
-- `POST /api/accounts/users/<id>/promote-to-gold/` (Manager+)
-- `POST /api/accounts/users/<id>/promote-to-manager/` (Master only)
-- `GET /api/accounts/users/search/` (Manager+)
+- All public endpoints return **200 OK with empty structures** (never 404 for missing data)
+- Korean signal translation at ingest: 매수→BUY, 매도→SELL, 관망→HOLD
+- Trendline values are pre-calculated as JSONB arrays (`[{"date": "...", "y": 148.2}, ...]`) for direct Flutter rendering
+- API key auth via `Depends(verify_api_key)` using `X-API-Key` header
+- DB sessions via `Depends(get_db)` — SQLAlchemy `SessionLocal` with `yield`/`finally` pattern
+- Pydantic v2 schemas with `from_attributes = True` for ORM mode
 
 ---
 
@@ -218,13 +200,33 @@ Relevant Django API endpoints:
 6. **analytics** - HypeHere visitor tracking (DailyVisitor, UserActivityLog), admin dashboard
 7. **specs** - Internal project management notes
 
+Note: `lotto` app loads conditionally if the directory exists (local dev only, git-ignored).
+
 ### Authentication (CRITICAL)
 
 ```python
 # USERNAME_FIELD = 'email' — NOT username
 User.objects.create_user(email='user@example.com', nickname='Display Name', password='pass')
-# username is auto-generated from email, never user-facing
+# username is auto-generated from email prefix, never user-facing
 ```
+
+**Auth methods**: Token auth (DRF `rest_framework.authtoken`) + Session auth. Both enabled in DRF settings.
+
+### Custom Middleware
+
+- **`SuspensionCheckMiddleware`** (`accounts/middleware.py`): Auto-lifts expired suspensions by calling `user.lift_suspension()` on each request
+- **`VisitorTrackingMiddleware`** (`analytics/middleware.py`): Tracks DailyVisitor (IP + user) and UserActivityLog; handles `X-Forwarded-For` for reverse proxy; uses `try/except IntegrityError` for race conditions
+
+### URL Routing Pattern
+
+Django URLs split by app with these prefixes:
+- `accounts/` — HTML views (login, register, profile pages)
+- `api/accounts/` — REST API (user search, role management)
+- `api/posts/` and `api/community/posts/` — Post CRUD (same app, dual mount for MarketLens)
+- `api/chat/` — Chat REST API; `messages/` — Chat HTML views
+- `notifications/` — Both views and API (nested at `notifications/api/`)
+- `learning/` — Learning API (nested at `learning/api/`)
+- `admin-dashboard/` — Analytics dashboard
 
 ### WebSocket Consumers (5 total, Django Channels)
 
@@ -246,6 +248,15 @@ Dev: in-memory channel layer. Production: Redis/ElastiCache.
 - **Reports**: PostReport, CommentReport, Report (chat) → user.report_count
 - **User states**: suspended (auto-lifts via middleware), banned, deactivated (30-day grace), deletion_requested
 
+### MarketLens Role System (in Django accounts app)
+
+5-tier hierarchy: Master > Manager > Gold > Regular > Guest
+- `python manage.py create_master` creates initial admin
+- `POST /api/accounts/users/<id>/promote-to-gold/` (Manager+)
+- `POST /api/accounts/users/<id>/promote-to-manager/` (Master only)
+- `POST /api/accounts/users/<id>/demote-to-regular/` (Master only)
+- `GET /api/accounts/users/search/` (Manager+)
+
 ### i18n: ko (default), en, ja, es
 
 ## Infrastructure
@@ -257,21 +268,5 @@ Dev: in-memory channel layer. Production: Redis/ElastiCache.
 | Reverse Proxy | Nginx (path-based routing) |
 | Database | PostgreSQL RDS (dual schema) |
 | Cache | ElastiCache Redis (Channels) |
-| Storage | S3 (production static/media) |
-
-### Systemd Services
-```bash
-sudo systemctl restart hypehere              # Django (Daphne)
-sudo systemctl restart fastapi-analytics     # FastAPI (Uvicorn)
-sudo systemctl restart nginx
-```
-
-## Key Implementation Notes
-
-- FastAPI analytics schema migrations are raw SQL files, not Django ORM managed
-- FastAPI never writes to `public.*`; Django never reads from `analytics.*`
-- Mac mini is the sole data source for all stock market data
-- Flutter app authenticates via Django, gets market data via FastAPI
-- All FastAPI public endpoints return 200 OK with empty structures (never 404 for missing data)
-- Korean signal translation happens at ingest: 매수→BUY, 매도→SELL, 관망→HOLD
-- Trendline values are pre-calculated as JSONB arrays (`[{"date": "...", "y": 148.2}, ...]`) for direct Flutter rendering
+| Storage | S3 (production static/media), WhiteNoise fallback |
+| Email | Gmail SMTP (requires app-specific password) |
