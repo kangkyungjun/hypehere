@@ -229,7 +229,7 @@ class MacroIndicatorItem(BaseModel):
     observation_date: Optional[str] = None
     name: Optional[str] = None
     risk_level: Optional[str] = None       # BULLISH/POSITIVE/NEUTRAL/CAUTIOUS/BEARISH
-    message: Optional[str] = None          # 한국어 설명 (e.g., "금리 긴축적")
+    signal_message: Optional[str] = None    # 한국어 설명 (e.g., "금리 긴축적")
 
 
 class MacroSignalItem(BaseModel):
@@ -237,7 +237,7 @@ class MacroSignalItem(BaseModel):
     value: float
     risk_level: Optional[str] = None       # CRITICAL/WARNING/NORMAL
     liquidity_status: Optional[str] = None  # EXPANDING/CONTRACTING/NEUTRAL
-    message: Optional[str] = None           # 한국어 설명
+    signal_message: Optional[str] = None    # 한국어 설명
 
 
 class MacroChartPoint(BaseModel):

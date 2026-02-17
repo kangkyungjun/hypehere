@@ -98,7 +98,7 @@ def ingest_macro_indicators(payload: MacroIngestPayload, db: Session = Depends(g
                 obj.previous_value = previous_value
                 obj.change_pct = change_pct
                 obj.risk_level = item.risk_level
-                obj.signal_message = item.message
+                obj.signal_message = item.signal_message
             else:
                 db.add(MacroIndicator(
                     date=ingest_date, indicator_code=code,
@@ -106,7 +106,7 @@ def ingest_macro_indicators(payload: MacroIngestPayload, db: Session = Depends(g
                     value=item.value, previous_value=previous_value,
                     change_pct=change_pct, source='FRED',
                     risk_level=item.risk_level,
-                    signal_message=item.message,
+                    signal_message=item.signal_message,
                 ))
             upserted += 1
 
@@ -134,7 +134,7 @@ def ingest_macro_indicators(payload: MacroIngestPayload, db: Session = Depends(g
             if obj:
                 obj.value = sig.value
                 obj.risk_level = sig.risk_level
-                obj.signal_message = sig.message
+                obj.signal_message = sig.signal_message
                 obj.liquidity_status = sig.liquidity_status
                 obj.previous_value = previous_value
                 obj.change_pct = change_pct
@@ -143,7 +143,7 @@ def ingest_macro_indicators(payload: MacroIngestPayload, db: Session = Depends(g
                     date=ingest_date, indicator_code=code,
                     value=sig.value,
                     risk_level=sig.risk_level,
-                    signal_message=sig.message,
+                    signal_message=sig.signal_message,
                     liquidity_status=sig.liquidity_status,
                     previous_value=previous_value,
                     change_pct=change_pct,
