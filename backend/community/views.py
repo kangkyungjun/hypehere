@@ -202,7 +202,7 @@ class CommentViewSet(viewsets.ModelViewSet):
                 instance.post.decrement_comment_count()
 
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticatedForCommentWrite])
-    def like(self, request, pk=None):
+    def like(self, request, pk=None, **kwargs):
         """
         댓글 좋아요 추가
 
@@ -234,7 +234,7 @@ class CommentViewSet(viewsets.ModelViewSet):
         )
 
     @action(detail=True, methods=['delete'], permission_classes=[IsAuthenticatedForCommentWrite])
-    def unlike(self, request, pk=None):
+    def unlike(self, request, pk=None, **kwargs):
         """
         댓글 좋아요 취소
 
