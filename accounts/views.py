@@ -2385,3 +2385,58 @@ class PromoteToManagerAPIView(APIView):
                 'role': target_user.role,
             }
         }, status=status.HTTP_200_OK)
+
+
+class DemoteToRegularAPIView(APIView):
+    """
+    사용자를 Regular로 강등 (Manager→Regular는 Master만, Gold→Regular는 Manager+)
+    PATCH /api/accounts/users/<id>/demote-to-regular/
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def patch(self, request, user_id):
+        target_user = get_object_or_404(User, id=user_id)
+
+        # Master는 강등 불가
+        if target_user.role == 'master':
+            return Response(
+                {'error': 'Master는 강등할 수 없습니다.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # 이미 Regular면 에러
+        if target_user.role == 'regular':
+            return Response(
+                {'error': f'{target_user.nickname}님은 이미 Regular입니다.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Manager 강등은 Master만 가능
+        if target_user.role == 'manager':
+            if request.user.role != 'master':
+                return Response(
+                    {'error': 'Manager 강등은 Master만 가능합니다.'},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+
+        # Gold 강등은 Manager 이상 가능
+        if target_user.role == 'gold':
+            if not request.user.is_manager_or_above():
+                return Response(
+                    {'error': '권한이 없습니다. Manager 이상만 강등할 수 있습니다.'},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+
+        previous_role = target_user.get_role_display()
+        target_user.role = 'regular'
+        target_user.save(update_fields=['role'])
+
+        return Response({
+            'message': f'{target_user.nickname}님을 {previous_role}에서 Regular로 강등했습니다.',
+            'user': {
+                'id': target_user.id,
+                'email': target_user.email,
+                'nickname': target_user.nickname,
+                'role': target_user.role,
+            }
+        }, status=status.HTTP_200_OK)

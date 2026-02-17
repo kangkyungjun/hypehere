@@ -43,6 +43,7 @@ from .views import (
     UserSearchAPIView,
     PromoteToGoldAPIView,
     PromoteToManagerAPIView,
+    DemoteToRegularAPIView,
 )
 
 app_name = 'accounts'
@@ -115,4 +116,5 @@ urlpatterns = [
     path('api/users/search/', UserSearchAPIView.as_view(), name='user_search'),
     path('api/users/<int:user_id>/promote-to-gold/', PromoteToGoldAPIView.as_view(), name='promote_to_gold'),
     path('api/users/<int:user_id>/promote-to-manager/', PromoteToManagerAPIView.as_view(), name='promote_to_manager'),
+    path('api/users/<int:user_id>/demote-to-regular/', DemoteToRegularAPIView.as_view(), name='demote_to_regular'),
 ]
