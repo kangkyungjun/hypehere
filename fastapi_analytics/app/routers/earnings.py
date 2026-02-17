@@ -31,7 +31,7 @@ def get_upcoming_earnings(
         EarningsWeekEvent.earnings_date <= end_date,
     ).order_by(
         EarningsWeekEvent.earnings_date.asc(),
-        EarningsWeekEvent.market_cap.desc(),
+        EarningsWeekEvent.score.desc(),
     ).all()
 
     if events:
@@ -40,14 +40,19 @@ def get_upcoming_earnings(
             date_str = str(ev.earnings_date)
             by_date[date_str].append(EarningsWeekEventResponse(
                 ticker=ev.ticker,
-                earnings_date=date_str,
-                earnings_time=ev.earnings_time,
-                eps_estimate=ev.eps_estimate,
-                revenue_estimate=ev.revenue_estimate,
-                market_cap=ev.market_cap,
-                sector=ev.sector,
-                name_en=ev.name_en,
+                week=ev.week or "this",
                 name_ko=ev.name_ko,
+                name_en=ev.name_en,
+                earnings_date=date_str,
+                earnings_date_end=str(ev.earnings_date_end) if ev.earnings_date_end else None,
+                earnings_confirmed=ev.earnings_confirmed or False,
+                d_day=ev.d_day,
+                eps_estimate_high=ev.eps_estimate_high,
+                eps_estimate_low=ev.eps_estimate_low,
+                eps_estimate_avg=ev.eps_estimate_avg,
+                revenue_estimate=ev.revenue_estimate,
+                prev_surprise_pct=ev.prev_surprise_pct,
+                score=ev.score,
             ))
 
         return EarningsUpcomingResponse(
@@ -86,14 +91,12 @@ def get_upcoming_earnings(
 
         by_date[date_str].append(EarningsWeekEventResponse(
             ticker=cal.ticker,
-            earnings_date=date_str,
-            earnings_time=None,
-            eps_estimate=cal.earnings_avg,
-            revenue_estimate=cal.revenue_avg,
-            market_cap=None,
-            sector=tkr.sector if tkr else None,
-            name_en=tkr.name if tkr else None,
+            week="this",
             name_ko=name_ko,
+            name_en=tkr.name if tkr else None,
+            earnings_date=date_str,
+            eps_estimate_avg=cal.earnings_avg,
+            revenue_estimate=cal.revenue_avg,
         ))
 
     total = sum(len(v) for v in by_date.values())

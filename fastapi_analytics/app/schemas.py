@@ -688,21 +688,32 @@ class TreemapResponse(BaseModel):
 # Earnings Week Schemas (이번 주 실적 일정)
 # ============================================================
 
+class EarningsEstimateIngest(BaseModel):
+    """EPS consensus estimates"""
+    high: Optional[float] = None
+    low: Optional[float] = None
+    avg: Optional[float] = None
+
+
 class EarningsWeekItem(BaseModel):
     """Single earnings event for weekly calendar ingest"""
     ticker: str
-    earnings_date: str
-    earnings_time: Optional[str] = None
-    eps_estimate: Optional[float] = None
-    revenue_estimate: Optional[float] = None
-    market_cap: Optional[float] = None
-    sector: Optional[str] = None
-    name_en: Optional[str] = None
+    week: str                                    # "this" | "next"
     name_ko: Optional[str] = None
+    name_en: Optional[str] = None
+    earnings_date: str
+    earnings_date_end: Optional[str] = None
+    earnings_confirmed: bool = False
+    d_day: Optional[int] = None
+    earnings_estimate: EarningsEstimateIngest = EarningsEstimateIngest()
+    revenue_estimate: Optional[float] = None
+    prev_surprise_pct: Optional[float] = None
+    score: Optional[float] = None
 
 
 class EarningsWeekIngestPayload(BaseModel):
     """Earnings week ingest payload from Mac mini"""
+    date: str
     week_start: str
     week_end: str
     events: List[EarningsWeekItem]
@@ -711,14 +722,19 @@ class EarningsWeekIngestPayload(BaseModel):
 class EarningsWeekEventResponse(BaseModel):
     """Single earnings event in API response"""
     ticker: str
-    earnings_date: str
-    earnings_time: Optional[str] = None
-    eps_estimate: Optional[float] = None
-    revenue_estimate: Optional[float] = None
-    market_cap: Optional[float] = None
-    sector: Optional[str] = None
-    name_en: Optional[str] = None
+    week: str
     name_ko: Optional[str] = None
+    name_en: Optional[str] = None
+    earnings_date: str
+    earnings_date_end: Optional[str] = None
+    earnings_confirmed: bool = False
+    d_day: Optional[int] = None
+    eps_estimate_high: Optional[float] = None
+    eps_estimate_low: Optional[float] = None
+    eps_estimate_avg: Optional[float] = None
+    revenue_estimate: Optional[float] = None
+    prev_surprise_pct: Optional[float] = None
+    score: Optional[float] = None
 
 
 class EarningsUpcomingResponse(BaseModel):

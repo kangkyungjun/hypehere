@@ -1077,46 +1077,43 @@ def ingest_scores(payload: IngestPayload, db: Session = Depends(get_db)):
 @router.post("/earnings-week", dependencies=[Depends(verify_api_key)])
 def ingest_earnings_week(payload: EarningsWeekIngestPayload, db: Session = Depends(get_db)):
     """
-    이번 주 실적 발표 일정 업로드 (Mac mini → AWS).
-
-    주 단위 교체: week_start~week_end 범위 기존 데이터 DELETE → INSERT.
+    이번 주 + 다음 주 실적 발표 일정 업로드 (Mac mini → AWS).
+    전체 교체: 기존 데이터 전부 DELETE → INSERT.
     """
-    week_start = datetime.strptime(payload.week_start, "%Y-%m-%d").date()
-    week_end = datetime.strptime(payload.week_end, "%Y-%m-%d").date()
-
-    # Delete existing data for this week range
-    db.query(EarningsWeekEvent).filter(
-        EarningsWeekEvent.earnings_date >= week_start,
-        EarningsWeekEvent.earnings_date <= week_end,
-    ).delete()
+    # 전체 삭제 (this + next 주 모두 포함하므로 범위 제한 불필요)
+    db.query(EarningsWeekEvent).delete()
 
     inserted = 0
     for event in payload.events:
         earn_date = datetime.strptime(event.earnings_date, "%Y-%m-%d").date()
+        earn_date_end = (
+            datetime.strptime(event.earnings_date_end, "%Y-%m-%d").date()
+            if event.earnings_date_end else None
+        )
+        est = event.earnings_estimate
         db.add(EarningsWeekEvent(
             ticker=event.ticker,
             earnings_date=earn_date,
-            earnings_time=event.earnings_time,
-            eps_estimate=event.eps_estimate,
-            revenue_estimate=event.revenue_estimate,
-            market_cap=event.market_cap,
-            sector=event.sector,
-            name_en=event.name_en,
+            week=event.week,
             name_ko=event.name_ko,
+            name_en=event.name_en,
+            earnings_date_end=earn_date_end,
+            earnings_confirmed=event.earnings_confirmed,
+            d_day=event.d_day,
+            eps_estimate_high=est.high,
+            eps_estimate_low=est.low,
+            eps_estimate_avg=est.avg,
+            revenue_estimate=event.revenue_estimate,
+            prev_surprise_pct=event.prev_surprise_pct,
+            score=event.score,
         ))
         inserted += 1
 
     db.commit()
 
-    # Cleanup: remove events older than 30 days
-    db.execute(text(
-        "DELETE FROM analytics.earnings_week_events "
-        "WHERE earnings_date < CURRENT_DATE - INTERVAL '30 days'"
-    ))
-    db.commit()
-
     return {
         "status": "ok",
+        "date": payload.date,
         "week_start": payload.week_start,
         "week_end": payload.week_end,
         "inserted": inserted,

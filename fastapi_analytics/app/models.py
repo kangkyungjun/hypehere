@@ -495,11 +495,16 @@ class EarningsWeekEvent(Base):
 
     ticker = Column(String(10), primary_key=True, index=True)
     earnings_date = Column(Date, primary_key=True)
-    earnings_time = Column(String(10))  # BMO/AMC/TAS/Unknown
-    eps_estimate = Column(Float)
-    revenue_estimate = Column(Float)
-    market_cap = Column(Float)
-    sector = Column(String(50))
-    name_en = Column(String(100))
+    week = Column(String(10))                  # "this" | "next"
     name_ko = Column(String(100))
+    name_en = Column(String(100))
+    earnings_date_end = Column(Date)
+    earnings_confirmed = Column(Boolean, server_default=text('FALSE'))
+    d_day = Column(Integer)
+    eps_estimate_high = Column(Float)
+    eps_estimate_low = Column(Float)
+    eps_estimate_avg = Column(Float)
+    revenue_estimate = Column(Float)
+    prev_surprise_pct = Column(Float)
+    score = Column(Float)
     updated_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
