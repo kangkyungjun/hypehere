@@ -13,8 +13,10 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'nickname', 'display_name', 'profile_picture')
-        read_only_fields = ('id', 'username', 'email', 'nickname', 'display_name', 'profile_picture')
+        fields = ('id', 'username', 'email', 'nickname', 'display_name', 'profile_picture',
+                  'created_at', 'bio', 'role')
+        read_only_fields = ('id', 'username', 'email', 'nickname', 'display_name', 'profile_picture',
+                    'created_at', 'bio', 'role')
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -128,10 +130,10 @@ class UserProfileSerializer(serializers.ModelSerializer):
         fields = ('id', 'email', 'nickname', 'display_name',
                   'date_of_birth', 'bio', 'profile_picture', 'address',
                   'city', 'country', 'postal_code', 'is_verified', 'is_premium',
-                  'follower_count', 'following_count',
+                  'role', 'follower_count', 'following_count',
                   'created_at', 'updated_at')
         read_only_fields = ('id', 'email', 'display_name', 'is_verified',
-                            'is_premium', 'follower_count', 'following_count',
+                            'is_premium', 'role', 'follower_count', 'following_count',
                             'created_at', 'updated_at')
 
     def get_follower_count(self, obj):

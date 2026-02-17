@@ -61,6 +61,11 @@ class PostListCreateAPIView(generics.ListCreateAPIView):
             # Not authenticated: only show non-deleted posts
             queryset = queryset.filter(is_deleted_by_report=False)
 
+        # Filter by ticker if provided (for MarketLens community)
+        ticker = self.request.query_params.get('ticker')
+        if ticker:
+            queryset = queryset.filter(ticker__iexact=ticker)
+
         return queryset
 
     def get_serializer_class(self):

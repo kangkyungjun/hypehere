@@ -58,6 +58,8 @@ class Post(models.Model):
         related_name='posts'
     )
     content = models.TextField(max_length=1000)
+    title = models.CharField(max_length=200, blank=True, default='')
+    ticker = models.CharField(max_length=10, blank=True, default='', db_index=True)
     native_language = models.CharField(
         max_length=2,
         choices=LANGUAGE_CHOICES,

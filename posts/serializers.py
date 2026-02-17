@@ -39,7 +39,7 @@ class PostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
         fields = [
-            'id', 'author', 'content',
+            'id', 'author', 'title', 'content', 'ticker',
             'native_language', 'target_language',
             'hashtags', 'images', 'like_count', 'comment_count', 'is_liked', 'is_favorited',
             'can_edit', 'can_delete',
@@ -119,7 +119,7 @@ class PostCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ['content', 'native_language', 'target_language', 'images']
+        fields = ['title', 'content', 'ticker', 'native_language', 'target_language', 'images']
 
     def validate_images(self, value):
         """Validate uploaded images"""
