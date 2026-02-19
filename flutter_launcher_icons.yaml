@@ -1,0 +1,21 @@
+# flutter_launcher_icons configuration
+# Run: flutter pub run flutter_launcher_icons
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon/app_icon.png"
+
+  # Android adaptive icon (optional, for Android 8.0+)
+  adaptive_icon_background: "#1E88E5"
+  adaptive_icon_foreground: "assets/icon/app_icon.png"
+
+  # Remove old launcher icons
+  remove_alpha_ios: true
+
+  # Android specific settings
+  android_13:
+    generate: true
+
+  # Icon sizes to generate
+  # Android will auto-generate: mdpi(48), hdpi(72), xhdpi(96), xxhdpi(144), xxxhdpi(192)
