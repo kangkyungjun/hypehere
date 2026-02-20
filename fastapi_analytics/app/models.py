@@ -527,6 +527,28 @@ class StockMembership(Base):
     index_code = Column(String(20), primary_key=True)
 
 
+class TickerNews(Base):
+    """Ticker news with AI summary and sentiment analysis."""
+    __tablename__ = "ticker_news"
+    __table_args__ = {'schema': 'analytics'}
+
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    date = Column(Date, nullable=False, index=True)
+    ticker = Column(String(10), nullable=False, index=True)
+    title = Column(String(512), nullable=False)
+    title_hash = Column(String(32), nullable=False)
+    source = Column(String(100))
+    source_url = Column(String(2048))
+    published_at = Column(TIMESTAMP, nullable=False)
+    ai_summary = Column(String(200), nullable=False)
+    sentiment_score = Column(Integer, nullable=False)
+    sentiment_grade = Column(String(10), nullable=False)
+    sentiment_label = Column(String(10), nullable=False)
+    future_event = Column(JSONB)
+    created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+    updated_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
 class EarningsWeekEvent(Base):
     """이번 주 실적 발표 일정 (Flutter 캘린더용)."""
     __tablename__ = "earnings_week_events"

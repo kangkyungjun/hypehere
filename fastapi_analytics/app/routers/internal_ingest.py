@@ -2,6 +2,7 @@ from fastapi import APIRouter, Header, HTTPException, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from datetime import date, datetime
+import hashlib
 import logging
 
 from app.database import get_db
@@ -12,11 +13,13 @@ from app.models import (
     CompanyProfile, TickerKeyMetrics, TickerFinancials, TickerDividend,
     MacroIndicator, MacroChartData, TickerCalendar, TickerEarningsHistory,
     TickerDefenseLine, TickerRecommendation, TickerInstitutionalHolder,
-    EarningsWeekEvent, MarketIndex, MarketIndexChart, StockMembership
+    EarningsWeekEvent, MarketIndex, MarketIndexChart, StockMembership,
+    TickerNews
 )
 from app.schemas import (
     IngestPayload, ExtendedItemIngest, MacroIngestPayload,
-    EarningsWeekIngestPayload, MarketIndicesIngestPayload
+    EarningsWeekIngestPayload, MarketIndicesIngestPayload,
+    NewsIngestPayload, NewsIngestResponse
 )
 from app.config import settings
 from app.utils.trading_calendar import is_trading_day
@@ -1201,3 +1204,69 @@ def ingest_market_indices(payload: MarketIndicesIngestPayload, db: Session = Dep
     db.commit()
 
     return {"status": "ok", "upserted": upserted, "chart_points": chart_points}
+
+
+# ============================
+# News Ingest (Mac mini → AWS)
+# ============================
+
+@router.post("/news", dependencies=[Depends(verify_api_key)], response_model=NewsIngestResponse)
+def ingest_news(payload: NewsIngestPayload, db: Session = Depends(get_db)):
+    """
+    뉴스 데이터 인제스트 (Mac mini → AWS).
+
+    - title_hash = md5(lower(trim(title))) 로 중복 제거
+    - UPSERT: (ticker, date, title_hash) 기준
+    - 3년 자동 cleanup
+    """
+    upserted = 0
+
+    for item in payload.items:
+        title_hash = hashlib.md5(item.title.lower().strip().encode("utf-8")).hexdigest()
+
+        obj = db.query(TickerNews).filter(
+            TickerNews.ticker == item.ticker.upper(),
+            TickerNews.date == item.date,
+            TickerNews.title_hash == title_hash,
+        ).first()
+
+        future_event_dict = item.future_event.model_dump() if item.future_event else None
+
+        if obj:
+            obj.title = item.title
+            obj.source = item.source
+            obj.source_url = item.source_url
+            obj.published_at = item.published_at
+            obj.ai_summary = item.ai_summary
+            obj.sentiment_score = item.sentiment_score
+            obj.sentiment_grade = item.sentiment_grade
+            obj.sentiment_label = item.sentiment_label
+            obj.future_event = future_event_dict
+            obj.updated_at = datetime.utcnow()
+        else:
+            db.add(TickerNews(
+                date=item.date,
+                ticker=item.ticker.upper(),
+                title=item.title,
+                title_hash=title_hash,
+                source=item.source,
+                source_url=item.source_url,
+                published_at=item.published_at,
+                ai_summary=item.ai_summary,
+                sentiment_score=item.sentiment_score,
+                sentiment_grade=item.sentiment_grade,
+                sentiment_label=item.sentiment_label,
+                future_event=future_event_dict,
+            ))
+        upserted += 1
+
+    db.commit()
+
+    # 3년 cleanup
+    db.execute(text(
+        "DELETE FROM analytics.ticker_news "
+        "WHERE date < CURRENT_DATE - INTERVAL '3 years'"
+    ))
+    db.commit()
+
+    return NewsIngestResponse(upserted=upserted, total=len(payload.items))

@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
-from datetime import date as Date
-from typing import Optional, List, Union, Dict
+from datetime import date as Date, datetime as DateTime
+from typing import Optional, List, Union, Dict, Literal
 
 
 # ============================================================
@@ -480,6 +480,9 @@ class CompleteChartResponse(BaseModel):
     recommendations: Optional[RecommendationsResponse] = Field(None, description="Analyst recommendations distribution")
     institutional_holders: Optional[List[InstitutionalHolderResponse]] = Field(None, description="Top institutional holders")
 
+    # News (latest 5 articles)
+    news: Optional[List["NewsItemResponse"]] = Field(None, description="Latest news articles")
+
 
 # ============================================================
 # Internal Ingest Schemas (Mac mini → FastAPI)
@@ -804,3 +807,74 @@ class EarningsUpcomingResponse(BaseModel):
     week_end: str
     total_count: int
     by_date: Dict[str, List[EarningsWeekEventResponse]]
+
+
+# ============================================================
+# News Schemas (뉴스 인제스트 & 조회)
+# ============================================================
+
+class FutureEventData(BaseModel):
+    """Future event nested object within news item"""
+    date: Optional[str] = Field(None, description="Expected event date (YYYY-MM-DD)")
+    description: Optional[str] = Field(None, description="Event description")
+
+
+class NewsItemIngest(BaseModel):
+    """Single news item for ingest from Mac mini"""
+    date: Date = Field(..., description="News collection date")
+    ticker: str = Field(..., max_length=10, description="Ticker symbol")
+    title: str = Field(..., max_length=512, description="News headline")
+    source: Optional[str] = Field(None, max_length=100, description="News source name")
+    source_url: Optional[str] = Field(None, max_length=2048, description="Original article URL")
+    published_at: DateTime = Field(..., description="Article publication datetime")
+    ai_summary: str = Field(..., max_length=200, description="AI-generated summary")
+    sentiment_score: int = Field(..., ge=-100, le=100, description="Sentiment score (-100 ~ +100)")
+    sentiment_grade: Literal["bullish", "neutral", "bearish"] = Field(..., description="Sentiment grade")
+    sentiment_label: Literal["호재", "중립", "악재"] = Field(..., description="Korean sentiment label")
+    future_event: Optional[FutureEventData] = Field(None, description="Upcoming event related to this news")
+
+
+class NewsIngestPayload(BaseModel):
+    """News ingest payload from Mac mini"""
+    items: List[NewsItemIngest] = Field(..., description="List of news items")
+
+
+class NewsIngestResponse(BaseModel):
+    """News ingest response"""
+    upserted: int = Field(..., description="Number of items upserted")
+    total: int = Field(..., description="Total items in payload")
+
+
+class NewsItemResponse(BaseModel):
+    """Single news item in public API response"""
+    date: Date
+    ticker: str
+    title: str
+    source: Optional[str] = None
+    source_url: Optional[str] = None
+    published_at: DateTime
+    ai_summary: str
+    sentiment_score: int
+    sentiment_grade: str
+    sentiment_label: str
+    future_event: Optional[dict] = None
+
+    class Config:
+        from_attributes = True
+
+
+class NewsListResponse(BaseModel):
+    """News list API response"""
+    items: List[NewsItemResponse] = Field(default_factory=list)
+    total: int = 0
+
+
+class NewsSummaryResponse(BaseModel):
+    """News sentiment summary for a ticker"""
+    ticker: str
+    date: Optional[Date] = None
+    total_articles: int = 0
+    bullish: int = 0
+    neutral: int = 0
+    bearish: int = 0
+    avg_score: Optional[float] = None

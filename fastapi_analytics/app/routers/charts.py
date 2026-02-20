@@ -9,14 +9,16 @@ from app.models import (
     TickerAnalystRating,
     CompanyProfile, TickerKeyMetrics, TickerFinancials, TickerDividend,
     TickerCalendar, TickerEarningsHistory,
-    TickerDefenseLine, TickerRecommendation, TickerInstitutionalHolder
+    TickerDefenseLine, TickerRecommendation, TickerInstitutionalHolder,
+    TickerNews
 )
 from app.schemas import (
     CompleteChartResponse, ChartDataPoint, TrendlineValue,
     AnalystConsensus, AnalystRatingItem,
     CompanyProfileResponse, KeyMetricsResponse, FinancialsResponse, DividendEntry,
     CalendarResponse, EarningsHistoryItem,
-    DefenseLineResponse, RecommendationsResponse, InstitutionalHolderResponse
+    DefenseLineResponse, RecommendationsResponse, InstitutionalHolderResponse,
+    NewsItemResponse
 )
 
 router = APIRouter()
@@ -279,6 +281,11 @@ def get_complete_chart_data(
             TickerInstitutionalHolder.date == latest_ih_date,
         ).order_by(TickerInstitutionalHolder.pct_held.desc()).limit(20).all()
 
+    # 20) Latest news (5 articles)
+    news_objs = db.query(TickerNews).filter(
+        TickerNews.ticker == ticker
+    ).order_by(TickerNews.published_at.desc()).limit(5).all()
+
     # ========================================
     # Build lookup dictionaries by date
     # ========================================
@@ -515,5 +522,22 @@ def get_complete_chart_data(
                 pct_held=ih.pct_held,
                 pct_change=ih.pct_change,
             ) for ih in institutional_holder_objs
+        ] or None,
+
+        # News (latest 5)
+        news=[
+            NewsItemResponse(
+                date=n.date,
+                ticker=n.ticker,
+                title=n.title,
+                source=n.source,
+                source_url=n.source_url,
+                published_at=n.published_at,
+                ai_summary=n.ai_summary,
+                sentiment_score=n.sentiment_score,
+                sentiment_grade=n.sentiment_grade,
+                sentiment_label=n.sentiment_label,
+                future_event=n.future_event,
+            ) for n in news_objs
         ] or None,
     )
