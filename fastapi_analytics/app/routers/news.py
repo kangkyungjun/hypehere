@@ -9,6 +9,50 @@ from app.schemas import NewsListResponse, NewsItemResponse, NewsSummaryResponse
 router = APIRouter()
 
 
+@router.get("/latest", response_model=NewsListResponse)
+def get_latest_news(
+    limit: int = Query(3, ge=1, le=50, description="Max items"),
+    offset: int = Query(0, ge=0, description="Offset for pagination"),
+    db: Session = Depends(get_db),
+):
+    """
+    전체 종목 최신 AI 요약 뉴스 조회 (대시보드용).
+
+    - ticker 파라미터 없이 전체 종목 대상
+    - 정렬: published_at DESC
+    - 빈 데이터 시 빈 구조 반환 (404 아님)
+    """
+    query = db.query(TickerNews)
+    total = query.count()
+
+    rows = (
+        query
+        .order_by(TickerNews.published_at.desc())
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
+
+    items = [
+        NewsItemResponse(
+            date=r.date,
+            ticker=r.ticker,
+            title=r.title,
+            source=r.source,
+            source_url=r.source_url,
+            published_at=r.published_at,
+            ai_summary=r.ai_summary,
+            sentiment_score=r.sentiment_score,
+            sentiment_grade=r.sentiment_grade,
+            sentiment_label=r.sentiment_label,
+            future_event=r.future_event,
+        )
+        for r in rows
+    ]
+
+    return NewsListResponse(items=items, total=total)
+
+
 @router.get("/", response_model=NewsListResponse)
 def get_news(
     ticker: str = Query(..., description="Ticker symbol"),
