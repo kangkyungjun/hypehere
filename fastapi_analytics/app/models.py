@@ -410,6 +410,36 @@ class MacroChartData(Base):
     created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
 
 
+class MarketIndex(Base):
+    """Major market indices (SPY, QQQ, DIA)."""
+    __tablename__ = "market_indices"
+    __table_args__ = {'schema': 'analytics'}
+
+    date = Column(Date, primary_key=True)
+    code = Column(String(10), primary_key=True)
+    name = Column(String(50), nullable=False)
+    open = Column(Float)
+    high = Column(Float)
+    low = Column(Float)
+    close = Column(Float)
+    volume = Column(BigInteger)
+    prev_close = Column(Float)
+    change = Column(Float)
+    change_pct = Column(Float)
+    created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class MarketIndexChart(Base):
+    """Market index daily chart data (sparkline)."""
+    __tablename__ = "market_index_chart"
+    __table_args__ = {'schema': 'analytics'}
+
+    code = Column(String(10), primary_key=True)
+    date = Column(Date, primary_key=True)
+    close = Column(Float, nullable=False)
+    created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
 class TickerCalendar(Base):
     """Ticker calendar events (earnings date, dividends)."""
     __tablename__ = "ticker_calendar"
@@ -486,6 +516,15 @@ class TickerInstitutionalHolder(Base):
     pct_held = Column(Float)
     pct_change = Column(Float)
     created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class StockMembership(Base):
+    """Stock index membership (SP500, DOW30, NASDAQ100)."""
+    __tablename__ = "stock_membership"
+    __table_args__ = {'schema': 'analytics'}
+
+    ticker = Column(String(10), primary_key=True)
+    index_code = Column(String(20), primary_key=True)
 
 
 class EarningsWeekEvent(Base):

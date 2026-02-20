@@ -12,11 +12,11 @@ from app.models import (
     CompanyProfile, TickerKeyMetrics, TickerFinancials, TickerDividend,
     MacroIndicator, MacroChartData, TickerCalendar, TickerEarningsHistory,
     TickerDefenseLine, TickerRecommendation, TickerInstitutionalHolder,
-    EarningsWeekEvent
+    EarningsWeekEvent, MarketIndex, MarketIndexChart, StockMembership
 )
 from app.schemas import (
     IngestPayload, ExtendedItemIngest, MacroIngestPayload,
-    EarningsWeekIngestPayload
+    EarningsWeekIngestPayload, MarketIndicesIngestPayload
 )
 from app.config import settings
 from app.utils.trading_calendar import is_trading_day
@@ -394,6 +394,15 @@ def ingest_scores(payload: IngestPayload, db: Session = Depends(get_db)):
                     extra_data=metadata,
                 )
                 db.add(ticker_obj)
+
+        # ==========================================
+        # 2.6) Sync stock_membership (index membership tags)
+        # ==========================================
+        membership = getattr(item, 'membership', None) or []
+        if membership:
+            db.query(StockMembership).filter(StockMembership.ticker == ticker).delete()
+            for code in membership:
+                db.add(StockMembership(ticker=ticker, index_code=code))
 
         # ==========================================
         # 3) UPSERT to ticker_indicators (RSI, MACD, BB)
@@ -1118,3 +1127,77 @@ def ingest_earnings_week(payload: EarningsWeekIngestPayload, db: Session = Depen
         "week_end": payload.week_end,
         "inserted": inserted,
     }
+
+
+# ============================
+# 시장 지수 Ingest 엔드포인트
+# ============================
+@router.post("/market-indices", dependencies=[Depends(verify_api_key)])
+def ingest_market_indices(payload: MarketIndicesIngestPayload, db: Session = Depends(get_db)):
+    """
+    시장 주요 지수 업로드 (Mac mini → AWS).
+
+    SPY (S&P 500), QQQ (NASDAQ 100), DIA (Dow Jones) 데이터 수신.
+    각 지수의 OHLCV + 변동률 + 1년치 스파크라인 차트 데이터 저장.
+    """
+    ingest_date = datetime.strptime(payload.date, "%Y-%m-%d").date()
+    upserted = 0
+    chart_points = 0
+
+    for idx in payload.indices:
+        # 1) market_indices 테이블 UPSERT
+        obj = db.query(MarketIndex).filter(
+            MarketIndex.date == ingest_date,
+            MarketIndex.code == idx.code,
+        ).first()
+
+        if obj:
+            obj.name = idx.name
+            obj.open = idx.open
+            obj.high = idx.high
+            obj.low = idx.low
+            obj.close = idx.close
+            obj.volume = idx.volume
+            obj.prev_close = idx.prev_close
+            obj.change = idx.change
+            obj.change_pct = idx.change_pct
+        else:
+            db.add(MarketIndex(
+                date=ingest_date, code=idx.code, name=idx.name,
+                open=idx.open, high=idx.high, low=idx.low,
+                close=idx.close, volume=idx.volume,
+                prev_close=idx.prev_close,
+                change=idx.change, change_pct=idx.change_pct,
+            ))
+        upserted += 1
+
+        # 2) chart 데이터 bulk UPSERT (스파크라인용)
+        for pt in idx.chart:
+            pt_date = datetime.strptime(pt.date, "%Y-%m-%d").date()
+            chart_obj = db.query(MarketIndexChart).filter(
+                MarketIndexChart.code == idx.code,
+                MarketIndexChart.date == pt_date,
+            ).first()
+
+            if chart_obj:
+                chart_obj.close = pt.close
+            else:
+                db.add(MarketIndexChart(
+                    code=idx.code, date=pt_date, close=pt.close,
+                ))
+            chart_points += 1
+
+    db.commit()
+
+    # 3년 cleanup
+    db.execute(text(
+        "DELETE FROM analytics.market_indices "
+        "WHERE date < CURRENT_DATE - INTERVAL '3 years'"
+    ))
+    db.execute(text(
+        "DELETE FROM analytics.market_index_chart "
+        "WHERE date < CURRENT_DATE - INTERVAL '3 years'"
+    ))
+    db.commit()
+
+    return {"status": "ok", "upserted": upserted, "chart_points": chart_points}

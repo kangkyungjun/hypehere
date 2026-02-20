@@ -351,6 +351,7 @@ def get_complete_chart_data(
             # Institutions
             inst_ownership=inst_obj.inst_ownership if inst_obj else None,
             foreign_ownership=inst_obj.foreign_ownership if inst_obj else None,
+            insider_ownership=inst_obj.insider_ownership if inst_obj else None,
             inst_chg_1d=inst_obj.inst_chg_1d if inst_obj else None,
             inst_chg_5d=inst_obj.inst_chg_5d if inst_obj else None,
             foreign_chg_1d=inst_obj.foreign_chg_1d if inst_obj else None,

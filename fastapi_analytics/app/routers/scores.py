@@ -2,9 +2,9 @@ from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import desc, func
 from datetime import date, timedelta
-from typing import List
+from typing import List, Optional
 from app.database import get_db
-from app.models import TickerScore, Ticker
+from app.models import TickerScore, Ticker, StockMembership
 from app.schemas import TickerScoreListResponse, TopTickerResponse
 from app.utils.trading_calendar import get_latest_trading_date
 
@@ -46,6 +46,7 @@ def translate_signal(korean_signal: str | None) -> str | None:
 def get_top_scores(
     target_date: date = Query(None, alias="date", description="Date (default: today)"),
     limit: int = Query(10, le=500, ge=1, description="Number of results (max 500)"),
+    index: Optional[str] = Query(None, description="Filter by index: SP500, DOW30, NASDAQ100"),
     db: Session = Depends(get_db)
 ):
     """
@@ -55,28 +56,11 @@ def get_top_scores(
     - 오늘의 상위 종목
     - 시그널 포함
     - 이름 포함 (ticker metadata join)
+    - index 파라미터로 지수별 필터링 가능
 
     Example:
     ```
-    GET /api/v1/scores/top?date=2026-02-02&limit=10
-    ```
-
-    Response:
-    ```json
-    [
-        {
-            "ticker": "AAPL",
-            "score": 92.5,
-            "signal": "BUY",
-            "name": "Apple Inc."
-        },
-        {
-            "ticker": "TSLA",
-            "score": 88.3,
-            "signal": "HOLD",
-            "name": "Tesla, Inc."
-        }
-    ]
+    GET /api/v1/scores/top?date=2026-02-02&limit=10&index=SP500
     ```
     """
     if target_date is None:
@@ -88,7 +72,7 @@ def get_top_scores(
         target_date = latest_date
 
     # Join with ticker metadata for names
-    results = db.query(
+    query = db.query(
         TickerScore.ticker,
         TickerScore.score,
         TickerScore.signal,
@@ -99,9 +83,29 @@ def get_top_scores(
         TickerScore.ticker == Ticker.ticker
     ).filter(
         TickerScore.date == target_date
-    ).order_by(
+    )
+
+    # Optional index filter
+    if index:
+        query = query.join(
+            StockMembership,
+            (TickerScore.ticker == StockMembership.ticker) &
+            (StockMembership.index_code == index)
+        )
+
+    results = query.order_by(
         desc(TickerScore.score)
     ).limit(limit).all()
+
+    # Batch-fetch memberships for all result tickers
+    result_tickers = [r.ticker for r in results]
+    memberships_rows = db.query(
+        StockMembership.ticker, StockMembership.index_code
+    ).filter(StockMembership.ticker.in_(result_tickers)).all() if result_tickers else []
+
+    membership_map: dict[str, list[str]] = {}
+    for m in memberships_rows:
+        membership_map.setdefault(m.ticker, []).append(m.index_code)
 
     # 결과 없어도 빈 배열 반환 (404 금지)
     return [
@@ -110,7 +114,8 @@ def get_top_scores(
             "score": r.score,
             "signal": translate_signal(r.signal),  # Korean → English translation
             "name": r.name,
-            "name_ko": r.extra_data.get("name_ko") if r.extra_data else None
+            "name_ko": r.extra_data.get("name_ko") if r.extra_data else None,
+            "membership": membership_map.get(r.ticker),
         }
         for r in results
     ]
@@ -121,6 +126,7 @@ def get_market_insights(
     target_date: date = Query(None, alias="date", description="Date (default: today)"),
     top: int = Query(5, ge=1, le=500, description="Number of top movers (max 500)"),
     bottom: int = Query(5, ge=1, le=500, description="Number of bottom movers (max 500)"),
+    index: Optional[str] = Query(None, description="Filter by index: SP500, DOW30, NASDAQ100"),
     db: Session = Depends(get_db)
 ):
     """
@@ -129,35 +135,7 @@ def get_market_insights(
     **대시보드용** ⭐⭐⭐
     - 강세 종목 (점수 높은 순)
     - 약세 종목 (점수 낮은 순)
-    - 매수/매도 후보 파악
-
-    Example:
-    ```
-    GET /api/v1/scores/insights?date=2026-02-03&top=5&bottom=5
-    ```
-
-    Response:
-    ```json
-    {
-        "date": "2026-02-03",
-        "top_movers": [
-            {
-                "ticker": "NVDA",
-                "score": 95.2,
-                "signal": "BUY",
-                "name": "NVIDIA Corporation"
-            }
-        ],
-        "bottom_movers": [
-            {
-                "ticker": "INTC",
-                "score": 32.1,
-                "signal": "SELL",
-                "name": "Intel Corporation"
-            }
-        ]
-    }
-    ```
+    - index 파라미터로 지수별 필터링 가능
     """
     if target_date is None:
         # Use latest trading day instead of raw MAX(date) to skip weekends/holidays
@@ -167,61 +145,63 @@ def get_market_insights(
             return {"date": None, "top_movers": [], "bottom_movers": []}
         target_date = latest_date
 
+    # Base query builder
+    def _build_base_query():
+        q = db.query(
+            TickerScore.ticker,
+            TickerScore.score,
+            TickerScore.signal,
+            Ticker.name,
+            Ticker.extra_data  # JSONB metadata (contains name_ko)
+        ).outerjoin(
+            Ticker,
+            TickerScore.ticker == Ticker.ticker
+        ).filter(
+            TickerScore.date == target_date
+        )
+        if index:
+            q = q.join(
+                StockMembership,
+                (TickerScore.ticker == StockMembership.ticker) &
+                (StockMembership.index_code == index)
+            )
+        return q
+
     # Query top movers (highest scores)
-    top_results = db.query(
-        TickerScore.ticker,
-        TickerScore.score,
-        TickerScore.signal,
-        Ticker.name,
-        Ticker.extra_data  # JSONB metadata (contains name_ko)
-    ).outerjoin(
-        Ticker,
-        TickerScore.ticker == Ticker.ticker
-    ).filter(
-        TickerScore.date == target_date
-    ).order_by(
+    top_results = _build_base_query().order_by(
         desc(TickerScore.score)
     ).limit(top).all()
 
     # Query bottom movers (lowest scores)
-    bottom_results = db.query(
-        TickerScore.ticker,
-        TickerScore.score,
-        TickerScore.signal,
-        Ticker.name,
-        Ticker.extra_data  # JSONB metadata (contains name_ko)
-    ).outerjoin(
-        Ticker,
-        TickerScore.ticker == Ticker.ticker
-    ).filter(
-        TickerScore.date == target_date
-    ).order_by(
+    bottom_results = _build_base_query().order_by(
         TickerScore.score.asc()
     ).limit(bottom).all()
+
+    # Batch-fetch memberships
+    all_tickers = list({r.ticker for r in top_results} | {r.ticker for r in bottom_results})
+    memberships_rows = db.query(
+        StockMembership.ticker, StockMembership.index_code
+    ).filter(StockMembership.ticker.in_(all_tickers)).all() if all_tickers else []
+
+    membership_map: dict[str, list[str]] = {}
+    for m in memberships_rows:
+        membership_map.setdefault(m.ticker, []).append(m.index_code)
+
+    def _format_result(r):
+        return {
+            "ticker": r.ticker,
+            "score": r.score,
+            "signal": translate_signal(r.signal),
+            "name": r.name,
+            "name_ko": r.extra_data.get("name_ko") if r.extra_data else None,
+            "membership": membership_map.get(r.ticker),
+        }
 
     # 결과 없어도 빈 배열 반환 (404 금지)
     return {
         "date": str(target_date),
-        "top_movers": [
-            {
-                "ticker": r.ticker,
-                "score": r.score,
-                "signal": translate_signal(r.signal),  # Korean → English translation
-                "name": r.name,
-                "name_ko": r.extra_data.get("name_ko") if r.extra_data else None
-            }
-            for r in top_results
-        ],
-        "bottom_movers": [
-            {
-                "ticker": r.ticker,
-                "score": r.score,
-                "signal": translate_signal(r.signal),  # Korean → English translation
-                "name": r.name,
-                "name_ko": r.extra_data.get("name_ko") if r.extra_data else None
-            }
-            for r in bottom_results
-        ]
+        "top_movers": [_format_result(r) for r in top_results],
+        "bottom_movers": [_format_result(r) for r in bottom_results],
     }
 
 

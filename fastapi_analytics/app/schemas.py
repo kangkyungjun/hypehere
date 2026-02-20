@@ -30,6 +30,7 @@ class TopTickerResponse(BaseModel):
     signal: Optional[str] = Field(None, description="Trading signal")
     name: Optional[str] = Field(None, description="Human-readable name")
     name_ko: Optional[str] = Field(None, description="Korean name (e.g., '애플')")
+    membership: Optional[List[str]] = Field(None, description="Index membership (e.g., ['SP500', 'DOW30'])")
 
     class Config:
         from_attributes = True
@@ -129,6 +130,7 @@ class ChartDataPoint(BaseModel):
     # Institutional data
     inst_ownership: Optional[float] = Field(None, description="Institutional ownership %")
     foreign_ownership: Optional[float] = Field(None, description="Foreign ownership %")
+    insider_ownership: Optional[float] = Field(None, description="Insider ownership %")
     inst_chg_1d: Optional[float] = Field(None, description="1-day institutional change")
     inst_chg_5d: Optional[float] = Field(None, description="5-day institutional change")
     foreign_chg_1d: Optional[float] = Field(None, description="1-day foreign change")
@@ -307,6 +309,61 @@ class MacroChartResponse(BaseModel):
     series_id: str
     count: int
     data: List[MacroChartPointResponse]
+
+
+# ============================================================
+# Market Indices Schemas
+# ============================================================
+
+class IndexChartPoint(BaseModel):
+    """스파크라인 차트 포인트"""
+    date: str
+    close: float
+
+
+class MarketIndexItem(BaseModel):
+    """단일 지수 ingest 데이터 (Mac mini → AWS)"""
+    code: str
+    name: str
+    close: float
+    prev_close: float
+    change: float
+    change_pct: float
+    open: float
+    high: float
+    low: float
+    volume: int
+    chart: List[IndexChartPoint] = []
+
+
+class MarketIndicesIngestPayload(BaseModel):
+    """시장 지수 ingest payload (Mac mini → AWS)"""
+    date: str
+    indices: List[MarketIndexItem]
+
+
+class MarketIndexResponse(BaseModel):
+    """단일 지수 응답 (Flutter용)"""
+    code: str
+    name: str
+    close: float
+    prev_close: float
+    change: float
+    change_pct: float
+    open: Optional[float] = None
+    high: Optional[float] = None
+    low: Optional[float] = None
+    volume: Optional[int] = None
+    chart: List[IndexChartPoint] = []
+
+    class Config:
+        from_attributes = True
+
+
+class MarketIndicesResponse(BaseModel):
+    """시장 지수 전체 응답 (Flutter용)"""
+    date: str
+    indices: List[MarketIndexResponse]
 
 
 # ============================================================
@@ -594,6 +651,7 @@ class ExtendedItemIngest(BaseModel):
     earnings_history: Optional[List[EarningsHistoryEntry]] = Field(None, description="Earnings history (EPS estimate vs reported)")
     ownership: Optional[OwnershipData] = Field(None, description="Ownership data (institution, insider, short_float)")
     institutional_holders: Optional[List[InstitutionalHolder]] = Field(None, description="Individual institutional holders")
+    membership: Optional[List[str]] = Field(None, description="Index membership list (e.g., ['SP500', 'DOW30'])")
 
 
 class SimpleItemIngest(BaseModel):
@@ -632,6 +690,9 @@ class SimpleItemIngest(BaseModel):
     sub_industry: Optional[str] = Field(None, max_length=200, description="GICS sub-industry name")
     change_pct: Optional[float] = Field(None, description="Daily price change %")
     trading_value: Optional[float] = Field(None, description="close * volume (USD)")
+
+    # Index membership
+    membership: Optional[List[str]] = Field(None, description="Index membership list (e.g., ['SP500', 'DOW30'])")
 
 
 class IngestPayload(BaseModel):
