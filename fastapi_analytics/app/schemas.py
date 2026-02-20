@@ -434,6 +434,24 @@ class InstitutionalHolderResponse(BaseModel):
     pct_change: Optional[float] = None
 
 
+class NewsItemResponse(BaseModel):
+    """Single news item in public API response"""
+    date: Date
+    ticker: str
+    title: str
+    source: Optional[str] = None
+    source_url: Optional[str] = None
+    published_at: DateTime
+    ai_summary: str
+    sentiment_score: int
+    sentiment_grade: str
+    sentiment_label: str
+    future_event: Optional[dict] = None
+
+    class Config:
+        from_attributes = True
+
+
 class CompleteChartResponse(BaseModel):
     """
     Complete chart data for Flutter app (1 API call gets everything).
@@ -481,7 +499,7 @@ class CompleteChartResponse(BaseModel):
     institutional_holders: Optional[List[InstitutionalHolderResponse]] = Field(None, description="Top institutional holders")
 
     # News (latest 5 articles)
-    news: Optional[List["NewsItemResponse"]] = Field(None, description="Latest news articles")
+    news: Optional[List[NewsItemResponse]] = Field(None, description="Latest news articles")
 
 
 # ============================================================
@@ -843,24 +861,6 @@ class NewsIngestResponse(BaseModel):
     """News ingest response"""
     upserted: int = Field(..., description="Number of items upserted")
     total: int = Field(..., description="Total items in payload")
-
-
-class NewsItemResponse(BaseModel):
-    """Single news item in public API response"""
-    date: Date
-    ticker: str
-    title: str
-    source: Optional[str] = None
-    source_url: Optional[str] = None
-    published_at: DateTime
-    ai_summary: str
-    sentiment_score: int
-    sentiment_grade: str
-    sentiment_label: str
-    future_event: Optional[dict] = None
-
-    class Config:
-        from_attributes = True
 
 
 class NewsListResponse(BaseModel):
