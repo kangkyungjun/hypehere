@@ -501,6 +501,9 @@ class CompleteChartResponse(BaseModel):
     # News (latest 5 articles)
     news: Optional[List[NewsItemResponse]] = Field(None, description="Latest news articles")
 
+    # News sentiment stats (week/month aggregation)
+    news_sentiment_stats: Optional[dict] = Field(None, description="Sentiment counts: {week: {bullish, neutral, bearish}, month: {bullish, neutral, bearish}}")
+
 
 # ============================================================
 # Internal Ingest Schemas (Mac mini → FastAPI)

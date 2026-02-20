@@ -286,6 +286,27 @@ def get_complete_chart_data(
         TickerNews.ticker == ticker
     ).order_by(TickerNews.published_at.desc()).limit(5).all()
 
+    # 21) News sentiment stats (week / month)
+    today = date.today()
+    week_ago = today - timedelta(days=7)
+    month_ago = today - timedelta(days=30)
+
+    def _count_sentiments(since_date):
+        rows = db.query(TickerNews.sentiment_grade, func.count()).filter(
+            TickerNews.ticker == ticker,
+            TickerNews.date >= since_date,
+        ).group_by(TickerNews.sentiment_grade).all()
+        counts = {"bullish": 0, "neutral": 0, "bearish": 0}
+        for grade, cnt in rows:
+            if grade in counts:
+                counts[grade] = cnt
+        return counts
+
+    news_sentiment_stats = {
+        "week": _count_sentiments(week_ago),
+        "month": _count_sentiments(month_ago),
+    }
+
     # ========================================
     # Build lookup dictionaries by date
     # ========================================
@@ -540,4 +561,7 @@ def get_complete_chart_data(
                 future_event=n.future_event,
             ) for n in news_objs
         ] or None,
+
+        # News sentiment stats
+        news_sentiment_stats=news_sentiment_stats,
     )
