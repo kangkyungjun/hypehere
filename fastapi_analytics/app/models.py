@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Date, Float, BigInteger, Integer, Boolean, TIMESTAMP, text
+from sqlalchemy import Column, String, Date, Float, BigInteger, Integer, Boolean, TIMESTAMP, Text, text
 from sqlalchemy.dialects.postgresql import JSONB
 from app.database import Base
 
@@ -569,3 +569,15 @@ class EarningsWeekEvent(Base):
     prev_surprise_pct = Column(Float)
     score = Column(Float)
     updated_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class AccountWithdrawal(Base):
+    """Account withdrawal reasons (Flutter app → FastAPI)."""
+    __tablename__ = "account_withdrawals"
+    __table_args__ = {'schema': 'analytics'}
+
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    user_email = Column(String(255), nullable=False)
+    user_nickname = Column(String(100))
+    reason = Column(Text)
+    created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))

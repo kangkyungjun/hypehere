@@ -881,3 +881,20 @@ class NewsSummaryResponse(BaseModel):
     neutral: int = 0
     bearish: int = 0
     avg_score: Optional[float] = None
+
+
+# ============================================================
+# Account Withdrawal Schemas (회원탈퇴)
+# ============================================================
+
+class WithdrawalRequest(BaseModel):
+    """Account withdrawal reason from Flutter app"""
+    user_email: str
+    user_nickname: Optional[str] = None
+    reason: Optional[str] = None
+
+
+class WithdrawalResponse(BaseModel):
+    """Account withdrawal response"""
+    message: str
+    id: int

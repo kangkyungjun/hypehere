@@ -14,12 +14,13 @@ from app.models import (
     MacroIndicator, MacroChartData, TickerCalendar, TickerEarningsHistory,
     TickerDefenseLine, TickerRecommendation, TickerInstitutionalHolder,
     EarningsWeekEvent, MarketIndex, MarketIndexChart, StockMembership,
-    TickerNews
+    TickerNews, AccountWithdrawal
 )
 from app.schemas import (
     IngestPayload, ExtendedItemIngest, MacroIngestPayload,
     EarningsWeekIngestPayload, MarketIndicesIngestPayload,
-    NewsIngestPayload, NewsIngestResponse
+    NewsIngestPayload, NewsIngestResponse,
+    WithdrawalRequest, WithdrawalResponse
 )
 from app.config import settings
 from app.utils.trading_calendar import is_trading_day
@@ -1270,3 +1271,29 @@ def ingest_news(payload: NewsIngestPayload, db: Session = Depends(get_db)):
     db.commit()
 
     return NewsIngestResponse(upserted=upserted, total=len(payload.items))
+
+
+# ============================
+# 회원탈퇴 사유 저장 (Flutter → AWS)
+# ============================
+
+@router.post("/withdrawal", response_model=WithdrawalResponse)
+def save_withdrawal_reason(payload: WithdrawalRequest, db: Session = Depends(get_db)):
+    """
+    회원탈퇴 사유 저장 (Flutter 앱에서 직접 호출, API key 불필요).
+
+    탈퇴 사유를 analytics.account_withdrawals에 INSERT하여
+    관리자가 나중에 확인할 수 있도록 한다.
+    """
+    withdrawal = AccountWithdrawal(
+        user_email=payload.user_email,
+        user_nickname=payload.user_nickname,
+        reason=payload.reason,
+    )
+    db.add(withdrawal)
+    db.commit()
+    db.refresh(withdrawal)
+
+    logger.info(f"Withdrawal reason saved: {payload.user_email} (id={withdrawal.id})")
+
+    return WithdrawalResponse(message="saved", id=withdrawal.id)
