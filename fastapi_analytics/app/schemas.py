@@ -541,10 +541,10 @@ class IndicatorData(BaseModel):
 class AIAnalysisData(BaseModel):
     """AI analysis results (nested structure)"""
     probability: float = Field(..., ge=0, le=1, description="Prediction confidence (0.0-1.0)")
-    summary: str = Field(..., max_length=200, description="Brief analysis summary")
+    summary: str = Field(..., max_length=1000, description="Brief analysis summary (multilingual |||‑packed)")
     bullish_reasons: List[str] = Field(..., description="List of bullish factors")
     bearish_reasons: List[str] = Field(..., description="List of bearish factors")
-    final_comment: str = Field(..., max_length=500, description="Final recommendation")
+    final_comment: str = Field(..., max_length=2500, description="Final recommendation (multilingual |||‑packed)")
 
 
 class TrendlineCoefficients(BaseModel):

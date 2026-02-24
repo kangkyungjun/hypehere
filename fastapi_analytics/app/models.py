@@ -254,10 +254,10 @@ class TickerAIAnalysis(Base):
     ticker = Column(String(10), primary_key=True, index=True)
     date = Column(Date, primary_key=True, index=True)
     probability = Column(Float, nullable=False)
-    summary = Column(String(200), nullable=False)
+    summary = Column(String(1000), nullable=False)
     bullish_reasons = Column(JSONB)  # Array of strings
     bearish_reasons = Column(JSONB)  # Array of strings
-    final_comment = Column(String(500))
+    final_comment = Column(String(2500))
     created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
 
 
