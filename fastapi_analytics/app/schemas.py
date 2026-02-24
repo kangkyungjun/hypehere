@@ -447,6 +447,7 @@ class NewsItemResponse(BaseModel):
     sentiment_grade: str
     sentiment_label: str
     future_event: Optional[dict] = None
+    ticker_name_ko: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -848,10 +849,10 @@ class NewsItemIngest(BaseModel):
     source: Optional[str] = Field(None, max_length=100, description="News source name")
     source_url: Optional[str] = Field(None, max_length=2048, description="Original article URL")
     published_at: DateTime = Field(..., description="Article publication datetime")
-    ai_summary: str = Field(..., max_length=200, description="AI-generated summary")
+    ai_summary: str = Field(..., max_length=1000, description="AI-generated summary (multilingual |||‑packed)")
     sentiment_score: int = Field(..., ge=-100, le=100, description="Sentiment score (-100 ~ +100)")
     sentiment_grade: Literal["bullish", "neutral", "bearish"] = Field(..., description="Sentiment grade")
-    sentiment_label: Literal["호재", "중립", "악재"] = Field(..., description="Korean sentiment label")
+    sentiment_label: str = Field(..., max_length=100, description="Sentiment label (multilingual |||‑packed)")
     future_event: Optional[FutureEventData] = Field(None, description="Upcoming event related to this news")
 
 

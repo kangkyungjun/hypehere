@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 from datetime import date
 from app.database import get_db
-from app.models import TickerNews
+from app.models import TickerNews, Ticker
 from app.schemas import NewsListResponse, NewsItemResponse, NewsSummaryResponse
 
 router = APIRouter()
@@ -20,13 +20,14 @@ def get_latest_news(
 
     - ticker 파라미터 없이 전체 종목 대상
     - 정렬: published_at DESC
+    - Ticker JOIN으로 한글 회사명(name_ko) 포함
     - 빈 데이터 시 빈 구조 반환 (404 아님)
     """
-    query = db.query(TickerNews)
-    total = query.count()
+    total = db.query(TickerNews).count()
 
     rows = (
-        query
+        db.query(TickerNews, Ticker.extra_data)
+        .outerjoin(Ticker, TickerNews.ticker == Ticker.ticker)
         .order_by(TickerNews.published_at.desc())
         .offset(offset)
         .limit(limit)
@@ -46,8 +47,9 @@ def get_latest_news(
             sentiment_grade=r.sentiment_grade,
             sentiment_label=r.sentiment_label,
             future_event=r.future_event,
+            ticker_name_ko=(extra_data or {}).get('name_ko') if extra_data else None,
         )
-        for r in rows
+        for r, extra_data in rows
     ]
 
     return NewsListResponse(items=items, total=total)
@@ -66,21 +68,26 @@ def get_news(
     종목별 뉴스 목록 조회.
 
     - 정렬: published_at DESC
+    - Ticker JOIN으로 한글 회사명(name_ko) 포함
     - 빈 데이터 시 빈 구조 반환 (404 아님)
     """
     ticker = ticker.upper()
 
-    query = db.query(TickerNews).filter(TickerNews.ticker == ticker)
+    base_query = db.query(TickerNews).filter(TickerNews.ticker == ticker)
 
     if from_date:
-        query = query.filter(TickerNews.date >= from_date)
+        base_query = base_query.filter(TickerNews.date >= from_date)
     if to_date:
-        query = query.filter(TickerNews.date <= to_date)
+        base_query = base_query.filter(TickerNews.date <= to_date)
 
-    total = query.count()
+    total = base_query.count()
+
+    # Ticker JOIN for name_ko
+    ticker_meta = db.query(Ticker.extra_data).filter(Ticker.ticker == ticker).first()
+    name_ko = (ticker_meta[0] or {}).get('name_ko') if ticker_meta else None
 
     rows = (
-        query
+        base_query
         .order_by(TickerNews.published_at.desc())
         .offset(offset)
         .limit(limit)
@@ -100,6 +107,7 @@ def get_news(
             sentiment_grade=r.sentiment_grade,
             sentiment_label=r.sentiment_label,
             future_event=r.future_event,
+            ticker_name_ko=name_ko,
         )
         for r in rows
     ]
