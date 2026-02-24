@@ -37,7 +37,7 @@ urlpatterns = [
     path("accounts/", include("accounts.urls")),
     path("api/accounts/", include("accounts.api_urls")),
     path("api/posts/", include("posts.api_urls")),
-    path("api/community/posts/", include("posts.api_urls")),  # MarketLens: Community API
+    path("api/community/", include("community.urls")),  # MarketLens: Community API (분리된 앱)
     path("api/chat/", include("chat.urls")),  # Chat app: /api/chat/ (API)
     path("messages/", include("chat.urls")),  # Chat app: /messages/ (view)
     path("notifications/", include("notifications.urls")),  # Notifications: /notifications/ (view) + /notifications/api/ (API)

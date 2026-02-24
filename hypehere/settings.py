@@ -63,6 +63,7 @@ INSTALLED_APPS = [
     "notifications",
     "learning",
     "analytics",  # Admin dashboard and analytics
+    "community",  # MarketLens community (HypeHere posts와 완전 분리)
 ]
 
 # Conditionally add lotto app (only if directory exists - local development only)
