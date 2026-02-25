@@ -14,6 +14,24 @@ from app.schemas import (
 
 router = APIRouter()
 
+# ETF name detection keywords (for tickers with NULL sector)
+_ETF_NAME_KEYWORDS = (
+    'ETF', 'FUND', 'TRUST',
+    'PROSHARES', 'DIREXION', 'ISHARES', 'SPDR',
+    'VANGUARD', 'VANECK', 'GLOBAL X', 'KRANESHARES',
+    'STATE STREET', 'INVESCO', 'SCHWAB', 'AMPLIFY', 'JPMORGAN',
+)
+
+
+def _detect_sector(sector: str | None, name: str | None) -> str:
+    if sector:
+        return sector
+    if name:
+        name_upper = name.upper()
+        if any(kw in name_upper for kw in _ETF_NAME_KEYWORDS):
+            return "ETF"
+    return "Unknown"
+
 
 @router.get("/treemap", response_model=TreemapResponse)
 def get_treemap(
@@ -85,12 +103,12 @@ def get_treemap(
     # Group by sector in Python
     sector_map = defaultdict(list)
     for row in rows:
-        sector_name = row.sector or "Unknown"
+        sector_name = _detect_sector(row.sector, row.name)
         sector_map[sector_name].append(
             TreemapItem(
                 ticker=row.ticker,
                 name=row.name,
-                sector=row.sector,
+                sector=sector_name,
                 sub_industry=row.sub_industry,
                 change_pct=row.change_pct,
                 trading_value=row.trading_value,
