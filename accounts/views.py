@@ -1,6 +1,7 @@
 from rest_framework import status, generics, permissions
+from rest_framework.decorators import api_view, permission_classes as drf_permission_classes
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.views import APIView
@@ -29,7 +30,7 @@ from .serializers import (
     BlockSerializer,
     UserReportSerializer
 )
-from .models import Follow, Block, SupportTicket, UserReport
+from .models import Follow, Block, SupportTicket, UserReport, DeviceToken, NotificationSubscription
 from posts.models import Post, PostFavorite, PostReport, CommentReport
 from posts.serializers import PostSerializer, PostFavoriteSerializer
 from posts.views import PostPagination
@@ -2447,3 +2448,85 @@ class DemoteToRegularAPIView(APIView):
                 'role': target_user.role,
             }
         }, status=status.HTTP_200_OK)
+
+
+# ========================================
+# FCM 디바이스 토큰 API
+# ========================================
+
+@api_view(['POST'])
+@drf_permission_classes([IsAuthenticated])
+def device_register_view(request):
+    """
+    FCM 토큰 등록/갱신
+    Flutter: POST /api/accounts/device/register/ {token, platform}
+    """
+    token = request.data.get('token')
+    platform = request.data.get('platform', 'android')
+
+    if not token:
+        return Response({'error': 'token 필수'}, status=status.HTTP_400_BAD_REQUEST)
+    if platform not in ('android', 'ios'):
+        return Response({'error': 'platform은 android 또는 ios'}, status=status.HTTP_400_BAD_REQUEST)
+
+    # 같은 토큰이 다른 사용자에게 있으면 비활성화
+    DeviceToken.objects.filter(token=token).exclude(user=request.user).update(is_active=False)
+
+    # UPSERT: 토큰 있으면 갱신, 없으면 생성
+    obj, created = DeviceToken.objects.update_or_create(
+        token=token,
+        defaults={'user': request.user, 'platform': platform, 'is_active': True},
+    )
+
+    return Response({'message': '토큰 등록 완료', 'created': created})
+
+
+@api_view(['POST'])
+@drf_permission_classes([IsAuthenticated])
+def device_deactivate_view(request):
+    """
+    로그아웃 시 FCM 토큰 비활성화
+    Flutter: POST /api/accounts/device/deactivate/ {token}
+    """
+    token = request.data.get('token')
+    if not token:
+        return Response({'error': 'token 필수'}, status=status.HTTP_400_BAD_REQUEST)
+
+    updated = DeviceToken.objects.filter(
+        user=request.user, token=token
+    ).update(is_active=False)
+
+    return Response({'message': '토큰 비활성화 완료', 'deactivated': updated > 0})
+
+
+@api_view(['PUT', 'GET'])
+@drf_permission_classes([IsAuthenticated])
+def device_subscriptions_view(request):
+    """
+    Watchlist 구독 동기화
+    GET: 현재 구독 목록
+    PUT: watchlist와 동기화 {tickers: ["AAPL", "TSLA", ...]}
+    """
+    if request.method == 'GET':
+        tickers = list(
+            NotificationSubscription.objects.filter(
+                user=request.user, is_active=True
+            ).values_list('ticker', flat=True)
+        )
+        return Response({'tickers': tickers})
+
+    # PUT
+    tickers_data = request.data.get('tickers', [])
+    new_tickers = set(t.upper() for t in tickers_data if isinstance(t, str))
+
+    # 기존 구독 전부 비활성화
+    NotificationSubscription.objects.filter(user=request.user).update(is_active=False)
+
+    # 새 목록으로 UPSERT
+    for ticker in new_tickers:
+        NotificationSubscription.objects.update_or_create(
+            user=request.user, ticker=ticker,
+            defaults={'is_active': True},
+        )
+
+    return Response({'message': '구독 동기화 완료', 'tickers': sorted(new_tickers)})

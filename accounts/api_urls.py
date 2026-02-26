@@ -28,6 +28,9 @@ from .views import (
     PromoteToGoldAPIView,
     PromoteToManagerAPIView,
     DemoteToRegularAPIView,
+    device_register_view,
+    device_deactivate_view,
+    device_subscriptions_view,
 )
 
 app_name = 'accounts_api'
@@ -80,4 +83,9 @@ urlpatterns = [
     path('users/<int:user_id>/promote-to-gold/', PromoteToGoldAPIView.as_view(), name='api_promote_to_gold'),
     path('users/<int:user_id>/promote-to-manager/', PromoteToManagerAPIView.as_view(), name='api_promote_to_manager'),
     path('users/<int:user_id>/demote-to-regular/', DemoteToRegularAPIView.as_view(), name='api_demote_to_regular'),
+
+    # FCM 디바이스 토큰 관리
+    path('device/register/', device_register_view, name='device_register'),
+    path('device/deactivate/', device_deactivate_view, name='device_deactivate'),
+    path('device/subscriptions/', device_subscriptions_view, name='device_subscriptions'),
 ]

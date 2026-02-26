@@ -911,3 +911,57 @@ class LegalDocumentVersion(models.Model):
 
     def __str__(self):
         return f"{self.document.get_document_type_display()} v{self.version} ({self.created_at.strftime('%Y-%m-%d')})"
+
+
+# ==========================================
+# FCM Push Notification Models
+# ==========================================
+
+class DeviceToken(models.Model):
+    """FCM 디바이스 토큰"""
+    PLATFORM_CHOICES = [('android', 'Android'), ('ios', 'iOS')]
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='device_tokens')
+    token = models.TextField(unique=True)
+    platform = models.CharField(max_length=10, choices=PLATFORM_CHOICES)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'accounts_devicetoken'
+        indexes = [
+            models.Index(fields=['user', 'is_active']),
+            models.Index(fields=['token']),
+        ]
+
+    def __str__(self):
+        return f"{self.user.email} ({self.platform})"
+
+
+class NotificationSubscription(models.Model):
+    """종목별 알림 구독 (watchlist 동기화)"""
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='notification_subscriptions')
+    ticker = models.CharField(max_length=50)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'accounts_notificationsubscription'
+        unique_together = ['user', 'ticker']
+        indexes = [
+            models.Index(fields=['ticker', 'is_active']),
+            models.Index(fields=['user', 'is_active']),
+        ]
+
+    def __str__(self):
+        return f"{self.user.email} → {self.ticker}"
+
+
+class NotificationRateLimit(models.Model):
+    """1시간 1알림 제한 (일반 알림용)"""
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, primary_key=True)
+    last_general_notified_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'accounts_notificationratelimit'
