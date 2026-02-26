@@ -320,14 +320,16 @@ class User(AbstractUser):
         """Return number of users this user has blocked"""
         return self.blocking.count()
 
+    DELETION_GRACE_DAYS = 7
+
     def can_cancel_deletion(self):
-        """Check if deletion can be cancelled (within 30 days)"""
+        """Check if deletion can be cancelled (within grace period)"""
         if not self.deletion_requested_at:
             return False
         from django.utils import timezone
         from datetime import timedelta
         grace_period = timezone.now() - self.deletion_requested_at
-        return grace_period < timedelta(days=30)
+        return grace_period < timedelta(days=self.DELETION_GRACE_DAYS)
 
     def days_until_deletion(self):
         """Return number of days until account deletion"""
@@ -335,7 +337,7 @@ class User(AbstractUser):
             return None
         from django.utils import timezone
         grace_period = timezone.now() - self.deletion_requested_at
-        return max(0, 30 - grace_period.days)
+        return max(0, self.DELETION_GRACE_DAYS - grace_period.days)
 
     # Suspension/Ban management methods
     def suspend_account(self, duration_days, reason, admin_user):

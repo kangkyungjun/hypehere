@@ -88,9 +88,9 @@
                 <div class="privacy-setting-item" style="flex-direction: column; align-items: flex-start;">
                     <div class="privacy-setting-content" style="width: 100%; margin-bottom: var(--space-md);">
                         <div class="privacy-setting-text">
-                            <div class="privacy-setting-label">{% trans "계정 삭제" %}</div>
+                            <div class="privacy-setting-label">{% trans "계정 탈퇴" %}</div>
                             <div class="privacy-setting-description">
-                                {% trans "30일 후 계정과 모든 데이터가 영구적으로 삭제됩니다. 이 작업은 되돌릴 수 없습니다." %}
+                                {% trans "7일 후 계정과 모든 데이터가 영구적으로 삭제됩니다. 그 전에 다시 로그인하면 탈퇴가 취소됩니다." %}
                             </div>
                         </div>
                     </div>
@@ -118,8 +118,8 @@
 <div id="delete-modal-step1" class="modal hidden">
     <div class="modal-overlay" data-action="close-modal" data-modal-id="delete-modal-step1"></div>
     <div class="modal-content">
-        <h2>{% trans "정말로 계정을 삭제하시겠습니까?" %}</h2>
-        <p>{% trans "30일 후 다음 항목이 영구적으로 삭제됩니다:" %}</p>
+        <h2>{% trans "정말로 계정을 탈퇴하시겠습니까?" %}</h2>
+        <p>{% trans "7일 후 다음 항목이 영구적으로 삭제됩니다:" %}</p>
         <ul style="text-align: left; margin: var(--space-md) 0;">
             <li>{% trans "프로필 정보" %}</li>
             <li>{% trans "모든 게시글 및 댓글" %}</li>

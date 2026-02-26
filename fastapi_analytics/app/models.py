@@ -484,7 +484,7 @@ class TickerDefenseLine(Base):
     date = Column(Date, primary_key=True, index=True)
     period = Column(Integer, primary_key=True)  # 20, 50, 200 etc.
     price = Column(Float, nullable=False)
-    label = Column(String(20))
+    label = Column(String(200))
     distance_pct = Column(Float)
     created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
 

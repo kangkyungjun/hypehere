@@ -99,6 +99,10 @@ class UserLoginView(APIView):
             user.is_deactivated = False
             user.deactivated_at = None
 
+        # Cancel pending deletion request on login (within grace period)
+        if user.deletion_requested_at and user.can_cancel_deletion():
+            user.deletion_requested_at = None
+
         # Get or create authentication token
         token, created = Token.objects.get_or_create(user=user)
 
@@ -109,7 +113,7 @@ class UserLoginView(APIView):
             user.last_login_ip = request.META.get('REMOTE_ADDR')
 
         # Save all changes
-        user.save(update_fields=['last_login_ip', 'is_deactivated', 'deactivated_at'])
+        user.save(update_fields=['last_login_ip', 'is_deactivated', 'deactivated_at', 'deletion_requested_at'])
 
         return Response({
             'user': UserProfileSerializer(user).data,
@@ -1078,14 +1082,13 @@ class RequestAccountDeletionView(APIView):
         user.save()
 
         from datetime import timedelta
-        deletion_date = user.deletion_requested_at + timedelta(days=30)
-
-        # TODO: Send email notification
+        grace_days = user.DELETION_GRACE_DAYS
+        deletion_date = user.deletion_requested_at + timedelta(days=grace_days)
 
         return Response({
-            'message': '계정 삭제가 예약되었습니다. 30일 후 영구 삭제됩니다.',
+            'message': f'계정 탈퇴가 예약되었습니다. {grace_days}일 후 영구 삭제됩니다.',
             'deletion_date': deletion_date,
-            'days_remaining': 30
+            'days_remaining': grace_days
         })
 
 
