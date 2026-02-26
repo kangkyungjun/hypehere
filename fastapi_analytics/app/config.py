@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     APP_NAME: str = "HypeHere Analytics API"
     VERSION: str = "1.0.0"
     DESCRIPTION: str = "Read-only analytics API for HypeHere mobile app"
+    FIREBASE_CREDENTIALS_PATH: str = "/opt/marketlens/firebase-service-account.json"
 
     class Config:
         env_file = ".env"

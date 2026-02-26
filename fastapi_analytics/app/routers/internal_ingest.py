@@ -24,6 +24,12 @@ from app.schemas import (
 )
 from app.config import settings
 from app.utils.trading_calendar import is_trading_day
+from app.services.fcm_service import (
+    process_score_notifications,
+    process_news_notifications,
+    process_bullish_surge_notifications,
+    process_daily_summary_notification,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -1057,6 +1063,35 @@ def ingest_scores(payload: IngestPayload, db: Session = Depends(get_db)):
     db.commit()
 
     # ----------------------------
+    # FCM 알림: score ≥80 or ≤20
+    # ----------------------------
+    for item in items:
+        try:
+            is_extended = isinstance(item, ExtendedItemIngest)
+            ticker = item.ticker
+            score_date = item.date
+            if is_extended:
+                sv = item.score.value
+                sig = item.score.signal
+            else:
+                sv = item.score
+                sig = item.signal
+            if sv is not None:
+                process_score_notifications(db, score_date, ticker, sv, sig)
+        except Exception as e:
+            logger.error(f"FCM score error for {item.ticker}: {e}")
+
+    # ----------------------------
+    # FCM 알림: 일일 시그널 요약 (전체 사용자, 하루 1회)
+    # ----------------------------
+    try:
+        ingest_date = items[0].date if items else date.today()
+        process_daily_summary_notification(db, ingest_date)
+    except Exception as e:
+        logger.error(f"FCM daily summary error: {e}")
+    db.commit()
+
+    # ----------------------------
     # 3년 초과 데이터 자동 삭제 (전체 테이블)
     # ----------------------------
     db.execute(text("DELETE FROM analytics.ticker_scores WHERE date < CURRENT_DATE - INTERVAL '3 years'"))
@@ -1261,6 +1296,28 @@ def ingest_news(payload: NewsIngestPayload, db: Session = Depends(get_db)):
             ))
         upserted += 1
 
+    db.commit()
+
+    # ----------------------------
+    # FCM 알림: bullish/bearish 뉴스
+    # ----------------------------
+    for item in payload.items:
+        if item.sentiment_grade in ("bullish", "bearish"):
+            try:
+                process_news_notifications(
+                    db, item.date, item.ticker.upper(),
+                    item.sentiment_grade, item.sentiment_score,
+                    item.ai_summary,
+                )
+            except Exception as e:
+                logger.error(f"FCM news error for {item.ticker}: {e}")
+
+    # FCM: 호재 뉴스 급상승 종목 감지 (배치)
+    ingested_tickers = list(set(item.ticker.upper() for item in payload.items))
+    try:
+        process_bullish_surge_notifications(db, date.today(), ingested_tickers)
+    except Exception as e:
+        logger.error(f"FCM bullish surge error: {e}")
     db.commit()
 
     # 3년 cleanup

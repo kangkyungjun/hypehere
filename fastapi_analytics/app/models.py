@@ -581,3 +581,20 @@ class AccountWithdrawal(Base):
     user_nickname = Column(String(100))
     reason = Column(Text)
     created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class NotificationLog(Base):
+    """FCM 알림 발송 로그 (중복 방지 + 감사)"""
+    __tablename__ = "notification_log"
+    __table_args__ = {'schema': 'analytics'}
+
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    date = Column(Date, nullable=False, index=True)
+    ticker = Column(String(50), nullable=False, index=True)
+    signal_type = Column(String(30), nullable=False)
+    score = Column(Float)
+    recipients_count = Column(Integer, server_default=text('0'))
+    success_count = Column(Integer, server_default=text('0'))
+    failure_count = Column(Integer, server_default=text('0'))
+    error_detail = Column(Text)
+    created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
