@@ -1,8 +1,20 @@
 from django.views.generic import TemplateView, RedirectView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Count, Exists, OuterRef
+from django.shortcuts import render
 from posts.models import Post, Like, PostFavorite
 from posts.services.recommendation import get_recommendations_for_user
+
+SUPPORTED_LANGS = {'ko', 'en', 'zh', 'ja', 'es'}
+
+
+def marketlens_legal_view(request, doc_type):
+    """Serve MarketLens legal docs with ?lang= support."""
+    lang = request.GET.get('lang', 'ko')
+    if lang not in SUPPORTED_LANGS:
+        lang = 'ko'
+    suffix = f'_{lang}' if lang != 'ko' else ''
+    return render(request, f'marketlens/{doc_type}{suffix}.html')
 
 
 class HomeView(TemplateView):

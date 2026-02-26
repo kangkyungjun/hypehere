@@ -23,7 +23,8 @@ from django.views.i18n import JavaScriptCatalog
 from django.views.generic import TemplateView
 from .views import (
     HomeView, ExploreView,
-    LearningMatchingView, LearningChatView
+    LearningMatchingView, LearningChatView,
+    marketlens_legal_view,
 )
 from chat.views import open_chat_room_view
 
@@ -46,9 +47,9 @@ urlpatterns = [
     path("i18n/", include("django.conf.urls.i18n")),  # Language selection
     path("jsi18n/", JavaScriptCatalog.as_view(), name='javascript-catalog'),  # JavaScript i18n
 
-    # MarketLens: Privacy Policy & Terms of Service
-    path("marketlens/privacy/", TemplateView.as_view(template_name="marketlens/privacy.html"), name='marketlens_privacy'),
-    path("marketlens/terms/", TemplateView.as_view(template_name="marketlens/terms.html"), name='marketlens_terms'),
+    # MarketLens: Privacy Policy & Terms of Service (multi-language via ?lang=ko|en|zh|ja|es)
+    path("marketlens/privacy/", marketlens_legal_view, {'doc_type': 'privacy'}, name='marketlens_privacy'),
+    path("marketlens/terms/", marketlens_legal_view, {'doc_type': 'terms'}, name='marketlens_terms'),
 ]
 
 # Media files (development only)
