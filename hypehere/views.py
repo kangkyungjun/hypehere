@@ -10,9 +10,9 @@ SUPPORTED_LANGS = {'ko', 'en', 'zh', 'ja', 'es'}
 
 def marketlens_legal_view(request, doc_type):
     """Serve MarketLens legal docs with ?lang= support."""
-    lang = request.GET.get('lang', 'ko')
+    lang = request.GET.get('lang', 'en')
     if lang not in SUPPORTED_LANGS:
-        lang = 'ko'
+        lang = 'en'
     suffix = f'_{lang}' if lang != 'ko' else ''
     return render(request, f'marketlens/{doc_type}{suffix}.html')
 
