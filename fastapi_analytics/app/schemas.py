@@ -31,6 +31,8 @@ class TopTickerResponse(BaseModel):
     name: Optional[str] = Field(None, description="Human-readable name")
     name_ko: Optional[str] = Field(None, description="Korean name (e.g., '애플')")
     membership: Optional[List[str]] = Field(None, description="Index membership (e.g., ['SP500', 'DOW30'])")
+    close: Optional[float] = Field(None, description="Latest close price")
+    change_pct: Optional[float] = Field(None, description="Daily price change %")
 
     class Config:
         from_attributes = True

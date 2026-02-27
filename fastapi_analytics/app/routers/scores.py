@@ -4,7 +4,7 @@ from sqlalchemy import desc, func
 from datetime import date, timedelta
 from typing import List, Optional
 from app.database import get_db
-from app.models import TickerScore, Ticker, StockMembership
+from app.models import TickerScore, Ticker, StockMembership, TickerPrice
 from app.schemas import TickerScoreListResponse, TopTickerResponse
 from app.utils.trading_calendar import get_latest_trading_date
 
@@ -71,16 +71,21 @@ def get_top_scores(
             return []
         target_date = latest_date
 
-    # Join with ticker metadata for names
+    # Join with ticker metadata for names + price data
     query = db.query(
         TickerScore.ticker,
         TickerScore.score,
         TickerScore.signal,
         Ticker.name,
-        Ticker.extra_data  # JSONB metadata (contains name_ko)
+        Ticker.extra_data,  # JSONB metadata (contains name_ko)
+        TickerPrice.close,
+        TickerPrice.change_pct,
     ).outerjoin(
         Ticker,
         TickerScore.ticker == Ticker.ticker
+    ).outerjoin(
+        TickerPrice,
+        (TickerScore.ticker == TickerPrice.ticker) & (TickerScore.date == TickerPrice.date)
     ).filter(
         TickerScore.date == target_date
     )
@@ -116,6 +121,8 @@ def get_top_scores(
             "name": r.name,
             "name_ko": r.extra_data.get("name_ko") if r.extra_data else None,
             "membership": membership_map.get(r.ticker),
+            "close": r.close,
+            "change_pct": r.change_pct,
         }
         for r in results
     ]
