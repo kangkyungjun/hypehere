@@ -192,3 +192,9 @@ SPECTACULAR_SETTINGS = {
     "COMPONENT_SPLIT_REQUEST": True,
     "SCHEMA_PATH_PREFIX": "/api/",
 }
+
+# Firebase Cloud Messaging
+FIREBASE_CREDENTIALS_PATH = os.getenv(
+    'FIREBASE_CREDENTIALS_PATH',
+    str(BASE_DIR.parent / 'secrets' / 'firebase-service-account.json')
+)

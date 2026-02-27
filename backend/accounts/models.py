@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
@@ -39,6 +40,10 @@ class CustomUser(AbstractUser):
     # 타임스탬프
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    # 탈퇴 관련
+    deletion_requested_at = models.DateTimeField(null=True, blank=True)
+    DELETION_GRACE_DAYS = 7
 
     # 관심 종목 (JSON 배열)
     watchlist_tickers = models.JSONField(default=list, blank=True)
@@ -89,3 +94,79 @@ class CustomUser(AbstractUser):
     def is_watching(self, ticker):
         """관심 종목 포함 여부 확인"""
         return ticker.upper() in self.watchlist_tickers
+
+
+class DeviceToken(models.Model):
+    """FCM 디바이스 토큰"""
+    PLATFORM_CHOICES = [('android', 'Android'), ('ios', 'iOS')]
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='device_tokens')
+    token = models.TextField(unique=True)
+    platform = models.CharField(max_length=10, choices=PLATFORM_CHOICES)
+    language = models.CharField(max_length=10, default='en')
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'accounts_devicetoken'
+        indexes = [
+            models.Index(fields=['user', 'is_active']),
+            models.Index(fields=['token']),
+        ]
+
+    def __str__(self):
+        return f"{self.user.nickname} ({self.platform})"
+
+
+class NotificationSubscription(models.Model):
+    """종목별 알림 구독 (watchlist 동기화)"""
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='notification_subscriptions')
+    ticker = models.CharField(max_length=50)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'accounts_notificationsubscription'
+        unique_together = ['user', 'ticker']
+        indexes = [
+            models.Index(fields=['ticker', 'is_active']),
+            models.Index(fields=['user', 'is_active']),
+        ]
+
+    def __str__(self):
+        return f"{self.user.nickname} → {self.ticker}"
+
+
+class NotificationRateLimit(models.Model):
+    """1시간 1알림 제한 (일반 알림용)"""
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, primary_key=True)
+    last_general_notified_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'accounts_notificationratelimit'
+
+
+class NotificationHistory(models.Model):
+    """사용자별 알림 히스토리 (rate limit 무관하게 모든 대상자 기록)"""
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+        related_name='notification_history',
+    )
+    title = models.CharField(max_length=200)
+    body = models.TextField()
+    notification_type = models.CharField(max_length=30)
+    ticker = models.CharField(max_length=50, blank=True, default='')
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'accounts_notification_history'
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['user', '-created_at']),
+            models.Index(fields=['user', 'is_read']),
+        ]
+
+    def __str__(self):
+        return f"{self.user_id} [{self.notification_type}] {self.title}"

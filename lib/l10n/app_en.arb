@@ -1,0 +1,673 @@
+{
+  "@@locale": "en",
+
+  "appTitle": "MarketLens",
+  "@appTitle": { "description": "App title" },
+
+  "tabDashboard": "Dashboard",
+  "tabDashboardTooltip": "Market Dashboard",
+  "tabSearch": "Search",
+  "tabSearchTooltip": "Search Tickers",
+  "tabNews": "News",
+  "tabNewsTooltip": "Market News",
+  "tabCommunity": "Community",
+  "tabCommunityTooltip": "Discussion Board",
+  "tabWatchlist": "Watchlist",
+  "tabWatchlistTooltip": "My Watchlist",
+
+  "settings": "Settings",
+  "settingsTooltip": "Settings",
+  "compareTickers": "Compare Tickers",
+
+  "account": "Account",
+  "login": "Login",
+  "loginSubtitle": "Access community features",
+  "signup": "Sign Up",
+  "signupTitle": "Sign Up",
+  "signupSubtitle": "Create a new account",
+  "noAccountSignup": "Don't have an account? Sign Up",
+  "hasAccountLogin": "Already have an account? Login",
+  "logout": "Logout",
+  "logoutConfirmTitle": "Logout",
+  "logoutConfirmMessage": "Are you sure you want to log out?",
+  "welcome": "Welcome!",
+  "accountCreated": "Account created!",
+
+  "email": "Email",
+  "emailHint": "example@email.com",
+  "emailRequired": "Please enter your email",
+  "emailInvalid": "Invalid email format",
+  "nickname": "Nickname",
+  "nicknameHint": "Nickname for the community",
+  "nicknameRequired": "Please enter a nickname",
+  "nicknameTooShort": "Nickname must be at least 2 characters",
+  "password": "Password",
+  "passwordHint": "Enter your password",
+  "passwordRequired": "Please enter your password",
+  "passwordTooShort": "Password must be at least 8 characters",
+  "passwordConfirm": "Confirm Password",
+  "passwordConfirmHint": "Re-enter your password",
+  "passwordConfirmRequired": "Please confirm your password",
+  "passwordMismatch": "Passwords do not match",
+
+  "changePassword": "Change Password",
+  "changePasswordGuide": "Password Change Guide",
+  "oldPassword": "Current Password",
+  "oldPasswordHint": "Enter your current password",
+  "oldPasswordRequired": "Please enter your current password",
+  "newPassword": "New Password",
+  "newPasswordHint": "Enter a new password (min 8 characters)",
+  "newPasswordRequired": "Please enter a new password",
+  "newPasswordConfirm": "Confirm New Password",
+  "newPasswordConfirmHint": "Re-enter your new password",
+  "newPasswordConfirmRequired": "Please confirm your new password",
+  "newPasswordMustDiffer": "New password must differ from current password",
+  "passwordChanged": "Password changed successfully",
+  "passwordChangeFailed": "Password change failed: {error}",
+  "@passwordChangeFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+
+  "loginRequired": "Login Required",
+  "loginPromptMessage": "Login and join the community!",
+
+  "searchHint": "Search by ticker or company (e.g. AAPL, Apple)",
+  "searchFailed": "Search Failed",
+  "noSearchResults": "No Results",
+  "tryDifferentSearch": "Try a different ticker",
+  "tickerSearch": "Ticker Search",
+  "enterTickerAbove": "Enter a search term",
+  "recentSearches": "Recent Searches",
+  "clearAll": "Clear All",
+  "retry": "Retry",
+  "tryAgain": "Try Again",
+
+  "sectorMarketOverview": "Sector Overview",
+  "filterAll": "All",
+  "filterNasdaq": "NASDAQ",
+  "filterDow": "Dow",
+  "marketLensAIScore": "AI Score",
+  "distributionShownOnFullLoad": "Score distribution loads with all signals",
+  "topN": "▲ Top {n}",
+  "@topN": {
+    "placeholders": {
+      "n": { "type": "int" }
+    }
+  },
+  "bottomN": "▼ Bottom {n}",
+  "@bottomN": {
+    "placeholders": {
+      "n": { "type": "int" }
+    }
+  },
+  "noData": "No data",
+  "signalLoadFailed": "Failed to load signals",
+  "dashboardLoadFailed": "Dashboard loading failed: {error}",
+  "@dashboardLoadFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+
+  "allSignals": "All Signals",
+  "sp500Signals": "S&P 500 Signals",
+  "dow30Signals": "Dow 30 Signals",
+  "nasdaq100Signals": "NASDAQ 100 Signals",
+  "marketTrend": "Overall Market Trend",
+  "loadingSignals": "Loading signals...",
+  "loadingSP500Signals": "Loading S&P 500 signals...",
+  "loadingDow30Signals": "Loading Dow 30 signals...",
+  "loadingNasdaq100Signals": "Loading NASDAQ 100 signals...",
+  "noAdditionalSignals": "No additional signals",
+  "showMore": "Show More ({remaining} left)",
+  "@showMore": {
+    "placeholders": {
+      "remaining": { "type": "int" }
+    }
+  },
+  "nItems": "{count} items",
+  "@nItems": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "scoreStrongBuy": "Strong Buy",
+  "scoreBuy": "Buy",
+  "scoreHold": "Hold",
+  "scoreSell": "Sell",
+  "scoreStrongSell": "Strong Sell",
+  "score": "Score",
+
+  "myWatchlist": "My Watchlist",
+  "nTickers": "{count} tickers",
+  "@nTickers": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "watchlistEmpty": "Watchlist is empty",
+  "watchlistEmptyHint": "Search and add tickers from the Search tab",
+  "explore": "Explore",
+  "tapToViewDetails": "Tap for details",
+  "tickerRemovedFromWatchlist": "{ticker} removed from watchlist",
+  "@tickerRemovedFromWatchlist": {
+    "placeholders": {
+      "ticker": { "type": "String" }
+    }
+  },
+  "undo": "Undo",
+  "tickerDataLoadFailed": "Failed to load ticker data",
+  "addToWatchlist": "Add to Watchlist",
+  "removeFromWatchlist": "Remove from Watchlist",
+  "addedToWatchlist": "Added to watchlist",
+  "removedFromWatchlist": "Removed from watchlist",
+
+  "communitySearchHint": "Search by title or content...",
+  "writePost": "Write Post",
+  "deletePost": "Delete Post",
+  "deleteConfirm": "Are you sure you want to delete this post?\nDeleted posts cannot be recovered.",
+  "cancel": "Cancel",
+  "delete": "Delete",
+  "edit": "Edit",
+  "done": "Done",
+  "confirm": "Confirm",
+  "postDeleted": "Post deleted",
+  "report": "Report",
+  "reportTitle": "Report",
+  "reportAbuse": "Abuse / Defamation",
+  "reportSpam": "Spam / Advertising",
+  "reportInappropriate": "Inappropriate Content",
+  "reportHarassment": "Harassment",
+  "reportOther": "Other",
+  "reportDescription": "Description",
+  "reportSubmitted": "Report submitted",
+  "reportSubmit": "Report",
+  "postDeleteFailed": "Failed to delete post: {error}",
+  "@postDeleteFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "noPostsYet": "No posts yet",
+  "writeFirstPost": "Write the first post!",
+  "noSearchResultsCommunity": "No search results",
+  "tryDifferentFilter": "Try a different search or filter",
+  "networkError": "Connection failed. Please try again later.",
+  "serverTimeout": "Server timeout. Please try again later.",
+  "postsLoadFailed": "Failed to load posts. Please try again later.",
+  "searchResultsLoadFailed": "Failed to load search results",
+  "refresh": "Refresh",
+  "all": "All",
+  "add": "Add",
+  "tickerBoard": "{ticker} Board",
+  "@tickerBoard": {
+    "placeholders": {
+      "ticker": { "type": "String" }
+    }
+  },
+  "tickerSearchHint": "Search ticker... (e.g. AAPL, TSLA)",
+  "popularTickers": "Popular Tickers",
+  "freePost": "Free",
+  "checkNetwork": "Please check your network connection",
+  "tryAgainLater": "Please try again later",
+
+  "newPost": "New Post",
+  "editPostTitle": "Edit Post",
+  "tickerOnlyBoard": "Ticker-specific Board",
+  "selectTicker": "Ticker",
+  "tickerSearchLabel": "Search Ticker",
+  "tickerSearchHintCreate": "Search by name, symbol, or Korean name",
+  "tickerNotSelectedHint": "Post will be tagged as Free if no ticker is selected",
+  "noTickerSearchResults": "No search results",
+  "postTitle": "Title",
+  "postTitleHint": "Enter post title",
+  "postTitleRequired": "Please enter a title",
+  "postTitleTooShort": "Title must be at least 2 characters",
+  "postContent": "Content",
+  "postContentHint": "Enter post content",
+  "postContentRequired": "Please enter content",
+  "postContentTooShort": "Content must be at least 5 characters",
+  "postCreated": "Post created",
+  "postUpdated": "Post updated",
+  "submitPost": "Post",
+  "updatePostButton": "Update",
+
+  "deleteComment": "Delete Comment",
+  "deleteCommentConfirm": "Are you sure you want to delete this comment?",
+  "editComment": "Edit Comment",
+  "commentHint": "Write a comment...",
+  "commentPlaceholder": "Enter comment content",
+  "commentCreated": "Comment posted",
+  "commentUpdated": "Comment updated",
+  "commentDeleted": "Comment deleted",
+  "commentRequired": "Please enter a comment",
+  "loginToViewComments": "Login to view comments",
+  "writeFirstComment": "Write the first comment!",
+  "postDetail": "Post",
+  "startWithFirstPost": "Start with your first post",
+  "writeAPost": "Write a Post",
+  "cannotLoadPosts": "Cannot load posts",
+  "noPostsInTicker": "No posts in this board yet",
+  "writeFirstPostInTicker": "Write the first post!",
+
+  "dataManagement": "Data Management",
+  "clearRecentSearches": "Clear Recent Searches",
+  "nSearchRecords": "{count} search records",
+  "@nSearchRecords": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "clearRecentSearchesConfirm": "Clear all recent search records?",
+  "recentSearchesCleared": "Recent searches cleared",
+  "clearWatchlist": "Clear Watchlist",
+  "clearWatchlistConfirm": "Clear all watchlist tickers?",
+  "watchlistCleared": "Watchlist cleared",
+  "deleteAllData": "Delete All Data",
+  "deleteAllDataConfirm": "All local data including watchlist and search history will be deleted. This cannot be undone.",
+  "deleteAllButton": "Delete All",
+  "allDataDeleted": "All data deleted",
+  "removeAllLocalData": "Remove all local data",
+
+  "info": "Info",
+  "aboutMarketLens": "About",
+  "version": "Version {version}",
+  "@version": {
+    "placeholders": {
+      "version": { "type": "String" }
+    }
+  },
+  "appDescription": "AI-powered stock analysis tool for data-driven investment decisions",
+  "aiStockAnalysis": "AI Stock Analysis",
+  "privacyPolicy": "Privacy Policy",
+  "termsOfService": "Terms of Service",
+
+  "admin": "Admin",
+  "adminPanel": "Admin Panel",
+  "adminPanelSubtitle": "User management and permissions",
+  "showAds": "Show Ads",
+  "adsEnabledDescription": "Banner ads shown to all users",
+  "adsDisabledDescription": "Ads are hidden",
+  "sendPushNotification": "Send Push Notification",
+  "sendPushNotificationSubtitle": "Broadcast to all users",
+  "pushTitle": "Title",
+  "pushBody": "Message",
+  "send": "Send",
+  "pushSentResult": "Push sent to {count} devices",
+  "@pushSentResult": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "pushSendFailed": "Failed to send push notification",
+  "promoteToGold": "Promote to Gold",
+  "promoteToManager": "Promote to Manager",
+  "demoteToRegular": "Demote to Regular",
+
+  "profile": "Profile",
+  "editProfile": "Edit Profile",
+  "myPosts": "My Posts",
+  "myComments": "My Comments",
+  "viewAll": "View All",
+  "noPosts": "No posts",
+  "noComments": "No comments",
+  "joinDate": "Joined: {date}",
+  "@joinDate": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "deleteAccount": "Withdraw Account",
+  "withdrawAccountConfirm": "Are you sure you want to withdraw your account?\nYour account will be permanently deleted after 7 days. Log in again within that period to cancel.",
+  "withdrawAccountReasonHint": "Please enter your reason for withdrawal (optional)",
+  "withdrawAccountSuccess": "Account withdrawal requested. Your account will be permanently deleted in 7 days.",
+  "withdrawAccountFailed": "Failed to request account withdrawal. Please try again.",
+  "deactivateAccount": "Deactivate Account",
+  "profileUpdated": "Profile updated",
+  "imagePickerFailed": "Failed to select image",
+
+  "language": "Language",
+  "languageSystem": "System Default",
+  "languageKorean": "한국어",
+  "languageEnglish": "English",
+  "languageChinese": "中文(简体)",
+  "languageJapanese": "日本語",
+  "languageSpanish": "Español",
+  "languageSettings": "Language",
+  "systemDefault": "System Default",
+  "languageChanged": "Language changed",
+
+  "timeJustNow": "Just now",
+  "timeMinutesAgo": "{n}m ago",
+  "@timeMinutesAgo": {
+    "placeholders": {
+      "n": { "type": "int" }
+    }
+  },
+  "timeHoursAgo": "{n}h ago",
+  "@timeHoursAgo": {
+    "placeholders": {
+      "n": { "type": "int" }
+    }
+  },
+  "timeYesterday": "Yesterday",
+  "timeDaysAgo": "{n}d ago",
+  "@timeDaysAgo": {
+    "placeholders": {
+      "n": { "type": "int" }
+    }
+  },
+
+  "companyOverview": "Company Overview",
+  "companyDetails": "Company Details",
+  "companyIntro": "About",
+  "employeeCount": "{count} employees",
+  "@employeeCount": {
+    "placeholders": {
+      "count": { "type": "String" }
+    }
+  },
+
+  "valuation": "Valuation",
+  "forwardPE": "Forward PE",
+  "beta": "Beta",
+  "profitabilityGrowth": "Profitability & Growth",
+  "netProfitMargin": "Net Margin",
+  "revenueGrowth": "Rev Growth",
+  "operatingMargin": "Op Margin",
+  "earningsGrowth": "Earn Growth",
+  "financialHealth": "Financial Health",
+  "debtRatio": "D/E Ratio",
+  "liquidityRatio": "Current Ratio",
+
+  "dividends": "Dividends",
+  "dividendYield": "Yield ",
+  "annualDividend": "Annual ",
+
+  "shortInterest": "Short Interest",
+  "shortInterestRatio": "Short Ratio",
+  "shortPercentFloat": "Short % Float",
+  "shortDays": "{days} days",
+  "@shortDays": {
+    "placeholders": {
+      "days": { "type": "String" }
+    }
+  },
+  "shortInterestLow": "Short interest low (stable)",
+  "shortInterestModerate": "Short interest moderate (caution)",
+  "shortInterestHigh": "Short interest high (warning)",
+
+  "institutionalInsiderFlow": "Institutional / Insider Flow",
+  "institutional": "Institutional",
+  "insider": "Insider",
+  "oneDay": "1D",
+  "fiveDay": "5D",
+
+  "tickerNews": "{ticker} News",
+  "@tickerNews": {
+    "placeholders": {
+      "ticker": { "type": "String" }
+    }
+  },
+  "newsCount": "{count}",
+  "@newsCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "oneWeek": "1W",
+  "oneMonth": "1M",
+  "noNews": "No news",
+  "marketNews": "Market News",
+  "viewOriginalArticle": "View Original Article",
+  "sentimentBullish": "Bullish",
+  "sentimentNeutral": "Neutral",
+  "sentimentBearish": "Bearish",
+  "aiSummaryNews": "AI Summary News",
+  "aiSummary": "AI Summary",
+  "noNewsAvailable": "No news available",
+
+  "earningsHistory": "Earnings History",
+  "earningsHistoryEPS": "Earnings History (EPS)",
+  "earningsEstimate": "Estimate",
+  "earningsBeat": "Beat",
+  "earningsMiss": "Miss",
+  "earningsActual": "Actual",
+  "earningsScheduled": "Scheduled",
+  "epsEstimateLabel": "EPS Estimate",
+  "revenueEstimateLabel": "Revenue Estimate",
+  "averageLabel": "avg",
+  "surpriseLabel": "Surprise",
+  "thisWeekEarnings": "This Week's Earnings",
+  "previousEarnings": "Previous Earnings",
+  "earningsCount": "{count}",
+  "@earningsCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "noEarningsThisWeek": "No earnings scheduled this week",
+  "nextEarningsDate": "Next Earnings",
+  "earningsConfirmed": "Confirmed",
+
+  "keyEvents": "Key Events",
+  "eventDetails": "Event Details",
+  "upcomingEvents": "Upcoming Events",
+  "exDividendDate": "Ex-Dividend Date",
+  "dividendPayDate": "Dividend Pay Date",
+  "recentEarningsQuarters": "Recent Earnings ({count}Q)",
+  "@recentEarningsQuarters": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "earningsHistoryChart": "Earnings History (Chart)",
+
+  "weekdayMon": "Mon",
+  "weekdayTue": "Tue",
+  "weekdayWed": "Wed",
+  "weekdayThu": "Thu",
+  "weekdayFri": "Fri",
+  "weekdaySat": "Sat",
+  "weekdaySun": "Sun",
+
+  "macroFedFunds": "Fed Rate",
+  "macroDGS10": "10Y Yield",
+  "macroDGS2": "2Y Yield",
+  "macroT10Y2Y": "Spread",
+  "macroVIXCLS": "VIX",
+  "macroCPIAUCSL": "CPI",
+  "macroUNRATE": "Unemployment",
+  "macroFedFundsDesc": "Federal Funds Rate",
+  "macroDGS10Desc": "US 10-Year Treasury Yield",
+  "macroDGS2Desc": "US 2-Year Treasury Yield",
+  "macroT10Y2YDesc": "Yield Curve Spread (10Y-2Y)",
+  "macroVIXCLSDesc": "Market Volatility Index",
+  "macroCPIAUCSLDesc": "Consumer Price Index (CPI)",
+  "macroUNRATEDesc": "US Unemployment Rate",
+  "riskBearish": "Bearish",
+  "riskCautious": "Cautious",
+  "riskNeutral": "Neutral",
+  "riskPositive": "Positive",
+  "riskBullish": "Bullish",
+  "macroCategoryRates": "Interest Rates",
+  "macroCategorySentiment": "Sentiment",
+  "macroCategoryEconomy": "Economy",
+  "macroYieldCurve": "Yield Curve",
+  "macroLiquidity": "Liquidity",
+  "macroOverall": "Macro Overall",
+
+  "macroCurrentValue": "Current: {value}",
+  "@macroCurrentValue": {
+    "placeholders": {
+      "value": { "type": "String" }
+    }
+  },
+  "macroChange": "Change: {value}",
+  "@macroChange": {
+    "placeholders": {
+      "value": { "type": "String" }
+    }
+  },
+  "epsEstimateValue": "Est. ${value}",
+  "@epsEstimateValue": {
+    "placeholders": {
+      "value": { "type": "String" }
+    }
+  },
+  "bbInterpretation": "Bollinger Bands Interpretation",
+  "bbBandWidth": "• Band width: shows volatility (wider = higher)",
+  "bbUpperApproach": "• Upper band approach: potential overbought",
+  "bbLowerApproach": "• Lower band approach: potential oversold",
+  "bbMiddleLine": "• Middle line: 20-day moving average",
+
+  "cannotLoadData": "Cannot load data",
+  "marketlensAI": "MarketLens AI",
+  "marketlensAIOpinion": "MarketLens AI Opinion",
+  "bullishFactors": "Bullish Factors",
+  "bearishFactors": "Bearish Factors",
+  "target": "Target ",
+  "stopLoss": "Stop ",
+  "averageTargetPrice": "Avg Target Price",
+  "currentPrice": "Current",
+  "targetPrice": "Target",
+  "recentAnalystRatings": "Recent Analyst Ratings",
+  "unknownFirm": "Unknown",
+  "volume": "Volume",
+  "legend": "Legend",
+
+  "ratingBuy": "Buy",
+  "ratingStrongBuy": "Strong Buy",
+  "ratingOutperform": "Outperform",
+  "ratingHold": "Hold",
+  "ratingNeutral": "Neutral",
+  "ratingMarketPerform": "Market Perform",
+  "ratingSell": "Sell",
+  "ratingStrongSell": "Strong Sell",
+  "ratingUnderperform": "Underperform",
+  "ratingActionUpgrade": "Upgrade",
+  "ratingActionDowngrade": "Downgrade",
+  "ratingActionReiterated": "Reiterated",
+  "ratingActionInitiated": "Initiated",
+
+  "roleMaster": "Master",
+  "roleManager": "Manager",
+  "roleGold": "Gold",
+  "roleRegular": "Regular",
+  "roleGuest": "Guest",
+
+  "errInvalidCredentials": "Invalid email or password",
+  "errLoginRequired": "Login required",
+  "errSessionExpired": "Session expired. Please login again.",
+  "errCannotLoadUser": "Cannot load user info",
+  "errServerConnection": "Cannot connect to server. Please check your network.",
+  "errServerConnectionShort": "Cannot connect to server",
+  "errNetworkFailed": "Network connection failed. Please check your internet.",
+  "errResponseFormat": "Invalid server response format",
+  "errTimeout": "Server timeout ({seconds}s)",
+  "@errTimeout": {
+    "placeholders": {
+      "seconds": { "type": "int" }
+    }
+  },
+  "errBadRequest": "Please check your input",
+  "errForbidden": "Access denied",
+  "errNotFound": "Page not found",
+  "errServerError": "Server error. Please try again later.",
+  "errNoEditPermission": "No edit permission",
+  "errNoDeletePermission": "No delete permission",
+  "errPostDeleteFailed": "Failed to delete post",
+  "errCommentDeleteFailed": "Failed to delete comment",
+  "errReportAlreadySubmitted": "You have already reported this content",
+  "errCannotReportOwn": "You cannot report your own content",
+  "errReportFailed": "Failed to submit report",
+  "errManagerRequired": "Manager or above access required",
+  "errMasterRequired": "Master access required",
+  "errSearchRequired": "Please enter a search term",
+  "errDemotionFailed": "Demotion failed",
+  "errMaxCompare": "Maximum 3 tickers can be compared",
+  "today": "Today",
+  "yesterday": "Yesterday",
+  "dayBeforeYesterday": "2 days ago",
+
+  "expertCount": "Analyst Targets ({count})",
+  "@expertCount": {
+    "placeholders": {
+      "count": { "type": "String" }
+    }
+  },
+  "scorePoints": "{score} pts",
+  "@scorePoints": {
+    "placeholders": {
+      "score": { "type": "String" }
+    }
+  },
+  "averageVolume": "Avg: {volume}",
+  "@averageVolume": {
+    "placeholders": {
+      "volume": { "type": "String" }
+    }
+  },
+  "showBullBearFactors": "Show factors",
+  "hideBullBearFactors": "Hide factors",
+  "analystConsensus": "Analyst Targets ({count} firms)",
+  "@analystConsensus": {
+    "placeholders": {
+      "count": { "type": "String" }
+    }
+  },
+  "lowestPrice": "Low ${price}",
+  "@lowestPrice": {
+    "placeholders": {
+      "price": { "type": "String" }
+    }
+  },
+  "highestPrice": "High ${price}",
+  "@highestPrice": {
+    "placeholders": {
+      "price": { "type": "String" }
+    }
+  },
+  "liveTalk": "💬 Live Talk",
+  "commentsCount": "{count} comments",
+  "@commentsCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "browsePosts": "Browse Posts",
+  "loginPromptComments": "See what other investors think and\nshare your own analysis!",
+  "shareThoughtsPrompt": "Share your thoughts on tickers\nand connect with other investors",
+  "writeFirstCommentPrompt": "Leave the first comment on a post",
+  "startConversationPrompt": "Start a conversation by commenting\non other investors' posts",
+
+  "ratingOverweight": "Overweight",
+  "ratingUnderweight": "Underweight",
+  "ratingSectorOutperform": "Sector Outperform",
+  "ratingSectorPerform": "Sector Perform",
+  "ratingSectorUnderperform": "Sector Underperform",
+  "ratingPositive": "Positive",
+  "ratingNegative": "Negative",
+  "ratingEqualWeight": "Equal Weight",
+
+  "keyMetricsComparison": "Key Metrics Comparison",
+  "metric": "Metric",
+  "serverCalculatedNote": "※ All metrics are server-calculated values",
+  "priceTrendComparison": "Price Trend Comparison",
+  "rsiComparison": "RSI Comparison (Server Values)",
+  "rsiInterpretation": "※ RSI > 70: Overbought / RSI < 30: Oversold",
+
+  "passwordChangeInstructions": "• New password must be at least 8 characters\n• Use a combination of letters, numbers, and symbols\n• You will need to login again with the new password",
+
+  "notifications": "Notifications",
+  "noNotifications": "No notifications yet",
+  "notificationsRetentionHint": "Notifications from the last 7 days appear here.",
+
+  "bioLabel": "Bio",
+  "bioHint": "Tell us about yourself",
+  "profileEditGuide": "Profile Edit Guide",
+  "updatedDate": "Updated:"
+}

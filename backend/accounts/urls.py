@@ -10,9 +10,18 @@ from .views import (
     profile_view,
     update_profile_view,
     change_password_view,
+    request_deletion_view,
+    cancel_deletion_view,
     search_users_view,
     promote_to_gold_view,
     promote_to_manager_view,
+    demote_to_regular_view,
+    device_register_view,
+    device_deactivate_view,
+    device_subscriptions_view,
+    broadcast_push_view,
+    notification_history_view,
+    notification_mark_read_view,
 )
 
 app_name = 'accounts'
@@ -25,10 +34,27 @@ urlpatterns = [
     path('update/', update_profile_view, name='update-profile'),
     path('change-password/', change_password_view, name='change-password'),
 
+    # 회원탈퇴
+    path('request-deletion/', request_deletion_view, name='request-deletion'),
+    path('cancel-deletion/', cancel_deletion_view, name='cancel-deletion'),
+
     # 권한 관리 (Manager/Master 전용)
     path('users/search/', search_users_view, name='user-search'),
     path('users/<int:pk>/promote-to-gold/', promote_to_gold_view, name='promote-to-gold'),
     path('users/<int:pk>/promote-to-manager/', promote_to_manager_view, name='promote-to-manager'),
+    path('users/<int:pk>/demote-to-regular/', demote_to_regular_view, name='demote-to-regular'),
+
+    # FCM 디바이스 토큰
+    path('device/register/', device_register_view, name='device-register'),
+    path('device/deactivate/', device_deactivate_view, name='device-deactivate'),
+    path('device/subscriptions/', device_subscriptions_view, name='device-subscriptions'),
+
+    # 푸시 알림 브로드캐스트 (Manager+ 전용)
+    path('push/broadcast/', broadcast_push_view, name='push-broadcast'),
+
+    # 알림 인박스
+    path('notifications/', notification_history_view, name='notification-history'),
+    path('notifications/read/', notification_mark_read_view, name='notification-mark-read'),
 
     # JWT 엔드포인트 (하위 호환)
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),

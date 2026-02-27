@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model, authenticate
 from django.contrib.auth.password_validation import validate_password
+from .models import DeviceToken
 
 User = get_user_model()
 
@@ -115,3 +116,20 @@ class ChangePasswordSerializer(serializers.Serializer):
         if not user.check_password(value):
             raise serializers.ValidationError('기존 비밀번호가 올바르지 않습니다.')
         return value
+
+
+class DeviceTokenSerializer(serializers.ModelSerializer):
+    """FCM 디바이스 토큰 등록/갱신"""
+    language = serializers.CharField(max_length=10, default='en')
+
+    class Meta:
+        model = DeviceToken
+        fields = ['token', 'platform', 'language']
+
+
+class SubscriptionSyncSerializer(serializers.Serializer):
+    """Watchlist 구독 동기화"""
+    tickers = serializers.ListField(
+        child=serializers.CharField(max_length=50),
+        allow_empty=True,
+    )
