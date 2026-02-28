@@ -61,6 +61,24 @@ MESSAGES = {
         "ja": ("本日のシグナル要約", "強力買い {buy_count}件、強力売り {sell_count}件 — 確認しましょう"),
         "es": ("Resumen de señales de hoy", "Compra fuerte: {buy_count}, Venta fuerte: {sell_count} — Revisa ahora"),
     },
+    "MORNING_BRIEFING": {
+        "en": ("Good Morning! Market Recap", "Yesterday: {top_ticker} {top_change}%. Strong Buy {buy_count}, Strong Sell {sell_count}"),
+        "ko": ("아침 시장 브리핑", "어제 최대 변동: {top_ticker} {top_change}%. 강력매수 {buy_count}건, 강력매도 {sell_count}건"),
+        "ja": ("おはようございます！市場レビュー", "昨日の注目: {top_ticker} {top_change}%. 強力買い {buy_count}件、強力売り {sell_count}件"),
+        "es": ("Buenos días! Resumen del mercado", "Ayer: {top_ticker} {top_change}%. Compra fuerte {buy_count}, Venta fuerte {sell_count}"),
+    },
+    "CLOSING_REPORT": {
+        "en": ("Market Closed", "Strong Buy {buy_count}, Strong Sell {sell_count}. Top: {top_ticker} {top_change}%"),
+        "ko": ("장 마감 리포트", "강력매수 {buy_count}건, 강력매도 {sell_count}건. 최대변동: {top_ticker} {top_change}%"),
+        "ja": ("市場クローズ", "強力買い {buy_count}件、強力売り {sell_count}件。最大変動: {top_ticker} {top_change}%"),
+        "es": ("Mercado cerrado", "Compra fuerte {buy_count}, Venta fuerte {sell_count}. Mayor: {top_ticker} {top_change}%"),
+    },
+    "MARKET_OPEN": {
+        "en": ("Market Opening Now", "{earnings_count} earnings today. {buy_count} Strong Buy signals active"),
+        "ko": ("시장 개장", "오늘 실적발표 {earnings_count}건. 강력매수 시그널 {buy_count}건 활성"),
+        "ja": ("市場開場", "本日の決算発表 {earnings_count}件。強力買いシグナル {buy_count}件"),
+        "es": ("Mercado abriendo", "{earnings_count} reportes hoy. {buy_count} señales de compra fuerte"),
+    },
 }
 
 
@@ -268,8 +286,12 @@ def _send_localized_to_subscribers(db: Session, ticker: str, msg_key: str, msg_p
     return sent
 
 
-def _send_localized_to_all(db: Session, msg_key: str, msg_params: dict, data: dict = None):
-    """다국어 알림: 전체 사용자에게 언어별 발송 (1시간 제한)"""
+def _send_localized_to_all(db: Session, msg_key: str, msg_params: dict,
+                           data: dict = None, skip_rate_limit: bool = False):
+    """
+    다국어 알림: 전체 사용자에게 언어별 발송
+    skip_rate_limit=True: 예약 브로드캐스트용 — rate limit 체크/갱신 건너뜀
+    """
     rows = _get_all_active_tokens(db)
 
     user_info = {}
@@ -288,14 +310,15 @@ def _send_localized_to_all(db: Session, msg_key: str, msg_params: dict, data: di
     sent = 0
     all_invalid = []
     for user_id, info in user_info.items():
-        if not _can_send_general(db, user_id):
+        if not skip_rate_limit and not _can_send_general(db, user_id):
             continue
 
         title, body = _get_msg(info["language"], msg_key, **msg_params)
         success, failure, invalid = _send_fcm(info["tokens"], title, body, data)
         all_invalid.extend(invalid)
         if success > 0:
-            _update_rate_limit(db, user_id)
+            if not skip_rate_limit:
+                _update_rate_limit(db, user_id)
             sent += 1
 
     if all_invalid:
@@ -474,6 +497,136 @@ def process_daily_summary_notification(db: Session, today: date):
         "buy_count": str(buy_count),
         "sell_count": str(sell_count),
         "date": str(today),
-    })
+    }, skip_rate_limit=True)
     _log_notification(db, today, "ALL", "DAILY_SUMMARY",
+                      recipients=sent, success=sent)
+
+
+def _get_top_mover(db: Session, target_date: date):
+    """해당 날짜의 최대 변동률 종목 조회 (ticker, change_pct)"""
+    result = db.execute(text("""
+        SELECT ticker, change_pct FROM analytics.ticker_prices
+        WHERE date = :date AND change_pct IS NOT NULL
+        ORDER BY ABS(change_pct) DESC
+        LIMIT 1
+    """), {"date": target_date})
+    row = result.fetchone()
+    if row:
+        return row[0], f"{row[1]:+.1f}"
+    return "N/A", "0.0"
+
+
+def _get_signal_counts(db: Session, target_date: date):
+    """해당 날짜의 강력매수/강력매도 종목 수"""
+    result = db.execute(text("""
+        SELECT
+            COUNT(DISTINCT CASE WHEN score >= 80 THEN ticker END),
+            COUNT(DISTINCT CASE WHEN score <= 20 THEN ticker END)
+        FROM analytics.ticker_scores
+        WHERE date = :date
+    """), {"date": target_date})
+    row = result.fetchone()
+    return (row[0] or 0, row[1] or 0) if row else (0, 0)
+
+
+def process_morning_briefing(db: Session):
+    """
+    아침 브리핑 — 전일 장 마감 요약 (전체 사용자)
+    Triggered at 17:00 EST (after market close recap)
+    """
+    today = date.today()
+    if _already_notified(db, today, "ALL", "MORNING_BRIEFING"):
+        return
+
+    # 마지막 거래일 찾기 (어제 또는 금요일)
+    yesterday = today - timedelta(days=1)
+    result = db.execute(text("""
+        SELECT DISTINCT date FROM analytics.ticker_scores
+        WHERE date <= :yesterday
+        ORDER BY date DESC LIMIT 1
+    """), {"yesterday": yesterday})
+    row = result.fetchone()
+    if not row:
+        return
+    last_trading_day = row[0]
+
+    buy_count, sell_count = _get_signal_counts(db, last_trading_day)
+    if buy_count == 0 and sell_count == 0:
+        return
+
+    top_ticker, top_change = _get_top_mover(db, last_trading_day)
+
+    params = {
+        "top_ticker": top_ticker, "top_change": top_change,
+        "buy_count": str(buy_count), "sell_count": str(sell_count),
+    }
+
+    sent = _send_localized_to_all(db, "MORNING_BRIEFING", params, data={
+        "type": "MORNING_BRIEFING", "date": str(last_trading_day),
+    }, skip_rate_limit=True)
+    _log_notification(db, today, "ALL", "MORNING_BRIEFING",
+                      recipients=sent, success=sent)
+
+
+def process_closing_report(db: Session, today: date):
+    """
+    장 마감 리포트 — 당일 최종 결과 (전체 사용자)
+    Triggered at 06:45 EST (after 06:30 ingest completes)
+    """
+    if _already_notified(db, today, "ALL", "CLOSING_REPORT"):
+        return
+
+    buy_count, sell_count = _get_signal_counts(db, today)
+    if buy_count == 0 and sell_count == 0:
+        return
+
+    top_ticker, top_change = _get_top_mover(db, today)
+
+    params = {
+        "top_ticker": top_ticker, "top_change": top_change,
+        "buy_count": str(buy_count), "sell_count": str(sell_count),
+    }
+
+    sent = _send_localized_to_all(db, "CLOSING_REPORT", params, data={
+        "type": "CLOSING_REPORT", "date": str(today),
+    }, skip_rate_limit=True)
+    _log_notification(db, today, "ALL", "CLOSING_REPORT",
+                      recipients=sent, success=sent)
+
+
+def process_market_open(db: Session, today: date):
+    """
+    시장 개장 알림 — 어닝 예정 + 활성 매수 시그널 (전체 사용자)
+    Triggered at 09:35 EST (right after market opens)
+    """
+    if _already_notified(db, today, "ALL", "MARKET_OPEN"):
+        return
+
+    # 오늘 어닝 발표 건수
+    result = db.execute(text("""
+        SELECT COUNT(*) FROM analytics.earnings_week_events
+        WHERE earnings_date = :today
+    """), {"today": today})
+    earnings_count = result.scalar() or 0
+
+    # 최근 데이터 기준 활성 강력매수 시그널 수
+    result = db.execute(text("""
+        SELECT COUNT(DISTINCT ticker) FROM analytics.ticker_scores
+        WHERE date = (SELECT MAX(date) FROM analytics.ticker_scores)
+          AND score >= 80
+    """))
+    buy_count = result.scalar() or 0
+
+    if earnings_count == 0 and buy_count == 0:
+        return
+
+    params = {
+        "earnings_count": str(earnings_count),
+        "buy_count": str(buy_count),
+    }
+
+    sent = _send_localized_to_all(db, "MARKET_OPEN", params, data={
+        "type": "MARKET_OPEN", "date": str(today),
+    }, skip_rate_limit=True)
+    _log_notification(db, today, "ALL", "MARKET_OPEN",
                       recipients=sent, success=sent)

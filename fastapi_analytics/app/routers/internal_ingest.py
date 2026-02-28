@@ -20,7 +20,8 @@ from app.schemas import (
     IngestPayload, ExtendedItemIngest, MacroIngestPayload,
     EarningsWeekIngestPayload, MarketIndicesIngestPayload,
     NewsIngestPayload, NewsIngestResponse,
-    WithdrawalRequest, WithdrawalResponse
+    WithdrawalRequest, WithdrawalResponse,
+    ScheduledNotificationRequest,
 )
 from app.config import settings
 from app.utils.trading_calendar import is_trading_day
@@ -29,6 +30,9 @@ from app.services.fcm_service import (
     process_news_notifications,
     process_bullish_surge_notifications,
     process_daily_summary_notification,
+    process_morning_briefing,
+    process_closing_report,
+    process_market_open,
 )
 
 logger = logging.getLogger(__name__)
@@ -1328,6 +1332,39 @@ def ingest_news(payload: NewsIngestPayload, db: Session = Depends(get_db)):
     db.commit()
 
     return NewsIngestResponse(upserted=upserted, total=len(payload.items))
+
+
+# ============================
+# 예약 브로드캐스트 알림 트리거 (Mac mini → AWS)
+# ============================
+
+@router.post("/notifications/trigger", dependencies=[Depends(verify_api_key)])
+def trigger_scheduled_notification(
+    payload: ScheduledNotificationRequest,
+    db: Session = Depends(get_db),
+):
+    """
+    예약 브로드캐스트 알림 트리거 (Mac mini cron → AWS FastAPI).
+
+    notification_type: MORNING_BRIEFING | CLOSING_REPORT | MARKET_OPEN
+    """
+    ntype = payload.notification_type
+    today = date.today()
+
+    try:
+        if ntype == "MORNING_BRIEFING":
+            process_morning_briefing(db)
+        elif ntype == "CLOSING_REPORT":
+            process_closing_report(db, today)
+        elif ntype == "MARKET_OPEN":
+            process_market_open(db, today)
+
+        db.commit()
+        return {"status": "ok", "notification_type": ntype, "date": str(today)}
+
+    except Exception as e:
+        logger.error(f"Scheduled notification error ({ntype}): {e}")
+        return {"status": "error", "notification_type": ntype, "detail": str(e)}
 
 
 # ============================

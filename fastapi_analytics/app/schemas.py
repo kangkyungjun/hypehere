@@ -901,3 +901,12 @@ class WithdrawalResponse(BaseModel):
     """Account withdrawal response"""
     message: str
     id: int
+
+
+# ============================================================
+# Scheduled Notification Schemas (예약 브로드캐스트)
+# ============================================================
+
+class ScheduledNotificationRequest(BaseModel):
+    """Trigger a scheduled broadcast notification from Mac mini"""
+    notification_type: Literal["MORNING_BRIEFING", "CLOSING_REPORT", "MARKET_OPEN"]

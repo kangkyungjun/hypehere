@@ -924,6 +924,7 @@ class DeviceToken(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='device_tokens')
     token = models.TextField(unique=True)
     platform = models.CharField(max_length=10, choices=PLATFORM_CHOICES)
+    language = models.CharField(max_length=5, default='en')
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -965,3 +966,22 @@ class NotificationRateLimit(models.Model):
 
     class Meta:
         db_table = 'accounts_notificationratelimit'
+
+
+class NotificationHistory(models.Model):
+    """앱 내 알림 히스토리 (FCM 발송과 별도로 저장)"""
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='notification_history')
+    title = models.CharField(max_length=200)
+    body = models.TextField()
+    notification_type = models.CharField(max_length=30)
+    ticker = models.CharField(max_length=50, blank=True, default='')
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'accounts_notification_history'
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['user', '-created_at']),
+            models.Index(fields=['user', 'is_read']),
+        ]
