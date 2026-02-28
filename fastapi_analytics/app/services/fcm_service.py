@@ -56,28 +56,28 @@ MESSAGES = {
         "es": ("[{ticker}] Aumento de noticias alcistas", "{this_week} noticias alcistas esta semana (+{increase_pct}%) — {headline}"),
     },
     "DAILY_SUMMARY": {
-        "en": ("Today's Market Signals", "Strong Buy: {buy_count}, Strong Sell: {sell_count}. Open the app for details."),
-        "ko": ("오늘의 시장 시그널", "강력매수 {buy_count}건, 강력매도 {sell_count}건. 앱에서 확인하세요."),
-        "ja": ("本日の市場シグナル", "強力買い {buy_count}件、強力売り {sell_count}件。アプリで確認しましょう。"),
-        "es": ("Señales del mercado hoy", "Compra fuerte: {buy_count}, Venta fuerte: {sell_count}. Abre la app."),
+        "en": ("Today's #1: {top_ticker} (Score {top_score})", "{buy_count} Buy, {sell_count} Sell, {hold_count} Hold signals. Check the app for details!"),
+        "ko": ("오늘의 1위: {top_ticker} (Score {top_score})", "매수 {buy_count}건, 매도 {sell_count}건, 관망 {hold_count}건. 앱에서 확인하세요!"),
+        "ja": ("本日1位: {top_ticker} (Score {top_score})", "買い {buy_count}件、売り {sell_count}件、様子見 {hold_count}件。アプリで確認！"),
+        "es": ("Hoy #1: {top_ticker} (Score {top_score})", "Compra {buy_count}, Venta {sell_count}, Espera {hold_count}. Revisa la app!"),
     },
     "MORNING_BRIEFING": {
-        "en": ("Good Morning! Market Recap", "Yesterday: {top_ticker} {top_change}%. Strong Buy {buy_count}, Strong Sell {sell_count}"),
-        "ko": ("아침 시장 브리핑", "어제 최대 변동: {top_ticker} {top_change}%. 강력매수 {buy_count}건, 강력매도 {sell_count}건"),
-        "ja": ("おはようございます！市場レビュー", "昨日の注目: {top_ticker} {top_change}%. 強力買い {buy_count}件、強力売り {sell_count}件"),
-        "es": ("Buenos días! Resumen del mercado", "Ayer: {top_ticker} {top_change}%. Compra fuerte {buy_count}, Venta fuerte {sell_count}"),
+        "en": ("Market Recap: S&P 500 {spy_change}%", "Top Gainer: {top_gainer} {gainer_change}%. {buy_count} Buy signals today."),
+        "ko": ("시장 요약: S&P 500 {spy_change}%", "최대 상승: {top_gainer} {gainer_change}%. 오늘 매수 시그널 {buy_count}건."),
+        "ja": ("市場まとめ: S&P 500 {spy_change}%", "最大上昇: {top_gainer} {gainer_change}%。本日の買いシグナル {buy_count}件。"),
+        "es": ("Resumen: S&P 500 {spy_change}%", "Mayor subida: {top_gainer} {gainer_change}%. {buy_count} señales de compra hoy."),
     },
     "CLOSING_REPORT": {
-        "en": ("Market Closed", "Strong Buy {buy_count}, Strong Sell {sell_count}. Top: {top_ticker} {top_change}%"),
-        "ko": ("장 마감 리포트", "강력매수 {buy_count}건, 강력매도 {sell_count}건. 최대변동: {top_ticker} {top_change}%"),
-        "ja": ("市場クローズ", "強力買い {buy_count}件、強力売り {sell_count}件。最大変動: {top_ticker} {top_change}%"),
-        "es": ("Mercado cerrado", "Compra fuerte {buy_count}, Venta fuerte {sell_count}. Mayor: {top_ticker} {top_change}%"),
+        "en": ("Market Closed: {top_gainer} {gainer_change}%", "Top Score: {top_ticker} ({top_score}). {top_loser} {loser_change}%."),
+        "ko": ("장 마감: {top_gainer} {gainer_change}%", "최고 스코어: {top_ticker} ({top_score}). {top_loser} {loser_change}%."),
+        "ja": ("市場終了: {top_gainer} {gainer_change}%", "最高スコア: {top_ticker} ({top_score})。{top_loser} {loser_change}%。"),
+        "es": ("Mercado cerrado: {top_gainer} {gainer_change}%", "Mejor puntaje: {top_ticker} ({top_score}). {top_loser} {loser_change}%."),
     },
     "MARKET_OPEN": {
-        "en": ("Market Opening Now", "{earnings_count} earnings today. {buy_count} Strong Buy signals active"),
-        "ko": ("시장 개장", "오늘 실적발표 {earnings_count}건. 강력매수 시그널 {buy_count}건 활성"),
-        "ja": ("市場開場", "本日の決算発表 {earnings_count}件。強力買いシグナル {buy_count}件"),
-        "es": ("Mercado abriendo", "{earnings_count} reportes hoy. {buy_count} señales de compra fuerte"),
+        "en": ("Market Open! {earnings_count} Earnings Today", "Yesterday's Top: {top_ticker} (Score {top_score}). {buy_count} Buy signals active."),
+        "ko": ("시장 개장! 오늘 실적발표 {earnings_count}건", "어제 1위: {top_ticker} (Score {top_score}). 매수 시그널 {buy_count}건 활성."),
+        "ja": ("市場開場！本日の決算 {earnings_count}件", "昨日1位: {top_ticker} (Score {top_score})。買いシグナル {buy_count}件。"),
+        "es": ("Mercado abierto! {earnings_count} reportes hoy", "Ayer #1: {top_ticker} (Score {top_score}). {buy_count} señales de compra."),
     },
 }
 
@@ -471,71 +471,95 @@ def process_bullish_surge_notifications(db: Session, today: date, tickers: list)
 
 
 def process_daily_summary_notification(db: Session, today: date):
-    """일일 시그널 요약 알림 — 모든 사용자에게 하루 1회 발송 (거래일이면 무조건)"""
+    """
+    일일 시그널 요약 — 오늘의 1위 종목 + 시그널 분포
+    Triggered during score ingest
+    """
     if _already_notified(db, today, "ALL", "DAILY_SUMMARY"):
         return
 
-    result = db.execute(text("""
-        SELECT COUNT(DISTINCT ticker) FROM analytics.ticker_scores
-        WHERE date = :date AND score >= 80
-    """), {"date": today})
-    buy_count = result.scalar() or 0
+    top_ticker, top_score = _get_top_scorer(db, today)
+    buy_count, sell_count, hold_count = _get_signal_distribution(db, today)
 
-    result = db.execute(text("""
-        SELECT COUNT(DISTINCT ticker) FROM analytics.ticker_scores
-        WHERE date = :date AND score <= 20
-    """), {"date": today})
-    sell_count = result.scalar() or 0
-
-    params = {"buy_count": str(buy_count), "sell_count": str(sell_count)}
+    params = {
+        "top_ticker": top_ticker, "top_score": str(top_score),
+        "buy_count": str(buy_count), "sell_count": str(sell_count),
+        "hold_count": str(hold_count),
+    }
 
     sent = _send_localized_to_all(db, "DAILY_SUMMARY", params, data={
-        "type": "DAILY_SUMMARY",
-        "buy_count": str(buy_count),
-        "sell_count": str(sell_count),
-        "date": str(today),
+        "type": "DAILY_SUMMARY", "top_ticker": top_ticker, "date": str(today),
     }, skip_rate_limit=True)
     _log_notification(db, today, "ALL", "DAILY_SUMMARY",
                       recipients=sent, success=sent)
 
 
-def _get_top_mover(db: Session, target_date: date):
-    """해당 날짜의 최대 변동률 종목 조회 (ticker, change_pct)"""
+def _get_top_scorer(db: Session, target_date: date):
+    """해당 날짜의 최고 점수 종목 (ticker, score)"""
     result = db.execute(text("""
-        SELECT ticker, change_pct FROM analytics.ticker_prices
-        WHERE date = :date AND change_pct IS NOT NULL
-        ORDER BY ABS(change_pct) DESC
-        LIMIT 1
+        SELECT ticker, score FROM analytics.ticker_scores
+        WHERE date = :date
+        ORDER BY score DESC LIMIT 1
     """), {"date": target_date})
     row = result.fetchone()
-    if row:
-        return row[0], f"{row[1]:+.1f}"
-    return "N/A", "0.0"
+    return (row[0], int(row[1])) if row else ("N/A", 0)
 
 
-def _get_signal_counts(db: Session, target_date: date):
-    """해당 날짜의 강력매수/강력매도 종목 수"""
+def _get_signal_distribution(db: Session, target_date: date):
+    """해당 날짜의 시그널 분포 (buy, sell, hold)"""
     result = db.execute(text("""
         SELECT
-            COUNT(DISTINCT CASE WHEN score >= 80 THEN ticker END),
-            COUNT(DISTINCT CASE WHEN score <= 20 THEN ticker END)
+            COUNT(DISTINCT CASE WHEN score >= 60 THEN ticker END),
+            COUNT(DISTINCT CASE WHEN score <= 40 THEN ticker END),
+            COUNT(DISTINCT CASE WHEN score > 40 AND score < 60 THEN ticker END)
         FROM analytics.ticker_scores
         WHERE date = :date
     """), {"date": target_date})
     row = result.fetchone()
-    return (row[0] or 0, row[1] or 0) if row else (0, 0)
+    return (row[0] or 0, row[1] or 0, row[2] or 0) if row else (0, 0, 0)
+
+
+def _get_top_gainer_loser(db: Session, target_date: date):
+    """해당 날짜의 최대 상승/하락 종목"""
+    result = db.execute(text("""
+        SELECT ticker, change_pct FROM analytics.ticker_prices
+        WHERE date = :date AND change_pct IS NOT NULL
+        ORDER BY change_pct DESC LIMIT 1
+    """), {"date": target_date})
+    gainer_row = result.fetchone()
+
+    result = db.execute(text("""
+        SELECT ticker, change_pct FROM analytics.ticker_prices
+        WHERE date = :date AND change_pct IS NOT NULL
+        ORDER BY change_pct ASC LIMIT 1
+    """), {"date": target_date})
+    loser_row = result.fetchone()
+
+    gainer = (gainer_row[0], f"{gainer_row[1]:+.1f}") if gainer_row else ("N/A", "+0.0")
+    loser = (loser_row[0], f"{loser_row[1]:+.1f}") if loser_row else ("N/A", "-0.0")
+    return gainer, loser
+
+
+def _get_spy_change(db: Session, target_date: date):
+    """SPY 변동률 조회"""
+    result = db.execute(text("""
+        SELECT change_pct FROM analytics.ticker_prices
+        WHERE date = :date AND ticker = 'SPY'
+    """), {"date": target_date})
+    row = result.fetchone()
+    return f"{row[0]:+.1f}" if row and row[0] is not None else "+0.0"
 
 
 def process_morning_briefing(db: Session):
     """
-    아침 브리핑 — 전일 장 마감 요약 (전체 사용자)
-    Triggered at 17:00 EST (after market close recap)
+    아침 브리핑 — S&P 500 변동 + 최대 상승종목 + 매수 시그널 수
+    Triggered at 17:00 EST (after market close, morning in Asia)
     """
     today = date.today()
     if _already_notified(db, today, "ALL", "MORNING_BRIEFING"):
         return
 
-    # 마지막 거래일 찾기 (어제 또는 금요일)
+    # 마지막 거래일 찾기
     yesterday = today - timedelta(days=1)
     result = db.execute(text("""
         SELECT DISTINCT date FROM analytics.ticker_scores
@@ -547,12 +571,14 @@ def process_morning_briefing(db: Session):
         return
     last_trading_day = row[0]
 
-    buy_count, sell_count = _get_signal_counts(db, last_trading_day)
-    top_ticker, top_change = _get_top_mover(db, last_trading_day)
+    spy_change = _get_spy_change(db, last_trading_day)
+    (top_gainer, gainer_change), _ = _get_top_gainer_loser(db, last_trading_day)
+    buy_count, _, _ = _get_signal_distribution(db, last_trading_day)
 
     params = {
-        "top_ticker": top_ticker, "top_change": top_change,
-        "buy_count": str(buy_count), "sell_count": str(sell_count),
+        "spy_change": spy_change,
+        "top_gainer": top_gainer, "gainer_change": gainer_change,
+        "buy_count": str(buy_count),
     }
 
     sent = _send_localized_to_all(db, "MORNING_BRIEFING", params, data={
@@ -564,18 +590,19 @@ def process_morning_briefing(db: Session):
 
 def process_closing_report(db: Session, today: date):
     """
-    장 마감 리포트 — 당일 최종 결과 (전체 사용자)
+    장 마감 리포트 — 상승/하락 1위 + 최고 스코어
     Triggered at 06:45 EST (after 06:30 ingest completes)
     """
     if _already_notified(db, today, "ALL", "CLOSING_REPORT"):
         return
 
-    buy_count, sell_count = _get_signal_counts(db, today)
-    top_ticker, top_change = _get_top_mover(db, today)
+    (top_gainer, gainer_change), (top_loser, loser_change) = _get_top_gainer_loser(db, today)
+    top_ticker, top_score = _get_top_scorer(db, today)
 
     params = {
-        "top_ticker": top_ticker, "top_change": top_change,
-        "buy_count": str(buy_count), "sell_count": str(sell_count),
+        "top_gainer": top_gainer, "gainer_change": gainer_change,
+        "top_loser": top_loser, "loser_change": loser_change,
+        "top_ticker": top_ticker, "top_score": str(top_score),
     }
 
     sent = _send_localized_to_all(db, "CLOSING_REPORT", params, data={
@@ -587,7 +614,7 @@ def process_closing_report(db: Session, today: date):
 
 def process_market_open(db: Session, today: date):
     """
-    시장 개장 알림 — 어닝 예정 + 활성 매수 시그널 (전체 사용자)
+    시장 개장 알림 — 어닝 예정 + 어제 1위 종목
     Triggered at 09:35 EST (right after market opens)
     """
     if _already_notified(db, today, "ALL", "MARKET_OPEN"):
@@ -600,16 +627,19 @@ def process_market_open(db: Session, today: date):
     """), {"today": today})
     earnings_count = result.scalar() or 0
 
-    # 최근 데이터 기준 활성 강력매수 시그널 수
+    # 최근 거래일의 1위 종목 + 활성 매수 시그널 수
     result = db.execute(text("""
-        SELECT COUNT(DISTINCT ticker) FROM analytics.ticker_scores
-        WHERE date = (SELECT MAX(date) FROM analytics.ticker_scores)
-          AND score >= 80
+        SELECT MAX(date) FROM analytics.ticker_scores
     """))
-    buy_count = result.scalar() or 0
+    last_date_row = result.fetchone()
+    last_date = last_date_row[0] if last_date_row and last_date_row[0] else today
+
+    top_ticker, top_score = _get_top_scorer(db, last_date)
+    buy_count, _, _ = _get_signal_distribution(db, last_date)
 
     params = {
         "earnings_count": str(earnings_count),
+        "top_ticker": top_ticker, "top_score": str(top_score),
         "buy_count": str(buy_count),
     }
 
