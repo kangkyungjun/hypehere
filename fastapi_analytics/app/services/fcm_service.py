@@ -56,10 +56,10 @@ MESSAGES = {
         "es": ("[{ticker}] Aumento de noticias alcistas", "{this_week} noticias alcistas esta semana (+{increase_pct}%) — {headline}"),
     },
     "DAILY_SUMMARY": {
-        "en": ("Today's Signal Summary", "Strong Buy: {buy_count}, Strong Sell: {sell_count} — Check now"),
-        "ko": ("오늘의 시그널 요약", "강력매수 {buy_count}건, 강력매도 {sell_count}건을 확인해보세요"),
-        "ja": ("本日のシグナル要約", "強力買い {buy_count}件、強力売り {sell_count}件 — 確認しましょう"),
-        "es": ("Resumen de señales de hoy", "Compra fuerte: {buy_count}, Venta fuerte: {sell_count} — Revisa ahora"),
+        "en": ("Today's Market Signals", "Strong Buy: {buy_count}, Strong Sell: {sell_count}. Open the app for details."),
+        "ko": ("오늘의 시장 시그널", "강력매수 {buy_count}건, 강력매도 {sell_count}건. 앱에서 확인하세요."),
+        "ja": ("本日の市場シグナル", "強力買い {buy_count}件、強力売り {sell_count}件。アプリで確認しましょう。"),
+        "es": ("Señales del mercado hoy", "Compra fuerte: {buy_count}, Venta fuerte: {sell_count}. Abre la app."),
     },
     "MORNING_BRIEFING": {
         "en": ("Good Morning! Market Recap", "Yesterday: {top_ticker} {top_change}%. Strong Buy {buy_count}, Strong Sell {sell_count}"),
@@ -471,7 +471,7 @@ def process_bullish_surge_notifications(db: Session, today: date, tickers: list)
 
 
 def process_daily_summary_notification(db: Session, today: date):
-    """일일 시그널 요약 알림 — 모든 사용자에게 하루 1회 발송"""
+    """일일 시그널 요약 알림 — 모든 사용자에게 하루 1회 발송 (거래일이면 무조건)"""
     if _already_notified(db, today, "ALL", "DAILY_SUMMARY"):
         return
 
@@ -486,9 +486,6 @@ def process_daily_summary_notification(db: Session, today: date):
         WHERE date = :date AND score <= 20
     """), {"date": today})
     sell_count = result.scalar() or 0
-
-    if buy_count == 0 and sell_count == 0:
-        return
 
     params = {"buy_count": str(buy_count), "sell_count": str(sell_count)}
 
@@ -551,9 +548,6 @@ def process_morning_briefing(db: Session):
     last_trading_day = row[0]
 
     buy_count, sell_count = _get_signal_counts(db, last_trading_day)
-    if buy_count == 0 and sell_count == 0:
-        return
-
     top_ticker, top_change = _get_top_mover(db, last_trading_day)
 
     params = {
@@ -577,9 +571,6 @@ def process_closing_report(db: Session, today: date):
         return
 
     buy_count, sell_count = _get_signal_counts(db, today)
-    if buy_count == 0 and sell_count == 0:
-        return
-
     top_ticker, top_change = _get_top_mover(db, today)
 
     params = {
@@ -616,9 +607,6 @@ def process_market_open(db: Session, today: date):
           AND score >= 80
     """))
     buy_count = result.scalar() or 0
-
-    if earnings_count == 0 and buy_count == 0:
-        return
 
     params = {
         "earnings_count": str(earnings_count),
