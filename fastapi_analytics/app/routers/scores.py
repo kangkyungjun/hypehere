@@ -128,6 +128,78 @@ def get_top_scores(
     ]
 
 
+@router.get("/batch", response_model=List[TopTickerResponse])
+def get_batch_scores(
+    tickers: str = Query(..., description="Comma-separated ticker symbols (e.g., AAPL,TSLA,MSFT)"),
+    target_date: date = Query(None, alias="date", description="Date (default: latest trading day)"),
+    db: Session = Depends(get_db)
+):
+    """
+    Get scores for specific tickers by batch.
+
+    **워치리스트용** ⭐
+    - 관심 종목 리스트의 점수/시그널/가격 일괄 조회
+    - 쉼표로 구분된 티커 심볼 전달
+
+    Example:
+    ```
+    GET /api/v1/scores/batch?tickers=AAPL,TSLA,MSFT
+    ```
+    """
+    ticker_list = [t.strip().upper() for t in tickers.split(",") if t.strip()]
+    if not ticker_list:
+        return []
+
+    if target_date is None:
+        latest_date = get_latest_trading_date(db)
+        if latest_date is None:
+            return []
+        target_date = latest_date
+
+    results = db.query(
+        TickerScore.ticker,
+        TickerScore.score,
+        TickerScore.signal,
+        Ticker.name,
+        Ticker.extra_data,
+        TickerPrice.close,
+        TickerPrice.change_pct,
+    ).outerjoin(
+        Ticker,
+        TickerScore.ticker == Ticker.ticker
+    ).outerjoin(
+        TickerPrice,
+        (TickerScore.ticker == TickerPrice.ticker) & (TickerScore.date == TickerPrice.date)
+    ).filter(
+        TickerScore.date == target_date,
+        TickerScore.ticker.in_(ticker_list)
+    ).all()
+
+    # Batch-fetch memberships
+    result_tickers = [r.ticker for r in results]
+    memberships_rows = db.query(
+        StockMembership.ticker, StockMembership.index_code
+    ).filter(StockMembership.ticker.in_(result_tickers)).all() if result_tickers else []
+
+    membership_map: dict[str, list[str]] = {}
+    for m in memberships_rows:
+        membership_map.setdefault(m.ticker, []).append(m.index_code)
+
+    return [
+        {
+            "ticker": r.ticker,
+            "score": r.score,
+            "signal": translate_signal(r.signal),
+            "name": r.name,
+            "name_ko": r.extra_data.get("name_ko") if r.extra_data else None,
+            "membership": membership_map.get(r.ticker),
+            "close": r.close,
+            "change_pct": r.change_pct,
+        }
+        for r in results
+    ]
+
+
 @router.get("/insights")
 def get_market_insights(
     target_date: date = Query(None, alias="date", description="Date (default: today)"),

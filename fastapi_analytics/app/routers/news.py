@@ -26,7 +26,7 @@ def get_latest_news(
     total = db.query(TickerNews).count()
 
     rows = (
-        db.query(TickerNews, Ticker.extra_data)
+        db.query(TickerNews, Ticker.extra_data, Ticker.sector)
         .outerjoin(Ticker, TickerNews.ticker == Ticker.ticker)
         .order_by(TickerNews.published_at.desc())
         .offset(offset)
@@ -48,8 +48,9 @@ def get_latest_news(
             sentiment_label=r.sentiment_label,
             future_event=r.future_event,
             ticker_name_ko=(extra_data or {}).get('name_ko') if extra_data else None,
+            sector=sector,
         )
-        for r, extra_data in rows
+        for r, extra_data, sector in rows
     ]
 
     return NewsListResponse(items=items, total=total)
@@ -82,9 +83,10 @@ def get_news(
 
     total = base_query.count()
 
-    # Ticker JOIN for name_ko
-    ticker_meta = db.query(Ticker.extra_data).filter(Ticker.ticker == ticker).first()
+    # Ticker JOIN for name_ko and sector
+    ticker_meta = db.query(Ticker.extra_data, Ticker.sector).filter(Ticker.ticker == ticker).first()
     name_ko = (ticker_meta[0] or {}).get('name_ko') if ticker_meta else None
+    ticker_sector = ticker_meta[1] if ticker_meta else None
 
     rows = (
         base_query
@@ -108,6 +110,7 @@ def get_news(
             sentiment_label=r.sentiment_label,
             future_event=r.future_event,
             ticker_name_ko=name_ko,
+            sector=ticker_sector,
         )
         for r in rows
     ]

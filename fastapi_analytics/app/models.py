@@ -545,6 +545,7 @@ class TickerNews(Base):
     sentiment_grade = Column(String(10), nullable=False)
     sentiment_label = Column(String(100), nullable=False)
     future_event = Column(JSONB)
+    is_breaking = Column(Boolean, default=False)
     created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
     updated_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
 
@@ -580,6 +581,22 @@ class AccountWithdrawal(Base):
     user_email = Column(String(255), nullable=False)
     user_nickname = Column(String(100))
     reason = Column(Text)
+    created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class MarketCalendarEvent(Base):
+    """월별 이벤트 캘린더 (FOMC, 실적, 경제지표 등)."""
+    __tablename__ = "market_calendar"
+    __table_args__ = {'schema': 'analytics'}
+
+    id = Column(String(16), primary_key=True)
+    event_date = Column(Date, nullable=False, index=True)
+    event_type = Column(String(30), nullable=False)
+    title = Column(String(500), nullable=False)       # "ko|||en|||zh|||ja|||es"
+    description = Column(Text)                         # "ko|||en|||zh|||ja|||es"
+    ticker = Column(String(10))
+    importance = Column(String(10), server_default=text("'medium'"))
+    source = Column(String(50))
     created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
 
 

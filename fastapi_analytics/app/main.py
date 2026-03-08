@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from app.routers import scores, tickers, prices, internal_ingest, dashboard, charts, market, macro, earnings, news
+from app.routers import scores, tickers, prices, internal_ingest, dashboard, charts, market, macro, earnings, news, events
 from app.config import settings
 from app.schemas import HealthCheck
 
@@ -78,6 +78,13 @@ app.include_router(
     news.router,
     prefix="/api/v1/news",
     tags=["News 📰"]
+)
+
+# Events calendar router (Flutter app)
+app.include_router(
+    events.router,
+    prefix="/api/v1/events",
+    tags=["Events Calendar 📅"]
 )
 
 # Internal router (Mac mini ingest)

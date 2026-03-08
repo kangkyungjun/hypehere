@@ -14,7 +14,7 @@ from app.models import (
     MacroIndicator, MacroChartData, TickerCalendar, TickerEarningsHistory,
     TickerDefenseLine, TickerRecommendation, TickerInstitutionalHolder,
     EarningsWeekEvent, MarketIndex, MarketIndexChart, StockMembership,
-    TickerNews, AccountWithdrawal
+    TickerNews, AccountWithdrawal, MarketCalendarEvent
 )
 from app.schemas import (
     IngestPayload, ExtendedItemIngest, MacroIngestPayload,
@@ -22,12 +22,14 @@ from app.schemas import (
     NewsIngestPayload, NewsIngestResponse,
     WithdrawalRequest, WithdrawalResponse,
     ScheduledNotificationRequest,
+    MarketCalendarIngestPayload,
 )
 from app.config import settings
 from app.utils.trading_calendar import is_trading_day
 from app.services.fcm_service import (
     process_score_notifications,
     process_news_notifications,
+    process_breaking_news_notification,
     process_bullish_surge_notifications,
     process_daily_summary_notification,
     process_morning_briefing,
@@ -1282,6 +1284,7 @@ def ingest_news(payload: NewsIngestPayload, db: Session = Depends(get_db)):
             obj.sentiment_grade = item.sentiment_grade
             obj.sentiment_label = item.sentiment_label
             obj.future_event = future_event_dict
+            obj.is_breaking = item.is_breaking or False
             obj.updated_at = datetime.utcnow()
         else:
             db.add(TickerNews(
@@ -1297,6 +1300,7 @@ def ingest_news(payload: NewsIngestPayload, db: Session = Depends(get_db)):
                 sentiment_grade=item.sentiment_grade,
                 sentiment_label=item.sentiment_label,
                 future_event=future_event_dict,
+                is_breaking=item.is_breaking or False,
             ))
         upserted += 1
 
@@ -1315,6 +1319,19 @@ def ingest_news(payload: NewsIngestPayload, db: Session = Depends(get_db)):
                 )
             except Exception as e:
                 logger.error(f"FCM news error for {item.ticker}: {e}")
+
+    # ----------------------------
+    # FCM 알림: 속보 뉴스 (전체 broadcast)
+    # ----------------------------
+    for item in payload.items:
+        if item.is_breaking:
+            try:
+                process_breaking_news_notification(
+                    db, item.date, item.ticker.upper(),
+                    item.ai_summary, item.source_url,
+                )
+            except Exception as e:
+                logger.error(f"FCM breaking news error for {item.ticker}: {e}")
 
     # FCM: 호재 뉴스 급상승 종목 감지 (배치)
     ingested_tickers = list(set(item.ticker.upper() for item in payload.items))
@@ -1391,3 +1408,56 @@ def save_withdrawal_reason(payload: WithdrawalRequest, db: Session = Depends(get
     logger.info(f"Withdrawal reason saved: {payload.user_email} (id={withdrawal.id})")
 
     return WithdrawalResponse(message="saved", id=withdrawal.id)
+
+
+# ============================
+# 월별 이벤트 캘린더 Ingest (Mac mini → AWS)
+# ============================
+
+@router.post("/calendar", dependencies=[Depends(verify_api_key)])
+def ingest_calendar(payload: MarketCalendarIngestPayload, db: Session = Depends(get_db)):
+    """
+    월별 이벤트 캘린더 업로드 (Mac mini → AWS).
+
+    FOMC, 연준 연설, 옵션 만기, 경제지표 발표, 실적, 컨퍼런스,
+    배당, 제품 출시, 주주총회 등 이벤트를 UPSERT.
+    title/description은 "ko|||en|||zh|||ja|||es" 다국어 패킹 형태.
+    """
+    upserted = 0
+    for item in payload.items:
+        event_date = datetime.strptime(item.date, "%Y-%m-%d").date()
+        existing = db.query(MarketCalendarEvent).filter(MarketCalendarEvent.id == item.id).first()
+
+        if existing:
+            existing.event_date = event_date
+            existing.event_type = item.event_type
+            existing.title = item.title
+            existing.description = item.description
+            existing.ticker = item.ticker
+            existing.importance = item.importance
+            existing.source = item.source
+        else:
+            db.add(MarketCalendarEvent(
+                id=item.id,
+                event_date=event_date,
+                event_type=item.event_type,
+                title=item.title,
+                description=item.description,
+                ticker=item.ticker,
+                importance=item.importance,
+                source=item.source,
+            ))
+        upserted += 1
+
+    # 3년 초과 데이터 정리
+    from dateutil.relativedelta import relativedelta
+    cutoff = date.today() - relativedelta(years=3)
+    deleted = db.query(MarketCalendarEvent).filter(
+        MarketCalendarEvent.event_date < cutoff
+    ).delete()
+    if deleted:
+        logger.info(f"Calendar cleanup: removed {deleted} events older than {cutoff}")
+
+    db.commit()
+
+    return {"status": "ok", "upserted": upserted}

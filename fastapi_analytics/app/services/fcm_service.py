@@ -29,55 +29,71 @@ MESSAGES = {
         "en": ("[{ticker}] Strong Buy Signal", "Score {score} — {signal}"),
         "ko": ("[{ticker}] 강력 매수 시그널", "Score {score} — {signal}"),
         "ja": ("[{ticker}] 強力買いシグナル", "スコア {score} — {signal}"),
+        "zh": ("[{ticker}] 强力买入信号", "评分 {score} — {signal}"),
         "es": ("[{ticker}] Señal de compra fuerte", "Puntuación {score} — {signal}"),
     },
     "STRONG_SELL": {
         "en": ("[{ticker}] Strong Sell Signal", "Score {score} — {signal}"),
         "ko": ("[{ticker}] 강력 매도 시그널", "Score {score} — {signal}"),
         "ja": ("[{ticker}] 強力売りシグナル", "スコア {score} — {signal}"),
+        "zh": ("[{ticker}] 强力卖出信号", "评分 {score} — {signal}"),
         "es": ("[{ticker}] Señal de venta fuerte", "Puntuación {score} — {signal}"),
     },
     "NEWS_BULLISH": {
         "en": ("[{ticker}] Bullish News 📈", "{summary}"),
         "ko": ("[{ticker}] 호재 뉴스 📈", "{summary}"),
         "ja": ("[{ticker}] 強気ニュース 📈", "{summary}"),
+        "zh": ("[{ticker}] 利好消息 📈", "{summary}"),
         "es": ("[{ticker}] Noticias alcistas 📈", "{summary}"),
     },
     "NEWS_BEARISH": {
         "en": ("[{ticker}] Bearish News 📉", "{summary}"),
         "ko": ("[{ticker}] 악재 뉴스 📉", "{summary}"),
         "ja": ("[{ticker}] 弱気ニュース 📉", "{summary}"),
+        "zh": ("[{ticker}] 利空消息 📉", "{summary}"),
         "es": ("[{ticker}] Noticias bajistas 📉", "{summary}"),
     },
     "BULLISH_NEWS_SURGE": {
         "en": ("[{ticker}] Bullish News Surge", "{this_week} bullish articles this week (+{increase_pct}%) — {headline}"),
         "ko": ("[{ticker}] 호재 뉴스 급상승", "이번 주 호재 {this_week}건 (지난주 대비 +{increase_pct}%) — {headline}"),
         "ja": ("[{ticker}] 強気ニュース急増", "今週の強気記事 {this_week}件 (先週比 +{increase_pct}%) — {headline}"),
+        "zh": ("[{ticker}] 利好消息激增", "本周利好 {this_week}篇 (较上周 +{increase_pct}%) — {headline}"),
         "es": ("[{ticker}] Aumento de noticias alcistas", "{this_week} noticias alcistas esta semana (+{increase_pct}%) — {headline}"),
     },
     "DAILY_SUMMARY": {
         "en": ("Today's #1: {top_ticker} (Score {top_score})", "{buy_count} Buy, {sell_count} Sell, {hold_count} Hold signals. Check the app for details!"),
         "ko": ("오늘의 1위: {top_ticker} (Score {top_score})", "매수 {buy_count}건, 매도 {sell_count}건, 관망 {hold_count}건. 앱에서 확인하세요!"),
         "ja": ("本日1位: {top_ticker} (Score {top_score})", "買い {buy_count}件、売り {sell_count}件、様子見 {hold_count}件。アプリで確認！"),
+        "zh": ("今日第一: {top_ticker} (评分 {top_score})", "买入 {buy_count}个, 卖出 {sell_count}个, 观望 {hold_count}个。打开应用查看详情！"),
         "es": ("Hoy #1: {top_ticker} (Score {top_score})", "Compra {buy_count}, Venta {sell_count}, Espera {hold_count}. Revisa la app!"),
     },
     "MORNING_BRIEFING": {
         "en": ("Market Recap: S&P 500 {spy_change}%", "Top Gainer: {top_gainer} {gainer_change}%. {buy_count} Buy signals today."),
         "ko": ("시장 요약: S&P 500 {spy_change}%", "최대 상승: {top_gainer} {gainer_change}%. 오늘 매수 시그널 {buy_count}건."),
         "ja": ("市場まとめ: S&P 500 {spy_change}%", "最大上昇: {top_gainer} {gainer_change}%。本日の買いシグナル {buy_count}件。"),
+        "zh": ("市场回顾: S&P 500 {spy_change}%", "最大涨幅: {top_gainer} {gainer_change}%。今日买入信号 {buy_count}个。"),
         "es": ("Resumen: S&P 500 {spy_change}%", "Mayor subida: {top_gainer} {gainer_change}%. {buy_count} señales de compra hoy."),
     },
     "CLOSING_REPORT": {
         "en": ("Market Closed: {top_gainer} {gainer_change}%", "Top Score: {top_ticker} ({top_score}). {top_loser} {loser_change}%."),
         "ko": ("장 마감: {top_gainer} {gainer_change}%", "최고 스코어: {top_ticker} ({top_score}). {top_loser} {loser_change}%."),
         "ja": ("市場終了: {top_gainer} {gainer_change}%", "最高スコア: {top_ticker} ({top_score})。{top_loser} {loser_change}%。"),
+        "zh": ("收盘: {top_gainer} {gainer_change}%", "最高评分: {top_ticker} ({top_score})。{top_loser} {loser_change}%。"),
         "es": ("Mercado cerrado: {top_gainer} {gainer_change}%", "Mejor puntaje: {top_ticker} ({top_score}). {top_loser} {loser_change}%."),
     },
     "MARKET_OPEN": {
         "en": ("Market Open! {earnings_count} Earnings Today", "Yesterday's Top: {top_ticker} (Score {top_score}). {buy_count} Buy signals active."),
         "ko": ("시장 개장! 오늘 실적발표 {earnings_count}건", "어제 1위: {top_ticker} (Score {top_score}). 매수 시그널 {buy_count}건 활성."),
         "ja": ("市場開場！本日の決算 {earnings_count}件", "昨日1位: {top_ticker} (Score {top_score})。買いシグナル {buy_count}件。"),
+        "zh": ("开盘！今日财报 {earnings_count}家", "昨日第一: {top_ticker} (评分 {top_score})。买入信号 {buy_count}个。"),
         "es": ("Mercado abierto! {earnings_count} reportes hoy", "Ayer #1: {top_ticker} (Score {top_score}). {buy_count} señales de compra."),
+    },
+    "BREAKING_NEWS": {
+        "en": ("[{ticker}] Breaking News", "{summary}"),
+        "ko": ("[{ticker}] 속보", "{summary}"),
+        "ja": ("[{ticker}] 速報", "{summary}"),
+        "zh": ("[{ticker}] 突发新闻", "{summary}"),
+        "es": ("[{ticker}] Última hora", "{summary}"),
     },
 }
 
@@ -418,6 +434,30 @@ def process_news_notifications(db: Session, today: date, ticker: str,
     _log_notification(db, today, ticker, signal_type, recipients=sent, success=sent)
 
 
+def process_breaking_news_notification(db: Session, today: date, ticker: str,
+                                       ai_summary: str = None, source_url: str = None):
+    """
+    속보 뉴스 알림 — 전체 사용자 즉시 broadcast (1시간 제한 무시).
+    is_breaking=True인 뉴스가 ingest될 때 호출.
+    """
+    signal_type = "BREAKING_NEWS"
+
+    if _already_notified(db, today, ticker, signal_type):
+        return
+
+    params = {"ticker": ticker, "summary": (ai_summary or "")[:120]}
+    data = {
+        "type": "BREAKING_NEWS",
+        "ticker": ticker,
+    }
+    if source_url:
+        data["source_url"] = source_url
+
+    sent = _send_localized_to_all(db, signal_type, params, data=data,
+                                  skip_rate_limit=True)
+    _log_notification(db, today, ticker, signal_type, recipients=sent, success=sent)
+
+
 def process_bullish_surge_notifications(db: Session, today: date, tickers: list):
     """
     호재 뉴스 급상승 종목 감지 (주간 비교)
@@ -478,7 +518,12 @@ def process_daily_summary_notification(db: Session, today: date):
     if _already_notified(db, today, "ALL", "DAILY_SUMMARY"):
         return
 
-    top_ticker, top_score = _get_top_scorer(db, today)
+    scorer = _get_top_scorer(db, today)
+    if not scorer:
+        logger.info(f"DAILY_SUMMARY skipped: no score data for {today}")
+        return
+
+    top_ticker, top_score = scorer
     buy_count, sell_count, hold_count = _get_signal_distribution(db, today)
 
     params = {
@@ -494,15 +539,30 @@ def process_daily_summary_notification(db: Session, today: date):
                       recipients=sent, success=sent)
 
 
+def _get_last_trading_date(db: Session, up_to: date = None):
+    """DB에 실제 데이터가 있는 가장 최근 거래일 반환 (타임존 무관)"""
+    if up_to:
+        result = db.execute(text("""
+            SELECT MAX(date) FROM analytics.ticker_scores
+            WHERE date <= :up_to
+        """), {"up_to": up_to})
+    else:
+        result = db.execute(text("""
+            SELECT MAX(date) FROM analytics.ticker_scores
+        """))
+    row = result.fetchone()
+    return row[0] if row and row[0] else None
+
+
 def _get_top_scorer(db: Session, target_date: date):
-    """해당 날짜의 최고 점수 종목 (ticker, score)"""
+    """해당 날짜의 최고 점수 종목 (ticker, score) — 데이터 없으면 None"""
     result = db.execute(text("""
         SELECT ticker, score FROM analytics.ticker_scores
         WHERE date = :date
         ORDER BY score DESC LIMIT 1
     """), {"date": target_date})
     row = result.fetchone()
-    return (row[0], int(row[1])) if row else ("N/A", 0)
+    return (row[0], int(row[1])) if row else None
 
 
 def _get_signal_distribution(db: Session, target_date: date):
@@ -535,8 +595,8 @@ def _get_top_gainer_loser(db: Session, target_date: date):
     """), {"date": target_date})
     loser_row = result.fetchone()
 
-    gainer = (gainer_row[0], f"{gainer_row[1]:+.1f}") if gainer_row else ("N/A", "+0.0")
-    loser = (loser_row[0], f"{loser_row[1]:+.1f}") if loser_row else ("N/A", "-0.0")
+    gainer = (gainer_row[0], f"{gainer_row[1]:+.1f}") if gainer_row else None
+    loser = (loser_row[0], f"{loser_row[1]:+.1f}") if loser_row else None
     return gainer, loser
 
 
@@ -547,32 +607,30 @@ def _get_spy_change(db: Session, target_date: date):
         WHERE date = :date AND ticker = 'SPY'
     """), {"date": target_date})
     row = result.fetchone()
-    return f"{row[0]:+.1f}" if row and row[0] is not None else "+0.0"
+    return f"{row[0]:+.1f}" if row and row[0] is not None else None
 
 
 def process_morning_briefing(db: Session):
     """
     아침 브리핑 — S&P 500 변동 + 최대 상승종목 + 매수 시그널 수
-    Triggered at 17:00 EST (after market close, morning in Asia)
+    Triggered at 22:00 UTC (17:00 EST / 07:00 KST+1)
     """
     today = date.today()
     if _already_notified(db, today, "ALL", "MORNING_BRIEFING"):
         return
 
-    # 마지막 거래일 찾기
-    yesterday = today - timedelta(days=1)
-    result = db.execute(text("""
-        SELECT DISTINCT date FROM analytics.ticker_scores
-        WHERE date <= :yesterday
-        ORDER BY date DESC LIMIT 1
-    """), {"yesterday": yesterday})
-    row = result.fetchone()
-    if not row:
+    last_trading_day = _get_last_trading_date(db, today - timedelta(days=1))
+    if not last_trading_day:
+        logger.info("MORNING_BRIEFING skipped: no trading data found")
         return
-    last_trading_day = row[0]
 
     spy_change = _get_spy_change(db, last_trading_day)
-    (top_gainer, gainer_change), _ = _get_top_gainer_loser(db, last_trading_day)
+    gainer, _ = _get_top_gainer_loser(db, last_trading_day)
+    if not spy_change or not gainer:
+        logger.info(f"MORNING_BRIEFING skipped: incomplete data for {last_trading_day}")
+        return
+
+    top_gainer, gainer_change = gainer
     buy_count, _, _ = _get_signal_distribution(db, last_trading_day)
 
     params = {
@@ -591,13 +649,26 @@ def process_morning_briefing(db: Session):
 def process_closing_report(db: Session, today: date):
     """
     장 마감 리포트 — 상승/하락 1위 + 최고 스코어
-    Triggered at 06:45 EST (after 06:30 ingest completes)
+    Triggered at 11:45 UTC (06:45 EST / 20:45 KST)
+    today = UTC date (서버 기준). 데이터는 미국 거래일 기준이므로 DB에서 최근 거래일을 조회.
     """
     if _already_notified(db, today, "ALL", "CLOSING_REPORT"):
         return
 
-    (top_gainer, gainer_change), (top_loser, loser_change) = _get_top_gainer_loser(db, today)
-    top_ticker, top_score = _get_top_scorer(db, today)
+    trading_date = _get_last_trading_date(db, today)
+    if not trading_date:
+        logger.info(f"CLOSING_REPORT skipped: no trading data found up to {today}")
+        return
+
+    gainer, loser = _get_top_gainer_loser(db, trading_date)
+    scorer = _get_top_scorer(db, trading_date)
+    if not gainer or not scorer:
+        logger.info(f"CLOSING_REPORT skipped: incomplete data for {trading_date}")
+        return
+
+    top_gainer, gainer_change = gainer
+    top_loser, loser_change = loser if loser else ("—", "0.0")
+    top_ticker, top_score = scorer
 
     params = {
         "top_gainer": top_gainer, "gainer_change": gainer_change,
@@ -606,7 +677,7 @@ def process_closing_report(db: Session, today: date):
     }
 
     sent = _send_localized_to_all(db, "CLOSING_REPORT", params, data={
-        "type": "CLOSING_REPORT", "date": str(today),
+        "type": "CLOSING_REPORT", "date": str(trading_date),
     }, skip_rate_limit=True)
     _log_notification(db, today, "ALL", "CLOSING_REPORT",
                       recipients=sent, success=sent)
@@ -615,7 +686,7 @@ def process_closing_report(db: Session, today: date):
 def process_market_open(db: Session, today: date):
     """
     시장 개장 알림 — 어닝 예정 + 어제 1위 종목
-    Triggered at 09:35 EST (right after market opens)
+    Triggered at 14:35 UTC (09:35 EST / 23:35 KST)
     """
     if _already_notified(db, today, "ALL", "MARKET_OPEN"):
         return
@@ -628,13 +699,17 @@ def process_market_open(db: Session, today: date):
     earnings_count = result.scalar() or 0
 
     # 최근 거래일의 1위 종목 + 활성 매수 시그널 수
-    result = db.execute(text("""
-        SELECT MAX(date) FROM analytics.ticker_scores
-    """))
-    last_date_row = result.fetchone()
-    last_date = last_date_row[0] if last_date_row and last_date_row[0] else today
+    last_date = _get_last_trading_date(db)
+    if not last_date:
+        logger.info("MARKET_OPEN skipped: no trading data found")
+        return
 
-    top_ticker, top_score = _get_top_scorer(db, last_date)
+    scorer = _get_top_scorer(db, last_date)
+    if not scorer:
+        logger.info(f"MARKET_OPEN skipped: incomplete data for {last_date}")
+        return
+
+    top_ticker, top_score = scorer
     buy_count, _, _ = _get_signal_distribution(db, last_date)
 
     params = {
@@ -644,7 +719,7 @@ def process_market_open(db: Session, today: date):
     }
 
     sent = _send_localized_to_all(db, "MARKET_OPEN", params, data={
-        "type": "MARKET_OPEN", "date": str(today),
+        "type": "MARKET_OPEN", "date": str(last_date),
     }, skip_rate_limit=True)
     _log_notification(db, today, "ALL", "MARKET_OPEN",
                       recipients=sent, success=sent)

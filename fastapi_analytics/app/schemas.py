@@ -449,7 +449,9 @@ class NewsItemResponse(BaseModel):
     sentiment_grade: str
     sentiment_label: str
     future_event: Optional[dict] = None
+    is_breaking: bool = False
     ticker_name_ko: Optional[str] = None
+    sector: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -856,6 +858,7 @@ class NewsItemIngest(BaseModel):
     sentiment_grade: Literal["bullish", "neutral", "bearish"] = Field(..., description="Sentiment grade")
     sentiment_label: str = Field(..., max_length=100, description="Sentiment label (multilingual |||‑packed)")
     future_event: Optional[FutureEventData] = Field(None, description="Upcoming event related to this news")
+    is_breaking: Optional[bool] = Field(False, description="Breaking news flag from Mac mini")
 
 
 class NewsIngestPayload(BaseModel):
@@ -910,3 +913,43 @@ class WithdrawalResponse(BaseModel):
 class ScheduledNotificationRequest(BaseModel):
     """Trigger a scheduled broadcast notification from Mac mini"""
     notification_type: Literal["MORNING_BRIEFING", "CLOSING_REPORT", "MARKET_OPEN"]
+
+
+# ============================================================
+# Market Calendar Schemas (월별 이벤트 캘린더)
+# ============================================================
+
+class MarketCalendarItemIngest(BaseModel):
+    """Single calendar event for ingest from Mac mini"""
+    id: str
+    date: str
+    event_type: str
+    title: str                           # "ko|||en|||zh|||ja|||es"
+    description: Optional[str] = None    # "ko|||en|||zh|||ja|||es"
+    ticker: Optional[str] = None
+    importance: str = "medium"
+    source: Optional[str] = None
+
+
+class MarketCalendarIngestPayload(BaseModel):
+    """Calendar events ingest payload from Mac mini"""
+    items: List[MarketCalendarItemIngest]
+
+
+class MarketCalendarEventResponse(BaseModel):
+    """Single calendar event in API response (unpacked language)"""
+    id: str
+    date: str
+    event_type: str
+    title: str              # 언패킹된 단일 언어 문자열
+    description: Optional[str] = None
+    ticker: Optional[str] = None
+    importance: str
+
+
+class MarketCalendarResponse(BaseModel):
+    """Monthly calendar API response"""
+    year: int
+    month: int
+    total_count: int
+    by_date: Dict[str, List[MarketCalendarEventResponse]]

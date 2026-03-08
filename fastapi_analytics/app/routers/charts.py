@@ -10,7 +10,7 @@ from app.models import (
     CompanyProfile, TickerKeyMetrics, TickerFinancials, TickerDividend,
     TickerCalendar, TickerEarningsHistory,
     TickerDefenseLine, TickerRecommendation, TickerInstitutionalHolder,
-    TickerNews
+    TickerNews, Ticker
 )
 from app.schemas import (
     CompleteChartResponse, ChartDataPoint, TrendlineValue,
@@ -281,10 +281,15 @@ def get_complete_chart_data(
             TickerInstitutionalHolder.date == latest_ih_date,
         ).order_by(TickerInstitutionalHolder.pct_held.desc()).limit(20).all()
 
-    # 20) Latest news (5 articles)
-    news_objs = db.query(TickerNews).filter(
-        TickerNews.ticker == ticker
-    ).order_by(TickerNews.published_at.desc()).limit(5).all()
+    # 20) Latest news (5 articles) with sector from tickers table
+    news_rows = (
+        db.query(TickerNews, Ticker.sector)
+        .outerjoin(Ticker, TickerNews.ticker == Ticker.ticker)
+        .filter(TickerNews.ticker == ticker)
+        .order_by(TickerNews.published_at.desc())
+        .limit(5)
+        .all()
+    )
 
     # 21) News sentiment stats (week / month)
     today = date.today()
@@ -559,7 +564,9 @@ def get_complete_chart_data(
                 sentiment_grade=n.sentiment_grade,
                 sentiment_label=n.sentiment_label,
                 future_event=n.future_event,
-            ) for n in news_objs
+                is_breaking=n.is_breaking or False,
+                sector=news_sector,
+            ) for n, news_sector in news_rows
         ] or None,
 
         # News sentiment stats
