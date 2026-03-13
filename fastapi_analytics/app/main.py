@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from app.routers import scores, tickers, prices, internal_ingest, dashboard, charts, market, macro, earnings, news, events
+from app.routers import scores, tickers, prices, internal_ingest, dashboard, charts, market, macro, earnings, news, events, portfolio, alerts
 from app.config import settings
 from app.schemas import HealthCheck
 
@@ -19,7 +19,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # TODO: Restrict in production
     allow_credentials=True,
-    allow_methods=["GET", "POST"],  # GET for public API, POST for internal ingest
+    allow_methods=["GET", "POST", "PUT", "DELETE"],  # CRUD for portfolio + existing
     allow_headers=["*"],
 )
 
@@ -85,6 +85,20 @@ app.include_router(
     events.router,
     prefix="/api/v1/events",
     tags=["Events Calendar 📅"]
+)
+
+# Portfolio router (authenticated Flutter endpoints)
+app.include_router(
+    portfolio.router,
+    prefix="/api/v1/portfolio",
+    tags=["Portfolio & AI Brain 🧠"]
+)
+
+# Alerts router (authenticated Flutter endpoints)
+app.include_router(
+    alerts.router,
+    prefix="/api/v1/alerts",
+    tags=["User Alerts 🔔"]
 )
 
 # Internal router (Mac mini ingest)

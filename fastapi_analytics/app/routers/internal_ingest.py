@@ -14,7 +14,10 @@ from app.models import (
     MacroIndicator, MacroChartData, TickerCalendar, TickerEarningsHistory,
     TickerDefenseLine, TickerRecommendation, TickerInstitutionalHolder,
     EarningsWeekEvent, MarketIndex, MarketIndexChart, StockMembership,
-    TickerNews, AccountWithdrawal, MarketCalendarEvent
+    TickerNews, AccountWithdrawal, MarketCalendarEvent,
+    # Phase 1: AI 투자 브레인
+    UserPortfolio, PortfolioAdvice, PortfolioSummary, UserAlert, ExchangeRate,
+    AISignal, AIMessage,
 )
 from app.schemas import (
     IngestPayload, ExtendedItemIngest, MacroIngestPayload,
@@ -23,6 +26,11 @@ from app.schemas import (
     WithdrawalRequest, WithdrawalResponse,
     ScheduledNotificationRequest,
     MarketCalendarIngestPayload,
+    # Phase 1: AI 투자 브레인
+    PortfolioAdviceIngestPayload, PortfolioSummaryIngestPayload,
+    AlertsIngestPayload, ExchangeRateIngestPayload,
+    UserPortfolioInternal,
+    AISignalsIngestPayload, AIMessagesIngestPayload,
 )
 from app.config import settings
 from app.utils.trading_calendar import is_trading_day
@@ -1458,6 +1466,359 @@ def ingest_calendar(payload: MarketCalendarIngestPayload, db: Session = Depends(
     if deleted:
         logger.info(f"Calendar cleanup: removed {deleted} events older than {cutoff}")
 
+    db.commit()
+
+    return {"status": "ok", "upserted": upserted}
+
+
+# ============================================================
+# Phase 1: AI 투자 브레인 — Internal Ingest Endpoints
+# ============================================================
+
+# ============================
+# 포트폴리오 AI 의견 Ingest (맥미니 → AWS)
+# ============================
+@router.post("/portfolio-advice", dependencies=[Depends(verify_api_key)])
+def ingest_portfolio_advice(
+    payload: PortfolioAdviceIngestPayload,
+    db: Session = Depends(get_db),
+):
+    """
+    맥미니가 생성한 종목별 AI 의견 업로드.
+
+    UPSERT: (user_id, ticker, date) 기준.
+    """
+    upserted = 0
+    for item in payload.items:
+        obj = db.query(PortfolioAdvice).filter(
+            PortfolioAdvice.user_id == item.user_id,
+            PortfolioAdvice.ticker == item.ticker.upper(),
+            PortfolioAdvice.date == item.date,
+        ).first()
+
+        if obj:
+            obj.signal = item.signal
+            obj.confidence = item.confidence
+            obj.summary = item.summary
+            obj.reasons = item.reasons
+            obj.target_action = item.target_action
+        else:
+            db.add(PortfolioAdvice(
+                user_id=item.user_id,
+                ticker=item.ticker.upper(),
+                date=item.date,
+                signal=item.signal,
+                confidence=item.confidence,
+                summary=item.summary,
+                reasons=item.reasons,
+                target_action=item.target_action,
+            ))
+        upserted += 1
+
+    db.commit()
+
+    # 3년 cleanup
+    db.execute(text(
+        "DELETE FROM analytics.portfolio_advice "
+        "WHERE date < CURRENT_DATE - INTERVAL '3 years'"
+    ))
+    db.commit()
+
+    return {"status": "ok", "upserted": upserted}
+
+
+# ============================
+# 포트폴리오 P&L 요약 Ingest (맥미니 → AWS)
+# ============================
+@router.post("/portfolio-summary", dependencies=[Depends(verify_api_key)])
+def ingest_portfolio_summary(
+    payload: PortfolioSummaryIngestPayload,
+    db: Session = Depends(get_db),
+):
+    """
+    맥미니가 계산한 유저별 일일 P&L 요약 업로드.
+
+    UPSERT: (user_id, date) 기준.
+    """
+    upserted = 0
+    for item in payload.items:
+        obj = db.query(PortfolioSummary).filter(
+            PortfolioSummary.user_id == item.user_id,
+            PortfolioSummary.date == item.date,
+        ).first()
+
+        if obj:
+            obj.total_value = item.total_value
+            obj.total_cost = item.total_cost
+            obj.total_pnl = item.total_pnl
+            obj.total_pnl_pct = item.total_pnl_pct
+            obj.day_pnl = item.day_pnl
+            obj.day_pnl_pct = item.day_pnl_pct
+            obj.holdings_detail = item.holdings_detail
+        else:
+            db.add(PortfolioSummary(
+                user_id=item.user_id,
+                date=item.date,
+                total_value=item.total_value,
+                total_cost=item.total_cost,
+                total_pnl=item.total_pnl,
+                total_pnl_pct=item.total_pnl_pct,
+                day_pnl=item.day_pnl,
+                day_pnl_pct=item.day_pnl_pct,
+                holdings_detail=item.holdings_detail,
+            ))
+        upserted += 1
+
+    db.commit()
+
+    # 3년 cleanup
+    db.execute(text(
+        "DELETE FROM analytics.portfolio_summary "
+        "WHERE date < CURRENT_DATE - INTERVAL '3 years'"
+    ))
+    db.commit()
+
+    return {"status": "ok", "upserted": upserted}
+
+
+# ============================
+# 알림 Ingest (맥미니 → AWS)
+# ============================
+@router.post("/alerts", dependencies=[Depends(verify_api_key)])
+def ingest_alerts(
+    payload: AlertsIngestPayload,
+    db: Session = Depends(get_db),
+):
+    """
+    맥미니가 생성한 유저 알림 업로드.
+
+    INSERT only (알림은 중복 허용, 시간순 누적).
+    FCM push 동시 발송.
+    """
+    inserted = 0
+    for item in payload.items:
+        db.add(UserAlert(
+            user_id=item.user_id,
+            ticker=item.ticker.upper() if item.ticker else None,
+            alert_type=item.alert_type,
+            title=item.title,
+            message=item.message,
+            data=item.data,
+        ))
+        inserted += 1
+
+    db.commit()
+
+    # TODO: FCM push 발송 연동 (기존 fcm_service 패턴 재사용)
+    # for item in payload.items:
+    #     try:
+    #         process_alert_notification(db, item)
+    #     except Exception as e:
+    #         logger.error(f"FCM alert error for user {item.user_id}: {e}")
+
+    return {"status": "ok", "inserted": inserted}
+
+
+# ============================
+# 환율 Ingest (맥미니 → AWS)
+# ============================
+@router.post("/exchange-rate", dependencies=[Depends(verify_api_key)])
+def ingest_exchange_rate(
+    payload: ExchangeRateIngestPayload,
+    db: Session = Depends(get_db),
+):
+    """
+    일별 환율 (USD/KRW) 업로드.
+
+    UPSERT: date 기준.
+    """
+    upserted = 0
+    for item in payload.items:
+        obj = db.query(ExchangeRate).filter(ExchangeRate.date == item.date).first()
+        if obj:
+            obj.usd_krw = item.usd_krw
+            obj.source = item.source
+        else:
+            db.add(ExchangeRate(
+                date=item.date,
+                usd_krw=item.usd_krw,
+                source=item.source,
+            ))
+        upserted += 1
+
+    db.commit()
+
+    # 3년 cleanup
+    db.execute(text(
+        "DELETE FROM analytics.exchange_rates "
+        "WHERE date < CURRENT_DATE - INTERVAL '3 years'"
+    ))
+    db.commit()
+
+    return {"status": "ok", "upserted": upserted}
+
+
+# ============================
+# 유저 포트폴리오 벌크 조회 (맥미니 ← AWS)
+# ============================
+@router.get(
+    "/users/portfolios",
+    dependencies=[Depends(verify_api_key)],
+    response_model=list[UserPortfolioInternal],
+)
+def get_all_user_portfolios(
+    type: str | None = None,
+    db: Session = Depends(get_db),
+):
+    """
+    전체 유저 포트폴리오 벌크 조회 (맥미니가 AI 분석에 사용).
+
+    - type=HOLDING: 보유 종목만
+    - type=WATCHLIST: 관심 종목만
+    - type 미지정: 전체
+    """
+    q = db.query(UserPortfolio)
+    if type:
+        q = q.filter(UserPortfolio.type == type.upper())
+    return q.all()
+
+
+# ============================
+# 유저 거래내역 증분 조회 (맥미니 ← AWS)
+# ============================
+@router.get(
+    "/users/transactions",
+    dependencies=[Depends(verify_api_key)],
+)
+def get_recent_transactions(
+    since: str | None = None,
+    db: Session = Depends(get_db),
+):
+    """
+    최근 거래내역 증분 조회 (맥미니가 P&L 계산에 사용).
+
+    since: ISO timestamp (e.g., "2026-03-08T00:00:00") — 이후 생성된 것만 반환.
+    """
+    from app.models import UserTransaction
+
+    q = db.query(UserTransaction)
+    if since:
+        since_dt = datetime.fromisoformat(since)
+        q = q.filter(UserTransaction.created_at >= since_dt)
+    q = q.order_by(UserTransaction.created_at.asc())
+
+    rows = q.all()
+    return [
+        {
+            "id": r.id, "user_id": r.user_id, "ticker": r.ticker,
+            "type": r.type, "shares": r.shares, "price": r.price,
+            "date": str(r.date), "created_at": str(r.created_at),
+        }
+        for r in rows
+    ]
+
+
+# ============================
+# AI 시그널 Ingest (맥미니 → AWS)
+# ============================
+@router.post("/ai-signals", dependencies=[Depends(verify_api_key)])
+def ingest_ai_signals(
+    payload: AISignalsIngestPayload,
+    db: Session = Depends(get_db),
+):
+    """
+    맥미니가 생성한 종목별 AI 시그널 업로드.
+
+    UPSERT: (ticker, date) 기준.
+    """
+    upserted = 0
+    for item in payload.items:
+        ticker_upper = item.ticker.upper()
+        obj = db.query(AISignal).filter(
+            AISignal.ticker == ticker_upper,
+            AISignal.date == item.date,
+        ).first()
+
+        if obj:
+            obj.signal = item.signal
+            obj.confidence = item.confidence
+            obj.price_at_signal = item.price_at_signal
+            obj.target_price = item.target_price
+            obj.stop_loss_price = item.stop_loss_price
+            obj.reasoning = item.reasoning
+        else:
+            db.add(AISignal(
+                ticker=ticker_upper,
+                date=item.date,
+                signal=item.signal,
+                confidence=item.confidence,
+                price_at_signal=item.price_at_signal,
+                target_price=item.target_price,
+                stop_loss_price=item.stop_loss_price,
+                reasoning=item.reasoning,
+            ))
+        upserted += 1
+
+    db.commit()
+
+    # 3년 cleanup
+    db.execute(text(
+        "DELETE FROM analytics.ai_signals "
+        "WHERE date < CURRENT_DATE - INTERVAL '3 years'"
+    ))
+    db.commit()
+
+    return {"status": "ok", "upserted": upserted}
+
+
+# ============================
+# AI 메시지 Ingest (맥미니 → AWS)
+# ============================
+@router.post("/ai-messages", dependencies=[Depends(verify_api_key)])
+def ingest_ai_messages(
+    payload: AIMessagesIngestPayload,
+    db: Session = Depends(get_db),
+):
+    """
+    맥미니가 생성한 AI 메시지 업로드.
+
+    같은 (type, date, user_id) 조합이면 UPSERT, 아니면 INSERT.
+    user_id=NULL인 전체 브리핑도 지원.
+    """
+    upserted = 0
+    for item in payload.items:
+        # user_id가 NULL인 경우도 있으므로 IS NULL 처리
+        if item.user_id is not None:
+            obj = db.query(AIMessage).filter(
+                AIMessage.type == item.type,
+                AIMessage.date == item.date,
+                AIMessage.user_id == item.user_id,
+            ).first()
+        else:
+            obj = db.query(AIMessage).filter(
+                AIMessage.type == item.type,
+                AIMessage.date == item.date,
+                AIMessage.user_id.is_(None),
+            ).first()
+
+        if obj:
+            obj.messages = item.messages
+        else:
+            db.add(AIMessage(
+                type=item.type,
+                date=item.date,
+                user_id=item.user_id,
+                messages=item.messages,
+            ))
+        upserted += 1
+
+    db.commit()
+
+    # 3년 cleanup
+    db.execute(text(
+        "DELETE FROM analytics.ai_messages "
+        "WHERE date < CURRENT_DATE - INTERVAL '3 years'"
+    ))
     db.commit()
 
     return {"status": "ok", "upserted": upserted}

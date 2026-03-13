@@ -600,6 +600,170 @@ class MarketCalendarEvent(Base):
     created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
 
 
+# ============================================================
+# Phase 1: AI 투자 브레인 — Portfolio & Advisory Tables
+# ============================================================
+
+class UserPortfolio(Base):
+    """
+    유저 보유/관심 종목 (서버 저장).
+
+    type = HOLDING: 실제 매수 종목 (avg_price, shares 포함)
+    type = WATCHLIST: 관심 종목 (기존 SharedPreferences → 서버 마이그레이션)
+    """
+    __tablename__ = "user_portfolios"
+    __table_args__ = {'schema': 'analytics'}
+
+    user_id = Column(Integer, primary_key=True, index=True)
+    ticker = Column(String(10), primary_key=True, index=True)
+    type = Column(String(10), nullable=False, default='WATCHLIST')  # HOLDING | WATCHLIST
+    shares = Column(Float)           # 보유 수량 (HOLDING only)
+    avg_price = Column(Float)        # 평균 매수가 (HOLDING only)
+    notes = Column(String(500))      # 메모
+    created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+    updated_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class UserTransaction(Base):
+    """
+    매수/매도 거래 이력.
+
+    유저가 Flutter에서 기록한 거래 내역.
+    세금 계산, P&L 추적, 맥미니 AI 분석의 기초 데이터.
+    """
+    __tablename__ = "user_transactions"
+    __table_args__ = {'schema': 'analytics'}
+
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, nullable=False, index=True)
+    ticker = Column(String(10), nullable=False, index=True)
+    type = Column(String(4), nullable=False)  # BUY | SELL
+    shares = Column(Float, nullable=False)
+    price = Column(Float, nullable=False)     # 거래 단가 (USD)
+    date = Column(Date, nullable=False)       # 거래일
+    notes = Column(String(500))
+    created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class PortfolioAdvice(Base):
+    """
+    맥미니가 생성한 종목별 AI 의견.
+
+    맥미니 스케줄러 → POST /ingest/portfolio-advice → 이 테이블에 저장.
+    Flutter가 GET /portfolio/advice 로 조회.
+    """
+    __tablename__ = "portfolio_advice"
+    __table_args__ = {'schema': 'analytics'}
+
+    user_id = Column(Integer, primary_key=True, index=True)
+    ticker = Column(String(10), primary_key=True, index=True)
+    date = Column(Date, primary_key=True, index=True)
+    signal = Column(String(10))              # BUY / SELL / HOLD
+    confidence = Column(Float)               # 0.0 ~ 1.0
+    summary = Column(String(2000))           # 다국어 ||| 패킹
+    reasons = Column(JSONB)                  # {"bullish": [...], "bearish": [...]}
+    target_action = Column(String(500))      # 권고 행동 (다국어 ||| 패킹)
+    created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class PortfolioSummary(Base):
+    """
+    유저별 일일 P&L 요약.
+
+    맥미니가 매일 장 마감 후 계산 → POST /ingest/portfolio-summary.
+    Flutter가 GET /portfolio/summary 로 조회.
+    """
+    __tablename__ = "portfolio_summary"
+    __table_args__ = {'schema': 'analytics'}
+
+    user_id = Column(Integer, primary_key=True, index=True)
+    date = Column(Date, primary_key=True, index=True)
+    total_value = Column(Float)              # 총 평가액 (USD)
+    total_cost = Column(Float)               # 총 투자원금 (USD)
+    total_pnl = Column(Float)                # 총 손익 (USD)
+    total_pnl_pct = Column(Float)            # 총 수익률 (%)
+    day_pnl = Column(Float)                  # 일간 손익 (USD)
+    day_pnl_pct = Column(Float)              # 일간 수익률 (%)
+    holdings_detail = Column(JSONB)          # [{ticker, shares, avg_price, current_price, pnl, pnl_pct}]
+    created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class UserAlert(Base):
+    """
+    맥미니가 생성한 유저 알림.
+
+    급등/급락, 목표가 도달, 실적 발표 임박 등 개인화된 알림.
+    FCM push도 서버에서 동시 발송.
+    """
+    __tablename__ = "user_alerts"
+    __table_args__ = {'schema': 'analytics'}
+
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, nullable=False, index=True)
+    ticker = Column(String(10), index=True)
+    alert_type = Column(String(30), nullable=False)  # PRICE_SURGE, TARGET_HIT, EARNINGS_NEAR, SIGNAL_CHANGE, etc.
+    title = Column(String(500), nullable=False)       # 다국어 ||| 패킹
+    message = Column(String(2000))                    # 다국어 ||| 패킹
+    data = Column(JSONB)                              # 추가 데이터 (가격, 변동률 등)
+    is_read = Column(Boolean, server_default=text('FALSE'))
+    created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class ExchangeRate(Base):
+    """
+    일별 환율 (USD/KRW).
+
+    맥미니가 무료 API(exchangerate-api.com)에서 수집 → POST /ingest/exchange-rate.
+    Flutter 세금 계산기에서 사용.
+    """
+    __tablename__ = "exchange_rates"
+    __table_args__ = {'schema': 'analytics'}
+
+    date = Column(Date, primary_key=True)
+    usd_krw = Column(Float, nullable=False)
+    source = Column(String(50))  # exchangerate-api.com
+    created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class AISignal(Base):
+    """
+    맥미니가 생성한 종목별 AI 시그널.
+
+    맥미니 스케줄러 → POST /ingest/ai-signals → 이 테이블에 저장.
+    Flutter가 GET /portfolio/signals 로 조회 (추후).
+    """
+    __tablename__ = "ai_signals"
+    __table_args__ = {'schema': 'analytics'}
+
+    ticker = Column(String(10), primary_key=True, index=True)
+    date = Column(Date, primary_key=True, index=True)
+    signal = Column(String(15), nullable=False)  # STRONG_BUY/BUY/HOLD/SELL/STRONG_SELL
+    confidence = Column(Float)
+    price_at_signal = Column(Float)
+    target_price = Column(Float)
+    stop_loss_price = Column(Float)
+    reasoning = Column(String(2000))
+    created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class AIMessage(Base):
+    """
+    맥미니가 생성한 AI 메시지 (브리핑, 리뷰, Q&A).
+
+    맥미니 스케줄러 → POST /ingest/ai-messages → 이 테이블에 저장.
+    Flutter가 GET /portfolio/messages 로 조회 (추후).
+    """
+    __tablename__ = "ai_messages"
+    __table_args__ = {'schema': 'analytics'}
+
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    type = Column(String(30), nullable=False)  # daily_briefing / portfolio_review / stock_qa
+    date = Column(Date, nullable=False, index=True)
+    user_id = Column(Integer, index=True)       # NULL = 전체 브리핑
+    messages = Column(JSONB, nullable=False)     # [{role, content}]
+    created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
 class NotificationLog(Base):
     """FCM 알림 발송 로그 (중복 방지 + 감사)"""
     __tablename__ = "notification_log"

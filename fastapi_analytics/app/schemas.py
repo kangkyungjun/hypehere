@@ -953,3 +953,269 @@ class MarketCalendarResponse(BaseModel):
     month: int
     total_count: int
     by_date: Dict[str, List[MarketCalendarEventResponse]]
+
+
+# ============================================================
+# Phase 1: AI 투자 브레인 — Portfolio & Advisory Schemas
+# ============================================================
+
+# --- Portfolio CRUD (Flutter ↔ Server) ---
+
+class PortfolioHoldingCreate(BaseModel):
+    """매수 종목 추가/수정"""
+    ticker: str = Field(..., max_length=10)
+    shares: float = Field(..., gt=0)
+    avg_price: float = Field(..., gt=0)
+    notes: Optional[str] = Field(None, max_length=500)
+
+
+class PortfolioHoldingResponse(BaseModel):
+    """보유 종목 응답"""
+    ticker: str
+    shares: Optional[float] = None
+    avg_price: Optional[float] = None
+    notes: Optional[str] = None
+    created_at: Optional[DateTime] = None
+    updated_at: Optional[DateTime] = None
+    # 서버가 조인해서 추가하는 필드
+    name: Optional[str] = None
+    name_ko: Optional[str] = None
+    current_price: Optional[float] = None
+    change_pct: Optional[float] = None
+    score: Optional[float] = None
+    signal: Optional[str] = None
+    # 즉시 AI 의견 (보유 종목 추가/수정 시 DB 데이터로 즉시 생성)
+    instant_advice: Optional["PortfolioAdviceResponse"] = None
+
+    class Config:
+        from_attributes = True
+
+
+class WatchlistItemCreate(BaseModel):
+    """관심 종목 추가"""
+    ticker: str = Field(..., max_length=10)
+    notes: Optional[str] = Field(None, max_length=500)
+
+
+class WatchlistItemResponse(BaseModel):
+    """관심 종목 응답"""
+    ticker: str
+    notes: Optional[str] = None
+    created_at: Optional[DateTime] = None
+    name: Optional[str] = None
+    name_ko: Optional[str] = None
+    current_price: Optional[float] = None
+    change_pct: Optional[float] = None
+    score: Optional[float] = None
+    signal: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+
+class WatchlistBulkSync(BaseModel):
+    """Watchlist 벌크 동기화 (SharedPreferences → Server 마이그레이션)"""
+    tickers: List[str] = Field(..., description="티커 목록")
+
+
+# --- Transactions (Flutter ↔ Server) ---
+
+class TransactionCreate(BaseModel):
+    """거래 기록 추가"""
+    ticker: str = Field(..., max_length=10)
+    type: Literal["BUY", "SELL"]
+    shares: float = Field(..., gt=0)
+    price: float = Field(..., gt=0)
+    date: Date
+    notes: Optional[str] = Field(None, max_length=500)
+
+
+class TransactionResponse(BaseModel):
+    """거래 기록 응답"""
+    id: int
+    ticker: str
+    type: str
+    shares: float
+    price: float
+    date: Date
+    notes: Optional[str] = None
+    created_at: Optional[DateTime] = None
+
+    class Config:
+        from_attributes = True
+
+
+# --- Portfolio Advice (맥미니 → Server → Flutter) ---
+
+class PortfolioAdviceItem(BaseModel):
+    """종목별 AI 의견 (ingest용)"""
+    user_id: int
+    ticker: str = Field(..., max_length=10)
+    date: Date
+    signal: Optional[str] = None         # BUY / SELL / HOLD
+    confidence: Optional[float] = None   # 0.0 ~ 1.0
+    summary: Optional[str] = None        # 다국어 ||| 패킹
+    reasons: Optional[dict] = None       # {"bullish": [...], "bearish": [...]}
+    target_action: Optional[str] = None  # 권고 행동
+
+
+class PortfolioAdviceIngestPayload(BaseModel):
+    """포트폴리오 AI 의견 ingest payload"""
+    items: List[PortfolioAdviceItem]
+
+
+class PortfolioAdviceResponse(BaseModel):
+    """종목별 AI 의견 응답 (Flutter용)"""
+    ticker: str
+    date: Date
+    signal: Optional[str] = None
+    confidence: Optional[float] = None
+    summary: Optional[str] = None
+    reasons: Optional[dict] = None
+    target_action: Optional[str] = None
+    # 서버가 추가하는 필드
+    name: Optional[str] = None
+    name_ko: Optional[str] = None
+    current_price: Optional[float] = None
+    score: Optional[float] = None
+
+    class Config:
+        from_attributes = True
+
+
+# --- Portfolio Summary (맥미니 → Server → Flutter) ---
+
+class PortfolioSummaryItem(BaseModel):
+    """유저별 일일 P&L 요약 (ingest용)"""
+    user_id: int
+    date: Date
+    total_value: Optional[float] = None
+    total_cost: Optional[float] = None
+    total_pnl: Optional[float] = None
+    total_pnl_pct: Optional[float] = None
+    day_pnl: Optional[float] = None
+    day_pnl_pct: Optional[float] = None
+    holdings_detail: Optional[List[dict]] = None
+
+
+class PortfolioSummaryIngestPayload(BaseModel):
+    """포트폴리오 요약 ingest payload"""
+    items: List[PortfolioSummaryItem]
+
+
+class PortfolioSummaryResponse(BaseModel):
+    """유저 포트폴리오 요약 응답 (Flutter용)"""
+    date: Date
+    total_value: Optional[float] = None
+    total_cost: Optional[float] = None
+    total_pnl: Optional[float] = None
+    total_pnl_pct: Optional[float] = None
+    day_pnl: Optional[float] = None
+    day_pnl_pct: Optional[float] = None
+    holdings_detail: Optional[List[dict]] = None
+
+    class Config:
+        from_attributes = True
+
+
+# --- Alerts (맥미니 → Server → Flutter) ---
+
+class AlertItem(BaseModel):
+    """알림 아이템 (ingest용)"""
+    user_id: int
+    ticker: Optional[str] = Field(None, max_length=10)
+    alert_type: str = Field(..., max_length=30)
+    title: str = Field(..., max_length=500)    # 다국어 ||| 패킹
+    message: Optional[str] = Field(None, max_length=2000)
+    data: Optional[dict] = None
+
+
+class AlertsIngestPayload(BaseModel):
+    """알림 ingest payload"""
+    items: List[AlertItem]
+
+
+class AlertResponse(BaseModel):
+    """알림 응답 (Flutter용)"""
+    id: int
+    ticker: Optional[str] = None
+    alert_type: str
+    title: str
+    message: Optional[str] = None
+    data: Optional[dict] = None
+    is_read: bool = False
+    created_at: Optional[DateTime] = None
+
+    class Config:
+        from_attributes = True
+
+
+# --- Exchange Rate (맥미니 → Server) ---
+
+class ExchangeRateIngest(BaseModel):
+    """환율 데이터 (ingest용)"""
+    date: Date
+    usd_krw: float
+    source: Optional[str] = None
+
+
+class ExchangeRateIngestPayload(BaseModel):
+    """환율 ingest payload"""
+    items: List[ExchangeRateIngest]
+
+
+class ExchangeRateResponse(BaseModel):
+    """환율 응답 (Flutter용)"""
+    date: Date
+    usd_krw: float
+
+    class Config:
+        from_attributes = True
+
+
+# --- AI Signals (맥미니 → Server) ---
+
+class AISignalItem(BaseModel):
+    """종목별 AI 시그널 (ingest용)"""
+    ticker: str = Field(..., max_length=10)
+    date: Date
+    signal: str = Field(..., max_length=15)  # STRONG_BUY/BUY/HOLD/SELL/STRONG_SELL
+    confidence: Optional[float] = None
+    price_at_signal: Optional[float] = None
+    target_price: Optional[float] = None
+    stop_loss_price: Optional[float] = None
+    reasoning: Optional[str] = Field(None, max_length=2000)
+
+
+class AISignalsIngestPayload(BaseModel):
+    """AI 시그널 ingest payload"""
+    items: List[AISignalItem]
+
+
+# --- AI Messages (맥미니 → Server) ---
+
+class AIMessageItem(BaseModel):
+    """AI 메시지 아이템 (ingest용)"""
+    type: str = Field(..., max_length=30)  # daily_briefing / portfolio_review / stock_qa
+    date: Date
+    user_id: Optional[int] = None           # NULL = 전체 브리핑
+    messages: List[dict]                     # [{role, content}]
+
+
+class AIMessagesIngestPayload(BaseModel):
+    """AI 메시지 ingest payload"""
+    items: List[AIMessageItem]
+
+
+# --- Internal: 맥미니가 유저 포트폴리오 조회 ---
+
+class UserPortfolioInternal(BaseModel):
+    """맥미니 조회용 유저 포트폴리오"""
+    user_id: int
+    ticker: str
+    type: str
+    shares: Optional[float] = None
+    avg_price: Optional[float] = None
+
+    class Config:
+        from_attributes = True
