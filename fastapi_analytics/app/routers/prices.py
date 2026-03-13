@@ -5,7 +5,7 @@ from datetime import date, timedelta
 from typing import List
 from app.database import get_db
 from app.models import TickerPrice
-from app.schemas import TickerPriceListResponse
+from app.schemas import TickerPriceListResponse, ClosePriceResponse
 
 router = APIRouter()
 
@@ -78,4 +78,36 @@ def get_ticker_prices(
     return {
         "ticker": ticker.upper(),
         "prices": prices
+    }
+
+
+@router.get("/{ticker}/close", response_model=ClosePriceResponse)
+def get_close_price(
+    ticker: str,
+    date_param: date = Query(..., alias="date", description="Target date (YYYY-MM-DD)"),
+    db: Session = Depends(get_db),
+):
+    """
+    단일 날짜 종가 조회 (Flutter 보유 추가/매도 시 사용).
+
+    해당 날짜에 데이터가 없으면 (휴장일) 직전 거래일 종가 반환.
+    """
+    # 1) 해당 날짜 이하 가장 최근 거래일 종가
+    row = (
+        db.query(TickerPrice)
+        .filter(
+            TickerPrice.ticker == ticker.upper(),
+            TickerPrice.date <= date_param,
+        )
+        .order_by(TickerPrice.date.desc())
+        .first()
+    )
+
+    if not row:
+        return {"ticker": ticker.upper(), "date": str(date_param), "close": None}
+
+    return {
+        "ticker": ticker.upper(),
+        "date": str(row.date),
+        "close": row.close,
     }

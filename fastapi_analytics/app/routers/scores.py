@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy.orm import Session
-from sqlalchemy import desc, func
+from sqlalchemy import desc, func, and_
 from datetime import date, timedelta
 from typing import List, Optional
 from app.database import get_db
@@ -150,30 +150,56 @@ def get_batch_scores(
     if not ticker_list:
         return []
 
-    if target_date is None:
-        latest_date = get_latest_trading_date(db)
-        if latest_date is None:
-            return []
-        target_date = latest_date
+    if target_date is not None:
+        # 명시적 날짜 지정 → 해당 날짜로 필터링 (기존 동작)
+        results = db.query(
+            TickerScore.ticker,
+            TickerScore.score,
+            TickerScore.signal,
+            Ticker.name,
+            Ticker.extra_data,
+            TickerPrice.close,
+            TickerPrice.change_pct,
+        ).outerjoin(
+            Ticker,
+            TickerScore.ticker == Ticker.ticker
+        ).outerjoin(
+            TickerPrice,
+            and_(TickerScore.ticker == TickerPrice.ticker, TickerScore.date == TickerPrice.date)
+        ).filter(
+            TickerScore.date == target_date,
+            TickerScore.ticker.in_(ticker_list)
+        ).all()
+    else:
+        # 날짜 미지정 → 종목별 최신 날짜 조회
+        latest_per_ticker = db.query(
+            TickerScore.ticker,
+            func.max(TickerScore.date).label("max_date")
+        ).filter(
+            TickerScore.ticker.in_(ticker_list)
+        ).group_by(TickerScore.ticker).subquery()
 
-    results = db.query(
-        TickerScore.ticker,
-        TickerScore.score,
-        TickerScore.signal,
-        Ticker.name,
-        Ticker.extra_data,
-        TickerPrice.close,
-        TickerPrice.change_pct,
-    ).outerjoin(
-        Ticker,
-        TickerScore.ticker == Ticker.ticker
-    ).outerjoin(
-        TickerPrice,
-        (TickerScore.ticker == TickerPrice.ticker) & (TickerScore.date == TickerPrice.date)
-    ).filter(
-        TickerScore.date == target_date,
-        TickerScore.ticker.in_(ticker_list)
-    ).all()
+        results = db.query(
+            TickerScore.ticker,
+            TickerScore.score,
+            TickerScore.signal,
+            Ticker.name,
+            Ticker.extra_data,
+            TickerPrice.close,
+            TickerPrice.change_pct,
+        ).join(
+            latest_per_ticker,
+            and_(
+                TickerScore.ticker == latest_per_ticker.c.ticker,
+                TickerScore.date == latest_per_ticker.c.max_date,
+            )
+        ).outerjoin(
+            Ticker,
+            TickerScore.ticker == Ticker.ticker
+        ).outerjoin(
+            TickerPrice,
+            and_(TickerScore.ticker == TickerPrice.ticker, TickerScore.date == TickerPrice.date)
+        ).all()
 
     # Batch-fetch memberships
     result_tickers = [r.ticker for r in results]

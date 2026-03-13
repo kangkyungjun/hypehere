@@ -16,7 +16,7 @@ from app.database import get_db
 from app.auth import get_current_user
 from app.models import (
     UserPortfolio, UserTransaction, PortfolioAdvice,
-    PortfolioSummary, ExchangeRate,
+    PortfolioSummary, ExchangeRate, AnalysisRequest,
 )
 from app.schemas import (
     PortfolioHoldingCreate, PortfolioHoldingResponse,
@@ -24,6 +24,7 @@ from app.schemas import (
     TransactionCreate, TransactionResponse,
     PortfolioAdviceResponse, PortfolioSummaryResponse,
     ExchangeRateResponse,
+    AnalysisStatusResponse,
 )
 
 # Time remaining templates for instant advice (multilingual |||‑packed)
@@ -264,6 +265,27 @@ def add_or_update_holding(
         logger.warning(f"Instant advice generation failed for {ticker}: {e}")
         instant = None
 
+    # Create analysis request for Mac mini real-time AI analysis
+    request_id = None
+    try:
+        analysis_req = AnalysisRequest(
+            user_id=user_id,
+            request_type="PORTFOLIO_CHANGE",
+            trigger_data={
+                "ticker": ticker,
+                "action": "ADD_HOLDING",
+                "shares": body.shares,
+                "avg_price": body.avg_price,
+            },
+        )
+        db.add(analysis_req)
+        db.commit()
+        db.refresh(analysis_req)
+        request_id = analysis_req.id
+        logger.info(f"Analysis request created: id={request_id}, user={user_id}, ticker={ticker}")
+    except Exception as e:
+        logger.warning(f"Analysis request creation failed for {ticker}: {e}")
+
     return PortfolioHoldingResponse(
         ticker=ticker, shares=obj.shares, avg_price=obj.avg_price,
         notes=obj.notes, created_at=obj.created_at, updated_at=obj.updated_at,
@@ -274,6 +296,7 @@ def add_or_update_holding(
         score=enriched.score if enriched else None,
         signal=enriched.signal if enriched else None,
         instant_advice=instant,
+        request_id=request_id,
     )
 
 
@@ -458,6 +481,37 @@ def delete_transaction(
     ).delete()
     db.commit()
     return {"deleted": deleted}
+
+
+# ============================================================
+# Analysis Status (실시간 분석 상태 폴링)
+# ============================================================
+
+@router.get("/analysis-status", response_model=AnalysisStatusResponse)
+def get_analysis_status(
+    request_id: int = Query(..., description="분석 요청 ID"),
+    user_id: int = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Flutter가 폴링하여 맥미니 AI 분석 진행 상태 확인"""
+    row = db.query(AnalysisRequest).filter(
+        AnalysisRequest.id == request_id,
+        AnalysisRequest.user_id == user_id,
+    ).first()
+
+    if not row:
+        return AnalysisStatusResponse(
+            request_id=request_id,
+            status="NOT_FOUND",
+        )
+
+    return AnalysisStatusResponse(
+        request_id=row.id,
+        status=row.status,
+        result_summary=row.result_summary,
+        created_at=row.created_at,
+        completed_at=row.completed_at,
+    )
 
 
 # ============================================================

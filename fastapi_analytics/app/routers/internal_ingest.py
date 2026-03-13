@@ -18,6 +18,8 @@ from app.models import (
     # Phase 1: AI 투자 브레인
     UserPortfolio, PortfolioAdvice, PortfolioSummary, UserAlert, ExchangeRate,
     AISignal, AIMessage,
+    # 실시간 분석 파이프라인
+    AnalysisRequest,
 )
 from app.schemas import (
     IngestPayload, ExtendedItemIngest, MacroIngestPayload,
@@ -31,6 +33,8 @@ from app.schemas import (
     AlertsIngestPayload, ExchangeRateIngestPayload,
     UserPortfolioInternal,
     AISignalsIngestPayload, AIMessagesIngestPayload,
+    # 실시간 분석 파이프라인
+    AnalysisRequestResponse, AnalysisQueueCompleteRequest,
 )
 from app.config import settings
 from app.utils.trading_calendar import is_trading_day
@@ -1555,6 +1559,9 @@ def ingest_portfolio_summary(
             obj.day_pnl = item.day_pnl
             obj.day_pnl_pct = item.day_pnl_pct
             obj.holdings_detail = item.holdings_detail
+            obj.ai_summary = item.ai_summary
+            obj.ai_recommendations = item.ai_recommendations
+            obj.realized_pnl = item.realized_pnl
         else:
             db.add(PortfolioSummary(
                 user_id=item.user_id,
@@ -1566,6 +1573,9 @@ def ingest_portfolio_summary(
                 day_pnl=item.day_pnl,
                 day_pnl_pct=item.day_pnl_pct,
                 holdings_detail=item.holdings_detail,
+                ai_summary=item.ai_summary,
+                ai_recommendations=item.ai_recommendations,
+                realized_pnl=item.realized_pnl,
             ))
         upserted += 1
 
@@ -1822,3 +1832,119 @@ def ingest_ai_messages(
     db.commit()
 
     return {"status": "ok", "upserted": upserted}
+
+
+# ============================================================
+# 실시간 분석 요청 큐 (맥미니 ↔ AWS)
+# ============================================================
+
+@router.get(
+    "/analysis-queue",
+    dependencies=[Depends(verify_api_key)],
+    response_model=list[AnalysisRequestResponse],
+)
+def get_analysis_queue(
+    status: str = "PENDING",
+    limit: int = 20,
+    db: Session = Depends(get_db),
+):
+    """
+    맥미니가 10초 폴링으로 PENDING 분석 요청 조회.
+
+    - status=PENDING (기본): 아직 처리 안 된 요청
+    - status=PROCESSING: 현재 처리 중인 요청
+    - limit: 한 번에 가져올 최대 개수 (기본 20)
+    """
+    rows = (
+        db.query(AnalysisRequest)
+        .filter(AnalysisRequest.status == status.upper())
+        .order_by(AnalysisRequest.created_at.asc())
+        .limit(limit)
+        .all()
+    )
+    return rows
+
+
+@router.post(
+    "/analysis-queue/{request_id}/processing",
+    dependencies=[Depends(verify_api_key)],
+)
+def mark_analysis_processing(
+    request_id: int,
+    db: Session = Depends(get_db),
+):
+    """
+    맥미니가 분석 시작 시 PROCESSING 상태로 마킹.
+
+    started_at 타임스탬프도 함께 기록.
+    """
+    obj = db.query(AnalysisRequest).filter(
+        AnalysisRequest.id == request_id,
+    ).first()
+
+    if not obj:
+        raise HTTPException(status_code=404, detail="Request not found")
+
+    obj.status = "PROCESSING"
+    obj.started_at = datetime.utcnow()
+    db.commit()
+
+    return {"status": "ok", "request_id": request_id}
+
+
+@router.post(
+    "/analysis-queue/{request_id}/complete",
+    dependencies=[Depends(verify_api_key)],
+)
+def mark_analysis_complete(
+    request_id: int,
+    body: AnalysisQueueCompleteRequest = None,
+    db: Session = Depends(get_db),
+):
+    """
+    맥미니가 분석 완료 시 COMPLETED 상태로 마킹.
+
+    completed_at 타임스탬프 + 결과 요약 기록.
+    """
+    obj = db.query(AnalysisRequest).filter(
+        AnalysisRequest.id == request_id,
+    ).first()
+
+    if not obj:
+        raise HTTPException(status_code=404, detail="Request not found")
+
+    obj.status = "COMPLETED"
+    obj.completed_at = datetime.utcnow()
+    if body and body.result_summary:
+        obj.result_summary = body.result_summary
+    db.commit()
+
+    return {"status": "ok", "request_id": request_id}
+
+
+@router.post(
+    "/analysis-queue/{request_id}/fail",
+    dependencies=[Depends(verify_api_key)],
+)
+def mark_analysis_failed(
+    request_id: int,
+    body: AnalysisQueueCompleteRequest = None,
+    db: Session = Depends(get_db),
+):
+    """
+    맥미니가 분석 실패 시 FAILED 상태로 마킹.
+    """
+    obj = db.query(AnalysisRequest).filter(
+        AnalysisRequest.id == request_id,
+    ).first()
+
+    if not obj:
+        raise HTTPException(status_code=404, detail="Request not found")
+
+    obj.status = "FAILED"
+    obj.completed_at = datetime.utcnow()
+    if body and body.result_summary:
+        obj.result_summary = body.result_summary
+    db.commit()
+
+    return {"status": "ok", "request_id": request_id}

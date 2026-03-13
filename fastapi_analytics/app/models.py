@@ -685,6 +685,9 @@ class PortfolioSummary(Base):
     day_pnl = Column(Float)                  # 일간 손익 (USD)
     day_pnl_pct = Column(Float)              # 일간 수익률 (%)
     holdings_detail = Column(JSONB)          # [{ticker, shares, avg_price, current_price, pnl, pnl_pct}]
+    ai_summary = Column(String(2000), nullable=True)  # 전체 포트폴리오 AI 텍스트
+    ai_recommendations = Column(JSONB, nullable=True)  # 추천사항 리스트 [{action, ticker, reason}]
+    realized_pnl = Column(Float, nullable=True)        # 실현손익 (USD)
     created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
 
 
@@ -762,6 +765,27 @@ class AIMessage(Base):
     user_id = Column(Integer, index=True)       # NULL = 전체 브리핑
     messages = Column(JSONB, nullable=False)     # [{role, content}]
     created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class AnalysisRequest(Base):
+    """
+    실시간 포트폴리오 AI 분석 요청 큐.
+
+    Flutter가 포트폴리오 변경 시 INSERT (PENDING),
+    맥미니가 10초 폴링으로 PENDING 감지 → PROCESSING → COMPLETED/FAILED.
+    """
+    __tablename__ = "analysis_requests"
+    __table_args__ = {'schema': 'analytics'}
+
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, nullable=False, index=True)
+    request_type = Column(String(30), nullable=False)  # PORTFOLIO_CHANGE / DAILY_BATCH
+    status = Column(String(20), server_default=text("'PENDING'"))  # PENDING / PROCESSING / COMPLETED / FAILED
+    trigger_data = Column(JSONB)  # {"ticker":"AAPL","action":"ADD_HOLDING","shares":10,"avg_price":178.5}
+    result_summary = Column(String(500))
+    created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+    started_at = Column(TIMESTAMP)
+    completed_at = Column(TIMESTAMP)
 
 
 class NotificationLog(Base):

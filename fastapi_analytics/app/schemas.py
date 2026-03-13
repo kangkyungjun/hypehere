@@ -92,6 +92,13 @@ class TickerPriceListResponse(BaseModel):
     prices: List[TickerPriceResponse] = Field(..., description="Historical OHLCV data")
 
 
+class ClosePriceResponse(BaseModel):
+    """단일 날짜 종가 응답 (보유 추가/매도 시 사용)"""
+    ticker: str
+    date: str
+    close: Optional[float] = None
+
+
 # ============================================================
 # Complete Chart Data Schemas (⭐⭐⭐ Flutter 최적화)
 # ============================================================
@@ -986,6 +993,8 @@ class PortfolioHoldingResponse(BaseModel):
     signal: Optional[str] = None
     # 즉시 AI 의견 (보유 종목 추가/수정 시 DB 데이터로 즉시 생성)
     instant_advice: Optional["PortfolioAdviceResponse"] = None
+    # 실시간 분석 요청 ID (POST /holdings 시 반환, Flutter가 폴링용으로 사용)
+    request_id: Optional[int] = None
 
     class Config:
         from_attributes = True
@@ -1099,6 +1108,9 @@ class PortfolioSummaryItem(BaseModel):
     day_pnl: Optional[float] = None
     day_pnl_pct: Optional[float] = None
     holdings_detail: Optional[List[dict]] = None
+    ai_summary: Optional[str] = None
+    ai_recommendations: Optional[List[dict]] = None
+    realized_pnl: Optional[float] = None
 
 
 class PortfolioSummaryIngestPayload(BaseModel):
@@ -1116,6 +1128,9 @@ class PortfolioSummaryResponse(BaseModel):
     day_pnl: Optional[float] = None
     day_pnl_pct: Optional[float] = None
     holdings_detail: Optional[List[dict]] = None
+    ai_summary: Optional[str] = None
+    ai_recommendations: Optional[List[dict]] = None
+    realized_pnl: Optional[float] = None
 
     class Config:
         from_attributes = True
@@ -1208,6 +1223,38 @@ class AIMessageItem(BaseModel):
 class AIMessagesIngestPayload(BaseModel):
     """AI 메시지 ingest payload"""
     items: List[AIMessageItem]
+
+
+# --- Analysis Request Queue (실시간 분석 파이프라인) ---
+
+class AnalysisRequestResponse(BaseModel):
+    """분석 요청 응답 (Flutter / 맥미니 공용)"""
+    id: int
+    user_id: int
+    request_type: str
+    status: str
+    trigger_data: Optional[dict] = None
+    result_summary: Optional[str] = None
+    created_at: Optional[DateTime] = None
+    started_at: Optional[DateTime] = None
+    completed_at: Optional[DateTime] = None
+
+    class Config:
+        from_attributes = True
+
+
+class AnalysisStatusResponse(BaseModel):
+    """Flutter가 폴링하는 분석 상태 응답"""
+    request_id: int
+    status: str                              # PENDING / PROCESSING / COMPLETED / FAILED
+    result_summary: Optional[str] = None
+    created_at: Optional[DateTime] = None
+    completed_at: Optional[DateTime] = None
+
+
+class AnalysisQueueCompleteRequest(BaseModel):
+    """맥미니가 분석 완료 시 전송하는 요청"""
+    result_summary: Optional[str] = Field(None, max_length=500)
 
 
 # --- Internal: 맥미니가 유저 포트폴리오 조회 ---
