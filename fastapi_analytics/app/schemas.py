@@ -990,6 +990,9 @@ class PortfolioHoldingResponse(BaseModel):
     class Config:
         from_attributes = True
 
+# Rebuild model to resolve forward ref to PortfolioAdviceResponse
+# (defined later in this file, called via model_rebuild at bottom)
+
 
 class WatchlistItemCreate(BaseModel):
     """관심 종목 추가"""
@@ -1219,3 +1222,7 @@ class UserPortfolioInternal(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+# Resolve forward reference: PortfolioHoldingResponse.instant_advice -> PortfolioAdviceResponse
+PortfolioHoldingResponse.model_rebuild()
