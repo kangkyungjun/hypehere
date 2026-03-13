@@ -36,7 +36,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get tabCommunityTooltip => '讨论区';
 
   @override
-  String get tabWatchlist => '自选';
+  String get tabWatchlist => '自选股';
 
   @override
   String get tabWatchlistTooltip => '我的自选股';
@@ -356,6 +356,15 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get removedFromWatchlist => '已从自选股移除';
+
+  @override
+  String get watchlistDiscoveryTitle => '添加到自选股';
+
+  @override
+  String get watchlistDiscoverySubtitle => '添加后可接收相关新闻和信号提醒';
+
+  @override
+  String get topTradingVolume => '今日成交额TOP';
 
   @override
   String get communitySearchHint => '按标题或内容搜索...';
@@ -1447,4 +1456,322 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get updatedDate => '更新日期：';
+
+  @override
+  String get tabCalendar => '日历';
+
+  @override
+  String get tabCalendarTooltip => '事件日历';
+
+  @override
+  String get eventTypeFomc => 'FOMC';
+
+  @override
+  String get eventTypeEarnings => '财报';
+
+  @override
+  String get eventTypeEconomic => '经济指标';
+
+  @override
+  String get eventTypeOptionsExpiry => '期权到期';
+
+  @override
+  String get eventTypeConference => '会议';
+
+  @override
+  String get eventTypeDividend => '分红';
+
+  @override
+  String get eventTypeProductLaunch => '产品发布';
+
+  @override
+  String get eventTypeShareholder => '股东大会';
+
+  @override
+  String get eventTypeFedSpeech => '美联储讲话';
+
+  @override
+  String nEvents(int count) {
+    return '$count个事件';
+  }
+
+  @override
+  String get noEventsThisMonth => '本月没有事件';
+
+  @override
+  String get noEventsSelectedDay => '该日期没有事件';
+
+  @override
+  String get forgotPassword => '找回密码';
+
+  @override
+  String get forgotPasswordSubtitle => '请输入您的注册邮箱，我们将发送验证码。';
+
+  @override
+  String get sendVerificationCode => '发送验证码';
+
+  @override
+  String get verificationTitle => '邮箱验证';
+
+  @override
+  String verificationSubtitle(String email) {
+    return '请输入发送至 $email 的6位验证码。';
+  }
+
+  @override
+  String verificationExpiry(String time) {
+    return '有效期: $time';
+  }
+
+  @override
+  String get verificationCode => '验证码';
+
+  @override
+  String get verificationCodeRequired => '请输入6位验证码';
+
+  @override
+  String get verifyButton => '验证';
+
+  @override
+  String get resendCode => '重新发送验证码';
+
+  @override
+  String resendCodeCooldown(int seconds) {
+    return '重新发送 ($seconds秒)';
+  }
+
+  @override
+  String get verificationCodeResent => '验证码已重新发送。';
+
+  @override
+  String get resetPassword => '重置密码';
+
+  @override
+  String get resetPasswordSubtitle => '请输入新密码。';
+
+  @override
+  String get resetPasswordSuccess => '密码已重置，请使用新密码登录。';
+
+  @override
+  String get errEmailNotVerified => '需要邮箱验证。';
+
+  @override
+  String get errRateLimited => '请稍后再试。';
+
+  @override
+  String get myHoldings => '我的持仓';
+
+  @override
+  String nHoldings(int count) {
+    return '$count只持仓';
+  }
+
+  @override
+  String get portfolioSummary => '投资组合摘要';
+
+  @override
+  String get totalValue => '总价值';
+
+  @override
+  String get totalPnl => '总盈亏';
+
+  @override
+  String get dayPnl => '今日';
+
+  @override
+  String get buyStock => '买入';
+
+  @override
+  String get shares => '股数';
+
+  @override
+  String get avgPrice => '均价';
+
+  @override
+  String get totalCost => '买入总额';
+
+  @override
+  String get enterShares => '输入股数';
+
+  @override
+  String get enterAvgPrice => '输入平均买入价';
+
+  @override
+  String get buyConfirm => '添加到持仓';
+
+  @override
+  String holdingAdded(String ticker) {
+    return '$ticker 已添加到持仓';
+  }
+
+  @override
+  String holdingRemoved(String ticker) {
+    return '$ticker 已从持仓移除';
+  }
+
+  @override
+  String removeHoldingConfirm(String ticker) {
+    return '确定从持仓中移除 $ticker？';
+  }
+
+  @override
+  String get aiAdvice => 'AI建议';
+
+  @override
+  String get aiAdviceInstant => '即时AI建议';
+
+  @override
+  String get bullishFactorsPortfolio => '看涨因素';
+
+  @override
+  String get bearishFactorsPortfolio => '看跌因素';
+
+  @override
+  String get detailedAnalysisComingSoon => '详细分析将在明天早上更新';
+
+  @override
+  String get loginForPortfolio => '登录以管理投资组合';
+
+  @override
+  String get loginForPortfolioHint => '追踪持仓、获取AI建议、监控盈亏';
+
+  @override
+  String sharesAtPrice(String shares, String price) {
+    return '$shares股 @ \$$price';
+  }
+
+  @override
+  String get noHoldingsYet => '暂无持仓';
+
+  @override
+  String get addFirstHolding => '从自选股中买入开始吧';
+
+  @override
+  String get invalidShares => '请输入有效的股数';
+
+  @override
+  String get invalidPrice => '请输入有效的价格';
+
+  @override
+  String get confidence => '置信度';
+
+  @override
+  String get tabHoldings => '持仓';
+
+  @override
+  String get purchaseDate => '买入日期';
+
+  @override
+  String get sellDate => '卖出日期';
+
+  @override
+  String get sellPrice => '卖出价格';
+
+  @override
+  String get sellShares => '卖出数量';
+
+  @override
+  String get sellConfirm => '确认卖出';
+
+  @override
+  String get sellAll => '全部卖出';
+
+  @override
+  String get sellAmount => '卖出金额';
+
+  @override
+  String get realizedPnlLabel => '已实现盈亏';
+
+  @override
+  String get unrealizedPnl => '未实现盈亏';
+
+  @override
+  String get realizedPnl => '已实现';
+
+  @override
+  String get transactionHistory => '交易记录';
+
+  @override
+  String get additionalBuy => '追加买入';
+
+  @override
+  String get partialSell => '卖出';
+
+  @override
+  String get editHolding => '修改信息';
+
+  @override
+  String get saveChanges => '保存修改';
+
+  @override
+  String holdingUpdated(String ticker) {
+    return '$ticker 持仓信息已更新';
+  }
+
+  @override
+  String get portfolioAIAnalysis => '投资组合AI分析';
+
+  @override
+  String get aiRecommendations => '推荐建议';
+
+  @override
+  String get analysisWaiting => 'AI分析等待中...';
+
+  @override
+  String get alreadyHeld => '已持有';
+
+  @override
+  String get goToWatchlistTab => '前往自选股';
+
+  @override
+  String get noHoldingsHint => '从自选股中添加持仓';
+
+  @override
+  String get closingPriceAuto => '收盘价自动填入';
+
+  @override
+  String holidayPriceNotice(String date) {
+    return '$date 收盘价（上一交易日）';
+  }
+
+  @override
+  String get addToHoldings => '添加到持仓';
+
+  @override
+  String get currentHoldings => '持仓情况';
+
+  @override
+  String get holdingStatus => '持仓状态';
+
+  @override
+  String addHoldingTitle(String ticker) {
+    return '$ticker 添加持仓';
+  }
+
+  @override
+  String sellHoldingTitle(String ticker) {
+    return '$ticker 卖出';
+  }
+
+  @override
+  String editHoldingTitle(String ticker) {
+    return '$ticker 修改持仓';
+  }
+
+  @override
+  String holdingSold(String ticker) {
+    return '$ticker 卖出成功';
+  }
+
+  @override
+  String get deleteHolding => '删除持仓';
+
+  @override
+  String get avgPriceLabel => '均价';
+
+  @override
+  String get currentValueLabel => '市值';
+
+  @override
+  String get dailyUpdate => '每日早间更新';
 }

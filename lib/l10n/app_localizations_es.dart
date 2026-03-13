@@ -36,7 +36,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get tabCommunityTooltip => 'Foro de discusión';
 
   @override
-  String get tabWatchlist => 'Favoritos';
+  String get tabWatchlist => 'Seguimiento';
 
   @override
   String get tabWatchlistTooltip => 'Mi lista de seguimiento';
@@ -363,6 +363,16 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get removedFromWatchlist => 'Eliminado de la lista de seguimiento';
+
+  @override
+  String get watchlistDiscoveryTitle => 'Añade a tu lista de seguimiento';
+
+  @override
+  String get watchlistDiscoverySubtitle =>
+      'Recibe alertas de noticias y señales de tus acciones';
+
+  @override
+  String get topTradingVolume => 'Mayor volumen de hoy';
 
   @override
   String get communitySearchHint => 'Buscar por título o contenido...';
@@ -1484,4 +1494,330 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get updatedDate => 'Actualizado:';
+
+  @override
+  String get tabCalendar => 'Calendario';
+
+  @override
+  String get tabCalendarTooltip => 'Calendario de eventos';
+
+  @override
+  String get eventTypeFomc => 'FOMC';
+
+  @override
+  String get eventTypeEarnings => 'Resultados';
+
+  @override
+  String get eventTypeEconomic => 'Indicadores';
+
+  @override
+  String get eventTypeOptionsExpiry => 'Vencimiento opciones';
+
+  @override
+  String get eventTypeConference => 'Conferencia';
+
+  @override
+  String get eventTypeDividend => 'Dividendo';
+
+  @override
+  String get eventTypeProductLaunch => 'Lanzamiento';
+
+  @override
+  String get eventTypeShareholder => 'Junta de accionistas';
+
+  @override
+  String get eventTypeFedSpeech => 'Discurso Fed';
+
+  @override
+  String nEvents(int count) {
+    return '$count eventos';
+  }
+
+  @override
+  String get noEventsThisMonth => 'No hay eventos este mes';
+
+  @override
+  String get noEventsSelectedDay => 'No hay eventos en este día';
+
+  @override
+  String get forgotPassword => 'Olvidé mi contraseña';
+
+  @override
+  String get forgotPasswordSubtitle =>
+      'Ingresa tu correo electrónico y te enviaremos un código de verificación.';
+
+  @override
+  String get sendVerificationCode => 'Enviar código';
+
+  @override
+  String get verificationTitle => 'Verificación de correo';
+
+  @override
+  String verificationSubtitle(String email) {
+    return 'Ingresa el código de 6 dígitos enviado a $email.';
+  }
+
+  @override
+  String verificationExpiry(String time) {
+    return 'Expira en: $time';
+  }
+
+  @override
+  String get verificationCode => 'Código de verificación';
+
+  @override
+  String get verificationCodeRequired =>
+      'Ingresa el código de verificación de 6 dígitos';
+
+  @override
+  String get verifyButton => 'Verificar';
+
+  @override
+  String get resendCode => 'Reenviar código';
+
+  @override
+  String resendCodeCooldown(int seconds) {
+    return 'Reenviar en (${seconds}s)';
+  }
+
+  @override
+  String get verificationCodeResent =>
+      'El código de verificación ha sido reenviado.';
+
+  @override
+  String get resetPassword => 'Restablecer contraseña';
+
+  @override
+  String get resetPasswordSubtitle => 'Ingresa tu nueva contraseña.';
+
+  @override
+  String get resetPasswordSuccess =>
+      'Contraseña restablecida. Inicia sesión con tu nueva contraseña.';
+
+  @override
+  String get errEmailNotVerified => 'Se requiere verificación de correo.';
+
+  @override
+  String get errRateLimited => 'Por favor, inténtalo más tarde.';
+
+  @override
+  String get myHoldings => 'Mis posiciones';
+
+  @override
+  String nHoldings(int count) {
+    return '$count posiciones';
+  }
+
+  @override
+  String get portfolioSummary => 'Resumen del portafolio';
+
+  @override
+  String get totalValue => 'Valor total';
+
+  @override
+  String get totalPnl => 'P&L total';
+
+  @override
+  String get dayPnl => 'Hoy';
+
+  @override
+  String get buyStock => 'Comprar';
+
+  @override
+  String get shares => 'Acciones';
+
+  @override
+  String get avgPrice => 'Precio promedio';
+
+  @override
+  String get totalCost => 'Costo total';
+
+  @override
+  String get enterShares => 'Número de acciones';
+
+  @override
+  String get enterAvgPrice => 'Precio promedio de compra';
+
+  @override
+  String get buyConfirm => 'Añadir a posiciones';
+
+  @override
+  String holdingAdded(String ticker) {
+    return '$ticker añadido a posiciones';
+  }
+
+  @override
+  String holdingRemoved(String ticker) {
+    return '$ticker eliminado de posiciones';
+  }
+
+  @override
+  String removeHoldingConfirm(String ticker) {
+    return '¿Eliminar $ticker de posiciones?';
+  }
+
+  @override
+  String get aiAdvice => 'Consejo IA';
+
+  @override
+  String get aiAdviceInstant => 'Consejo IA instantáneo';
+
+  @override
+  String get bullishFactorsPortfolio => 'Factores alcistas';
+
+  @override
+  String get bearishFactorsPortfolio => 'Factores bajistas';
+
+  @override
+  String get detailedAnalysisComingSoon =>
+      'El análisis detallado se actualizará por la mañana';
+
+  @override
+  String get loginForPortfolio => 'Inicia sesión para gestionar tu portafolio';
+
+  @override
+  String get loginForPortfolioHint =>
+      'Seguimiento de posiciones, consejos IA y control de P&L';
+
+  @override
+  String sharesAtPrice(String shares, String price) {
+    return '$shares acciones @ \$$price';
+  }
+
+  @override
+  String get noHoldingsYet => 'Sin posiciones aún';
+
+  @override
+  String get addFirstHolding =>
+      'Compra acciones de tu lista de seguimiento para comenzar';
+
+  @override
+  String get invalidShares => 'Introduce un número de acciones válido';
+
+  @override
+  String get invalidPrice => 'Introduce un precio válido';
+
+  @override
+  String get confidence => 'Confianza';
+
+  @override
+  String get tabHoldings => 'Posiciones';
+
+  @override
+  String get purchaseDate => 'Fecha de compra';
+
+  @override
+  String get sellDate => 'Fecha de venta';
+
+  @override
+  String get sellPrice => 'Precio de venta';
+
+  @override
+  String get sellShares => 'Cantidad a vender';
+
+  @override
+  String get sellConfirm => 'Confirmar venta';
+
+  @override
+  String get sellAll => 'Vender todo';
+
+  @override
+  String get sellAmount => 'Monto de venta';
+
+  @override
+  String get realizedPnlLabel => 'P&L realizado';
+
+  @override
+  String get unrealizedPnl => 'P&L no realizado';
+
+  @override
+  String get realizedPnl => 'Realizado';
+
+  @override
+  String get transactionHistory => 'Historial de transacciones';
+
+  @override
+  String get additionalBuy => 'Comprar más';
+
+  @override
+  String get partialSell => 'Vender';
+
+  @override
+  String get editHolding => 'Editar info';
+
+  @override
+  String get saveChanges => 'Guardar cambios';
+
+  @override
+  String holdingUpdated(String ticker) {
+    return '$ticker posición actualizada';
+  }
+
+  @override
+  String get portfolioAIAnalysis => 'Análisis IA del portafolio';
+
+  @override
+  String get aiRecommendations => 'Recomendaciones';
+
+  @override
+  String get analysisWaiting => 'Análisis IA pendiente...';
+
+  @override
+  String get alreadyHeld => 'En cartera';
+
+  @override
+  String get goToWatchlistTab => 'Ir a seguimiento';
+
+  @override
+  String get noHoldingsHint =>
+      'Añade posiciones desde la pestaña de seguimiento';
+
+  @override
+  String get closingPriceAuto => 'Precio de cierre automático';
+
+  @override
+  String holidayPriceNotice(String date) {
+    return 'Precio de cierre del $date (día hábil anterior)';
+  }
+
+  @override
+  String get addToHoldings => 'Añadir a posiciones';
+
+  @override
+  String get currentHoldings => 'Posiciones actuales';
+
+  @override
+  String get holdingStatus => 'Estado de posición';
+
+  @override
+  String addHoldingTitle(String ticker) {
+    return '$ticker Añadir posición';
+  }
+
+  @override
+  String sellHoldingTitle(String ticker) {
+    return '$ticker Vender';
+  }
+
+  @override
+  String editHoldingTitle(String ticker) {
+    return '$ticker Editar posición';
+  }
+
+  @override
+  String holdingSold(String ticker) {
+    return '$ticker vendido exitosamente';
+  }
+
+  @override
+  String get deleteHolding => 'Eliminar posición';
+
+  @override
+  String get avgPriceLabel => 'Precio promedio';
+
+  @override
+  String get currentValueLabel => 'Valor actual';
+
+  @override
+  String get dailyUpdate => 'Actualización diaria por la mañana';
 }

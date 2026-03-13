@@ -36,7 +36,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get tabCommunityTooltip => '토론 게시판';
 
   @override
-  String get tabWatchlist => '관심';
+  String get tabWatchlist => '관심종목';
 
   @override
   String get tabWatchlistTooltip => '나의 관심목록';
@@ -356,6 +356,15 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get removedFromWatchlist => '관심 목록에서 삭제됨';
+
+  @override
+  String get watchlistDiscoveryTitle => '관심종목을 등록해보세요';
+
+  @override
+  String get watchlistDiscoverySubtitle => '등록하면 관련 뉴스·시그널 알림을 받을 수 있어요';
+
+  @override
+  String get topTradingVolume => '오늘의 거래량 TOP';
 
   @override
   String get communitySearchHint => '제목, 내용으로 검색...';
@@ -1449,4 +1458,322 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get updatedDate => '업데이트:';
+
+  @override
+  String get tabCalendar => '캘린더';
+
+  @override
+  String get tabCalendarTooltip => '이벤트 캘린더';
+
+  @override
+  String get eventTypeFomc => 'FOMC';
+
+  @override
+  String get eventTypeEarnings => '실적발표';
+
+  @override
+  String get eventTypeEconomic => '경제지표';
+
+  @override
+  String get eventTypeOptionsExpiry => '옵션만기';
+
+  @override
+  String get eventTypeConference => '컨퍼런스';
+
+  @override
+  String get eventTypeDividend => '배당';
+
+  @override
+  String get eventTypeProductLaunch => '제품출시';
+
+  @override
+  String get eventTypeShareholder => '주주총회';
+
+  @override
+  String get eventTypeFedSpeech => '연준 연설';
+
+  @override
+  String nEvents(int count) {
+    return '$count개 이벤트';
+  }
+
+  @override
+  String get noEventsThisMonth => '이번 달 이벤트가 없습니다';
+
+  @override
+  String get noEventsSelectedDay => '선택한 날짜에 이벤트가 없습니다';
+
+  @override
+  String get forgotPassword => '비밀번호 찾기';
+
+  @override
+  String get forgotPasswordSubtitle => '가입한 이메일을 입력하시면 인증코드를 보내드립니다.';
+
+  @override
+  String get sendVerificationCode => '인증코드 발송';
+
+  @override
+  String get verificationTitle => '이메일 인증';
+
+  @override
+  String verificationSubtitle(String email) {
+    return '$email로 발송된 6자리 인증코드를 입력하세요.';
+  }
+
+  @override
+  String verificationExpiry(String time) {
+    return '유효시간: $time';
+  }
+
+  @override
+  String get verificationCode => '인증코드';
+
+  @override
+  String get verificationCodeRequired => '6자리 인증코드를 입력하세요';
+
+  @override
+  String get verifyButton => '인증하기';
+
+  @override
+  String get resendCode => '인증코드 재발송';
+
+  @override
+  String resendCodeCooldown(int seconds) {
+    return '재발송 가능 ($seconds초)';
+  }
+
+  @override
+  String get verificationCodeResent => '인증코드가 재발송되었습니다.';
+
+  @override
+  String get resetPassword => '비밀번호 재설정';
+
+  @override
+  String get resetPasswordSubtitle => '새로운 비밀번호를 입력하세요.';
+
+  @override
+  String get resetPasswordSuccess => '비밀번호가 재설정되었습니다. 새 비밀번호로 로그인하세요.';
+
+  @override
+  String get errEmailNotVerified => '이메일 인증이 필요합니다.';
+
+  @override
+  String get errRateLimited => '잠시 후 다시 시도해주세요.';
+
+  @override
+  String get myHoldings => '나의 보유종목';
+
+  @override
+  String nHoldings(int count) {
+    return '$count개 보유';
+  }
+
+  @override
+  String get portfolioSummary => '포트폴리오 요약';
+
+  @override
+  String get totalValue => '총 가치';
+
+  @override
+  String get totalPnl => '총 손익';
+
+  @override
+  String get dayPnl => '오늘';
+
+  @override
+  String get buyStock => '매수';
+
+  @override
+  String get shares => '주수';
+
+  @override
+  String get avgPrice => '평균단가';
+
+  @override
+  String get totalCost => '총 매수금액';
+
+  @override
+  String get enterShares => '주수를 입력하세요';
+
+  @override
+  String get enterAvgPrice => '평균 매수가를 입력하세요';
+
+  @override
+  String get buyConfirm => '보유에 추가';
+
+  @override
+  String holdingAdded(String ticker) {
+    return '$ticker 보유종목에 추가됨';
+  }
+
+  @override
+  String holdingRemoved(String ticker) {
+    return '$ticker 보유종목에서 삭제됨';
+  }
+
+  @override
+  String removeHoldingConfirm(String ticker) {
+    return '$ticker을(를) 보유종목에서 삭제하시겠습니까?';
+  }
+
+  @override
+  String get aiAdvice => 'AI 자문';
+
+  @override
+  String get aiAdviceInstant => '즉시 AI 자문';
+
+  @override
+  String get bullishFactorsPortfolio => '상승 요인';
+
+  @override
+  String get bearishFactorsPortfolio => '하락 요인';
+
+  @override
+  String get detailedAnalysisComingSoon => '상세 분석은 내일 오전에 업데이트됩니다';
+
+  @override
+  String get loginForPortfolio => '로그인하여 포트폴리오를 관리하세요';
+
+  @override
+  String get loginForPortfolioHint => '보유종목 추적, AI 자문, 손익 관리';
+
+  @override
+  String sharesAtPrice(String shares, String price) {
+    return '$shares주 @ \$$price';
+  }
+
+  @override
+  String get noHoldingsYet => '보유종목이 없습니다';
+
+  @override
+  String get addFirstHolding => '관심종목에서 매수하여 시작하세요';
+
+  @override
+  String get invalidShares => '유효한 주수를 입력하세요';
+
+  @override
+  String get invalidPrice => '유효한 가격을 입력하세요';
+
+  @override
+  String get confidence => '신뢰도';
+
+  @override
+  String get tabHoldings => '보유종목';
+
+  @override
+  String get purchaseDate => '매수일';
+
+  @override
+  String get sellDate => '매도일';
+
+  @override
+  String get sellPrice => '매도 단가';
+
+  @override
+  String get sellShares => '매도 수량';
+
+  @override
+  String get sellConfirm => '매도 확인';
+
+  @override
+  String get sellAll => '전량 매도';
+
+  @override
+  String get sellAmount => '매도금액';
+
+  @override
+  String get realizedPnlLabel => '실현손익';
+
+  @override
+  String get unrealizedPnl => '미실현손익';
+
+  @override
+  String get realizedPnl => '실현손익';
+
+  @override
+  String get transactionHistory => '거래 이력';
+
+  @override
+  String get additionalBuy => '추가 매수';
+
+  @override
+  String get partialSell => '매도';
+
+  @override
+  String get editHolding => '정보 수정';
+
+  @override
+  String get saveChanges => '수정 저장';
+
+  @override
+  String holdingUpdated(String ticker) {
+    return '$ticker 보유 정보가 수정되었습니다';
+  }
+
+  @override
+  String get portfolioAIAnalysis => '포트폴리오 AI 분석';
+
+  @override
+  String get aiRecommendations => '추천사항';
+
+  @override
+  String get analysisWaiting => 'AI 분석 대기 중...';
+
+  @override
+  String get alreadyHeld => '보유중';
+
+  @override
+  String get goToWatchlistTab => '관심종목 탭으로 이동';
+
+  @override
+  String get noHoldingsHint => '관심종목에서 보유 종목을 추가하세요';
+
+  @override
+  String get closingPriceAuto => '종가 자동 입력';
+
+  @override
+  String holidayPriceNotice(String date) {
+    return '$date 종가 기준 (직전 거래일)';
+  }
+
+  @override
+  String get addToHoldings => '보유에 추가';
+
+  @override
+  String get currentHoldings => '보유현황';
+
+  @override
+  String get holdingStatus => '보유 현황';
+
+  @override
+  String addHoldingTitle(String ticker) {
+    return '$ticker 보유 추가';
+  }
+
+  @override
+  String sellHoldingTitle(String ticker) {
+    return '$ticker 매도';
+  }
+
+  @override
+  String editHoldingTitle(String ticker) {
+    return '$ticker 보유 정보 수정';
+  }
+
+  @override
+  String holdingSold(String ticker) {
+    return '$ticker 매도 완료';
+  }
+
+  @override
+  String get deleteHolding => '보유 삭제';
+
+  @override
+  String get avgPriceLabel => '평균단가';
+
+  @override
+  String get currentValueLabel => '평가액';
+
+  @override
+  String get dailyUpdate => '매일 오전 업데이트';
 }

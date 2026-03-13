@@ -1,0 +1,793 @@
+import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:http/http.dart' as http;
+import '../exceptions/api_error_codes.dart';
+import '../exceptions/api_exception.dart';
+import '../models/chart_data.dart';
+import '../models/ticker_score.dart';
+import '../models/ticker_info.dart';
+import '../models/market_insights.dart';
+import '../models/treemap_data.dart';
+import '../models/macro_data.dart';
+import '../models/earnings_data.dart';
+import '../models/indices_data.dart';
+import '../models/news_data.dart';
+import '../models/market_event.dart';
+
+class AnalyticsApiClient {
+  // Base URL for analytics API
+  // Loaded from .env file (API_BASE_URL)
+  // Development: local server or EC2 instance
+  // Production: Load balancer or CloudFront URL
+  static final String _baseUrl =
+      dotenv.env['API_BASE_URL'] ?? 'http://43.201.45.60:8001';
+
+  final http.Client _httpClient;
+
+  AnalyticsApiClient({http.Client? httpClient})
+      : _httpClient = httpClient ?? http.Client() {
+    // Debug logging for APK troubleshooting
+    print('[AnalyticsApiClient] 🌐 Base URL: $_baseUrl');
+    print('[AnalyticsApiClient] 📁 dotenv loaded: ${dotenv.env['API_BASE_URL']}');
+  }
+
+  /// Get complete chart data for a ticker
+  ///
+  /// Returns OHLCV prices, scores, indicators, targets, trendlines,
+  /// institutional ownership, and short data in a single API call.
+  ///
+  /// Example:
+  /// ```dart
+  /// final data = await client.getChartData('AAPL',
+  ///   fromDate: DateTime(2026, 1, 1),
+  ///   toDate: DateTime(2026, 2, 6)
+  /// );
+  /// ```
+  Future<CompleteChartData> getChartData(
+    String ticker, {
+    DateTime? fromDate,
+    DateTime? toDate,
+  }) async {
+    try {
+      final params = <String, String>{};
+      if (fromDate != null) {
+        params['from'] = _formatDate(fromDate);
+      }
+      if (toDate != null) {
+        params['to'] = _formatDate(toDate);
+      }
+
+      final uri = Uri.parse('$_baseUrl/api/v1/charts/$ticker')
+          .replace(queryParameters: params.isNotEmpty ? params : null);
+
+      print('[CHART_REQUEST] baseUrl=$_baseUrl');
+      print('[CHART_REQUEST] ticker=$ticker');
+      print('[CHART_REQUEST] fullUrl=$uri');
+      print('[CHART_REQUEST] params from=${params['from']} to=${params['to']}');
+
+      final response = await _httpClient.get(uri).timeout(
+        const Duration(seconds: 15),
+        onTimeout: () {
+          throw TimeoutException('Chart data timeout');
+        },
+      );
+
+      print('[CHART_RESPONSE] status=${response.statusCode} bytes=${response.bodyBytes.length}');
+
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+
+        // 서버 키가 data/prices 중 무엇이든 대응
+        final list = (json['data'] ?? json['prices']) as List?;
+        final count = list?.length ?? 0;
+
+        String latest = 'N/A';
+        if (list != null && list.isNotEmpty) {
+          // date 문자열 최대값으로 최신일 계산 (정렬 가정 금지)
+          latest = (list
+              .map((e) => (e as Map)['date']?.toString() ?? '')
+              .where((d) => d.isNotEmpty)
+              .reduce((a, b) => a.compareTo(b) > 0 ? a : b));
+        }
+
+        print('[CHART_RESPONSE] points=$count latest_date=$latest');
+
+        return CompleteChartData.fromJson(json);
+      } else if (response.statusCode == 404) {
+        throw TickerNotFoundException(ticker: ticker);
+      } else {
+        throw ApiException(
+          ApiErrorCode.genericError,
+          debugMessage: 'Failed to load chart data: ${response.statusCode}',
+          statusCode: response.statusCode,
+        );
+      }
+    } on TimeoutException {
+      throw ApiException(ApiErrorCode.timeout15s, debugMessage: 'Chart data');
+    } on SocketException {
+      throw ApiException(ApiErrorCode.networkFailed, debugMessage: 'Chart data');
+    } on FormatException {
+      throw ApiException(ApiErrorCode.responseFormat, debugMessage: 'Chart data');
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(ApiErrorCode.genericError, debugMessage: '$e');
+    }
+  }
+
+  /// Get top scoring tickers for a specific date
+  ///
+  /// Example:
+  /// ```dart
+  /// final topTickers = await client.getTopTickers(
+  ///   date: DateTime(2026, 2, 6),
+  ///   limit: 20
+  /// );
+  /// ```
+  Future<List<TickerScore>> getTopTickers({
+    DateTime? date,
+    int limit = 20,
+  }) async {
+    try {
+      final params = <String, String>{
+        'limit': limit.toString(),
+      };
+      if (date != null) {
+        params['date'] = _formatDate(date);
+      }
+
+      final uri = Uri.parse('$_baseUrl/api/v1/scores/top')
+          .replace(queryParameters: params);
+
+      print('[API] 🏆 GET $_baseUrl/api/v1/scores/top?limit=$limit');
+
+      final response = await _httpClient.get(uri).timeout(
+        const Duration(seconds: 15),
+        onTimeout: () {
+          throw TimeoutException('Top tickers timeout');
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body) as List;
+        return json.map((item) => TickerScore.fromJson(item)).toList();
+      } else {
+        throw ApiException(
+          ApiErrorCode.genericError,
+          debugMessage: 'Failed to load top tickers: ${response.statusCode}',
+          statusCode: response.statusCode,
+        );
+      }
+    } on TimeoutException {
+      throw ApiException(ApiErrorCode.timeout15s, debugMessage: 'Top tickers');
+    } on SocketException {
+      throw ApiException(ApiErrorCode.networkFailed, debugMessage: 'Top tickers');
+    } on FormatException {
+      throw ApiException(ApiErrorCode.responseFormat, debugMessage: 'Top tickers');
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(ApiErrorCode.genericError, debugMessage: '$e');
+    }
+  }
+
+  /// Get scores for specific tickers by batch
+  ///
+  /// Used by watchlist screen to fetch exact tickers instead of top N.
+  ///
+  /// Example:
+  /// ```dart
+  /// final scores = await client.getTickerScoresBatch(['AAPL', 'TSLA', 'MSFT']);
+  /// ```
+  Future<List<TickerScore>> getTickerScoresBatch(List<String> tickers) async {
+    if (tickers.isEmpty) return [];
+
+    try {
+      final uri = Uri.parse('$_baseUrl/api/v1/scores/batch')
+          .replace(queryParameters: {'tickers': tickers.join(',')});
+
+      print('[API] GET $_baseUrl/api/v1/scores/batch?tickers=${tickers.join(',')}');
+
+      final response = await _httpClient.get(uri).timeout(
+        const Duration(seconds: 15),
+        onTimeout: () {
+          throw TimeoutException('Batch scores timeout');
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body) as List;
+        return json.map((item) => TickerScore.fromJson(item)).toList();
+      } else {
+        throw ApiException(
+          ApiErrorCode.genericError,
+          debugMessage: 'Failed to load batch scores: ${response.statusCode}',
+          statusCode: response.statusCode,
+        );
+      }
+    } on TimeoutException {
+      throw ApiException(ApiErrorCode.timeout15s, debugMessage: 'Batch scores');
+    } on SocketException {
+      throw ApiException(ApiErrorCode.networkFailed, debugMessage: 'Batch scores');
+    } on FormatException {
+      throw ApiException(ApiErrorCode.responseFormat, debugMessage: 'Batch scores');
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(ApiErrorCode.genericError, debugMessage: '$e');
+    }
+  }
+
+  /// Get market insights with top and bottom performers
+  ///
+  /// Example:
+  /// ```dart
+  /// final insights = await client.getMarketInsights(
+  ///   date: DateTime(2026, 2, 6),
+  ///   top: 50,
+  ///   bottom: 50
+  /// );
+  /// ```
+  Future<MarketInsights> getMarketInsights({
+    DateTime? date,
+    int top = 50,
+    int bottom = 50,
+    String? index,
+  }) async {
+    try {
+      final params = <String, String>{
+        'top': top.toString(),
+        'bottom': bottom.toString(),
+      };
+      if (date != null) {
+        params['date'] = _formatDate(date);
+      }
+      if (index != null) {
+        params['index'] = index;
+      }
+
+      final uri = Uri.parse('$_baseUrl/api/v1/scores/insights')
+          .replace(queryParameters: params);
+
+      print('[API] 📊 GET $_baseUrl/api/v1/scores/insights?top=$top&bottom=$bottom${index != null ? '&index=$index' : ''}');
+
+      final response = await _httpClient.get(uri).timeout(
+        const Duration(seconds: 15),
+        onTimeout: () {
+          throw TimeoutException('Market insights timeout');
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+        return MarketInsights.fromJson(json);
+      } else {
+        throw ApiException(
+          ApiErrorCode.genericError,
+          debugMessage: 'Failed to load market insights: ${response.statusCode}',
+          statusCode: response.statusCode,
+        );
+      }
+    } on TimeoutException {
+      throw ApiException(ApiErrorCode.timeout15s, debugMessage: 'Market insights');
+    } on SocketException {
+      throw ApiException(ApiErrorCode.networkFailed, debugMessage: 'Market insights');
+    } on FormatException {
+      throw ApiException(ApiErrorCode.responseFormat, debugMessage: 'Market insights');
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(ApiErrorCode.genericError, debugMessage: '$e');
+    }
+  }
+
+  /// Search tickers by symbol or name
+  ///
+  /// Example:
+  /// ```dart
+  /// final results = await client.searchTickers('AAPL');
+  /// ```
+  Future<List<TickerInfo>> searchTickers(String query) async {
+    try {
+      if (query.trim().isEmpty) {
+        return [];
+      }
+
+      final uri = Uri.parse('$_baseUrl/api/v1/tickers/search')
+          .replace(queryParameters: {'q': query});
+
+      print('[API] 🔍 GET $_baseUrl/api/v1/tickers/search?q=$query');
+
+      final response = await _httpClient.get(uri).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          throw TimeoutException('Search timeout');
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body) as List;
+        return json.map((item) => TickerInfo.fromJson(item)).toList();
+      } else {
+        throw ApiException(
+          ApiErrorCode.genericError,
+          debugMessage: 'Failed to search tickers: ${response.statusCode}',
+          statusCode: response.statusCode,
+        );
+      }
+    } on TimeoutException {
+      throw ApiException(ApiErrorCode.timeout10s, debugMessage: 'Ticker search');
+    } on SocketException {
+      throw ApiException(ApiErrorCode.networkFailed, debugMessage: 'Ticker search');
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(ApiErrorCode.genericError, debugMessage: '$e');
+    }
+  }
+
+  /// Get ticker metadata (name, category)
+  ///
+  /// Example:
+  /// ```dart
+  /// final info = await client.getTickerInfo('AAPL');
+  /// ```
+  Future<TickerInfo> getTickerInfo(String ticker) async {
+    try {
+      final uri = Uri.parse('$_baseUrl/api/v1/tickers/$ticker');
+
+      print('[API] ℹ️  GET $_baseUrl/api/v1/tickers/$ticker');
+
+      final response = await _httpClient.get(uri).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          throw TimeoutException('Ticker info timeout');
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+        return TickerInfo.fromJson(json);
+      } else if (response.statusCode == 404) {
+        throw TickerNotFoundException(ticker: ticker);
+      } else {
+        throw ApiException(
+          ApiErrorCode.genericError,
+          debugMessage: 'Failed to load ticker info: ${response.statusCode}',
+          statusCode: response.statusCode,
+        );
+      }
+    } on TimeoutException {
+      throw ApiException(ApiErrorCode.timeout10s, debugMessage: 'Ticker info');
+    } on SocketException {
+      throw ApiException(ApiErrorCode.networkFailed, debugMessage: 'Ticker info');
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(ApiErrorCode.genericError, debugMessage: '$e');
+    }
+  }
+
+  /// Get treemap data for sector visualization
+  ///
+  /// Returns S&P 500 tickers grouped by GICS sector with change_pct
+  /// and trading_value for treemap chart rendering.
+  ///
+  /// Example:
+  /// ```dart
+  /// final data = await client.getTreemapData();
+  /// ```
+  Future<TreemapData> getTreemapData({DateTime? date, String? index}) async {
+    try {
+      final params = <String, String>{};
+      if (date != null) {
+        params['date'] = _formatDate(date);
+      }
+      if (index != null) {
+        params['index'] = index;
+      }
+
+      final uri = Uri.parse('$_baseUrl/api/v1/market/treemap')
+          .replace(queryParameters: params.isNotEmpty ? params : null);
+
+      print('[API] GET $_baseUrl/api/v1/market/treemap${index != null ? '?index=$index' : ''}');
+
+      final response = await _httpClient.get(uri).timeout(
+        const Duration(seconds: 15),
+        onTimeout: () {
+          throw TimeoutException('Treemap timeout');
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+        return TreemapData.fromJson(json);
+      } else {
+        throw ApiException(
+          ApiErrorCode.genericError,
+          debugMessage: 'Failed to load treemap data: ${response.statusCode}',
+          statusCode: response.statusCode,
+        );
+      }
+    } on TimeoutException {
+      throw ApiException(ApiErrorCode.timeout15s, debugMessage: 'Treemap');
+    } on SocketException {
+      throw ApiException(ApiErrorCode.networkFailed, debugMessage: 'Treemap');
+    } on FormatException {
+      throw ApiException(ApiErrorCode.responseFormat, debugMessage: 'Treemap');
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(ApiErrorCode.genericError, debugMessage: '$e');
+    }
+  }
+
+  /// Get macro economic indicators for dashboard banner
+  ///
+  /// Returns FRED macro indicators (Fed Funds Rate, Treasury yields,
+  /// VIX, CPI, Unemployment Rate) with change percentages.
+  ///
+  /// Example:
+  /// ```dart
+  /// final data = await client.getMacroIndicators();
+  /// ```
+  Future<MacroIndicatorsData> getMacroIndicators({String? date}) async {
+    try {
+      final params = <String, String>{};
+      if (date != null) {
+        params['date'] = date;
+      }
+
+      final uri = Uri.parse('$_baseUrl/api/v1/macro/indicators')
+          .replace(queryParameters: params.isNotEmpty ? params : null);
+
+      print('[API] GET $_baseUrl/api/v1/macro/indicators');
+
+      final response = await _httpClient.get(uri).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          throw TimeoutException('Macro indicators timeout');
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+        return MacroIndicatorsData.fromJson(json);
+      } else {
+        throw ApiException(
+          ApiErrorCode.genericError,
+          debugMessage: 'Failed to load macro indicators: ${response.statusCode}',
+          statusCode: response.statusCode,
+        );
+      }
+    } on TimeoutException {
+      throw ApiException(ApiErrorCode.timeout10s, debugMessage: 'Macro indicators');
+    } on SocketException {
+      throw ApiException(ApiErrorCode.networkFailed, debugMessage: 'Macro indicators');
+    } on FormatException {
+      throw ApiException(ApiErrorCode.responseFormat, debugMessage: 'Macro indicators');
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(ApiErrorCode.genericError, debugMessage: '$e');
+    }
+  }
+
+  /// Get macro signals (yield_curve, m2_liquidity, overall_macro)
+  ///
+  /// Returns signals from the macro signals API including overall_macro
+  /// for the dashboard header display.
+  Future<MacroSignalsData> getMacroSignals({String? date}) async {
+    try {
+      final params = <String, String>{};
+      if (date != null) {
+        params['date'] = date;
+      }
+
+      final uri = Uri.parse('$_baseUrl/api/v1/macro/signals')
+          .replace(queryParameters: params.isNotEmpty ? params : null);
+
+      print('[API] GET $_baseUrl/api/v1/macro/signals');
+
+      final response = await _httpClient.get(uri).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          throw TimeoutException('Macro signals timeout');
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+        return MacroSignalsData.fromJson(json);
+      } else {
+        throw ApiException(
+          ApiErrorCode.genericError,
+          debugMessage: 'Failed to load macro signals: ${response.statusCode}',
+          statusCode: response.statusCode,
+        );
+      }
+    } on TimeoutException {
+      throw ApiException(ApiErrorCode.timeout10s, debugMessage: 'Macro signals');
+    } on SocketException {
+      throw ApiException(ApiErrorCode.networkFailed, debugMessage: 'Macro signals');
+    } on FormatException {
+      throw ApiException(ApiErrorCode.responseFormat, debugMessage: 'Macro signals');
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(ApiErrorCode.genericError, debugMessage: '$e');
+    }
+  }
+
+  /// Get upcoming earnings events for the week
+  ///
+  /// Returns earnings events grouped by date for the calendar screen.
+  Future<EarningsUpcomingData> getUpcomingEarnings({int days = 7}) async {
+    try {
+      final uri = Uri.parse('$_baseUrl/api/v1/earnings/upcoming')
+          .replace(queryParameters: {'days': days.toString()});
+
+      print('[API] GET $_baseUrl/api/v1/earnings/upcoming?days=$days');
+
+      final response = await _httpClient.get(uri).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          throw TimeoutException('Earnings timeout');
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+        return EarningsUpcomingData.fromJson(json);
+      } else {
+        throw ApiException(
+          ApiErrorCode.genericError,
+          debugMessage: 'Failed to load earnings data: ${response.statusCode}',
+          statusCode: response.statusCode,
+        );
+      }
+    } on TimeoutException {
+      throw ApiException(ApiErrorCode.timeout10s, debugMessage: 'Earnings');
+    } on SocketException {
+      throw ApiException(ApiErrorCode.networkFailed, debugMessage: 'Earnings');
+    } on FormatException {
+      throw ApiException(ApiErrorCode.responseFormat, debugMessage: 'Earnings');
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(ApiErrorCode.genericError, debugMessage: '$e');
+    }
+  }
+
+  /// Get latest news across all tickers (dashboard preview)
+  Future<NewsListData> getLatestNews({int limit = 3}) async {
+    try {
+      final uri = Uri.parse('$_baseUrl/api/v1/news/latest')
+          .replace(queryParameters: {'limit': limit.toString()});
+
+      print('[API] GET $_baseUrl/api/v1/news/latest?limit=$limit');
+
+      final response = await _httpClient.get(uri).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          throw TimeoutException('News timeout');
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+        return NewsListData.fromJson(json);
+      } else {
+        throw ApiException(
+          ApiErrorCode.genericError,
+          debugMessage: 'Failed to load news: ${response.statusCode}',
+          statusCode: response.statusCode,
+        );
+      }
+    } on TimeoutException {
+      throw ApiException(ApiErrorCode.timeout10s, debugMessage: 'Latest news');
+    } on SocketException {
+      throw ApiException(ApiErrorCode.networkFailed, debugMessage: 'Latest news');
+    } on FormatException {
+      throw ApiException(ApiErrorCode.responseFormat, debugMessage: 'Latest news');
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(ApiErrorCode.genericError, debugMessage: '$e');
+    }
+  }
+
+  /// Get paginated news list (infinite scroll)
+  Future<NewsListData> getNewsList({int limit = 20, int offset = 0}) async {
+    try {
+      final uri = Uri.parse('$_baseUrl/api/v1/news/latest')
+          .replace(queryParameters: {
+        'limit': limit.toString(),
+        'offset': offset.toString(),
+      });
+
+      print('[API] GET $_baseUrl/api/v1/news/latest?limit=$limit&offset=$offset');
+
+      final response = await _httpClient.get(uri).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          throw TimeoutException('News list timeout');
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+        return NewsListData.fromJson(json);
+      } else {
+        throw ApiException(
+          ApiErrorCode.genericError,
+          debugMessage: 'Failed to load news list: ${response.statusCode}',
+          statusCode: response.statusCode,
+        );
+      }
+    } on TimeoutException {
+      throw ApiException(ApiErrorCode.timeout10s, debugMessage: 'News list');
+    } on SocketException {
+      throw ApiException(ApiErrorCode.networkFailed, debugMessage: 'News list');
+    } on FormatException {
+      throw ApiException(ApiErrorCode.responseFormat, debugMessage: 'News list');
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(ApiErrorCode.genericError, debugMessage: '$e');
+    }
+  }
+
+  /// Get news for a specific ticker (infinite scroll)
+  Future<NewsListData> getTickerNews(String ticker, {int limit = 20, int offset = 0}) async {
+    try {
+      final uri = Uri.parse('$_baseUrl/api/v1/news/')
+          .replace(queryParameters: {
+        'ticker': ticker,
+        'limit': limit.toString(),
+        'offset': offset.toString(),
+      });
+
+      print('[API] GET $_baseUrl/api/v1/news/?ticker=$ticker&limit=$limit&offset=$offset');
+
+      final response = await _httpClient.get(uri).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          throw TimeoutException('Ticker news timeout');
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+        return NewsListData.fromJson(json);
+      } else {
+        throw ApiException(
+          ApiErrorCode.genericError,
+          debugMessage: 'Failed to load ticker news: ${response.statusCode}',
+          statusCode: response.statusCode,
+        );
+      }
+    } on TimeoutException {
+      throw ApiException(ApiErrorCode.timeout10s, debugMessage: 'Ticker news');
+    } on SocketException {
+      throw ApiException(ApiErrorCode.networkFailed, debugMessage: 'Ticker news');
+    } on FormatException {
+      throw ApiException(ApiErrorCode.responseFormat, debugMessage: 'Ticker news');
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(ApiErrorCode.genericError, debugMessage: '$e');
+    }
+  }
+
+  /// Get event calendar for a specific month
+  Future<EventCalendarData> getEventCalendar(int year, int month, String lang) async {
+    try {
+      final uri = Uri.parse('$_baseUrl/api/v1/events/calendar')
+          .replace(queryParameters: {
+        'year': year.toString(),
+        'month': month.toString(),
+        'lang': lang,
+      });
+
+      print('[API] GET $_baseUrl/api/v1/events/calendar?year=$year&month=$month&lang=$lang');
+
+      final response = await _httpClient.get(uri).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          throw TimeoutException('Event calendar timeout');
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+        return EventCalendarData.fromJson(json);
+      } else {
+        throw ApiException(
+          ApiErrorCode.genericError,
+          debugMessage: 'Failed to load event calendar: ${response.statusCode}',
+          statusCode: response.statusCode,
+        );
+      }
+    } on TimeoutException {
+      throw ApiException(ApiErrorCode.timeout10s, debugMessage: 'Event calendar');
+    } on SocketException {
+      throw ApiException(ApiErrorCode.networkFailed, debugMessage: 'Event calendar');
+    } on FormatException {
+      throw ApiException(ApiErrorCode.responseFormat, debugMessage: 'Event calendar');
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(ApiErrorCode.genericError, debugMessage: '$e');
+    }
+  }
+
+  /// Health check endpoint
+  Future<bool> checkHealth() async {
+    try {
+      final uri = Uri.parse('$_baseUrl/health');
+      final response = await _httpClient.get(uri);
+      return response.statusCode == 200;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /// Format DateTime to YYYY-MM-DD string
+  String _formatDate(DateTime date) {
+    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+  }
+
+  /// Get market indices (SPY, QQQ, DIA) for dashboard header
+  Future<MarketIndicesData> getMarketIndices() async {
+    try {
+      final uri = Uri.parse('$_baseUrl/api/v1/market/indices');
+
+      print('[API] 📊 GET $_baseUrl/api/v1/market/indices');
+
+      final response = await _httpClient.get(uri).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          throw TimeoutException('Market indices timeout');
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+        return MarketIndicesData.fromJson(json);
+      } else {
+        throw ApiException(
+          ApiErrorCode.genericError,
+          debugMessage: 'Failed to load market indices: ${response.statusCode}',
+          statusCode: response.statusCode,
+        );
+      }
+    } on TimeoutException {
+      throw ApiException(ApiErrorCode.timeout10s, debugMessage: 'Market indices');
+    } on SocketException {
+      throw ApiException(ApiErrorCode.networkFailed, debugMessage: 'Market indices');
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(ApiErrorCode.genericError, debugMessage: '$e');
+    }
+  }
+
+  /// Get closing price for a specific date (for add/sell holding).
+  /// Falls back to prior trading day if target date is a holiday.
+  Future<({String date, double? close})> getClosePrice(String ticker, DateTime date) async {
+    try {
+      final dateStr = _formatDate(date);
+      final uri = Uri.parse('$_baseUrl/api/v1/prices/${ticker.toUpperCase()}/close')
+          .replace(queryParameters: {'date': dateStr});
+
+      final response = await _httpClient.get(uri).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () => throw TimeoutException('Close price timeout'),
+      );
+
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+        return (
+          date: json['date'] as String,
+          close: (json['close'] as num?)?.toDouble(),
+        );
+      }
+      return (date: dateStr, close: null);
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      return (date: _formatDate(date), close: null);
+    }
+  }
+
+  void dispose() {
+    _httpClient.close();
+  }
+}

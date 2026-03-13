@@ -123,6 +123,9 @@
   "removeFromWatchlist": "从自选股移除",
   "addedToWatchlist": "已添加到自选股",
   "removedFromWatchlist": "已从自选股移除",
+  "watchlistDiscoveryTitle": "添加到自选股",
+  "watchlistDiscoverySubtitle": "添加后可接收相关新闻和信号提醒",
+  "topTradingVolume": "今日成交额TOP",
 
   "communitySearchHint": "按标题或内容搜索...",
   "writePost": "发帖",
@@ -498,5 +501,153 @@
   "bioLabel": "简介",
   "bioHint": "介绍一下你自己",
   "profileEditGuide": "编辑资料指南",
-  "updatedDate": "更新日期："
+  "updatedDate": "更新日期：",
+
+  "tabCalendar": "日历",
+  "tabCalendarTooltip": "事件日历",
+  "eventTypeFomc": "FOMC",
+  "eventTypeEarnings": "财报",
+  "eventTypeEconomic": "经济指标",
+  "eventTypeOptionsExpiry": "期权到期",
+  "eventTypeConference": "会议",
+  "eventTypeDividend": "分红",
+  "eventTypeProductLaunch": "产品发布",
+  "eventTypeShareholder": "股东大会",
+  "eventTypeFedSpeech": "美联储讲话",
+  "nEvents": "{count}个事件",
+  "@nEvents": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "noEventsThisMonth": "本月没有事件",
+  "noEventsSelectedDay": "该日期没有事件",
+  "today": "今天",
+
+  "forgotPassword": "找回密码",
+  "forgotPasswordSubtitle": "请输入您的注册邮箱，我们将发送验证码。",
+  "sendVerificationCode": "发送验证码",
+  "verificationTitle": "邮箱验证",
+  "verificationSubtitle": "请输入发送至 {email} 的6位验证码。",
+  "@verificationSubtitle": {
+    "placeholders": {
+      "email": { "type": "String" }
+    }
+  },
+  "verificationExpiry": "有效期: {time}",
+  "@verificationExpiry": {
+    "placeholders": {
+      "time": { "type": "String" }
+    }
+  },
+  "verificationCode": "验证码",
+  "verificationCodeRequired": "请输入6位验证码",
+  "verifyButton": "验证",
+  "resendCode": "重新发送验证码",
+  "resendCodeCooldown": "重新发送 ({seconds}秒)",
+  "@resendCodeCooldown": {
+    "placeholders": {
+      "seconds": { "type": "int" }
+    }
+  },
+  "verificationCodeResent": "验证码已重新发送。",
+  "resetPassword": "重置密码",
+  "resetPasswordSubtitle": "请输入新密码。",
+  "resetPasswordSuccess": "密码已重置，请使用新密码登录。",
+  "errEmailNotVerified": "需要邮箱验证。",
+  "errRateLimited": "请稍后再试。",
+
+  "myHoldings": "我的持仓",
+  "nHoldings": "{count}只持仓",
+  "@nHoldings": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "portfolioSummary": "投资组合摘要",
+  "totalValue": "总价值",
+  "totalPnl": "总盈亏",
+  "dayPnl": "今日",
+  "buyStock": "买入",
+  "shares": "股数",
+  "avgPrice": "均价",
+  "totalCost": "买入总额",
+  "enterShares": "输入股数",
+  "enterAvgPrice": "输入平均买入价",
+  "buyConfirm": "添加到持仓",
+  "holdingAdded": "{ticker} 已添加到持仓",
+  "@holdingAdded": {
+    "placeholders": {
+      "ticker": { "type": "String" }
+    }
+  },
+  "holdingRemoved": "{ticker} 已从持仓移除",
+  "@holdingRemoved": {
+    "placeholders": {
+      "ticker": { "type": "String" }
+    }
+  },
+  "removeHoldingConfirm": "确定从持仓中移除 {ticker}？",
+  "@removeHoldingConfirm": {
+    "placeholders": {
+      "ticker": { "type": "String" }
+    }
+  },
+  "aiAdvice": "AI建议",
+  "aiAdviceInstant": "即时AI建议",
+  "bullishFactorsPortfolio": "看涨因素",
+  "bearishFactorsPortfolio": "看跌因素",
+  "detailedAnalysisComingSoon": "详细分析将在明天早上更新",
+  "loginForPortfolio": "登录以管理投资组合",
+  "loginForPortfolioHint": "追踪持仓、获取AI建议、监控盈亏",
+  "sharesAtPrice": "{shares}股 @ ${price}",
+  "@sharesAtPrice": {
+    "placeholders": {
+      "shares": { "type": "String" },
+      "price": { "type": "String" }
+    }
+  },
+  "noHoldingsYet": "暂无持仓",
+  "addFirstHolding": "从自选股中买入开始吧",
+  "invalidShares": "请输入有效的股数",
+  "invalidPrice": "请输入有效的价格",
+  "confidence": "置信度",
+
+  "tabWatchlist": "自选股",
+  "tabHoldings": "持仓",
+  "purchaseDate": "买入日期",
+  "sellDate": "卖出日期",
+  "sellPrice": "卖出价格",
+  "sellShares": "卖出数量",
+  "sellConfirm": "确认卖出",
+  "sellAll": "全部卖出",
+  "sellAmount": "卖出金额",
+  "realizedPnlLabel": "已实现盈亏",
+  "unrealizedPnl": "未实现盈亏",
+  "realizedPnl": "已实现",
+  "transactionHistory": "交易记录",
+  "additionalBuy": "追加买入",
+  "partialSell": "卖出",
+  "editHolding": "修改信息",
+  "saveChanges": "保存修改",
+  "holdingUpdated": "{ticker} 持仓信息已更新",
+  "portfolioAIAnalysis": "投资组合AI分析",
+  "aiRecommendations": "推荐建议",
+  "analysisWaiting": "AI分析等待中...",
+  "alreadyHeld": "已持有",
+  "goToWatchlistTab": "前往自选股",
+  "noHoldingsHint": "从自选股中添加持仓",
+  "closingPriceAuto": "收盘价自动填入",
+  "holidayPriceNotice": "{date} 收盘价（上一交易日）",
+  "addToHoldings": "添加到持仓",
+  "currentHoldings": "持仓情况",
+  "holdingStatus": "持仓状态",
+  "addHoldingTitle": "{ticker} 添加持仓",
+  "sellHoldingTitle": "{ticker} 卖出",
+  "editHoldingTitle": "{ticker} 修改持仓",
+  "holdingSold": "{ticker} 卖出成功",
+  "deleteHolding": "删除持仓",
+  "avgPriceLabel": "均价",
+  "currentValueLabel": "市值",
+  "dailyUpdate": "每日早间更新"
 }

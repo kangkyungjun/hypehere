@@ -164,6 +164,9 @@
   "removeFromWatchlist": "Remove from Watchlist",
   "addedToWatchlist": "Added to watchlist",
   "removedFromWatchlist": "Removed from watchlist",
+  "watchlistDiscoveryTitle": "Add to your watchlist",
+  "watchlistDiscoverySubtitle": "Get news & signal alerts for your picks",
+  "topTradingVolume": "Top Trading Volume Today",
 
   "communitySearchHint": "Search by title or content...",
   "writePost": "Write Post",
@@ -669,5 +672,183 @@
   "bioLabel": "Bio",
   "bioHint": "Tell us about yourself",
   "profileEditGuide": "Profile Edit Guide",
-  "updatedDate": "Updated:"
+  "updatedDate": "Updated:",
+
+  "tabCalendar": "Calendar",
+  "tabCalendarTooltip": "Event Calendar",
+  "eventTypeFomc": "FOMC",
+  "eventTypeEarnings": "Earnings",
+  "eventTypeEconomic": "Economic",
+  "eventTypeOptionsExpiry": "Options Expiry",
+  "eventTypeConference": "Conference",
+  "eventTypeDividend": "Dividend",
+  "eventTypeProductLaunch": "Product Launch",
+  "eventTypeShareholder": "Shareholder Meeting",
+  "eventTypeFedSpeech": "Fed Speech",
+  "nEvents": "{count} events",
+  "@nEvents": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "noEventsThisMonth": "No events this month",
+  "noEventsSelectedDay": "No events on this day",
+  "today": "Today",
+
+  "forgotPassword": "Forgot Password",
+  "forgotPasswordSubtitle": "Enter your email and we'll send you a verification code.",
+  "sendVerificationCode": "Send Code",
+  "verificationTitle": "Email Verification",
+  "verificationSubtitle": "Enter the 6-digit code sent to {email}.",
+  "@verificationSubtitle": {
+    "placeholders": {
+      "email": { "type": "String" }
+    }
+  },
+  "verificationExpiry": "Expires in: {time}",
+  "@verificationExpiry": {
+    "placeholders": {
+      "time": { "type": "String" }
+    }
+  },
+  "verificationCode": "Verification Code",
+  "verificationCodeRequired": "Enter the 6-digit verification code",
+  "verifyButton": "Verify",
+  "resendCode": "Resend Code",
+  "resendCodeCooldown": "Resend in ({seconds}s)",
+  "@resendCodeCooldown": {
+    "placeholders": {
+      "seconds": { "type": "int" }
+    }
+  },
+  "verificationCodeResent": "Verification code has been resent.",
+  "resetPassword": "Reset Password",
+  "resetPasswordSubtitle": "Enter your new password.",
+  "resetPasswordSuccess": "Password has been reset. Please login with your new password.",
+  "errEmailNotVerified": "Email verification required.",
+  "errRateLimited": "Please try again later.",
+
+  "myHoldings": "My Holdings",
+  "nHoldings": "{count} holdings",
+  "@nHoldings": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "portfolioSummary": "Portfolio Summary",
+  "totalValue": "Total Value",
+  "totalPnl": "Total P&L",
+  "dayPnl": "Today",
+  "buyStock": "Buy",
+  "shares": "Shares",
+  "avgPrice": "Avg Price",
+  "totalCost": "Total Cost",
+  "enterShares": "Number of shares",
+  "enterAvgPrice": "Average purchase price",
+  "buyConfirm": "Add to Holdings",
+  "holdingAdded": "{ticker} added to holdings",
+  "@holdingAdded": {
+    "placeholders": {
+      "ticker": { "type": "String" }
+    }
+  },
+  "holdingRemoved": "{ticker} removed from holdings",
+  "@holdingRemoved": {
+    "placeholders": {
+      "ticker": { "type": "String" }
+    }
+  },
+  "removeHoldingConfirm": "Remove {ticker} from holdings?",
+  "@removeHoldingConfirm": {
+    "placeholders": {
+      "ticker": { "type": "String" }
+    }
+  },
+  "aiAdvice": "AI Advice",
+  "aiAdviceInstant": "Instant AI Advice",
+  "bullishFactorsPortfolio": "Bullish Factors",
+  "bearishFactorsPortfolio": "Bearish Factors",
+  "detailedAnalysisComingSoon": "Detailed analysis will be updated in the morning",
+  "loginForPortfolio": "Log in to manage your portfolio",
+  "loginForPortfolioHint": "Track holdings, get AI advice, and monitor P&L",
+  "sharesAtPrice": "{shares} shares @ ${price}",
+  "@sharesAtPrice": {
+    "placeholders": {
+      "shares": { "type": "String" },
+      "price": { "type": "String" }
+    }
+  },
+  "noHoldingsYet": "No holdings yet",
+  "addFirstHolding": "Buy stocks from your watchlist to get started",
+  "invalidShares": "Please enter a valid number of shares",
+  "invalidPrice": "Please enter a valid price",
+  "confidence": "Confidence",
+
+  "tabWatchlist": "Watchlist",
+  "tabHoldings": "Holdings",
+  "purchaseDate": "Purchase Date",
+  "sellDate": "Sell Date",
+  "sellPrice": "Sell Price",
+  "sellShares": "Sell Quantity",
+  "sellConfirm": "Confirm Sell",
+  "sellAll": "Sell All",
+  "sellAmount": "Sell Amount",
+  "realizedPnlLabel": "Realized P&L",
+  "unrealizedPnl": "Unrealized P&L",
+  "realizedPnl": "Realized",
+  "transactionHistory": "Transaction History",
+  "additionalBuy": "Buy More",
+  "partialSell": "Sell",
+  "editHolding": "Edit Info",
+  "saveChanges": "Save Changes",
+  "holdingUpdated": "{ticker} holding updated",
+  "@holdingUpdated": {
+    "placeholders": {
+      "ticker": { "type": "String" }
+    }
+  },
+  "portfolioAIAnalysis": "Portfolio AI Analysis",
+  "aiRecommendations": "Recommendations",
+  "analysisWaiting": "AI analysis pending...",
+  "alreadyHeld": "Held",
+  "goToWatchlistTab": "Go to Watchlist",
+  "noHoldingsHint": "Add holdings from the Watchlist tab",
+  "closingPriceAuto": "Closing price auto-filled",
+  "holidayPriceNotice": "Closing price from {date} (prior trading day)",
+  "@holidayPriceNotice": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "addToHoldings": "Add to Holdings",
+  "currentHoldings": "Current Holdings",
+  "holdingStatus": "Holding Status",
+  "addHoldingTitle": "{ticker} Add Holding",
+  "@addHoldingTitle": {
+    "placeholders": {
+      "ticker": { "type": "String" }
+    }
+  },
+  "sellHoldingTitle": "{ticker} Sell",
+  "@sellHoldingTitle": {
+    "placeholders": {
+      "ticker": { "type": "String" }
+    }
+  },
+  "editHoldingTitle": "{ticker} Edit Holding",
+  "@editHoldingTitle": {
+    "placeholders": {
+      "ticker": { "type": "String" }
+    }
+  },
+  "holdingSold": "{ticker} sold successfully",
+  "@holdingSold": {
+    "placeholders": {
+      "ticker": { "type": "String" }
+    }
+  },
+  "deleteHolding": "Delete Holding",
+  "avgPriceLabel": "Avg Price",
+  "currentValueLabel": "Current Value",
+  "dailyUpdate": "Updated daily in the morning"
 }

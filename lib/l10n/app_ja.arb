@@ -123,6 +123,9 @@
   "removeFromWatchlist": "ウォッチリストから削除",
   "addedToWatchlist": "ウォッチリストに追加しました",
   "removedFromWatchlist": "ウォッチリストから削除しました",
+  "watchlistDiscoveryTitle": "ウォッチリストに追加しよう",
+  "watchlistDiscoverySubtitle": "登録するとニュース・シグナル通知を受け取れます",
+  "topTradingVolume": "本日の出来高トップ",
 
   "communitySearchHint": "タイトルや内容で検索...",
   "writePost": "投稿する",
@@ -498,5 +501,153 @@
   "bioLabel": "自己紹介",
   "bioHint": "自己紹介を入力してください",
   "profileEditGuide": "プロフィール編集ガイド",
-  "updatedDate": "更新日："
+  "updatedDate": "更新日：",
+
+  "tabCalendar": "カレンダー",
+  "tabCalendarTooltip": "イベントカレンダー",
+  "eventTypeFomc": "FOMC",
+  "eventTypeEarnings": "決算",
+  "eventTypeEconomic": "経済指標",
+  "eventTypeOptionsExpiry": "オプション満期",
+  "eventTypeConference": "カンファレンス",
+  "eventTypeDividend": "配当",
+  "eventTypeProductLaunch": "製品発表",
+  "eventTypeShareholder": "株主総会",
+  "eventTypeFedSpeech": "FRB講演",
+  "nEvents": "{count}件のイベント",
+  "@nEvents": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "noEventsThisMonth": "今月のイベントはありません",
+  "noEventsSelectedDay": "この日のイベントはありません",
+  "today": "今日",
+
+  "forgotPassword": "パスワードを忘れた",
+  "forgotPasswordSubtitle": "登録したメールアドレスを入力してください。認証コードをお送りします。",
+  "sendVerificationCode": "認証コード送信",
+  "verificationTitle": "メール認証",
+  "verificationSubtitle": "{email}に送信された6桁の認証コードを入力してください。",
+  "@verificationSubtitle": {
+    "placeholders": {
+      "email": { "type": "String" }
+    }
+  },
+  "verificationExpiry": "有効期限: {time}",
+  "@verificationExpiry": {
+    "placeholders": {
+      "time": { "type": "String" }
+    }
+  },
+  "verificationCode": "認証コード",
+  "verificationCodeRequired": "6桁の認証コードを入力してください",
+  "verifyButton": "認証する",
+  "resendCode": "認証コード再送信",
+  "resendCodeCooldown": "再送信可能 ({seconds}秒)",
+  "@resendCodeCooldown": {
+    "placeholders": {
+      "seconds": { "type": "int" }
+    }
+  },
+  "verificationCodeResent": "認証コードが再送信されました。",
+  "resetPassword": "パスワード再設定",
+  "resetPasswordSubtitle": "新しいパスワードを入力してください。",
+  "resetPasswordSuccess": "パスワードが再設定されました。新しいパスワードでログインしてください。",
+  "errEmailNotVerified": "メール認証が必要です。",
+  "errRateLimited": "しばらくしてから再度お試しください。",
+
+  "myHoldings": "保有銘柄",
+  "nHoldings": "{count}銘柄保有",
+  "@nHoldings": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "portfolioSummary": "ポートフォリオ概要",
+  "totalValue": "総資産",
+  "totalPnl": "損益合計",
+  "dayPnl": "本日",
+  "buyStock": "購入",
+  "shares": "株数",
+  "avgPrice": "平均単価",
+  "totalCost": "購入総額",
+  "enterShares": "株数を入力",
+  "enterAvgPrice": "平均取得単価を入力",
+  "buyConfirm": "保有に追加",
+  "holdingAdded": "{ticker} を保有銘柄に追加しました",
+  "@holdingAdded": {
+    "placeholders": {
+      "ticker": { "type": "String" }
+    }
+  },
+  "holdingRemoved": "{ticker} を保有銘柄から削除しました",
+  "@holdingRemoved": {
+    "placeholders": {
+      "ticker": { "type": "String" }
+    }
+  },
+  "removeHoldingConfirm": "{ticker} を保有銘柄から削除しますか？",
+  "@removeHoldingConfirm": {
+    "placeholders": {
+      "ticker": { "type": "String" }
+    }
+  },
+  "aiAdvice": "AIアドバイス",
+  "aiAdviceInstant": "即時AIアドバイス",
+  "bullishFactorsPortfolio": "強気要因",
+  "bearishFactorsPortfolio": "弱気要因",
+  "detailedAnalysisComingSoon": "詳細分析は翌朝更新されます",
+  "loginForPortfolio": "ログインしてポートフォリオを管理",
+  "loginForPortfolioHint": "保有銘柄の追跡、AIアドバイス、損益管理",
+  "sharesAtPrice": "{shares}株 @ ${price}",
+  "@sharesAtPrice": {
+    "placeholders": {
+      "shares": { "type": "String" },
+      "price": { "type": "String" }
+    }
+  },
+  "noHoldingsYet": "保有銘柄がありません",
+  "addFirstHolding": "ウォッチリストから購入して始めましょう",
+  "invalidShares": "有効な株数を入力してください",
+  "invalidPrice": "有効な価格を入力してください",
+  "confidence": "信頼度",
+
+  "tabWatchlist": "ウォッチリスト",
+  "tabHoldings": "保有銘柄",
+  "purchaseDate": "購入日",
+  "sellDate": "売却日",
+  "sellPrice": "売却価格",
+  "sellShares": "売却数量",
+  "sellConfirm": "売却確認",
+  "sellAll": "全量売却",
+  "sellAmount": "売却金額",
+  "realizedPnlLabel": "実現損益",
+  "unrealizedPnl": "未実現損益",
+  "realizedPnl": "実現損益",
+  "transactionHistory": "取引履歴",
+  "additionalBuy": "追加購入",
+  "partialSell": "売却",
+  "editHolding": "情報修正",
+  "saveChanges": "変更を保存",
+  "holdingUpdated": "{ticker} の保有情報が更新されました",
+  "portfolioAIAnalysis": "ポートフォリオAI分析",
+  "aiRecommendations": "推奨事項",
+  "analysisWaiting": "AI分析待機中...",
+  "alreadyHeld": "保有中",
+  "goToWatchlistTab": "ウォッチリストへ",
+  "noHoldingsHint": "ウォッチリストから保有銘柄を追加してください",
+  "closingPriceAuto": "終値自動入力",
+  "holidayPriceNotice": "{date} 終値基準（前営業日）",
+  "addToHoldings": "保有に追加",
+  "currentHoldings": "保有状況",
+  "holdingStatus": "保有状況",
+  "addHoldingTitle": "{ticker} 保有追加",
+  "sellHoldingTitle": "{ticker} 売却",
+  "editHoldingTitle": "{ticker} 保有情報修正",
+  "holdingSold": "{ticker} 売却完了",
+  "deleteHolding": "保有削除",
+  "avgPriceLabel": "平均単価",
+  "currentValueLabel": "評価額",
+  "dailyUpdate": "毎朝更新"
 }

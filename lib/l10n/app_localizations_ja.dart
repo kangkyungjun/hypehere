@@ -36,7 +36,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get tabCommunityTooltip => '掲示板';
 
   @override
-  String get tabWatchlist => 'ウォッチ';
+  String get tabWatchlist => 'ウォッチリスト';
 
   @override
   String get tabWatchlistTooltip => 'マイウォッチリスト';
@@ -356,6 +356,15 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get removedFromWatchlist => 'ウォッチリストから削除しました';
+
+  @override
+  String get watchlistDiscoveryTitle => 'ウォッチリストに追加しよう';
+
+  @override
+  String get watchlistDiscoverySubtitle => '登録するとニュース・シグナル通知を受け取れます';
+
+  @override
+  String get topTradingVolume => '本日の出来高トップ';
 
   @override
   String get communitySearchHint => 'タイトルや内容で検索...';
@@ -1449,4 +1458,322 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get updatedDate => '更新日：';
+
+  @override
+  String get tabCalendar => 'カレンダー';
+
+  @override
+  String get tabCalendarTooltip => 'イベントカレンダー';
+
+  @override
+  String get eventTypeFomc => 'FOMC';
+
+  @override
+  String get eventTypeEarnings => '決算';
+
+  @override
+  String get eventTypeEconomic => '経済指標';
+
+  @override
+  String get eventTypeOptionsExpiry => 'オプション満期';
+
+  @override
+  String get eventTypeConference => 'カンファレンス';
+
+  @override
+  String get eventTypeDividend => '配当';
+
+  @override
+  String get eventTypeProductLaunch => '製品発表';
+
+  @override
+  String get eventTypeShareholder => '株主総会';
+
+  @override
+  String get eventTypeFedSpeech => 'FRB講演';
+
+  @override
+  String nEvents(int count) {
+    return '$count件のイベント';
+  }
+
+  @override
+  String get noEventsThisMonth => '今月のイベントはありません';
+
+  @override
+  String get noEventsSelectedDay => 'この日のイベントはありません';
+
+  @override
+  String get forgotPassword => 'パスワードを忘れた';
+
+  @override
+  String get forgotPasswordSubtitle => '登録したメールアドレスを入力してください。認証コードをお送りします。';
+
+  @override
+  String get sendVerificationCode => '認証コード送信';
+
+  @override
+  String get verificationTitle => 'メール認証';
+
+  @override
+  String verificationSubtitle(String email) {
+    return '$emailに送信された6桁の認証コードを入力してください。';
+  }
+
+  @override
+  String verificationExpiry(String time) {
+    return '有効期限: $time';
+  }
+
+  @override
+  String get verificationCode => '認証コード';
+
+  @override
+  String get verificationCodeRequired => '6桁の認証コードを入力してください';
+
+  @override
+  String get verifyButton => '認証する';
+
+  @override
+  String get resendCode => '認証コード再送信';
+
+  @override
+  String resendCodeCooldown(int seconds) {
+    return '再送信可能 ($seconds秒)';
+  }
+
+  @override
+  String get verificationCodeResent => '認証コードが再送信されました。';
+
+  @override
+  String get resetPassword => 'パスワード再設定';
+
+  @override
+  String get resetPasswordSubtitle => '新しいパスワードを入力してください。';
+
+  @override
+  String get resetPasswordSuccess => 'パスワードが再設定されました。新しいパスワードでログインしてください。';
+
+  @override
+  String get errEmailNotVerified => 'メール認証が必要です。';
+
+  @override
+  String get errRateLimited => 'しばらくしてから再度お試しください。';
+
+  @override
+  String get myHoldings => '保有銘柄';
+
+  @override
+  String nHoldings(int count) {
+    return '$count銘柄保有';
+  }
+
+  @override
+  String get portfolioSummary => 'ポートフォリオ概要';
+
+  @override
+  String get totalValue => '総資産';
+
+  @override
+  String get totalPnl => '損益合計';
+
+  @override
+  String get dayPnl => '本日';
+
+  @override
+  String get buyStock => '購入';
+
+  @override
+  String get shares => '株数';
+
+  @override
+  String get avgPrice => '平均単価';
+
+  @override
+  String get totalCost => '購入総額';
+
+  @override
+  String get enterShares => '株数を入力';
+
+  @override
+  String get enterAvgPrice => '平均取得単価を入力';
+
+  @override
+  String get buyConfirm => '保有に追加';
+
+  @override
+  String holdingAdded(String ticker) {
+    return '$ticker を保有銘柄に追加しました';
+  }
+
+  @override
+  String holdingRemoved(String ticker) {
+    return '$ticker を保有銘柄から削除しました';
+  }
+
+  @override
+  String removeHoldingConfirm(String ticker) {
+    return '$ticker を保有銘柄から削除しますか？';
+  }
+
+  @override
+  String get aiAdvice => 'AIアドバイス';
+
+  @override
+  String get aiAdviceInstant => '即時AIアドバイス';
+
+  @override
+  String get bullishFactorsPortfolio => '強気要因';
+
+  @override
+  String get bearishFactorsPortfolio => '弱気要因';
+
+  @override
+  String get detailedAnalysisComingSoon => '詳細分析は翌朝更新されます';
+
+  @override
+  String get loginForPortfolio => 'ログインしてポートフォリオを管理';
+
+  @override
+  String get loginForPortfolioHint => '保有銘柄の追跡、AIアドバイス、損益管理';
+
+  @override
+  String sharesAtPrice(String shares, String price) {
+    return '$shares株 @ \$$price';
+  }
+
+  @override
+  String get noHoldingsYet => '保有銘柄がありません';
+
+  @override
+  String get addFirstHolding => 'ウォッチリストから購入して始めましょう';
+
+  @override
+  String get invalidShares => '有効な株数を入力してください';
+
+  @override
+  String get invalidPrice => '有効な価格を入力してください';
+
+  @override
+  String get confidence => '信頼度';
+
+  @override
+  String get tabHoldings => '保有銘柄';
+
+  @override
+  String get purchaseDate => '購入日';
+
+  @override
+  String get sellDate => '売却日';
+
+  @override
+  String get sellPrice => '売却価格';
+
+  @override
+  String get sellShares => '売却数量';
+
+  @override
+  String get sellConfirm => '売却確認';
+
+  @override
+  String get sellAll => '全量売却';
+
+  @override
+  String get sellAmount => '売却金額';
+
+  @override
+  String get realizedPnlLabel => '実現損益';
+
+  @override
+  String get unrealizedPnl => '未実現損益';
+
+  @override
+  String get realizedPnl => '実現損益';
+
+  @override
+  String get transactionHistory => '取引履歴';
+
+  @override
+  String get additionalBuy => '追加購入';
+
+  @override
+  String get partialSell => '売却';
+
+  @override
+  String get editHolding => '情報修正';
+
+  @override
+  String get saveChanges => '変更を保存';
+
+  @override
+  String holdingUpdated(String ticker) {
+    return '$ticker の保有情報が更新されました';
+  }
+
+  @override
+  String get portfolioAIAnalysis => 'ポートフォリオAI分析';
+
+  @override
+  String get aiRecommendations => '推奨事項';
+
+  @override
+  String get analysisWaiting => 'AI分析待機中...';
+
+  @override
+  String get alreadyHeld => '保有中';
+
+  @override
+  String get goToWatchlistTab => 'ウォッチリストへ';
+
+  @override
+  String get noHoldingsHint => 'ウォッチリストから保有銘柄を追加してください';
+
+  @override
+  String get closingPriceAuto => '終値自動入力';
+
+  @override
+  String holidayPriceNotice(String date) {
+    return '$date 終値基準（前営業日）';
+  }
+
+  @override
+  String get addToHoldings => '保有に追加';
+
+  @override
+  String get currentHoldings => '保有状況';
+
+  @override
+  String get holdingStatus => '保有状況';
+
+  @override
+  String addHoldingTitle(String ticker) {
+    return '$ticker 保有追加';
+  }
+
+  @override
+  String sellHoldingTitle(String ticker) {
+    return '$ticker 売却';
+  }
+
+  @override
+  String editHoldingTitle(String ticker) {
+    return '$ticker 保有情報修正';
+  }
+
+  @override
+  String holdingSold(String ticker) {
+    return '$ticker 売却完了';
+  }
+
+  @override
+  String get deleteHolding => '保有削除';
+
+  @override
+  String get avgPriceLabel => '平均単価';
+
+  @override
+  String get currentValueLabel => '評価額';
+
+  @override
+  String get dailyUpdate => '毎朝更新';
 }

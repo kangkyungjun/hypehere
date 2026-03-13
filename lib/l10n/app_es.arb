@@ -123,6 +123,9 @@
   "removeFromWatchlist": "Eliminar de seguimiento",
   "addedToWatchlist": "Añadido a la lista de seguimiento",
   "removedFromWatchlist": "Eliminado de la lista de seguimiento",
+  "watchlistDiscoveryTitle": "Añade a tu lista de seguimiento",
+  "watchlistDiscoverySubtitle": "Recibe alertas de noticias y señales de tus acciones",
+  "topTradingVolume": "Mayor volumen de hoy",
 
   "communitySearchHint": "Buscar por título o contenido...",
   "writePost": "Escribir publicación",
@@ -498,5 +501,153 @@
   "bioLabel": "Biografía",
   "bioHint": "Cuéntanos sobre ti",
   "profileEditGuide": "Guía de edición de perfil",
-  "updatedDate": "Actualizado:"
+  "updatedDate": "Actualizado:",
+
+  "tabCalendar": "Calendario",
+  "tabCalendarTooltip": "Calendario de eventos",
+  "eventTypeFomc": "FOMC",
+  "eventTypeEarnings": "Resultados",
+  "eventTypeEconomic": "Indicadores",
+  "eventTypeOptionsExpiry": "Vencimiento opciones",
+  "eventTypeConference": "Conferencia",
+  "eventTypeDividend": "Dividendo",
+  "eventTypeProductLaunch": "Lanzamiento",
+  "eventTypeShareholder": "Junta de accionistas",
+  "eventTypeFedSpeech": "Discurso Fed",
+  "nEvents": "{count} eventos",
+  "@nEvents": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "noEventsThisMonth": "No hay eventos este mes",
+  "noEventsSelectedDay": "No hay eventos en este día",
+  "today": "Hoy",
+
+  "forgotPassword": "Olvidé mi contraseña",
+  "forgotPasswordSubtitle": "Ingresa tu correo electrónico y te enviaremos un código de verificación.",
+  "sendVerificationCode": "Enviar código",
+  "verificationTitle": "Verificación de correo",
+  "verificationSubtitle": "Ingresa el código de 6 dígitos enviado a {email}.",
+  "@verificationSubtitle": {
+    "placeholders": {
+      "email": { "type": "String" }
+    }
+  },
+  "verificationExpiry": "Expira en: {time}",
+  "@verificationExpiry": {
+    "placeholders": {
+      "time": { "type": "String" }
+    }
+  },
+  "verificationCode": "Código de verificación",
+  "verificationCodeRequired": "Ingresa el código de verificación de 6 dígitos",
+  "verifyButton": "Verificar",
+  "resendCode": "Reenviar código",
+  "resendCodeCooldown": "Reenviar en ({seconds}s)",
+  "@resendCodeCooldown": {
+    "placeholders": {
+      "seconds": { "type": "int" }
+    }
+  },
+  "verificationCodeResent": "El código de verificación ha sido reenviado.",
+  "resetPassword": "Restablecer contraseña",
+  "resetPasswordSubtitle": "Ingresa tu nueva contraseña.",
+  "resetPasswordSuccess": "Contraseña restablecida. Inicia sesión con tu nueva contraseña.",
+  "errEmailNotVerified": "Se requiere verificación de correo.",
+  "errRateLimited": "Por favor, inténtalo más tarde.",
+
+  "myHoldings": "Mis posiciones",
+  "nHoldings": "{count} posiciones",
+  "@nHoldings": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "portfolioSummary": "Resumen del portafolio",
+  "totalValue": "Valor total",
+  "totalPnl": "P&L total",
+  "dayPnl": "Hoy",
+  "buyStock": "Comprar",
+  "shares": "Acciones",
+  "avgPrice": "Precio promedio",
+  "totalCost": "Costo total",
+  "enterShares": "Número de acciones",
+  "enterAvgPrice": "Precio promedio de compra",
+  "buyConfirm": "Añadir a posiciones",
+  "holdingAdded": "{ticker} añadido a posiciones",
+  "@holdingAdded": {
+    "placeholders": {
+      "ticker": { "type": "String" }
+    }
+  },
+  "holdingRemoved": "{ticker} eliminado de posiciones",
+  "@holdingRemoved": {
+    "placeholders": {
+      "ticker": { "type": "String" }
+    }
+  },
+  "removeHoldingConfirm": "¿Eliminar {ticker} de posiciones?",
+  "@removeHoldingConfirm": {
+    "placeholders": {
+      "ticker": { "type": "String" }
+    }
+  },
+  "aiAdvice": "Consejo IA",
+  "aiAdviceInstant": "Consejo IA instantáneo",
+  "bullishFactorsPortfolio": "Factores alcistas",
+  "bearishFactorsPortfolio": "Factores bajistas",
+  "detailedAnalysisComingSoon": "El análisis detallado se actualizará por la mañana",
+  "loginForPortfolio": "Inicia sesión para gestionar tu portafolio",
+  "loginForPortfolioHint": "Seguimiento de posiciones, consejos IA y control de P&L",
+  "sharesAtPrice": "{shares} acciones @ ${price}",
+  "@sharesAtPrice": {
+    "placeholders": {
+      "shares": { "type": "String" },
+      "price": { "type": "String" }
+    }
+  },
+  "noHoldingsYet": "Sin posiciones aún",
+  "addFirstHolding": "Compra acciones de tu lista de seguimiento para comenzar",
+  "invalidShares": "Introduce un número de acciones válido",
+  "invalidPrice": "Introduce un precio válido",
+  "confidence": "Confianza",
+
+  "tabWatchlist": "Seguimiento",
+  "tabHoldings": "Posiciones",
+  "purchaseDate": "Fecha de compra",
+  "sellDate": "Fecha de venta",
+  "sellPrice": "Precio de venta",
+  "sellShares": "Cantidad a vender",
+  "sellConfirm": "Confirmar venta",
+  "sellAll": "Vender todo",
+  "sellAmount": "Monto de venta",
+  "realizedPnlLabel": "P&L realizado",
+  "unrealizedPnl": "P&L no realizado",
+  "realizedPnl": "Realizado",
+  "transactionHistory": "Historial de transacciones",
+  "additionalBuy": "Comprar más",
+  "partialSell": "Vender",
+  "editHolding": "Editar info",
+  "saveChanges": "Guardar cambios",
+  "holdingUpdated": "{ticker} posición actualizada",
+  "portfolioAIAnalysis": "Análisis IA del portafolio",
+  "aiRecommendations": "Recomendaciones",
+  "analysisWaiting": "Análisis IA pendiente...",
+  "alreadyHeld": "En cartera",
+  "goToWatchlistTab": "Ir a seguimiento",
+  "noHoldingsHint": "Añade posiciones desde la pestaña de seguimiento",
+  "closingPriceAuto": "Precio de cierre automático",
+  "holidayPriceNotice": "Precio de cierre del {date} (día hábil anterior)",
+  "addToHoldings": "Añadir a posiciones",
+  "currentHoldings": "Posiciones actuales",
+  "holdingStatus": "Estado de posición",
+  "addHoldingTitle": "{ticker} Añadir posición",
+  "sellHoldingTitle": "{ticker} Vender",
+  "editHoldingTitle": "{ticker} Editar posición",
+  "holdingSold": "{ticker} vendido exitosamente",
+  "deleteHolding": "Eliminar posición",
+  "avgPriceLabel": "Precio promedio",
+  "currentValueLabel": "Valor actual",
+  "dailyUpdate": "Actualización diaria por la mañana"
 }

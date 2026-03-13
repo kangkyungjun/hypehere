@@ -770,6 +770,24 @@ abstract class AppLocalizations {
   /// **'Removed from watchlist'**
   String get removedFromWatchlist;
 
+  /// No description provided for @watchlistDiscoveryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to your watchlist'**
+  String get watchlistDiscoveryTitle;
+
+  /// No description provided for @watchlistDiscoverySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Get news & signal alerts for your picks'**
+  String get watchlistDiscoverySubtitle;
+
+  /// No description provided for @topTradingVolume.
+  ///
+  /// In en, this message translates to:
+  /// **'Top Trading Volume Today'**
+  String get topTradingVolume;
+
   /// No description provided for @communitySearchHint.
   ///
   /// In en, this message translates to:
@@ -2845,6 +2863,582 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Updated:'**
   String get updatedDate;
+
+  /// No description provided for @tabCalendar.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar'**
+  String get tabCalendar;
+
+  /// No description provided for @tabCalendarTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Event Calendar'**
+  String get tabCalendarTooltip;
+
+  /// No description provided for @eventTypeFomc.
+  ///
+  /// In en, this message translates to:
+  /// **'FOMC'**
+  String get eventTypeFomc;
+
+  /// No description provided for @eventTypeEarnings.
+  ///
+  /// In en, this message translates to:
+  /// **'Earnings'**
+  String get eventTypeEarnings;
+
+  /// No description provided for @eventTypeEconomic.
+  ///
+  /// In en, this message translates to:
+  /// **'Economic'**
+  String get eventTypeEconomic;
+
+  /// No description provided for @eventTypeOptionsExpiry.
+  ///
+  /// In en, this message translates to:
+  /// **'Options Expiry'**
+  String get eventTypeOptionsExpiry;
+
+  /// No description provided for @eventTypeConference.
+  ///
+  /// In en, this message translates to:
+  /// **'Conference'**
+  String get eventTypeConference;
+
+  /// No description provided for @eventTypeDividend.
+  ///
+  /// In en, this message translates to:
+  /// **'Dividend'**
+  String get eventTypeDividend;
+
+  /// No description provided for @eventTypeProductLaunch.
+  ///
+  /// In en, this message translates to:
+  /// **'Product Launch'**
+  String get eventTypeProductLaunch;
+
+  /// No description provided for @eventTypeShareholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Shareholder Meeting'**
+  String get eventTypeShareholder;
+
+  /// No description provided for @eventTypeFedSpeech.
+  ///
+  /// In en, this message translates to:
+  /// **'Fed Speech'**
+  String get eventTypeFedSpeech;
+
+  /// No description provided for @nEvents.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} events'**
+  String nEvents(int count);
+
+  /// No description provided for @noEventsThisMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'No events this month'**
+  String get noEventsThisMonth;
+
+  /// No description provided for @noEventsSelectedDay.
+  ///
+  /// In en, this message translates to:
+  /// **'No events on this day'**
+  String get noEventsSelectedDay;
+
+  /// No description provided for @forgotPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot Password'**
+  String get forgotPassword;
+
+  /// No description provided for @forgotPasswordSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email and we\'ll send you a verification code.'**
+  String get forgotPasswordSubtitle;
+
+  /// No description provided for @sendVerificationCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Code'**
+  String get sendVerificationCode;
+
+  /// No description provided for @verificationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Email Verification'**
+  String get verificationTitle;
+
+  /// No description provided for @verificationSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the 6-digit code sent to {email}.'**
+  String verificationSubtitle(String email);
+
+  /// No description provided for @verificationExpiry.
+  ///
+  /// In en, this message translates to:
+  /// **'Expires in: {time}'**
+  String verificationExpiry(String time);
+
+  /// No description provided for @verificationCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification Code'**
+  String get verificationCode;
+
+  /// No description provided for @verificationCodeRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the 6-digit verification code'**
+  String get verificationCodeRequired;
+
+  /// No description provided for @verifyButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify'**
+  String get verifyButton;
+
+  /// No description provided for @resendCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend Code'**
+  String get resendCode;
+
+  /// No description provided for @resendCodeCooldown.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend in ({seconds}s)'**
+  String resendCodeCooldown(int seconds);
+
+  /// No description provided for @verificationCodeResent.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification code has been resent.'**
+  String get verificationCodeResent;
+
+  /// No description provided for @resetPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset Password'**
+  String get resetPassword;
+
+  /// No description provided for @resetPasswordSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your new password.'**
+  String get resetPasswordSubtitle;
+
+  /// No description provided for @resetPasswordSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Password has been reset. Please login with your new password.'**
+  String get resetPasswordSuccess;
+
+  /// No description provided for @errEmailNotVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Email verification required.'**
+  String get errEmailNotVerified;
+
+  /// No description provided for @errRateLimited.
+  ///
+  /// In en, this message translates to:
+  /// **'Please try again later.'**
+  String get errRateLimited;
+
+  /// No description provided for @myHoldings.
+  ///
+  /// In en, this message translates to:
+  /// **'My Holdings'**
+  String get myHoldings;
+
+  /// No description provided for @nHoldings.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} holdings'**
+  String nHoldings(int count);
+
+  /// No description provided for @portfolioSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Portfolio Summary'**
+  String get portfolioSummary;
+
+  /// No description provided for @totalValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Value'**
+  String get totalValue;
+
+  /// No description provided for @totalPnl.
+  ///
+  /// In en, this message translates to:
+  /// **'Total P&L'**
+  String get totalPnl;
+
+  /// No description provided for @dayPnl.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get dayPnl;
+
+  /// No description provided for @buyStock.
+  ///
+  /// In en, this message translates to:
+  /// **'Buy'**
+  String get buyStock;
+
+  /// No description provided for @shares.
+  ///
+  /// In en, this message translates to:
+  /// **'Shares'**
+  String get shares;
+
+  /// No description provided for @avgPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Avg Price'**
+  String get avgPrice;
+
+  /// No description provided for @totalCost.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Cost'**
+  String get totalCost;
+
+  /// No description provided for @enterShares.
+  ///
+  /// In en, this message translates to:
+  /// **'Number of shares'**
+  String get enterShares;
+
+  /// No description provided for @enterAvgPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Average purchase price'**
+  String get enterAvgPrice;
+
+  /// No description provided for @buyConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to Holdings'**
+  String get buyConfirm;
+
+  /// No description provided for @holdingAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'{ticker} added to holdings'**
+  String holdingAdded(String ticker);
+
+  /// No description provided for @holdingRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'{ticker} removed from holdings'**
+  String holdingRemoved(String ticker);
+
+  /// No description provided for @removeHoldingConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {ticker} from holdings?'**
+  String removeHoldingConfirm(String ticker);
+
+  /// No description provided for @aiAdvice.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Advice'**
+  String get aiAdvice;
+
+  /// No description provided for @aiAdviceInstant.
+  ///
+  /// In en, this message translates to:
+  /// **'Instant AI Advice'**
+  String get aiAdviceInstant;
+
+  /// No description provided for @bullishFactorsPortfolio.
+  ///
+  /// In en, this message translates to:
+  /// **'Bullish Factors'**
+  String get bullishFactorsPortfolio;
+
+  /// No description provided for @bearishFactorsPortfolio.
+  ///
+  /// In en, this message translates to:
+  /// **'Bearish Factors'**
+  String get bearishFactorsPortfolio;
+
+  /// No description provided for @detailedAnalysisComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Detailed analysis will be updated in the morning'**
+  String get detailedAnalysisComingSoon;
+
+  /// No description provided for @loginForPortfolio.
+  ///
+  /// In en, this message translates to:
+  /// **'Log in to manage your portfolio'**
+  String get loginForPortfolio;
+
+  /// No description provided for @loginForPortfolioHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Track holdings, get AI advice, and monitor P&L'**
+  String get loginForPortfolioHint;
+
+  /// No description provided for @sharesAtPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'{shares} shares @ \${price}'**
+  String sharesAtPrice(String shares, String price);
+
+  /// No description provided for @noHoldingsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No holdings yet'**
+  String get noHoldingsYet;
+
+  /// No description provided for @addFirstHolding.
+  ///
+  /// In en, this message translates to:
+  /// **'Buy stocks from your watchlist to get started'**
+  String get addFirstHolding;
+
+  /// No description provided for @invalidShares.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid number of shares'**
+  String get invalidShares;
+
+  /// No description provided for @invalidPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid price'**
+  String get invalidPrice;
+
+  /// No description provided for @confidence.
+  ///
+  /// In en, this message translates to:
+  /// **'Confidence'**
+  String get confidence;
+
+  /// No description provided for @tabHoldings.
+  ///
+  /// In en, this message translates to:
+  /// **'Holdings'**
+  String get tabHoldings;
+
+  /// No description provided for @purchaseDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchase Date'**
+  String get purchaseDate;
+
+  /// No description provided for @sellDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Sell Date'**
+  String get sellDate;
+
+  /// No description provided for @sellPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Sell Price'**
+  String get sellPrice;
+
+  /// No description provided for @sellShares.
+  ///
+  /// In en, this message translates to:
+  /// **'Sell Quantity'**
+  String get sellShares;
+
+  /// No description provided for @sellConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Sell'**
+  String get sellConfirm;
+
+  /// No description provided for @sellAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Sell All'**
+  String get sellAll;
+
+  /// No description provided for @sellAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Sell Amount'**
+  String get sellAmount;
+
+  /// No description provided for @realizedPnlLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Realized P&L'**
+  String get realizedPnlLabel;
+
+  /// No description provided for @unrealizedPnl.
+  ///
+  /// In en, this message translates to:
+  /// **'Unrealized P&L'**
+  String get unrealizedPnl;
+
+  /// No description provided for @realizedPnl.
+  ///
+  /// In en, this message translates to:
+  /// **'Realized'**
+  String get realizedPnl;
+
+  /// No description provided for @transactionHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction History'**
+  String get transactionHistory;
+
+  /// No description provided for @additionalBuy.
+  ///
+  /// In en, this message translates to:
+  /// **'Buy More'**
+  String get additionalBuy;
+
+  /// No description provided for @partialSell.
+  ///
+  /// In en, this message translates to:
+  /// **'Sell'**
+  String get partialSell;
+
+  /// No description provided for @editHolding.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Info'**
+  String get editHolding;
+
+  /// No description provided for @saveChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Changes'**
+  String get saveChanges;
+
+  /// No description provided for @holdingUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'{ticker} holding updated'**
+  String holdingUpdated(String ticker);
+
+  /// No description provided for @portfolioAIAnalysis.
+  ///
+  /// In en, this message translates to:
+  /// **'Portfolio AI Analysis'**
+  String get portfolioAIAnalysis;
+
+  /// No description provided for @aiRecommendations.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommendations'**
+  String get aiRecommendations;
+
+  /// No description provided for @analysisWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'AI analysis pending...'**
+  String get analysisWaiting;
+
+  /// No description provided for @alreadyHeld.
+  ///
+  /// In en, this message translates to:
+  /// **'Held'**
+  String get alreadyHeld;
+
+  /// No description provided for @goToWatchlistTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to Watchlist'**
+  String get goToWatchlistTab;
+
+  /// No description provided for @noHoldingsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add holdings from the Watchlist tab'**
+  String get noHoldingsHint;
+
+  /// No description provided for @closingPriceAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Closing price auto-filled'**
+  String get closingPriceAuto;
+
+  /// No description provided for @holidayPriceNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Closing price from {date} (prior trading day)'**
+  String holidayPriceNotice(String date);
+
+  /// No description provided for @addToHoldings.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to Holdings'**
+  String get addToHoldings;
+
+  /// No description provided for @currentHoldings.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Holdings'**
+  String get currentHoldings;
+
+  /// No description provided for @holdingStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Holding Status'**
+  String get holdingStatus;
+
+  /// No description provided for @addHoldingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{ticker} Add Holding'**
+  String addHoldingTitle(String ticker);
+
+  /// No description provided for @sellHoldingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{ticker} Sell'**
+  String sellHoldingTitle(String ticker);
+
+  /// No description provided for @editHoldingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{ticker} Edit Holding'**
+  String editHoldingTitle(String ticker);
+
+  /// No description provided for @holdingSold.
+  ///
+  /// In en, this message translates to:
+  /// **'{ticker} sold successfully'**
+  String holdingSold(String ticker);
+
+  /// No description provided for @deleteHolding.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Holding'**
+  String get deleteHolding;
+
+  /// No description provided for @avgPriceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Avg Price'**
+  String get avgPriceLabel;
+
+  /// No description provided for @currentValueLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Value'**
+  String get currentValueLabel;
+
+  /// No description provided for @dailyUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated daily in the morning'**
+  String get dailyUpdate;
 }
 
 class _AppLocalizationsDelegate

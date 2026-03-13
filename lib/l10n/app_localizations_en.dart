@@ -360,6 +360,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get removedFromWatchlist => 'Removed from watchlist';
 
   @override
+  String get watchlistDiscoveryTitle => 'Add to your watchlist';
+
+  @override
+  String get watchlistDiscoverySubtitle =>
+      'Get news & signal alerts for your picks';
+
+  @override
+  String get topTradingVolume => 'Top Trading Volume Today';
+
+  @override
   String get communitySearchHint => 'Search by title or content...';
 
   @override
@@ -1466,4 +1476,326 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get updatedDate => 'Updated:';
+
+  @override
+  String get tabCalendar => 'Calendar';
+
+  @override
+  String get tabCalendarTooltip => 'Event Calendar';
+
+  @override
+  String get eventTypeFomc => 'FOMC';
+
+  @override
+  String get eventTypeEarnings => 'Earnings';
+
+  @override
+  String get eventTypeEconomic => 'Economic';
+
+  @override
+  String get eventTypeOptionsExpiry => 'Options Expiry';
+
+  @override
+  String get eventTypeConference => 'Conference';
+
+  @override
+  String get eventTypeDividend => 'Dividend';
+
+  @override
+  String get eventTypeProductLaunch => 'Product Launch';
+
+  @override
+  String get eventTypeShareholder => 'Shareholder Meeting';
+
+  @override
+  String get eventTypeFedSpeech => 'Fed Speech';
+
+  @override
+  String nEvents(int count) {
+    return '$count events';
+  }
+
+  @override
+  String get noEventsThisMonth => 'No events this month';
+
+  @override
+  String get noEventsSelectedDay => 'No events on this day';
+
+  @override
+  String get forgotPassword => 'Forgot Password';
+
+  @override
+  String get forgotPasswordSubtitle =>
+      'Enter your email and we\'ll send you a verification code.';
+
+  @override
+  String get sendVerificationCode => 'Send Code';
+
+  @override
+  String get verificationTitle => 'Email Verification';
+
+  @override
+  String verificationSubtitle(String email) {
+    return 'Enter the 6-digit code sent to $email.';
+  }
+
+  @override
+  String verificationExpiry(String time) {
+    return 'Expires in: $time';
+  }
+
+  @override
+  String get verificationCode => 'Verification Code';
+
+  @override
+  String get verificationCodeRequired => 'Enter the 6-digit verification code';
+
+  @override
+  String get verifyButton => 'Verify';
+
+  @override
+  String get resendCode => 'Resend Code';
+
+  @override
+  String resendCodeCooldown(int seconds) {
+    return 'Resend in (${seconds}s)';
+  }
+
+  @override
+  String get verificationCodeResent => 'Verification code has been resent.';
+
+  @override
+  String get resetPassword => 'Reset Password';
+
+  @override
+  String get resetPasswordSubtitle => 'Enter your new password.';
+
+  @override
+  String get resetPasswordSuccess =>
+      'Password has been reset. Please login with your new password.';
+
+  @override
+  String get errEmailNotVerified => 'Email verification required.';
+
+  @override
+  String get errRateLimited => 'Please try again later.';
+
+  @override
+  String get myHoldings => 'My Holdings';
+
+  @override
+  String nHoldings(int count) {
+    return '$count holdings';
+  }
+
+  @override
+  String get portfolioSummary => 'Portfolio Summary';
+
+  @override
+  String get totalValue => 'Total Value';
+
+  @override
+  String get totalPnl => 'Total P&L';
+
+  @override
+  String get dayPnl => 'Today';
+
+  @override
+  String get buyStock => 'Buy';
+
+  @override
+  String get shares => 'Shares';
+
+  @override
+  String get avgPrice => 'Avg Price';
+
+  @override
+  String get totalCost => 'Total Cost';
+
+  @override
+  String get enterShares => 'Number of shares';
+
+  @override
+  String get enterAvgPrice => 'Average purchase price';
+
+  @override
+  String get buyConfirm => 'Add to Holdings';
+
+  @override
+  String holdingAdded(String ticker) {
+    return '$ticker added to holdings';
+  }
+
+  @override
+  String holdingRemoved(String ticker) {
+    return '$ticker removed from holdings';
+  }
+
+  @override
+  String removeHoldingConfirm(String ticker) {
+    return 'Remove $ticker from holdings?';
+  }
+
+  @override
+  String get aiAdvice => 'AI Advice';
+
+  @override
+  String get aiAdviceInstant => 'Instant AI Advice';
+
+  @override
+  String get bullishFactorsPortfolio => 'Bullish Factors';
+
+  @override
+  String get bearishFactorsPortfolio => 'Bearish Factors';
+
+  @override
+  String get detailedAnalysisComingSoon =>
+      'Detailed analysis will be updated in the morning';
+
+  @override
+  String get loginForPortfolio => 'Log in to manage your portfolio';
+
+  @override
+  String get loginForPortfolioHint =>
+      'Track holdings, get AI advice, and monitor P&L';
+
+  @override
+  String sharesAtPrice(String shares, String price) {
+    return '$shares shares @ \$$price';
+  }
+
+  @override
+  String get noHoldingsYet => 'No holdings yet';
+
+  @override
+  String get addFirstHolding => 'Buy stocks from your watchlist to get started';
+
+  @override
+  String get invalidShares => 'Please enter a valid number of shares';
+
+  @override
+  String get invalidPrice => 'Please enter a valid price';
+
+  @override
+  String get confidence => 'Confidence';
+
+  @override
+  String get tabHoldings => 'Holdings';
+
+  @override
+  String get purchaseDate => 'Purchase Date';
+
+  @override
+  String get sellDate => 'Sell Date';
+
+  @override
+  String get sellPrice => 'Sell Price';
+
+  @override
+  String get sellShares => 'Sell Quantity';
+
+  @override
+  String get sellConfirm => 'Confirm Sell';
+
+  @override
+  String get sellAll => 'Sell All';
+
+  @override
+  String get sellAmount => 'Sell Amount';
+
+  @override
+  String get realizedPnlLabel => 'Realized P&L';
+
+  @override
+  String get unrealizedPnl => 'Unrealized P&L';
+
+  @override
+  String get realizedPnl => 'Realized';
+
+  @override
+  String get transactionHistory => 'Transaction History';
+
+  @override
+  String get additionalBuy => 'Buy More';
+
+  @override
+  String get partialSell => 'Sell';
+
+  @override
+  String get editHolding => 'Edit Info';
+
+  @override
+  String get saveChanges => 'Save Changes';
+
+  @override
+  String holdingUpdated(String ticker) {
+    return '$ticker holding updated';
+  }
+
+  @override
+  String get portfolioAIAnalysis => 'Portfolio AI Analysis';
+
+  @override
+  String get aiRecommendations => 'Recommendations';
+
+  @override
+  String get analysisWaiting => 'AI analysis pending...';
+
+  @override
+  String get alreadyHeld => 'Held';
+
+  @override
+  String get goToWatchlistTab => 'Go to Watchlist';
+
+  @override
+  String get noHoldingsHint => 'Add holdings from the Watchlist tab';
+
+  @override
+  String get closingPriceAuto => 'Closing price auto-filled';
+
+  @override
+  String holidayPriceNotice(String date) {
+    return 'Closing price from $date (prior trading day)';
+  }
+
+  @override
+  String get addToHoldings => 'Add to Holdings';
+
+  @override
+  String get currentHoldings => 'Current Holdings';
+
+  @override
+  String get holdingStatus => 'Holding Status';
+
+  @override
+  String addHoldingTitle(String ticker) {
+    return '$ticker Add Holding';
+  }
+
+  @override
+  String sellHoldingTitle(String ticker) {
+    return '$ticker Sell';
+  }
+
+  @override
+  String editHoldingTitle(String ticker) {
+    return '$ticker Edit Holding';
+  }
+
+  @override
+  String holdingSold(String ticker) {
+    return '$ticker sold successfully';
+  }
+
+  @override
+  String get deleteHolding => 'Delete Holding';
+
+  @override
+  String get avgPriceLabel => 'Avg Price';
+
+  @override
+  String get currentValueLabel => 'Current Value';
+
+  @override
+  String get dailyUpdate => 'Updated daily in the morning';
 }

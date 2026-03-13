@@ -123,6 +123,9 @@
   "removeFromWatchlist": "관심 목록에서 삭제",
   "addedToWatchlist": "관심 목록에 추가됨",
   "removedFromWatchlist": "관심 목록에서 삭제됨",
+  "watchlistDiscoveryTitle": "관심종목을 등록해보세요",
+  "watchlistDiscoverySubtitle": "등록하면 관련 뉴스·시그널 알림을 받을 수 있어요",
+  "topTradingVolume": "오늘의 거래량 TOP",
 
   "communitySearchHint": "제목, 내용으로 검색...",
   "writePost": "글쓰기",
@@ -553,5 +556,183 @@
   "bioLabel": "소개글",
   "bioHint": "자신을 소개해주세요",
   "profileEditGuide": "프로필 편집 안내",
-  "updatedDate": "업데이트:"
+  "updatedDate": "업데이트:",
+
+  "tabCalendar": "캘린더",
+  "tabCalendarTooltip": "이벤트 캘린더",
+  "eventTypeFomc": "FOMC",
+  "eventTypeEarnings": "실적발표",
+  "eventTypeEconomic": "경제지표",
+  "eventTypeOptionsExpiry": "옵션만기",
+  "eventTypeConference": "컨퍼런스",
+  "eventTypeDividend": "배당",
+  "eventTypeProductLaunch": "제품출시",
+  "eventTypeShareholder": "주주총회",
+  "eventTypeFedSpeech": "연준 연설",
+  "nEvents": "{count}개 이벤트",
+  "@nEvents": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "noEventsThisMonth": "이번 달 이벤트가 없습니다",
+  "noEventsSelectedDay": "선택한 날짜에 이벤트가 없습니다",
+  "today": "오늘",
+
+  "forgotPassword": "비밀번호 찾기",
+  "forgotPasswordSubtitle": "가입한 이메일을 입력하시면 인증코드를 보내드립니다.",
+  "sendVerificationCode": "인증코드 발송",
+  "verificationTitle": "이메일 인증",
+  "verificationSubtitle": "{email}로 발송된 6자리 인증코드를 입력하세요.",
+  "@verificationSubtitle": {
+    "placeholders": {
+      "email": { "type": "String" }
+    }
+  },
+  "verificationExpiry": "유효시간: {time}",
+  "@verificationExpiry": {
+    "placeholders": {
+      "time": { "type": "String" }
+    }
+  },
+  "verificationCode": "인증코드",
+  "verificationCodeRequired": "6자리 인증코드를 입력하세요",
+  "verifyButton": "인증하기",
+  "resendCode": "인증코드 재발송",
+  "resendCodeCooldown": "재발송 가능 ({seconds}초)",
+  "@resendCodeCooldown": {
+    "placeholders": {
+      "seconds": { "type": "int" }
+    }
+  },
+  "verificationCodeResent": "인증코드가 재발송되었습니다.",
+  "resetPassword": "비밀번호 재설정",
+  "resetPasswordSubtitle": "새로운 비밀번호를 입력하세요.",
+  "resetPasswordSuccess": "비밀번호가 재설정되었습니다. 새 비밀번호로 로그인하세요.",
+  "errEmailNotVerified": "이메일 인증이 필요합니다.",
+  "errRateLimited": "잠시 후 다시 시도해주세요.",
+
+  "myHoldings": "나의 보유종목",
+  "nHoldings": "{count}개 보유",
+  "@nHoldings": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "portfolioSummary": "포트폴리오 요약",
+  "totalValue": "총 가치",
+  "totalPnl": "총 손익",
+  "dayPnl": "오늘",
+  "buyStock": "매수",
+  "shares": "주수",
+  "avgPrice": "평균단가",
+  "totalCost": "총 매수금액",
+  "enterShares": "주수를 입력하세요",
+  "enterAvgPrice": "평균 매수가를 입력하세요",
+  "buyConfirm": "보유에 추가",
+  "holdingAdded": "{ticker} 보유종목에 추가됨",
+  "@holdingAdded": {
+    "placeholders": {
+      "ticker": { "type": "String" }
+    }
+  },
+  "holdingRemoved": "{ticker} 보유종목에서 삭제됨",
+  "@holdingRemoved": {
+    "placeholders": {
+      "ticker": { "type": "String" }
+    }
+  },
+  "removeHoldingConfirm": "{ticker}을(를) 보유종목에서 삭제하시겠습니까?",
+  "@removeHoldingConfirm": {
+    "placeholders": {
+      "ticker": { "type": "String" }
+    }
+  },
+  "aiAdvice": "AI 자문",
+  "aiAdviceInstant": "즉시 AI 자문",
+  "bullishFactorsPortfolio": "상승 요인",
+  "bearishFactorsPortfolio": "하락 요인",
+  "detailedAnalysisComingSoon": "상세 분석은 내일 오전에 업데이트됩니다",
+  "loginForPortfolio": "로그인하여 포트폴리오를 관리하세요",
+  "loginForPortfolioHint": "보유종목 추적, AI 자문, 손익 관리",
+  "sharesAtPrice": "{shares}주 @ ${price}",
+  "@sharesAtPrice": {
+    "placeholders": {
+      "shares": { "type": "String" },
+      "price": { "type": "String" }
+    }
+  },
+  "noHoldingsYet": "보유종목이 없습니다",
+  "addFirstHolding": "관심종목에서 매수하여 시작하세요",
+  "invalidShares": "유효한 주수를 입력하세요",
+  "invalidPrice": "유효한 가격을 입력하세요",
+  "confidence": "신뢰도",
+
+  "tabWatchlist": "관심종목",
+  "tabHoldings": "보유종목",
+  "purchaseDate": "매수일",
+  "sellDate": "매도일",
+  "sellPrice": "매도 단가",
+  "sellShares": "매도 수량",
+  "sellConfirm": "매도 확인",
+  "sellAll": "전량 매도",
+  "sellAmount": "매도금액",
+  "realizedPnlLabel": "실현손익",
+  "unrealizedPnl": "미실현손익",
+  "realizedPnl": "실현손익",
+  "transactionHistory": "거래 이력",
+  "additionalBuy": "추가 매수",
+  "partialSell": "매도",
+  "editHolding": "정보 수정",
+  "saveChanges": "수정 저장",
+  "holdingUpdated": "{ticker} 보유 정보가 수정되었습니다",
+  "@holdingUpdated": {
+    "placeholders": {
+      "ticker": { "type": "String" }
+    }
+  },
+  "portfolioAIAnalysis": "포트폴리오 AI 분석",
+  "aiRecommendations": "추천사항",
+  "analysisWaiting": "AI 분석 대기 중...",
+  "alreadyHeld": "보유중",
+  "goToWatchlistTab": "관심종목 탭으로 이동",
+  "noHoldingsHint": "관심종목에서 보유 종목을 추가하세요",
+  "closingPriceAuto": "종가 자동 입력",
+  "holidayPriceNotice": "{date} 종가 기준 (직전 거래일)",
+  "@holidayPriceNotice": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "addToHoldings": "보유에 추가",
+  "currentHoldings": "보유현황",
+  "holdingStatus": "보유 현황",
+  "addHoldingTitle": "{ticker} 보유 추가",
+  "@addHoldingTitle": {
+    "placeholders": {
+      "ticker": { "type": "String" }
+    }
+  },
+  "sellHoldingTitle": "{ticker} 매도",
+  "@sellHoldingTitle": {
+    "placeholders": {
+      "ticker": { "type": "String" }
+    }
+  },
+  "editHoldingTitle": "{ticker} 보유 정보 수정",
+  "@editHoldingTitle": {
+    "placeholders": {
+      "ticker": { "type": "String" }
+    }
+  },
+  "holdingSold": "{ticker} 매도 완료",
+  "@holdingSold": {
+    "placeholders": {
+      "ticker": { "type": "String" }
+    }
+  },
+  "deleteHolding": "보유 삭제",
+  "avgPriceLabel": "평균단가",
+  "currentValueLabel": "평가액",
+  "dailyUpdate": "매일 오전 업데이트"
 }
