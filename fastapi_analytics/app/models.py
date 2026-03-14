@@ -784,6 +784,7 @@ class AnalysisRequest(Base):
     trigger_data = Column(JSONB)  # {"ticker":"AAPL","action":"ADD_HOLDING","shares":10,"avg_price":178.5}
     result_summary = Column(String(500))
     created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+    updated_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
     started_at = Column(TIMESTAMP)
     completed_at = Column(TIMESTAMP)
 

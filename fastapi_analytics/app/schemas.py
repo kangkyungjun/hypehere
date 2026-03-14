@@ -1236,6 +1236,7 @@ class AnalysisRequestResponse(BaseModel):
     trigger_data: Optional[dict] = None
     result_summary: Optional[str] = None
     created_at: Optional[DateTime] = None
+    updated_at: Optional[DateTime] = None
     started_at: Optional[DateTime] = None
     completed_at: Optional[DateTime] = None
 

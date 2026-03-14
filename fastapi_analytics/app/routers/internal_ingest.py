@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Header, HTTPException, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import text
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 import hashlib
 import logging
 
@@ -47,6 +47,7 @@ from app.services.fcm_service import (
     process_morning_briefing,
     process_closing_report,
     process_market_open,
+    send_portfolio_advice_notification,
 )
 
 logger = logging.getLogger(__name__)
@@ -1851,13 +1852,20 @@ def get_analysis_queue(
     """
     맥미니가 10초 폴링으로 PENDING 분석 요청 조회.
 
-    - status=PENDING (기본): 아직 처리 안 된 요청
+    - status=PENDING (기본): 아직 처리 안 된 요청 (updated_at + 5분 경과 후에만 반환)
     - status=PROCESSING: 현재 처리 중인 요청
     - limit: 한 번에 가져올 최대 개수 (기본 20)
     """
+    filters = [AnalysisRequest.status == status.upper()]
+
+    # PENDING 조회 시 5분 쿨다운: 유저가 종목을 천천히 입력해도 모아서 1회만 분석
+    if status.upper() == "PENDING":
+        cooldown = datetime.utcnow() - timedelta(minutes=5)
+        filters.append(AnalysisRequest.updated_at <= cooldown)
+
     rows = (
         db.query(AnalysisRequest)
-        .filter(AnalysisRequest.status == status.upper())
+        .filter(*filters)
         .order_by(AnalysisRequest.created_at.asc())
         .limit(limit)
         .all()
@@ -1918,6 +1926,12 @@ def mark_analysis_complete(
     if body and body.result_summary:
         obj.result_summary = body.result_summary
     db.commit()
+
+    # FCM: AI 분석 완료 알림 (포트폴리오 전체)
+    try:
+        send_portfolio_advice_notification(db, obj.user_id)
+    except Exception as e:
+        logger.warning(f"Portfolio advice FCM failed: request={request_id}, err={e}")
 
     return {"status": "ok", "request_id": request_id}
 

@@ -95,6 +95,13 @@ MESSAGES = {
         "zh": ("[{ticker}] 突发新闻", "{summary}"),
         "es": ("[{ticker}] Última hora", "{summary}"),
     },
+    "PORTFOLIO_ADVICE": {
+        "en": ("Portfolio AI Analysis Complete", "Your portfolio analysis is ready. Check it out!"),
+        "ko": ("포트폴리오 AI 분석 완료", "전체 포트폴리오 분석이 완료되었습니다. 확인해보세요!"),
+        "ja": ("ポートフォリオAI分析完了", "ポートフォリオ全体の分析が完了しました。確認してください！"),
+        "zh": ("投资组合AI分析完成", "投资组合分析已完成，请查看！"),
+        "es": ("Análisis AI del portafolio listo", "¡El análisis de tu portafolio está listo!"),
+    },
 }
 
 
@@ -723,3 +730,43 @@ def process_market_open(db: Session, today: date):
     }, skip_rate_limit=True)
     _log_notification(db, today, "ALL", "MARKET_OPEN",
                       recipients=sent, success=sent)
+
+
+def send_portfolio_advice_notification(db: Session, user_id: int):
+    """
+    포트폴리오 AI 분석 완료 후 해당 유저에게 FCM 발송.
+    1시간 rate limit 적용.
+    """
+    rows = db.execute(text("""
+        SELECT dt.token, COALESCE(dt.language, 'en') as language
+        FROM public.accounts_devicetoken dt
+        WHERE dt.user_id = :user_id AND dt.is_active = TRUE
+    """), {"user_id": user_id}).fetchall()
+
+    if not rows:
+        return
+
+    if not _can_send_general(db, user_id):
+        logger.info(f"Portfolio advice FCM skipped (rate limit): user={user_id}")
+        return
+
+    language = rows[0].language
+    tokens = [r.token for r in rows]
+    title, body = _get_msg(language, "PORTFOLIO_ADVICE")
+
+    # Save notification history
+    _save_notification_history_bulk(db, [
+        (user_id, title, body, "PORTFOLIO_ADVICE", ''),
+    ])
+
+    success, failure, invalid = _send_fcm(tokens, title, body, data={
+        "type": "PORTFOLIO_ADVICE",
+    })
+
+    if success > 0:
+        _update_rate_limit(db, user_id)
+
+    if invalid:
+        _deactivate_invalid_tokens(db, invalid)
+
+    logger.info(f"Portfolio advice FCM sent: user={user_id}, success={success}, failure={failure}")

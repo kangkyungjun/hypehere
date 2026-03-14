@@ -7,6 +7,7 @@ Handles holdings, watchlist, transactions, advice, summary, exchange rates.
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import text
+from sqlalchemy.orm.attributes import flag_modified
 from datetime import date, datetime
 from typing import List, Optional
 import json
@@ -29,30 +30,31 @@ from app.schemas import (
 
 # Time remaining templates for instant advice (multilingual |||‑packed)
 _INSTANT_ADVICE_TEMPLATES = {
+    # Order: en|||ko|||ja|||zh|||es (must match Flutter _parseSummary langOrder)
     "summary_with_data": (
-        "즉시 분석: 현재 AI 점수 {score}점, 시그널 {signal}. "
-        "상세 포트폴리오 분석은 내일 오전 업데이트됩니다!"
-        "|||"
         "Quick analysis: AI score {score}, signal {signal}. "
         "Detailed portfolio analysis will be updated tomorrow morning!"
         "|||"
-        "即时分析：AI评分{score}分，信号{signal}。"
-        "详细组合分析将于明天上午更新！"
+        "즉시 분석: 현재 AI 점수 {score}점, 시그널 {signal}. "
+        "상세 포트폴리오 분석은 내일 오전 업데이트됩니다!"
         "|||"
         "即座分析：AIスコア{score}点、シグナル{signal}。"
         "詳細なポートフォリオ分析は明日の朝更新されます！"
+        "|||"
+        "即时分析：AI评分{score}分，信号{signal}。"
+        "详细组合分析将于明天上午更新！"
         "|||"
         "Análisis rápido: puntuación AI {score}, señal {signal}. "
         "¡El análisis detallado se actualizará mañana por la mañana!"
     ),
     "summary_no_data": (
-        "새로 추가된 종목입니다. 상세 AI 분석은 내일 오전에 제공됩니다. 기대해주세요!"
-        "|||"
         "Newly added stock. Detailed AI analysis coming tomorrow morning. Stay tuned!"
         "|||"
-        "新添加的股票。详细AI分析将于明天上午提供，敬请期待！"
+        "새로 추가된 종목입니다. 상세 AI 분석은 내일 오전에 제공됩니다. 기대해주세요!"
         "|||"
         "新しく追加された銘柄です。詳細なAI分析は明日の朝に提供されます。お楽しみに！"
+        "|||"
+        "新添加的股票。详细AI分析将于明天上午提供，敬请期待！"
         "|||"
         "Acción recién añadida. ¡El análisis detallado llegará mañana por la mañana!"
     ),
@@ -265,24 +267,57 @@ def add_or_update_holding(
         logger.warning(f"Instant advice generation failed for {ticker}: {e}")
         instant = None
 
-    # Create analysis request for Mac mini real-time AI analysis
+    # Create or merge analysis request for Mac mini real-time AI analysis
+    # If a PENDING request already exists for this user, merge the new change
+    # into it so Mac mini processes all recent changes in one batch.
     request_id = None
     try:
-        analysis_req = AnalysisRequest(
-            user_id=user_id,
-            request_type="PORTFOLIO_CHANGE",
-            trigger_data={
+        existing_req = db.query(AnalysisRequest).filter(
+            AnalysisRequest.user_id == user_id,
+            AnalysisRequest.status == 'PENDING',
+            AnalysisRequest.request_type == 'PORTFOLIO_CHANGE',
+        ).first()
+
+        if existing_req:
+            changes = existing_req.trigger_data.get("changes", [])
+            # Migrate old single-ticker format to changes list
+            if not changes and "ticker" in existing_req.trigger_data:
+                changes.append({
+                    "ticker": existing_req.trigger_data["ticker"],
+                    "action": existing_req.trigger_data.get("action", "ADD_HOLDING"),
+                    "shares": existing_req.trigger_data.get("shares"),
+                    "avg_price": existing_req.trigger_data.get("avg_price"),
+                })
+            changes.append({
                 "ticker": ticker,
                 "action": "ADD_HOLDING",
                 "shares": body.shares,
                 "avg_price": body.avg_price,
-            },
-        )
-        db.add(analysis_req)
-        db.commit()
-        db.refresh(analysis_req)
-        request_id = analysis_req.id
-        logger.info(f"Analysis request created: id={request_id}, user={user_id}, ticker={ticker}")
+            })
+            existing_req.trigger_data = {"changes": changes}
+            existing_req.updated_at = datetime.utcnow()
+            flag_modified(existing_req, "trigger_data")
+            db.commit()
+            request_id = existing_req.id
+            logger.info(f"Analysis request merged: id={request_id}, user={user_id}, ticker={ticker}, total_changes={len(changes)}")
+        else:
+            analysis_req = AnalysisRequest(
+                user_id=user_id,
+                request_type="PORTFOLIO_CHANGE",
+                trigger_data={
+                    "changes": [{
+                        "ticker": ticker,
+                        "action": "ADD_HOLDING",
+                        "shares": body.shares,
+                        "avg_price": body.avg_price,
+                    }],
+                },
+            )
+            db.add(analysis_req)
+            db.commit()
+            db.refresh(analysis_req)
+            request_id = analysis_req.id
+            logger.info(f"Analysis request created: id={request_id}, user={user_id}, ticker={ticker}")
     except Exception as e:
         logger.warning(f"Analysis request creation failed for {ticker}: {e}")
 
@@ -449,6 +484,35 @@ def add_transaction(
     db.add(txn)
     db.commit()
     db.refresh(txn)
+
+    # SELL 시 실현 손익 즉시 계산 → portfolio_summary 업데이트
+    if body.type.upper() == 'SELL':
+        try:
+            holding = db.query(UserPortfolio).filter(
+                UserPortfolio.user_id == user_id,
+                UserPortfolio.ticker == body.ticker.upper(),
+                UserPortfolio.type == 'HOLDING',
+            ).first()
+            if holding and holding.avg_price is not None:
+                realized_pnl = (body.price - holding.avg_price) * body.shares
+                today = date.today()
+                summary = db.query(PortfolioSummary).filter(
+                    PortfolioSummary.user_id == user_id,
+                    PortfolioSummary.date == today,
+                ).first()
+                if summary:
+                    summary.realized_pnl = (summary.realized_pnl or 0) + realized_pnl
+                else:
+                    db.add(PortfolioSummary(
+                        user_id=user_id,
+                        date=today,
+                        realized_pnl=realized_pnl,
+                    ))
+                db.commit()
+                logger.info(f"Realized P&L updated: user={user_id}, ticker={body.ticker}, pnl={realized_pnl:.2f}")
+        except Exception as e:
+            logger.warning(f"Realized P&L update failed: {e}")
+
     return txn
 
 
