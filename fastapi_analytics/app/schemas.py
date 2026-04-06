@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from datetime import date as Date, datetime as DateTime
 from typing import Optional, List, Union, Dict, Literal
 
@@ -1050,6 +1050,7 @@ class TransactionResponse(BaseModel):
     shares: float
     price: float
     date: Date
+    realized_pnl: Optional[float] = None
     notes: Optional[str] = None
     created_at: Optional[DateTime] = None
 
@@ -1060,15 +1061,30 @@ class TransactionResponse(BaseModel):
 # --- Portfolio Advice (맥미니 → Server → Flutter) ---
 
 class PortfolioAdviceItem(BaseModel):
-    """종목별 AI 의견 (ingest용)"""
+    """종목별 AI 의견 (ingest용) — 맥미니 RT-ADVICE 페이로드 호환"""
     user_id: int
     ticker: str = Field(..., max_length=10)
     date: Date
+    # 기존 필드 (instant advice에서 직접 사용)
     signal: Optional[str] = None         # BUY / SELL / HOLD
     confidence: Optional[float] = None   # 0.0 ~ 1.0
     summary: Optional[str] = None        # 다국어 ||| 패킹
     reasons: Optional[dict] = None       # {"bullish": [...], "bearish": [...]}
     target_action: Optional[str] = None  # 권고 행동
+    # 맥미니 RT-ADVICE 추가 필드 (→ DB 매핑은 ingest 핸들러에서)
+    name_ko: Optional[str] = None
+    name_en: Optional[str] = None
+    sector: Optional[str] = None
+    buy_price: Optional[float] = None
+    buy_date: Optional[str] = None
+    quantity: Optional[float] = None
+    current_price: Optional[float] = None
+    pnl_pct: Optional[float] = None
+    pnl_amount: Optional[float] = None
+    score: Optional[float] = None
+    ai_prob: Optional[float] = None      # → confidence 매핑
+    rsi: Optional[float] = None
+    advice: Optional[dict] = None        # → summary, reasons 매핑
 
 
 class PortfolioAdviceIngestPayload(BaseModel):
@@ -1098,9 +1114,10 @@ class PortfolioAdviceResponse(BaseModel):
 # --- Portfolio Summary (맥미니 → Server → Flutter) ---
 
 class PortfolioSummaryItem(BaseModel):
-    """유저별 일일 P&L 요약 (ingest용)"""
+    """유저별 일일 P&L 요약 (ingest용) — 맥미니 RT-SUMMARY 호환"""
     user_id: int
     date: Date
+    # 기존 flat 필드 (DB 직접 매핑)
     total_value: Optional[float] = None
     total_cost: Optional[float] = None
     total_pnl: Optional[float] = None
@@ -1111,6 +1128,9 @@ class PortfolioSummaryItem(BaseModel):
     ai_summary: Optional[str] = None
     ai_recommendations: Optional[List[dict]] = None
     realized_pnl: Optional[float] = None
+    # 맥미니 RT-SUMMARY 추가 필드
+    periods: Optional[dict] = None         # {today, 1week, 1month, 3month, ytd, 1year, total}
+    trade_history: Optional[List[dict]] = None
 
 
 class PortfolioSummaryIngestPayload(BaseModel):
@@ -1131,6 +1151,8 @@ class PortfolioSummaryResponse(BaseModel):
     ai_summary: Optional[str] = None
     ai_recommendations: Optional[List[dict]] = None
     realized_pnl: Optional[float] = None
+    periods: Optional[dict] = None                    # 기간별 P&L 원본
+    trade_history: Optional[List[dict]] = None        # 매매 이력
 
     class Config:
         from_attributes = True
@@ -1139,12 +1161,15 @@ class PortfolioSummaryResponse(BaseModel):
 # --- Alerts (맥미니 → Server → Flutter) ---
 
 class AlertItem(BaseModel):
-    """알림 아이템 (ingest용)"""
+    """알림 아이템 (ingest용) — 맥미니 RT-ALERT 호환"""
     user_id: int
     ticker: Optional[str] = Field(None, max_length=10)
     alert_type: str = Field(..., max_length=30)
     title: str = Field(..., max_length=500)    # 다국어 ||| 패킹
     message: Optional[str] = Field(None, max_length=2000)
+    priority: Optional[str] = Field(None, max_length=10)  # HIGH/MEDIUM/LOW
+    name_ko: Optional[str] = None              # 맥미니 전송, 저장 안 함
+    name_en: Optional[str] = None              # 맥미니 전송, 저장 안 함
     data: Optional[dict] = None
 
 
@@ -1160,6 +1185,7 @@ class AlertResponse(BaseModel):
     alert_type: str
     title: str
     message: Optional[str] = None
+    priority: Optional[str] = None         # HIGH/MEDIUM/LOW
     data: Optional[dict] = None
     is_read: bool = False
     created_at: Optional[DateTime] = None
@@ -1202,7 +1228,20 @@ class AISignalItem(BaseModel):
     price_at_signal: Optional[float] = None
     target_price: Optional[float] = None
     stop_loss_price: Optional[float] = None
-    reasoning: Optional[str] = Field(None, max_length=2000)
+    reasoning: Optional[str] = Field(None, max_length=5000)
+
+    @field_validator('confidence', 'price_at_signal', 'target_price', 'stop_loss_price', mode='before')
+    @classmethod
+    def coerce_float(cls, v):
+        if v is None:
+            return None
+        try:
+            val = float(v)
+            if val != val:  # NaN check
+                return None
+            return val
+        except (TypeError, ValueError):
+            return None
 
 
 class AISignalsIngestPayload(BaseModel):

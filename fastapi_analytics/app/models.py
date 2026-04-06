@@ -641,6 +641,7 @@ class UserTransaction(Base):
     shares = Column(Float, nullable=False)
     price = Column(Float, nullable=False)     # 거래 단가 (USD)
     date = Column(Date, nullable=False)       # 거래일
+    realized_pnl = Column(Float, nullable=True)  # SELL 시 (sell_price - avg_price) * shares
     notes = Column(String(500))
     created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
 
@@ -686,8 +687,10 @@ class PortfolioSummary(Base):
     day_pnl_pct = Column(Float)              # 일간 수익률 (%)
     holdings_detail = Column(JSONB)          # [{ticker, shares, avg_price, current_price, pnl, pnl_pct}]
     ai_summary = Column(String(2000), nullable=True)  # 전체 포트폴리오 AI 텍스트
-    ai_recommendations = Column(JSONB, nullable=True)  # 추천사항 리스트 [{action, ticker, reason}]
+    ai_recommendations = Column(JSONB, nullable=True)  # 추천사항 리스트 [{type, message, priority}]
     realized_pnl = Column(Float, nullable=True)        # 실현손익 (USD)
+    periods = Column(JSONB, nullable=True)             # 기간별 P&L 원본 {today, 1week, 1month, ...}
+    trade_history = Column(JSONB, nullable=True)       # 매매 이력 [{ticker, buy_date, sell_date, ...}]
     created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
 
 
@@ -707,6 +710,7 @@ class UserAlert(Base):
     alert_type = Column(String(30), nullable=False)  # PRICE_SURGE, TARGET_HIT, EARNINGS_NEAR, SIGNAL_CHANGE, etc.
     title = Column(String(500), nullable=False)       # 다국어 ||| 패킹
     message = Column(String(2000))                    # 다국어 ||| 패킹
+    priority = Column(String(10), nullable=True)     # HIGH / MEDIUM / LOW
     data = Column(JSONB)                              # 추가 데이터 (가격, 변동률 등)
     is_read = Column(Boolean, server_default=text('FALSE'))
     created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
@@ -745,7 +749,7 @@ class AISignal(Base):
     price_at_signal = Column(Float)
     target_price = Column(Float)
     stop_loss_price = Column(Float)
-    reasoning = Column(String(2000))
+    reasoning = Column(String(5000))
     created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
 
 

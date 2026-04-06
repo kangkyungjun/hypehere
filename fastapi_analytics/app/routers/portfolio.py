@@ -30,33 +30,33 @@ from app.schemas import (
 
 # Time remaining templates for instant advice (multilingual |||‑packed)
 _INSTANT_ADVICE_TEMPLATES = {
-    # Order: en|||ko|||ja|||zh|||es (must match Flutter _parseSummary langOrder)
+    # Order: Ko|||En|||Zh|||Ja|||Es (맥미니와 동일)
     "summary_with_data": (
-        "Quick analysis: AI score {score}, signal {signal}. "
-        "Detailed portfolio analysis will be updated tomorrow morning!"
-        "|||"
         "즉시 분석: 현재 AI 점수 {score}점, 시그널 {signal}. "
-        "상세 포트폴리오 분석은 내일 오전 업데이트됩니다!"
+        "상세 포트폴리오 분석이 곧 업데이트됩니다!"
         "|||"
-        "即座分析：AIスコア{score}点、シグナル{signal}。"
-        "詳細なポートフォリオ分析は明日の朝更新されます！"
+        "Quick analysis: AI score {score}, signal {signal}. "
+        "Detailed portfolio analysis will be updated shortly!"
         "|||"
         "即时分析：AI评分{score}分，信号{signal}。"
-        "详细组合分析将于明天上午更新！"
+        "详细组合分析即将更新！"
+        "|||"
+        "即座分析：AIスコア{score}点、シグナル{signal}。"
+        "詳細なポートフォリオ分析はまもなく更新されます！"
         "|||"
         "Análisis rápido: puntuación AI {score}, señal {signal}. "
-        "¡El análisis detallado se actualizará mañana por la mañana!"
+        "¡El análisis detallado se actualizará en breve!"
     ),
     "summary_no_data": (
-        "Newly added stock. Detailed AI analysis coming tomorrow morning. Stay tuned!"
+        "새로 추가된 종목입니다. 상세 AI 분석이 곧 제공됩니다. 기대해주세요!"
         "|||"
-        "새로 추가된 종목입니다. 상세 AI 분석은 내일 오전에 제공됩니다. 기대해주세요!"
+        "Newly added stock. Detailed AI analysis coming shortly. Stay tuned!"
         "|||"
-        "新しく追加された銘柄です。詳細なAI分析は明日の朝に提供されます。お楽しみに！"
+        "新添加的股票。详细AI分析即将提供，敬请期待！"
         "|||"
-        "新添加的股票。详细AI分析将于明天上午提供，敬请期待！"
+        "新しく追加された銘柄です。詳細なAI分析はまもなく提供されます。お楽しみに！"
         "|||"
-        "Acción recién añadida. ¡El análisis detallado llegará mañana por la mañana!"
+        "Acción recién añadida. ¡El análisis detallado llegará en breve!"
     ),
 }
 
@@ -120,15 +120,25 @@ def _generate_instant_advice(
         if row.bearish_reasons:
             reasons["bearish"] = row.bearish_reasons
 
-        # Build target_action from targets
+        # Build target_action from targets (Ko|||En|||Zh|||Ja|||Es)
         target_action = None
         if row.target_price or row.stop_loss:
-            parts = []
-            if row.target_price:
-                parts.append(f"목표가 ${row.target_price:.2f}|||Target ${row.target_price:.2f}")
-            if row.stop_loss:
-                parts.append(f"손절가 ${row.stop_loss:.2f}|||Stop-loss ${row.stop_loss:.2f}")
-            target_action = " / ".join(parts)
+            tp, sl = row.target_price, row.stop_loss
+            langs = []  # [ko, en, zh, ja, es] 각 언어별 완전한 문자열
+            for tpl_target, tpl_stop in [
+                ("목표가 ${tp}", "손절가 ${sl}"),
+                ("Target ${tp}", "Stop-loss ${sl}"),
+                ("目标价 ${tp}", "止损价 ${sl}"),
+                ("目標値 ${tp}", "損切り ${sl}"),
+                ("Precio objetivo ${tp}", "Stop-loss ${sl}"),
+            ]:
+                parts = []
+                if tp:
+                    parts.append(tpl_target.replace("${tp}", f"${tp:.2f}"))
+                if sl:
+                    parts.append(tpl_stop.replace("${sl}", f"${sl:.2f}"))
+                langs.append(" / ".join(parts))
+            target_action = "|||".join(langs)
 
         summary = _INSTANT_ADVICE_TEMPLATES["summary_with_data"].format(
             score=f"{score_val:.0f}", signal=signal,
@@ -272,6 +282,16 @@ def add_or_update_holding(
     # into it so Mac mini processes all recent changes in one batch.
     request_id = None
     try:
+        # Fetch all current holdings so Mac mini can populate local DB
+        all_holdings = db.query(UserPortfolio).filter(
+            UserPortfolio.user_id == user_id,
+            UserPortfolio.type == 'HOLDING',
+        ).all()
+        holdings_list = [
+            {"ticker": h.ticker, "shares": float(h.shares), "avg_price": float(h.avg_price)}
+            for h in all_holdings
+        ]
+
         existing_req = db.query(AnalysisRequest).filter(
             AnalysisRequest.user_id == user_id,
             AnalysisRequest.status == 'PENDING',
@@ -294,7 +314,7 @@ def add_or_update_holding(
                 "shares": body.shares,
                 "avg_price": body.avg_price,
             })
-            existing_req.trigger_data = {"changes": changes}
+            existing_req.trigger_data = {"changes": changes, "holdings": holdings_list}
             existing_req.updated_at = datetime.utcnow()
             flag_modified(existing_req, "trigger_data")
             db.commit()
@@ -311,6 +331,7 @@ def add_or_update_holding(
                         "shares": body.shares,
                         "avg_price": body.avg_price,
                     }],
+                    "holdings": holdings_list,
                 },
             )
             db.add(analysis_req)
@@ -485,33 +506,41 @@ def add_transaction(
     db.commit()
     db.refresh(txn)
 
-    # SELL 시 실현 손익 즉시 계산 → portfolio_summary 업데이트
+    # SELL 시 실현 손익 계산 → 트랜잭션 자체에 저장 (원본)
     if body.type.upper() == 'SELL':
-        try:
-            holding = db.query(UserPortfolio).filter(
-                UserPortfolio.user_id == user_id,
-                UserPortfolio.ticker == body.ticker.upper(),
-                UserPortfolio.type == 'HOLDING',
-            ).first()
-            if holding and holding.avg_price is not None:
-                realized_pnl = (body.price - holding.avg_price) * body.shares
+        holding = db.query(UserPortfolio).filter(
+            UserPortfolio.user_id == user_id,
+            UserPortfolio.ticker == body.ticker.upper(),
+            UserPortfolio.type == 'HOLDING',
+        ).first()
+        if holding and holding.avg_price is not None:
+            rpnl = (body.price - holding.avg_price) * body.shares
+            # 트랜잭션 자체에 realized_pnl 저장 (원본 — 실패 시 500)
+            txn.realized_pnl = rpnl
+            db.commit()
+            logger.info(f"Realized P&L saved to txn: user={user_id}, ticker={body.ticker}, pnl={rpnl:.2f}")
+
+            # portfolio_summary에도 기록 (보조, 실패해도 무관)
+            try:
                 today = date.today()
                 summary = db.query(PortfolioSummary).filter(
                     PortfolioSummary.user_id == user_id,
                     PortfolioSummary.date == today,
                 ).first()
                 if summary:
-                    summary.realized_pnl = (summary.realized_pnl or 0) + realized_pnl
+                    summary.realized_pnl = (summary.realized_pnl or 0) + rpnl
                 else:
                     db.add(PortfolioSummary(
                         user_id=user_id,
                         date=today,
-                        realized_pnl=realized_pnl,
+                        realized_pnl=rpnl,
                     ))
                 db.commit()
-                logger.info(f"Realized P&L updated: user={user_id}, ticker={body.ticker}, pnl={realized_pnl:.2f}")
-        except Exception as e:
-            logger.warning(f"Realized P&L update failed: {e}")
+            except Exception as e:
+                logger.warning(f"Portfolio summary realized_pnl sync failed: {e}")
+        else:
+            logger.warning(f"SELL realized_pnl skip: holding not found or avg_price is None "
+                           f"(user={user_id}, ticker={body.ticker})")
 
     return txn
 
@@ -595,10 +624,16 @@ def get_advice(
             PortfolioAdvice.date == target_date,
         ).all()
     else:
-        # 가장 최근 날짜의 의견
+        # summary가 있는 최신 날짜 우선
         latest = db.execute(text(
-            "SELECT MAX(date) FROM analytics.portfolio_advice WHERE user_id = :uid"
+            "SELECT MAX(date) FROM analytics.portfolio_advice "
+            "WHERE user_id = :uid AND summary IS NOT NULL AND summary != ''"
         ), {"uid": user_id}).scalar()
+        # fallback: summary 없어도 최신 날짜
+        if not latest:
+            latest = db.execute(text(
+                "SELECT MAX(date) FROM analytics.portfolio_advice WHERE user_id = :uid"
+            ), {"uid": user_id}).scalar()
         if not latest:
             return []
         rows = db.query(PortfolioAdvice).filter(
@@ -630,9 +665,86 @@ def get_summary(
             PortfolioSummary.date == target_date,
         ).first()
     else:
-        row = db.query(PortfolioSummary).filter(
+        # ── 실시간 계산 (target_date 없을 때) ──
+
+        # 1) 보유 종목 + 최신 가격 조회
+        holdings_rows = db.execute(text("""
+            SELECT p.ticker, p.shares, p.avg_price,
+                   tp.close AS current_price, tp.change_pct
+            FROM analytics.user_portfolios p
+            LEFT JOIN LATERAL (
+                SELECT close, change_pct FROM analytics.ticker_prices
+                WHERE ticker = p.ticker ORDER BY date DESC LIMIT 1
+            ) tp ON true
+            WHERE p.user_id = :uid AND p.type = 'HOLDING'
+              AND COALESCE(p.shares, 0) > 0
+        """), {"uid": user_id}).fetchall()
+
+        # 2) 실시간 P&L 계산
+        total_value = 0.0
+        total_cost = 0.0
+        day_pnl = 0.0
+        holdings_detail = []
+
+        for h in holdings_rows:
+            price = h.current_price or 0
+            shares = h.shares or 0
+            avg = h.avg_price or 0
+            cv = price * shares
+            cb = avg * shares
+
+            total_value += cv
+            total_cost += cb
+
+            if h.change_pct and price:
+                prev = price / (1 + h.change_pct / 100)
+                day_pnl += (price - prev) * shares
+
+            holdings_detail.append({
+                "ticker": h.ticker, "shares": shares,
+                "avg_price": avg, "current_price": price,
+                "pnl": round(cv - cb, 2),
+                "pnl_pct": round((cv - cb) / cb * 100, 2) if cb > 0 else 0,
+            })
+
+        total_pnl = total_value - total_cost
+        total_pnl_pct = (total_pnl / total_cost * 100) if total_cost > 0 else 0
+        day_pnl_pct = (day_pnl / (total_value - day_pnl) * 100) if (total_value - day_pnl) > 0 else 0
+
+        # 3) 누적 실현손익 — user_transactions가 원본 (더 신뢰)
+        realized_sum = db.execute(text(
+            "SELECT COALESCE(SUM(realized_pnl), 0) "
+            "FROM analytics.user_transactions "
+            "WHERE user_id = :uid AND type = 'SELL' AND realized_pnl IS NOT NULL"
+        ), {"uid": user_id}).scalar() or 0
+
+        # 4) AI 데이터 보충 (맥미니가 넣은 최신 레코드)
+        ai_row = db.query(PortfolioSummary).filter(
+            PortfolioSummary.user_id == user_id,
+            PortfolioSummary.ai_summary.isnot(None),
+            PortfolioSummary.ai_summary != '',
+        ).order_by(PortfolioSummary.date.desc()).first()
+
+        latest_row = db.query(PortfolioSummary).filter(
             PortfolioSummary.user_id == user_id,
         ).order_by(PortfolioSummary.date.desc()).first()
+
+        # 5) 응답 조립
+        return PortfolioSummaryResponse(
+            date=date.today(),
+            total_value=round(total_value, 2),
+            total_cost=round(total_cost, 2),
+            total_pnl=round(total_pnl, 2),
+            total_pnl_pct=round(total_pnl_pct, 2),
+            day_pnl=round(day_pnl, 2),
+            day_pnl_pct=round(day_pnl_pct, 2),
+            holdings_detail=holdings_detail or None,
+            realized_pnl=round(realized_sum, 2),
+            ai_summary=ai_row.ai_summary if ai_row else None,
+            ai_recommendations=ai_row.ai_recommendations if ai_row else None,
+            periods=latest_row.periods if latest_row else None,
+            trade_history=latest_row.trade_history if latest_row else None,
+        )
 
     if not row:
         # Return empty summary (never 404)

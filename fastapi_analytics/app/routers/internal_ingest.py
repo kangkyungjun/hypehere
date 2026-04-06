@@ -1492,9 +1492,40 @@ def ingest_portfolio_advice(
     맥미니가 생성한 종목별 AI 의견 업로드.
 
     UPSERT: (user_id, ticker, date) 기준.
+    맥미니 RT-ADVICE 필드 매핑:
+      - ai_prob → confidence
+      - advice.message → summary
+      - advice.details → reasons (bullish/bearish 추출)
+      - advice 전체 → reasons에 보존
+    None이 아닌 값만 업데이트 (instant advice 기존 데이터 보호).
     """
     upserted = 0
     for item in payload.items:
+        # --- 맥미니 필드 → DB 필드 매핑 ---
+        confidence = item.confidence or item.ai_prob
+        summary = item.summary
+        reasons = item.reasons
+        target_action = item.target_action
+
+        # advice 중첩 객체에서 summary/reasons 추출
+        if item.advice:
+            adv = item.advice
+            if not summary:
+                summary = adv.get('message')
+            if not reasons:
+                details = adv.get('details') or {}
+                reasons = {}
+                # HOLD 등에서 bullish/bearish reasons 추출
+                if 'bullish_reasons' in details:
+                    reasons['bullish'] = details['bullish_reasons']
+                if 'bearish_reasons' in details:
+                    reasons['bearish'] = details['bearish_reasons']
+                # advice 메타 정보 보존
+                reasons['action'] = adv.get('action')
+                reasons['priority'] = adv.get('priority')
+                reasons['reason'] = adv.get('reason')
+                reasons['details'] = details
+
         obj = db.query(PortfolioAdvice).filter(
             PortfolioAdvice.user_id == item.user_id,
             PortfolioAdvice.ticker == item.ticker.upper(),
@@ -1502,21 +1533,27 @@ def ingest_portfolio_advice(
         ).first()
 
         if obj:
-            obj.signal = item.signal
-            obj.confidence = item.confidence
-            obj.summary = item.summary
-            obj.reasons = item.reasons
-            obj.target_action = item.target_action
+            # None이 아닌 값만 업데이트 (instant advice 보호)
+            if item.signal is not None:
+                obj.signal = item.signal
+            if confidence is not None:
+                obj.confidence = confidence
+            if summary is not None:
+                obj.summary = summary
+            if reasons:
+                obj.reasons = reasons
+            if target_action is not None:
+                obj.target_action = target_action
         else:
             db.add(PortfolioAdvice(
                 user_id=item.user_id,
                 ticker=item.ticker.upper(),
                 date=item.date,
                 signal=item.signal,
-                confidence=item.confidence,
-                summary=item.summary,
-                reasons=item.reasons,
-                target_action=item.target_action,
+                confidence=confidence,
+                summary=summary,
+                reasons=reasons,
+                target_action=target_action,
             ))
         upserted += 1
 
@@ -1544,25 +1581,60 @@ def ingest_portfolio_summary(
     맥미니가 계산한 유저별 일일 P&L 요약 업로드.
 
     UPSERT: (user_id, date) 기준.
+    맥미니 RT-SUMMARY 필드 매핑:
+      - periods.total → total_value, total_cost, total_pnl, total_pnl_pct
+      - periods.today → day_pnl, day_pnl_pct
+      - periods 원본 → periods 컬럼에 보존
+      - trade_history → trade_history 컬럼에 보존
+    realized_pnl: SELL 핸들러가 설정한 기존 값이 있으면 보존.
     """
     upserted = 0
     for item in payload.items:
+        # periods → flat 필드 변환
+        if item.periods and not item.total_value:
+            total_period = item.periods.get('total') or {}
+            today_period = item.periods.get('today') or {}
+            item.total_value = total_period.get('end_value')
+            item.total_cost = total_period.get('start_value')
+            item.total_pnl = total_period.get('pnl_amount')
+            item.total_pnl_pct = total_period.get('pnl_pct')
+            item.day_pnl = today_period.get('pnl_amount')
+            item.day_pnl_pct = today_period.get('pnl_pct')
+
         obj = db.query(PortfolioSummary).filter(
             PortfolioSummary.user_id == item.user_id,
             PortfolioSummary.date == item.date,
         ).first()
 
         if obj:
-            obj.total_value = item.total_value
-            obj.total_cost = item.total_cost
-            obj.total_pnl = item.total_pnl
-            obj.total_pnl_pct = item.total_pnl_pct
-            obj.day_pnl = item.day_pnl
-            obj.day_pnl_pct = item.day_pnl_pct
-            obj.holdings_detail = item.holdings_detail
-            obj.ai_summary = item.ai_summary
-            obj.ai_recommendations = item.ai_recommendations
-            obj.realized_pnl = item.realized_pnl
+            if item.total_value is not None:
+                obj.total_value = item.total_value
+            if item.total_cost is not None:
+                obj.total_cost = item.total_cost
+            if item.total_pnl is not None:
+                obj.total_pnl = item.total_pnl
+            if item.total_pnl_pct is not None:
+                obj.total_pnl_pct = item.total_pnl_pct
+            if item.day_pnl is not None:
+                obj.day_pnl = item.day_pnl
+            if item.day_pnl_pct is not None:
+                obj.day_pnl_pct = item.day_pnl_pct
+            if item.holdings_detail is not None:
+                obj.holdings_detail = item.holdings_detail
+            if item.ai_summary is not None:
+                obj.ai_summary = item.ai_summary
+            if item.ai_recommendations is not None:
+                obj.ai_recommendations = item.ai_recommendations
+            # realized_pnl: 기존 non-zero 값 보존 (SELL 핸들러 우선)
+            if item.realized_pnl is not None:
+                if not (obj.realized_pnl and obj.realized_pnl != 0
+                        and item.realized_pnl == 0):
+                    obj.realized_pnl = item.realized_pnl
+            # 새 컬럼
+            if item.periods is not None:
+                obj.periods = item.periods
+            if item.trade_history is not None:
+                obj.trade_history = item.trade_history
         else:
             db.add(PortfolioSummary(
                 user_id=item.user_id,
@@ -1577,6 +1649,8 @@ def ingest_portfolio_summary(
                 ai_summary=item.ai_summary,
                 ai_recommendations=item.ai_recommendations,
                 realized_pnl=item.realized_pnl,
+                periods=item.periods,
+                trade_history=item.trade_history,
             ))
         upserted += 1
 
@@ -1614,6 +1688,7 @@ def ingest_alerts(
             alert_type=item.alert_type,
             title=item.title,
             message=item.message,
+            priority=item.priority,
             data=item.data,
         ))
         inserted += 1
