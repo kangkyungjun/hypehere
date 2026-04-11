@@ -24,12 +24,13 @@ _ETF_NAME_KEYWORDS = (
 
 
 def _detect_sector(sector: str | None, name: str | None) -> str:
-    if sector:
-        return sector
+    # Always check ETF keywords in name first (even if sector exists)
     if name:
         name_upper = name.upper()
         if any(kw in name_upper for kw in _ETF_NAME_KEYWORDS):
             return "ETF"
+    if sector:
+        return sector
     return "Unknown"
 
 
@@ -39,6 +40,7 @@ def get_treemap(
     sector: Optional[str] = Query(None, description="Filter by sector name"),
     index: Optional[str] = Query(None, description="Filter by index: SP500, DOW30, NASDAQ100"),
     limit: int = Query(500, ge=1, le=2000, description="Max tickers to return"),
+    exclude_etf: bool = Query(True, description="Exclude ETF sector from results"),
     db: Session = Depends(get_db),
 ):
     """
@@ -104,6 +106,8 @@ def get_treemap(
     sector_map = defaultdict(list)
     for row in rows:
         sector_name = _detect_sector(row.sector, row.name)
+        if exclude_etf and sector_name == "ETF":
+            continue
         sector_map[sector_name].append(
             TreemapItem(
                 ticker=row.ticker,

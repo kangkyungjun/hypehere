@@ -283,6 +283,9 @@ class MacroIndicatorResponse(BaseModel):
     risk_level: Optional[str] = None
     liquidity_status: Optional[str] = None
     signal_message: Optional[str] = None
+    high_3m: Optional[float] = None
+    avg_3m: Optional[float] = None
+    low_3m: Optional[float] = None
 
 
 class MacroIndicatorsResponse(BaseModel):
@@ -299,6 +302,9 @@ class MacroSignalResponse(BaseModel):
     liquidity_status: Optional[str] = None
     message: Optional[str] = None
     date: str
+    high_3m: Optional[float] = None
+    avg_3m: Optional[float] = None
+    low_3m: Optional[float] = None
 
 
 class MacroSignalsResponse(BaseModel):
@@ -457,6 +463,9 @@ class NewsItemResponse(BaseModel):
     sentiment_label: str
     future_event: Optional[dict] = None
     is_breaking: bool = False
+    is_hot_topic: bool = False
+    hot_topic_category: Optional[str] = None
+    hot_topic_priority: Optional[int] = None
     ticker_name_ko: Optional[str] = None
     sector: Optional[str] = None
 
@@ -552,10 +561,10 @@ class IndicatorData(BaseModel):
 class AIAnalysisData(BaseModel):
     """AI analysis results (nested structure)"""
     probability: float = Field(..., ge=0, le=1, description="Prediction confidence (0.0-1.0)")
-    summary: str = Field(..., max_length=1000, description="Brief analysis summary (multilingual |||‑packed)")
+    summary: str = Field(..., max_length=4000, description="Brief analysis summary (multilingual |||‑packed)")
     bullish_reasons: List[str] = Field(..., description="List of bullish factors")
     bearish_reasons: List[str] = Field(..., description="List of bearish factors")
-    final_comment: str = Field(..., max_length=2500, description="Final recommendation (multilingual |||‑packed)")
+    final_comment: str = Field(..., max_length=4000, description="Final recommendation (multilingual |||‑packed)")
 
 
 class TrendlineCoefficients(BaseModel):
@@ -856,16 +865,35 @@ class NewsItemIngest(BaseModel):
     """Single news item for ingest from Mac mini"""
     date: Date = Field(..., description="News collection date")
     ticker: str = Field(..., max_length=10, description="Ticker symbol")
-    title: str = Field(..., max_length=512, description="News headline")
+    title: str = Field(..., max_length=1000, description="News headline")
     source: Optional[str] = Field(None, max_length=100, description="News source name")
     source_url: Optional[str] = Field(None, max_length=2048, description="Original article URL")
     published_at: DateTime = Field(..., description="Article publication datetime")
-    ai_summary: str = Field(..., max_length=1000, description="AI-generated summary (multilingual |||‑packed)")
+    ai_summary: str = Field(..., max_length=4000, description="AI-generated summary (multilingual |||‑packed)")
     sentiment_score: int = Field(..., ge=-100, le=100, description="Sentiment score (-100 ~ +100)")
     sentiment_grade: Literal["bullish", "neutral", "bearish"] = Field(..., description="Sentiment grade")
-    sentiment_label: str = Field(..., max_length=100, description="Sentiment label (multilingual |||‑packed)")
+    sentiment_label: str = Field(..., max_length=500, description="Sentiment label (multilingual |||‑packed)")
     future_event: Optional[FutureEventData] = Field(None, description="Upcoming event related to this news")
     is_breaking: Optional[bool] = Field(False, description="Breaking news flag from Mac mini")
+    is_hot_topic: Optional[bool] = Field(False, description="Hot topic flag")
+    hot_topic_category: Optional[str] = Field(None, max_length=30, description="GLOBAL_CRISIS/TRADE_WAR/GEOPOLITICAL/FED_EMERGENCY/MARKET_CRASH/REGULATORY/EARNINGS_SHOCK/SECTOR_SHIFT")
+    hot_topic_priority: Optional[int] = Field(None, ge=1, le=3, description="1=critical, 2=high, 3=medium")
+
+
+class TickerMentionItem(BaseModel):
+    """Single ticker mention count for bubble chart"""
+    ticker: str
+    mention_count: int
+    name_ko: Optional[str] = None
+    sector: Optional[str] = None
+    dominant_sentiment: str = "neutral"  # bullish/bearish/neutral
+    avg_sentiment_score: float = 0.0
+
+
+class TickerMentionBubbleResponse(BaseModel):
+    """Ticker mention bubble chart data"""
+    items: List[TickerMentionItem] = Field(default_factory=list)
+    period_hours: int = 24
 
 
 class NewsIngestPayload(BaseModel):
@@ -1165,8 +1193,8 @@ class AlertItem(BaseModel):
     user_id: int
     ticker: Optional[str] = Field(None, max_length=10)
     alert_type: str = Field(..., max_length=30)
-    title: str = Field(..., max_length=500)    # 다국어 ||| 패킹
-    message: Optional[str] = Field(None, max_length=2000)
+    title: str = Field(..., max_length=2000)    # 다국어 ||| 패킹
+    message: Optional[str] = Field(None, max_length=4000)
     priority: Optional[str] = Field(None, max_length=10)  # HIGH/MEDIUM/LOW
     name_ko: Optional[str] = None              # 맥미니 전송, 저장 안 함
     name_en: Optional[str] = None              # 맥미니 전송, 저장 안 함

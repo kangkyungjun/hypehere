@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from datetime import date as DateType, timedelta
-from typing import Optional, List
+from typing import Optional, List, Dict, Tuple
 
 from app.database import get_db
 from app.models import MacroIndicator, MacroChartData
@@ -19,6 +19,46 @@ INDICATOR_ORDER = ["FEDFUNDS", "DGS10", "DGS2", "T10Y2Y", "VIXCLS", "CPIAUCSL", 
 
 # Signal codes (시장레이더/머니프린팅)
 SIGNAL_CODES = {"yield_curve", "m2_liquidity"}
+
+
+def _compute_3m_stats(
+    db: Session, indicator_codes: List[str], is_signal: bool, target_date: DateType,
+) -> Dict[str, Tuple[Optional[float], Optional[float], Optional[float]]]:
+    """Compute 90-day high/avg/low per indicator_code.
+
+    Returns dict: {code: (high_3m, avg_3m, low_3m)}
+    """
+    from_date = target_date - timedelta(days=90)
+    source_filter = (
+        MacroIndicator.source == 'SIGNAL' if is_signal
+        else MacroIndicator.source != 'SIGNAL'
+    )
+
+    rows = (
+        db.query(
+            MacroIndicator.indicator_code,
+            func.max(MacroIndicator.value),
+            func.avg(MacroIndicator.value),
+            func.min(MacroIndicator.value),
+        )
+        .filter(
+            MacroIndicator.indicator_code.in_(indicator_codes),
+            MacroIndicator.date >= from_date,
+            MacroIndicator.date <= target_date,
+            source_filter,
+        )
+        .group_by(MacroIndicator.indicator_code)
+        .all()
+    )
+
+    result = {}
+    for code, high, avg, low in rows:
+        result[code] = (
+            round(high, 4) if high is not None else None,
+            round(float(avg), 4) if avg is not None else None,
+            round(low, 4) if low is not None else None,
+        )
+    return result
 
 
 @router.get("/indicators", response_model=MacroIndicatorsResponse)
@@ -47,6 +87,10 @@ def get_macro_indicators(
         if r.indicator_code not in INDICATOR_ORDER:
             sorted_rows.append(r)
 
+    # 3-month stats
+    codes = [r.indicator_code for r in sorted_rows]
+    stats_3m = _compute_3m_stats(db, codes, is_signal=False, target_date=target_date)
+
     return MacroIndicatorsResponse(
         date=str(target_date),
         indicators=[
@@ -60,6 +104,9 @@ def get_macro_indicators(
                 risk_level=r.risk_level,
                 liquidity_status=r.liquidity_status,
                 signal_message=r.signal_message,
+                high_3m=stats_3m.get(r.indicator_code, (None, None, None))[0],
+                avg_3m=stats_3m.get(r.indicator_code, (None, None, None))[1],
+                low_3m=stats_3m.get(r.indicator_code, (None, None, None))[2],
             )
             for r in sorted_rows
         ],
@@ -85,6 +132,10 @@ def get_macro_signals(
         MacroIndicator.source == 'SIGNAL',
     ).all()
 
+    # 3-month stats
+    codes = [r.indicator_code for r in rows]
+    stats_3m = _compute_3m_stats(db, codes, is_signal=True, target_date=target_date)
+
     return MacroSignalsResponse(
         date=str(target_date),
         signals=[
@@ -95,6 +146,9 @@ def get_macro_signals(
                 liquidity_status=r.liquidity_status,
                 message=r.signal_message,
                 date=str(r.date),
+                high_3m=stats_3m.get(r.indicator_code, (None, None, None))[0],
+                avg_3m=stats_3m.get(r.indicator_code, (None, None, None))[1],
+                low_3m=stats_3m.get(r.indicator_code, (None, None, None))[2],
             )
             for r in rows
         ],

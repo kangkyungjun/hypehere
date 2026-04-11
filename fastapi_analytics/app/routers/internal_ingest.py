@@ -1145,10 +1145,17 @@ def ingest_scores(payload: IngestPayload, db: Session = Depends(get_db)):
 def ingest_earnings_week(payload: EarningsWeekIngestPayload, db: Session = Depends(get_db)):
     """
     이번 주 + 다음 주 실적 발표 일정 업로드 (Mac mini → AWS).
-    전체 교체: 기존 데이터 전부 DELETE → INSERT.
+    payload의 week_start~week_end 범위만 교체하여 과거 실적 보존.
+    3년 초과 데이터 자동 정리.
     """
-    # 전체 삭제 (this + next 주 모두 포함하므로 범위 제한 불필요)
-    db.query(EarningsWeekEvent).delete()
+    ws = datetime.strptime(payload.week_start, "%Y-%m-%d").date()
+    # week_end 이후 다음 주 일요일까지 커버 (this+next 2주분)
+    we = datetime.strptime(payload.week_end, "%Y-%m-%d").date() + timedelta(days=7)
+
+    deleted = db.query(EarningsWeekEvent).filter(
+        EarningsWeekEvent.earnings_date >= ws,
+        EarningsWeekEvent.earnings_date <= we,
+    ).delete()
 
     inserted = 0
     for event in payload.events:
@@ -1176,6 +1183,15 @@ def ingest_earnings_week(payload: EarningsWeekIngestPayload, db: Session = Depen
         ))
         inserted += 1
 
+    # 3년 초과 데이터 정리
+    from datetime import timedelta
+    cutoff = date.today() - timedelta(days=1095)
+    cleaned = db.query(EarningsWeekEvent).filter(
+        EarningsWeekEvent.earnings_date < cutoff
+    ).delete()
+    if cleaned:
+        logger.info(f"Earnings cleanup: removed {cleaned} events older than {cutoff}")
+
     db.commit()
 
     return {
@@ -1183,7 +1199,9 @@ def ingest_earnings_week(payload: EarningsWeekIngestPayload, db: Session = Depen
         "date": payload.date,
         "week_start": payload.week_start,
         "week_end": payload.week_end,
+        "deleted_range": deleted,
         "inserted": inserted,
+        "cleaned_old": cleaned,
     }
 
 
@@ -1275,9 +1293,14 @@ def ingest_news(payload: NewsIngestPayload, db: Session = Depends(get_db)):
     - 3년 자동 cleanup
     """
     upserted = 0
+    seen = set()  # 배치 내 중복 방지
 
     for item in payload.items:
         title_hash = hashlib.md5(item.title.lower().strip().encode("utf-8")).hexdigest()
+        dedup_key = (item.ticker.upper(), str(item.date), title_hash)
+        if dedup_key in seen:
+            continue
+        seen.add(dedup_key)
 
         obj = db.query(TickerNews).filter(
             TickerNews.ticker == item.ticker.upper(),
@@ -1298,6 +1321,9 @@ def ingest_news(payload: NewsIngestPayload, db: Session = Depends(get_db)):
             obj.sentiment_label = item.sentiment_label
             obj.future_event = future_event_dict
             obj.is_breaking = item.is_breaking or False
+            obj.is_hot_topic = item.is_hot_topic or False
+            obj.hot_topic_category = item.hot_topic_category
+            obj.hot_topic_priority = item.hot_topic_priority
             obj.updated_at = datetime.utcnow()
         else:
             db.add(TickerNews(
@@ -1314,6 +1340,9 @@ def ingest_news(payload: NewsIngestPayload, db: Session = Depends(get_db)):
                 sentiment_label=item.sentiment_label,
                 future_event=future_event_dict,
                 is_breaking=item.is_breaking or False,
+                is_hot_topic=item.is_hot_topic or False,
+                hot_topic_category=item.hot_topic_category,
+                hot_topic_priority=item.hot_topic_priority,
             ))
         upserted += 1
 
@@ -1463,8 +1492,8 @@ def ingest_calendar(payload: MarketCalendarIngestPayload, db: Session = Depends(
         upserted += 1
 
     # 3년 초과 데이터 정리
-    from dateutil.relativedelta import relativedelta
-    cutoff = date.today() - relativedelta(years=3)
+    from datetime import timedelta
+    cutoff = date.today() - timedelta(days=1095)
     deleted = db.query(MarketCalendarEvent).filter(
         MarketCalendarEvent.event_date < cutoff
     ).delete()

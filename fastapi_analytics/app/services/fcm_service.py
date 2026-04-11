@@ -432,6 +432,7 @@ def process_news_notifications(db: Session, today: date, ticker: str,
     if ticker == "MARKET":
         sent = _send_localized_to_all(db, signal_type, params, data={
             "type": "MARKET_NEWS", "sentiment": sentiment_grade,
+            "ticker": "MARKET",
         })
     else:
         sent = _send_localized_to_subscribers(db, ticker, signal_type, params, data={

@@ -254,10 +254,10 @@ class TickerAIAnalysis(Base):
     ticker = Column(String(10), primary_key=True, index=True)
     date = Column(Date, primary_key=True, index=True)
     probability = Column(Float, nullable=False)
-    summary = Column(String(1000), nullable=False)
+    summary = Column(String(4000), nullable=False)
     bullish_reasons = Column(JSONB)  # Array of strings
     bearish_reasons = Column(JSONB)  # Array of strings
-    final_comment = Column(String(2500))
+    final_comment = Column(String(4000))
     created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
 
 
@@ -535,17 +535,20 @@ class TickerNews(Base):
     id = Column(BigInteger, primary_key=True, autoincrement=True)
     date = Column(Date, nullable=False, index=True)
     ticker = Column(String(10), nullable=False, index=True)
-    title = Column(String(512), nullable=False)
+    title = Column(String(1000), nullable=False)
     title_hash = Column(String(32), nullable=False)
     source = Column(String(100))
     source_url = Column(String(2048))
     published_at = Column(TIMESTAMP, nullable=False)
-    ai_summary = Column(String(1000), nullable=False)
+    ai_summary = Column(String(4000), nullable=False)
     sentiment_score = Column(Integer, nullable=False)
     sentiment_grade = Column(String(10), nullable=False)
-    sentiment_label = Column(String(100), nullable=False)
+    sentiment_label = Column(String(500), nullable=False)
     future_event = Column(JSONB)
     is_breaking = Column(Boolean, default=False)
+    is_hot_topic = Column(Boolean, default=False)
+    hot_topic_category = Column(String(30))    # GLOBAL_CRISIS, TRADE_WAR, GEOPOLITICAL, FED_EMERGENCY, MARKET_CRASH, REGULATORY, EARNINGS_SHOCK, SECTOR_SHIFT
+    hot_topic_priority = Column(Integer)       # 1=critical, 2=high, 3=medium
     created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
     updated_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
 
@@ -592,7 +595,7 @@ class MarketCalendarEvent(Base):
     id = Column(String(16), primary_key=True)
     event_date = Column(Date, nullable=False, index=True)
     event_type = Column(String(30), nullable=False)
-    title = Column(String(500), nullable=False)       # "ko|||en|||zh|||ja|||es"
+    title = Column(String(2000), nullable=False)       # "ko|||en|||zh|||ja|||es"
     description = Column(Text)                         # "ko|||en|||zh|||ja|||es"
     ticker = Column(String(10))
     importance = Column(String(10), server_default=text("'medium'"))
@@ -661,9 +664,9 @@ class PortfolioAdvice(Base):
     date = Column(Date, primary_key=True, index=True)
     signal = Column(String(10))              # BUY / SELL / HOLD
     confidence = Column(Float)               # 0.0 ~ 1.0
-    summary = Column(String(2000))           # 다국어 ||| 패킹
+    summary = Column(String(4000))           # 다국어 ||| 패킹
     reasons = Column(JSONB)                  # {"bullish": [...], "bearish": [...]}
-    target_action = Column(String(500))      # 권고 행동 (다국어 ||| 패킹)
+    target_action = Column(String(2000))      # 권고 행동 (다국어 ||| 패킹)
     created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
 
 
@@ -686,7 +689,7 @@ class PortfolioSummary(Base):
     day_pnl = Column(Float)                  # 일간 손익 (USD)
     day_pnl_pct = Column(Float)              # 일간 수익률 (%)
     holdings_detail = Column(JSONB)          # [{ticker, shares, avg_price, current_price, pnl, pnl_pct}]
-    ai_summary = Column(String(2000), nullable=True)  # 전체 포트폴리오 AI 텍스트
+    ai_summary = Column(String(4000), nullable=True)  # 전체 포트폴리오 AI 텍스트
     ai_recommendations = Column(JSONB, nullable=True)  # 추천사항 리스트 [{type, message, priority}]
     realized_pnl = Column(Float, nullable=True)        # 실현손익 (USD)
     periods = Column(JSONB, nullable=True)             # 기간별 P&L 원본 {today, 1week, 1month, ...}
@@ -708,8 +711,8 @@ class UserAlert(Base):
     user_id = Column(Integer, nullable=False, index=True)
     ticker = Column(String(10), index=True)
     alert_type = Column(String(30), nullable=False)  # PRICE_SURGE, TARGET_HIT, EARNINGS_NEAR, SIGNAL_CHANGE, etc.
-    title = Column(String(500), nullable=False)       # 다국어 ||| 패킹
-    message = Column(String(2000))                    # 다국어 ||| 패킹
+    title = Column(String(2000), nullable=False)       # 다국어 ||| 패킹
+    message = Column(String(4000))                    # 다국어 ||| 패킹
     priority = Column(String(10), nullable=True)     # HIGH / MEDIUM / LOW
     data = Column(JSONB)                              # 추가 데이터 (가격, 변동률 등)
     is_read = Column(Boolean, server_default=text('FALSE'))
