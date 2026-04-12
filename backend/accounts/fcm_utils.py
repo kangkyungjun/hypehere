@@ -148,7 +148,7 @@ def _deactivate_invalid_tokens(invalid_tokens):
 
 
 # ── 알림 히스토리 저장 ─────────────────────────────────────────────
-def _save_notification_history(user_ids, title, body, notification_type, ticker=''):
+def _save_notification_history(user_ids, title, body, notification_type, ticker='', post_id=None):
     """rate limit 무관하게 모든 대상 사용자에게 알림 히스토리 저장"""
     if not user_ids:
         return
@@ -156,6 +156,7 @@ def _save_notification_history(user_ids, title, body, notification_type, ticker=
         NotificationHistory(
             user_id=uid, title=title, body=body,
             notification_type=notification_type, ticker=ticker,
+            post_id=post_id,
         )
         for uid in user_ids
     ]
@@ -190,9 +191,10 @@ def send_general_to_ticker_subscribers(ticker, msg_key, msg_params=None, data=No
     lang_users = defaultdict(list)
     for uid, lang in user_lang_map.items():
         lang_users[lang].append(uid)
+    _post_id = int(data['post_id']) if data and data.get('post_id') else None
     for lang, uids in lang_users.items():
         title, body = _get_msg(lang, msg_key, **params)
-        _save_notification_history(uids, title, body, msg_key, ticker=ticker.upper())
+        _save_notification_history(uids, title, body, msg_key, ticker=ticker.upper(), post_id=_post_id)
 
     sent = 0
     for sub in sub_list:
@@ -208,19 +210,13 @@ def send_general_to_ticker_subscribers(ticker, msg_key, msg_params=None, data=No
         if not devices:
             continue
 
-        # 언어별 그룹핑
-        lang_tokens = defaultdict(list)
-        for token, lang in devices:
-            lang_tokens[lang or DEFAULT_LANG].append(token)
+        # 사용자당 1개 언어로 통일 (최신 토큰 기준, 중복 발송 방지)
+        all_tokens = [token for token, _ in devices]
+        lang = devices[-1][1] or DEFAULT_LANG
+        title, body = _get_msg(lang, msg_key, **params)
+        success, _, _ = _send_fcm(all_tokens, title, body, data)
 
-        any_success = False
-        for lang, tokens in lang_tokens.items():
-            title, body = _get_msg(lang, msg_key, **params)
-            success, _, _ = _send_fcm(tokens, title, body, data)
-            if success > 0:
-                any_success = True
-
-        if any_success:
+        if success > 0:
             _update_rate_limit(sub.user_id)
             sent += 1
 
@@ -231,18 +227,23 @@ def send_general_to_ticker_subscribers(ticker, msg_key, msg_params=None, data=No
 def send_general_to_all(msg_key, msg_params=None, data=None):
     """
     일반 알림: 전체 사용자에게 다국어 발송 (1시간 제한 적용)
+    비로그인(user_id=NULL) 토큰도 포함, rate limit/history는 skip
     """
     params = msg_params or {}
     active_devices = DeviceToken.objects.filter(
         is_active=True
     ).values_list('user_id', 'token', 'language')
 
-    # user별, 언어별 그룹핑
+    # user별, 언어별 그룹핑 (user_id=None은 별도 처리)
     user_lang_tokens = defaultdict(lambda: defaultdict(list))
+    anon_lang_tokens = defaultdict(list)  # 비로그인 토큰
     for user_id, token, lang in active_devices:
-        user_lang_tokens[user_id][lang or DEFAULT_LANG].append(token)
+        if user_id is None:
+            anon_lang_tokens[lang or DEFAULT_LANG].append(token)
+        else:
+            user_lang_tokens[user_id][lang or DEFAULT_LANG].append(token)
 
-    # 히스토리 저장: rate limit 무관하게 전체 사용자 (언어별)
+    # 히스토리 저장: 로그인 사용자만 (비로그인은 skip)
     lang_users = defaultdict(list)
     for user_id, lang_dict in user_lang_tokens.items():
         first_lang = next(iter(lang_dict.keys()), DEFAULT_LANG)
@@ -252,22 +253,32 @@ def send_general_to_all(msg_key, msg_params=None, data=None):
         _save_notification_history(uids, title, body, msg_key)
 
     sent = 0
-    for user_id, lang_tokens in user_lang_tokens.items():
+
+    # 로그인 사용자: 사용자당 1개 언어로 통일 발송 (중복 방지)
+    for user_id, lang_dict in user_lang_tokens.items():
         if not can_send_general(user_id):
             continue
 
-        any_success = False
-        for lang, tokens in lang_tokens.items():
-            title, body = _get_msg(lang, msg_key, **params)
-            success, _, _ = _send_fcm(tokens, title, body, data)
-            if success > 0:
-                any_success = True
+        all_tokens = []
+        last_lang = DEFAULT_LANG
+        for lang, tokens in lang_dict.items():
+            all_tokens.extend(tokens)
+            last_lang = lang
+        title, body = _get_msg(last_lang, msg_key, **params)
+        success, _, _ = _send_fcm(all_tokens, title, body, data)
 
-        if any_success:
+        if success > 0:
             _update_rate_limit(user_id)
             sent += 1
 
-    logger.info(f"General notification [ALL]: sent to {sent} users")
+    # 비로그인 토큰: rate limit/history 없이 바로 발송
+    for lang, tokens in anon_lang_tokens.items():
+        title, body = _get_msg(lang, msg_key, **params)
+        success, _, _ = _send_fcm(tokens, title, body, data)
+        if success > 0:
+            sent += 1
+
+    logger.info(f"General notification [ALL]: sent to {sent} users/devices")
     return sent
 
 
@@ -288,20 +299,16 @@ def send_comment_notification(user_id, msg_key, msg_params=None, data=None):
         first_lang = devices[0][1] or DEFAULT_LANG
     title_h, body_h = _get_msg(first_lang, msg_key, **params)
     ticker = params.get('ticker', '')
-    _save_notification_history([user_id], title_h, body_h, msg_key, ticker=ticker)
+    _post_id = int(data['post_id']) if data and data.get('post_id') else None
+    _save_notification_history([user_id], title_h, body_h, msg_key, ticker=ticker, post_id=_post_id)
 
     if not devices:
         return 0
 
-    # 언어별 그룹핑
-    lang_tokens = defaultdict(list)
-    for token, lang in devices:
-        lang_tokens[lang or DEFAULT_LANG].append(token)
+    # 사용자당 1개 언어로 통일 (최신 토큰 기준, 중복 발송 방지)
+    all_tokens = [token for token, _ in devices]
+    lang = devices[-1][1] or DEFAULT_LANG
+    title, body = _get_msg(lang, msg_key, **params)
+    success, _, _ = _send_fcm(all_tokens, title, body, data)
 
-    total_success = 0
-    for lang, tokens in lang_tokens.items():
-        title, body = _get_msg(lang, msg_key, **params)
-        success, _, _ = _send_fcm(tokens, title, body, data)
-        total_success += success
-
-    return total_success
+    return success

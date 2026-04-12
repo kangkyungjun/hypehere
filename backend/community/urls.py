@@ -31,6 +31,25 @@ urlpatterns = [
         name='post-comment-detail'
     ),
 
+    # Nested route: 댓글 좋아요 추가/취소
+    path(
+        'posts/<int:post_pk>/comments/<int:pk>/like/',
+        CommentViewSet.as_view({'post': 'like'}),
+        name='post-comment-like'
+    ),
+    path(
+        'posts/<int:post_pk>/comments/<int:pk>/unlike/',
+        CommentViewSet.as_view({'delete': 'unlike'}),
+        name='post-comment-unlike'
+    ),
+
+    # Nested route: 댓글 신고
+    path(
+        'posts/<int:post_pk>/comments/<int:pk>/report/',
+        CommentViewSet.as_view({'post': 'report'}),
+        name='post-comment-report'
+    ),
+
     # 내 댓글 목록
     path('posts/comments/my/', my_comments_view, name='my-comments'),
 ]

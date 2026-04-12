@@ -1,9 +1,18 @@
+import logging
+
 from rest_framework import viewsets, status
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from django.db import transaction
 from .models import Post, Comment, PostLike, CommentLike
+from moderation.models import PostReport, CommentReport
+from accounts.fcm_utils import (
+    send_general_to_ticker_subscribers,
+    send_comment_notification,
+)
+
+logger = logging.getLogger(__name__)
 from .serializers import (
     PostSerializer,
     PostListSerializer,
@@ -61,6 +70,20 @@ class PostViewSet(viewsets.ModelViewSet):
             return PostListSerializer
         return PostSerializer
 
+    def perform_create(self, serializer):
+        """글 작성 + FCM 알림 (일반, 1시간 제한)"""
+        post = serializer.save(author=self.request.user)
+        try:
+            send_general_to_ticker_subscribers(
+                ticker=post.ticker,
+                msg_key="NEW_POST",
+                msg_params={"ticker": post.ticker, "title": post.title[:100]},
+                data={"type": "NEW_POST", "post_id": str(post.id), "ticker": post.ticker},
+                exclude_user=self.request.user.id,
+            )
+        except Exception as e:
+            logger.error(f"FCM new post error: {e}")
+
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticatedOrReadOnly])
     def like(self, request, pk=None):
         """
@@ -87,6 +110,23 @@ class PostViewSet(viewsets.ModelViewSet):
         with transaction.atomic():
             PostLike.objects.create(post=post, user=request.user)
             post.increment_like_count()
+
+        # 인기글 알림 (일반, 1시간 제한)
+        post.refresh_from_db()
+        if post.like_count in (10, 30, 100):
+            try:
+                send_general_to_ticker_subscribers(
+                    ticker=post.ticker,
+                    msg_key="HOT_POST",
+                    msg_params={"ticker": post.ticker, "title": post.title[:50], "count": post.like_count},
+                    data={
+                        "type": f"HOT_POST_{post.like_count}",
+                        "post_id": str(post.id),
+                        "ticker": post.ticker,
+                    },
+                )
+            except Exception as e:
+                logger.error(f"FCM hot post error: {e}")
 
         return Response(
             {'detail': '좋아요를 추가했습니다.'},
@@ -123,6 +163,39 @@ class PostViewSet(viewsets.ModelViewSet):
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticatedOrReadOnly])
+    def search(self, request):
+        """
+        게시글 검색 (제목 + 내용)
+        Flutter: GET /api/community/posts/search/?q=<query>&ticker=<ticker>
+        """
+        from django.db.models import Q
+
+        query = request.query_params.get('q', '').strip()
+        if not query:
+            return Response([])
+
+        queryset = Post.objects.filter(
+            is_deleted=False,
+        ).filter(
+            Q(title__icontains=query) | Q(content__icontains=query)
+        ).select_related('author')
+
+        # ticker 필터 (선택)
+        ticker = request.query_params.get('ticker')
+        if ticker:
+            queryset = queryset.filter(ticker=ticker.upper())
+
+        queryset = queryset.order_by('-created_at')
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = PostListSerializer(page, many=True, context={'request': request})
+            return self.get_paginated_response(serializer.data)
+
+        serializer = PostListSerializer(queryset, many=True, context={'request': request})
+        return Response(serializer.data)
+
     @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
     def my(self, request):
         """
@@ -140,6 +213,51 @@ class PostViewSet(viewsets.ModelViewSet):
 
         serializer = PostListSerializer(queryset, many=True, context={'request': request})
         return Response(serializer.data)
+
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    def report(self, request, pk=None):
+        """
+        게시글 신고
+        Flutter: POST /api/community/posts/{id}/report/
+        Body: {"report_type": "spam|abuse|false_info|inappropriate|other", "description": ""}
+        """
+        post = self.get_object()
+
+        # 자기 글 신고 방지
+        if post.author == request.user:
+            return Response(
+                {'detail': '본인의 게시글은 신고할 수 없습니다.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # 중복 신고 방지
+        if PostReport.objects.filter(post=post, reporter=request.user).exists():
+            return Response(
+                {'detail': '이미 신고한 게시글입니다.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        report_type = request.data.get('report_type', 'other')
+        description = request.data.get('description', '')
+
+        valid_reasons = [c[0] for c in PostReport.REASON_CHOICES]
+        if report_type not in valid_reasons:
+            return Response(
+                {'detail': f'유효하지 않은 신고 사유입니다. ({", ".join(valid_reasons)})'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        PostReport.objects.create(
+            post=post,
+            reporter=request.user,
+            reason=report_type,
+            description=description[:500],
+        )
+
+        return Response(
+            {'detail': '신고가 접수되었습니다.'},
+            status=status.HTTP_201_CREATED
+        )
 
 
 class CommentViewSet(viewsets.ModelViewSet):
@@ -176,7 +294,7 @@ class CommentViewSet(viewsets.ModelViewSet):
         return queryset.order_by('created_at')
 
     def perform_create(self, serializer):
-        """댓글 생성 시 post의 comment_count 증가"""
+        """댓글 생성 시 post의 comment_count 증가 + FCM 알림"""
         # Nested route: URL에서 post_pk 가져오기
         post_pk = self.kwargs.get('post_pk')
         if post_pk:
@@ -190,6 +308,39 @@ class CommentViewSet(viewsets.ModelViewSet):
         if comment.parent is None:
             with transaction.atomic():
                 comment.post.increment_comment_count()
+
+        # FCM 댓글 알림 (즉시, 제한 면제)
+        try:
+            post_obj = comment.post
+            author = self.request.user
+
+            # 1) 글 작성자에게 알림 (본인 댓글 제외)
+            if post_obj.author_id != author.id:
+                send_comment_notification(
+                    user_id=post_obj.author_id,
+                    msg_key="COMMENT_ON_MY_POST",
+                    msg_params={"ticker": post_obj.ticker, "nickname": author.nickname, "content": comment.content[:80]},
+                    data={"type": "COMMENT_ON_MY_POST", "post_id": str(post_obj.id), "ticker": post_obj.ticker},
+                )
+
+            # 2) 같은 글에 댓글 단 다른 사용자들에게 알림
+            commenters = Comment.objects.filter(
+                post=post_obj, is_deleted=False
+            ).exclude(
+                author_id=author.id
+            ).exclude(
+                author_id=post_obj.author_id
+            ).values_list('author_id', flat=True).distinct()
+
+            for user_id in commenters:
+                send_comment_notification(
+                    user_id=user_id,
+                    msg_key="COMMENT_ON_THREAD",
+                    msg_params={"ticker": post_obj.ticker, "nickname": author.nickname, "content": comment.content[:80]},
+                    data={"type": "COMMENT_ON_THREAD", "post_id": str(post_obj.id), "ticker": post_obj.ticker},
+                )
+        except Exception as e:
+            logger.error(f"FCM comment error: {e}")
 
     def perform_destroy(self, instance):
         """댓글 삭제 시 소프트 삭제 및 post의 comment_count 감소"""
@@ -262,6 +413,51 @@ class CommentViewSet(viewsets.ModelViewSet):
             comment.decrement_like_count()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    def report(self, request, pk=None, **kwargs):
+        """
+        댓글 신고
+        Flutter: POST /api/community/posts/{post_pk}/comments/{id}/report/
+        Body: {"report_type": "spam|abuse|false_info|inappropriate|other", "description": ""}
+        """
+        comment = self.get_object()
+
+        # 자기 댓글 신고 방지
+        if comment.author == request.user:
+            return Response(
+                {'detail': '본인의 댓글은 신고할 수 없습니다.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # 중복 신고 방지
+        if CommentReport.objects.filter(comment=comment, reporter=request.user).exists():
+            return Response(
+                {'detail': '이미 신고한 댓글입니다.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        report_type = request.data.get('report_type', 'other')
+        description = request.data.get('description', '')
+
+        valid_reasons = [c[0] for c in CommentReport.REASON_CHOICES]
+        if report_type not in valid_reasons:
+            return Response(
+                {'detail': f'유효하지 않은 신고 사유입니다. ({", ".join(valid_reasons)})'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        CommentReport.objects.create(
+            comment=comment,
+            reporter=request.user,
+            reason=report_type,
+            description=description[:500],
+        )
+
+        return Response(
+            {'detail': '신고가 접수되었습니다.'},
+            status=status.HTTP_201_CREATED
+        )
 
 
 @api_view(['GET'])

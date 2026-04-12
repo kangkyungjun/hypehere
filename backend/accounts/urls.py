@@ -10,6 +10,10 @@ from .views import (
     profile_view,
     update_profile_view,
     change_password_view,
+    send_verification_code_view,
+    verify_code_view,
+    password_reset_request_view,
+    password_reset_confirm_view,
     request_deletion_view,
     cancel_deletion_view,
     search_users_view,
@@ -33,6 +37,14 @@ urlpatterns = [
     path('profile/', profile_view, name='profile'),
     path('update/', update_profile_view, name='update-profile'),
     path('change-password/', change_password_view, name='change-password'),
+
+    # 이메일 인증
+    path('verification/send/', send_verification_code_view, name='verification-send'),
+    path('verification/verify/', verify_code_view, name='verification-verify'),
+
+    # 비밀번호 재설정
+    path('password-reset/request/', password_reset_request_view, name='password-reset-request'),
+    path('password-reset/confirm/', password_reset_confirm_view, name='password-reset-confirm'),
 
     # 회원탈퇴
     path('request-deletion/', request_deletion_view, name='request-deletion'),

@@ -73,7 +73,7 @@ ROOT_URLCONF = "marketlens_backend.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / 'templates'],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -198,3 +198,17 @@ FIREBASE_CREDENTIALS_PATH = os.getenv(
     'FIREBASE_CREDENTIALS_PATH',
     str(BASE_DIR.parent / 'secrets' / 'firebase-service-account.json')
 )
+
+# Email (Gmail SMTP)
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', 'marketlens.service@gmail.com')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'marketlens.service@gmail.com')
+
+# Email verification settings
+VERIFICATION_CODE_EXPIRY_MINUTES = 10
+VERIFICATION_CODE_MAX_ATTEMPTS = 5
+VERIFICATION_CODE_RESEND_COOLDOWN_SECONDS = 60

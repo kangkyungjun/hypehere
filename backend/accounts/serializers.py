@@ -13,9 +13,9 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'id', 'email', 'nickname', 'profile_picture', 'bio',
-            'watchlist_tickers', 'role', 'created_at'
+            'watchlist_tickers', 'role', 'is_email_verified', 'created_at'
         ]
-        read_only_fields = ['id', 'email', 'role', 'created_at']
+        read_only_fields = ['id', 'email', 'role', 'is_email_verified', 'created_at']
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -118,13 +118,11 @@ class ChangePasswordSerializer(serializers.Serializer):
         return value
 
 
-class DeviceTokenSerializer(serializers.ModelSerializer):
-    """FCM 디바이스 토큰 등록/갱신"""
+class DeviceTokenSerializer(serializers.Serializer):
+    """FCM 디바이스 토큰 등록/갱신 (uniqueness handled by view's update_or_create)"""
+    token = serializers.CharField()
+    platform = serializers.ChoiceField(choices=DeviceToken.PLATFORM_CHOICES)
     language = serializers.CharField(max_length=10, default='en')
-
-    class Meta:
-        model = DeviceToken
-        fields = ['token', 'platform', 'language']
 
 
 class SubscriptionSyncSerializer(serializers.Serializer):
@@ -133,3 +131,40 @@ class SubscriptionSyncSerializer(serializers.Serializer):
         child=serializers.CharField(max_length=50),
         allow_empty=True,
     )
+
+
+class SendVerificationCodeSerializer(serializers.Serializer):
+    """인증코드 발송 요청"""
+    email = serializers.EmailField(required=True)
+    purpose = serializers.ChoiceField(choices=['signup', 'password_reset'], required=True)
+
+
+class VerifyCodeSerializer(serializers.Serializer):
+    """인증코드 확인"""
+    email = serializers.EmailField(required=True)
+    code = serializers.CharField(max_length=6, min_length=6, required=True)
+    purpose = serializers.ChoiceField(choices=['signup', 'password_reset'], required=True)
+
+
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    """비밀번호 재설정 확인"""
+    email = serializers.EmailField(required=True)
+    code = serializers.CharField(max_length=6, min_length=6, required=True)
+    new_password = serializers.CharField(
+        required=True,
+        write_only=True,
+        validators=[validate_password],
+        style={'input_type': 'password'},
+    )
+    new_password_confirm = serializers.CharField(
+        required=True,
+        write_only=True,
+        style={'input_type': 'password'},
+    )
+
+    def validate(self, attrs):
+        if attrs['new_password'] != attrs['new_password_confirm']:
+            raise serializers.ValidationError({
+                'new_password_confirm': '새 비밀번호가 일치하지 않습니다.'
+            })
+        return attrs

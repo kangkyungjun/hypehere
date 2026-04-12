@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.utils import timezone
 
 
 class CustomUser(AbstractUser):
@@ -45,11 +46,14 @@ class CustomUser(AbstractUser):
     deletion_requested_at = models.DateTimeField(null=True, blank=True)
     DELETION_GRACE_DAYS = 7
 
+    # 이메일 인증
+    is_email_verified = models.BooleanField(default=False)
+
     # 관심 종목 (JSON 배열)
     watchlist_tickers = models.JSONField(default=list, blank=True)
 
     class Meta:
-        db_table = 'users'
+        db_table = 'accounts_user'
         verbose_name = '사용자'
         verbose_name_plural = '사용자'
         indexes = [
@@ -100,7 +104,10 @@ class DeviceToken(models.Model):
     """FCM 디바이스 토큰"""
     PLATFORM_CHOICES = [('android', 'Android'), ('ios', 'iOS')]
 
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='device_tokens')
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+        related_name='device_tokens', null=True, blank=True,
+    )
     token = models.TextField(unique=True)
     platform = models.CharField(max_length=10, choices=PLATFORM_CHOICES)
     language = models.CharField(max_length=10, default='en')
@@ -116,7 +123,9 @@ class DeviceToken(models.Model):
         ]
 
     def __str__(self):
-        return f"{self.user.nickname} ({self.platform})"
+        if self.user_id:
+            return f"{self.user.nickname} ({self.platform})"
+        return f"anonymous ({self.platform})"
 
 
 class NotificationSubscription(models.Model):
@@ -157,6 +166,7 @@ class NotificationHistory(models.Model):
     body = models.TextField()
     notification_type = models.CharField(max_length=30)
     ticker = models.CharField(max_length=50, blank=True, default='')
+    post_id = models.IntegerField(null=True, blank=True)
     is_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -170,3 +180,40 @@ class NotificationHistory(models.Model):
 
     def __str__(self):
         return f"{self.user_id} [{self.notification_type}] {self.title}"
+
+
+class EmailVerificationCode(models.Model):
+    """이메일 인증 코드 (회원가입 / 비밀번호 재설정)"""
+    PURPOSE_CHOICES = [
+        ('signup', 'Sign Up'),
+        ('password_reset', 'Password Reset'),
+    ]
+
+    email = models.EmailField(db_index=True)
+    code = models.CharField(max_length=6)
+    purpose = models.CharField(max_length=20, choices=PURPOSE_CHOICES)
+    is_used = models.BooleanField(default=False)
+    attempts = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+
+    class Meta:
+        db_table = 'accounts_email_verification_code'
+        indexes = [
+            models.Index(fields=['email', 'purpose', '-created_at']),
+        ]
+
+    @property
+    def is_expired(self):
+        return timezone.now() > self.expires_at
+
+    @property
+    def is_valid(self):
+        return (
+            not self.is_used
+            and not self.is_expired
+            and self.attempts < settings.VERIFICATION_CODE_MAX_ATTEMPTS
+        )
+
+    def __str__(self):
+        return f"{self.email} [{self.purpose}] {self.code}"

@@ -12,8 +12,10 @@ from django.utils import timezone
 from .serializers import (
     RegisterSerializer, LoginSerializer, UserSerializer, ChangePasswordSerializer,
     DeviceTokenSerializer, SubscriptionSyncSerializer,
+    SendVerificationCodeSerializer, VerifyCodeSerializer, PasswordResetConfirmSerializer,
 )
 from .models import DeviceToken, NotificationSubscription, NotificationHistory
+from .email_utils import create_and_send_code, verify_code
 from .fcm_utils import send_general_to_all, _send_fcm
 
 User = get_user_model()
@@ -24,11 +26,31 @@ User = get_user_model()
 def register_view(request):
     """
     회원가입 → {user, token, message}
+    이메일 인증 완료 후에만 가입 가능
     Flutter: POST /api/accounts/register/
     """
     serializer = RegisterSerializer(data=request.data)
     if serializer.is_valid():
+        email = serializer.validated_data['email']
+
+        # 이메일 인증 완료 여부 확인
+        from .models import EmailVerificationCode
+        verified = EmailVerificationCode.objects.filter(
+            email=email,
+            purpose='signup',
+            is_used=True,
+        ).exists()
+
+        if not verified:
+            return Response(
+                {'error': '이메일 인증이 완료되지 않았습니다.', 'email_not_verified': True},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         user = serializer.save()
+        user.is_email_verified = True
+        user.save(update_fields=['is_email_verified'])
+
         token, _ = Token.objects.get_or_create(user=user)
         return Response({
             'user': UserSerializer(user).data,
@@ -43,11 +65,19 @@ def register_view(request):
 def login_view(request):
     """
     로그인 → {user, token, message}
+    이메일 미인증 사용자는 403 반환
     Flutter: POST /api/accounts/login/
     """
     serializer = LoginSerializer(data=request.data, context={'request': request})
     if serializer.is_valid():
         user = serializer.validated_data['user']
+
+        if not user.is_email_verified:
+            return Response(
+                {'error': '이메일 인증이 완료되지 않았습니다.', 'email_not_verified': True},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
         token, _ = Token.objects.get_or_create(user=user)
         return Response({
             'user': UserSerializer(user).data,
@@ -110,6 +140,169 @@ def change_password_view(request):
             'message': '비밀번호가 변경되었습니다.',
         }, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# ========================================
+# 이메일 인증 API
+# ========================================
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def send_verification_code_view(request):
+    """
+    인증코드 발송
+    signup: 이메일 중복 체크 후 발송
+    password_reset: 존재 여부 숨김 (항상 200)
+    Flutter: POST /api/accounts/verification/send/
+    """
+    serializer = SendVerificationCodeSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    email = serializer.validated_data['email']
+    purpose = serializer.validated_data['purpose']
+
+    if purpose == 'signup':
+        # 이미 가입된 이메일 체크
+        if User.objects.filter(email=email).exists():
+            return Response(
+                {'error': '이미 가입된 이메일입니다.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+    if purpose == 'password_reset':
+        # email enumeration 방지: 존재하지 않아도 동일 응답
+        if not User.objects.filter(email=email).exists():
+            return Response({'message': '인증코드가 발송되었습니다.'})
+
+    success, error, cooldown = create_and_send_code(email, purpose)
+
+    if success:
+        return Response({'message': '인증코드가 발송되었습니다.'})
+
+    if error == 'cooldown':
+        return Response(
+            {'error': '잠시 후 다시 시도해주세요.', 'cooldown_remaining': cooldown},
+            status=status.HTTP_429_TOO_MANY_REQUESTS,
+        )
+
+    return Response(
+        {'error': '이메일 발송에 실패했습니다. 잠시 후 다시 시도해주세요.'},
+        status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+    )
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def verify_code_view(request):
+    """
+    인증코드 확인
+    Flutter: POST /api/accounts/verification/verify/
+    """
+    serializer = VerifyCodeSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    email = serializer.validated_data['email']
+    code = serializer.validated_data['code']
+    purpose = serializer.validated_data['purpose']
+
+    success, error_type = verify_code(email, code, purpose)
+
+    if success:
+        return Response({'message': '인증이 완료되었습니다.', 'verified': True})
+
+    error_messages = {
+        'not_found': '인증코드를 찾을 수 없습니다. 새 코드를 요청해주세요.',
+        'expired': '인증코드가 만료되었습니다. 새 코드를 요청해주세요.',
+        'max_attempts': '입력 횟수를 초과했습니다. 새 코드를 요청해주세요.',
+        'invalid_code': '인증코드가 올바르지 않습니다.',
+    }
+
+    return Response(
+        {'error': error_messages.get(error_type, '인증에 실패했습니다.'), 'error_type': error_type},
+        status=status.HTTP_400_BAD_REQUEST,
+    )
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def password_reset_request_view(request):
+    """
+    비밀번호 재설정 코드 발송 (send_verification_code_view의 래퍼)
+    email enumeration 방지: 항상 200 반환
+    Flutter: POST /api/accounts/password-reset/request/
+    """
+    email = (request.data.get('email') or '').strip()
+    if not email:
+        return Response(
+            {'error': '이메일을 입력해주세요.'},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    # 존재하지 않는 이메일이어도 동일 응답
+    if not User.objects.filter(email=email).exists():
+        return Response({'message': '인증코드가 발송되었습니다.'})
+
+    success, error, cooldown = create_and_send_code(email, 'password_reset')
+
+    if success:
+        return Response({'message': '인증코드가 발송되었습니다.'})
+
+    if error == 'cooldown':
+        return Response(
+            {'error': '잠시 후 다시 시도해주세요.', 'cooldown_remaining': cooldown},
+            status=status.HTTP_429_TOO_MANY_REQUESTS,
+        )
+
+    return Response(
+        {'error': '이메일 발송에 실패했습니다. 잠시 후 다시 시도해주세요.'},
+        status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+    )
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def password_reset_confirm_view(request):
+    """
+    코드 검증 + 새 비밀번호 설정 + 기존 토큰 삭제
+    Flutter: POST /api/accounts/password-reset/confirm/
+    """
+    serializer = PasswordResetConfirmSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    email = serializer.validated_data['email']
+    code = serializer.validated_data['code']
+    new_password = serializer.validated_data['new_password']
+
+    # 코드 검증
+    success, error_type = verify_code(email, code, 'password_reset')
+    if not success:
+        error_messages = {
+            'not_found': '인증코드를 찾을 수 없습니다. 새 코드를 요청해주세요.',
+            'expired': '인증코드가 만료되었습니다. 새 코드를 요청해주세요.',
+            'max_attempts': '입력 횟수를 초과했습니다. 새 코드를 요청해주세요.',
+            'invalid_code': '인증코드가 올바르지 않습니다.',
+        }
+        return Response(
+            {'error': error_messages.get(error_type, '인증에 실패했습니다.'), 'error_type': error_type},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    # 비밀번호 변경
+    try:
+        user = User.objects.get(email=email)
+    except User.DoesNotExist:
+        return Response({'message': '비밀번호가 재설정되었습니다.'})
+
+    user.set_password(new_password)
+    user.save(update_fields=['password'])
+
+    # 기존 토큰 전부 삭제 (전 기기 로그아웃)
+    Token.objects.filter(user=user).delete()
+
+    return Response({'message': '비밀번호가 재설정되었습니다. 새 비밀번호로 로그인해주세요.'})
 
 
 # ========================================
@@ -318,11 +511,11 @@ def demote_to_regular_view(request, pk):
 # ========================================
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 def device_register_view(request):
     """
-    FCM 토큰 등록/갱신
-    Flutter: POST /api/accounts/device/register/ {token, platform}
+    FCM 토큰 등록/갱신 (비로그인 사용자도 가능)
+    Flutter: POST /api/accounts/device/register/ {token, platform, language}
     """
     serializer = DeviceTokenSerializer(data=request.data)
     if not serializer.is_valid():
@@ -332,14 +525,23 @@ def device_register_view(request):
     platform = serializer.validated_data['platform']
     language = serializer.validated_data.get('language', 'en')
 
-    # 같은 토큰이 다른 사용자에게 있으면 비활성화
-    DeviceToken.objects.filter(token=token).exclude(user=request.user).update(is_active=False)
+    user = request.user if request.user.is_authenticated else None
+
+    if user:
+        # 로그인 사용자: 같은 토큰이 다른 사용자에게 있으면 비활성화
+        DeviceToken.objects.filter(token=token).exclude(user=user).update(is_active=False)
 
     # UPSERT: 토큰 있으면 갱신, 없으면 생성
     obj, created = DeviceToken.objects.update_or_create(
         token=token,
-        defaults={'user': request.user, 'platform': platform, 'language': language, 'is_active': True},
+        defaults={'user': user, 'platform': platform, 'language': language, 'is_active': True},
     )
+
+    # 같은 사용자의 모든 활성 토큰 언어를 최신 언어로 동기화 (중복 언어 발송 방지)
+    if user:
+        DeviceToken.objects.filter(
+            user=user, is_active=True
+        ).exclude(pk=obj.pk).update(language=language)
 
     return Response({'message': '토큰 등록 완료', 'created': created})
 
@@ -450,6 +652,19 @@ def broadcast_push_view(request):
         data={'type': 'ADMIN_BROADCAST'},
     )
 
+    # 전체 활성 사용자에게 알림 이력 저장 (비로그인 user_id=NULL 제외)
+    users = DeviceToken.objects.filter(
+        is_active=True, user_id__isnull=False,
+    ).values_list('user_id', flat=True).distinct()
+    history_objs = [
+        NotificationHistory(
+            user_id=uid, title=title, body=body,
+            notification_type='ADMIN_BROADCAST', ticker='',
+        )
+        for uid in users
+    ]
+    NotificationHistory.objects.bulk_create(history_objs, ignore_conflicts=True)
+
     return Response({
         'message': f'발송 완료: 성공 {success}, 실패 {failure}',
         'sent': success,
@@ -488,6 +703,7 @@ def notification_history_view(request):
             'body': n.body,
             'notification_type': n.notification_type,
             'ticker': n.ticker,
+            'post_id': n.post_id,
             'is_read': n.is_read,
             'created_at': n.created_at.isoformat(),
         }

@@ -19,13 +19,16 @@ class PostListSerializer(serializers.ModelSerializer):
 
     author = CustomUserSerializer(read_only=True)
     is_liked = serializers.SerializerMethodField()
+    can_edit = serializers.SerializerMethodField()
+    can_delete = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
         fields = [
             'id', 'ticker', 'title', 'content', 'author',
             'like_count', 'comment_count', 'view_count',
-            'created_at', 'updated_at', 'is_liked'
+            'created_at', 'updated_at', 'is_liked',
+            'can_edit', 'can_delete'
         ]
         read_only_fields = [
             'id', 'like_count', 'comment_count', 'view_count',
@@ -43,19 +46,38 @@ class PostListSerializer(serializers.ModelSerializer):
             return False
         return PostLike.objects.filter(post=obj, user=request.user).exists()
 
+    def get_can_edit(self, obj):
+        request = self.context.get('request')
+        if not request or request.user.is_anonymous:
+            return False
+        return (obj.author == request.user
+                or request.user.is_staff
+                or getattr(request.user, 'role', None) in ('master', 'manager'))
+
+    def get_can_delete(self, obj):
+        request = self.context.get('request')
+        if not request or request.user.is_anonymous:
+            return False
+        return (obj.author == request.user
+                or request.user.is_staff
+                or getattr(request.user, 'role', None) in ('master', 'manager'))
+
 
 class PostSerializer(serializers.ModelSerializer):
     """게시글 상세 Serializer (전체 필드)"""
 
     author = CustomUserSerializer(read_only=True)
     is_liked = serializers.SerializerMethodField()
+    can_edit = serializers.SerializerMethodField()
+    can_delete = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
         fields = [
             'id', 'ticker', 'title', 'content', 'author',
             'like_count', 'comment_count', 'view_count',
-            'created_at', 'updated_at', 'is_liked'
+            'created_at', 'updated_at', 'is_liked',
+            'can_edit', 'can_delete'
         ]
         read_only_fields = [
             'id', 'author', 'like_count', 'comment_count', 'view_count',
@@ -68,6 +90,22 @@ class PostSerializer(serializers.ModelSerializer):
         if not request or request.user.is_anonymous:
             return False
         return PostLike.objects.filter(post=obj, user=request.user).exists()
+
+    def get_can_edit(self, obj):
+        request = self.context.get('request')
+        if not request or request.user.is_anonymous:
+            return False
+        return (obj.author == request.user
+                or request.user.is_staff
+                or getattr(request.user, 'role', None) in ('master', 'manager'))
+
+    def get_can_delete(self, obj):
+        request = self.context.get('request')
+        if not request or request.user.is_anonymous:
+            return False
+        return (obj.author == request.user
+                or request.user.is_staff
+                or getattr(request.user, 'role', None) in ('master', 'manager'))
 
     def create(self, validated_data):
         """게시글 생성 시 author 자동 설정"""
@@ -82,6 +120,8 @@ class CommentSerializer(serializers.ModelSerializer):
     author = CustomUserSerializer(read_only=True)
     content = serializers.SerializerMethodField()  # 비회원에게는 숨김 처리
     is_liked = serializers.SerializerMethodField()
+    can_edit = serializers.SerializerMethodField()
+    can_delete = serializers.SerializerMethodField()
     replies = serializers.SerializerMethodField()
 
     class Meta:
@@ -89,7 +129,7 @@ class CommentSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'post', 'content', 'author', 'parent',
             'like_count', 'created_at', 'updated_at',
-            'is_liked', 'replies'
+            'is_liked', 'can_edit', 'can_delete', 'replies'
         ]
         read_only_fields = [
             'id', 'author', 'like_count',
@@ -116,6 +156,22 @@ class CommentSerializer(serializers.ModelSerializer):
         if not request or request.user.is_anonymous:
             return False
         return CommentLike.objects.filter(comment=obj, user=request.user).exists()
+
+    def get_can_edit(self, obj):
+        request = self.context.get('request')
+        if not request or request.user.is_anonymous:
+            return False
+        return (obj.author == request.user
+                or request.user.is_staff
+                or getattr(request.user, 'role', None) in ('master', 'manager'))
+
+    def get_can_delete(self, obj):
+        request = self.context.get('request')
+        if not request or request.user.is_anonymous:
+            return False
+        return (obj.author == request.user
+                or request.user.is_staff
+                or getattr(request.user, 'role', None) in ('master', 'manager'))
 
     def get_replies(self, obj):
         """대댓글 리스트 (parent가 None인 경우에만)"""
