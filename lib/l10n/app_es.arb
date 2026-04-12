@@ -11,8 +11,13 @@
   "tabNewsTooltip": "Noticias del mercado",
   "tabCommunity": "Comunidad",
   "tabCommunityTooltip": "Foro de discusión",
+  "tabMarket": "Mercado",
+  "tabMarketTooltip": "Resumen del Mercado",
+  "tabAILens": "IA",
+  "tabAILensTooltip": "Análisis IA",
   "tabWatchlist": "Favoritos",
   "tabWatchlistTooltip": "Mi lista de seguimiento",
+  "tabHoldingsTooltip": "Mis Posiciones",
 
   "settings": "Ajustes",
   "settingsTooltip": "Ajustes",
@@ -495,6 +500,7 @@
   "passwordChangeInstructions": "• La nueva contraseña debe tener al menos 8 caracteres\n• Usa una combinación de letras, números y símbolos\n• Necesitarás iniciar sesión de nuevo con la nueva contraseña",
 
   "notifications": "Notificaciones",
+  "markAllAsRead": "Marcar todo leído",
   "noNotifications": "No hay notificaciones",
   "notificationsRetentionHint": "Notificaciones de los últimos 7 días.",
 
@@ -522,6 +528,8 @@
   },
   "noEventsThisMonth": "No hay eventos este mes",
   "noEventsSelectedDay": "No hay eventos en este día",
+  "calendarNewsAnnouncements": "Noticias · Anuncios",
+  "calendarEconomicIndicators": "Economía EE.UU.",
   "today": "Hoy",
 
   "forgotPassword": "Olvidé mi contraseña",
@@ -633,6 +641,11 @@
   "holdingUpdated": "{ticker} posición actualizada",
   "portfolioAIAnalysis": "Análisis IA del portafolio",
   "aiRecommendations": "Recomendaciones",
+  "recPortfolioOverview": "Resumen del Portafolio",
+  "recTechnicalInsight": "Análisis Técnico",
+  "recMarketIntelligence": "Inteligencia de Mercado",
+  "recActionSummary": "Resumen de Acciones",
+  "recommendedAction": "Acción Recomendada",
   "analysisWaiting": "Análisis IA pendiente...",
   "alreadyHeld": "En cartera",
   "goToWatchlistTab": "Ir a seguimiento",
@@ -649,5 +662,77 @@
   "deleteHolding": "Eliminar posición",
   "avgPriceLabel": "Precio promedio",
   "currentValueLabel": "Valor actual",
-  "dailyUpdate": "Actualización diaria por la mañana"
+  "dailyUpdate": "Actualización diaria por la mañana",
+  "viewAIAdvice": "Ver consejo AI",
+  "noAnalysisYet": "Aún no hay análisis disponible",
+  "recentTransactions": "Transacciones recientes",
+  "viewAllTransactions": "Ver todo ({count})",
+  "@viewAllTransactions": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "newsFilter": "Filtro",
+  "filterSource": "Fuente",
+  "filterAll": "Todo",
+  "filterMyWatchlist": "Mi lista",
+  "filterNoWatchlist": "Agrega acciones a tu lista primero",
+  "filterMarketOnly": "Noticias del mercado",
+  "filterSentiment": "Sentimiento",
+  "filterSector": "Sector",
+  "filterBreakingOnly": "Solo urgentes",
+  "filterReset": "Restablecer",
+  "filterApply": "Aplicar",
+  "hotTopicMore": "+{count} más",
+  "@hotTopicMore": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "sectorTechnology": "Tecnología",
+  "sectorHealthcare": "Salud",
+  "sectorEnergy": "Energía",
+  "sectorCyclical": "Consumo cíclico",
+  "sectorDefensive": "Consumo básico",
+  "sectorComm": "Comunicación",
+  "sectorFinance": "Finanzas",
+  "sectorIndustrials": "Industriales",
+  "sectorUtilities": "Servicios públicos",
+  "sectorRealEstate": "Inmobiliario",
+  "sectorMaterials": "Materiales",
+
+  "newsBubbleTitle": "Burbuja de noticias 24h",
+  "newsBubbleLegendBullish": "Mayoría alcista",
+  "newsBubbleLegendBearish": "Mayoría bajista",
+  "newsBubbleLegendMixed": "Mixto",
+  "newsBubbleMentions": "{count} menciones",
+  "@newsBubbleMentions": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "taxEstimateTitle": "Estimación de impuestos",
+  "totalGains": "Ganancias totales",
+  "annualExemption": "Exención anual",
+  "estimatedTax": "Impuesto estimado (22%)",
+  "netProfit": "Beneficio neto",
+  "krwSuffix": " KRW",
+  "taxTradeCount": " ventas",
+  "macro3mTitle": "3M",
+  "macro3mHigh": "Máx",
+  "macro3mAvg": "Med",
+  "macro3mLow": "Mín",
+  "tooltipClearSearch": "Borrar búsqueda",
+  "tooltipPreviousMonth": "Mes anterior",
+  "tooltipNextMonth": "Mes siguiente",
+  "tooltipShowPassword": "Mostrar contraseña",
+  "tooltipHidePassword": "Ocultar contraseña",
+  "tooltipChangePhoto": "Cambiar foto",
+  "tooltipFilter": "Filtrar",
+  "tooltipRemove": "Eliminar",
+  "otherSectors": "Otros sectores",
+  "otherTickers": "Otras acciones",
+  "nDaysAgo": "Hace {count}d"
 }

@@ -15,13 +15,8 @@ import '../../l10n/app_localizations.dart';
 import 'widgets/add_holding_sheet.dart';
 import 'widgets/instant_advice_sheet.dart';
 import 'widgets/watchlist_tab.dart';
-import 'widgets/holdings_tab.dart';
 
-/// Watchlist Screen — tab-based: 관심종목 | 보유종목
-///
-/// TabBar + TabBarView structure:
-/// ├── WatchlistTab (관심종목 + [+💼] 보유추가)
-/// └── HoldingsTab (요약카드 + AI자문 + 보유리스트)
+/// Watchlist Screen — 관심종목 전용 (보유종목은 별도 HoldingsScreen으로 분리됨)
 class WatchlistScreen extends StatefulWidget {
   const WatchlistScreen({super.key});
 
@@ -29,9 +24,7 @@ class WatchlistScreen extends StatefulWidget {
   State<WatchlistScreen> createState() => _WatchlistScreenState();
 }
 
-class _WatchlistScreenState extends State<WatchlistScreen>
-    with SingleTickerProviderStateMixin {
-  late final TabController _tabController;
+class _WatchlistScreenState extends State<WatchlistScreen> {
   final AnalyticsApiClient _apiClient = AnalyticsApiClient();
 
   Map<String, TickerScore> _tickerScores = {};
@@ -42,14 +35,12 @@ class _WatchlistScreenState extends State<WatchlistScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
     _loadWatchlistData();
     _loadTreemapData();
   }
 
   @override
   void dispose() {
-    _tabController.dispose();
     _apiClient.dispose();
     super.dispose();
   }
@@ -105,7 +96,9 @@ class _WatchlistScreenState extends State<WatchlistScreen>
       if (mounted) {
         setState(() => _treemapData = data);
       }
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('watchlist treemap error: $e');
+    }
   }
 
   void _onTickerTap(String ticker) {
@@ -117,7 +110,7 @@ class _WatchlistScreenState extends State<WatchlistScreen>
     );
   }
 
-  /// Add holding from watchlist: open AddHoldingSheet → BUY transaction → switch tab.
+  /// Add holding from watchlist: open AddHoldingSheet → BUY transaction.
   Future<void> _onAddHolding(String ticker, TickerScore? score) async {
     final auth = context.read<AuthProvider>();
     if (!auth.isLoggedIn) {
@@ -152,7 +145,6 @@ class _WatchlistScreenState extends State<WatchlistScreen>
     final portfolio = context.read<PortfolioProvider>();
 
     try {
-      // Record BUY transaction
       await portfolio.addTransaction(
         ticker: ticker,
         type: 'BUY',
@@ -161,7 +153,6 @@ class _WatchlistScreenState extends State<WatchlistScreen>
         date: result.date,
       );
 
-      // Add/update holding
       await portfolio.addOrUpdateHolding(
         ticker: ticker,
         shares: result.shares,
@@ -175,22 +166,20 @@ class _WatchlistScreenState extends State<WatchlistScreen>
       );
 
       // Show instant advice if available
-      final holding = portfolio.holdings.firstWhere(
+      final holdingMatch = portfolio.holdings.where(
         (h) => h.ticker == ticker.toUpperCase(),
-        orElse: () => portfolio.holdings.first,
       );
-      if (holding.instantAdvice != null && mounted) {
-        await InstantAdviceSheet.show(context, holding.instantAdvice!);
-      } else {
-        final adviceMatch =
-            portfolio.advice.where((a) => a.ticker == ticker.toUpperCase());
-        if (adviceMatch.isNotEmpty && mounted) {
-          await InstantAdviceSheet.show(context, adviceMatch.first);
+      if (holdingMatch.isNotEmpty && mounted) {
+        final holding = holdingMatch.first;
+        if (holding.instantAdvice != null) {
+          await InstantAdviceSheet.show(context, holding.instantAdvice!);
+          return;
         }
       }
-
-      // Switch to holdings tab
-      if (mounted) _tabController.animateTo(1);
+      final adviceMatch = portfolio.advice.where((a) => a.ticker == ticker.toUpperCase());
+      if (adviceMatch.isNotEmpty && mounted) {
+        await InstantAdviceSheet.show(context, adviceMatch.first);
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -202,50 +191,15 @@ class _WatchlistScreenState extends State<WatchlistScreen>
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
-
-    return Column(
-      children: [
-        // Tab bar
-        Material(
-          color: theme.colorScheme.surface,
-          child: TabBar(
-            controller: _tabController,
-            tabs: [
-              Tab(text: l10n.tabWatchlist),
-              Tab(text: l10n.tabHoldings),
-            ],
-            labelColor: theme.colorScheme.primary,
-            unselectedLabelColor: theme.colorScheme.onSurfaceVariant,
-            indicatorColor: theme.colorScheme.primary,
-          ),
-        ),
-
-        // Tab content
-        Expanded(
-          child: TabBarView(
-            controller: _tabController,
-            children: [
-              WatchlistTab(
-                tickerScores: _tickerScores,
-                isLoading: _isLoading,
-                error: _error,
-                treemapData: _treemapData,
-                onTickerTap: _onTickerTap,
-                onAddHolding: _onAddHolding,
-                onRefresh: _loadAllData,
-                onRetry: _loadWatchlistData,
-              ),
-              HoldingsTab(
-                onTickerTap: _onTickerTap,
-                onSwitchToWatchlist: () => _tabController.animateTo(0),
-                onRefresh: _loadAllData,
-              ),
-            ],
-          ),
-        ),
-      ],
+    return WatchlistTab(
+      tickerScores: _tickerScores,
+      isLoading: _isLoading,
+      error: _error,
+      treemapData: _treemapData,
+      onTickerTap: _onTickerTap,
+      onAddHolding: _onAddHolding,
+      onRefresh: _loadAllData,
+      onRetry: _loadWatchlistData,
     );
   }
 }

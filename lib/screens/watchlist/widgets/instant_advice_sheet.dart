@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../models/portfolio_data.dart';
+import '../../../theme/app_colors.dart';
+import '../../../theme/app_radius.dart';
+import '../../../theme/app_spacing.dart';
+import '../../../theme/app_typography.dart';
+import '../../../utils/multilingual.dart';
 
 /// Bottom sheet showing instant AI advice after a stock purchase.
 class InstantAdviceSheet extends StatelessWidget {
@@ -14,54 +19,32 @@ class InstantAdviceSheet extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xxl)),
       ),
       builder: (_) => InstantAdviceSheet(advice: advice),
     );
   }
 
-  Color _signalColor(String? signal) {
-    switch (signal?.toUpperCase()) {
-      case 'BUY':
-      case 'STRONG_BUY':
-        return Colors.green;
-      case 'SELL':
-      case 'STRONG_SELL':
-        return Colors.red;
-      default:
-        return Colors.grey;
+  Color _signalColor(BuildContext context, String? signal) {
+    final mlc = context.mlColors;
+    final s = signal?.toUpperCase() ?? '';
+    if (s == 'BUY' || s == 'STRONG_BUY' || s.contains('매수')) {
+      return mlc.gainColor;
     }
+    if (s == 'SELL' || s == 'STRONG_SELL' || s.contains('매도')) {
+      return mlc.lossColor;
+    }
+    return mlc.neutralColor;
   }
 
   String _signalLabel(String? signal) {
-    switch (signal?.toUpperCase()) {
-      case 'BUY':
-        return 'BUY';
-      case 'STRONG_BUY':
-        return 'STRONG BUY';
-      case 'SELL':
-        return 'SELL';
-      case 'STRONG_SELL':
-        return 'STRONG SELL';
-      case 'HOLD':
-        return 'HOLD';
-      default:
-        return signal ?? 'N/A';
-    }
-  }
-
-  /// Parse multilingual summary (|||  delimited) — pick current locale.
-  String _parseSummary(String? raw, BuildContext context) {
-    if (raw == null || raw.isEmpty) return '';
-    final parts = raw.split('|||');
-    if (parts.length == 1) return raw;
-
-    final lang = Localizations.localeOf(context).languageCode;
-    // Convention: en|||ko|||ja|||zh|||es
-    const langOrder = ['en', 'ko', 'ja', 'zh', 'es'];
-    final idx = langOrder.indexOf(lang);
-    if (idx >= 0 && idx < parts.length) return parts[idx].trim();
-    return parts.first.trim();
+    final s = signal?.toUpperCase() ?? '';
+    if (s == 'BUY' || s == '매수권고') return 'BUY';
+    if (s == 'STRONG_BUY' || s == '적극매수') return 'STRONG BUY';
+    if (s == 'SELL' || s == '매도권고') return 'SELL';
+    if (s == 'STRONG_SELL' || s == '적극매도') return 'STRONG SELL';
+    if (s == 'HOLD' || s == '관망') return 'HOLD';
+    return signal ?? 'N/A';
   }
 
   @override
@@ -79,7 +62,7 @@ class InstantAdviceSheet extends StatelessWidget {
         return SingleChildScrollView(
           controller: scrollController,
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+            padding: const EdgeInsets.fromLTRB(AppSpacing.xxl, AppSpacing.md, AppSpacing.xxl, AppSpacing.xxxl),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -90,11 +73,11 @@ class InstantAdviceSheet extends StatelessWidget {
                     height: 4,
                     decoration: BoxDecoration(
                       color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
-                      borderRadius: BorderRadius.circular(2),
+                      borderRadius: BorderRadius.circular(AppRadius.xxs),
                     ),
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.xl),
 
                 // Header: ticker + signal pill + confidence
                 Row(
@@ -102,25 +85,25 @@ class InstantAdviceSheet extends StatelessWidget {
                     Text(
                       advice.ticker,
                       style: const TextStyle(
-                        fontSize: 22,
+                        fontSize: AppTypography.displaySmall,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     if (isKo && advice.nameKo != null) ...[
-                      const SizedBox(width: 8),
+                      const SizedBox(width: AppSpacing.md),
                       Text(
                         advice.nameKo!,
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: AppTypography.bodyLarge,
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ] else if (advice.name != null) ...[
-                      const SizedBox(width: 8),
+                      const SizedBox(width: AppSpacing.md),
                       Text(
                         advice.name!,
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: AppTypography.bodyLarge,
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
                       ),
@@ -128,16 +111,16 @@ class InstantAdviceSheet extends StatelessWidget {
                     const Spacer(),
                     if (advice.signal != null)
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.xs),
                         decoration: BoxDecoration(
-                          color: _signalColor(advice.signal),
-                          borderRadius: BorderRadius.circular(12),
+                          color: _signalColor(context, advice.signal),
+                          borderRadius: BorderRadius.circular(AppRadius.lg),
                         ),
                         child: Text(
                           _signalLabel(advice.signal),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
+                          style: TextStyle(
+                            color: context.mlColors.onPrimary,
+                            fontSize: AppTypography.bodySmall,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -147,68 +130,68 @@ class InstantAdviceSheet extends StatelessWidget {
 
                 // Confidence
                 if (advice.confidence != null) ...[
-                  const SizedBox(height: 6),
+                  const SizedBox(height: AppSpacing.sm),
                   Text(
                     '${l10n.confidence}: ${(advice.confidence! * 100).toStringAsFixed(0)}%',
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: AppTypography.bodyMedium,
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ],
 
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.xl),
 
                 // Title
                 Text(
                   l10n.aiAdviceInstant,
                   style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
+                    fontSize: AppTypography.headlineMedium,
+                    fontWeight: AppTypography.semiBold,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.md),
 
                 // Summary text
                 if (advice.summary != null)
                   Text(
-                    _parseSummary(advice.summary, context),
+                    localizePacked(advice.summary ?? '', effectiveLanguageCode(context)),
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: AppTypography.bodyLarge,
                       height: 1.5,
                       color: theme.colorScheme.onSurface,
                     ),
                   ),
 
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.xl),
 
                 // Bullish factors
                 if (advice.bullishReasons.isNotEmpty) ...[
                   Text(
                     l10n.bullishFactorsPortfolio,
                     style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.green[700],
+                      fontSize: AppTypography.bodyLarge,
+                      fontWeight: AppTypography.semiBold,
+                      color: context.mlColors.gainColor,
                     ),
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: AppSpacing.sm),
                   ...advice.bullishReasons.map((r) => Padding(
-                        padding: const EdgeInsets.only(bottom: 4),
+                        padding: const EdgeInsets.only(bottom: AppSpacing.xs),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('+ ', style: TextStyle(color: Colors.green[700], fontWeight: FontWeight.bold)),
+                            Text('+ ', style: TextStyle(color: context.mlColors.gainColor, fontWeight: FontWeight.bold)),
                             Expanded(
                               child: Text(
-                                _parseSummary(r, context),
-                                style: const TextStyle(fontSize: 13),
+                                localizePacked(r, effectiveLanguageCode(context)),
+                                style: const TextStyle(fontSize: AppTypography.bodyMedium),
                               ),
                             ),
                           ],
                         ),
                       )),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: AppSpacing.lg),
                 ],
 
                 // Bearish factors
@@ -216,42 +199,42 @@ class InstantAdviceSheet extends StatelessWidget {
                   Text(
                     l10n.bearishFactorsPortfolio,
                     style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.red[700],
+                      fontSize: AppTypography.bodyLarge,
+                      fontWeight: AppTypography.semiBold,
+                      color: context.mlColors.lossColor,
                     ),
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: AppSpacing.sm),
                   ...advice.bearishReasons.map((r) => Padding(
-                        padding: const EdgeInsets.only(bottom: 4),
+                        padding: const EdgeInsets.only(bottom: AppSpacing.xs),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('- ', style: TextStyle(color: Colors.red[700], fontWeight: FontWeight.bold)),
+                            Text('- ', style: TextStyle(color: context.mlColors.lossColor, fontWeight: FontWeight.bold)),
                             Expanded(
                               child: Text(
-                                _parseSummary(r, context),
-                                style: const TextStyle(fontSize: 13),
+                                localizePacked(r, effectiveLanguageCode(context)),
+                                style: const TextStyle(fontSize: AppTypography.bodyMedium),
                               ),
                             ),
                           ],
                         ),
                       )),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: AppSpacing.lg),
                 ],
 
                 // Footer
                 const Divider(),
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.md),
                 Row(
                   children: [
                     Icon(Icons.schedule, size: 16, color: theme.colorScheme.outline),
-                    const SizedBox(width: 6),
+                    const SizedBox(width: AppSpacing.sm),
                     Expanded(
                       child: Text(
                         l10n.detailedAnalysisComingSoon,
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: AppTypography.bodySmall,
                           color: theme.colorScheme.outline,
                           fontStyle: FontStyle.italic,
                         ),

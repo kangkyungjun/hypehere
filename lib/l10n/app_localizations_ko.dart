@@ -36,10 +36,25 @@ class AppLocalizationsKo extends AppLocalizations {
   String get tabCommunityTooltip => '토론 게시판';
 
   @override
+  String get tabMarket => '시장';
+
+  @override
+  String get tabMarketTooltip => '시장 현황';
+
+  @override
+  String get tabAILens => 'AI';
+
+  @override
+  String get tabAILensTooltip => 'AI 분석';
+
+  @override
   String get tabWatchlist => '관심종목';
 
   @override
   String get tabWatchlistTooltip => '나의 관심목록';
+
+  @override
+  String get tabHoldingsTooltip => '나의 보유종목';
 
   @override
   String get settings => '설정';
@@ -1442,6 +1457,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get notifications => '알림';
 
   @override
+  String get markAllAsRead => '모두 읽음';
+
+  @override
   String get noNotifications => '알림이 없습니다';
 
   @override
@@ -1502,6 +1520,12 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get noEventsSelectedDay => '선택한 날짜에 이벤트가 없습니다';
+
+  @override
+  String get calendarNewsAnnouncements => '뉴스·발표';
+
+  @override
+  String get calendarEconomicIndicators => '미국 경제지표';
 
   @override
   String get forgotPassword => '비밀번호 찾기';
@@ -1717,6 +1741,21 @@ class AppLocalizationsKo extends AppLocalizations {
   String get aiRecommendations => '추천사항';
 
   @override
+  String get recPortfolioOverview => '포트폴리오 개요';
+
+  @override
+  String get recTechnicalInsight => '기술적 분석';
+
+  @override
+  String get recMarketIntelligence => '시장 인텔리전스';
+
+  @override
+  String get recActionSummary => '실행 요약';
+
+  @override
+  String get recommendedAction => '권고 사항';
+
+  @override
   String get analysisWaiting => 'AI 분석 대기 중...';
 
   @override
@@ -1776,4 +1815,171 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get dailyUpdate => '매일 오전 업데이트';
+
+  @override
+  String get viewAIAdvice => 'AI 의견 보기';
+
+  @override
+  String get noAnalysisYet => '아직 분석이 없습니다';
+
+  @override
+  String get recentTransactions => '최근 거래';
+
+  @override
+  String viewAllTransactions(int count) {
+    return '전체 보기 ($count건)';
+  }
+
+  @override
+  String get newsFilter => '필터';
+
+  @override
+  String get filterSource => '소스';
+
+  @override
+  String get filterMyWatchlist => '관심종목';
+
+  @override
+  String get filterNoWatchlist => '관심종목을 먼저 추가하세요';
+
+  @override
+  String get filterMarketOnly => '시장뉴스';
+
+  @override
+  String get filterSentiment => '감성';
+
+  @override
+  String get filterSector => '섹터';
+
+  @override
+  String get filterBreakingOnly => '속보만 보기';
+
+  @override
+  String get filterReset => '초기화';
+
+  @override
+  String get filterApply => '적용';
+
+  @override
+  String hotTopicMore(int count) {
+    return '+$count 더보기';
+  }
+
+  @override
+  String get sectorTechnology => '기술';
+
+  @override
+  String get sectorHealthcare => '헬스케어';
+
+  @override
+  String get sectorEnergy => '에너지';
+
+  @override
+  String get sectorCyclical => '경기소비재';
+
+  @override
+  String get sectorDefensive => '필수소비재';
+
+  @override
+  String get sectorComm => '커뮤니케이션';
+
+  @override
+  String get sectorFinance => '금융';
+
+  @override
+  String get sectorIndustrials => '산업재';
+
+  @override
+  String get sectorUtilities => '유틸리티';
+
+  @override
+  String get sectorRealEstate => '부동산';
+
+  @override
+  String get sectorMaterials => '소재';
+
+  @override
+  String get newsBubbleTitle => '24시간 뉴스 버블';
+
+  @override
+  String get newsBubbleLegendBullish => '강세 다수';
+
+  @override
+  String get newsBubbleLegendBearish => '약세 다수';
+
+  @override
+  String get newsBubbleLegendMixed => '혼합';
+
+  @override
+  String newsBubbleMentions(int count) {
+    return '$count건';
+  }
+
+  @override
+  String get taxEstimateTitle => '양도소득세 예상';
+
+  @override
+  String get totalGains => '총 양도차익';
+
+  @override
+  String get annualExemption => '기본공제 (250만원)';
+
+  @override
+  String get estimatedTax => '예상 세금 (22%)';
+
+  @override
+  String get netProfit => '세후 순수익';
+
+  @override
+  String get krwSuffix => '원';
+
+  @override
+  String get taxTradeCount => '건 매도';
+
+  @override
+  String get macro3mTitle => '3개월';
+
+  @override
+  String get macro3mHigh => '최고';
+
+  @override
+  String get macro3mAvg => '평균';
+
+  @override
+  String get macro3mLow => '최저';
+
+  @override
+  String get tooltipClearSearch => '검색 지우기';
+
+  @override
+  String get tooltipPreviousMonth => '이전 달';
+
+  @override
+  String get tooltipNextMonth => '다음 달';
+
+  @override
+  String get tooltipShowPassword => '비밀번호 표시';
+
+  @override
+  String get tooltipHidePassword => '비밀번호 숨기기';
+
+  @override
+  String get tooltipChangePhoto => '사진 변경';
+
+  @override
+  String get tooltipFilter => '필터';
+
+  @override
+  String get tooltipRemove => '삭제';
+
+  @override
+  String get otherSectors => '기타 섹터';
+
+  @override
+  String get otherTickers => '기타 종목';
+
+  @override
+  String nDaysAgo(int count) {
+    return '$count일전';
+  }
 }

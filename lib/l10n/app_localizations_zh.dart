@@ -36,10 +36,25 @@ class AppLocalizationsZh extends AppLocalizations {
   String get tabCommunityTooltip => '讨论区';
 
   @override
+  String get tabMarket => '市场';
+
+  @override
+  String get tabMarketTooltip => '市场概况';
+
+  @override
+  String get tabAILens => 'AI';
+
+  @override
+  String get tabAILensTooltip => 'AI分析';
+
+  @override
   String get tabWatchlist => '自选股';
 
   @override
   String get tabWatchlistTooltip => '我的自选股';
+
+  @override
+  String get tabHoldingsTooltip => '我的持仓';
 
   @override
   String get settings => '设置';
@@ -1440,6 +1455,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get notifications => '通知';
 
   @override
+  String get markAllAsRead => '全部已读';
+
+  @override
   String get noNotifications => '暂无通知';
 
   @override
@@ -1500,6 +1518,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get noEventsSelectedDay => '该日期没有事件';
+
+  @override
+  String get calendarNewsAnnouncements => '新闻·公告';
+
+  @override
+  String get calendarEconomicIndicators => '美国经济指标';
 
   @override
   String get forgotPassword => '找回密码';
@@ -1715,6 +1739,21 @@ class AppLocalizationsZh extends AppLocalizations {
   String get aiRecommendations => '推荐建议';
 
   @override
+  String get recPortfolioOverview => '投资组合概览';
+
+  @override
+  String get recTechnicalInsight => '技术分析';
+
+  @override
+  String get recMarketIntelligence => '市场情报';
+
+  @override
+  String get recActionSummary => '行动摘要';
+
+  @override
+  String get recommendedAction => '建议操作';
+
+  @override
   String get analysisWaiting => 'AI分析等待中...';
 
   @override
@@ -1774,4 +1813,171 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get dailyUpdate => '每日早间更新';
+
+  @override
+  String get viewAIAdvice => '查看AI建议';
+
+  @override
+  String get noAnalysisYet => '暂无分析';
+
+  @override
+  String get recentTransactions => '最近交易';
+
+  @override
+  String viewAllTransactions(int count) {
+    return '查看全部 ($count笔)';
+  }
+
+  @override
+  String get newsFilter => '筛选';
+
+  @override
+  String get filterSource => '来源';
+
+  @override
+  String get filterMyWatchlist => '自选股';
+
+  @override
+  String get filterNoWatchlist => '请先添加自选股';
+
+  @override
+  String get filterMarketOnly => '市场新闻';
+
+  @override
+  String get filterSentiment => '情绪';
+
+  @override
+  String get filterSector => '板块';
+
+  @override
+  String get filterBreakingOnly => '仅看快讯';
+
+  @override
+  String get filterReset => '重置';
+
+  @override
+  String get filterApply => '应用';
+
+  @override
+  String hotTopicMore(int count) {
+    return '+$count 更多';
+  }
+
+  @override
+  String get sectorTechnology => '科技';
+
+  @override
+  String get sectorHealthcare => '医疗';
+
+  @override
+  String get sectorEnergy => '能源';
+
+  @override
+  String get sectorCyclical => '可选消费';
+
+  @override
+  String get sectorDefensive => '必需消费';
+
+  @override
+  String get sectorComm => '通信';
+
+  @override
+  String get sectorFinance => '金融';
+
+  @override
+  String get sectorIndustrials => '工业';
+
+  @override
+  String get sectorUtilities => '公用事业';
+
+  @override
+  String get sectorRealEstate => '房地产';
+
+  @override
+  String get sectorMaterials => '原材料';
+
+  @override
+  String get newsBubbleTitle => '24小时新闻气泡';
+
+  @override
+  String get newsBubbleLegendBullish => '看涨居多';
+
+  @override
+  String get newsBubbleLegendBearish => '看跌居多';
+
+  @override
+  String get newsBubbleLegendMixed => '混合';
+
+  @override
+  String newsBubbleMentions(int count) {
+    return '$count条';
+  }
+
+  @override
+  String get taxEstimateTitle => '税费估算';
+
+  @override
+  String get totalGains => '总收益';
+
+  @override
+  String get annualExemption => '年度免税额';
+
+  @override
+  String get estimatedTax => '预估税额 (22%)';
+
+  @override
+  String get netProfit => '税后净利';
+
+  @override
+  String get krwSuffix => '韩元';
+
+  @override
+  String get taxTradeCount => '笔卖出';
+
+  @override
+  String get macro3mTitle => '3个月';
+
+  @override
+  String get macro3mHigh => '最高';
+
+  @override
+  String get macro3mAvg => '均值';
+
+  @override
+  String get macro3mLow => '最低';
+
+  @override
+  String get tooltipClearSearch => '清除搜索';
+
+  @override
+  String get tooltipPreviousMonth => '上个月';
+
+  @override
+  String get tooltipNextMonth => '下个月';
+
+  @override
+  String get tooltipShowPassword => '显示密码';
+
+  @override
+  String get tooltipHidePassword => '隐藏密码';
+
+  @override
+  String get tooltipChangePhoto => '更换照片';
+
+  @override
+  String get tooltipFilter => '筛选';
+
+  @override
+  String get tooltipRemove => '删除';
+
+  @override
+  String get otherSectors => '其他板块';
+
+  @override
+  String get otherTickers => '其他股票';
+
+  @override
+  String nDaysAgo(int count) {
+    return '$count天前';
+  }
 }

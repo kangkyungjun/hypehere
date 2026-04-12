@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../services/analytics_api_client.dart';
+import '../../../theme/app_radius.dart';
+import '../../../theme/app_spacing.dart';
+import '../../../theme/app_typography.dart';
 
 /// Bottom sheet for adding a holding with date picker + auto close price.
 ///
@@ -25,7 +28,7 @@ class AddHoldingSheet extends StatefulWidget {
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xxl)),
       ),
       builder: (_) => AddHoldingSheet(ticker: ticker, name: name),
     );
@@ -44,6 +47,7 @@ class _AddHoldingSheetState extends State<AddHoldingSheet> {
   DateTime _selectedDate = DateTime.now();
   String? _actualPriceDate;
   bool _loadingPrice = false;
+  bool _priceError = false;
   double? _totalCost;
 
   @override
@@ -76,7 +80,12 @@ class _AddHoldingSheetState extends State<AddHoldingSheet> {
         });
       }
     } catch (_) {
-      if (mounted) setState(() => _loadingPrice = false);
+      if (mounted) {
+        setState(() {
+          _loadingPrice = false;
+          _priceError = true;
+        });
+      }
     }
   }
 
@@ -109,12 +118,13 @@ class _AddHoldingSheetState extends State<AddHoldingSheet> {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+    final bottomPadding = MediaQuery.of(context).viewPadding.bottom;
 
     final dateStr = _formatDate(_selectedDate);
     final isDifferentDate = _actualPriceDate != null && _actualPriceDate != dateStr;
 
     return Padding(
-      padding: EdgeInsets.fromLTRB(16, 8, 16, 24 + bottomInset),
+      padding: EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.md, AppSpacing.xl, AppSpacing.xxl + bottomInset + bottomPadding),
       child: Form(
         key: _formKey,
         child: Column(
@@ -125,10 +135,10 @@ class _AddHoldingSheetState extends State<AddHoldingSheet> {
             Center(
               child: Container(
                 width: 40, height: 4,
-                margin: const EdgeInsets.only(bottom: 12),
+                margin: const EdgeInsets.only(bottom: AppSpacing.lg),
                 decoration: BoxDecoration(
                   color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(2),
+                  borderRadius: BorderRadius.circular(AppRadius.xxs),
                 ),
               ),
             ),
@@ -136,42 +146,42 @@ class _AddHoldingSheetState extends State<AddHoldingSheet> {
             // Title
             Text(
               l10n.addHoldingTitle(widget.ticker),
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: AppTypography.headlineLarge, fontWeight: FontWeight.bold),
             ),
             if (widget.name != null)
               Text(
                 widget.name!,
-                style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurfaceVariant),
+                style: TextStyle(fontSize: AppTypography.bodyMedium, color: theme.colorScheme.onSurfaceVariant),
               ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.xl),
 
             // Purchase date
-            Text(l10n.purchaseDate, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
-            const SizedBox(height: 4),
+            Text(l10n.purchaseDate, style: const TextStyle(fontSize: AppTypography.bodyMedium, fontWeight: AppTypography.medium)),
+            const SizedBox(height: AppSpacing.xs),
             InkWell(
               onTap: _pickDate,
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(AppRadius.md),
               child: Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.lg),
                 decoration: BoxDecoration(
                   border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.5)),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(AppRadius.md),
                 ),
                 child: Row(
                   children: [
                     Icon(Icons.calendar_today, size: 18, color: theme.colorScheme.primary),
-                    const SizedBox(width: 8),
-                    Text(dateStr, style: const TextStyle(fontSize: 15)),
+                    const SizedBox(width: AppSpacing.md),
+                    Text(dateStr, style: const TextStyle(fontSize: AppTypography.headlineSmall)),
                   ],
                 ),
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.lg),
 
             // Price input
-            Text(l10n.avgPrice, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
-            const SizedBox(height: 4),
+            Text(l10n.avgPrice, style: const TextStyle(fontSize: AppTypography.bodyMedium, fontWeight: AppTypography.medium)),
+            const SizedBox(height: AppSpacing.xs),
             TextFormField(
               controller: _priceController,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -180,13 +190,22 @@ class _AddHoldingSheetState extends State<AddHoldingSheet> {
                 prefixText: '\$ ',
                 suffixIcon: _loadingPrice
                     ? const Padding(
-                        padding: EdgeInsets.all(12),
+                        padding: EdgeInsets.all(AppSpacing.lg),
                         child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
                       )
-                    : null,
+                    : _priceError && _priceController.text.isEmpty
+                        ? IconButton(
+                            tooltip: l10n.refresh,
+                            icon: const Icon(Icons.refresh, size: 20),
+                            onPressed: () {
+                              setState(() => _priceError = false);
+                              _fetchClosePrice();
+                            },
+                          )
+                        : null,
                 isDense: true,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.lg),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
               ),
               validator: (v) {
                 final n = double.tryParse(v ?? '');
@@ -196,25 +215,35 @@ class _AddHoldingSheetState extends State<AddHoldingSheet> {
             ),
             if (isDifferentDate)
               Padding(
-                padding: const EdgeInsets.only(top: 4),
+                padding: const EdgeInsets.only(top: AppSpacing.xs),
                 child: Text(
                   l10n.holidayPriceNotice(_actualPriceDate!),
-                  style: TextStyle(fontSize: 11, color: theme.colorScheme.primary),
+                  style: TextStyle(fontSize: AppTypography.caption, color: theme.colorScheme.primary),
                 ),
               )
             else if (!_loadingPrice && _priceController.text.isNotEmpty)
               Padding(
-                padding: const EdgeInsets.only(top: 4),
+                padding: const EdgeInsets.only(top: AppSpacing.xs),
                 child: Text(
                   l10n.closingPriceAuto,
-                  style: TextStyle(fontSize: 11, color: theme.colorScheme.onSurfaceVariant),
+                  style: TextStyle(fontSize: AppTypography.caption, color: theme.colorScheme.onSurfaceVariant),
                 ),
               ),
-            const SizedBox(height: 12),
+            if (_priceError && _priceController.text.isEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: AppSpacing.xs),
+                child: Text(
+                  Localizations.localeOf(context).languageCode == 'ko'
+                      ? '종가를 불러올 수 없습니다. 직접 입력해주세요.'
+                      : 'Could not load close price. Please enter manually.',
+                  style: TextStyle(fontSize: AppTypography.caption, color: theme.colorScheme.error),
+                ),
+              ),
+            const SizedBox(height: AppSpacing.lg),
 
             // Shares input
-            Text(l10n.shares, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
-            const SizedBox(height: 4),
+            Text(l10n.shares, style: const TextStyle(fontSize: AppTypography.bodyMedium, fontWeight: AppTypography.medium)),
+            const SizedBox(height: AppSpacing.xs),
             TextFormField(
               controller: _sharesController,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -222,8 +251,8 @@ class _AddHoldingSheetState extends State<AddHoldingSheet> {
               decoration: InputDecoration(
                 prefixText: '# ',
                 isDense: true,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.lg),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
               ),
               validator: (v) {
                 final n = double.tryParse(v ?? '');
@@ -232,28 +261,28 @@ class _AddHoldingSheetState extends State<AddHoldingSheet> {
               },
               autofocus: true,
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.lg),
 
             // Total cost
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.lg),
               decoration: BoxDecoration(
                 color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(AppRadius.md),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(l10n.totalCost, style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurfaceVariant)),
+                  Text(l10n.totalCost, style: TextStyle(fontSize: AppTypography.bodyMedium, color: theme.colorScheme.onSurfaceVariant)),
                   Text(
                     _totalCost != null ? '\$${_totalCost!.toStringAsFixed(2)}' : '—',
-                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                    style: const TextStyle(fontSize: AppTypography.headlineSmall, fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.xl),
 
             // Submit button
             SizedBox(
@@ -266,9 +295,9 @@ class _AddHoldingSheetState extends State<AddHoldingSheet> {
                   Navigator.pop(context, (shares: shares, avgPrice: avgPrice, date: _selectedDate));
                 },
                 style: FilledButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
                 ),
-                child: Text(l10n.addToHoldings, style: const TextStyle(fontSize: 15)),
+                child: Text(l10n.addToHoldings, style: const TextStyle(fontSize: AppTypography.headlineSmall)),
               ),
             ),
           ],

@@ -3,21 +3,29 @@ import 'package:provider/provider.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../models/portfolio_data.dart';
 import '../../../providers/portfolio_provider.dart';
-import '../../../utils/error_localizer.dart';
-import 'add_holding_sheet.dart';
-import 'sell_holding_sheet.dart';
-import 'edit_holding_sheet.dart';
+import '../../../theme/app_colors.dart';
+import '../../../theme/app_spacing.dart';
+import '../../../theme/app_radius.dart';
+import '../../../theme/app_typography.dart';
+import '../../../utils/multilingual.dart';
+import 'transaction_row.dart';
+
+/// Actions that can be returned from HoldingDetailSheet.
+enum HoldingAction { additionalBuy, sell, edit, delete, viewDetail }
 
 /// Bottom sheet showing holding details, transaction history, and action buttons.
+///
+/// Returns a [HoldingAction] via Navigator.pop so the caller (HoldingsTab)
+/// handles further navigation with a valid context.
 class HoldingDetailSheet {
   HoldingDetailSheet._();
 
-  static Future<void> show(BuildContext context, PortfolioHolding holding) {
-    return showModalBottomSheet(
+  static Future<HoldingAction?> show(BuildContext context, PortfolioHolding holding) {
+    return showModalBottomSheet<HoldingAction>(
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xxl)),
       ),
       builder: (_) => DraggableScrollableSheet(
         initialChildSize: 0.7,
@@ -49,6 +57,7 @@ class _HoldingDetailContent extends StatefulWidget {
 class _HoldingDetailContentState extends State<_HoldingDetailContent> {
   List<PortfolioTransaction> _transactions = [];
   bool _loadingTxn = true;
+  bool _showAllTxn = false;
 
   @override
   void initState() {
@@ -67,23 +76,131 @@ class _HoldingDetailContentState extends State<_HoldingDetailContent> {
     }
   }
 
-  Color _signalColor(String? signal) {
-    switch (signal?.toUpperCase()) {
-      case 'BUY': case 'STRONG_BUY': return Colors.green;
-      case 'SELL': case 'STRONG_SELL': return Colors.red;
-      default: return Colors.grey;
-    }
+  Color _signalColor(BuildContext context, String? signal) {
+    final s = signal?.toUpperCase() ?? '';
+    if (s == 'BUY' || s == 'STRONG_BUY' || s.contains('매수')) return context.mlColors.gainColor;
+    if (s == 'SELL' || s == 'STRONG_SELL' || s.contains('매도')) return context.mlColors.lossColor;
+    return context.mlColors.neutralColor;
   }
 
   String _signalLabel(String? signal) {
-    switch (signal?.toUpperCase()) {
-      case 'BUY': return 'BUY';
-      case 'STRONG_BUY': return 'STRONG BUY';
-      case 'SELL': return 'SELL';
-      case 'STRONG_SELL': return 'STRONG SELL';
-      case 'HOLD': return 'HOLD';
-      default: return '';
+    final s = signal?.toUpperCase() ?? '';
+    if (s == 'BUY' || s == '매수권고') return 'BUY';
+    if (s == 'STRONG_BUY' || s == '적극매수') return 'STRONG BUY';
+    if (s == 'SELL' || s == '매도권고') return 'SELL';
+    if (s == 'STRONG_SELL' || s == '적극매도') return 'STRONG SELL';
+    if (s == 'HOLD' || s == '관망') return 'HOLD';
+    return '';
+  }
+
+  Widget _buildInlineAdvice(BuildContext context, ThemeData theme, AppLocalizations l10n, String ticker) {
+    final portfolio = context.watch<PortfolioProvider>();
+    final adviceList = portfolio.advice;
+    final tickerAdvice = adviceList.where((a) => a.ticker == ticker).toList();
+    final langCode = effectiveLanguageCode(context);
+
+    if (tickerAdvice.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+        child: Row(
+          children: [
+            Icon(Icons.auto_awesome, size: 16, color: theme.colorScheme.outline),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: Text(
+                l10n.noAnalysisYet,
+                style: TextStyle(fontSize: AppTypography.bodySmall, color: theme.colorScheme.outline, fontStyle: FontStyle.italic),
+              ),
+            ),
+          ],
+        ),
+      );
     }
+
+    final advice = tickerAdvice.first;
+
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
+      color: theme.colorScheme.primaryContainer.withValues(alpha: 0.2),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.lg),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.auto_awesome, size: 14, color: theme.colorScheme.primary),
+                const SizedBox(width: AppSpacing.sm),
+                Text(l10n.aiAdvice, style: TextStyle(fontSize: AppTypography.bodyMedium, fontWeight: AppTypography.semiBold, color: theme.colorScheme.primary)),
+              ],
+            ),
+            if (advice.summary != null) ...[
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                localizePacked(advice.summary!, langCode),
+                style: TextStyle(fontSize: AppTypography.bodyMedium, height: 1.4, color: theme.colorScheme.onSurface),
+              ),
+            ],
+            if (advice.targetAction != null && advice.targetAction!.isNotEmpty) ...[
+              const SizedBox(height: AppSpacing.md),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(AppRadius.md),
+                  color: theme.colorScheme.secondaryContainer.withValues(alpha: 0.3),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${l10n.recommendedAction}: ',
+                      style: TextStyle(fontSize: AppTypography.bodySmall, fontWeight: AppTypography.bold, color: theme.colorScheme.onSurfaceVariant),
+                    ),
+                    Expanded(
+                      child: Text(
+                        localizePacked(advice.targetAction!, langCode),
+                        style: TextStyle(fontSize: AppTypography.bodySmall, fontWeight: AppTypography.semiBold, height: 1.3, color: theme.colorScheme.onSurface),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+            if (advice.bullishReasons.isNotEmpty) ...[
+              const SizedBox(height: AppSpacing.md),
+              Text(l10n.bullishFactorsPortfolio, style: TextStyle(fontSize: AppTypography.bodySmall, fontWeight: AppTypography.semiBold, color: context.mlColors.gainColor)),
+              const SizedBox(height: AppSpacing.xs),
+              ...advice.bullishReasons.map((r) => Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.xxs),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('+ ', style: TextStyle(color: context.mlColors.gainColor, fontWeight: FontWeight.bold, fontSize: AppTypography.bodySmall)),
+                    Expanded(child: Text(localizePacked(r, langCode), style: const TextStyle(fontSize: AppTypography.bodySmall))),
+                  ],
+                ),
+              )),
+            ],
+            if (advice.bearishReasons.isNotEmpty) ...[
+              const SizedBox(height: AppSpacing.sm),
+              Text(l10n.bearishFactorsPortfolio, style: TextStyle(fontSize: AppTypography.bodySmall, fontWeight: AppTypography.semiBold, color: context.mlColors.lossColor)),
+              const SizedBox(height: AppSpacing.xs),
+              ...advice.bearishReasons.map((r) => Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.xxs),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('- ', style: TextStyle(color: context.mlColors.lossColor, fontWeight: FontWeight.bold, fontSize: AppTypography.bodySmall)),
+                    Expanded(child: Text(localizePacked(r, langCode), style: const TextStyle(fontSize: AppTypography.bodySmall))),
+                  ],
+                ),
+              )),
+            ],
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -94,95 +211,111 @@ class _HoldingDetailContentState extends State<_HoldingDetailContent> {
     final isKo = Localizations.localeOf(context).languageCode == 'ko';
     final displayName = isKo && h.nameKo != null ? h.nameKo! : h.name ?? h.ticker;
 
+    // Transaction display: show 3 or all
+    final displayTxn = _showAllTxn ? _transactions : _transactions.take(3).toList();
+    final hasMoreTxn = _transactions.length > 3;
+
     return ListView(
       controller: widget.scrollController,
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+      padding: const EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.md, AppSpacing.xl, AppSpacing.xxl),
       children: [
         // Drag handle
         Center(
           child: Container(
             width: 40, height: 4,
-            margin: const EdgeInsets.only(bottom: 12),
+            margin: const EdgeInsets.only(bottom: AppSpacing.lg),
             decoration: BoxDecoration(
               color: theme.colorScheme.outline.withValues(alpha: 0.3),
-              borderRadius: BorderRadius.circular(2),
+              borderRadius: BorderRadius.circular(AppRadius.xxs),
             ),
           ),
         ),
 
-        // Header: ticker + price + signal
+        // Header: ticker (tap→detail) + price + signal
         Row(
           children: [
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(h.ticker, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                  Text(displayName, style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurfaceVariant)),
-                ],
+              child: GestureDetector(
+                onTap: () => Navigator.pop(context, HoldingAction.viewDetail),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(h.ticker, style: TextStyle(fontSize: AppTypography.displayMedium, fontWeight: FontWeight.bold, color: theme.colorScheme.primary)),
+                        const SizedBox(width: AppSpacing.xs),
+                        Icon(Icons.open_in_new, size: 14, color: theme.colorScheme.primary),
+                      ],
+                    ),
+                    Text(displayName, style: TextStyle(fontSize: AppTypography.bodyMedium, color: theme.colorScheme.onSurfaceVariant)),
+                  ],
+                ),
               ),
             ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 if (h.currentPrice != null)
-                  Text('\$${h.currentPrice!.toStringAsFixed(2)}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                  Text('\$${h.currentPrice!.toStringAsFixed(2)}', style: const TextStyle(fontSize: AppTypography.headlineMedium, fontWeight: AppTypography.semiBold))
+                else
+                  Text('—', style: TextStyle(fontSize: AppTypography.headlineMedium, color: theme.colorScheme.outline)),
                 Text(
-                  '${h.pnlPct >= 0 ? '+' : ''}${h.pnlPct.toStringAsFixed(2)}%',
-                  style: TextStyle(fontSize: 13, color: h.pnlPct >= 0 ? Colors.green : Colors.red),
+                  '${(h.changePct ?? 0) >= 0 ? '+' : ''}${(h.changePct ?? 0).toStringAsFixed(2)}%',
+                  style: TextStyle(fontSize: AppTypography.bodyMedium, color: (h.changePct ?? 0) >= 0 ? context.mlColors.gainColor : context.mlColors.lossColor),
                 ),
               ],
             ),
             if (h.signal != null && _signalLabel(h.signal).isNotEmpty) ...[
-              const SizedBox(width: 8),
+              const SizedBox(width: AppSpacing.md),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.xs),
                 decoration: BoxDecoration(
-                  color: _signalColor(h.signal),
-                  borderRadius: BorderRadius.circular(10),
+                  color: _signalColor(context, h.signal),
+                  borderRadius: BorderRadius.circular(AppRadius.lg),
                 ),
                 child: Text(
                   _signalLabel(h.signal),
-                  style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+                  style: TextStyle(color: context.mlColors.onPrimary, fontSize: AppTypography.caption, fontWeight: FontWeight.bold),
                 ),
               ),
             ],
           ],
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.lg),
 
         // Holding status card
         Card(
           elevation: 0,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
           color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.lg),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(l10n.holdingStatus, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: theme.colorScheme.onSurfaceVariant)),
-                const SizedBox(height: 6),
+                Text(l10n.holdingStatus, style: TextStyle(fontSize: AppTypography.bodyMedium, fontWeight: AppTypography.semiBold, color: theme.colorScheme.onSurfaceVariant)),
+                const SizedBox(height: AppSpacing.sm),
                 Row(
                   children: [
                     _InfoItem(label: l10n.shares, value: h.shares?.toStringAsFixed(h.shares == h.shares?.truncateToDouble() ? 0 : 2) ?? '—'),
                     _InfoItem(label: l10n.avgPriceLabel, value: '\$${h.avgPrice?.toStringAsFixed(2) ?? '—'}'),
-                    _InfoItem(label: l10n.currentValueLabel, value: '\$${h.currentValue.toStringAsFixed(2)}'),
+                    _InfoItem(label: l10n.currentValueLabel, value: h.currentPrice != null ? '\$${h.currentValue.toStringAsFixed(2)}' : '—'),
                   ],
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: AppSpacing.xs),
                 Row(
                   children: [
                     Text(
                       '${l10n.unrealizedPnl}: ',
-                      style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant),
+                      style: TextStyle(fontSize: AppTypography.bodySmall, color: theme.colorScheme.onSurfaceVariant),
                     ),
                     Text(
                       '${h.pnl >= 0 ? '+' : ''}\$${h.pnl.toStringAsFixed(2)} (${h.pnlPct >= 0 ? '+' : ''}${h.pnlPct.toStringAsFixed(1)}%)',
                       style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: h.pnl >= 0 ? Colors.green : Colors.red,
+                        fontSize: AppTypography.bodySmall,
+                        fontWeight: AppTypography.semiBold,
+                        color: h.pnl >= 0 ? context.mlColors.gainColor : context.mlColors.lossColor,
                       ),
                     ),
                   ],
@@ -191,25 +324,53 @@ class _HoldingDetailContentState extends State<_HoldingDetailContent> {
             ),
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.lg),
+
+        // Inline AI advice
+        _buildInlineAdvice(context, theme, l10n, h.ticker),
+        const SizedBox(height: AppSpacing.lg),
 
         // Transaction history
-        Text(l10n.transactionHistory, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-        const SizedBox(height: 6),
+        Text(l10n.transactionHistory, style: const TextStyle(fontSize: AppTypography.bodyLarge, fontWeight: AppTypography.semiBold)),
+        const SizedBox(height: AppSpacing.sm),
         if (_loadingTxn)
           const Center(child: Padding(
-            padding: EdgeInsets.all(16),
+            padding: EdgeInsets.all(AppSpacing.xl),
             child: CircularProgressIndicator(strokeWidth: 2),
           ))
         else if (_transactions.isEmpty)
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12),
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
             child: Text('—', style: TextStyle(color: theme.colorScheme.outline)),
           )
-        else
-          ..._transactions.map((txn) => _TransactionRow(txn: txn, avgPrice: h.avgPrice ?? 0)),
+        else ...[
+          ...displayTxn.map((txn) => TransactionRow(txn: txn, avgPrice: h.avgPrice ?? 0)),
+          if (hasMoreTxn && !_showAllTxn)
+            Padding(
+              padding: const EdgeInsets.only(top: AppSpacing.xs),
+              child: TextButton(
+                onPressed: () => setState(() => _showAllTxn = true),
+                child: Text(
+                  l10n.viewAllTransactions(_transactions.length),
+                  style: TextStyle(fontSize: AppTypography.bodySmall, color: theme.colorScheme.primary),
+                ),
+              ),
+            )
+          else if (_showAllTxn && hasMoreTxn)
+            Padding(
+              padding: const EdgeInsets.only(top: AppSpacing.xs),
+              child: TextButton.icon(
+                onPressed: () => setState(() => _showAllTxn = false),
+                icon: Icon(Icons.keyboard_arrow_up, size: 16, color: theme.colorScheme.primary),
+                label: Text(
+                  Localizations.localeOf(context).languageCode == 'ko' ? '줄이기' : 'Show less',
+                  style: TextStyle(fontSize: AppTypography.bodySmall, color: theme.colorScheme.primary),
+                ),
+              ),
+            ),
+        ],
 
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.xl),
 
         // Action buttons: 2x2 grid
         Row(
@@ -217,200 +378,52 @@ class _HoldingDetailContentState extends State<_HoldingDetailContent> {
             Expanded(
               child: OutlinedButton.icon(
                 icon: const Icon(Icons.add, size: 18),
-                label: Text(l10n.additionalBuy, style: const TextStyle(fontSize: 13)),
-                style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 10)),
-                onPressed: () => _onAdditionalBuy(context),
+                label: Text(l10n.additionalBuy, style: const TextStyle(fontSize: AppTypography.bodyMedium)),
+                style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg)),
+                onPressed: () => Navigator.pop(context, HoldingAction.additionalBuy),
               ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: AppSpacing.md),
             Expanded(
               child: OutlinedButton.icon(
-                icon: Icon(Icons.sell, size: 18, color: Colors.red.shade400),
-                label: Text(l10n.partialSell, style: TextStyle(fontSize: 13, color: Colors.red.shade400)),
+                icon: Icon(Icons.sell, size: 18, color: context.mlColors.dangerColor),
+                label: Text(l10n.partialSell, style: TextStyle(fontSize: AppTypography.bodyMedium, color: context.mlColors.dangerColor)),
                 style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  side: BorderSide(color: Colors.red.shade300),
+                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
+                  side: BorderSide(color: context.mlColors.dangerColor),
                 ),
-                onPressed: () => _onSell(context),
+                onPressed: () => Navigator.pop(context, HoldingAction.sell),
               ),
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.md),
         Row(
           children: [
             Expanded(
               child: OutlinedButton.icon(
                 icon: const Icon(Icons.edit, size: 18),
-                label: Text(l10n.editHolding, style: const TextStyle(fontSize: 13)),
-                style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 10)),
-                onPressed: () => _onEdit(context),
+                label: Text(l10n.editHolding, style: const TextStyle(fontSize: AppTypography.bodyMedium)),
+                style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg)),
+                onPressed: () => Navigator.pop(context, HoldingAction.edit),
               ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: AppSpacing.md),
             Expanded(
               child: OutlinedButton.icon(
-                icon: Icon(Icons.delete_outline, size: 18, color: Colors.red.shade400),
-                label: Text(l10n.deleteHolding, style: TextStyle(fontSize: 13, color: Colors.red.shade400)),
+                icon: Icon(Icons.delete_outline, size: 18, color: context.mlColors.dangerColor),
+                label: Text(l10n.deleteHolding, style: TextStyle(fontSize: AppTypography.bodyMedium, color: context.mlColors.dangerColor)),
                 style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  side: BorderSide(color: Colors.red.shade300),
+                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
+                  side: BorderSide(color: context.mlColors.dangerColor),
                 ),
-                onPressed: () => _onDelete(context),
+                onPressed: () => Navigator.pop(context, HoldingAction.delete),
               ),
             ),
           ],
         ),
       ],
     );
-  }
-
-  Future<void> _onAdditionalBuy(BuildContext context) async {
-    final l10n = AppLocalizations.of(context);
-    Navigator.pop(context); // Close detail sheet first
-    final h = widget.holding;
-    final isKo = Localizations.localeOf(context).languageCode == 'ko';
-    final displayName = isKo && h.nameKo != null ? h.nameKo! : h.name ?? h.ticker;
-
-    final result = await AddHoldingSheet.show(context, ticker: h.ticker, name: displayName);
-    if (result == null || !context.mounted) return;
-
-    final portfolio = context.read<PortfolioProvider>();
-    try {
-      // Calculate new average: (old_cost + new_cost) / (old_shares + new_shares)
-      final oldShares = h.shares ?? 0;
-      final oldAvg = h.avgPrice ?? 0;
-      final newTotalShares = oldShares + result.shares;
-      final newAvgPrice = ((oldShares * oldAvg) + (result.shares * result.avgPrice)) / newTotalShares;
-
-      await portfolio.addTransaction(
-        ticker: h.ticker, type: 'BUY', shares: result.shares,
-        price: result.avgPrice, date: result.date,
-      );
-      await portfolio.addOrUpdateHolding(
-        ticker: h.ticker, shares: newTotalShares, avgPrice: newAvgPrice,
-      );
-
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.holdingAdded(h.ticker))),
-        );
-      }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(ErrorLocalizer.getMessage(context, e))),
-        );
-      }
-    }
-  }
-
-  Future<void> _onSell(BuildContext context) async {
-    final l10n = AppLocalizations.of(context);
-    Navigator.pop(context);
-    final h = widget.holding;
-
-    final result = await SellHoldingSheet.show(
-      context,
-      ticker: h.ticker,
-      name: h.name,
-      currentShares: h.shares ?? 0,
-      avgPrice: h.avgPrice ?? 0,
-    );
-    if (result == null || !context.mounted) return;
-
-    final portfolio = context.read<PortfolioProvider>();
-    try {
-      await portfolio.sellHolding(
-        ticker: h.ticker,
-        shares: result.shares,
-        price: result.price,
-        date: result.date,
-        currentShares: h.shares ?? 0,
-      );
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.holdingSold(h.ticker))),
-        );
-      }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(ErrorLocalizer.getMessage(context, e))),
-        );
-      }
-    }
-  }
-
-  Future<void> _onEdit(BuildContext context) async {
-    final l10n = AppLocalizations.of(context);
-    Navigator.pop(context);
-    final h = widget.holding;
-
-    final result = await EditHoldingSheet.show(
-      context,
-      ticker: h.ticker,
-      name: h.name,
-      currentShares: h.shares ?? 0,
-      avgPrice: h.avgPrice ?? 0,
-      purchaseDate: h.createdAt,
-    );
-    if (result == null || !context.mounted) return;
-
-    final portfolio = context.read<PortfolioProvider>();
-    try {
-      await portfolio.addOrUpdateHolding(
-        ticker: h.ticker, shares: result.shares, avgPrice: result.avgPrice,
-      );
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.holdingUpdated(h.ticker))),
-        );
-      }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(ErrorLocalizer.getMessage(context, e))),
-        );
-      }
-    }
-  }
-
-  Future<void> _onDelete(BuildContext context) async {
-    final l10n = AppLocalizations.of(context);
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.confirm),
-        content: Text(l10n.removeHoldingConfirm(widget.holding.ticker)),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.cancel)),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: Text(l10n.delete),
-          ),
-        ],
-      ),
-    );
-    if (confirmed != true || !context.mounted) return;
-
-    Navigator.pop(context);
-    final portfolio = context.read<PortfolioProvider>();
-    try {
-      await portfolio.deleteHolding(widget.holding.ticker);
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.holdingRemoved(widget.holding.ticker))),
-        );
-      }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(ErrorLocalizer.getMessage(context, e))),
-        );
-      }
-    }
   }
 }
 
@@ -425,59 +438,9 @@ class _InfoItem extends StatelessWidget {
     return Expanded(
       child: Column(
         children: [
-          Text(label, style: TextStyle(fontSize: 11, color: Theme.of(context).colorScheme.outline)),
-          const SizedBox(height: 2),
-          Text(value, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
-        ],
-      ),
-    );
-  }
-}
-
-class _TransactionRow extends StatelessWidget {
-  final PortfolioTransaction txn;
-  final double avgPrice;
-
-  const _TransactionRow({required this.txn, required this.avgPrice});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isBuy = txn.type == 'BUY';
-    final dateStr = '${txn.date.year}-${txn.date.month.toString().padLeft(2, '0')}-${txn.date.day.toString().padLeft(2, '0')}';
-    final realizedPnl = !isBuy ? (txn.price - avgPrice) * txn.shares : null;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        children: [
-          Icon(Icons.calendar_today, size: 14, color: theme.colorScheme.outline),
-          const SizedBox(width: 6),
-          Text(dateStr, style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant)),
-          const SizedBox(width: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-            decoration: BoxDecoration(
-              color: isBuy ? Colors.green.withValues(alpha: 0.1) : Colors.red.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              txn.type,
-              style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: isBuy ? Colors.green : Colors.red),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              '${txn.shares.toStringAsFixed(txn.shares == txn.shares.truncateToDouble() ? 0 : 2)} x \$${txn.price.toStringAsFixed(2)} = \$${txn.totalValue.toStringAsFixed(2)}',
-              style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurface),
-            ),
-          ),
-          if (realizedPnl != null)
-            Text(
-              '${realizedPnl >= 0 ? '+' : ''}\$${realizedPnl.toStringAsFixed(2)}',
-              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: realizedPnl >= 0 ? Colors.green : Colors.red),
-            ),
+          Text(label, style: TextStyle(fontSize: AppTypography.caption, color: Theme.of(context).colorScheme.outline)),
+          const SizedBox(height: AppSpacing.xxs),
+          Text(value, style: const TextStyle(fontSize: AppTypography.bodyMedium, fontWeight: AppTypography.semiBold)),
         ],
       ),
     );

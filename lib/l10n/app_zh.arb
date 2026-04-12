@@ -11,8 +11,13 @@
   "tabNewsTooltip": "市场新闻",
   "tabCommunity": "社区",
   "tabCommunityTooltip": "讨论区",
+  "tabMarket": "市场",
+  "tabMarketTooltip": "市场概况",
+  "tabAILens": "AI",
+  "tabAILensTooltip": "AI分析",
   "tabWatchlist": "自选",
   "tabWatchlistTooltip": "我的自选股",
+  "tabHoldingsTooltip": "我的持仓",
 
   "settings": "设置",
   "settingsTooltip": "设置",
@@ -495,6 +500,7 @@
   "passwordChangeInstructions": "- 新密码至少需要8个字符\n- 建议使用字母、数字和符号组合\n- 修改后需使用新密码重新登录",
 
   "notifications": "通知",
+  "markAllAsRead": "全部已读",
   "noNotifications": "暂无通知",
   "notificationsRetentionHint": "最近7天的通知显示在这里。",
 
@@ -522,6 +528,8 @@
   },
   "noEventsThisMonth": "本月没有事件",
   "noEventsSelectedDay": "该日期没有事件",
+  "calendarNewsAnnouncements": "新闻·公告",
+  "calendarEconomicIndicators": "美国经济指标",
   "today": "今天",
 
   "forgotPassword": "找回密码",
@@ -633,6 +641,11 @@
   "holdingUpdated": "{ticker} 持仓信息已更新",
   "portfolioAIAnalysis": "投资组合AI分析",
   "aiRecommendations": "推荐建议",
+  "recPortfolioOverview": "投资组合概览",
+  "recTechnicalInsight": "技术分析",
+  "recMarketIntelligence": "市场情报",
+  "recActionSummary": "行动摘要",
+  "recommendedAction": "建议操作",
   "analysisWaiting": "AI分析等待中...",
   "alreadyHeld": "已持有",
   "goToWatchlistTab": "前往自选股",
@@ -649,5 +662,77 @@
   "deleteHolding": "删除持仓",
   "avgPriceLabel": "均价",
   "currentValueLabel": "市值",
-  "dailyUpdate": "每日早间更新"
+  "dailyUpdate": "每日早间更新",
+  "viewAIAdvice": "查看AI建议",
+  "noAnalysisYet": "暂无分析",
+  "recentTransactions": "最近交易",
+  "viewAllTransactions": "查看全部 ({count}笔)",
+  "@viewAllTransactions": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "newsFilter": "筛选",
+  "filterSource": "来源",
+  "filterAll": "全部",
+  "filterMyWatchlist": "自选股",
+  "filterNoWatchlist": "请先添加自选股",
+  "filterMarketOnly": "市场新闻",
+  "filterSentiment": "情绪",
+  "filterSector": "板块",
+  "filterBreakingOnly": "仅看快讯",
+  "filterReset": "重置",
+  "filterApply": "应用",
+  "hotTopicMore": "+{count} 更多",
+  "@hotTopicMore": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "sectorTechnology": "科技",
+  "sectorHealthcare": "医疗",
+  "sectorEnergy": "能源",
+  "sectorCyclical": "可选消费",
+  "sectorDefensive": "必需消费",
+  "sectorComm": "通信",
+  "sectorFinance": "金融",
+  "sectorIndustrials": "工业",
+  "sectorUtilities": "公用事业",
+  "sectorRealEstate": "房地产",
+  "sectorMaterials": "原材料",
+
+  "newsBubbleTitle": "24小时新闻气泡",
+  "newsBubbleLegendBullish": "看涨居多",
+  "newsBubbleLegendBearish": "看跌居多",
+  "newsBubbleLegendMixed": "混合",
+  "newsBubbleMentions": "{count}条",
+  "@newsBubbleMentions": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "taxEstimateTitle": "税费估算",
+  "totalGains": "总收益",
+  "annualExemption": "年度免税额",
+  "estimatedTax": "预估税额 (22%)",
+  "netProfit": "税后净利",
+  "krwSuffix": "韩元",
+  "taxTradeCount": "笔卖出",
+  "macro3mTitle": "3个月",
+  "macro3mHigh": "最高",
+  "macro3mAvg": "均值",
+  "macro3mLow": "最低",
+  "tooltipClearSearch": "清除搜索",
+  "tooltipPreviousMonth": "上个月",
+  "tooltipNextMonth": "下个月",
+  "tooltipShowPassword": "显示密码",
+  "tooltipHidePassword": "隐藏密码",
+  "tooltipChangePhoto": "更换照片",
+  "tooltipFilter": "筛选",
+  "tooltipRemove": "删除",
+  "otherSectors": "其他板块",
+  "otherTickers": "其他股票",
+  "nDaysAgo": "{count}天前"
 }

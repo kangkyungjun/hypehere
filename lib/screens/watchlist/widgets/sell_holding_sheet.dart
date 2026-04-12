@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../services/analytics_api_client.dart';
+import '../../../theme/app_colors.dart';
+import '../../../theme/app_radius.dart';
+import '../../../theme/app_spacing.dart';
+import '../../../theme/app_typography.dart';
 
 /// Bottom sheet for selling shares with date picker + auto close price.
 class SellHoldingSheet extends StatefulWidget {
@@ -9,6 +13,7 @@ class SellHoldingSheet extends StatefulWidget {
   final String? name;
   final double currentShares;
   final double avgPrice;
+  final double? currentPrice;
 
   const SellHoldingSheet({
     super.key,
@@ -16,6 +21,7 @@ class SellHoldingSheet extends StatefulWidget {
     this.name,
     required this.currentShares,
     required this.avgPrice,
+    this.currentPrice,
   });
 
   static Future<({double shares, double price, DateTime date})?> show(
@@ -24,18 +30,20 @@ class SellHoldingSheet extends StatefulWidget {
     String? name,
     required double currentShares,
     required double avgPrice,
+    double? currentPrice,
   }) {
     return showModalBottomSheet<({double shares, double price, DateTime date})>(
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xxl)),
       ),
       builder: (_) => SellHoldingSheet(
         ticker: ticker,
         name: name,
         currentShares: currentShares,
         avgPrice: avgPrice,
+        currentPrice: currentPrice,
       ),
     );
   }
@@ -53,6 +61,7 @@ class _SellHoldingSheetState extends State<SellHoldingSheet> {
   DateTime _selectedDate = DateTime.now();
   String? _actualPriceDate;
   bool _loadingPrice = false;
+  bool _priceError = false;
 
   @override
   void initState() {
@@ -86,7 +95,16 @@ class _SellHoldingSheetState extends State<SellHoldingSheet> {
         });
       }
     } catch (_) {
-      if (mounted) setState(() => _loadingPrice = false);
+      if (mounted) {
+        setState(() {
+          _loadingPrice = false;
+          _priceError = true;
+          if (_priceController.text.isEmpty && widget.currentPrice != null) {
+            _priceController.text = widget.currentPrice!.toStringAsFixed(2);
+            _priceError = false;
+          }
+        });
+      }
     }
   }
 
@@ -130,11 +148,12 @@ class _SellHoldingSheetState extends State<SellHoldingSheet> {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+    final bottomPadding = MediaQuery.of(context).viewPadding.bottom;
     final dateStr = _formatDate(_selectedDate);
     final isDifferentDate = _actualPriceDate != null && _actualPriceDate != dateStr;
 
     return Padding(
-      padding: EdgeInsets.fromLTRB(16, 8, 16, 24 + bottomInset),
+      padding: EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.md, AppSpacing.xl, AppSpacing.xxl + bottomInset + bottomPadding),
       child: Form(
         key: _formKey,
         child: Column(
@@ -144,51 +163,51 @@ class _SellHoldingSheetState extends State<SellHoldingSheet> {
             Center(
               child: Container(
                 width: 40, height: 4,
-                margin: const EdgeInsets.only(bottom: 12),
+                margin: const EdgeInsets.only(bottom: AppSpacing.lg),
                 decoration: BoxDecoration(
                   color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(2),
+                  borderRadius: BorderRadius.circular(AppRadius.xxs),
                 ),
               ),
             ),
 
             Text(
               l10n.sellHoldingTitle(widget.ticker),
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: AppTypography.headlineLarge, fontWeight: FontWeight.bold),
             ),
             Text(
               '${l10n.currentHoldings}: ${widget.currentShares.toStringAsFixed(widget.currentShares == widget.currentShares.truncateToDouble() ? 0 : 2)}${l10n.shares} (${l10n.avgPriceLabel} \$${widget.avgPrice.toStringAsFixed(2)})',
-              style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant),
+              style: TextStyle(fontSize: AppTypography.bodySmall, color: theme.colorScheme.onSurfaceVariant),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.xl),
 
             // Sell date
-            Text(l10n.sellDate, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
-            const SizedBox(height: 4),
+            Text(l10n.sellDate, style: const TextStyle(fontSize: AppTypography.bodyMedium, fontWeight: AppTypography.medium)),
+            const SizedBox(height: AppSpacing.xs),
             InkWell(
               onTap: _pickDate,
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(AppRadius.md),
               child: Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.lg),
                 decoration: BoxDecoration(
                   border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.5)),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(AppRadius.md),
                 ),
                 child: Row(
                   children: [
                     Icon(Icons.calendar_today, size: 18, color: theme.colorScheme.primary),
-                    const SizedBox(width: 8),
-                    Text(dateStr, style: const TextStyle(fontSize: 15)),
+                    const SizedBox(width: AppSpacing.md),
+                    Text(dateStr, style: const TextStyle(fontSize: AppTypography.headlineSmall)),
                   ],
                 ),
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.lg),
 
             // Sell price
-            Text(l10n.sellPrice, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
-            const SizedBox(height: 4),
+            Text(l10n.sellPrice, style: const TextStyle(fontSize: AppTypography.bodyMedium, fontWeight: AppTypography.medium)),
+            const SizedBox(height: AppSpacing.xs),
             TextFormField(
               controller: _priceController,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -197,13 +216,22 @@ class _SellHoldingSheetState extends State<SellHoldingSheet> {
                 prefixText: '\$ ',
                 suffixIcon: _loadingPrice
                     ? const Padding(
-                        padding: EdgeInsets.all(12),
+                        padding: EdgeInsets.all(AppSpacing.lg),
                         child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
                       )
-                    : null,
+                    : _priceError && _priceController.text.isEmpty
+                        ? IconButton(
+                            tooltip: l10n.refresh,
+                            icon: const Icon(Icons.refresh, size: 20),
+                            onPressed: () {
+                              setState(() => _priceError = false);
+                              _fetchClosePrice();
+                            },
+                          )
+                        : null,
                 isDense: true,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.lg),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
               ),
               validator: (v) {
                 final n = double.tryParse(v ?? '');
@@ -213,17 +241,27 @@ class _SellHoldingSheetState extends State<SellHoldingSheet> {
             ),
             if (isDifferentDate)
               Padding(
-                padding: const EdgeInsets.only(top: 4),
+                padding: const EdgeInsets.only(top: AppSpacing.xs),
                 child: Text(
                   l10n.holidayPriceNotice(_actualPriceDate!),
-                  style: TextStyle(fontSize: 11, color: theme.colorScheme.primary),
+                  style: TextStyle(fontSize: AppTypography.caption, color: theme.colorScheme.primary),
                 ),
               ),
-            const SizedBox(height: 12),
+            if (_priceError && _priceController.text.isEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: AppSpacing.xs),
+                child: Text(
+                  Localizations.localeOf(context).languageCode == 'ko'
+                      ? '종가를 불러올 수 없습니다. 직접 입력해주세요.'
+                      : 'Could not load close price. Please enter manually.',
+                  style: TextStyle(fontSize: AppTypography.caption, color: theme.colorScheme.error),
+                ),
+              ),
+            const SizedBox(height: AppSpacing.lg),
 
             // Sell shares
-            Text(l10n.sellShares, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
-            const SizedBox(height: 4),
+            Text(l10n.sellShares, style: const TextStyle(fontSize: AppTypography.bodyMedium, fontWeight: AppTypography.medium)),
+            const SizedBox(height: AppSpacing.xs),
             Row(
               children: [
                 Expanded(
@@ -234,8 +272,8 @@ class _SellHoldingSheetState extends State<SellHoldingSheet> {
                     decoration: InputDecoration(
                       prefixText: '# ',
                       isDense: true,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.lg),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
                     ),
                     validator: (v) {
                       final n = double.tryParse(v ?? '');
@@ -246,63 +284,63 @@ class _SellHoldingSheetState extends State<SellHoldingSheet> {
                     autofocus: true,
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: AppSpacing.md),
                 OutlinedButton(
                   onPressed: () {
                     _sharesController.text = widget.currentShares.toStringAsFixed(
                         widget.currentShares == widget.currentShares.truncateToDouble() ? 0 : 2);
                   },
                   style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.lg),
                   ),
-                  child: Text(l10n.sellAll, style: const TextStyle(fontSize: 12)),
+                  child: Text(l10n.sellAll, style: const TextStyle(fontSize: AppTypography.bodySmall)),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.lg),
 
             // Summary: sell amount + realized P&L
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.lg),
               decoration: BoxDecoration(
                 color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(AppRadius.md),
               ),
               child: Column(
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(l10n.sellAmount, style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurfaceVariant)),
+                      Text(l10n.sellAmount, style: TextStyle(fontSize: AppTypography.bodyMedium, color: theme.colorScheme.onSurfaceVariant)),
                       Text(
                         _sellAmount != null ? '\$${_sellAmount!.toStringAsFixed(2)}' : '—',
-                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                        style: const TextStyle(fontSize: AppTypography.bodyLarge, fontWeight: AppTypography.semiBold),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: AppSpacing.xs),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(l10n.realizedPnlLabel, style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurfaceVariant)),
+                      Text(l10n.realizedPnlLabel, style: TextStyle(fontSize: AppTypography.bodyMedium, color: theme.colorScheme.onSurfaceVariant)),
                       if (_realizedPnl != null)
                         Text(
                           '${_realizedPnl! >= 0 ? '+' : ''}\$${_realizedPnl!.toStringAsFixed(2)} (${_realizedPnlPct != null ? '${_realizedPnlPct! >= 0 ? '+' : ''}${_realizedPnlPct!.toStringAsFixed(1)}%' : ''})',
                           style: TextStyle(
-                            fontSize: 14,
+                            fontSize: AppTypography.bodyLarge,
                             fontWeight: FontWeight.bold,
-                            color: _realizedPnl! >= 0 ? Colors.green : Colors.red,
+                            color: _realizedPnl! >= 0 ? context.mlColors.gainColor : context.mlColors.lossColor,
                           ),
                         )
                       else
-                        const Text('—', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                        const Text('—', style: TextStyle(fontSize: AppTypography.bodyLarge, fontWeight: FontWeight.bold)),
                     ],
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.xl),
 
             SizedBox(
               width: double.infinity,
@@ -314,10 +352,10 @@ class _SellHoldingSheetState extends State<SellHoldingSheet> {
                   Navigator.pop(context, (shares: shares, price: price, date: _selectedDate));
                 },
                 style: FilledButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  backgroundColor: Colors.red.shade700,
+                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
+                  backgroundColor: context.mlColors.dangerColor,
                 ),
-                child: Text(l10n.sellConfirm, style: const TextStyle(fontSize: 15, color: Colors.white)),
+                child: Text(l10n.sellConfirm, style: TextStyle(fontSize: AppTypography.headlineSmall, color: context.mlColors.onPrimary)),
               ),
             ),
           ],

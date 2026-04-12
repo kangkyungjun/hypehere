@@ -5,10 +5,15 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../../l10n/app_localizations.dart';
+import '../../theme/app_colors.dart';
+import '../../theme/app_spacing.dart';
+import '../../theme/app_typography.dart';
 import '../../models/notification_item.dart';
+import '../../widgets/common/empty_state_view.dart';
+import '../community/post_detail_screen.dart';
 import '../ticker_detail/ticker_detail_screen.dart';
 
 class NotificationInboxScreen extends StatefulWidget {
@@ -33,9 +38,10 @@ class _NotificationInboxScreenState extends State<NotificationInboxScreen> {
     _fetchNotifications();
   }
 
+  static const _storage = FlutterSecureStorage();
+
   Future<String?> _getAuthToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('auth_token');
+    return await _storage.read(key: 'auth_token');
   }
 
   Future<void> _fetchNotifications() async {
@@ -72,9 +78,6 @@ class _NotificationInboxScreenState extends State<NotificationInboxScreen> {
           _notifications = list;
           _isLoading = false;
         });
-
-        // Mark all as read on enter
-        _markAllRead(token);
       } else {
         setState(() {
           _isLoading = false;
@@ -108,7 +111,9 @@ class _NotificationInboxScreenState extends State<NotificationInboxScreen> {
           'Authorization': 'Token $token',
         },
       ).timeout(const Duration(seconds: 5));
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('markAllRead error: $e');
+    }
   }
 
   String _iconForType(String type) {
@@ -136,7 +141,14 @@ class _NotificationInboxScreenState extends State<NotificationInboxScreen> {
   }
 
   void _onTapNotification(NotificationItem item) {
-    if (item.ticker.isNotEmpty) {
+    if (item.isCommunityNotification && item.postId != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => PostDetailScreen(postId: item.postId!),
+        ),
+      );
+    } else if (item.ticker.isNotEmpty) {
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -151,9 +163,24 @@ class _NotificationInboxScreenState extends State<NotificationInboxScreen> {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
 
+    final hasUnread = _notifications.any((n) => !n.isRead);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.notifications),
+        actions: [
+          if (hasUnread && _notifications.isNotEmpty)
+            TextButton(
+              onPressed: () async {
+                final token = await _storage.read(key: 'auth_token');
+                if (token != null) {
+                  await _markAllRead(token);
+                  _fetchNotifications();
+                }
+              },
+              child: Text(l10n.markAllAsRead),
+            ),
+        ],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -163,7 +190,7 @@ class _NotificationInboxScreenState extends State<NotificationInboxScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(_error!, style: theme.textTheme.bodyMedium),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: AppSpacing.md),
                       TextButton(
                         onPressed: _fetchNotifications,
                         child: Text(l10n.retry),
@@ -195,28 +222,10 @@ class _NotificationInboxScreenState extends State<NotificationInboxScreen> {
   }
 
   Widget _buildEmptyState(AppLocalizations l10n, ThemeData theme) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Text(
-            '\u{1F515}', // 🔕
-            style: TextStyle(fontSize: 48),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            l10n.noNotifications,
-            style: theme.textTheme.titleMedium,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            l10n.notificationsRetentionHint,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: Colors.grey,
-            ),
-          ),
-        ],
-      ),
+    return EmptyStateView(
+      icon: Icons.notifications_off_outlined,
+      message: l10n.noNotifications,
+      subtitle: l10n.notificationsRetentionHint,
     );
   }
 
@@ -226,15 +235,17 @@ class _NotificationInboxScreenState extends State<NotificationInboxScreen> {
     ThemeData theme,
   ) {
     return InkWell(
-      onTap: item.ticker.isNotEmpty ? () => _onTapNotification(item) : null,
+      onTap: (item.ticker.isNotEmpty || (item.isCommunityNotification && item.postId != null))
+          ? () => _onTapNotification(item)
+          : null,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.md),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               _iconForType(item.notificationType),
-              style: const TextStyle(fontSize: 20),
+              style: const TextStyle(fontSize: AppTypography.displayMedium),
             ),
             const SizedBox(width: 10),
             Expanded(
@@ -247,29 +258,29 @@ class _NotificationInboxScreenState extends State<NotificationInboxScreen> {
                         child: Text(
                           item.title,
                           style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
+                            fontSize: AppTypography.bodyLarge,
+                            fontWeight: AppTypography.semiBold,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: AppSpacing.md),
                       Text(
                         item.timeAgoLocalized(l10n),
                         style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[500],
+                          fontSize: AppTypography.bodySmall,
+                          color: context.mlColors.textTertiary,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 2),
+                  const SizedBox(height: AppSpacing.xxs),
                   Text(
                     item.body,
                     style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.grey[600],
+                      fontSize: AppTypography.bodyMedium,
+                      color: context.mlColors.textSecondary,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,

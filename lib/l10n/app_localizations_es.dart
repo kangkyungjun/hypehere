@@ -36,10 +36,25 @@ class AppLocalizationsEs extends AppLocalizations {
   String get tabCommunityTooltip => 'Foro de discusión';
 
   @override
+  String get tabMarket => 'Mercado';
+
+  @override
+  String get tabMarketTooltip => 'Resumen del Mercado';
+
+  @override
+  String get tabAILens => 'IA';
+
+  @override
+  String get tabAILensTooltip => 'Análisis IA';
+
+  @override
   String get tabWatchlist => 'Seguimiento';
 
   @override
   String get tabWatchlistTooltip => 'Mi lista de seguimiento';
+
+  @override
+  String get tabHoldingsTooltip => 'Mis Posiciones';
 
   @override
   String get settings => 'Ajustes';
@@ -226,7 +241,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get sectorMarketOverview => 'Resumen por sectores';
 
   @override
-  String get filterAll => 'Todos';
+  String get filterAll => 'Todo';
 
   @override
   String get filterNasdaq => 'NASDAQ';
@@ -1477,6 +1492,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get notifications => 'Notificaciones';
 
   @override
+  String get markAllAsRead => 'Marcar todo leído';
+
+  @override
   String get noNotifications => 'No hay notificaciones';
 
   @override
@@ -1538,6 +1556,12 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get noEventsSelectedDay => 'No hay eventos en este día';
+
+  @override
+  String get calendarNewsAnnouncements => 'Noticias · Anuncios';
+
+  @override
+  String get calendarEconomicIndicators => 'Economía EE.UU.';
 
   @override
   String get forgotPassword => 'Olvidé mi contraseña';
@@ -1760,6 +1784,21 @@ class AppLocalizationsEs extends AppLocalizations {
   String get aiRecommendations => 'Recomendaciones';
 
   @override
+  String get recPortfolioOverview => 'Resumen del Portafolio';
+
+  @override
+  String get recTechnicalInsight => 'Análisis Técnico';
+
+  @override
+  String get recMarketIntelligence => 'Inteligencia de Mercado';
+
+  @override
+  String get recActionSummary => 'Resumen de Acciones';
+
+  @override
+  String get recommendedAction => 'Acción Recomendada';
+
+  @override
   String get analysisWaiting => 'Análisis IA pendiente...';
 
   @override
@@ -1820,4 +1859,171 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get dailyUpdate => 'Actualización diaria por la mañana';
+
+  @override
+  String get viewAIAdvice => 'Ver consejo AI';
+
+  @override
+  String get noAnalysisYet => 'Aún no hay análisis disponible';
+
+  @override
+  String get recentTransactions => 'Transacciones recientes';
+
+  @override
+  String viewAllTransactions(int count) {
+    return 'Ver todo ($count)';
+  }
+
+  @override
+  String get newsFilter => 'Filtro';
+
+  @override
+  String get filterSource => 'Fuente';
+
+  @override
+  String get filterMyWatchlist => 'Mi lista';
+
+  @override
+  String get filterNoWatchlist => 'Agrega acciones a tu lista primero';
+
+  @override
+  String get filterMarketOnly => 'Noticias del mercado';
+
+  @override
+  String get filterSentiment => 'Sentimiento';
+
+  @override
+  String get filterSector => 'Sector';
+
+  @override
+  String get filterBreakingOnly => 'Solo urgentes';
+
+  @override
+  String get filterReset => 'Restablecer';
+
+  @override
+  String get filterApply => 'Aplicar';
+
+  @override
+  String hotTopicMore(int count) {
+    return '+$count más';
+  }
+
+  @override
+  String get sectorTechnology => 'Tecnología';
+
+  @override
+  String get sectorHealthcare => 'Salud';
+
+  @override
+  String get sectorEnergy => 'Energía';
+
+  @override
+  String get sectorCyclical => 'Consumo cíclico';
+
+  @override
+  String get sectorDefensive => 'Consumo básico';
+
+  @override
+  String get sectorComm => 'Comunicación';
+
+  @override
+  String get sectorFinance => 'Finanzas';
+
+  @override
+  String get sectorIndustrials => 'Industriales';
+
+  @override
+  String get sectorUtilities => 'Servicios públicos';
+
+  @override
+  String get sectorRealEstate => 'Inmobiliario';
+
+  @override
+  String get sectorMaterials => 'Materiales';
+
+  @override
+  String get newsBubbleTitle => 'Burbuja de noticias 24h';
+
+  @override
+  String get newsBubbleLegendBullish => 'Mayoría alcista';
+
+  @override
+  String get newsBubbleLegendBearish => 'Mayoría bajista';
+
+  @override
+  String get newsBubbleLegendMixed => 'Mixto';
+
+  @override
+  String newsBubbleMentions(int count) {
+    return '$count menciones';
+  }
+
+  @override
+  String get taxEstimateTitle => 'Estimación de impuestos';
+
+  @override
+  String get totalGains => 'Ganancias totales';
+
+  @override
+  String get annualExemption => 'Exención anual';
+
+  @override
+  String get estimatedTax => 'Impuesto estimado (22%)';
+
+  @override
+  String get netProfit => 'Beneficio neto';
+
+  @override
+  String get krwSuffix => ' KRW';
+
+  @override
+  String get taxTradeCount => ' ventas';
+
+  @override
+  String get macro3mTitle => '3M';
+
+  @override
+  String get macro3mHigh => 'Máx';
+
+  @override
+  String get macro3mAvg => 'Med';
+
+  @override
+  String get macro3mLow => 'Mín';
+
+  @override
+  String get tooltipClearSearch => 'Borrar búsqueda';
+
+  @override
+  String get tooltipPreviousMonth => 'Mes anterior';
+
+  @override
+  String get tooltipNextMonth => 'Mes siguiente';
+
+  @override
+  String get tooltipShowPassword => 'Mostrar contraseña';
+
+  @override
+  String get tooltipHidePassword => 'Ocultar contraseña';
+
+  @override
+  String get tooltipChangePhoto => 'Cambiar foto';
+
+  @override
+  String get tooltipFilter => 'Filtrar';
+
+  @override
+  String get tooltipRemove => 'Eliminar';
+
+  @override
+  String get otherSectors => 'Otros sectores';
+
+  @override
+  String get otherTickers => 'Otras acciones';
+
+  @override
+  String nDaysAgo(int count) {
+    return 'Hace ${count}d';
+  }
 }

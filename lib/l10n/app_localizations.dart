@@ -158,6 +158,30 @@ abstract class AppLocalizations {
   /// **'Discussion Board'**
   String get tabCommunityTooltip;
 
+  /// No description provided for @tabMarket.
+  ///
+  /// In en, this message translates to:
+  /// **'Market'**
+  String get tabMarket;
+
+  /// No description provided for @tabMarketTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Market Overview'**
+  String get tabMarketTooltip;
+
+  /// No description provided for @tabAILens.
+  ///
+  /// In en, this message translates to:
+  /// **'AI'**
+  String get tabAILens;
+
+  /// No description provided for @tabAILensTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Analysis'**
+  String get tabAILensTooltip;
+
   /// No description provided for @tabWatchlist.
   ///
   /// In en, this message translates to:
@@ -169,6 +193,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'My Watchlist'**
   String get tabWatchlistTooltip;
+
+  /// No description provided for @tabHoldingsTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'My Holdings'**
+  String get tabHoldingsTooltip;
 
   /// No description provided for @settings.
   ///
@@ -2828,6 +2858,12 @@ abstract class AppLocalizations {
   /// **'Notifications'**
   String get notifications;
 
+  /// No description provided for @markAllAsRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark all read'**
+  String get markAllAsRead;
+
   /// No description provided for @noNotifications.
   ///
   /// In en, this message translates to:
@@ -2947,6 +2983,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No events on this day'**
   String get noEventsSelectedDay;
+
+  /// No description provided for @calendarNewsAnnouncements.
+  ///
+  /// In en, this message translates to:
+  /// **'News · Announcements'**
+  String get calendarNewsAnnouncements;
+
+  /// No description provided for @calendarEconomicIndicators.
+  ///
+  /// In en, this message translates to:
+  /// **'US Economic'**
+  String get calendarEconomicIndicators;
 
   /// No description provided for @forgotPassword.
   ///
@@ -3338,6 +3386,36 @@ abstract class AppLocalizations {
   /// **'Recommendations'**
   String get aiRecommendations;
 
+  /// No description provided for @recPortfolioOverview.
+  ///
+  /// In en, this message translates to:
+  /// **'Portfolio Overview'**
+  String get recPortfolioOverview;
+
+  /// No description provided for @recTechnicalInsight.
+  ///
+  /// In en, this message translates to:
+  /// **'Technical Analysis'**
+  String get recTechnicalInsight;
+
+  /// No description provided for @recMarketIntelligence.
+  ///
+  /// In en, this message translates to:
+  /// **'Market Intelligence'**
+  String get recMarketIntelligence;
+
+  /// No description provided for @recActionSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Action Summary'**
+  String get recActionSummary;
+
+  /// No description provided for @recommendedAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended Action'**
+  String get recommendedAction;
+
   /// No description provided for @analysisWaiting.
   ///
   /// In en, this message translates to:
@@ -3439,6 +3517,324 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Updated daily in the morning'**
   String get dailyUpdate;
+
+  /// No description provided for @viewAIAdvice.
+  ///
+  /// In en, this message translates to:
+  /// **'View AI Advice'**
+  String get viewAIAdvice;
+
+  /// No description provided for @noAnalysisYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No analysis available yet'**
+  String get noAnalysisYet;
+
+  /// No description provided for @recentTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Transactions'**
+  String get recentTransactions;
+
+  /// No description provided for @viewAllTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'View all ({count})'**
+  String viewAllTransactions(int count);
+
+  /// No description provided for @newsFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter'**
+  String get newsFilter;
+
+  /// No description provided for @filterSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Source'**
+  String get filterSource;
+
+  /// No description provided for @filterMyWatchlist.
+  ///
+  /// In en, this message translates to:
+  /// **'My Watchlist'**
+  String get filterMyWatchlist;
+
+  /// No description provided for @filterNoWatchlist.
+  ///
+  /// In en, this message translates to:
+  /// **'Add watchlist items first'**
+  String get filterNoWatchlist;
+
+  /// No description provided for @filterMarketOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Market News'**
+  String get filterMarketOnly;
+
+  /// No description provided for @filterSentiment.
+  ///
+  /// In en, this message translates to:
+  /// **'Sentiment'**
+  String get filterSentiment;
+
+  /// No description provided for @filterSector.
+  ///
+  /// In en, this message translates to:
+  /// **'Sector'**
+  String get filterSector;
+
+  /// No description provided for @filterBreakingOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Breaking only'**
+  String get filterBreakingOnly;
+
+  /// No description provided for @filterReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get filterReset;
+
+  /// No description provided for @filterApply.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get filterApply;
+
+  /// No description provided for @hotTopicMore.
+  ///
+  /// In en, this message translates to:
+  /// **'+{count} more'**
+  String hotTopicMore(int count);
+
+  /// No description provided for @sectorTechnology.
+  ///
+  /// In en, this message translates to:
+  /// **'Technology'**
+  String get sectorTechnology;
+
+  /// No description provided for @sectorHealthcare.
+  ///
+  /// In en, this message translates to:
+  /// **'Healthcare'**
+  String get sectorHealthcare;
+
+  /// No description provided for @sectorEnergy.
+  ///
+  /// In en, this message translates to:
+  /// **'Energy'**
+  String get sectorEnergy;
+
+  /// No description provided for @sectorCyclical.
+  ///
+  /// In en, this message translates to:
+  /// **'Cyclical'**
+  String get sectorCyclical;
+
+  /// No description provided for @sectorDefensive.
+  ///
+  /// In en, this message translates to:
+  /// **'Defensive'**
+  String get sectorDefensive;
+
+  /// No description provided for @sectorComm.
+  ///
+  /// In en, this message translates to:
+  /// **'Communication'**
+  String get sectorComm;
+
+  /// No description provided for @sectorFinance.
+  ///
+  /// In en, this message translates to:
+  /// **'Finance'**
+  String get sectorFinance;
+
+  /// No description provided for @sectorIndustrials.
+  ///
+  /// In en, this message translates to:
+  /// **'Industrials'**
+  String get sectorIndustrials;
+
+  /// No description provided for @sectorUtilities.
+  ///
+  /// In en, this message translates to:
+  /// **'Utilities'**
+  String get sectorUtilities;
+
+  /// No description provided for @sectorRealEstate.
+  ///
+  /// In en, this message translates to:
+  /// **'Real Estate'**
+  String get sectorRealEstate;
+
+  /// No description provided for @sectorMaterials.
+  ///
+  /// In en, this message translates to:
+  /// **'Materials'**
+  String get sectorMaterials;
+
+  /// No description provided for @newsBubbleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'24h News Bubble'**
+  String get newsBubbleTitle;
+
+  /// No description provided for @newsBubbleLegendBullish.
+  ///
+  /// In en, this message translates to:
+  /// **'Mostly Bullish'**
+  String get newsBubbleLegendBullish;
+
+  /// No description provided for @newsBubbleLegendBearish.
+  ///
+  /// In en, this message translates to:
+  /// **'Mostly Bearish'**
+  String get newsBubbleLegendBearish;
+
+  /// No description provided for @newsBubbleLegendMixed.
+  ///
+  /// In en, this message translates to:
+  /// **'Mixed'**
+  String get newsBubbleLegendMixed;
+
+  /// No description provided for @newsBubbleMentions.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} mentions'**
+  String newsBubbleMentions(int count);
+
+  /// No description provided for @taxEstimateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax Estimate'**
+  String get taxEstimateTitle;
+
+  /// No description provided for @totalGains.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Gains'**
+  String get totalGains;
+
+  /// No description provided for @annualExemption.
+  ///
+  /// In en, this message translates to:
+  /// **'Annual Exemption'**
+  String get annualExemption;
+
+  /// No description provided for @estimatedTax.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated Tax (22%)'**
+  String get estimatedTax;
+
+  /// No description provided for @netProfit.
+  ///
+  /// In en, this message translates to:
+  /// **'Net Profit'**
+  String get netProfit;
+
+  /// No description provided for @krwSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **' KRW'**
+  String get krwSuffix;
+
+  /// No description provided for @taxTradeCount.
+  ///
+  /// In en, this message translates to:
+  /// **' sells'**
+  String get taxTradeCount;
+
+  /// No description provided for @macro3mTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'3M'**
+  String get macro3mTitle;
+
+  /// No description provided for @macro3mHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'High'**
+  String get macro3mHigh;
+
+  /// No description provided for @macro3mAvg.
+  ///
+  /// In en, this message translates to:
+  /// **'Avg'**
+  String get macro3mAvg;
+
+  /// No description provided for @macro3mLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Low'**
+  String get macro3mLow;
+
+  /// No description provided for @tooltipClearSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear search'**
+  String get tooltipClearSearch;
+
+  /// No description provided for @tooltipPreviousMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous month'**
+  String get tooltipPreviousMonth;
+
+  /// No description provided for @tooltipNextMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Next month'**
+  String get tooltipNextMonth;
+
+  /// No description provided for @tooltipShowPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Show password'**
+  String get tooltipShowPassword;
+
+  /// No description provided for @tooltipHidePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide password'**
+  String get tooltipHidePassword;
+
+  /// No description provided for @tooltipChangePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Change photo'**
+  String get tooltipChangePhoto;
+
+  /// No description provided for @tooltipFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter'**
+  String get tooltipFilter;
+
+  /// No description provided for @tooltipRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get tooltipRemove;
+
+  /// No description provided for @otherSectors.
+  ///
+  /// In en, this message translates to:
+  /// **'Other Sectors'**
+  String get otherSectors;
+
+  /// No description provided for @otherTickers.
+  ///
+  /// In en, this message translates to:
+  /// **'Other Tickers'**
+  String get otherTickers;
+
+  /// No description provided for @nDaysAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}D ago'**
+  String nDaysAgo(int count);
 }
 
 class _AppLocalizationsDelegate

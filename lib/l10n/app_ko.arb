@@ -11,8 +11,13 @@
   "tabNewsTooltip": "시장 뉴스",
   "tabCommunity": "커뮤니티",
   "tabCommunityTooltip": "토론 게시판",
+  "tabMarket": "시장",
+  "tabMarketTooltip": "시장 현황",
+  "tabAILens": "AI",
+  "tabAILensTooltip": "AI 분석",
   "tabWatchlist": "관심",
   "tabWatchlistTooltip": "나의 관심목록",
+  "tabHoldingsTooltip": "나의 보유종목",
 
   "settings": "설정",
   "settingsTooltip": "설정",
@@ -550,6 +555,7 @@
   "passwordChangeInstructions": "• 새 비밀번호는 최소 8자 이상이어야 합니다\n• 영문, 숫자, 특수문자를 조합하여 사용하세요\n• 변경 후 새 비밀번호로 다시 로그인해주세요",
 
   "notifications": "알림",
+  "markAllAsRead": "모두 읽음",
   "noNotifications": "알림이 없습니다",
   "notificationsRetentionHint": "최근 7일간의 알림이 표시됩니다.",
 
@@ -577,6 +583,8 @@
   },
   "noEventsThisMonth": "이번 달 이벤트가 없습니다",
   "noEventsSelectedDay": "선택한 날짜에 이벤트가 없습니다",
+  "calendarNewsAnnouncements": "뉴스·발표",
+  "calendarEconomicIndicators": "미국 경제지표",
   "today": "오늘",
 
   "forgotPassword": "비밀번호 찾기",
@@ -693,6 +701,11 @@
   },
   "portfolioAIAnalysis": "포트폴리오 AI 분석",
   "aiRecommendations": "추천사항",
+  "recPortfolioOverview": "포트폴리오 개요",
+  "recTechnicalInsight": "기술적 분석",
+  "recMarketIntelligence": "시장 인텔리전스",
+  "recActionSummary": "실행 요약",
+  "recommendedAction": "권고 사항",
   "analysisWaiting": "AI 분석 대기 중...",
   "alreadyHeld": "보유중",
   "goToWatchlistTab": "관심종목 탭으로 이동",
@@ -734,5 +747,77 @@
   "deleteHolding": "보유 삭제",
   "avgPriceLabel": "평균단가",
   "currentValueLabel": "평가액",
-  "dailyUpdate": "매일 오전 업데이트"
+  "dailyUpdate": "매일 오전 업데이트",
+  "viewAIAdvice": "AI 의견 보기",
+  "noAnalysisYet": "아직 분석이 없습니다",
+  "recentTransactions": "최근 거래",
+  "viewAllTransactions": "전체 보기 ({count}건)",
+  "@viewAllTransactions": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "newsFilter": "필터",
+  "filterSource": "소스",
+  "filterAll": "전체",
+  "filterMyWatchlist": "관심종목",
+  "filterNoWatchlist": "관심종목을 먼저 추가하세요",
+  "filterMarketOnly": "시장뉴스",
+  "filterSentiment": "감성",
+  "filterSector": "섹터",
+  "filterBreakingOnly": "속보만 보기",
+  "filterReset": "초기화",
+  "filterApply": "적용",
+  "hotTopicMore": "+{count} 더보기",
+  "@hotTopicMore": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "sectorTechnology": "기술",
+  "sectorHealthcare": "헬스케어",
+  "sectorEnergy": "에너지",
+  "sectorCyclical": "경기소비재",
+  "sectorDefensive": "필수소비재",
+  "sectorComm": "커뮤니케이션",
+  "sectorFinance": "금융",
+  "sectorIndustrials": "산업재",
+  "sectorUtilities": "유틸리티",
+  "sectorRealEstate": "부동산",
+  "sectorMaterials": "소재",
+
+  "newsBubbleTitle": "24시간 뉴스 버블",
+  "newsBubbleLegendBullish": "강세 다수",
+  "newsBubbleLegendBearish": "약세 다수",
+  "newsBubbleLegendMixed": "혼합",
+  "newsBubbleMentions": "{count}건",
+  "@newsBubbleMentions": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "taxEstimateTitle": "양도소득세 예상",
+  "totalGains": "총 양도차익",
+  "annualExemption": "기본공제 (250만원)",
+  "estimatedTax": "예상 세금 (22%)",
+  "netProfit": "세후 순수익",
+  "krwSuffix": "원",
+  "taxTradeCount": "건 매도",
+  "macro3mTitle": "3개월",
+  "macro3mHigh": "최고",
+  "macro3mAvg": "평균",
+  "macro3mLow": "최저",
+  "tooltipClearSearch": "검색 지우기",
+  "tooltipPreviousMonth": "이전 달",
+  "tooltipNextMonth": "다음 달",
+  "tooltipShowPassword": "비밀번호 표시",
+  "tooltipHidePassword": "비밀번호 숨기기",
+  "tooltipChangePhoto": "사진 변경",
+  "tooltipFilter": "필터",
+  "tooltipRemove": "삭제",
+  "otherSectors": "기타 섹터",
+  "otherTickers": "기타 종목",
+  "nDaysAgo": "{count}일전"
 }

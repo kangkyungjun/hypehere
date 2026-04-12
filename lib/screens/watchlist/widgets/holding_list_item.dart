@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../models/portfolio_data.dart';
+import '../../../theme/app_colors.dart';
+import '../../../theme/app_radius.dart';
+import '../../../theme/app_spacing.dart';
+import '../../../theme/app_typography.dart';
 
 /// A single holding row in the portfolio section.
 ///
@@ -10,44 +14,33 @@ class HoldingListItem extends StatelessWidget {
   final PortfolioHolding holding;
   final VoidCallback onTap;
   final VoidCallback onDelete;
-  final VoidCallback onEdit;
 
   const HoldingListItem({
     super.key,
     required this.holding,
     required this.onTap,
     required this.onDelete,
-    required this.onEdit,
   });
 
-  Color _signalColor(String? signal) {
-    switch (signal?.toUpperCase()) {
-      case 'BUY':
-      case 'STRONG_BUY':
-        return Colors.green;
-      case 'SELL':
-      case 'STRONG_SELL':
-        return Colors.red;
-      default:
-        return Colors.grey;
+  Color _signalColor(BuildContext context, String? signal) {
+    final s = signal?.toUpperCase() ?? '';
+    if (s == 'BUY' || s == 'STRONG_BUY' || s.contains('매수')) {
+      return context.mlColors.gainColor;
     }
+    if (s == 'SELL' || s == 'STRONG_SELL' || s.contains('매도')) {
+      return context.mlColors.lossColor;
+    }
+    return context.mlColors.neutralColor;
   }
 
   String _signalLabel(String? signal) {
-    switch (signal?.toUpperCase()) {
-      case 'BUY':
-        return 'BUY';
-      case 'STRONG_BUY':
-        return 'STRONG BUY';
-      case 'SELL':
-        return 'SELL';
-      case 'STRONG_SELL':
-        return 'STRONG SELL';
-      case 'HOLD':
-        return 'HOLD';
-      default:
-        return '';
-    }
+    final s = signal?.toUpperCase() ?? '';
+    if (s == 'BUY' || s == '매수권고') return 'BUY';
+    if (s == 'STRONG_BUY' || s == '적극매수') return 'STRONG BUY';
+    if (s == 'SELL' || s == '매도권고') return 'SELL';
+    if (s == 'STRONG_SELL' || s == '적극매도') return 'STRONG SELL';
+    if (s == 'HOLD' || s == '관망') return 'HOLD';
+    return '';
   }
 
   String _formatDate(DateTime d) =>
@@ -78,7 +71,7 @@ class HoldingListItem extends StatelessWidget {
                   ),
                   TextButton(
                     onPressed: () => Navigator.pop(ctx, true),
-                    style: TextButton.styleFrom(foregroundColor: Colors.red),
+                    style: TextButton.styleFrom(foregroundColor: context.mlColors.dangerColor),
                     child: Text(l10n.delete),
                   ),
                 ],
@@ -88,17 +81,17 @@ class HoldingListItem extends StatelessWidget {
       },
       onDismissed: (_) => onDelete(),
       background: Container(
-        color: Colors.red,
+        color: context.mlColors.dangerColor,
         alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 20),
-        child: const Icon(Icons.delete, color: Colors.white),
+        padding: const EdgeInsets.only(right: AppSpacing.xxl),
+        child: Icon(Icons.delete, color: context.mlColors.onPrimary),
       ),
       child: Column(
         children: [
           InkWell(
             onTap: onTap,
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
               child: Row(
                 children: [
                   // Score box
@@ -107,10 +100,10 @@ class HoldingListItem extends StatelessWidget {
                     height: 44,
                     decoration: BoxDecoration(
                       color: holding.score != null
-                          ? _signalColor(holding.signal)
+                          ? _signalColor(context, holding.signal)
                               .withValues(alpha: 0.1)
                           : theme.colorScheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(AppRadius.lg),
                     ),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -118,17 +111,17 @@ class HoldingListItem extends StatelessWidget {
                         Text(
                           holding.score?.toStringAsFixed(0) ?? '—',
                           style: TextStyle(
-                            fontSize: 16,
+                            fontSize: AppTypography.headlineMedium,
                             fontWeight: FontWeight.bold,
                             color: holding.score != null
-                                ? _signalColor(holding.signal)
+                                ? _signalColor(context, holding.signal)
                                 : theme.colorScheme.outline,
                           ),
                         ),
                         Text(
                           l10n.score,
                           style: TextStyle(
-                            fontSize: 8,
+                            fontSize: AppTypography.chartMicro,
                             color: theme.colorScheme.onSurfaceVariant,
                           ),
                         ),
@@ -146,14 +139,14 @@ class HoldingListItem extends StatelessWidget {
                         Text(
                           holding.ticker,
                           style: const TextStyle(
-                            fontSize: 15,
+                            fontSize: AppTypography.headlineSmall,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         Text(
                           displayName,
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: AppTypography.bodySmall,
                             color: theme.colorScheme.onSurfaceVariant,
                           ),
                           maxLines: 1,
@@ -174,20 +167,20 @@ class HoldingListItem extends StatelessWidget {
                                   holding.avgPrice!.toStringAsFixed(2),
                                 ),
                                 style: TextStyle(
-                                  fontSize: 10,
+                                  fontSize: AppTypography.micro,
                                   color: theme.colorScheme.outline,
                                 ),
                               ),
                               if (holding.createdAt != null) ...[
-                                const SizedBox(width: 4),
+                                const SizedBox(width: AppSpacing.xs),
                                 Icon(Icons.calendar_today,
                                     size: 10,
                                     color: theme.colorScheme.outline),
-                                const SizedBox(width: 2),
+                                const SizedBox(width: AppSpacing.xxs),
                                 Text(
                                   _formatDate(holding.createdAt!),
                                   style: TextStyle(
-                                    fontSize: 10,
+                                    fontSize: AppTypography.micro,
                                     color: theme.colorScheme.outline,
                                   ),
                                 ),
@@ -206,59 +199,45 @@ class HoldingListItem extends StatelessWidget {
                         Text(
                           '\$${holding.currentValue.toStringAsFixed(2)}',
                           style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
+                            fontSize: AppTypography.bodySmall,
+                            fontWeight: AppTypography.semiBold,
                           ),
                         ),
-                      const SizedBox(height: 2),
+                      const SizedBox(height: AppSpacing.xxs),
                       Text(
                         '${holding.pnlPct >= 0 ? '+' : ''}${holding.pnlPct.toStringAsFixed(2)}%',
                         style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w500,
+                          fontSize: AppTypography.caption,
+                          fontWeight: AppTypography.medium,
                           color:
-                              holding.pnlPct >= 0 ? Colors.green : Colors.red,
+                              holding.pnlPct >= 0 ? context.mlColors.gainColor : context.mlColors.lossColor,
                         ),
                       ),
                     ],
                   ),
 
-                  const SizedBox(width: 6),
+                  const SizedBox(width: AppSpacing.sm),
 
                   // Signal pill
                   if (holding.signal != null &&
                       _signalLabel(holding.signal).isNotEmpty)
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 2),
+                          horizontal: AppSpacing.md, vertical: AppSpacing.xxs),
                       decoration: BoxDecoration(
-                        color: _signalColor(holding.signal),
-                        borderRadius: BorderRadius.circular(10),
+                        color: _signalColor(context, holding.signal),
+                        borderRadius: BorderRadius.circular(AppRadius.lg),
                       ),
                       child: Text(
                         _signalLabel(holding.signal),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
+                        style: TextStyle(
+                          color: context.mlColors.onPrimary,
+                          fontSize: AppTypography.micro,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
 
-                  // Edit button
-                  SizedBox(
-                    width: 32,
-                    height: 32,
-                    child: IconButton(
-                      icon: Icon(
-                        Icons.edit_outlined,
-                        size: 16,
-                        color: theme.colorScheme.primary,
-                      ),
-                      padding: EdgeInsets.zero,
-                      onPressed: onEdit,
-                    ),
-                  ),
                 ],
               ),
             ),

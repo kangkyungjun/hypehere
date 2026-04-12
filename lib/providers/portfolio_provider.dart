@@ -50,8 +50,12 @@ class PortfolioProvider with ChangeNotifier {
   /// All tracked tickers (holdings + watchlist)
   List<String> get allTickers {
     final set = <String>{};
-    for (final h in _holdings) set.add(h.ticker);
-    for (final w in _watchlist) set.add(w.ticker);
+    for (final h in _holdings) {
+      set.add(h.ticker);
+    }
+    for (final w in _watchlist) {
+      set.add(w.ticker);
+    }
     return set.toList();
   }
 
@@ -181,7 +185,7 @@ class PortfolioProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      // Parallel fetch
+      // Parallel fetch: core + AI data together
       final results = await Future.wait([
         _apiClient.getHoldings(),
         _apiClient.getWatchlist(),
@@ -192,9 +196,8 @@ class PortfolioProvider with ChangeNotifier {
       _watchlist = results[1] as List<WatchlistItem>;
       _alerts = results[2] as List<UserAlert>;
 
-      // Load advice + summary in background (non-blocking)
-      loadAdvice();
-      loadSummary();
+      // Await AI data so UI has complete state on first render
+      await _refreshAIData();
     } catch (e) {
       _error = e.toString();
       debugPrint('PortfolioProvider refresh error: $e');
@@ -202,6 +205,15 @@ class PortfolioProvider with ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     }
+  }
+
+  /// Refresh advice + summary + exchange rate in parallel.
+  Future<void> _refreshAIData() async {
+    await Future.wait([
+      loadAdvice(),
+      loadSummary(),
+      loadExchangeRate(),
+    ]);
   }
 
   // ============================================================
@@ -231,6 +243,9 @@ class PortfolioProvider with ChangeNotifier {
       // Refresh holdings to get enriched data (current price, score)
       _holdings = await _apiClient.getHoldings();
       notifyListeners();
+
+      // Refresh AI data so advice + summary reflect the change
+      _refreshAIData();
     } catch (e) {
       debugPrint('Add holding error: $e');
       rethrow;
@@ -241,7 +256,11 @@ class PortfolioProvider with ChangeNotifier {
     try {
       await _apiClient.deleteHolding(ticker);
       _holdings.removeWhere((h) => h.ticker == ticker.toUpperCase());
+      _advice.removeWhere((a) => a.ticker == ticker.toUpperCase());
       notifyListeners();
+
+      // Refresh AI data so summary reflects the removal
+      _refreshAIData();
     } catch (e) {
       debugPrint('Delete holding error: $e');
       rethrow;
@@ -273,18 +292,22 @@ class PortfolioProvider with ChangeNotifier {
         _holdings.removeWhere((h) => h.ticker == ticker.toUpperCase());
       } else {
         // Keep existing avg price, update shares
-        final existing = _holdings.firstWhere(
-          (h) => h.ticker == ticker.toUpperCase(),
+        final existing = _holdings.cast<PortfolioHolding?>().firstWhere(
+          (h) => h!.ticker == ticker.toUpperCase(),
+          orElse: () => null,
         );
         await _apiClient.addOrUpdateHolding(
           ticker: ticker,
           shares: remaining,
-          avgPrice: existing.avgPrice ?? 0,
+          avgPrice: existing?.avgPrice ?? 0,
         );
         _holdings = await _apiClient.getHoldings();
       }
 
       notifyListeners();
+
+      // Refresh AI data to reflect realized P&L + advice changes
+      _refreshAIData();
     } catch (e) {
       debugPrint('Sell holding error: $e');
       rethrow;
@@ -428,6 +451,7 @@ class PortfolioProvider with ChangeNotifier {
           alertType: old.alertType,
           title: old.title,
           message: old.message,
+          priority: old.priority,
           data: old.data,
           isRead: true,
           createdAt: old.createdAt,
@@ -479,6 +503,7 @@ class PortfolioProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  @override
   void dispose() {
     _apiClient.dispose();
     super.dispose();

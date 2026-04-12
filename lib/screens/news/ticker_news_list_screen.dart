@@ -6,7 +6,12 @@ import '../../utils/error_localizer.dart';
 import '../../widgets/ads/banner_ad_widget.dart';
 import '../../widgets/news/market_news_modal.dart';
 import '../../theme/app_colors.dart';
+import '../../theme/app_radius.dart';
+import '../../theme/app_spacing.dart';
+import '../../theme/app_typography.dart';
 import '../../l10n/app_localizations.dart';
+import '../../widgets/common/error_state_view.dart';
+import '../../widgets/common/empty_state_view.dart';
 
 /// Full news list for a specific ticker with infinite scroll.
 ///
@@ -122,29 +127,25 @@ class _TickerNewsListScreenState extends State<TickerNewsListScreen> {
     }
 
     if (_error != null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.error_outline, size: 48, color: Colors.red),
-            const SizedBox(height: 16),
-            Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.outline)),
-            const SizedBox(height: 16),
-            ElevatedButton(onPressed: _loadInitial, child: Text(l10n.retry)),
-          ],
-        ),
+      return ErrorStateView(
+        message: _error!,
+        onRetry: _loadInitial,
+        retryLabel: l10n.retry,
       );
     }
 
     if (_items.isEmpty && widget.stats == null) {
-      return Center(child: Text(l10n.noNewsAvailable));
+      return EmptyStateView(
+        icon: Icons.article_outlined,
+        message: l10n.noNewsAvailable,
+      );
     }
 
     return RefreshIndicator(
       onRefresh: _loadInitial,
       child: ListView.builder(
         controller: _scrollController,
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.xl),
         itemCount: _buildListItemCount(),
         itemBuilder: (context, index) => _buildListItem(index),
       ),
@@ -214,7 +215,7 @@ class _TickerNewsListScreenState extends State<TickerNewsListScreen> {
       if (newsCount % 15 == 0 && i != _items.length - 1) {
         if (currentVirtual == virtualIndex) {
           return const Padding(
-            padding: EdgeInsets.symmetric(vertical: 12),
+            padding: EdgeInsets.symmetric(vertical: AppSpacing.lg),
             child: BannerAdWidget(),
           );
         }
@@ -224,7 +225,7 @@ class _TickerNewsListScreenState extends State<TickerNewsListScreen> {
 
     if (_isLoadingMore) {
       return const Padding(
-        padding: EdgeInsets.all(16),
+        padding: EdgeInsets.all(AppSpacing.xl),
         child: Center(child: CircularProgressIndicator()),
       );
     }
@@ -235,11 +236,11 @@ class _TickerNewsListScreenState extends State<TickerNewsListScreen> {
     final l10n = AppLocalizations.of(context);
     final s = widget.stats!;
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      margin: const EdgeInsets.only(bottom: AppSpacing.lg),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.lg),
       decoration: BoxDecoration(
         color: context.mlColors.sectionBackground,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(AppRadius.lg),
         border: Border.all(color: context.mlColors.subtleBorder),
       ),
       child: Row(
@@ -259,17 +260,17 @@ class _TickerNewsListScreenState extends State<TickerNewsListScreen> {
         Text(
           title,
           style: TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w600,
+            fontSize: AppTypography.caption,
+            fontWeight: AppTypography.semiBold,
             color: Theme.of(context).colorScheme.outline,
           ),
         ),
-        const SizedBox(height: 6),
-        _buildStatRow(Colors.green, l10n.sentimentBullish, counts.bullish),
-        const SizedBox(height: 2),
-        _buildStatRow(Colors.grey, l10n.sentimentNeutral, counts.neutral),
-        const SizedBox(height: 2),
-        _buildStatRow(Colors.red, l10n.sentimentBearish, counts.bearish),
+        const SizedBox(height: AppSpacing.sm),
+        _buildStatRow(context.mlColors.gainColor, l10n.sentimentBullish, counts.bullish),
+        const SizedBox(height: AppSpacing.xxs),
+        _buildStatRow(context.mlColors.neutralColor, l10n.sentimentNeutral, counts.neutral),
+        const SizedBox(height: AppSpacing.xxs),
+        _buildStatRow(context.mlColors.lossColor, l10n.sentimentBearish, counts.bearish),
       ],
     );
   }
@@ -284,10 +285,10 @@ class _TickerNewsListScreenState extends State<TickerNewsListScreen> {
           height: 7,
           decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
-        const SizedBox(width: 4),
+        const SizedBox(width: AppSpacing.xs),
         Text(
           '$label  $count',
-          style: TextStyle(fontSize: 11, color: color.withValues(alpha: 0.9)),
+          style: TextStyle(fontSize: AppTypography.caption, color: color.withValues(alpha: 0.9)),
         ),
       ],
     );
@@ -296,11 +297,11 @@ class _TickerNewsListScreenState extends State<TickerNewsListScreen> {
   Widget _buildDateHeader(BuildContext context, NewsItem item) {
     final label = _formatDateLabel(item.date);
     return Padding(
-      padding: const EdgeInsets.only(top: 16, bottom: 8),
+      padding: const EdgeInsets.only(top: AppSpacing.xl, bottom: AppSpacing.md),
       child: Text(
         label,
         style: TextStyle(
-          fontSize: 13,
+          fontSize: AppTypography.bodyMedium,
           fontWeight: FontWeight.bold,
           color: Theme.of(context).colorScheme.onSurfaceVariant,
         ),
@@ -332,7 +333,7 @@ class _TickerNewsListScreenState extends State<TickerNewsListScreen> {
 
   Widget _buildNewsItem(BuildContext context, NewsItem item, {required bool isLastInGroup}) {
     final langCode = Localizations.localeOf(context).languageCode;
-    final dotColor = item.sentimentColor;
+    final dotColor = item.sentimentColor(context.mlColors);
 
     return InkWell(
       onTap: () => MarketNewsModal.show(context, item),
@@ -344,7 +345,7 @@ class _TickerNewsListScreenState extends State<TickerNewsListScreen> {
               width: 20,
               child: Column(
                 children: [
-                  const SizedBox(height: 6),
+                  const SizedBox(height: AppSpacing.sm),
                   Container(
                     width: 10,
                     height: 10,
@@ -366,23 +367,27 @@ class _TickerNewsListScreenState extends State<TickerNewsListScreen> {
             const SizedBox(width: 10),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.only(bottom: 14),
+                padding: const EdgeInsets.only(bottom: AppSpacing.xl),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Row 1: sentiment + time
+                    // Row 1: breaking badge + sentiment + time
                     Row(
                       children: [
+                        if (item.isBreaking) ...[
+                          Text('🚨', style: TextStyle(fontSize: AppTypography.bodySmall)),
+                          const SizedBox(width: AppSpacing.xs),
+                        ],
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xxs),
                           decoration: BoxDecoration(
                             color: dotColor.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(4),
+                            borderRadius: BorderRadius.circular(AppRadius.xs),
                           ),
                           child: Text(
                             item.sentimentLabelLocalized(AppLocalizations.of(context)),
                             style: TextStyle(
-                              fontSize: 10,
+                              fontSize: AppTypography.micro,
                               fontWeight: FontWeight.bold,
                               color: dotColor,
                             ),
@@ -392,20 +397,20 @@ class _TickerNewsListScreenState extends State<TickerNewsListScreen> {
                         Text(
                           item.timeAgoLocalized(AppLocalizations.of(context)),
                           style: TextStyle(
-                            fontSize: 10,
+                            fontSize: AppTypography.micro,
                             color: Theme.of(context).colorScheme.outline,
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: AppSpacing.xs),
 
                     // Row 2: AI summary (localized)
                     Text(
                       item.aiSummary.localize(langCode),
                       style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
+                        fontSize: AppTypography.bodyMedium,
+                        fontWeight: AppTypography.semiBold,
                         color: Theme.of(context).colorScheme.onSurface,
                         height: 1.4,
                       ),
@@ -419,7 +424,7 @@ class _TickerNewsListScreenState extends State<TickerNewsListScreen> {
                       Text(
                         item.source!,
                         style: TextStyle(
-                          fontSize: 10,
+                          fontSize: AppTypography.micro,
                           color: Theme.of(context).colorScheme.outline,
                         ),
                       ),

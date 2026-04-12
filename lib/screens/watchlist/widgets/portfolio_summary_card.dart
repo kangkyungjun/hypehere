@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/portfolio_provider.dart';
+import '../../../theme/app_colors.dart';
+import '../../../theme/app_spacing.dart';
+import '../../../theme/app_typography.dart';
 
 /// Card showing portfolio totals: value | unrealized P&L | realized P&L.
 ///
@@ -32,12 +35,9 @@ class PortfolioSummaryCard extends StatelessWidget {
     final realized = portfolio.realizedPnl;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      child: Card(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-        elevation: 1,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.xs),
+      child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.lg),
           child: Row(
             children: [
               // Total Value
@@ -61,7 +61,7 @@ class PortfolioSummaryCard extends StatelessWidget {
                       '${totalPnl >= 0 ? '+' : ''}${_formatMoney(totalPnl)}',
                   subValue:
                       '${totalPnlPct >= 0 ? '+' : ''}${totalPnlPct.toStringAsFixed(2)}%',
-                  valueColor: totalPnl >= 0 ? Colors.green : Colors.red,
+                  valueColor: totalPnl >= 0 ? context.mlColors.gainColor : context.mlColors.lossColor,
                 ),
               ),
               Container(
@@ -75,12 +75,11 @@ class PortfolioSummaryCard extends StatelessWidget {
                   label: l10n.realizedPnl,
                   value:
                       '${realized >= 0 ? '+' : ''}${_formatMoney(realized)}',
-                  valueColor: realized >= 0 ? Colors.green : Colors.red,
+                  valueColor: realized >= 0 ? context.mlColors.gainColor : context.mlColors.lossColor,
                 ),
               ),
             ],
           ),
-        ),
       ),
     );
   }
@@ -106,15 +105,15 @@ class _MetricColumn extends StatelessWidget {
         Text(
           label,
           style: TextStyle(
-            fontSize: 11,
+            fontSize: AppTypography.caption,
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: AppSpacing.xs),
         Text(
           value,
           style: TextStyle(
-            fontSize: 14,
+            fontSize: AppTypography.bodyLarge,
             fontWeight: FontWeight.bold,
             color: valueColor,
           ),
@@ -123,7 +122,7 @@ class _MetricColumn extends StatelessWidget {
           Text(
             subValue!,
             style: TextStyle(
-              fontSize: 11,
+              fontSize: AppTypography.caption,
               color: valueColor,
             ),
           ),

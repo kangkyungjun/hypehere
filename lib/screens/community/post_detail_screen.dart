@@ -1,3 +1,4 @@
+// ignore_for_file: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -5,16 +6,27 @@ import '../../models/community/post.dart';
 import '../../models/community/comment.dart';
 import '../../services/community_api_client.dart';
 import '../../providers/auth_provider.dart';
+import '../../utils/error_localizer.dart';
+import '../../theme/app_colors.dart';
+import '../../theme/app_radius.dart';
+import '../../theme/app_spacing.dart';
+import '../../theme/app_duration.dart';
+import '../../theme/app_typography.dart';
 import '../../widgets/community/comment_card.dart';
 import '../../widgets/community/signup_prompt_dialog.dart';
 import '../auth/login_screen.dart';
 import '../auth/signup_screen.dart';
+import 'create_post_screen.dart';
+import '../../widgets/ads/banner_ad_widget.dart';
+import '../../utils/badge_colors.dart';
+import '../../l10n/app_localizations.dart';
 
 /// 게시글 상세 화면
 ///
 /// - 단일 게시글 내용 + 댓글 목록 표시
 /// - 좋아요/댓글 작성 기능 (비회원은 로그인 유도)
 /// - 낙관적 UI 업데이트로 반응성 향상
+/// - 게시글/댓글 수정/삭제 기능
 class PostDetailScreen extends StatefulWidget {
   /// 조회할 게시글 ID
   final int postId;
@@ -48,40 +60,79 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   /// 에러 메시지
   String? _errorMessage;
 
+  /// 댓글 페이지네이션 상태
+  int _commentPage = 1;
+  bool _hasNextComments = false;
+  bool _isLoadingMoreComments = false;
+
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(_onScroll);
     _loadPostAndComments();
   }
 
   @override
   void dispose() {
     _commentController.dispose();
+    _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     super.dispose();
   }
 
-  /// 게시글 + 댓글 로드
+  /// 스크롤 하단 접근 시 댓글 추가 로드
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      _loadMoreComments();
+    }
+  }
+
+  /// 게시글 + 댓글 첫 페이지 로드
   Future<void> _loadPostAndComments() async {
     setState(() {
       _isLoading = true;
       _errorMessage = null;
+      _commentPage = 1;
+      _hasNextComments = false;
     });
 
     try {
       final post = await _apiClient.getPost(widget.postId);
-      final comments = await _apiClient.getComments(widget.postId);
+      final commentResult = await _apiClient.getComments(widget.postId, page: 1);
 
       setState(() {
         _post = post;
-        _comments = comments;
+        _comments = commentResult.items;
+        _hasNextComments = commentResult.hasNext;
         _isLoading = false;
       });
     } catch (e) {
       setState(() {
-        _errorMessage = '게시글을 불러올 수 없습니다: $e';
+        _errorMessage = ErrorLocalizer.getMessage(context, e);
         _isLoading = false;
       });
+    }
+  }
+
+  /// 댓글 추가 페이지 로드
+  Future<void> _loadMoreComments() async {
+    if (_isLoadingMoreComments || !_hasNextComments) return;
+
+    setState(() { _isLoadingMoreComments = true; });
+
+    try {
+      final result = await _apiClient.getComments(
+        widget.postId, page: _commentPage + 1,
+      );
+      setState(() {
+        _commentPage++;
+        _comments.addAll(result.items);
+        _hasNextComments = result.hasNext;
+        _isLoadingMoreComments = false;
+      });
+    } catch (e) {
+      setState(() { _isLoadingMoreComments = false; });
     }
   }
 
@@ -99,6 +150,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       );
 
       if (result == 'login') {
+        if (!mounted) return;
         final success = await Navigator.push<bool>(
           context,
           MaterialPageRoute(
@@ -111,6 +163,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
           _toggleLike();
         }
       } else if (result == 'signup') {
+        if (!mounted) return;
         final success = await Navigator.push<bool>(
           context,
           MaterialPageRoute(
@@ -149,7 +202,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('좋아요 처리 실패: $e')),
+          SnackBar(content: Text(ErrorLocalizer.getMessage(context, e))),
         );
       }
     }
@@ -162,7 +215,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     final content = _commentController.text.trim();
     if (content.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('댓글 내용을 입력해주세요')),
+        SnackBar(content: Text(AppLocalizations.of(context).commentRequired)),
       );
       return;
     }
@@ -177,6 +230,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       );
 
       if (result == 'login') {
+        if (!mounted) return;
         final success = await Navigator.push<bool>(
           context,
           MaterialPageRoute(
@@ -189,6 +243,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
           _submitComment();
         }
       } else if (result == 'signup') {
+        if (!mounted) return;
         final success = await Navigator.push<bool>(
           context,
           MaterialPageRoute(
@@ -223,17 +278,17 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       });
 
       // 새 댓글로 스크롤
-      Future.delayed(const Duration(milliseconds: 100), () {
+      Future.delayed(AppDuration.fastest, () {
         _scrollController.animateTo(
           _scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 300),
+          duration: AppDuration.normal,
           curve: Curves.easeOut,
         );
       });
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('댓글이 작성되었습니다')),
+          SnackBar(content: Text(AppLocalizations.of(context).commentCreated)),
         );
       }
     } catch (e) {
@@ -243,39 +298,352 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('댓글 작성 실패: $e')),
+          SnackBar(content: Text(ErrorLocalizer.getMessage(context, e))),
+        );
+      }
+    }
+  }
+
+  /// 게시글 삭제
+  Future<void> _deletePost() async {
+    final l10n = AppLocalizations.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.deletePost),
+        content: Text(l10n.deleteConfirm),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: context.mlColors.dangerColor),
+            child: Text(l10n.delete),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    try {
+      await _apiClient.deletePost(widget.postId);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.postDeleted)),
+        );
+        Navigator.pop(context, true);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(ErrorLocalizer.getMessage(context, e))),
+        );
+      }
+    }
+  }
+
+  /// 게시글 수정 화면으로 이동
+  Future<void> _editPost() async {
+    final result = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CreatePostScreen(editPost: _post),
+      ),
+    );
+
+    if (result == true) {
+      _loadPostAndComments();
+    }
+  }
+
+  /// 댓글 좋아요 토글 (낙관적 UI)
+  Future<void> _toggleCommentLike(Comment comment) async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    if (!authProvider.isLoggedIn) return;
+
+    // 낙관적 UI 업데이트
+    final index = _comments.indexWhere((c) => c.id == comment.id);
+    if (index == -1) return;
+
+    final original = _comments[index];
+    setState(() {
+      _comments[index] = original.copyWith(
+        isLiked: !original.isLiked,
+        likeCount: original.isLiked ? original.likeCount - 1 : original.likeCount + 1,
+      );
+    });
+
+    try {
+      if (original.isLiked) {
+        await _apiClient.unlikeComment(widget.postId, comment.id);
+      } else {
+        await _apiClient.likeComment(widget.postId, comment.id);
+      }
+    } catch (e) {
+      // 롤백
+      setState(() {
+        _comments[index] = original;
+      });
+    }
+  }
+
+  /// 댓글 삭제
+  Future<void> _deleteComment(Comment comment) async {
+    final l10n = AppLocalizations.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.deleteComment),
+        content: Text(l10n.deleteCommentConfirm),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: context.mlColors.dangerColor),
+            child: Text(l10n.delete),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    try {
+      await _apiClient.deleteComment(widget.postId, comment.id);
+      setState(() {
+        _comments.removeWhere((c) => c.id == comment.id);
+        _post = _post!.copyWith(commentCount: _post!.commentCount - 1);
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.commentDeleted)),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(ErrorLocalizer.getMessage(context, e))),
+        );
+      }
+    }
+  }
+
+  /// 댓글 수정
+  Future<void> _editComment(Comment comment) async {
+    final l10n = AppLocalizations.of(context);
+    final controller = TextEditingController(text: comment.content);
+    final result = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.editComment),
+        content: TextField(
+          controller: controller,
+          maxLines: 4,
+          decoration: InputDecoration(
+            hintText: l10n.commentPlaceholder,
+            border: const OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () {
+              final text = controller.text.trim();
+              if (text.isNotEmpty) {
+                Navigator.pop(context, text);
+              }
+            },
+            child: Text(l10n.edit),
+          ),
+        ],
+      ),
+    );
+    controller.dispose();
+
+    if (result == null || result == comment.content) return;
+
+    try {
+      final updated = await _apiClient.updateComment(
+        widget.postId,
+        comment.id,
+        content: result,
+      );
+      setState(() {
+        final index = _comments.indexWhere((c) => c.id == comment.id);
+        if (index != -1) {
+          _comments[index] = updated;
+        }
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.commentUpdated)),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(ErrorLocalizer.getMessage(context, e))),
+        );
+      }
+    }
+  }
+
+  /// 신고 사유 선택 다이얼로그
+  Future<Map<String, String>?> _showReportDialog() async {
+    final l10n = AppLocalizations.of(context);
+    String? selectedType;
+    final descriptionController = TextEditingController();
+
+    final result = await showDialog<Map<String, String>>(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            final reportTypes = {
+              'abuse': l10n.reportAbuse,
+              'spam': l10n.reportSpam,
+              'inappropriate': l10n.reportInappropriate,
+              'harassment': l10n.reportHarassment,
+              'other': l10n.reportOther,
+            };
+
+            return AlertDialog(
+              title: Text(l10n.reportTitle),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ...reportTypes.entries.map((entry) =>
+                        RadioListTile<String>(
+                          title: Text(entry.value),
+                          value: entry.key,
+                          groupValue: selectedType,
+                          onChanged: (value) {
+                            setDialogState(() {
+                              selectedType = value;
+                            });
+                          },
+                          dense: true,
+                          contentPadding: EdgeInsets.zero,
+                        )),
+                    if (selectedType == 'other') ...[
+                      const SizedBox(height: AppSpacing.md),
+                      TextField(
+                        controller: descriptionController,
+                        maxLines: 3,
+                        decoration: InputDecoration(
+                          hintText: l10n.reportDescription,
+                          border: const OutlineInputBorder(),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text(l10n.cancel),
+                ),
+                TextButton(
+                  onPressed: selectedType != null
+                      ? () {
+                          Navigator.pop(context, {
+                            'reportType': selectedType!,
+                            'description': descriptionController.text.trim(),
+                          });
+                        }
+                      : null,
+                  style: TextButton.styleFrom(foregroundColor: context.mlColors.reportColor),
+                  child: Text(l10n.reportSubmit),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+    descriptionController.dispose();
+    return result;
+  }
+
+  /// 게시글 신고
+  Future<void> _reportPost() async {
+    final result = await _showReportDialog();
+    if (result == null) return;
+
+    try {
+      await _apiClient.reportPost(
+        widget.postId,
+        reportType: result['reportType']!,
+        description: result['description'] ?? '',
+      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppLocalizations.of(context).reportSubmitted)),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(ErrorLocalizer.getMessage(context, e))),
+        );
+      }
+    }
+  }
+
+  /// 댓글 신고
+  Future<void> _reportComment(Comment comment) async {
+    final result = await _showReportDialog();
+    if (result == null) return;
+
+    try {
+      await _apiClient.reportComment(
+        widget.postId,
+        comment.id,
+        reportType: result['reportType']!,
+        description: result['description'] ?? '',
+      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppLocalizations.of(context).reportSubmitted)),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(ErrorLocalizer.getMessage(context, e))),
         );
       }
     }
   }
 
   /// Ticker 배지 색상 (PostCard와 동일)
-  Color _getTickerColor(String ticker) {
-    switch (ticker) {
-      case 'TSLA':
-        return const Color(0xFF1E88E5); // Blue
-      case 'AAPL':
-        return const Color(0xFF424242); // Gray
-      case 'NVDA':
-        return const Color(0xFF76B900); // Green
-      default:
-        return const Color(0xFF1E88E5);
-    }
-  }
+  Color _getTickerColor(String ticker) => BadgeColors.tickerBadge(ticker);
 
   /// 시간 표시 형식
   String _formatTimeAgo(DateTime dateTime) {
+    final l10n = AppLocalizations.of(context);
     final now = DateTime.now();
     final difference = now.difference(dateTime);
 
     if (difference.inMinutes < 1) {
-      return '방금 전';
+      return l10n.timeJustNow;
     } else if (difference.inHours < 1) {
-      return '${difference.inMinutes}분 전';
+      return l10n.timeMinutesAgo(difference.inMinutes);
     } else if (difference.inDays < 1) {
-      return '${difference.inHours}시간 전';
+      return l10n.timeHoursAgo(difference.inHours);
     } else if (difference.inDays < 7) {
-      return '${difference.inDays}일 전';
+      return l10n.timeDaysAgo(difference.inDays);
     } else {
       return DateFormat('yyyy-MM-dd').format(dateTime);
     }
@@ -285,7 +653,71 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('게시글'),
+        title: Text(AppLocalizations.of(context).postDetail),
+        actions: [
+          if (_post != null)
+            Builder(
+              builder: (context) {
+                final authProvider = Provider.of<AuthProvider>(context, listen: false);
+                final isOwnPost = authProvider.currentUser?.id == _post!.author.id;
+                final canReport = authProvider.isLoggedIn && !isOwnPost;
+                final showMenu = _post!.canEdit || _post!.canDelete || canReport;
+                if (!showMenu) return const SizedBox.shrink();
+                return PopupMenuButton<String>(
+                  onSelected: (value) {
+                    if (value == 'edit') {
+                      _editPost();
+                    } else if (value == 'delete') {
+                      _deletePost();
+                    } else if (value == 'report') {
+                      _reportPost();
+                    }
+                  },
+                  itemBuilder: (context) => [
+                    if (_post!.canEdit)
+                      PopupMenuItem(
+                        value: 'edit',
+                        height: 24,
+                        padding: const EdgeInsets.only(left: AppSpacing.md, right: AppSpacing.xl),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.edit, size: 20),
+                            const SizedBox(width: AppSpacing.md),
+                            Text(AppLocalizations.of(context).edit),
+                          ],
+                        ),
+                      ),
+                    if (_post!.canDelete)
+                      PopupMenuItem(
+                        value: 'delete',
+                        height: 24,
+                        padding: const EdgeInsets.only(left: AppSpacing.md, right: AppSpacing.xl),
+                        child: Row(
+                          children: [
+                            Icon(Icons.delete, size: 20, color: context.mlColors.dangerColor),
+                            const SizedBox(width: AppSpacing.md),
+                            Text(AppLocalizations.of(context).delete, style: TextStyle(color: context.mlColors.dangerColor)),
+                          ],
+                        ),
+                      ),
+                    if (canReport)
+                      PopupMenuItem(
+                        value: 'report',
+                        height: 24,
+                        padding: const EdgeInsets.only(left: AppSpacing.md, right: AppSpacing.xl),
+                        child: Row(
+                          children: [
+                            Icon(Icons.flag_outlined, size: 20, color: context.mlColors.reportColor),
+                            const SizedBox(width: AppSpacing.md),
+                            Text(AppLocalizations.of(context).report, style: TextStyle(color: context.mlColors.reportColor)),
+                          ],
+                        ),
+                      ),
+                  ],
+                );
+              },
+            ),
+        ],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -297,17 +729,25 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                       children: [
                         // 게시글 + 댓글 영역 (스크롤 가능)
                         Expanded(
-                          child: SingleChildScrollView(
-                            controller: _scrollController,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                _buildPostHeader(),
-                                _buildPostContent(),
-                                _buildPostActions(),
+                          child: RefreshIndicator(
+                            onRefresh: _loadPostAndComments,
+                            child: SingleChildScrollView(
+                              controller: _scrollController,
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _buildPostHeader(),
+                                  _buildPostContent(),
+                                  _buildPostActions(),
+                                const Padding(
+                                  padding: EdgeInsets.symmetric(vertical: AppSpacing.xl),
+                                  child: BannerAdWidget(),
+                                ),
                                 const Divider(height: 2, thickness: 2),
-                                _buildCommentsSection(),
-                              ],
+                                  _buildCommentsSection(),
+                                ],
+                              ),
                             ),
                           ),
                         ),
@@ -325,24 +765,24 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(
+          Icon(
             Icons.error_outline,
             size: 64,
-            color: Colors.red,
+            color: context.mlColors.dangerColor,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.xl),
           Text(
-            _errorMessage ?? '게시글을 불러올 수 없습니다',
+            _errorMessage ?? AppLocalizations.of(context).cannotLoadPosts,
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[700],
+              fontSize: AppTypography.bodyLarge,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: AppSpacing.xxl),
           ElevatedButton(
             onPressed: _loadPostAndComments,
-            child: const Text('다시 시도'),
+            child: Text(AppLocalizations.of(context).tryAgain),
           ),
         ],
       ),
@@ -351,40 +791,43 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
 
   /// 게시글 헤더 (Ticker 배지 + 제목 + 작성자 + 시간)
   Widget _buildPostHeader() {
+    final ticker = _post!.ticker;
+    final displayTicker = ticker.isEmpty ? AppLocalizations.of(context).freePost : ticker;
+
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppSpacing.xl),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Ticker 배지
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xs),
             decoration: BoxDecoration(
-              color: _getTickerColor(_post!.ticker),
-              borderRadius: BorderRadius.circular(4),
+              color: _getTickerColor(ticker),
+              borderRadius: BorderRadius.circular(AppRadius.xs),
             ),
             child: Text(
-              _post!.ticker,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 12,
+              displayTicker,
+              style: TextStyle(
+                color: context.mlColors.onPrimary,
+                fontSize: AppTypography.bodySmall,
                 fontWeight: FontWeight.bold,
               ),
             ),
           ),
 
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.sm),
 
           // 제목
           Text(
             _post!.title,
             style: const TextStyle(
-              fontSize: 20,
+              fontSize: AppTypography.displayMedium,
               fontWeight: FontWeight.bold,
             ),
           ),
 
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.xs),
 
           // 작성자 + 시간
           Row(
@@ -392,16 +835,16 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
               Text(
                 _post!.author.nickname,
                 style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
+                  fontSize: AppTypography.bodyLarge,
+                  fontWeight: AppTypography.medium,
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: AppSpacing.md),
               Text(
                 _formatTimeAgo(_post!.createdAt),
                 style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[500],
+                  fontSize: AppTypography.bodySmall,
+                  color: Theme.of(context).colorScheme.outline,
                 ),
               ),
             ],
@@ -415,12 +858,12 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   Widget _buildPostContent() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppSpacing.xl),
       child: Text(
         _post!.content,
         style: TextStyle(
-          fontSize: 14,
-          color: Colors.grey[700],
+          fontSize: AppTypography.bodyLarge,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
           height: 1.5,
         ),
       ),
@@ -430,35 +873,35 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   /// 게시글 액션 (좋아요/댓글 버튼)
   Widget _buildPostActions() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.md),
       child: Row(
         children: [
           // 좋아요 버튼
           IconButton(
             icon: Icon(
               _post!.isLiked ? Icons.favorite : Icons.favorite_border,
-              color: _post!.isLiked ? Colors.red : Colors.grey,
+              color: _post!.isLiked ? context.mlColors.dangerColor : context.mlColors.neutralColor,
             ),
             onPressed: _toggleLike,
           ),
           Text(
             '${_post!.likeCount}',
             style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[600],
+              fontSize: AppTypography.bodyLarge,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
 
-          const SizedBox(width: 16),
+          const SizedBox(width: AppSpacing.xl),
 
           // 댓글 아이콘 (클릭 불가, 표시용)
-          Icon(Icons.comment_outlined, color: Colors.grey[600]),
-          const SizedBox(width: 4),
+          Icon(Icons.comment_outlined, color: Theme.of(context).colorScheme.onSurfaceVariant),
+          const SizedBox(width: AppSpacing.xs),
           Text(
             '${_post!.commentCount}',
             style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[600],
+              fontSize: AppTypography.bodyLarge,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
         ],
@@ -473,53 +916,53 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
         // 비회원: 댓글 차단 + 회원가입 유도 UI
         if (!authProvider.isLoggedIn) {
           return Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(AppSpacing.xl),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // 댓글 헤더
                 Text(
-                  '댓글 ${_post?.commentCount ?? 0}개',
+                  AppLocalizations.of(context).commentsCount(_post?.commentCount ?? 0),
                   style: const TextStyle(
-                    fontSize: 16,
+                    fontSize: AppTypography.headlineMedium,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.md),
 
                 // 회원가입 유도 카드
                 Card(
-                  color: const Color(0xFFF5F5F5),
+                  color: context.mlColors.sectionBackground,
                   elevation: 0,
                   child: Padding(
-                    padding: const EdgeInsets.all(24),
+                    padding: const EdgeInsets.all(AppSpacing.xxl),
                     child: Column(
                       children: [
                         Icon(
                           Icons.lock_outline,
                           size: 48,
-                          color: Colors.grey[400],
+                          color: Theme.of(context).colorScheme.outline,
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: AppSpacing.md),
                         Text(
-                          '댓글을 보려면 로그인이 필요해요',
+                          AppLocalizations.of(context).loginToViewComments,
                           style: TextStyle(
-                            fontSize: 16,
+                            fontSize: AppTypography.headlineMedium,
                             fontWeight: FontWeight.bold,
-                            color: Colors.grey[800],
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                           textAlign: TextAlign.center,
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: AppSpacing.xs),
                         Text(
-                          '다른 투자자들의 의견을 확인하고\n나만의 분석을 공유해보세요!',
+                          AppLocalizations.of(context).loginPromptComments,
                           style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey[600],
+                            fontSize: AppTypography.bodyLarge,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                           textAlign: TextAlign.center,
                         ),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: AppSpacing.lg),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -532,9 +975,9 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                                   ),
                                 );
                               },
-                              child: const Text('로그인'),
+                              child: Text(AppLocalizations.of(context).login),
                             ),
-                            const SizedBox(width: 12),
+                            const SizedBox(width: AppSpacing.lg),
                             ElevatedButton(
                               onPressed: () {
                                 Navigator.push(
@@ -545,11 +988,11 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                                 );
                               },
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF1E88E5),
+                                backgroundColor: context.mlColors.accentBlue,
                               ),
-                              child: const Text(
-                                '회원가입',
-                                style: TextStyle(color: Colors.white),
+                              child: Text(
+                                AppLocalizations.of(context).signup,
+                                style: TextStyle(color: context.mlColors.onPrimary),
                               ),
                             ),
                           ],
@@ -565,45 +1008,75 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
 
         // 로그인 사용자: 정상 댓글 표시
         return Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(AppSpacing.xl),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // 댓글 헤더
               Text(
-                '댓글 ${_comments.length}개',
+                AppLocalizations.of(context).commentsCount(_comments.length),
                 style: const TextStyle(
-                  fontSize: 16,
+                  fontSize: AppTypography.headlineMedium,
                   fontWeight: FontWeight.bold,
                 ),
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
 
               // 댓글 목록
               if (_comments.isEmpty)
                 Center(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 32),
+                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxxl),
                     child: Text(
-                      '첫 번째 댓글을 남겨보세요!',
+                      AppLocalizations.of(context).writeFirstComment,
                       style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[500],
+                        fontSize: AppTypography.bodyLarge,
+                        color: Theme.of(context).colorScheme.outline,
                       ),
                     ),
                   ),
                 )
               else
-                ...List.generate(_comments.length, (index) {
-                  final comment = _comments[index];
-                  return CommentCard(comment: comment);
-                }),
+                ..._buildCommentsWithAds(),
+
+              // 댓글 추가 로딩 인디케이터
+              if (_isLoadingMoreComments || _hasNextComments)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: AppSpacing.xl),
+                  child: Center(child: CircularProgressIndicator()),
+                ),
             ],
           ),
         );
       },
     );
+  }
+
+  /// 댓글 목록에 10개마다 배너 광고 삽입
+  List<Widget> _buildCommentsWithAds() {
+    final widgets = <Widget>[];
+    for (var i = 0; i < _comments.length; i++) {
+      final comment = _comments[i];
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final isOwnComment = authProvider.currentUser?.id == comment.author.id;
+      final canReportComment = authProvider.isLoggedIn && !isOwnComment;
+      widgets.add(CommentCard(
+        comment: comment,
+        onEdit: comment.canEdit ? () => _editComment(comment) : null,
+        onDelete: comment.canDelete ? () => _deleteComment(comment) : null,
+        onReport: canReportComment ? () => _reportComment(comment) : null,
+        onLike: () => _toggleCommentLike(comment),
+      ));
+      // 10개마다 광고 삽입 (마지막 댓글 뒤에는 미삽입)
+      if ((i + 1) % 10 == 0 && i + 1 < _comments.length) {
+        widgets.add(const Padding(
+          padding: EdgeInsets.symmetric(vertical: AppSpacing.lg),
+          child: BannerAdWidget(),
+        ));
+      }
+    }
+    return widgets;
   }
 
   /// 댓글 입력란 (하단 고정, SafeArea 적용)
@@ -612,12 +1085,12 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       top: false,
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.mlColors.cardBackground,
           border: Border(
-            top: BorderSide(color: Colors.grey.shade300),
+            top: BorderSide(color: context.mlColors.subtleBorder),
           ),
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.md),
         child: Row(
           children: [
             // 입력 필드
@@ -625,13 +1098,13 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
               child: TextField(
                 controller: _commentController,
                 decoration: InputDecoration(
-                  hintText: '댓글을 입력하세요...',
+                  hintText: AppLocalizations.of(context).commentHint,
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(24),
+                    borderRadius: BorderRadius.circular(AppRadius.xxxl),
                   ),
                   contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
+                    horizontal: AppSpacing.xl,
+                    vertical: AppSpacing.md,
                   ),
                 ),
                 maxLines: 1,
@@ -639,7 +1112,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
               ),
             ),
 
-            const SizedBox(width: 8),
+            const SizedBox(width: AppSpacing.md),
 
             // 전송 버튼
             IconButton(

@@ -7,7 +7,11 @@ import '../../../providers/auth_provider.dart';
 import '../../../providers/portfolio_provider.dart';
 import '../../../providers/watchlist_provider.dart';
 import '../../../theme/app_colors.dart';
+import '../../../theme/app_radius.dart';
+import '../../../theme/app_spacing.dart';
+import '../../../theme/app_typography.dart';
 import '../../../widgets/dashboard/watchlist_discovery_card.dart';
+import '../../../widgets/common/error_state_view.dart';
 import 'login_required_banner.dart';
 
 /// Watchlist tab: shows watchlist items with [+💼] button or "보유중" badge.
@@ -43,15 +47,15 @@ class WatchlistTab extends StatelessWidget {
     return items.take(10).toList();
   }
 
-  Color _getSignalColor(SignalType signalType) {
+  Color _getSignalColor(BuildContext context, SignalType signalType) {
     switch (signalType) {
       case SignalType.buy:
-        return Colors.green;
+        return context.mlColors.gainColor;
       case SignalType.sell:
-        return Colors.red;
+        return context.mlColors.lossColor;
       case SignalType.hold:
       case SignalType.neutral:
-        return Colors.grey;
+        return context.mlColors.neutralColor;
     }
   }
 
@@ -143,10 +147,10 @@ class WatchlistTab extends StatelessWidget {
       key: Key(ticker),
       direction: DismissDirection.endToStart,
       background: Container(
-        color: Colors.red,
+        color: context.mlColors.dangerColor,
         alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 20),
-        child: const Icon(Icons.delete, color: Colors.white),
+        padding: const EdgeInsets.only(right: AppSpacing.xxl),
+        child: Icon(Icons.delete, color: context.mlColors.onPrimary),
       ),
       onDismissed: (_) => _onRemoveTicker(context, ticker, provider),
       child: Column(
@@ -155,7 +159,7 @@ class WatchlistTab extends StatelessWidget {
             onTap: () => onTickerTap(ticker),
             child: Padding(
               padding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
               child: Row(
                 children: [
                   // Score box
@@ -164,9 +168,9 @@ class WatchlistTab extends StatelessWidget {
                       width: 44,
                       height: 44,
                       decoration: BoxDecoration(
-                        color: _getSignalColor(tickerScore.signalType)
+                        color: _getSignalColor(context, tickerScore.signalType)
                             .withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(AppRadius.lg),
                       ),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -174,16 +178,16 @@ class WatchlistTab extends StatelessWidget {
                           Text(
                             tickerScore.score.toStringAsFixed(0),
                             style: TextStyle(
-                              fontSize: 16,
+                              fontSize: AppTypography.headlineMedium,
                               fontWeight: FontWeight.bold,
                               color:
-                                  _getSignalColor(tickerScore.signalType),
+                                  _getSignalColor(context, tickerScore.signalType),
                             ),
                           ),
                           Text(
                             l10n.score,
                             style: TextStyle(
-                              fontSize: 8,
+                              fontSize: AppTypography.chartMicro,
                               color:
                                   theme.colorScheme.onSurfaceVariant,
                             ),
@@ -197,7 +201,7 @@ class WatchlistTab extends StatelessWidget {
                       height: 44,
                       decoration: BoxDecoration(
                         color: context.mlColors.sectionBackground,
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(AppRadius.lg),
                       ),
                       child: Icon(
                         Icons.bookmark,
@@ -216,7 +220,7 @@ class WatchlistTab extends StatelessWidget {
                         Text(
                           ticker,
                           style: const TextStyle(
-                            fontSize: 15,
+                            fontSize: AppTypography.headlineSmall,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -230,7 +234,7 @@ class WatchlistTab extends StatelessWidget {
                                     ? tickerScore.nameKo!
                                     : tickerScore.name!,
                                 style: TextStyle(
-                                  fontSize: 12,
+                                  fontSize: AppTypography.bodySmall,
                                   color: theme
                                       .colorScheme.onSurfaceVariant,
                                 ),
@@ -240,7 +244,7 @@ class WatchlistTab extends StatelessWidget {
                             : Text(
                                 l10n.tapToViewDetails,
                                 style: TextStyle(
-                                  fontSize: 12,
+                                  fontSize: AppTypography.bodySmall,
                                   color: theme.colorScheme.outline,
                                   fontStyle: FontStyle.italic,
                                 ),
@@ -257,66 +261,66 @@ class WatchlistTab extends StatelessWidget {
                         Text(
                           '\$${tickerScore.close!.toStringAsFixed(2)}',
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: AppTypography.bodySmall,
                             color:
                                 theme.colorScheme.onSurfaceVariant,
                           ),
                         ),
                         if (tickerScore.changePct != null) ...[
-                          const SizedBox(height: 2),
+                          const SizedBox(height: AppSpacing.xxs),
                           Text(
                             '${tickerScore.changePct! >= 0 ? '+' : ''}${tickerScore.changePct!.toStringAsFixed(2)}%',
                             style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w500,
+                              fontSize: AppTypography.caption,
+                              fontWeight: AppTypography.medium,
                               color: tickerScore.changePct! >= 0
-                                  ? Colors.green
-                                  : Colors.red,
+                                  ? context.mlColors.gainColor
+                                  : context.mlColors.lossColor,
                             ),
                           ),
                         ],
                       ],
                     ),
 
-                  const SizedBox(width: 6),
+                  const SizedBox(width: AppSpacing.sm),
 
                   // Signal pill
                   if (hasScore && tickerScore.signal != null)
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 2),
+                          horizontal: AppSpacing.md, vertical: AppSpacing.xxs),
                       decoration: BoxDecoration(
                         color:
-                            _getSignalColor(tickerScore.signalType),
-                        borderRadius: BorderRadius.circular(10),
+                            _getSignalColor(context, tickerScore.signalType),
+                        borderRadius: BorderRadius.circular(AppRadius.lg),
                       ),
                       child: Text(
                         tickerScore.signalLabelLocalized(l10n),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
+                        style: TextStyle(
+                          color: context.mlColors.onPrimary,
+                          fontSize: AppTypography.micro,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
 
-                  const SizedBox(width: 4),
+                  const SizedBox(width: AppSpacing.xs),
 
                   // [+💼] or "보유중" badge
                   if (isLoggedIn)
                     isHeld
                         ? Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 4),
+                                horizontal: AppSpacing.md, vertical: AppSpacing.xs),
                             decoration: BoxDecoration(
                               color: theme.colorScheme.outline
                                   .withValues(alpha: 0.15),
-                              borderRadius: BorderRadius.circular(8),
+                              borderRadius: BorderRadius.circular(AppRadius.md),
                             ),
                             child: Text(
                               l10n.alreadyHeld,
                               style: TextStyle(
-                                fontSize: 10,
+                                fontSize: AppTypography.micro,
                                 color:
                                     theme.colorScheme.onSurfaceVariant,
                               ),
@@ -361,56 +365,56 @@ class WatchlistTab extends StatelessWidget {
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         child: Padding(
-          padding: const EdgeInsets.all(32),
+          padding: const EdgeInsets.all(AppSpacing.xxxl),
           child: Column(
             children: [
               if (!auth.isLoggedIn) ...[
                 const LoginRequiredBanner(),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.xl),
               ],
-              const SizedBox(height: 32),
+              const SizedBox(height: AppSpacing.xxxl),
               Icon(
                 Icons.bookmark_border,
                 size: 80,
                 color: Theme.of(context).colorScheme.outline,
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.xxl),
               Text(
                 l10n.watchlistEmpty,
                 style: const TextStyle(
-                  fontSize: 20,
+                  fontSize: AppTypography.displayMedium,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.lg),
               Text(
                 l10n.watchlistEmptyHint,
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: AppTypography.bodyLarge,
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.md),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.search,
                       size: 16,
                       color: Theme.of(context).colorScheme.outline),
-                  const SizedBox(width: 4),
+                  const SizedBox(width: AppSpacing.xs),
                   Text(
                     l10n.explore,
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: AppTypography.bodyLarge,
                       color: Theme.of(context).colorScheme.outline,
-                      fontWeight: FontWeight.w500,
+                      fontWeight: AppTypography.medium,
                     ),
                   ),
                 ],
               ),
               if (topVolumeItems.isNotEmpty) ...[
-                const SizedBox(height: 32),
+                const SizedBox(height: AppSpacing.xxxl),
                 WatchlistDiscoveryCard(
                   topItems: topVolumeItems,
                   onTickerTap: onTickerTap,
@@ -424,33 +428,11 @@ class WatchlistTab extends StatelessWidget {
   }
 
   Widget _buildErrorState(BuildContext context, AppLocalizations l10n) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.error_outline, size: 48, color: Colors.red),
-          const SizedBox(height: 16),
-          Text(
-            l10n.tickerDataLoadFailed,
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          const SizedBox(height: 8),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32),
-            child: Text(
-              error!,
-              style: TextStyle(
-                  color: Theme.of(context).colorScheme.outline),
-              textAlign: TextAlign.center,
-            ),
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: onRetry,
-            child: Text(l10n.retry),
-          ),
-        ],
-      ),
+    return ErrorStateView(
+      message: l10n.tickerDataLoadFailed,
+      detail: error,
+      onRetry: onRetry,
+      retryLabel: l10n.retry,
     );
   }
 }

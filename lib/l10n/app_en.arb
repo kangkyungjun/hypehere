@@ -12,8 +12,13 @@
   "tabNewsTooltip": "Market News",
   "tabCommunity": "Community",
   "tabCommunityTooltip": "Discussion Board",
+  "tabMarket": "Market",
+  "tabMarketTooltip": "Market Overview",
+  "tabAILens": "AI",
+  "tabAILensTooltip": "AI Analysis",
   "tabWatchlist": "Watchlist",
   "tabWatchlistTooltip": "My Watchlist",
+  "tabHoldingsTooltip": "My Holdings",
 
   "settings": "Settings",
   "settingsTooltip": "Settings",
@@ -666,6 +671,7 @@
   "passwordChangeInstructions": "• New password must be at least 8 characters\n• Use a combination of letters, numbers, and symbols\n• You will need to login again with the new password",
 
   "notifications": "Notifications",
+  "markAllAsRead": "Mark all read",
   "noNotifications": "No notifications yet",
   "notificationsRetentionHint": "Notifications from the last 7 days appear here.",
 
@@ -693,6 +699,8 @@
   },
   "noEventsThisMonth": "No events this month",
   "noEventsSelectedDay": "No events on this day",
+  "calendarNewsAnnouncements": "News · Announcements",
+  "calendarEconomicIndicators": "US Economic",
   "today": "Today",
 
   "forgotPassword": "Forgot Password",
@@ -809,6 +817,11 @@
   },
   "portfolioAIAnalysis": "Portfolio AI Analysis",
   "aiRecommendations": "Recommendations",
+  "recPortfolioOverview": "Portfolio Overview",
+  "recTechnicalInsight": "Technical Analysis",
+  "recMarketIntelligence": "Market Intelligence",
+  "recActionSummary": "Action Summary",
+  "recommendedAction": "Recommended Action",
   "analysisWaiting": "AI analysis pending...",
   "alreadyHeld": "Held",
   "goToWatchlistTab": "Go to Watchlist",
@@ -850,5 +863,82 @@
   "deleteHolding": "Delete Holding",
   "avgPriceLabel": "Avg Price",
   "currentValueLabel": "Current Value",
-  "dailyUpdate": "Updated daily in the morning"
+  "dailyUpdate": "Updated daily in the morning",
+  "viewAIAdvice": "View AI Advice",
+  "noAnalysisYet": "No analysis available yet",
+  "recentTransactions": "Recent Transactions",
+  "viewAllTransactions": "View all ({count})",
+  "@viewAllTransactions": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "newsFilter": "Filter",
+  "filterSource": "Source",
+  "filterAll": "All",
+  "filterMyWatchlist": "My Watchlist",
+  "filterNoWatchlist": "Add watchlist items first",
+  "filterMarketOnly": "Market News",
+  "filterSentiment": "Sentiment",
+  "filterSector": "Sector",
+  "filterBreakingOnly": "Breaking only",
+  "filterReset": "Reset",
+  "filterApply": "Apply",
+  "hotTopicMore": "+{count} more",
+  "@hotTopicMore": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "sectorTechnology": "Technology",
+  "sectorHealthcare": "Healthcare",
+  "sectorEnergy": "Energy",
+  "sectorCyclical": "Cyclical",
+  "sectorDefensive": "Defensive",
+  "sectorComm": "Communication",
+  "sectorFinance": "Finance",
+  "sectorIndustrials": "Industrials",
+  "sectorUtilities": "Utilities",
+  "sectorRealEstate": "Real Estate",
+  "sectorMaterials": "Materials",
+
+  "newsBubbleTitle": "24h News Bubble",
+  "newsBubbleLegendBullish": "Mostly Bullish",
+  "newsBubbleLegendBearish": "Mostly Bearish",
+  "newsBubbleLegendMixed": "Mixed",
+  "newsBubbleMentions": "{count} mentions",
+  "@newsBubbleMentions": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "taxEstimateTitle": "Tax Estimate",
+  "totalGains": "Total Gains",
+  "annualExemption": "Annual Exemption",
+  "estimatedTax": "Estimated Tax (22%)",
+  "netProfit": "Net Profit",
+  "krwSuffix": " KRW",
+  "taxTradeCount": " sells",
+  "macro3mTitle": "3M",
+  "macro3mHigh": "High",
+  "macro3mAvg": "Avg",
+  "macro3mLow": "Low",
+  "tooltipClearSearch": "Clear search",
+  "tooltipPreviousMonth": "Previous month",
+  "tooltipNextMonth": "Next month",
+  "tooltipShowPassword": "Show password",
+  "tooltipHidePassword": "Hide password",
+  "tooltipChangePhoto": "Change photo",
+  "tooltipFilter": "Filter",
+  "tooltipRemove": "Remove",
+  "otherSectors": "Other Sectors",
+  "otherTickers": "Other Tickers",
+  "nDaysAgo": "{count}D ago",
+  "@nDaysAgo": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  }
 }

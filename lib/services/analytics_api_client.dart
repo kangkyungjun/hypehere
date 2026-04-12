@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import '../exceptions/api_error_codes.dart';
@@ -14,6 +15,7 @@ import '../models/macro_data.dart';
 import '../models/earnings_data.dart';
 import '../models/indices_data.dart';
 import '../models/news_data.dart';
+import '../models/mention_bubble_data.dart';
 import '../models/market_event.dart';
 
 class AnalyticsApiClient {
@@ -29,8 +31,8 @@ class AnalyticsApiClient {
   AnalyticsApiClient({http.Client? httpClient})
       : _httpClient = httpClient ?? http.Client() {
     // Debug logging for APK troubleshooting
-    print('[AnalyticsApiClient] 🌐 Base URL: $_baseUrl');
-    print('[AnalyticsApiClient] 📁 dotenv loaded: ${dotenv.env['API_BASE_URL']}');
+    debugPrint('[AnalyticsApiClient] 🌐 Base URL: $_baseUrl');
+    debugPrint('[AnalyticsApiClient] 📁 dotenv loaded: ${dotenv.env['API_BASE_URL']}');
   }
 
   /// Get complete chart data for a ticker
@@ -62,10 +64,10 @@ class AnalyticsApiClient {
       final uri = Uri.parse('$_baseUrl/api/v1/charts/$ticker')
           .replace(queryParameters: params.isNotEmpty ? params : null);
 
-      print('[CHART_REQUEST] baseUrl=$_baseUrl');
-      print('[CHART_REQUEST] ticker=$ticker');
-      print('[CHART_REQUEST] fullUrl=$uri');
-      print('[CHART_REQUEST] params from=${params['from']} to=${params['to']}');
+      debugPrint('[CHART_REQUEST] baseUrl=$_baseUrl');
+      debugPrint('[CHART_REQUEST] ticker=$ticker');
+      debugPrint('[CHART_REQUEST] fullUrl=$uri');
+      debugPrint('[CHART_REQUEST] params from=${params['from']} to=${params['to']}');
 
       final response = await _httpClient.get(uri).timeout(
         const Duration(seconds: 15),
@@ -74,7 +76,7 @@ class AnalyticsApiClient {
         },
       );
 
-      print('[CHART_RESPONSE] status=${response.statusCode} bytes=${response.bodyBytes.length}');
+      debugPrint('[CHART_RESPONSE] status=${response.statusCode} bytes=${response.bodyBytes.length}');
 
       if (response.statusCode == 200) {
         final json = jsonDecode(response.body);
@@ -86,13 +88,15 @@ class AnalyticsApiClient {
         String latest = 'N/A';
         if (list != null && list.isNotEmpty) {
           // date 문자열 최대값으로 최신일 계산 (정렬 가정 금지)
-          latest = (list
+          final dates = list
               .map((e) => (e as Map)['date']?.toString() ?? '')
-              .where((d) => d.isNotEmpty)
-              .reduce((a, b) => a.compareTo(b) > 0 ? a : b));
+              .where((d) => d.isNotEmpty);
+          if (dates.isNotEmpty) {
+            latest = dates.reduce((a, b) => a.compareTo(b) > 0 ? a : b);
+          }
         }
 
-        print('[CHART_RESPONSE] points=$count latest_date=$latest');
+        debugPrint('[CHART_RESPONSE] points=$count latest_date=$latest');
 
         return CompleteChartData.fromJson(json);
       } else if (response.statusCode == 404) {
@@ -140,7 +144,7 @@ class AnalyticsApiClient {
       final uri = Uri.parse('$_baseUrl/api/v1/scores/top')
           .replace(queryParameters: params);
 
-      print('[API] 🏆 GET $_baseUrl/api/v1/scores/top?limit=$limit');
+      debugPrint('[API] 🏆 GET $_baseUrl/api/v1/scores/top?limit=$limit');
 
       final response = await _httpClient.get(uri).timeout(
         const Duration(seconds: 15),
@@ -186,7 +190,7 @@ class AnalyticsApiClient {
       final uri = Uri.parse('$_baseUrl/api/v1/scores/batch')
           .replace(queryParameters: {'tickers': tickers.join(',')});
 
-      print('[API] GET $_baseUrl/api/v1/scores/batch?tickers=${tickers.join(',')}');
+      debugPrint('[API] GET $_baseUrl/api/v1/scores/batch?tickers=${tickers.join(',')}');
 
       final response = await _httpClient.get(uri).timeout(
         const Duration(seconds: 15),
@@ -248,7 +252,7 @@ class AnalyticsApiClient {
       final uri = Uri.parse('$_baseUrl/api/v1/scores/insights')
           .replace(queryParameters: params);
 
-      print('[API] 📊 GET $_baseUrl/api/v1/scores/insights?top=$top&bottom=$bottom${index != null ? '&index=$index' : ''}');
+      debugPrint('[API] 📊 GET $_baseUrl/api/v1/scores/insights?top=$top&bottom=$bottom${index != null ? '&index=$index' : ''}');
 
       final response = await _httpClient.get(uri).timeout(
         const Duration(seconds: 15),
@@ -294,7 +298,7 @@ class AnalyticsApiClient {
       final uri = Uri.parse('$_baseUrl/api/v1/tickers/search')
           .replace(queryParameters: {'q': query});
 
-      print('[API] 🔍 GET $_baseUrl/api/v1/tickers/search?q=$query');
+      debugPrint('[API] 🔍 GET $_baseUrl/api/v1/tickers/search?q=$query');
 
       final response = await _httpClient.get(uri).timeout(
         const Duration(seconds: 10),
@@ -333,7 +337,7 @@ class AnalyticsApiClient {
     try {
       final uri = Uri.parse('$_baseUrl/api/v1/tickers/$ticker');
 
-      print('[API] ℹ️  GET $_baseUrl/api/v1/tickers/$ticker');
+      debugPrint('[API] ℹ️  GET $_baseUrl/api/v1/tickers/$ticker');
 
       final response = await _httpClient.get(uri).timeout(
         const Duration(seconds: 10),
@@ -386,7 +390,7 @@ class AnalyticsApiClient {
       final uri = Uri.parse('$_baseUrl/api/v1/market/treemap')
           .replace(queryParameters: params.isNotEmpty ? params : null);
 
-      print('[API] GET $_baseUrl/api/v1/market/treemap${index != null ? '?index=$index' : ''}');
+      debugPrint('[API] GET $_baseUrl/api/v1/market/treemap${index != null ? '?index=$index' : ''}');
 
       final response = await _httpClient.get(uri).timeout(
         const Duration(seconds: 15),
@@ -436,7 +440,7 @@ class AnalyticsApiClient {
       final uri = Uri.parse('$_baseUrl/api/v1/macro/indicators')
           .replace(queryParameters: params.isNotEmpty ? params : null);
 
-      print('[API] GET $_baseUrl/api/v1/macro/indicators');
+      debugPrint('[API] GET $_baseUrl/api/v1/macro/indicators');
 
       final response = await _httpClient.get(uri).timeout(
         const Duration(seconds: 10),
@@ -481,7 +485,7 @@ class AnalyticsApiClient {
       final uri = Uri.parse('$_baseUrl/api/v1/macro/signals')
           .replace(queryParameters: params.isNotEmpty ? params : null);
 
-      print('[API] GET $_baseUrl/api/v1/macro/signals');
+      debugPrint('[API] GET $_baseUrl/api/v1/macro/signals');
 
       final response = await _httpClient.get(uri).timeout(
         const Duration(seconds: 10),
@@ -520,7 +524,7 @@ class AnalyticsApiClient {
       final uri = Uri.parse('$_baseUrl/api/v1/earnings/upcoming')
           .replace(queryParameters: {'days': days.toString()});
 
-      print('[API] GET $_baseUrl/api/v1/earnings/upcoming?days=$days');
+      debugPrint('[API] GET $_baseUrl/api/v1/earnings/upcoming?days=$days');
 
       final response = await _httpClient.get(uri).timeout(
         const Duration(seconds: 10),
@@ -557,7 +561,7 @@ class AnalyticsApiClient {
       final uri = Uri.parse('$_baseUrl/api/v1/news/latest')
           .replace(queryParameters: {'limit': limit.toString()});
 
-      print('[API] GET $_baseUrl/api/v1/news/latest?limit=$limit');
+      debugPrint('[API] GET $_baseUrl/api/v1/news/latest?limit=$limit');
 
       final response = await _httpClient.get(uri).timeout(
         const Duration(seconds: 10),
@@ -588,16 +592,29 @@ class AnalyticsApiClient {
     }
   }
 
-  /// Get paginated news list (infinite scroll)
-  Future<NewsListData> getNewsList({int limit = 20, int offset = 0}) async {
+  /// Get paginated news list (infinite scroll) with optional filters
+  Future<NewsListData> getNewsList({
+    int limit = 20,
+    int offset = 0,
+    String? tickers,
+    String? sentiment,
+    String? sectors,
+    bool? isBreaking,
+  }) async {
     try {
-      final uri = Uri.parse('$_baseUrl/api/v1/news/latest')
-          .replace(queryParameters: {
+      final params = <String, String>{
         'limit': limit.toString(),
         'offset': offset.toString(),
-      });
+      };
+      if (tickers != null) params['tickers'] = tickers;
+      if (sentiment != null) params['sentiment'] = sentiment;
+      if (sectors != null) params['sectors'] = sectors;
+      if (isBreaking != null) params['is_breaking'] = isBreaking.toString();
 
-      print('[API] GET $_baseUrl/api/v1/news/latest?limit=$limit&offset=$offset');
+      final uri = Uri.parse('$_baseUrl/api/v1/news/latest')
+          .replace(queryParameters: params);
+
+      debugPrint('[API] GET $uri');
 
       final response = await _httpClient.get(uri).timeout(
         const Duration(seconds: 10),
@@ -628,6 +645,57 @@ class AnalyticsApiClient {
     }
   }
 
+  /// Get hot topic news (last 48h, sorted by priority)
+  Future<NewsListData> getHotTopics({int limit = 5}) async {
+    try {
+      final uri = Uri.parse('$_baseUrl/api/v1/news/hot-topics')
+          .replace(queryParameters: {'limit': limit.toString()});
+
+      final response = await _httpClient.get(uri).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          throw TimeoutException('Hot topics timeout');
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+        return NewsListData.fromJson(json);
+      } else {
+        return NewsListData(items: [], total: 0);
+      }
+    } catch (e) {
+      return NewsListData(items: [], total: 0);
+    }
+  }
+
+  /// Get mention bubble data (top tickers by mention count in last N hours)
+  Future<MentionBubbleData> getMentionBubble({int hours = 24, int limit = 15}) async {
+    try {
+      final uri = Uri.parse('$_baseUrl/api/v1/news/mention-bubble')
+          .replace(queryParameters: {
+        'hours': hours.toString(),
+        'limit': limit.toString(),
+      });
+
+      final response = await _httpClient.get(uri).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          throw TimeoutException('Mention bubble timeout');
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+        return MentionBubbleData.fromJson(json);
+      } else {
+        return MentionBubbleData(items: [], periodHours: hours);
+      }
+    } catch (e) {
+      return MentionBubbleData(items: [], periodHours: hours);
+    }
+  }
+
   /// Get news for a specific ticker (infinite scroll)
   Future<NewsListData> getTickerNews(String ticker, {int limit = 20, int offset = 0}) async {
     try {
@@ -638,7 +706,7 @@ class AnalyticsApiClient {
         'offset': offset.toString(),
       });
 
-      print('[API] GET $_baseUrl/api/v1/news/?ticker=$ticker&limit=$limit&offset=$offset');
+      debugPrint('[API] GET $_baseUrl/api/v1/news/?ticker=$ticker&limit=$limit&offset=$offset');
 
       final response = await _httpClient.get(uri).timeout(
         const Duration(seconds: 10),
@@ -679,7 +747,7 @@ class AnalyticsApiClient {
         'lang': lang,
       });
 
-      print('[API] GET $_baseUrl/api/v1/events/calendar?year=$year&month=$month&lang=$lang');
+      debugPrint('[API] GET $_baseUrl/api/v1/events/calendar?year=$year&month=$month&lang=$lang');
 
       final response = await _httpClient.get(uri).timeout(
         const Duration(seconds: 10),
@@ -731,7 +799,7 @@ class AnalyticsApiClient {
     try {
       final uri = Uri.parse('$_baseUrl/api/v1/market/indices');
 
-      print('[API] 📊 GET $_baseUrl/api/v1/market/indices');
+      debugPrint('[API] 📊 GET $_baseUrl/api/v1/market/indices');
 
       final response = await _httpClient.get(uri).timeout(
         const Duration(seconds: 10),

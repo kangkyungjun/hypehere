@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/news_data.dart';
+import '../../theme/app_colors.dart';
+import '../../theme/app_radius.dart';
+import '../../theme/app_spacing.dart';
+import '../../theme/app_typography.dart';
 import '../../utils/multilingual.dart';
 
 /// Shared modal for MARKET ticker news items.
@@ -18,7 +22,7 @@ class MarketNewsModal {
   static void show(BuildContext context, NewsItem item) {
     final l10n = AppLocalizations.of(context);
     final langCode = Localizations.localeOf(context).languageCode;
-    final dotColor = item.sentimentColor;
+    final dotColor = item.sentimentColor(context.mlColors);
 
     showModalBottomSheet(
       context: context,
@@ -30,10 +34,10 @@ class MarketNewsModal {
         ),
         decoration: BoxDecoration(
           color: Theme.of(ctx).scaffoldBackgroundColor,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
         ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl, vertical: AppSpacing.lg),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -44,42 +48,42 @@ class MarketNewsModal {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade400,
-                    borderRadius: BorderRadius.circular(2),
+                    color: ctx.mlColors.textTertiary,
+                    borderRadius: BorderRadius.circular(AppRadius.xxs),
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.xl),
 
               // Sentiment badge + time + source
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 3),
                     decoration: BoxDecoration(
-                      color: Colors.blueGrey.shade50,
-                      borderRadius: BorderRadius.circular(4),
+                      color: Theme.of(ctx).colorScheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(AppRadius.xs),
                     ),
                     child: Text(
                       isMarketNews(item) ? l10n.marketNews : item.ticker,
                       style: TextStyle(
-                        fontSize: 11,
+                        fontSize: AppTypography.caption,
                         fontWeight: FontWeight.bold,
-                        color: Colors.blueGrey.shade700,
+                        color: ctx.mlColors.textSecondary,
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: AppSpacing.md),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 3),
                     decoration: BoxDecoration(
                       color: dotColor.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(4),
+                      borderRadius: BorderRadius.circular(AppRadius.xs),
                     ),
                     child: Text(
                       item.sentimentLabelLocalized(l10n),
                       style: TextStyle(
-                        fontSize: 11,
+                        fontSize: AppTypography.caption,
                         fontWeight: FontWeight.bold,
                         color: dotColor,
                       ),
@@ -89,7 +93,7 @@ class MarketNewsModal {
                   Text(
                     item.timeAgoLocalized(l10n),
                     style: TextStyle(
-                      fontSize: 11,
+                      fontSize: AppTypography.caption,
                       color: Theme.of(ctx).colorScheme.outline,
                     ),
                   ),
@@ -97,11 +101,11 @@ class MarketNewsModal {
               ),
 
               if (item.source != null) ...[
-                const SizedBox(height: 6),
+                const SizedBox(height: AppSpacing.sm),
                 Text(
                   item.source!,
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: AppTypography.bodySmall,
                     color: Theme.of(ctx).colorScheme.outline,
                   ),
                 ),
@@ -117,14 +121,14 @@ class MarketNewsModal {
                     height: 16,
                     decoration: BoxDecoration(
                       color: Theme.of(ctx).colorScheme.primary,
-                      borderRadius: BorderRadius.circular(2),
+                      borderRadius: BorderRadius.circular(AppRadius.xxs),
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: AppSpacing.md),
                   Text(
                     l10n.aiSummary,
                     style: Theme.of(ctx).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
+                          fontWeight: AppTypography.semiBold,
                         ),
                   ),
                 ],
@@ -134,8 +138,8 @@ class MarketNewsModal {
               Text(
                 item.aiSummary.localize(langCode),
                 style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
+                  fontSize: AppTypography.bodyLarge,
+                  fontWeight: AppTypography.semiBold,
                   color: Theme.of(ctx).colorScheme.onSurface,
                   height: 1.5,
                 ),
@@ -143,7 +147,7 @@ class MarketNewsModal {
 
               // Source URL button
               if (item.sourceUrl != null) ...[
-                const SizedBox(height: 24),
+                const SizedBox(height: AppSpacing.xxl),
                 SizedBox(
                   width: double.infinity,
                   child: OutlinedButton.icon(
@@ -151,9 +155,9 @@ class MarketNewsModal {
                     icon: const Icon(Icons.open_in_new, size: 16),
                     label: Text(l10n.viewOriginalArticle),
                     style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(AppRadius.lg),
                       ),
                     ),
                   ),

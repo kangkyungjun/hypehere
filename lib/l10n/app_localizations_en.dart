@@ -36,10 +36,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tabCommunityTooltip => 'Discussion Board';
 
   @override
+  String get tabMarket => 'Market';
+
+  @override
+  String get tabMarketTooltip => 'Market Overview';
+
+  @override
+  String get tabAILens => 'AI';
+
+  @override
+  String get tabAILensTooltip => 'AI Analysis';
+
+  @override
   String get tabWatchlist => 'Watchlist';
 
   @override
   String get tabWatchlistTooltip => 'My Watchlist';
+
+  @override
+  String get tabHoldingsTooltip => 'My Holdings';
 
   @override
   String get settings => 'Settings';
@@ -1459,6 +1474,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notifications => 'Notifications';
 
   @override
+  String get markAllAsRead => 'Mark all read';
+
+  @override
   String get noNotifications => 'No notifications yet';
 
   @override
@@ -1520,6 +1538,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noEventsSelectedDay => 'No events on this day';
+
+  @override
+  String get calendarNewsAnnouncements => 'News · Announcements';
+
+  @override
+  String get calendarEconomicIndicators => 'US Economic';
 
   @override
   String get forgotPassword => 'Forgot Password';
@@ -1739,6 +1763,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get aiRecommendations => 'Recommendations';
 
   @override
+  String get recPortfolioOverview => 'Portfolio Overview';
+
+  @override
+  String get recTechnicalInsight => 'Technical Analysis';
+
+  @override
+  String get recMarketIntelligence => 'Market Intelligence';
+
+  @override
+  String get recActionSummary => 'Action Summary';
+
+  @override
+  String get recommendedAction => 'Recommended Action';
+
+  @override
   String get analysisWaiting => 'AI analysis pending...';
 
   @override
@@ -1798,4 +1837,171 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dailyUpdate => 'Updated daily in the morning';
+
+  @override
+  String get viewAIAdvice => 'View AI Advice';
+
+  @override
+  String get noAnalysisYet => 'No analysis available yet';
+
+  @override
+  String get recentTransactions => 'Recent Transactions';
+
+  @override
+  String viewAllTransactions(int count) {
+    return 'View all ($count)';
+  }
+
+  @override
+  String get newsFilter => 'Filter';
+
+  @override
+  String get filterSource => 'Source';
+
+  @override
+  String get filterMyWatchlist => 'My Watchlist';
+
+  @override
+  String get filterNoWatchlist => 'Add watchlist items first';
+
+  @override
+  String get filterMarketOnly => 'Market News';
+
+  @override
+  String get filterSentiment => 'Sentiment';
+
+  @override
+  String get filterSector => 'Sector';
+
+  @override
+  String get filterBreakingOnly => 'Breaking only';
+
+  @override
+  String get filterReset => 'Reset';
+
+  @override
+  String get filterApply => 'Apply';
+
+  @override
+  String hotTopicMore(int count) {
+    return '+$count more';
+  }
+
+  @override
+  String get sectorTechnology => 'Technology';
+
+  @override
+  String get sectorHealthcare => 'Healthcare';
+
+  @override
+  String get sectorEnergy => 'Energy';
+
+  @override
+  String get sectorCyclical => 'Cyclical';
+
+  @override
+  String get sectorDefensive => 'Defensive';
+
+  @override
+  String get sectorComm => 'Communication';
+
+  @override
+  String get sectorFinance => 'Finance';
+
+  @override
+  String get sectorIndustrials => 'Industrials';
+
+  @override
+  String get sectorUtilities => 'Utilities';
+
+  @override
+  String get sectorRealEstate => 'Real Estate';
+
+  @override
+  String get sectorMaterials => 'Materials';
+
+  @override
+  String get newsBubbleTitle => '24h News Bubble';
+
+  @override
+  String get newsBubbleLegendBullish => 'Mostly Bullish';
+
+  @override
+  String get newsBubbleLegendBearish => 'Mostly Bearish';
+
+  @override
+  String get newsBubbleLegendMixed => 'Mixed';
+
+  @override
+  String newsBubbleMentions(int count) {
+    return '$count mentions';
+  }
+
+  @override
+  String get taxEstimateTitle => 'Tax Estimate';
+
+  @override
+  String get totalGains => 'Total Gains';
+
+  @override
+  String get annualExemption => 'Annual Exemption';
+
+  @override
+  String get estimatedTax => 'Estimated Tax (22%)';
+
+  @override
+  String get netProfit => 'Net Profit';
+
+  @override
+  String get krwSuffix => ' KRW';
+
+  @override
+  String get taxTradeCount => ' sells';
+
+  @override
+  String get macro3mTitle => '3M';
+
+  @override
+  String get macro3mHigh => 'High';
+
+  @override
+  String get macro3mAvg => 'Avg';
+
+  @override
+  String get macro3mLow => 'Low';
+
+  @override
+  String get tooltipClearSearch => 'Clear search';
+
+  @override
+  String get tooltipPreviousMonth => 'Previous month';
+
+  @override
+  String get tooltipNextMonth => 'Next month';
+
+  @override
+  String get tooltipShowPassword => 'Show password';
+
+  @override
+  String get tooltipHidePassword => 'Hide password';
+
+  @override
+  String get tooltipChangePhoto => 'Change photo';
+
+  @override
+  String get tooltipFilter => 'Filter';
+
+  @override
+  String get tooltipRemove => 'Remove';
+
+  @override
+  String get otherSectors => 'Other Sectors';
+
+  @override
+  String get otherTickers => 'Other Tickers';
+
+  @override
+  String nDaysAgo(int count) {
+    return '${count}D ago';
+  }
 }

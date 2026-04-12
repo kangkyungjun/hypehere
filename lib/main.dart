@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
@@ -10,47 +12,89 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'l10n/app_localizations.dart';
 import 'theme/app_colors.dart';
+import 'theme/app_radius.dart';
+import 'theme/app_shadow.dart';
+import 'theme/app_spacing.dart';
+import 'theme/app_duration.dart';
+import 'theme/app_typography.dart';
 import 'providers/watchlist_provider.dart';
 import 'providers/recent_search_provider.dart';
 import 'providers/auth_provider.dart';
 import 'providers/locale_provider.dart';
+import 'providers/portfolio_provider.dart';
 import 'screens/dashboard/dashboard_screen.dart';
 import 'screens/explore/explore_screen.dart';
 import 'screens/watchlist/watchlist_screen.dart';
 import 'screens/settings/settings_screen.dart';
-import 'screens/compare/compare_screen.dart';
-import 'screens/community/community_feed_screen.dart';
-import 'screens/news/news_list_screen.dart';
+import 'screens/news/news_combined_screen.dart';
+import 'screens/ai_lens/ai_lens_screen.dart';
+import 'screens/holdings/holdings_screen.dart';
 import 'models/indices_data.dart';
 import 'services/analytics_api_client.dart';
 import 'services/notification_service.dart';
 import 'screens/notifications/notification_inbox_screen.dart';
+import 'screens/ticker_detail/ticker_detail_screen.dart';
+import 'screens/community/post_detail_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Load environment variables
-  await dotenv.load(fileName: '.env');
+  try {
+    await dotenv.load(fileName: '.env');
+  } catch (e) {
+    debugPrint('dotenv load error: $e');
+  }
 
-  // Initialize Firebase
-  await Firebase.initializeApp();
+  // Initialize Firebase (timeout: iPad 호환 모드 hang 방지)
+  try {
+    await Firebase.initializeApp()
+        .timeout(const Duration(seconds: 10));
+  } catch (e) {
+    debugPrint('Firebase init error: $e');
+  }
 
   // Initialize FCM Notification Service
-  final notificationService = NotificationService();
-  await notificationService.initialize();
+  try {
+    final notificationService = NotificationService();
+    await notificationService.initialize()
+        .timeout(const Duration(seconds: 10));
+  } catch (e) {
+    debugPrint('FCM init error: $e');
+  }
 
-  // Initialize Google AdMob
-  await MobileAds.instance.initialize();
+  // Initialize Google AdMob (timeout: iPad 호환 모드 hang 방지)
+  try {
+    await MobileAds.instance.initialize()
+        .timeout(const Duration(seconds: 10));
+  } catch (e) {
+    debugPrint('AdMob init error: $e');
+  }
 
   // Initialize Providers
   final watchlistProvider = WatchlistProvider();
-  await watchlistProvider.initialize();
+  try {
+    await watchlistProvider.initialize()
+        .timeout(const Duration(seconds: 5));
+  } catch (e) {
+    debugPrint('WatchlistProvider init error: $e');
+  }
 
   final recentSearchProvider = RecentSearchProvider();
-  await recentSearchProvider.initialize();
+  try {
+    await recentSearchProvider.initialize()
+        .timeout(const Duration(seconds: 5));
+  } catch (e) {
+    debugPrint('RecentSearchProvider init error: $e');
+  }
 
   final localeProvider = LocaleProvider();
-  await localeProvider.loadSavedLocale();
+  try {
+    await localeProvider.loadSavedLocale()
+        .timeout(const Duration(seconds: 5));
+  } catch (e) {
+    debugPrint('LocaleProvider init error: $e');
+  }
 
   runApp(
     MultiProvider(
@@ -59,6 +103,7 @@ void main() async {
         ChangeNotifierProvider.value(value: recentSearchProvider),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider.value(value: localeProvider),
+        ChangeNotifierProvider(create: (_) => PortfolioProvider()),
       ],
       child: const MarketLensApp(),
     ),
@@ -80,14 +125,19 @@ class MarketLensApp extends StatelessWidget {
       locale: localeProvider.locale,
       builder: (context, child) {
         return MediaQuery(
-          data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(1.0)),
+          data: MediaQuery.of(context).copyWith(
+            textScaler: MediaQuery.of(context).textScaler.clamp(
+              minScaleFactor: 0.8,
+              maxScaleFactor: 1.3,
+            ),
+          ),
           child: child!,
         );
       },
       theme: ThemeData(
         // MarketLens brand colors (HypeHere와 다름!)
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF1E88E5), // Professional blue
+          seedColor: const Color(0xFF1E88E5), // Professional blue (seed — not a display color)
           brightness: Brightness.light,
         ),
         useMaterial3: true,
@@ -98,12 +148,17 @@ class MarketLensApp extends StatelessWidget {
           centerTitle: false,
           elevation: 0,
           backgroundColor: Colors.transparent,
+          systemOverlayStyle: SystemUiOverlayStyle(
+            statusBarColor: Colors.transparent,
+            statusBarIconBrightness: Brightness.dark,   // Android: 어두운 아이콘
+            statusBarBrightness: Brightness.light,      // iOS: 밝은 배경 → 어두운 아이콘
+          ),
         ),
 
         // Bottom navigation theme
-        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-          selectedItemColor: Color(0xFF1E88E5),
-          unselectedItemColor: Colors.grey,
+        bottomNavigationBarTheme: BottomNavigationBarThemeData(
+          selectedItemColor: MarketLensColors.light.accentBlue,
+          unselectedItemColor: MarketLensColors.light.neutralColor,
           showUnselectedLabels: true,
           type: BottomNavigationBarType.fixed,
           elevation: 8,
@@ -112,17 +167,17 @@ class MarketLensApp extends StatelessWidget {
         // Input decoration theme
         inputDecorationTheme: InputDecorationTheme(
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(AppRadius.lg),
           ),
           filled: true,
-          fillColor: Colors.grey[100],
+          fillColor: MarketLensColors.light.sectionBackground,
         ),
       ),
 
       // Dark theme
       darkTheme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF1E88E5),
+          seedColor: const Color(0xFF1E88E5), // seed — same brand blue
           brightness: Brightness.dark,
         ),
         useMaterial3: true,
@@ -132,11 +187,16 @@ class MarketLensApp extends StatelessWidget {
           centerTitle: false,
           elevation: 0,
           backgroundColor: Colors.transparent,
+          systemOverlayStyle: SystemUiOverlayStyle(
+            statusBarColor: Colors.transparent,
+            statusBarIconBrightness: Brightness.light,  // Android: 밝은 아이콘
+            statusBarBrightness: Brightness.dark,       // iOS: 어두운 배경 → 밝은 아이콘
+          ),
         ),
 
-        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-          selectedItemColor: Color(0xFF42A5F5),
-          unselectedItemColor: Colors.grey,
+        bottomNavigationBarTheme: BottomNavigationBarThemeData(
+          selectedItemColor: MarketLensColors.dark.accentBlue,
+          unselectedItemColor: Color(0xFF9E9E9E), // intentional grey 500 for both themes
           showUnselectedLabels: true,
           type: BottomNavigationBarType.fixed,
           elevation: 8,
@@ -144,10 +204,10 @@ class MarketLensApp extends StatelessWidget {
 
         inputDecorationTheme: InputDecorationTheme(
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(AppRadius.lg),
           ),
           filled: true,
-          fillColor: const Color(0xFF2A2A2A),
+          fillColor: MarketLensColors.dark.sectionBackground,
         ),
       ),
 
@@ -157,11 +217,10 @@ class MarketLensApp extends StatelessWidget {
   }
 }
 
-/// 메인 네비게이션 (4탭 구조 - 커뮤니티 기능 통합)
+/// 메인 네비게이션 (5탭 구조)
 ///
-/// ⚠️ HypeHere 5탭 구조와 다름
 /// ⚠️ Settings는 AppBar 우측 아이콘으로 분리
-/// 📊 Dashboard → 🔍 Explore → 📰 News → 💬 Community → ⭐ Watchlist
+/// 📊 Market → 📰 News → 🤖 AI Lens → ⭐ Watchlist → 💼 Holdings
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
 
@@ -175,17 +234,28 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   MarketIndicesData? _indicesData;
   int _unreadNotificationCount = 0;
   final AnalyticsApiClient _apiClient = AnalyticsApiClient();
+  AuthProvider? _authProvider;
+  VoidCallback? _authListener;
+
+  // 앱 lifecycle (resume 시 뱃지 갱신)
+  late final AppLifecycleListener _lifecycleListener;
+
+  // 속보 토스트 상태
+  String? _breakingTitle;
+  String? _breakingBody;
+  Map<String, dynamic>? _breakingData;
+  Timer? _breakingDismissTimer;
 
   static final String _authBaseUrl =
       dotenv.env['AUTH_API_BASE_URL'] ?? 'http://43.201.45.60:8000/api/accounts';
 
-  // 5개 탭: Dashboard, Explore, News, Community, Watchlist
+  // 5개 탭: Market, News, AI Lens, Watchlist, Holdings
   final List<Widget> _screens = const [
-    DashboardScreen(), // 시장 스냅샷
-    ExploreScreen(), // 검색/탐색
-    NewsListScreen(embedded: true), // 시장 뉴스 전체보기
-    CommunityFeedScreen(), // 통합 게시판 (전체 글)
-    WatchlistScreen(), // 관심종목 워크스페이스
+    DashboardScreen(), // 마켓 (기존 대시보드)
+    NewsCombinedScreen(), // 뉴스 (캘린더+뉴스 내부탭)
+    AILensScreen(), // AI 렌즈 (AI 시그널 분석)
+    WatchlistScreen(), // 관심종목
+    HoldingsScreen(), // 보유종목
   ];
 
   @override
@@ -193,10 +263,83 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     super.initState();
     _loadIndices();
     _fetchUnreadCount();
+
+    // 앱 resume 시 뱃지 카운트 갱신
+    _lifecycleListener = AppLifecycleListener(
+      onResume: () {
+        _fetchUnreadCount();
+        _loadIndices();
+      },
+    );
+
+    // 상태바 아이콘 가시성 보장 (제조사 강제 다크모드 대응)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final isDark = Theme.of(context).brightness == Brightness.dark;
+      SystemChrome.setSystemUIOverlayStyle(
+        isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
+      );
+    });
+
+    // FCM 포그라운드 수신 시 뱃지 카운트 갱신
+    NotificationService().onForegroundMessageReceived = () {
+      _fetchUnreadCount();
+    };
+
+    // 속보 뉴스 포그라운드 콜백 등록
+    NotificationService().onBreakingNewsReceived = (title, body, data) {
+      if (mounted) {
+        _breakingDismissTimer?.cancel();
+        setState(() {
+          _breakingTitle = title;
+          _breakingBody = body;
+          _breakingData = data;
+        });
+        _breakingDismissTimer = Timer(
+          const Duration(seconds: 10),
+          _dismissBreakingToast,
+        );
+      }
+    };
+
+    // FCM 알림 탭 시 내비게이션 콜백 등록 (cold start 대기 데이터도 처리)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      NotificationService().onNotificationTap = _handleNotificationNavigation;
+    });
+
+    // Auth ↔ Watchlist/Portfolio 동기화: 로그인/로그아웃 시 유저별 데이터 전환
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _authProvider = context.read<AuthProvider>();
+      final watchlist = context.read<WatchlistProvider>();
+      final portfolio = context.read<PortfolioProvider>();
+
+      // 초기 동기화 (앱 시작 시 auth 상태 확인 완료 후)
+      watchlist.switchUser(_authProvider!.currentUser?.id);
+      if (_authProvider!.isLoggedIn) {
+        portfolio.initialize();
+      }
+
+      // 이후 auth 변경 감지
+      _authListener = () {
+        watchlist.switchUser(_authProvider!.currentUser?.id);
+        if (_authProvider!.isLoggedIn) {
+          portfolio.initialize();
+          _fetchUnreadCount(); // 로그인 직후 뱃지 갱신
+        } else {
+          portfolio.clear();
+          setState(() => _unreadNotificationCount = 0); // 로그아웃 시 뱃지 초기화
+        }
+      };
+      _authProvider!.addListener(_authListener!);
+    });
   }
 
   @override
   void dispose() {
+    _breakingDismissTimer?.cancel();
+    _lifecycleListener.dispose();
+    if (_authListener != null && _authProvider != null) {
+      _authProvider!.removeListener(_authListener!);
+    }
     _apiClient.dispose();
     super.dispose();
   }
@@ -230,7 +373,64 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           _unreadNotificationCount = json['unread_count'] as int? ?? 0;
         });
       }
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('fetchUnreadCount error: $e');
+    }
+  }
+
+  /// FCM 알림 탭 시 내비게이션 처리
+  void _handleNotificationNavigation(Map<String, dynamic> data) {
+    if (!mounted) return;
+
+    final type = data['type'] as String? ?? '';
+    final ticker = data['ticker'] as String?;
+    final topTicker = data['top_ticker'] as String?;
+    final postId = data['post_id'] as String?;
+
+    // 커뮤니티 알림 (post_id 있음) → PostDetailScreen
+    if (postId != null && postId.isNotEmpty) {
+      final id = int.tryParse(postId);
+      if (id != null) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => PostDetailScreen(postId: id)),
+        );
+        _fetchUnreadCount();
+        return;
+      }
+    }
+
+    // MARKET 뉴스 알림 → News 탭 (index 1)
+    if (ticker == 'MARKET' || type == 'MARKET_NEWS') {
+      setState(() => _currentIndex = 1);
+      _fetchUnreadCount();
+      return;
+    }
+
+    // 종목 관련 알림 → TickerDetailScreen
+    if (ticker != null && ticker.isNotEmpty) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => TickerDetailScreen(ticker: ticker)),
+      );
+      _fetchUnreadCount();
+      return;
+    }
+
+    // 시장 전체 알림 (top_ticker 있음) → TickerDetailScreen
+    if (topTicker != null && topTicker.isNotEmpty) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => TickerDetailScreen(ticker: topTicker)),
+      );
+      _fetchUnreadCount();
+      return;
+    }
+
+    // 그 외 (MORNING_BRIEFING 등) → Dashboard 탭
+    setState(() => _currentIndex = 0);
+    _loadIndices();
+    _fetchUnreadCount();
   }
 
   /// 지수 이름 축약
@@ -262,22 +462,147 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     return value.toStringAsFixed(2);
   }
 
+  void _dismissBreakingToast() {
+    _breakingDismissTimer?.cancel();
+    if (mounted) {
+      setState(() {
+        _breakingTitle = null;
+        _breakingBody = null;
+        _breakingData = null;
+      });
+    }
+  }
+
+  void _onBreakingToastTap() {
+    final ticker = _breakingData?['ticker'] as String?;
+    _dismissBreakingToast();
+    if (ticker != null && ticker.isNotEmpty) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => TickerDetailScreen(ticker: ticker),
+        ),
+      );
+    }
+  }
+
+  Widget _buildBreakingToast() {
+    final theme = Theme.of(context);
+    return Material(
+      color: Colors.transparent,
+      child: GestureDetector(
+        onTap: _onBreakingToastTap,
+        child: Container(
+          margin: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.md, AppSpacing.lg, 0),
+          padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.md, AppSpacing.lg),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.errorContainer,
+            borderRadius: BorderRadius.circular(AppRadius.lg),
+            border: Border.all(
+              color: theme.colorScheme.error.withValues(alpha: 0.4),
+              width: 1,
+            ),
+            boxShadow: [
+              AppShadow.lg(theme.colorScheme.error.withValues(alpha: 0.15)),
+            ],
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Padding(
+                padding: EdgeInsets.only(top: AppSpacing.xxs),
+                child: Text('🚨', style: TextStyle(fontSize: AppTypography.headlineLarge)),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      _breakingTitle ?? '',
+                      style: TextStyle(
+                        fontSize: AppTypography.bodyMedium,
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.onErrorContainer,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    if (_breakingBody != null && _breakingBody!.isNotEmpty) ...[
+                      const SizedBox(height: AppSpacing.xxs),
+                      Text(
+                        _breakingBody!,
+                        style: TextStyle(
+                          fontSize: AppTypography.bodySmall,
+                          color: theme.colorScheme.onErrorContainer.withValues(alpha: 0.85),
+                          height: 1.3,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(width: AppSpacing.xs),
+              GestureDetector(
+                onTap: _dismissBreakingToast,
+                child: Padding(
+                  padding: const EdgeInsets.only(left: AppSpacing.xs),
+                  child: Icon(
+                    Icons.close,
+                    size: 18,
+                    color: theme.colorScheme.onErrorContainer.withValues(alpha: 0.6),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// AppBar bottom: indices bar only
+  PreferredSize _buildAppBarBottom(bool hasIndices) {
+    final indicesHeight = (hasIndices && _showIndicesBar) ? 30.0 : 0.0;
+
+    return PreferredSize(
+      preferredSize: Size.fromHeight(indicesHeight),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (hasIndices)
+            AnimatedContainer(
+              duration: AppDuration.fast,
+              height: _showIndicesBar ? 30 : 0,
+              clipBehavior: Clip.hardEdge,
+              decoration: const BoxDecoration(),
+              child: _buildCompactIndicesRow(),
+            ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildCompactIndicesRow() {
     if (_indicesData == null || _indicesData!.indices.isEmpty) {
       return const SizedBox.shrink();
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: 0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: _indicesData!.indices.map((idx) {
           final isPositive = idx.changePct >= 0;
+          final mlc = context.mlColors;
           final changeColor = idx.changePct > 0
-              ? const Color(0xFF4CAF50)
+              ? mlc.gainColor
               : idx.changePct < 0
-                  ? const Color(0xFFF44336)
-                  : Colors.grey;
+                  ? mlc.lossColor
+                  : mlc.neutralColor;
           final arrow = idx.changePct > 0 ? '▲' : idx.changePct < 0 ? '▼' : '─';
           final sign = isPositive ? '+' : '';
 
@@ -286,17 +611,17 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             children: [
               Text(
                 _shortName(idx.code),
-                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
+                style: TextStyle(fontSize: AppTypography.caption, fontWeight: AppTypography.medium),
               ),
               const SizedBox(width: 3),
               Text(
                 _formatClose(idx.close),
-                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: AppTypography.caption, fontWeight: FontWeight.bold),
               ),
-              const SizedBox(width: 2),
+              const SizedBox(width: AppSpacing.xxs),
               Text(
                 '$arrow$sign${idx.changePct.toStringAsFixed(2)}%',
-                style: TextStyle(fontSize: 10, color: changeColor, fontWeight: FontWeight.w600),
+                style: TextStyle(fontSize: AppTypography.micro, color: changeColor, fontWeight: AppTypography.semiBold),
               ),
             ],
           );
@@ -312,24 +637,21 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        toolbarHeight: 34,
         title: const Text(
           'MarketLens',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         actions: [
-          // [숨김] 비교하기 기능 — 추후 활성화 시 주석 해제
-          // IconButton(
-          //   icon: const Icon(Icons.compare_arrows),
-          //   tooltip: '종목 비교',
-          //   onPressed: () {
-          //     Navigator.push(
-          //       context,
-          //       MaterialPageRoute(
-          //         builder: (context) => const CompareScreen(),
-          //       ),
-          //     );
-          //   },
-          // ),
+          // 검색 아이콘
+          IconButton(
+            icon: const Icon(Icons.search),
+            tooltip: l10n.searchHint,
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const ExploreScreen()),
+            ),
+          ),
           // 알림 아이콘 (벨 + 뱃지)
           IconButton(
             icon: Badge(
@@ -338,7 +660,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                 _unreadNotificationCount > 99
                     ? '99+'
                     : '$_unreadNotificationCount',
-                style: const TextStyle(fontSize: 10),
+                style: TextStyle(fontSize: AppTypography.micro),
               ),
               child: const Icon(Icons.notifications_outlined),
             ),
@@ -356,7 +678,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           ),
           // Settings 아이콘 (별도 탭 아님!)
           IconButton(
-            icon: const Icon(Icons.settings_outlined),
+            icon: const Icon(Icons.more_vert),
             tooltip: l10n.settings,
             onPressed: () {
               Navigator.push(
@@ -368,32 +690,33 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             },
           ),
         ],
-        bottom: hasIndices
-            ? PreferredSize(
-                preferredSize: Size.fromHeight(_showIndicesBar ? 30 : 0),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  height: _showIndicesBar ? 30 : 0,
-                  clipBehavior: Clip.hardEdge,
-                  decoration: const BoxDecoration(),
-                  child: _buildCompactIndicesRow(),
-                ),
-              )
-            : null,
+        bottom: _buildAppBarBottom(hasIndices),
       ),
-      body: NotificationListener<UserScrollNotification>(
-        onNotification: (notification) {
-          if (notification.direction == ScrollDirection.reverse && _showIndicesBar) {
-            setState(() => _showIndicesBar = false);
-          } else if (notification.direction == ScrollDirection.forward && !_showIndicesBar) {
-            setState(() => _showIndicesBar = true);
-          }
-          return false;
-        },
-        child: IndexedStack(
-          index: _currentIndex,
-          children: _screens,
-        ),
+      body: Stack(
+        children: [
+          NotificationListener<UserScrollNotification>(
+            onNotification: (notification) {
+              if (notification.direction == ScrollDirection.reverse && _showIndicesBar) {
+                setState(() => _showIndicesBar = false);
+              } else if (notification.direction == ScrollDirection.forward && !_showIndicesBar) {
+                setState(() => _showIndicesBar = true);
+              }
+              return false;
+            },
+            child: IndexedStack(
+              index: _currentIndex,
+              children: _screens,
+            ),
+          ),
+          // 속보 토스트
+          if (_breakingTitle != null)
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: _buildBreakingToast(),
+            ),
+        ],
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
@@ -405,16 +728,10 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         type: BottomNavigationBarType.fixed, // 5개 탭 고정 표시
         items: [
           BottomNavigationBarItem(
-            icon: const Icon(Icons.dashboard_outlined),
-            activeIcon: const Icon(Icons.dashboard),
-            label: l10n.tabDashboard,
-            tooltip: l10n.tabDashboardTooltip,
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.search),
-            activeIcon: const Icon(Icons.search),
-            label: l10n.tabSearch,
-            tooltip: l10n.tabSearchTooltip,
+            icon: const Icon(Icons.show_chart_outlined),
+            activeIcon: const Icon(Icons.show_chart),
+            label: l10n.tabMarket,
+            tooltip: l10n.tabMarketTooltip,
           ),
           BottomNavigationBarItem(
             icon: const Icon(Icons.article_outlined),
@@ -423,16 +740,22 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             tooltip: l10n.tabNewsTooltip,
           ),
           BottomNavigationBarItem(
-            icon: const Icon(Icons.forum_outlined),
-            activeIcon: const Icon(Icons.forum),
-            label: l10n.tabCommunity,
-            tooltip: l10n.tabCommunityTooltip,
+            icon: const Icon(Icons.auto_awesome_outlined),
+            activeIcon: const Icon(Icons.auto_awesome),
+            label: l10n.tabAILens,
+            tooltip: l10n.tabAILensTooltip,
           ),
           BottomNavigationBarItem(
             icon: const Icon(Icons.bookmark_outline),
             activeIcon: const Icon(Icons.bookmark),
             label: l10n.tabWatchlist,
             tooltip: l10n.tabWatchlistTooltip,
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.account_balance_wallet_outlined),
+            activeIcon: const Icon(Icons.account_balance_wallet),
+            label: l10n.tabHoldings,
+            tooltip: l10n.tabHoldingsTooltip,
           ),
         ],
       ),

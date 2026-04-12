@@ -4,6 +4,9 @@ import '../../models/news_data.dart';
 import '../../utils/multilingual.dart';
 import '../../screens/news/ticker_news_list_screen.dart';
 import '../../theme/app_colors.dart';
+import '../../theme/app_radius.dart';
+import '../../theme/app_spacing.dart';
+import '../../theme/app_typography.dart';
 import '../news/market_news_modal.dart';
 
 /// Ticker detail news card (3 items + inline sentiment stats)
@@ -29,46 +32,40 @@ class TickerNewsCard extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     if (items.isEmpty && stats == null) return const SizedBox.shrink();
 
-    return Container(
-      decoration: BoxDecoration(
-        color: context.mlColors.cardBackground,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: context.mlColors.chartGridLine),
-      ),
-      child: Column(
+    return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Header row
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 14, 12, 0),
+            padding: const EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.xl, AppSpacing.lg, 0),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Left: icon + title + badge
-                Icon(Icons.article_outlined, size: 20, color: Colors.orange.shade700),
-                const SizedBox(width: 6),
+                Icon(Icons.article_outlined, size: 20, color: context.mlColors.warningColor),
+                const SizedBox(width: AppSpacing.sm),
                 Text(
                   l10n.tickerNews(ticker),
                   style: TextStyle(
-                    fontSize: 15,
+                    fontSize: AppTypography.headlineSmall,
                     fontWeight: FontWeight.bold,
                     color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
-                const SizedBox(width: 6),
+                const SizedBox(width: AppSpacing.sm),
                 if (items.isNotEmpty)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xxs),
                     decoration: BoxDecoration(
-                      color: Colors.orange.shade50,
-                      borderRadius: BorderRadius.circular(10),
+                      color: context.mlColors.warningBg,
+                      borderRadius: BorderRadius.circular(AppRadius.lg),
                     ),
                     child: Text(
                       l10n.newsCount(items.length),
                       style: TextStyle(
-                        fontSize: 11,
+                        fontSize: AppTypography.caption,
                         fontWeight: FontWeight.bold,
-                        color: Colors.orange.shade700,
+                        color: context.mlColors.warningColor,
                       ),
                     ),
                   ),
@@ -82,7 +79,7 @@ class TickerNewsCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         _buildStatsRow(context, l10n.oneWeek, stats!.week),
-                        const SizedBox(height: 2),
+                        const SizedBox(height: AppSpacing.xxs),
                         _buildStatsRow(context, l10n.oneMonth, stats!.month),
                       ],
                     ),
@@ -90,7 +87,7 @@ class TickerNewsCard extends StatelessWidget {
                 else
                   const Spacer(),
 
-                const SizedBox(width: 4),
+                const SizedBox(width: AppSpacing.xs),
 
                 // Right: 전체보기
                 TextButton(
@@ -104,7 +101,7 @@ class TickerNewsCard extends StatelessWidget {
                     ),
                   ),
                   style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 6),
+                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
@@ -113,9 +110,9 @@ class TickerNewsCard extends StatelessWidget {
                     children: [
                       Text(
                         l10n.viewAll,
-                        style: TextStyle(fontSize: 11, color: Colors.orange.shade600),
+                        style: TextStyle(fontSize: AppTypography.caption, color: context.mlColors.warningColor),
                       ),
-                      Icon(Icons.chevron_right, size: 14, color: Colors.orange.shade600),
+                      Icon(Icons.chevron_right, size: 14, color: context.mlColors.warningColor),
                     ],
                   ),
                 ),
@@ -125,24 +122,23 @@ class TickerNewsCard extends StatelessWidget {
 
           // Timeline items
           if (items.isNotEmpty) ...[
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.md),
             ...List.generate(items.length, (i) {
               return _buildTimelineItem(context, items[i], isLast: i == items.length - 1);
             }),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.md),
           ] else
             Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(AppSpacing.xl),
               child: Text(
                 l10n.noNews,
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: AppTypography.bodySmall,
                   color: Theme.of(context).colorScheme.outline,
                 ),
               ),
             ),
         ],
-      ),
     );
   }
 
@@ -154,17 +150,17 @@ class TickerNewsCard extends StatelessWidget {
         Text(
           period,
           style: TextStyle(
-            fontSize: 9,
-            fontWeight: FontWeight.w600,
+            fontSize: AppTypography.chartLabel,
+            fontWeight: AppTypography.semiBold,
             color: Theme.of(context).colorScheme.outline,
           ),
         ),
-        const SizedBox(width: 4),
-        _buildStatChip(l10n.sentimentBullish, counts.bullish, Colors.green),
+        const SizedBox(width: AppSpacing.xs),
+        _buildStatChip(l10n.sentimentBullish, counts.bullish, context.mlColors.gainColor),
         const SizedBox(width: 3),
-        _buildStatChip(l10n.sentimentNeutral, counts.neutral, Colors.grey),
+        _buildStatChip(l10n.sentimentNeutral, counts.neutral, context.mlColors.neutralColor),
         const SizedBox(width: 3),
-        _buildStatChip(l10n.sentimentBearish, counts.bearish, Colors.red),
+        _buildStatChip(l10n.sentimentBearish, counts.bearish, context.mlColors.lossColor),
       ],
     );
   }
@@ -178,10 +174,10 @@ class TickerNewsCard extends StatelessWidget {
           height: 5,
           decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
-        const SizedBox(width: 2),
+        const SizedBox(width: AppSpacing.xxs),
         Text(
           '$label$count',
-          style: TextStyle(fontSize: 9, color: color.withValues(alpha: 0.8)),
+          style: TextStyle(fontSize: AppTypography.chartLabel, color: color.withValues(alpha: 0.8)),
         ),
       ],
     );
@@ -189,12 +185,12 @@ class TickerNewsCard extends StatelessWidget {
 
   Widget _buildTimelineItem(BuildContext context, NewsItem item, {required bool isLast}) {
     final langCode = Localizations.localeOf(context).languageCode;
-    final dotColor = item.sentimentColor;
+    final dotColor = item.sentimentColor(context.mlColors);
 
     return InkWell(
       onTap: () => MarketNewsModal.show(context, item),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
         child: IntrinsicHeight(
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -204,7 +200,7 @@ class TickerNewsCard extends StatelessWidget {
                 width: 20,
                 child: Column(
                   children: [
-                    const SizedBox(height: 6),
+                    const SizedBox(height: AppSpacing.sm),
                     Container(
                       width: 10,
                       height: 10,
@@ -223,28 +219,32 @@ class TickerNewsCard extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: AppSpacing.md),
 
               // Content
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
+                  padding: const EdgeInsets.only(bottom: AppSpacing.lg),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // First row: sentiment label + time
+                      // First row: breaking badge + sentiment label + time
                       Row(
                         children: [
+                          if (item.isBreaking) ...[
+                            const Text('🚨', style: TextStyle(fontSize: AppTypography.bodySmall)),
+                            const SizedBox(width: AppSpacing.xs),
+                          ],
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xxs),
                             decoration: BoxDecoration(
                               color: dotColor.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(4),
+                              borderRadius: BorderRadius.circular(AppRadius.xs),
                             ),
                             child: Text(
                               item.sentimentLabelLocalized(AppLocalizations.of(context)),
                               style: TextStyle(
-                                fontSize: 10,
+                                fontSize: AppTypography.micro,
                                 fontWeight: FontWeight.bold,
                                 color: dotColor,
                               ),
@@ -254,20 +254,20 @@ class TickerNewsCard extends StatelessWidget {
                           Text(
                             item.timeAgoLocalized(AppLocalizations.of(context)),
                             style: TextStyle(
-                              fontSize: 10,
+                              fontSize: AppTypography.micro,
                               color: Theme.of(context).colorScheme.outline,
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: AppSpacing.xs),
 
                       // AI summary (localized)
                       Text(
                         item.aiSummary.localize(langCode),
                         style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
+                          fontSize: AppTypography.bodySmall,
+                          fontWeight: AppTypography.semiBold,
                           color: Theme.of(context).colorScheme.onSurface,
                           height: 1.4,
                         ),

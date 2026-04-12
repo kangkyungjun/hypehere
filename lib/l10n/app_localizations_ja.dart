@@ -36,10 +36,25 @@ class AppLocalizationsJa extends AppLocalizations {
   String get tabCommunityTooltip => '掲示板';
 
   @override
+  String get tabMarket => 'マーケット';
+
+  @override
+  String get tabMarketTooltip => 'マーケット概要';
+
+  @override
+  String get tabAILens => 'AI';
+
+  @override
+  String get tabAILensTooltip => 'AI分析';
+
+  @override
   String get tabWatchlist => 'ウォッチリスト';
 
   @override
   String get tabWatchlistTooltip => 'マイウォッチリスト';
+
+  @override
+  String get tabHoldingsTooltip => '保有銘柄';
 
   @override
   String get settings => '設定';
@@ -221,7 +236,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get sectorMarketOverview => 'セクター別市場概況';
 
   @override
-  String get filterAll => '全体';
+  String get filterAll => 'すべて';
 
   @override
   String get filterNasdaq => 'NASDAQ';
@@ -1442,6 +1457,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get notifications => '通知';
 
   @override
+  String get markAllAsRead => 'すべて既読';
+
+  @override
   String get noNotifications => '通知はありません';
 
   @override
@@ -1502,6 +1520,12 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get noEventsSelectedDay => 'この日のイベントはありません';
+
+  @override
+  String get calendarNewsAnnouncements => 'ニュース·発表';
+
+  @override
+  String get calendarEconomicIndicators => '米国経済指標';
 
   @override
   String get forgotPassword => 'パスワードを忘れた';
@@ -1717,6 +1741,21 @@ class AppLocalizationsJa extends AppLocalizations {
   String get aiRecommendations => '推奨事項';
 
   @override
+  String get recPortfolioOverview => 'ポートフォリオ概要';
+
+  @override
+  String get recTechnicalInsight => 'テクニカル分析';
+
+  @override
+  String get recMarketIntelligence => 'マーケット情報';
+
+  @override
+  String get recActionSummary => 'アクションサマリー';
+
+  @override
+  String get recommendedAction => '推奨アクション';
+
+  @override
   String get analysisWaiting => 'AI分析待機中...';
 
   @override
@@ -1776,4 +1815,171 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get dailyUpdate => '毎朝更新';
+
+  @override
+  String get viewAIAdvice => 'AI意見を見る';
+
+  @override
+  String get noAnalysisYet => 'まだ分析がありません';
+
+  @override
+  String get recentTransactions => '最近の取引';
+
+  @override
+  String viewAllTransactions(int count) {
+    return 'すべて表示 ($count件)';
+  }
+
+  @override
+  String get newsFilter => 'フィルター';
+
+  @override
+  String get filterSource => 'ソース';
+
+  @override
+  String get filterMyWatchlist => 'ウォッチリスト';
+
+  @override
+  String get filterNoWatchlist => '先にウォッチリストを追加してください';
+
+  @override
+  String get filterMarketOnly => '市場ニュース';
+
+  @override
+  String get filterSentiment => 'センチメント';
+
+  @override
+  String get filterSector => 'セクター';
+
+  @override
+  String get filterBreakingOnly => '速報のみ';
+
+  @override
+  String get filterReset => 'リセット';
+
+  @override
+  String get filterApply => '適用';
+
+  @override
+  String hotTopicMore(int count) {
+    return '+$count もっと見る';
+  }
+
+  @override
+  String get sectorTechnology => 'テクノロジー';
+
+  @override
+  String get sectorHealthcare => 'ヘルスケア';
+
+  @override
+  String get sectorEnergy => 'エネルギー';
+
+  @override
+  String get sectorCyclical => '景気循環消費財';
+
+  @override
+  String get sectorDefensive => '生活必需品';
+
+  @override
+  String get sectorComm => '通信サービス';
+
+  @override
+  String get sectorFinance => '金融';
+
+  @override
+  String get sectorIndustrials => '資本財';
+
+  @override
+  String get sectorUtilities => '公益事業';
+
+  @override
+  String get sectorRealEstate => '不動産';
+
+  @override
+  String get sectorMaterials => '素材';
+
+  @override
+  String get newsBubbleTitle => '24時間ニュースバブル';
+
+  @override
+  String get newsBubbleLegendBullish => '強気多数';
+
+  @override
+  String get newsBubbleLegendBearish => '弱気多数';
+
+  @override
+  String get newsBubbleLegendMixed => '混合';
+
+  @override
+  String newsBubbleMentions(int count) {
+    return '$count件';
+  }
+
+  @override
+  String get taxEstimateTitle => '税金見積もり';
+
+  @override
+  String get totalGains => '総利益';
+
+  @override
+  String get annualExemption => '年間控除額';
+
+  @override
+  String get estimatedTax => '予想税額 (22%)';
+
+  @override
+  String get netProfit => '税引後利益';
+
+  @override
+  String get krwSuffix => 'ウォン';
+
+  @override
+  String get taxTradeCount => '件売却';
+
+  @override
+  String get macro3mTitle => '3ヶ月';
+
+  @override
+  String get macro3mHigh => '最高';
+
+  @override
+  String get macro3mAvg => '平均';
+
+  @override
+  String get macro3mLow => '最低';
+
+  @override
+  String get tooltipClearSearch => '検索をクリア';
+
+  @override
+  String get tooltipPreviousMonth => '前月';
+
+  @override
+  String get tooltipNextMonth => '翌月';
+
+  @override
+  String get tooltipShowPassword => 'パスワードを表示';
+
+  @override
+  String get tooltipHidePassword => 'パスワードを非表示';
+
+  @override
+  String get tooltipChangePhoto => '写真を変更';
+
+  @override
+  String get tooltipFilter => 'フィルター';
+
+  @override
+  String get tooltipRemove => '削除';
+
+  @override
+  String get otherSectors => 'その他セクター';
+
+  @override
+  String get otherTickers => 'その他銘柄';
+
+  @override
+  String nDaysAgo(int count) {
+    return '$count日前';
+  }
 }

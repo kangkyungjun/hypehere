@@ -11,8 +11,13 @@
   "tabNewsTooltip": "マーケットニュース",
   "tabCommunity": "コミュニティ",
   "tabCommunityTooltip": "掲示板",
+  "tabMarket": "マーケット",
+  "tabMarketTooltip": "マーケット概要",
+  "tabAILens": "AI",
+  "tabAILensTooltip": "AI分析",
   "tabWatchlist": "ウォッチ",
   "tabWatchlistTooltip": "マイウォッチリスト",
+  "tabHoldingsTooltip": "保有銘柄",
 
   "settings": "設定",
   "settingsTooltip": "設定",
@@ -495,6 +500,7 @@
   "passwordChangeInstructions": "・新しいパスワードは8文字以上必要です\n・英字、数字、記号を組み合わせてください\n・変更後は新しいパスワードで再ログインしてください",
 
   "notifications": "通知",
+  "markAllAsRead": "すべて既読",
   "noNotifications": "通知はありません",
   "notificationsRetentionHint": "過去7日間の通知が表示されます。",
 
@@ -522,6 +528,8 @@
   },
   "noEventsThisMonth": "今月のイベントはありません",
   "noEventsSelectedDay": "この日のイベントはありません",
+  "calendarNewsAnnouncements": "ニュース·発表",
+  "calendarEconomicIndicators": "米国経済指標",
   "today": "今日",
 
   "forgotPassword": "パスワードを忘れた",
@@ -633,6 +641,11 @@
   "holdingUpdated": "{ticker} の保有情報が更新されました",
   "portfolioAIAnalysis": "ポートフォリオAI分析",
   "aiRecommendations": "推奨事項",
+  "recPortfolioOverview": "ポートフォリオ概要",
+  "recTechnicalInsight": "テクニカル分析",
+  "recMarketIntelligence": "マーケット情報",
+  "recActionSummary": "アクションサマリー",
+  "recommendedAction": "推奨アクション",
   "analysisWaiting": "AI分析待機中...",
   "alreadyHeld": "保有中",
   "goToWatchlistTab": "ウォッチリストへ",
@@ -649,5 +662,77 @@
   "deleteHolding": "保有削除",
   "avgPriceLabel": "平均単価",
   "currentValueLabel": "評価額",
-  "dailyUpdate": "毎朝更新"
+  "dailyUpdate": "毎朝更新",
+  "viewAIAdvice": "AI意見を見る",
+  "noAnalysisYet": "まだ分析がありません",
+  "recentTransactions": "最近の取引",
+  "viewAllTransactions": "すべて表示 ({count}件)",
+  "@viewAllTransactions": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "newsFilter": "フィルター",
+  "filterSource": "ソース",
+  "filterAll": "すべて",
+  "filterMyWatchlist": "ウォッチリスト",
+  "filterNoWatchlist": "先にウォッチリストを追加してください",
+  "filterMarketOnly": "市場ニュース",
+  "filterSentiment": "センチメント",
+  "filterSector": "セクター",
+  "filterBreakingOnly": "速報のみ",
+  "filterReset": "リセット",
+  "filterApply": "適用",
+  "hotTopicMore": "+{count} もっと見る",
+  "@hotTopicMore": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "sectorTechnology": "テクノロジー",
+  "sectorHealthcare": "ヘルスケア",
+  "sectorEnergy": "エネルギー",
+  "sectorCyclical": "景気循環消費財",
+  "sectorDefensive": "生活必需品",
+  "sectorComm": "通信サービス",
+  "sectorFinance": "金融",
+  "sectorIndustrials": "資本財",
+  "sectorUtilities": "公益事業",
+  "sectorRealEstate": "不動産",
+  "sectorMaterials": "素材",
+
+  "newsBubbleTitle": "24時間ニュースバブル",
+  "newsBubbleLegendBullish": "強気多数",
+  "newsBubbleLegendBearish": "弱気多数",
+  "newsBubbleLegendMixed": "混合",
+  "newsBubbleMentions": "{count}件",
+  "@newsBubbleMentions": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "taxEstimateTitle": "税金見積もり",
+  "totalGains": "総利益",
+  "annualExemption": "年間控除額",
+  "estimatedTax": "予想税額 (22%)",
+  "netProfit": "税引後利益",
+  "krwSuffix": "ウォン",
+  "taxTradeCount": "件売却",
+  "macro3mTitle": "3ヶ月",
+  "macro3mHigh": "最高",
+  "macro3mAvg": "平均",
+  "macro3mLow": "最低",
+  "tooltipClearSearch": "検索をクリア",
+  "tooltipPreviousMonth": "前月",
+  "tooltipNextMonth": "翌月",
+  "tooltipShowPassword": "パスワードを表示",
+  "tooltipHidePassword": "パスワードを非表示",
+  "tooltipChangePhoto": "写真を変更",
+  "tooltipFilter": "フィルター",
+  "tooltipRemove": "削除",
+  "otherSectors": "その他セクター",
+  "otherTickers": "その他銘柄",
+  "nDaysAgo": "{count}日前"
 }

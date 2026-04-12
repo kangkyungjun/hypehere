@@ -1,6 +1,6 @@
-/// Portfolio data models for AI Investment Brain system.
-///
-/// Used by PortfolioApiClient and PortfolioProvider.
+// Portfolio data models for AI Investment Brain system.
+//
+// Used by PortfolioApiClient and PortfolioProvider.
 
 class PortfolioHolding {
   final String ticker;
@@ -65,12 +65,12 @@ class PortfolioHolding {
   /// Current value
   double get currentValue => (shares ?? 0) * (currentPrice ?? 0);
 
-  /// P&L in USD
-  double get pnl => currentValue - costBasis;
+  /// P&L in USD (0 when price unknown)
+  double get pnl => currentPrice != null ? currentValue - costBasis : 0;
 
-  /// P&L percentage
+  /// P&L percentage (0 when price unknown)
   double get pnlPct {
-    if (costBasis == 0) return 0;
+    if (currentPrice == null || costBasis == 0) return 0;
     return (pnl / costBasis) * 100;
   }
 }
@@ -124,6 +124,7 @@ class PortfolioTransaction {
   final DateTime date;
   final String? notes;
   final DateTime? createdAt;
+  final double? realizedPnl;
 
   PortfolioTransaction({
     required this.id,
@@ -134,6 +135,7 @@ class PortfolioTransaction {
     required this.date,
     this.notes,
     this.createdAt,
+    this.realizedPnl,
   });
 
   factory PortfolioTransaction.fromJson(Map<String, dynamic> json) {
@@ -148,6 +150,7 @@ class PortfolioTransaction {
       createdAt: json['created_at'] != null
           ? DateTime.tryParse(json['created_at'].toString())
           : null,
+      realizedPnl: (json['realized_pnl'] as num?)?.toDouble(),
     );
   }
 
@@ -217,6 +220,8 @@ class PortfolioSummary {
   final String? aiSummary;
   final List<Map<String, dynamic>>? aiRecommendations;
   final double? realizedPnl;
+  final Map<String, dynamic>? periods;
+  final List<Map<String, dynamic>>? tradeHistory;
 
   PortfolioSummary({
     required this.date,
@@ -230,6 +235,8 @@ class PortfolioSummary {
     this.aiSummary,
     this.aiRecommendations,
     this.realizedPnl,
+    this.periods,
+    this.tradeHistory,
   });
 
   factory PortfolioSummary.fromJson(Map<String, dynamic> json) {
@@ -248,6 +255,10 @@ class PortfolioSummary {
           ?.map((e) => Map<String, dynamic>.from(e as Map))
           .toList(),
       realizedPnl: (json['realized_pnl'] as num?)?.toDouble(),
+      periods: json['periods'] as Map<String, dynamic>?,
+      tradeHistory: (json['trade_history'] as List?)
+          ?.map((e) => Map<String, dynamic>.from(e as Map))
+          .toList(),
     );
   }
 }
@@ -258,6 +269,7 @@ class UserAlert {
   final String alertType;
   final String title;
   final String? message;
+  final String? priority;
   final Map<String, dynamic>? data;
   final bool isRead;
   final DateTime? createdAt;
@@ -268,6 +280,7 @@ class UserAlert {
     required this.alertType,
     required this.title,
     this.message,
+    this.priority,
     this.data,
     this.isRead = false,
     this.createdAt,
@@ -280,6 +293,7 @@ class UserAlert {
       alertType: json['alert_type'] as String,
       title: json['title'] as String,
       message: json['message'] as String?,
+      priority: json['priority'] as String?,
       data: json['data'] as Map<String, dynamic>?,
       isRead: json['is_read'] as bool? ?? false,
       createdAt: json['created_at'] != null
