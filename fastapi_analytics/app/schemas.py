@@ -156,6 +156,15 @@ class ChartDataPoint(BaseModel):
     ai_bearish_reasons: Optional[List[str]] = Field(None, description="Bearish factors")
     ai_final_comment: Optional[str] = Field(None, description="AI final recommendation")
 
+    # Expert analysis (5-language)
+    ai_analysis_ko: Optional[str] = Field(None, description="Expert analysis (Korean)")
+    ai_analysis_en: Optional[str] = Field(None, description="Expert analysis (English)")
+    ai_analysis_zh: Optional[str] = Field(None, description="Expert analysis (Chinese)")
+    ai_analysis_ja: Optional[str] = Field(None, description="Expert analysis (Japanese)")
+    ai_analysis_es: Optional[str] = Field(None, description="Expert analysis (Spanish)")
+    ai_expert_prediction: Optional[str] = Field(None, description="Expert prediction (bullish/bearish/neutral)")
+    ai_expert_key_factors: Optional[List[str]] = Field(None, description="Expert key factors")
+
 
 class TrendlineValue(BaseModel):
     """Single trendline data point with date and y-value"""
@@ -292,6 +301,13 @@ class MacroIndicatorsResponse(BaseModel):
     """Macro indicators API response"""
     date: str
     indicators: List[MacroIndicatorResponse]
+
+
+class MacroHistoryResponse(BaseModel):
+    """Macro indicator history API response"""
+    indicator_code: str
+    count: int
+    entries: List[MacroIndicatorResponse]
 
 
 class MacroSignalResponse(BaseModel):
@@ -567,6 +583,18 @@ class AIAnalysisData(BaseModel):
     final_comment: str = Field(..., max_length=4000, description="Final recommendation (multilingual |||‑packed)")
 
 
+class ExpertAnalysisData(BaseModel):
+    """Expert LLM analysis in 5 languages with prediction and key factors"""
+    analysis_ko: Optional[str] = None
+    analysis_en: Optional[str] = None
+    analysis_zh: Optional[str] = None
+    analysis_ja: Optional[str] = None
+    analysis_es: Optional[str] = None
+    prediction: Optional[str] = None
+    confidence: Optional[float] = None
+    key_factors: Optional[List[str]] = None
+
+
 class TrendlineCoefficients(BaseModel):
     """Trendline coefficients and pre-calculated values"""
     slope: Optional[float] = Field(None, description="Trendline slope")
@@ -697,6 +725,7 @@ class ExtendedItemIngest(BaseModel):
     ownership: Optional[OwnershipData] = Field(None, description="Ownership data (institution, insider, short_float)")
     institutional_holders: Optional[List[InstitutionalHolder]] = Field(None, description="Individual institutional holders")
     membership: Optional[List[str]] = Field(None, description="Index membership list (e.g., ['SP500', 'DOW30'])")
+    expert_analysis: Optional[ExpertAnalysisData] = Field(None, description="LLM expert comment (5-lang)")
 
 
 class SimpleItemIngest(BaseModel):
@@ -922,6 +951,11 @@ class NewsSummaryResponse(BaseModel):
     neutral: int = 0
     bearish: int = 0
     avg_score: Optional[float] = None
+
+
+class NewsSectorsResponse(BaseModel):
+    """Available sectors from DB"""
+    sectors: List[str] = Field(default_factory=list)
 
 
 # ============================================================
@@ -1256,7 +1290,7 @@ class AISignalItem(BaseModel):
     price_at_signal: Optional[float] = None
     target_price: Optional[float] = None
     stop_loss_price: Optional[float] = None
-    reasoning: Optional[str] = Field(None, max_length=5000)
+    reasoning: Optional[str] = Field(None, max_length=20000)
 
     @field_validator('confidence', 'price_at_signal', 'target_price', 'stop_loss_price', mode='before')
     @classmethod

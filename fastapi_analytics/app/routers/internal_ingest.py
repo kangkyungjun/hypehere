@@ -507,6 +507,7 @@ def ingest_scores(payload: IngestPayload, db: Session = Depends(get_db)):
         # ==========================================
         # AI analysis only available in extended format
         # Robust detection: check both isinstance and hasattr to handle Union type edge cases
+        ai_obj = None
         if is_extended and hasattr(item, 'ai_analysis'):
             ai_analysis = item.ai_analysis
 
@@ -544,6 +545,35 @@ def ingest_scores(payload: IngestPayload, db: Session = Depends(get_db)):
                 f"Stored AI analysis for {ticker} on {score_date}: "
                 f"probability={ai_analysis.probability:.3f}, summary='{ai_analysis.summary[:50]}...'"
             )
+
+        # ==========================================
+        # 4b) expert_analysis → same ticker_ai_analysis row
+        # ==========================================
+        if is_extended and hasattr(item, 'expert_analysis') and item.expert_analysis:
+            ea = item.expert_analysis
+            if ai_obj is None:
+                ai_obj = (
+                    db.query(TickerAIAnalysis)
+                    .filter(
+                        TickerAIAnalysis.ticker == ticker,
+                        TickerAIAnalysis.date == score_date,
+                    )
+                    .first()
+                )
+            if ai_obj:
+                ai_obj.analysis_ko = ea.analysis_ko
+                ai_obj.analysis_en = ea.analysis_en
+                ai_obj.analysis_zh = ea.analysis_zh
+                ai_obj.analysis_ja = ea.analysis_ja
+                ai_obj.analysis_es = ea.analysis_es
+                ai_obj.expert_prediction = ea.prediction
+                if ea.confidence is not None:
+                    ai_obj.probability = ea.confidence
+                ai_obj.expert_key_factors = ea.key_factors
+                logger.info(
+                    f"Stored expert analysis for {ticker} on {score_date}: "
+                    f"prediction={ea.prediction}, langs=[ko={bool(ea.analysis_ko)}, en={bool(ea.analysis_en)}]"
+                )
 
         # ==========================================
         # 5) UPSERT to ticker_trendlines (trendline coefficients + values)
@@ -1184,7 +1214,6 @@ def ingest_earnings_week(payload: EarningsWeekIngestPayload, db: Session = Depen
         inserted += 1
 
     # 3년 초과 데이터 정리
-    from datetime import timedelta
     cutoff = date.today() - timedelta(days=1095)
     cleaned = db.query(EarningsWeekEvent).filter(
         EarningsWeekEvent.earnings_date < cutoff
@@ -1492,7 +1521,6 @@ def ingest_calendar(payload: MarketCalendarIngestPayload, db: Session = Depends(
         upserted += 1
 
     # 3년 초과 데이터 정리
-    from datetime import timedelta
     cutoff = date.today() - timedelta(days=1095)
     deleted = db.query(MarketCalendarEvent).filter(
         MarketCalendarEvent.event_date < cutoff

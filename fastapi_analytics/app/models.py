@@ -258,6 +258,13 @@ class TickerAIAnalysis(Base):
     bullish_reasons = Column(JSONB)  # Array of strings
     bearish_reasons = Column(JSONB)  # Array of strings
     final_comment = Column(String(4000))
+    analysis_ko = Column(Text)
+    analysis_en = Column(Text)
+    analysis_zh = Column(Text)
+    analysis_ja = Column(Text)
+    analysis_es = Column(Text)
+    expert_prediction = Column(String(20))    # "bullish" / "bearish" / "neutral"
+    expert_key_factors = Column(JSONB)        # ["factor1", "factor2", ...]
     created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
 
 
@@ -752,7 +759,7 @@ class AISignal(Base):
     price_at_signal = Column(Float)
     target_price = Column(Float)
     stop_loss_price = Column(Float)
-    reasoning = Column(String(5000))
+    reasoning = Column(Text)
     created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
 
 

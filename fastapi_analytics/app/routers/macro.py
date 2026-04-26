@@ -10,6 +10,7 @@ from app.schemas import (
     MacroIndicatorsResponse, MacroIndicatorResponse,
     MacroSignalsResponse, MacroSignalResponse,
     MacroChartResponse, MacroChartPointResponse,
+    MacroHistoryResponse,
 )
 
 router = APIRouter()
@@ -179,4 +180,52 @@ def get_macro_chart(
             )
             for r in rows
         ],
+    )
+
+
+@router.get("/history/{indicator_code}", response_model=MacroHistoryResponse)
+def get_macro_history(
+    indicator_code: str,
+    limit: int = Query(15, ge=1, le=100, description="Number of entries"),
+    db: Session = Depends(get_db),
+):
+    """지표/시그널 히스토리 조회 (최신 N개, date DESC)"""
+    rows = (
+        db.query(MacroIndicator)
+        .filter(MacroIndicator.indicator_code == indicator_code)
+        .order_by(MacroIndicator.date.desc())
+        .limit(limit)
+        .all()
+    )
+
+    # 3-month stats (based on latest date)
+    stats_3m: dict = {}
+    if rows:
+        is_signal = rows[0].source == 'SIGNAL'
+        stats_3m = _compute_3m_stats(
+            db, [indicator_code], is_signal=is_signal, target_date=rows[0].date,
+        )
+
+    entries = [
+        MacroIndicatorResponse(
+            indicator_code=r.indicator_code,
+            indicator_name=r.indicator_name,
+            value=r.value,
+            observation_date=str(r.observation_date) if r.observation_date else None,
+            previous_value=r.previous_value,
+            change_pct=r.change_pct,
+            risk_level=r.risk_level,
+            liquidity_status=r.liquidity_status,
+            signal_message=r.signal_message,
+            high_3m=stats_3m.get(r.indicator_code, (None, None, None))[0],
+            avg_3m=stats_3m.get(r.indicator_code, (None, None, None))[1],
+            low_3m=stats_3m.get(r.indicator_code, (None, None, None))[2],
+        )
+        for r in rows
+    ]
+
+    return MacroHistoryResponse(
+        indicator_code=indicator_code,
+        count=len(entries),
+        entries=entries,
     )

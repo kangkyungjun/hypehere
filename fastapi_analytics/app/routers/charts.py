@@ -400,6 +400,15 @@ def get_complete_chart_data(
             ai_bullish_reasons=ai_obj.bullish_reasons if ai_obj else None,
             ai_bearish_reasons=ai_obj.bearish_reasons if ai_obj else None,
             ai_final_comment=ai_obj.final_comment if ai_obj else None,
+
+            # Expert analysis (5-language)
+            ai_analysis_ko=ai_obj.analysis_ko if ai_obj else None,
+            ai_analysis_en=ai_obj.analysis_en if ai_obj else None,
+            ai_analysis_zh=ai_obj.analysis_zh if ai_obj else None,
+            ai_analysis_ja=ai_obj.analysis_ja if ai_obj else None,
+            ai_analysis_es=ai_obj.analysis_es if ai_obj else None,
+            ai_expert_prediction=ai_obj.expert_prediction if ai_obj else None,
+            ai_expert_key_factors=ai_obj.expert_key_factors if ai_obj else None,
         ))
 
     # ========================================

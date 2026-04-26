@@ -8,6 +8,7 @@ from app.models import TickerNews, Ticker
 from app.schemas import (
     NewsListResponse, NewsItemResponse, NewsSummaryResponse,
     TickerMentionBubbleResponse, TickerMentionItem,
+    NewsSectorsResponse,
 )
 
 router = APIRouter()
@@ -44,6 +45,7 @@ def get_latest_news(
     sentiment: Optional[str] = Query(None, description="Comma-separated sentiment filter (e.g. bullish,bearish)"),
     sectors: Optional[str] = Query(None, description="Comma-separated sector filter (e.g. Technology,Healthcare)"),
     is_breaking: Optional[bool] = Query(None, description="Filter breaking news only"),
+    exclude_market: Optional[bool] = Query(None, description="Exclude MARKET ticker (for Biz category)"),
     db: Session = Depends(get_db),
 ):
     """
@@ -77,6 +79,9 @@ def get_latest_news(
 
     if is_breaking is not None:
         base_query = base_query.filter(TickerNews.is_breaking == is_breaking)
+
+    if exclude_market:
+        base_query = base_query.filter(TickerNews.ticker != 'MARKET')
 
     total = base_query.count()
 
@@ -137,6 +142,8 @@ def get_hot_topics(
 def get_mention_bubble(
     hours: int = Query(24, ge=1, le=72, description="Lookback period in hours"),
     limit: int = Query(15, ge=5, le=30, description="Max tickers to return"),
+    sectors: Optional[str] = Query(None, description="Comma-separated sector filter"),
+    tickers: Optional[str] = Query(None, description="Comma-separated ticker filter"),
     db: Session = Depends(get_db),
 ):
     """
@@ -144,11 +151,12 @@ def get_mention_bubble(
 
     - GROUP BY ticker, COUNT(*), AVG(sentiment_score)
     - Ticker 메타데이터 JOIN (name_ko, sector)
+    - sectors/tickers 필터 지원 (카테고리별 버블 연동)
     - 빈 데이터 시 빈 구조 반환 (404 아님)
     """
     cutoff = datetime.utcnow() - timedelta(hours=hours)
 
-    rows = (
+    bubble_query = (
         db.query(
             TickerNews.ticker,
             func.count().label('cnt'),
@@ -156,6 +164,26 @@ def get_mention_bubble(
         )
         .filter(TickerNews.published_at >= cutoff)
         .filter(TickerNews.ticker != 'MARKET')
+    )
+
+    # Ticker filter (watchlist)
+    if tickers:
+        ticker_list = [t.strip().upper() for t in tickers.split(",") if t.strip()]
+        if ticker_list:
+            bubble_query = bubble_query.filter(TickerNews.ticker.in_(ticker_list))
+
+    # Sector filter (join Ticker table)
+    if sectors:
+        sector_list = [s.strip() for s in sectors.split(",") if s.strip()]
+        if sector_list:
+            bubble_query = (
+                bubble_query
+                .join(Ticker, TickerNews.ticker == Ticker.ticker)
+                .filter(Ticker.sector.in_(sector_list))
+            )
+
+    rows = (
+        bubble_query
         .group_by(TickerNews.ticker)
         .order_by(func.count().desc())
         .limit(limit)
@@ -299,3 +327,15 @@ def get_news_summary(
         bearish=bearish,
         avg_score=avg_score,
     )
+
+
+@router.get("/sectors", response_model=NewsSectorsResponse)
+def get_available_sectors(db: Session = Depends(get_db)):
+    """
+    DB에 존재하는 고유 섹터 목록 반환.
+
+    - Ticker 테이블에서 sector IS NOT NULL인 고유값
+    - Flutter에서 필터 모달 열 때 캐시하여 사용
+    """
+    rows = db.query(Ticker.sector).filter(Ticker.sector.isnot(None)).distinct().all()
+    return NewsSectorsResponse(sectors=sorted([r[0] for r in rows]))
