@@ -1,3 +1,5 @@
+import json
+
 from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import func
@@ -10,7 +12,7 @@ from app.models import (
     CompanyProfile, TickerKeyMetrics, TickerFinancials, TickerDividend,
     TickerCalendar, TickerEarningsHistory,
     TickerDefenseLine, TickerRecommendation, TickerInstitutionalHolder,
-    TickerNews, Ticker
+    TickerNews, Ticker, StockClassification
 )
 from app.schemas import (
     CompleteChartResponse, ChartDataPoint, TrendlineValue,
@@ -18,7 +20,7 @@ from app.schemas import (
     CompanyProfileResponse, KeyMetricsResponse, FinancialsResponse, DividendEntry,
     CalendarResponse, EarningsHistoryItem,
     DefenseLineResponse, RecommendationsResponse, InstitutionalHolderResponse,
-    NewsItemResponse
+    NewsItemResponse, ClassificationResponse
 )
 
 router = APIRouter()
@@ -312,6 +314,11 @@ def get_complete_chart_data(
         "month": _count_sentiments(month_ago),
     }
 
+    # 22) Latest classification (Peter Lynch)
+    classification_obj = db.query(StockClassification).filter(
+        StockClassification.ticker == ticker
+    ).order_by(StockClassification.date.desc()).first()
+
     # ========================================
     # Build lookup dictionaries by date
     # ========================================
@@ -580,4 +587,15 @@ def get_complete_chart_data(
 
         # News sentiment stats
         news_sentiment_stats=news_sentiment_stats,
+
+        # Classification (Peter Lynch)
+        classification=ClassificationResponse(
+            category=classification_obj.category,
+            category_ko=classification_obj.category_ko,
+            category_en=classification_obj.category_en,
+            confidence=classification_obj.confidence,
+            reason_ko=classification_obj.reason_ko,
+            reason_en=classification_obj.reason_en,
+            metrics=json.loads(classification_obj.metrics_json) if classification_obj.metrics_json else None,
+        ) if classification_obj else None,
     )

@@ -15,6 +15,7 @@ from app.models import (
     TickerDefenseLine, TickerRecommendation, TickerInstitutionalHolder,
     EarningsWeekEvent, MarketIndex, MarketIndexChart, StockMembership,
     TickerNews, AccountWithdrawal, MarketCalendarEvent,
+    StockClassification,
     # Phase 1: AI 투자 브레인
     UserPortfolio, PortfolioAdvice, PortfolioSummary, UserAlert, ExchangeRate,
     AISignal, AIMessage,
@@ -48,6 +49,10 @@ from app.services.fcm_service import (
     process_closing_report,
     process_market_open,
     send_portfolio_advice_notification,
+    process_earnings_reminder,
+    process_watchlist_movers,
+    process_score_change_notification,
+    process_portfolio_daily,
 )
 
 logger = logging.getLogger(__name__)
@@ -1107,6 +1112,37 @@ def ingest_scores(payload: IngestPayload, db: Session = Depends(get_db)):
                         surprise_pct=eh.surprise_pct,
                     ))
 
+        # ==========================================
+        # 12) UPSERT stock_classifications (Peter Lynch, Extended format only)
+        # ==========================================
+        if is_extended and hasattr(item, 'classification') and item.classification:
+            import json as _json
+            cls = item.classification
+            cls_obj = db.query(StockClassification).filter(
+                StockClassification.ticker == ticker,
+                StockClassification.date == score_date,
+            ).first()
+            if cls_obj:
+                cls_obj.category = cls.category
+                cls_obj.category_ko = cls.category_ko
+                cls_obj.category_en = cls.category_en
+                cls_obj.confidence = cls.confidence
+                cls_obj.reason_ko = cls.reason_ko
+                cls_obj.reason_en = cls.reason_en
+                cls_obj.metrics_json = _json.dumps(cls.metrics) if cls.metrics else None
+            else:
+                db.add(StockClassification(
+                    date=score_date,
+                    ticker=ticker,
+                    category=cls.category,
+                    category_ko=cls.category_ko,
+                    category_en=cls.category_en,
+                    confidence=cls.confidence,
+                    reason_ko=cls.reason_ko,
+                    reason_en=cls.reason_en,
+                    metrics_json=_json.dumps(cls.metrics) if cls.metrics else None,
+                ))
+
         upserted += 1
 
     db.commit()
@@ -1127,6 +1163,7 @@ def ingest_scores(payload: IngestPayload, db: Session = Depends(get_db)):
                 sig = item.signal
             if sv is not None:
                 process_score_notifications(db, score_date, ticker, sv, sig)
+                process_score_change_notification(db, score_date, ticker, sv, sig)
         except Exception as e:
             logger.error(f"FCM score error for {item.ticker}: {e}")
 
@@ -1159,6 +1196,7 @@ def ingest_scores(payload: IngestPayload, db: Session = Depends(get_db)):
     db.execute(text("DELETE FROM analytics.ticker_defense_lines WHERE date < CURRENT_DATE - INTERVAL '3 years'"))
     db.execute(text("DELETE FROM analytics.ticker_recommendations WHERE date < CURRENT_DATE - INTERVAL '3 years'"))
     db.execute(text("DELETE FROM analytics.ticker_institutional_holders WHERE date < CURRENT_DATE - INTERVAL '3 years'"))
+    db.execute(text("DELETE FROM analytics.stock_classifications WHERE date < CURRENT_DATE - INTERVAL '3 years'"))
     db.commit()
 
     return {
@@ -1386,7 +1424,9 @@ def ingest_news(payload: NewsIngestPayload, db: Session = Depends(get_db)):
                 process_news_notifications(
                     db, item.date, item.ticker.upper(),
                     item.sentiment_grade, item.sentiment_score,
-                    item.ai_summary,
+                    ai_summary=item.ai_summary,
+                    title=item.title,
+                    source_url=item.source_url,
                 )
             except Exception as e:
                 logger.error(f"FCM news error for {item.ticker}: {e}")
@@ -1399,7 +1439,9 @@ def ingest_news(payload: NewsIngestPayload, db: Session = Depends(get_db)):
             try:
                 process_breaking_news_notification(
                     db, item.date, item.ticker.upper(),
-                    item.ai_summary, item.source_url,
+                    ai_summary=item.ai_summary,
+                    source_url=item.source_url,
+                    title=item.title,
                 )
             except Exception as e:
                 logger.error(f"FCM breaking news error for {item.ticker}: {e}")
@@ -1434,7 +1476,8 @@ def trigger_scheduled_notification(
     """
     예약 브로드캐스트 알림 트리거 (Mac mini cron → AWS FastAPI).
 
-    notification_type: MORNING_BRIEFING | CLOSING_REPORT | MARKET_OPEN
+    notification_type: MORNING_BRIEFING | CLOSING_REPORT | MARKET_OPEN |
+                       EARNINGS_REMINDER | WATCHLIST_MOVERS | PORTFOLIO_DAILY
     """
     ntype = payload.notification_type
     today = date.today()
@@ -1446,6 +1489,12 @@ def trigger_scheduled_notification(
             process_closing_report(db, today)
         elif ntype == "MARKET_OPEN":
             process_market_open(db, today)
+        elif ntype == "EARNINGS_REMINDER":
+            process_earnings_reminder(db)
+        elif ntype == "WATCHLIST_MOVERS":
+            process_watchlist_movers(db, today)
+        elif ntype == "PORTFOLIO_DAILY":
+            process_portfolio_daily(db, today)
 
         db.commit()
         return {"status": "ok", "notification_type": ntype, "date": str(today)}

@@ -803,6 +803,23 @@ class AnalysisRequest(Base):
     completed_at = Column(TIMESTAMP)
 
 
+class StockClassification(Base):
+    """Peter Lynch 6-category stock classification."""
+    __tablename__ = "stock_classifications"
+    __table_args__ = {'schema': 'analytics'}
+
+    date = Column(Date, primary_key=True, index=True)
+    ticker = Column(String(10), primary_key=True, index=True)
+    category = Column(String(20), nullable=False, index=True)
+    category_ko = Column(String(20), nullable=False)
+    category_en = Column(String(20), nullable=False)
+    confidence = Column(Float, default=0.0)
+    reason_ko = Column(Text)
+    reason_en = Column(Text)
+    metrics_json = Column(Text)  # JSON string for metrics dict
+    created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
 class NotificationLog(Base):
     """FCM 알림 발송 로그 (중복 방지 + 감사)"""
     __tablename__ = "notification_log"

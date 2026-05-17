@@ -489,6 +489,17 @@ class NewsItemResponse(BaseModel):
         from_attributes = True
 
 
+class ClassificationResponse(BaseModel):
+    """Peter Lynch stock classification response"""
+    category: str
+    category_ko: str
+    category_en: str
+    confidence: float = 0.0
+    reason_ko: Optional[str] = None
+    reason_en: Optional[str] = None
+    metrics: Optional[dict] = None
+
+
 class CompleteChartResponse(BaseModel):
     """
     Complete chart data for Flutter app (1 API call gets everything).
@@ -540,6 +551,9 @@ class CompleteChartResponse(BaseModel):
 
     # News sentiment stats (week/month aggregation)
     news_sentiment_stats: Optional[dict] = Field(None, description="Sentiment counts: {week: {bullish, neutral, bearish}, month: {bullish, neutral, bearish}}")
+
+    # Classification (Peter Lynch)
+    classification: Optional[ClassificationResponse] = Field(None, description="Stock classification (Peter Lynch 6-category)")
 
 
 # ============================================================
@@ -700,6 +714,17 @@ class InstitutionalHolder(BaseModel):
     pct_change: Optional[float] = Field(None, description="Change in holding %")
 
 
+class ClassificationData(BaseModel):
+    """Peter Lynch classification data from Mac mini"""
+    category: str
+    category_ko: str
+    category_en: str
+    confidence: float = 0.0
+    reason_ko: str = ""
+    reason_en: str = ""
+    metrics: Optional[dict] = None
+
+
 class ExtendedItemIngest(BaseModel):
     """
     Extended payload format from Mac mini (nested structure).
@@ -726,6 +751,7 @@ class ExtendedItemIngest(BaseModel):
     institutional_holders: Optional[List[InstitutionalHolder]] = Field(None, description="Individual institutional holders")
     membership: Optional[List[str]] = Field(None, description="Index membership list (e.g., ['SP500', 'DOW30'])")
     expert_analysis: Optional[ExpertAnalysisData] = Field(None, description="LLM expert comment (5-lang)")
+    classification: Optional[ClassificationData] = Field(None, description="Peter Lynch classification")
 
 
 class SimpleItemIngest(BaseModel):
@@ -790,6 +816,7 @@ class TreemapItem(BaseModel):
     """Individual ticker in treemap"""
     ticker: str = Field(..., description="Ticker symbol")
     name: Optional[str] = Field(None, description="Display name")
+    name_ko: Optional[str] = Field(None, description="Korean display name")
     sector: Optional[str] = Field(None, description="GICS sector")
     sub_industry: Optional[str] = Field(None, description="GICS sub-industry")
     change_pct: Optional[float] = Field(None, description="Daily price change %")
@@ -981,7 +1008,10 @@ class WithdrawalResponse(BaseModel):
 
 class ScheduledNotificationRequest(BaseModel):
     """Trigger a scheduled broadcast notification from Mac mini"""
-    notification_type: Literal["MORNING_BRIEFING", "CLOSING_REPORT", "MARKET_OPEN"]
+    notification_type: Literal[
+        "MORNING_BRIEFING", "CLOSING_REPORT", "MARKET_OPEN",
+        "EARNINGS_REMINDER", "WATCHLIST_MOVERS", "PORTFOLIO_DAILY",
+    ]
 
 
 # ============================================================

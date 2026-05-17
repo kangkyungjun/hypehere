@@ -6,10 +6,11 @@ from typing import Optional
 from collections import defaultdict
 
 from app.database import get_db
-from app.models import TickerPrice, Ticker, TickerScore, MarketIndex, MarketIndexChart, StockMembership
+from app.models import TickerPrice, Ticker, TickerScore, MarketIndex, MarketIndexChart, StockMembership, StockClassification
 from app.schemas import (
     TreemapResponse, TreemapSector, TreemapItem,
     MarketIndicesResponse, MarketIndexResponse, IndexChartPoint,
+    ClassificationResponse,
 )
 
 router = APIRouter()
@@ -39,6 +40,7 @@ def get_treemap(
     target_date: Optional[date] = Query(None, alias="date", description="Target date (default: latest available)"),
     sector: Optional[str] = Query(None, description="Filter by sector name"),
     index: Optional[str] = Query(None, description="Filter by index: SP500, DOW30, NASDAQ100"),
+    classification: Optional[str] = Query(None, description="Filter by classification: FAST_GROWER, STALWART, etc."),
     limit: int = Query(500, ge=1, le=2000, description="Max tickers to return"),
     exclude_etf: bool = Query(True, description="Exclude ETF sector from results"),
     db: Session = Depends(get_db),
@@ -72,6 +74,7 @@ def get_treemap(
             TickerPrice.change_pct,
             TickerPrice.trading_value,
             Ticker.name,
+            Ticker.extra_data,
             Ticker.sector,
             Ticker.sub_industry,
             TickerScore.score,
@@ -97,6 +100,26 @@ def get_treemap(
             (StockMembership.index_code == index)
         )
 
+    # Optional classification filter (Peter Lynch)
+    if classification:
+        # Subquery: latest classification per ticker
+        cls_subq = (
+            db.query(
+                StockClassification.ticker,
+                func.max(StockClassification.date).label("max_date"),
+            )
+            .group_by(StockClassification.ticker)
+            .subquery()
+        )
+        query = query.join(
+            StockClassification,
+            (TickerPrice.ticker == StockClassification.ticker),
+        ).join(
+            cls_subq,
+            (StockClassification.ticker == cls_subq.c.ticker) &
+            (StockClassification.date == cls_subq.c.max_date),
+        ).filter(StockClassification.category == classification.upper())
+
     # Order by trading_value DESC, limit results
     query = query.order_by(desc(TickerPrice.trading_value)).limit(limit)
 
@@ -108,10 +131,12 @@ def get_treemap(
         sector_name = _detect_sector(row.sector, row.name)
         if exclude_etf and sector_name == "ETF":
             continue
+        name_ko = (row.extra_data or {}).get('name_ko') if row.extra_data else None
         sector_map[sector_name].append(
             TreemapItem(
                 ticker=row.ticker,
                 name=row.name,
+                name_ko=name_ko,
                 sector=sector_name,
                 sub_industry=row.sub_industry,
                 change_pct=row.change_pct,
@@ -191,3 +216,144 @@ def get_market_indices(
         ))
 
     return MarketIndicesResponse(date=str(target_date), indices=indices)
+
+
+@router.get("/classifications/summary")
+def get_classification_summary(
+    db: Session = Depends(get_db),
+):
+    """
+    카테고리별 종목 수 요약 (Peter Lynch 6-category).
+
+    Returns: {"FAST_GROWER": 120, "STALWART": 95, ...}
+    """
+    from sqlalchemy import distinct
+
+    # Get latest date per ticker (subquery)
+    from sqlalchemy.orm import aliased
+    subq = (
+        db.query(
+            StockClassification.ticker,
+            func.max(StockClassification.date).label("max_date"),
+        )
+        .group_by(StockClassification.ticker)
+        .subquery()
+    )
+
+    rows = (
+        db.query(StockClassification.category, func.count())
+        .join(
+            subq,
+            (StockClassification.ticker == subq.c.ticker) &
+            (StockClassification.date == subq.c.max_date),
+        )
+        .group_by(StockClassification.category)
+        .all()
+    )
+
+    return {category: count for category, count in rows}
+
+
+@router.get("/classifications/stocks")
+def get_stocks_by_classification(
+    category: str = Query(..., description="Classification category (e.g., FAST_GROWER)"),
+    limit: int = Query(100, ge=1, le=500),
+    db: Session = Depends(get_db),
+):
+    """
+    특정 분류의 종목 목록 조회.
+
+    Returns: list of {ticker, name, name_ko, category_ko, category_en, confidence, score, change_pct}
+    """
+    # Latest classification per ticker
+    subq = (
+        db.query(
+            StockClassification.ticker,
+            func.max(StockClassification.date).label("max_date"),
+        )
+        .group_by(StockClassification.ticker)
+        .subquery()
+    )
+
+    # Latest score per ticker (independent of classification date)
+    score_subq = (
+        db.query(
+            TickerScore.ticker,
+            func.max(TickerScore.date).label("max_date"),
+        )
+        .group_by(TickerScore.ticker)
+        .subquery()
+    )
+
+    # Latest price per ticker (independent of classification date)
+    price_subq = (
+        db.query(
+            TickerPrice.ticker,
+            func.max(TickerPrice.date).label("max_date"),
+        )
+        .group_by(TickerPrice.ticker)
+        .subquery()
+    )
+
+    rows = (
+        db.query(
+            StockClassification.ticker,
+            StockClassification.category,
+            StockClassification.category_ko,
+            StockClassification.category_en,
+            StockClassification.confidence,
+            Ticker.name,
+            Ticker.extra_data,
+            TickerScore.score,
+            TickerScore.signal,
+            TickerPrice.change_pct,
+            TickerPrice.close,
+        )
+        .join(
+            subq,
+            (StockClassification.ticker == subq.c.ticker) &
+            (StockClassification.date == subq.c.max_date),
+        )
+        .outerjoin(Ticker, StockClassification.ticker == Ticker.ticker)
+        .outerjoin(
+            score_subq,
+            StockClassification.ticker == score_subq.c.ticker,
+        )
+        .outerjoin(
+            TickerScore,
+            (StockClassification.ticker == TickerScore.ticker) &
+            (TickerScore.date == score_subq.c.max_date),
+        )
+        .outerjoin(
+            price_subq,
+            StockClassification.ticker == price_subq.c.ticker,
+        )
+        .outerjoin(
+            TickerPrice,
+            (StockClassification.ticker == TickerPrice.ticker) &
+            (TickerPrice.date == price_subq.c.max_date),
+        )
+        .filter(StockClassification.category == category.upper())
+        .order_by(desc(StockClassification.confidence))
+        .limit(limit)
+        .all()
+    )
+
+    results = []
+    for row in rows:
+        name_ko = (row.extra_data or {}).get('name_ko') if row.extra_data else None
+        results.append({
+            "ticker": row.ticker,
+            "name": row.name,
+            "name_ko": name_ko,
+            "category": row.category,
+            "category_ko": row.category_ko,
+            "category_en": row.category_en,
+            "confidence": row.confidence,
+            "score": row.score,
+            "signal": row.signal,
+            "change_pct": row.change_pct,
+            "close": row.close,
+        })
+
+    return results
