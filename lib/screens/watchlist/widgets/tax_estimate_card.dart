@@ -94,7 +94,7 @@ class TaxEstimateCard extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: AppSpacing.lg),
 
               // Gain / Exemption / Tax / Net rows
               _TaxRow(
@@ -159,7 +159,7 @@ class _TaxRow extends StatelessWidget {
           style: TextStyle(
             fontSize: AppTypography.bodySmall,
             color: Theme.of(context).colorScheme.onSurfaceVariant,
-            fontWeight: bold ? AppTypography.semiBold : FontWeight.normal,
+            fontWeight: bold ? AppTypography.semiBold : AppTypography.regular,
           ),
         ),
         Text(

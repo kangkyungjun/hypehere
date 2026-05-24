@@ -100,6 +100,23 @@ class NewsItem {
     );
   }
 
+  /// FCM 알림 data에서 최소한의 뉴스 아이템 생성 (모달 표시용)
+  factory NewsItem.fromNotification(Map<String, dynamic> data) {
+    final sentiment = data['sentiment'] as String? ?? 'neutral';
+    return NewsItem(
+      date: data['date'] as String? ??
+          DateTime.now().toUtc().toIso8601String().substring(0, 10),
+      ticker: data['ticker'] as String? ?? 'MARKET',
+      title: data['title'] as String? ?? '',
+      sourceUrl: data['source_url'] as String?,
+      publishedAt: DateTime.now().toUtc(),
+      aiSummary: data['ai_summary'] as String? ?? '',
+      sentimentGrade: sentiment,
+      sentimentLabel: sentiment,
+      isBreaking: data['type'] == 'BREAKING_NEWS',
+    );
+  }
+
   /// Sentiment dot color: bullish=green, bearish=red, neutral=grey
   Color sentimentColor(MarketLensColors colors) {
     switch (sentimentGrade) {

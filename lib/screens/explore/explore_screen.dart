@@ -4,7 +4,10 @@ import 'dart:async';
 import '../../services/analytics_api_client.dart';
 import '../../utils/error_localizer.dart';
 import '../../models/ticker_info.dart';
+import '../../models/stock_classification.dart';
 import '../../providers/recent_search_provider.dart';
+import '../../providers/watchlist_provider.dart';
+import '../../theme/app_colors.dart';
 import '../ticker_detail/ticker_detail_screen.dart';
 import '../../widgets/ads/banner_ad_widget.dart';
 import '../../l10n/app_localizations.dart';
@@ -31,6 +34,12 @@ class _ExploreScreenState extends State<ExploreScreen> {
   bool _isLoading = false;
   String? _error;
   bool _hasSearched = false;
+
+  // Classification filter
+  String? _selectedClassification;
+  List<Map<String, dynamic>> _classificationResults = [];
+  bool _isLoadingClassification = false;
+  int _classificationDisplayCount = 20;
 
   @override
   void initState() {
@@ -105,12 +114,47 @@ class _ExploreScreenState extends State<ExploreScreen> {
     _performSearch(ticker.ticker);
   }
 
+  Future<void> _onClassificationTap(String category) async {
+    if (_selectedClassification == category) {
+      setState(() {
+        _selectedClassification = null;
+        _classificationResults = [];
+      });
+      return;
+    }
+    setState(() {
+      _selectedClassification = category;
+      _isLoadingClassification = true;
+      _classificationResults = [];
+      _classificationDisplayCount = 20;
+      _searchController.clear();
+      _searchResults = [];
+      _hasSearched = false;
+    });
+    try {
+      final results = await _apiClient.getStocksByClassification(category);
+      if (!mounted) return;
+      setState(() {
+        _classificationResults = results;
+        _isLoadingClassification = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isLoadingClassification = false;
+        _error = ErrorLocalizer.getMessage(context, e);
+      });
+    }
+  }
+
   void _clearSearch() {
     _searchController.clear();
     setState(() {
       _searchResults = [];
       _hasSearched = false;
       _error = null;
+      _selectedClassification = null;
+      _classificationResults = [];
     });
   }
 
@@ -151,14 +195,150 @@ class _ExploreScreenState extends State<ExploreScreen> {
 
           // 광고 배너
           const BannerAdWidget(),
-          const SizedBox(height: AppSpacing.md),
 
-          // 검색 결과 / 최근 검색
+          // Classification filter chips
+          _buildClassificationChips(),
+          const SizedBox(height: AppSpacing.sm),
+
+          // 검색 결과 / 최근 검색 / 분류 결과
           Expanded(
-            child: _buildContent(),
+            child: _selectedClassification != null
+                ? _buildClassificationContent()
+                : _buildContent(),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildClassificationChips() {
+    final langCode = Localizations.localeOf(context).languageCode;
+    return SizedBox(
+      height: 40,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+        itemCount: StockClassification.allCategories.length,
+        separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.sm),
+        itemBuilder: (context, index) {
+          final cat = StockClassification.allCategories[index];
+          final code = cat['code']!;
+          final label = langCode == 'ko' ? cat['ko']! : cat['en']!;
+          final isSelected = _selectedClassification == code;
+          return FilterChip(
+            label: Text(label),
+            selected: isSelected,
+            onSelected: (_) => _onClassificationTap(code),
+            selectedColor: Theme.of(context).colorScheme.primaryContainer,
+            labelStyle: TextStyle(
+              fontSize: AppTypography.bodySmall,
+              fontWeight: isSelected ? AppTypography.semiBold : AppTypography.regular,
+            ),
+            visualDensity: VisualDensity.compact,
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildClassificationContent() {
+    if (_isLoadingClassification) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (_classificationResults.isEmpty) {
+      return Center(
+        child: Text(
+          Localizations.localeOf(context).languageCode == 'ko'
+              ? '해당 분류 종목이 없습니다'
+              : 'No stocks in this category',
+          style: Theme.of(context).textTheme.bodyLarge,
+        ),
+      );
+    }
+
+    // Sort by trading_value descending (client-side fallback)
+    final sorted = List<Map<String, dynamic>>.from(_classificationResults)
+      ..sort((a, b) {
+        final aVal = (a['trading_value'] as num?)?.toDouble() ?? 0;
+        final bVal = (b['trading_value'] as num?)?.toDouble() ?? 0;
+        return bVal.compareTo(aVal);
+      });
+
+    final displayItems = sorted.take(_classificationDisplayCount).toList();
+    final hasMore = sorted.length > _classificationDisplayCount;
+
+    return ListView.builder(
+      itemCount: displayItems.length + (hasMore ? 1 : 0),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+      itemBuilder: (context, index) {
+        // "Load more" button at the end
+        if (index == displayItems.length) {
+          final remaining = sorted.length - _classificationDisplayCount;
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
+            child: Center(
+              child: OutlinedButton(
+                onPressed: () => setState(() => _classificationDisplayCount += 20),
+                child: Text(
+                  Localizations.localeOf(context).languageCode == 'ko'
+                      ? '더보기 ($remaining)'
+                      : 'Show more ($remaining)',
+                ),
+              ),
+            ),
+          );
+        }
+
+        final item = displayItems[index];
+        final ticker = item['ticker'] as String;
+        final name = item['name'] as String?;
+        final nameKo = item['name_ko'] as String?;
+        final score = item['score'] as num?;
+        final changePct = item['change_pct'] as num?;
+        final langCode = Localizations.localeOf(context).languageCode;
+        final displayName = (langCode == 'ko' && nameKo != null) ? nameKo : (name ?? ticker);
+
+        return ListTile(
+          leading: CircleAvatar(
+            backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+            child: Text(ticker[0], style: TextStyle(color: Theme.of(context).colorScheme.onPrimaryContainer)),
+          ),
+          title: Text(ticker, style: const TextStyle(fontWeight: FontWeight.w600)),
+          subtitle: Text(displayName, maxLines: 1, overflow: TextOverflow.ellipsis),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (score != null)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.tertiaryContainer,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(score.toStringAsFixed(0), style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onTertiaryContainer)),
+                ),
+              if (changePct != null) ...[
+                const SizedBox(width: 8),
+                Text(
+                  '${changePct >= 0 ? '+' : ''}${changePct.toStringAsFixed(1)}%',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: changePct >= 0
+                        ? context.mlColors.gainColor
+                        : context.mlColors.lossColor,
+                  ),
+                ),
+              ],
+            ],
+          ),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => TickerDetailScreen(ticker: ticker)),
+            );
+          },
+        );
+      },
     );
   }
 
@@ -216,16 +396,41 @@ class _ExploreScreenState extends State<ExploreScreen> {
                 ticker.ticker.substring(0, 1),
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.onPrimaryContainer,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: AppTypography.bold,
                 ),
               ),
             ),
             title: Text(
               ticker.ticker,
-              style: const TextStyle(fontWeight: FontWeight.bold),
+              style: const TextStyle(fontWeight: AppTypography.bold),
             ),
             subtitle: Text(ticker.searchDisplayText),
-            trailing: const Icon(Icons.chevron_right),
+            trailing: Consumer<WatchlistProvider>(
+              builder: (context, wp, _) {
+                final isIn = wp.isInWatchlist(ticker.ticker);
+                return IconButton(
+                  icon: Icon(
+                    isIn ? Icons.bookmark : Icons.bookmark_border,
+                    color: isIn
+                        ? Theme.of(context).colorScheme.primary
+                        : Theme.of(context).colorScheme.outline,
+                  ),
+                  onPressed: () {
+                    wp.toggleWatchlist(ticker.ticker);
+                    ScaffoldMessenger.of(context).clearSnackBars();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(isIn
+                            ? '${ticker.ticker} ${l10n.removedFromWatchlist}'
+                            : '${ticker.ticker} ${l10n.addedToWatchlist}'),
+                        duration: const Duration(seconds: 2),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
             onTap: () => _onTickerTap(ticker),
           );
         },
@@ -253,6 +458,9 @@ class _ExploreScreenState extends State<ExploreScreen> {
                   l10n.enterTickerAbove,
                   style: TextStyle(color: Theme.of(context).colorScheme.outline),
                 ),
+                const SizedBox(height: AppSpacing.xxxl),
+                // Bookmark guide card
+                _buildBookmarkGuide(context, l10n),
               ],
             ),
           );
@@ -269,7 +477,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                   Text(
                     l10n.recentSearches,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
+                          fontWeight: AppTypography.bold,
                         ),
                   ),
                   TextButton(
@@ -301,7 +509,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                     leading: const Icon(Icons.history),
                     title: Text(
                       ticker.ticker,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
+                      style: const TextStyle(fontWeight: AppTypography.bold),
                     ),
                     subtitle: subtitleText != null
                         ? Text(
@@ -327,6 +535,55 @@ class _ExploreScreenState extends State<ExploreScreen> {
           ],
         );
       },
+    );
+  }
+
+  Widget _buildBookmarkGuide(BuildContext context, AppLocalizations l10n) {
+    final theme = Theme.of(context);
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xxxl),
+      padding: const EdgeInsets.all(AppSpacing.xl),
+      decoration: BoxDecoration(
+        color: context.mlColors.sectionBackground,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        border: Border.all(color: context.mlColors.subtleBorder),
+      ),
+      child: Column(
+        children: [
+          Text(
+            l10n.bookmarkGuide,
+            style: TextStyle(
+              fontSize: AppTypography.bodySmall,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.bookmark_border,
+                size: 28,
+                color: theme.colorScheme.outline,
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                child: Icon(
+                  Icons.arrow_forward,
+                  size: 20,
+                  color: theme.colorScheme.outline,
+                ),
+              ),
+              Icon(
+                Icons.bookmark,
+                size: 28,
+                color: theme.colorScheme.primary,
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

@@ -302,7 +302,7 @@ class _TickerNewsListScreenState extends State<TickerNewsListScreen> {
         label,
         style: TextStyle(
           fontSize: AppTypography.bodyMedium,
-          fontWeight: FontWeight.bold,
+          fontWeight: AppTypography.bold,
           color: Theme.of(context).colorScheme.onSurfaceVariant,
         ),
       ),
@@ -364,7 +364,7 @@ class _TickerNewsListScreenState extends State<TickerNewsListScreen> {
                 ],
               ),
             ),
-            const SizedBox(width: 10),
+            const SizedBox(width: AppSpacing.lg),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.only(bottom: AppSpacing.xl),
@@ -388,7 +388,7 @@ class _TickerNewsListScreenState extends State<TickerNewsListScreen> {
                             item.sentimentLabelLocalized(AppLocalizations.of(context)),
                             style: TextStyle(
                               fontSize: AppTypography.micro,
-                              fontWeight: FontWeight.bold,
+                              fontWeight: AppTypography.bold,
                               color: dotColor,
                             ),
                           ),
@@ -420,7 +420,7 @@ class _TickerNewsListScreenState extends State<TickerNewsListScreen> {
 
                     // Row 3: source
                     if (item.source != null) ...[
-                      const SizedBox(height: 3),
+                      const SizedBox(height: AppSpacing.xxs),
                       Text(
                         item.source!,
                         style: TextStyle(

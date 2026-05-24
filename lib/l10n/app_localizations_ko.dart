@@ -141,6 +141,18 @@ class AppLocalizationsKo extends AppLocalizations {
   String get passwordTooShort => '비밀번호는 8자 이상이어야 합니다';
 
   @override
+  String get passwordAllNumeric => '비밀번호는 숫자로만 구성할 수 없습니다';
+
+  @override
+  String get passwordTooCommon => '너무 흔한 비밀번호입니다. 더 안전한 비밀번호를 사용하세요';
+
+  @override
+  String get passwordTooSimilar => '비밀번호가 이메일 또는 닉네임과 너무 유사합니다';
+
+  @override
+  String get passwordRequirements => '8자 이상, 숫자만 불가, 흔한 비밀번호 불가';
+
+  @override
   String get passwordConfirm => '비밀번호 확인';
 
   @override
@@ -312,19 +324,19 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get scoreStrongBuy => '강력매수';
+  String get scoreStrongBuy => '강력긍정';
 
   @override
-  String get scoreBuy => '매수권고';
+  String get scoreBuy => '긍정';
 
   @override
-  String get scoreHold => '관망';
+  String get scoreHold => '중립';
 
   @override
-  String get scoreSell => '매도권고';
+  String get scoreSell => '부정';
 
   @override
-  String get scoreStrongSell => '강력매도';
+  String get scoreStrongSell => '강력부정';
 
   @override
   String get score => '점수';
@@ -380,6 +392,12 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get topTradingVolume => '오늘의 거래량 TOP';
+
+  @override
+  String get addWatchlistSearch => '종목 검색하고 추가하기';
+
+  @override
+  String get bookmarkGuide => '북마크를 눌러 관심종목에 추가하세요';
 
   @override
   String get communitySearchHint => '제목, 내용으로 검색...';
@@ -1182,6 +1200,21 @@ class AppLocalizationsKo extends AppLocalizations {
   String get bearishFactors => '약세 요인';
 
   @override
+  String get expertAnalysis => '전문가 분석';
+
+  @override
+  String get expertKeyFactors => '핵심 요인';
+
+  @override
+  String get predictionBullish => '상승';
+
+  @override
+  String get predictionBearish => '하락';
+
+  @override
+  String get predictionNeutral => '중립';
+
+  @override
   String get target => '목표 ';
 
   @override
@@ -1753,6 +1786,27 @@ class AppLocalizationsKo extends AppLocalizations {
   String get recActionSummary => '실행 요약';
 
   @override
+  String get recCompanyClassification => '기업분류';
+
+  @override
+  String get recAnalystSummary => '애널리스트 요약';
+
+  @override
+  String get recMarketSummary => '시장 요약';
+
+  @override
+  String get recUpcomingEvents => '향후 주요 이벤트';
+
+  @override
+  String get recBuyRecommend => '보유 확대 (추가매수 추천)';
+
+  @override
+  String get recHoldRecommend => '보유 유지 (관망 필요)';
+
+  @override
+  String get recSellRecommend => '보유 축소 (매도 추천)';
+
+  @override
   String get recommendedAction => '권고 사항';
 
   @override
@@ -1766,6 +1820,30 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get noHoldingsHint => '관심종목에서 보유 종목을 추가하세요';
+
+  @override
+  String get addHoldingDirect => '종목 추가하기';
+
+  @override
+  String get aiPortfolioBenefitTitle => '종목을 등록하면 매일 아침\nAI가 맞춤 투자 인사이트를 제공합니다';
+
+  @override
+  String get aiPortfolioBenefit1 => '포트폴리오 리밸런싱 제안';
+
+  @override
+  String get aiPortfolioBenefit2 => '기술적 매매 신호 분석';
+
+  @override
+  String get aiPortfolioBenefit3 => '시장 뉴스 기반 영향도 평가';
+
+  @override
+  String get searchTickerHint => '종목명 또는 티커 검색';
+
+  @override
+  String get addToPortfolio => '보유종목에 추가';
+
+  @override
+  String get alreadyInHoldings => '이미 보유 중인 종목입니다';
 
   @override
   String get closingPriceAuto => '종가 자동 입력';
@@ -1815,6 +1893,14 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get dailyUpdate => '매일 오전 업데이트';
+
+  @override
+  String get aiRefreshOnChange => '종목 변경 시 자동 갱신';
+
+  @override
+  String lastUpdateTime(String time) {
+    return '마지막 업데이트: $time';
+  }
 
   @override
   String get viewAIAdvice => 'AI 의견 보기';
@@ -1899,7 +1985,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get sectorMaterials => '소재';
 
   @override
-  String get newsBubbleTitle => '24시간 뉴스 버블';
+  String get newsBubbleTitle => '24시간 Hot 뉴스';
 
   @override
   String get newsBubbleLegendBullish => '강세 다수';
@@ -1940,13 +2026,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get macro3mTitle => '3개월';
 
   @override
-  String get macro3mHigh => '최고';
+  String get macro3mHigh => '3M 최고';
 
   @override
-  String get macro3mAvg => '평균';
+  String get macro3mAvg => '3M 평균';
 
   @override
-  String get macro3mLow => '최저';
+  String get macro3mLow => '3M 최저';
 
   @override
   String get tooltipClearSearch => '검색 지우기';
@@ -1956,6 +2042,9 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get tooltipNextMonth => '다음 달';
+
+  @override
+  String get tooltipSelectMonth => '월 선택';
 
   @override
   String get tooltipShowPassword => '비밀번호 표시';
@@ -1982,4 +2071,338 @@ class AppLocalizationsKo extends AppLocalizations {
   String nDaysAgo(int count) {
     return '$count일전';
   }
+
+  @override
+  String get tabHome => '홈';
+
+  @override
+  String get tabHomeTooltip => '홈';
+
+  @override
+  String get tabAIAnalysis => 'AI 신호';
+
+  @override
+  String get tabToday => '오늘';
+
+  @override
+  String get tabUpDown => '등락';
+
+  @override
+  String get tabIndexes => '지표';
+
+  @override
+  String get macroCurrentLabel => '현재값';
+
+  @override
+  String get macroChangeLabel => '변동';
+
+  @override
+  String get tradingVolumeTop => '거래대금';
+
+  @override
+  String get gainersTop => '상승률';
+
+  @override
+  String get losersTop => '하락률';
+
+  @override
+  String get topByMarketCap => '시가총액 상위';
+
+  @override
+  String get viewMore => '더보기';
+
+  @override
+  String get gaugeStrongNegativeDesc => '강력부정: 주가 하락 확률 매우 높음';
+
+  @override
+  String get gaugeNegativeDesc => '부정: 주가 하락 확률 높음';
+
+  @override
+  String get gaugePositiveDesc => '긍정: 주가 상승 확률 높음';
+
+  @override
+  String get gaugeStrongPositiveDesc => '강력긍정: 주가 상승 확률 매우 높음';
+
+  @override
+  String aiRecommended20(int count) {
+    return 'AI 분석 추천 $count 종목';
+  }
+
+  @override
+  String aiCaution20(int count) {
+    return 'AI 분석 주의 $count 종목';
+  }
+
+  @override
+  String get seeMore => '더보기';
+
+  @override
+  String get holdingsSummary => '보유현황';
+
+  @override
+  String get returnRate => '수익률';
+
+  @override
+  String get purchaseAmount => '매수금';
+
+  @override
+  String get profitAmount => '수익금';
+
+  @override
+  String get evaluationAmount => '평가금';
+
+  @override
+  String get watchAdToUnlock => '짧은 광고를 보고 AI 분석을 확인하세요';
+
+  @override
+  String get watchAd => '광고 보기';
+
+  @override
+  String get adNotReady => '광고를 준비 중입니다. 잠시 후 다시 시도하세요';
+
+  @override
+  String get holdingsLimitTitle => '보유종목 제한';
+
+  @override
+  String get holdingsLimitMessage =>
+      '무료 회원은 최대 3개 종목까지 보유할 수 있습니다. Gold으로 업그레이드하면 무제한 종목 관리와 광고 없는 AI 분석을 이용하세요.';
+
+  @override
+  String get upgradeToGold => 'Gold 업그레이드';
+
+  @override
+  String get goldBenefitUnlimitedHoldings => '무제한 보유종목 관리';
+
+  @override
+  String get goldBenefitAIUnlimited => '광고 없는 AI 분석';
+
+  @override
+  String get goldBenefitNoAds => '광고 완전 제거';
+
+  @override
+  String get newAiAnalysisAvailable => '새로운 AI 분석이 도착했습니다';
+
+  @override
+  String get viewingPreviousAnalysis => '이전 분석 보기';
+
+  @override
+  String get goldUpgradeComingSoon => 'Gold 멤버십이 곧 출시됩니다! 기대해주세요.';
+
+  @override
+  String get close => '닫기';
+
+  @override
+  String goldMonthlyPrice(String price) {
+    return '월 $price';
+  }
+
+  @override
+  String get subscribeNow => '구독하기';
+
+  @override
+  String get restorePurchases => '구매 복원';
+
+  @override
+  String get purchaseRestored => '구매가 복원되었습니다';
+
+  @override
+  String get purchaseRestoreFailed => '복원할 구매 내역이 없습니다';
+
+  @override
+  String get purchaseFailed => '구매에 실패했습니다. 다시 시도해주세요.';
+
+  @override
+  String get purchaseCancelled => '구매가 취소되었습니다';
+
+  @override
+  String get subscriptionActive => '활성';
+
+  @override
+  String subscriptionExpires(String date) {
+    return '$date 만료';
+  }
+
+  @override
+  String get subscriptionManage => '구독 관리';
+
+  @override
+  String get subscriptionTermsIos =>
+      '결제는 App Store 계정으로 청구됩니다. 현재 기간 종료 24시간 전에 취소하지 않으면 자동으로 갱신됩니다.';
+
+  @override
+  String get subscriptionTermsAndroid =>
+      '결제는 Google Play 계정으로 청구됩니다. 현재 기간 종료 24시간 전에 취소하지 않으면 자동으로 갱신됩니다.';
+
+  @override
+  String get goldMembershipTitle => 'Gold 멤버십';
+
+  @override
+  String get subscription => '구독';
+
+  @override
+  String get freeTrialStart => '7일 무료 체험 시작하기';
+
+  @override
+  String freeTrialInfo(String price) {
+    return '7일 무료, 이후 $price/월. 언제든 취소 가능.';
+  }
+
+  @override
+  String get onFreeTrial => '무료 체험 중';
+
+  @override
+  String trialEndsOn(String date) {
+    return '체험 종료: $date';
+  }
+
+  @override
+  String get trialExpired => '무료 체험이 종료되었습니다';
+
+  @override
+  String get manageSubscription => '구독 관리';
+
+  @override
+  String get restorePurchaseTitle => '이전 구매 복원';
+
+  @override
+  String get restorePurchaseDescription =>
+      '기기 변경이나 앱 재설치 후 구독이 반영되지 않을 때 사용하세요.';
+
+  @override
+  String calendarPremiumEvents(int count) {
+    return '$count개 프리미엄 일정';
+  }
+
+  @override
+  String get calendarUnlockWithAd => '광고 보고 6시간 이용';
+
+  @override
+  String calendarUnlockedUntil(String time) {
+    return '$time까지 잠금 해제';
+  }
+
+  @override
+  String get treemapLegend => '크기 = 거래대금  |  초록 = 상승  |  빨강 = 하락';
+
+  @override
+  String get aiScoreSubtitle => 'AI 점수 (0: 매도 신호 ~ 100: 매수 신호)';
+
+  @override
+  String get aiSignalStrongBuyDesc => '강력 매수 (80-100): 기술적·재무적 지표가 모두 강한 매수 신호';
+
+  @override
+  String get aiSignalBuyDesc => '매수 (60-79): 전반적으로 긍정적 신호';
+
+  @override
+  String get aiSignalHoldDesc => '보유 (40-59): 혼합 신호, 현재 포지션 유지';
+
+  @override
+  String get aiSignalSellDesc => '매도 (20-39): 전반적으로 부정적 신호';
+
+  @override
+  String get aiSignalStrongSellDesc => '강력 매도 (0-19): 기술적·재무적 지표가 모두 강한 매도 신호';
+
+  @override
+  String get watchlistSubtitle => '관심 종목을 모아보세요';
+
+  @override
+  String get holdingsSubtitle => '보유 중인 종목을 관리하세요';
+
+  @override
+  String get filterActiveLabel => '필터 적용 중';
+
+  @override
+  String get tapToRemoveFilter => '탭하여 해제';
+
+  @override
+  String get searchTickersCta => '종목 검색하기';
+
+  @override
+  String get addTickersCta => '종목 추가하기';
+
+  @override
+  String get beFirstToPost => '첫 글을 작성해보세요!';
+
+  @override
+  String totalPosts(int count) {
+    return '$count개 게시글';
+  }
+
+  @override
+  String get recentComments => '최근 댓글';
+
+  @override
+  String get coachMarkDashboardTreemap => '색상은 주가 변동, 크기는 거래량을 나타냅니다';
+
+  @override
+  String get coachMarkAiLens => 'AI가 분석한 종목별 매수/매도 신호 분포입니다';
+
+  @override
+  String get coachMarkWatchlist => '관심 종목을 추가해보세요!';
+
+  @override
+  String get coachMarkHoldings => '보유 종목을 등록하면 수익률을 추적할 수 있습니다';
+
+  @override
+  String get coachMarkTickerScore => 'AI 점수 추이를 확인하세요. 70 이상은 매수 신호입니다';
+
+  @override
+  String get coachMarkMacroGauge => '좌우로 스와이프하여 경제 지표를 확인하세요';
+
+  @override
+  String get coachMarkGotIt => '확인';
+
+  @override
+  String get resetTutorials => '튜토리얼 다시 보기';
+
+  @override
+  String get resetTutorialsDesc => '모든 튜토리얼이 다시 표시됩니다';
+
+  @override
+  String get tutorialsReset => '튜토리얼이 초기화되었습니다';
+
+  @override
+  String get purchaseStoreUnavailable => 'App Store 연결 불가';
+
+  @override
+  String get purchaseTemporarilyUnavailable => '구독을 일시적으로 이용할 수 없습니다';
+
+  @override
+  String get purchaseStoreProblem =>
+      'App Store에 연결할 수 없습니다. Apple ID 설정을 확인하고, 결제가 활성화되어 있는지 확인한 후 다시 시도해주세요.';
+
+  @override
+  String get purchaseRetry => '다시 시도';
+
+  @override
+  String get purchaseInitializing => 'App Store에 연결 중...';
+
+  @override
+  String get loginRequiredForPurchase =>
+      'Gold 멤버십 구매를 위해 로그인이 필요합니다. 구독 정보가 계정에 동기화됩니다.';
+
+  @override
+  String get aiScoreGuideTitle => 'AI 점수 안내';
+
+  @override
+  String get aiScoreGuideDescription => 'AI 점수는 중장기(3~12개월) 투자 관점을 기반으로 산출됩니다.';
+
+  @override
+  String get aiScoreGuideStrongPositive => '80–100: 강력 긍정 – 상승 가능성 매우 높음';
+
+  @override
+  String get aiScoreGuidePositive => '60–79: 긍정 – 상승 가능성 높음';
+
+  @override
+  String get aiScoreGuideNeutral => '40–59: 중립 – 혼합 신호';
+
+  @override
+  String get aiScoreGuideNegative => '20–39: 부정 – 하락 가능성 높음';
+
+  @override
+  String get aiScoreGuideStrongNegative => '0–19: 강력 부정 – 하락 가능성 매우 높음';
+
+  @override
+  String get subscriptionPaymentAccountWarning =>
+      '결제는 이 기기에 로그인된 App Store / Google Play 계정으로 처리됩니다. 다른 사람의 기기에서 구매 시, 기기 소유자의 계정으로 청구될 수 있습니다.';
 }

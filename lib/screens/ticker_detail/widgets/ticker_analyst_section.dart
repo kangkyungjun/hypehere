@@ -55,7 +55,7 @@ class _TickerAnalystSectionState extends State<TickerAnalystSection> {
                 Text(
                   l10n.analystConsensus((consensus.count ?? '-').toString()),
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
+                        fontWeight: AppTypography.bold,
                       ),
                 ),
                 if (consensus.recommendation != null)
@@ -70,7 +70,7 @@ class _TickerAnalystSectionState extends State<TickerAnalystSection> {
                       style: TextStyle(
                         color: context.mlColors.onPrimary,
                         fontSize: AppTypography.bodySmall,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: AppTypography.bold,
                       ),
                     ),
                   ),
@@ -97,8 +97,9 @@ class _TickerAnalystSectionState extends State<TickerAnalystSection> {
                         text: '\$${consensus.mean!.toStringAsFixed(2)}',
                         style: TextStyle(
                           fontSize: AppTypography.heroSmall,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: AppTypography.bold,
                           color: Theme.of(context).colorScheme.onSurface,
+                          fontFeatures: AppTypography.tabularFigures,
                         ),
                       ),
                       if (upsideStr.isNotEmpty)
@@ -106,8 +107,9 @@ class _TickerAnalystSectionState extends State<TickerAnalystSection> {
                           text: upsideStr,
                           style: TextStyle(
                             fontSize: AppTypography.heroSmall,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: AppTypography.bold,
                             color: upsideColor,
+                            fontFeatures: AppTypography.tabularFigures,
                           ),
                         ),
                     ],
@@ -146,7 +148,7 @@ class _TickerAnalystSectionState extends State<TickerAnalystSection> {
                   Text(
                     l10n.recentAnalystRatings,
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
+                          fontWeight: AppTypography.bold,
                         ),
                   ),
                   Icon(
@@ -211,9 +213,9 @@ class _TickerAnalystSectionState extends State<TickerAnalystSection> {
                       height: 6,
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
-                          colors: [context.mlColors.lossColor, const Color(0xFFFFC107), context.mlColors.gainColor],
+                          colors: [context.mlColors.lossColor, context.mlColors.scoreHoldColor, context.mlColors.gainColor],
                         ),
-                        borderRadius: BorderRadius.circular(3),
+                        borderRadius: BorderRadius.circular(AppRadius.xxs),
                       ),
                     ),
                   ),
@@ -229,7 +231,7 @@ class _TickerAnalystSectionState extends State<TickerAnalystSection> {
                           Text(l10n.targetPrice, style: TextStyle(fontSize: AppTypography.chartLabel, color: Theme.of(context).colorScheme.onSurfaceVariant)),
                           Text(
                             '\$${consensus.mean?.toStringAsFixed(0) ?? ''}',
-                            style: TextStyle(fontSize: AppTypography.chartLabel, color: Theme.of(context).colorScheme.onSurfaceVariant, fontWeight: AppTypography.semiBold),
+                            style: TextStyle(fontSize: AppTypography.chartLabel, color: Theme.of(context).colorScheme.onSurfaceVariant, fontWeight: AppTypography.semiBold, fontFeatures: AppTypography.tabularFigures),
                           ),
                           const SizedBox(height: AppSpacing.xxs),
                           Container(
@@ -239,9 +241,7 @@ class _TickerAnalystSectionState extends State<TickerAnalystSection> {
                               color: context.mlColors.accentBlue,
                               shape: BoxShape.circle,
                               border: Border.all(color: context.mlColors.sectionBackground, width: 2),
-                              boxShadow: [
-                                AppShadow.sm(context.mlColors.overlayDim),
-                              ],
+                              boxShadow: AppShadow.sm(context.mlColors.overlayDim),
                             ),
                           ),
                         ],
@@ -259,7 +259,7 @@ class _TickerAnalystSectionState extends State<TickerAnalystSection> {
                           Text(l10n.currentPrice, style: TextStyle(fontSize: AppTypography.chartLabel, color: Theme.of(context).colorScheme.onSurfaceVariant)),
                           Text(
                             '\$${latestClose?.toStringAsFixed(0) ?? ''}',
-                            style: TextStyle(fontSize: AppTypography.chartLabel, color: Theme.of(context).colorScheme.onSurfaceVariant, fontWeight: AppTypography.semiBold),
+                            style: TextStyle(fontSize: AppTypography.chartLabel, color: Theme.of(context).colorScheme.onSurfaceVariant, fontWeight: AppTypography.semiBold, fontFeatures: AppTypography.tabularFigures),
                           ),
                           const SizedBox(height: AppSpacing.xxs),
                           Container(
@@ -269,9 +269,7 @@ class _TickerAnalystSectionState extends State<TickerAnalystSection> {
                               color: Theme.of(context).colorScheme.onSurface,
                               shape: BoxShape.circle,
                               border: Border.all(color: context.mlColors.cardBackground, width: 2),
-                              boxShadow: [
-                                AppShadow.sm(context.mlColors.overlayDim),
-                              ],
+                              boxShadow: AppShadow.sm(context.mlColors.overlayDim),
                             ),
                             child: Icon(
                               Icons.location_on,
@@ -293,11 +291,11 @@ class _TickerAnalystSectionState extends State<TickerAnalystSection> {
           children: [
             Text(
               l10n.lowestPrice('\$${low.toStringAsFixed(0)}'),
-              style: TextStyle(fontSize: AppTypography.caption, color: Theme.of(context).colorScheme.onSurfaceVariant),
+              style: TextStyle(fontSize: AppTypography.caption, color: Theme.of(context).colorScheme.onSurfaceVariant, fontFeatures: AppTypography.tabularFigures),
             ),
             Text(
               l10n.highestPrice('\$${high.toStringAsFixed(0)}'),
-              style: TextStyle(fontSize: AppTypography.caption, color: Theme.of(context).colorScheme.onSurfaceVariant),
+              style: TextStyle(fontSize: AppTypography.caption, color: Theme.of(context).colorScheme.onSurfaceVariant, fontFeatures: AppTypography.tabularFigures),
             ),
           ],
         ),
@@ -389,6 +387,7 @@ class _TickerAnalystSectionState extends State<TickerAnalystSection> {
                       style: const TextStyle(
                         fontSize: AppTypography.bodyMedium,
                         fontWeight: AppTypography.semiBold,
+                        fontFeatures: AppTypography.tabularFigures,
                       ),
                     ),
                   if (r.date != null)
@@ -445,7 +444,7 @@ class _TickerAnalystSectionState extends State<TickerAnalystSection> {
               ),
             ),
           ),
-        const SizedBox(height: 10),
+        const SizedBox(height: AppSpacing.lg),
         // Legend row
         Row(
           children: items.map((item) {
@@ -471,7 +470,7 @@ class _TickerAnalystSectionState extends State<TickerAnalystSection> {
                   const SizedBox(width: AppSpacing.xxs),
                   Text(
                     '${item.$3}',
-                    style: TextStyle(fontSize: AppTypography.bodySmall, fontWeight: FontWeight.bold, color: color),
+                    style: TextStyle(fontSize: AppTypography.bodySmall, fontWeight: AppTypography.bold, color: color, fontFeatures: AppTypography.tabularFigures),
                   ),
                 ],
               ),

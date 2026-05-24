@@ -166,6 +166,31 @@ class MacroIndicator {
   }
 }
 
+/// Macro history API response model (single indicator history)
+class MacroHistoryData {
+  final String indicatorCode;
+  final int count;
+  final List<MacroIndicator> entries;
+
+  MacroHistoryData({
+    required this.indicatorCode,
+    required this.count,
+    required this.entries,
+  });
+
+  factory MacroHistoryData.fromJson(Map<String, dynamic> json) {
+    return MacroHistoryData(
+      indicatorCode: json['indicator_code'] as String? ?? '',
+      count: json['count'] as int? ?? 0,
+      entries: (json['entries'] as List?)
+              ?.map((item) =>
+                  MacroIndicator.fromJson(item as Map<String, dynamic>))
+              .toList() ??
+          [],
+    );
+  }
+}
+
 /// Macro signals API response model
 class MacroSignalsData {
   final String date;

@@ -247,7 +247,7 @@ class _NotificationInboxScreenState extends State<NotificationInboxScreen> {
               _iconForType(item.notificationType),
               style: const TextStyle(fontSize: AppTypography.displayMedium),
             ),
-            const SizedBox(width: 10),
+            const SizedBox(width: AppSpacing.lg),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

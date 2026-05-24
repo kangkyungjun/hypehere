@@ -1,15 +1,15 @@
-/// News source filter mode
-enum NewsSourceFilter { all, watchlist, marketOnly }
+/// News category filter mode
+enum NewsCategory { all, biz, world, watchlist }
 
 /// Immutable filter state for news list
 class NewsFilterState {
-  final NewsSourceFilter sourceFilter;
+  final NewsCategory category;
   final Set<String> sentimentGrades; // {bullish, bearish, neutral}
   final Set<String> sectors;
   final bool breakingOnly;
 
   const NewsFilterState({
-    this.sourceFilter = NewsSourceFilter.all,
+    this.category = NewsCategory.all,
     this.sentimentGrades = const {},
     this.sectors = const {},
     this.breakingOnly = false,
@@ -17,7 +17,7 @@ class NewsFilterState {
 
   /// Whether any filter is active (non-default)
   bool get isActive =>
-      sourceFilter != NewsSourceFilter.all ||
+      category != NewsCategory.all ||
       sentimentGrades.isNotEmpty ||
       sectors.isNotEmpty ||
       breakingOnly;
@@ -25,7 +25,7 @@ class NewsFilterState {
   /// Count of active filter categories
   int get activeCount {
     int count = 0;
-    if (sourceFilter != NewsSourceFilter.all) count++;
+    if (category != NewsCategory.all) count++;
     if (sentimentGrades.isNotEmpty) count++;
     if (sectors.isNotEmpty) count++;
     if (breakingOnly) count++;
@@ -33,13 +33,13 @@ class NewsFilterState {
   }
 
   NewsFilterState copyWith({
-    NewsSourceFilter? sourceFilter,
+    NewsCategory? category,
     Set<String>? sentimentGrades,
     Set<String>? sectors,
     bool? breakingOnly,
   }) {
     return NewsFilterState(
-      sourceFilter: sourceFilter ?? this.sourceFilter,
+      category: category ?? this.category,
       sentimentGrades: sentimentGrades ?? this.sentimentGrades,
       sectors: sectors ?? this.sectors,
       breakingOnly: breakingOnly ?? this.breakingOnly,
@@ -49,8 +49,8 @@ class NewsFilterState {
   /// Reset to default state
   static const NewsFilterState defaultState = NewsFilterState();
 
-  /// All available GICS sector values
-  static const List<String> allSectors = [
+  /// Fallback GICS sector values (used when API unavailable)
+  static const List<String> fallbackSectors = [
     'Technology',
     'Healthcare',
     'Energy',

@@ -58,7 +58,7 @@ class _TickerInsightSectionState extends State<TickerInsightSection> {
                 Text(
                   l10n.marketlensAIOpinion,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
+                        fontWeight: AppTypography.bold,
                       ),
                 ),
               ],
@@ -104,7 +104,7 @@ class _TickerInsightSectionState extends State<TickerInsightSection> {
                   Text(
                     l10n.marketlensAIOpinion,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
+                          fontWeight: AppTypography.bold,
                         ),
                   ),
                 ],
@@ -125,9 +125,8 @@ class _TickerInsightSectionState extends State<TickerInsightSection> {
                     const SizedBox(width: AppSpacing.xs),
                     Text(
                       '$confidencePercent%',
-                      style: TextStyle(
-                        fontSize: AppTypography.bodyLarge,
-                        fontWeight: FontWeight.bold,
+                      style: AppTypography.changeBadge.copyWith(
+                        fontWeight: AppTypography.bold,
                         color: isUptrend ? context.mlColors.gainColor : context.mlColors.lossColor,
                       ),
                     ),
@@ -148,11 +147,12 @@ class _TickerInsightSectionState extends State<TickerInsightSection> {
                   l10n.scorePoints(score.toStringAsFixed(1)),
                   style: TextStyle(
                     fontSize: AppTypography.displaySmall,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: AppTypography.bold,
                     color: ScoreMapper.getScoreColor(score, context.mlColors),
+                    fontFeatures: AppTypography.tabularFigures,
                   ),
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: AppSpacing.lg),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.xs),
                   decoration: BoxDecoration(
@@ -164,7 +164,7 @@ class _TickerInsightSectionState extends State<TickerInsightSection> {
                     style: TextStyle(
                       color: context.mlColors.onPrimary,
                       fontSize: AppTypography.bodyMedium,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: AppTypography.bold,
                     ),
                   ),
                 ),
@@ -286,9 +286,111 @@ class _TickerInsightSectionState extends State<TickerInsightSection> {
               ],
             ],
           ],
+
+          // Expert Analysis Section
+          if (latestData.expertAnalysisForLang(langCode) != null) ...[
+            const Divider(height: 32),
+            const SizedBox(height: AppSpacing.sm),
+
+            // Header: icon + title + prediction badge
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.psychology, size: 20, color: context.mlColors.accentBlue),
+                    const SizedBox(width: AppSpacing.sm),
+                    Text(
+                      l10n.expertAnalysis,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: AppTypography.bold,
+                          ),
+                    ),
+                  ],
+                ),
+                if (latestData.aiExpertPrediction != null)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.xs),
+                    decoration: BoxDecoration(
+                      color: _predictionColor(latestData.aiExpertPrediction!, context).withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(AppRadius.xl),
+                    ),
+                    child: Text(
+                      _predictionLabel(latestData.aiExpertPrediction!, l10n),
+                      style: TextStyle(
+                        fontSize: AppTypography.bodyMedium,
+                        fontWeight: AppTypography.bold,
+                        color: _predictionColor(latestData.aiExpertPrediction!, context),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.md),
+
+            // Expert analysis text
+            Text(
+              latestData.expertAnalysisForLang(langCode)!,
+              style: const TextStyle(
+                fontSize: AppTypography.bodyLarge,
+                height: 1.5,
+              ),
+            ),
+
+            // Key Factors
+            if (latestData.aiExpertKeyFactors != null && latestData.aiExpertKeyFactors!.isNotEmpty) ...[
+              const SizedBox(height: AppSpacing.md),
+              Row(
+                children: [
+                  Icon(Icons.key, size: 16, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                  const SizedBox(width: AppSpacing.sm),
+                  Text(
+                    l10n.expertKeyFactors,
+                    style: TextStyle(
+                      fontSize: AppTypography.bodyMedium,
+                      fontWeight: AppTypography.semiBold,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              ...latestData.aiExpertKeyFactors!.map((factor) => Padding(
+                    padding: const EdgeInsets.only(left: 22, bottom: 3),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('• ', style: TextStyle(color: context.mlColors.accentBlue)),
+                        Expanded(
+                          child: Text(
+                            factor.localize(langCode),
+                            style: const TextStyle(fontSize: AppTypography.bodyMedium, height: 1.3),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )),
+            ],
+          ],
         ],
       ),
     );
+  }
+
+  Color _predictionColor(String prediction, BuildContext context) {
+    switch (prediction.toLowerCase()) {
+      case 'bullish': return context.mlColors.gainColor;
+      case 'bearish': return context.mlColors.lossColor;
+      default: return Theme.of(context).colorScheme.onSurfaceVariant;
+    }
+  }
+
+  String _predictionLabel(String prediction, AppLocalizations l10n) {
+    switch (prediction.toLowerCase()) {
+      case 'bullish': return l10n.predictionBullish;
+      case 'bearish': return l10n.predictionBearish;
+      default: return l10n.predictionNeutral;
+    }
   }
 
   /// 목표가/손절가 Row (AI 섹션 내부용)
@@ -310,9 +412,7 @@ class _TickerInsightSectionState extends State<TickerInsightSection> {
               style: TextStyle(fontSize: AppTypography.bodyMedium, color: Theme.of(context).colorScheme.onSurfaceVariant)),
           Text(
             '\$${latestData.targetPrice!.toStringAsFixed(2)}',
-            style: TextStyle(
-              fontSize: AppTypography.bodyLarge,
-              fontWeight: AppTypography.semiBold,
+            style: AppTypography.changeBadge.copyWith(
               color: context.mlColors.gainColor,
             ),
           ),
@@ -328,9 +428,7 @@ class _TickerInsightSectionState extends State<TickerInsightSection> {
               style: TextStyle(fontSize: AppTypography.bodyMedium, color: Theme.of(context).colorScheme.onSurfaceVariant)),
           Text(
             '\$${latestData.stopLoss!.toStringAsFixed(2)}',
-            style: TextStyle(
-              fontSize: AppTypography.bodyLarge,
-              fontWeight: AppTypography.semiBold,
+            style: AppTypography.changeBadge.copyWith(
               color: context.mlColors.lossColor,
             ),
           ),

@@ -141,6 +141,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String get passwordTooShort => '密码至少需要8个字符';
 
   @override
+  String get passwordAllNumeric => '密码不能全部由数字组成';
+
+  @override
+  String get passwordTooCommon => '此密码过于常见，请选择更安全的密码';
+
+  @override
+  String get passwordTooSimilar => '密码与您的邮箱或昵称过于相似';
+
+  @override
+  String get passwordRequirements => '至少8个字符，不能全为数字，不能是常见密码';
+
+  @override
   String get passwordConfirm => '确认密码';
 
   @override
@@ -312,19 +324,19 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get scoreStrongBuy => '强烈买入';
+  String get scoreStrongBuy => '强烈正面';
 
   @override
-  String get scoreBuy => '买入';
+  String get scoreBuy => '正面';
 
   @override
-  String get scoreHold => '观望';
+  String get scoreHold => '中立';
 
   @override
-  String get scoreSell => '卖出';
+  String get scoreSell => '负面';
 
   @override
-  String get scoreStrongSell => '强烈卖出';
+  String get scoreStrongSell => '强烈负面';
 
   @override
   String get score => '评分';
@@ -380,6 +392,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get topTradingVolume => '今日成交额TOP';
+
+  @override
+  String get addWatchlistSearch => '搜索并添加到自选';
+
+  @override
+  String get bookmarkGuide => '点击书签图标添加到自选列表';
 
   @override
   String get communitySearchHint => '按标题或内容搜索...';
@@ -1180,6 +1198,21 @@ class AppLocalizationsZh extends AppLocalizations {
   String get bearishFactors => '看跌因素';
 
   @override
+  String get expertAnalysis => '专家分析';
+
+  @override
+  String get expertKeyFactors => '关键因素';
+
+  @override
+  String get predictionBullish => '看涨';
+
+  @override
+  String get predictionBearish => '看跌';
+
+  @override
+  String get predictionNeutral => '中性';
+
+  @override
   String get target => '目标 ';
 
   @override
@@ -1751,6 +1784,27 @@ class AppLocalizationsZh extends AppLocalizations {
   String get recActionSummary => '行动摘要';
 
   @override
+  String get recCompanyClassification => '企业分类';
+
+  @override
+  String get recAnalystSummary => '分析师摘要';
+
+  @override
+  String get recMarketSummary => '市场摘要';
+
+  @override
+  String get recUpcomingEvents => '即将到来的重要事件';
+
+  @override
+  String get recBuyRecommend => '增持（建议买入）';
+
+  @override
+  String get recHoldRecommend => '持有（建议观望）';
+
+  @override
+  String get recSellRecommend => '减持（建议卖出）';
+
+  @override
   String get recommendedAction => '建议操作';
 
   @override
@@ -1764,6 +1818,30 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get noHoldingsHint => '从自选股中添加持仓';
+
+  @override
+  String get addHoldingDirect => '添加股票';
+
+  @override
+  String get aiPortfolioBenefitTitle => '注册股票后\n每天早晨AI将提供投资建议';
+
+  @override
+  String get aiPortfolioBenefit1 => '投资组合再平衡建议';
+
+  @override
+  String get aiPortfolioBenefit2 => '技术交易信号分析';
+
+  @override
+  String get aiPortfolioBenefit3 => '市场新闻影响评估';
+
+  @override
+  String get searchTickerHint => '搜索股票名称或代码';
+
+  @override
+  String get addToPortfolio => '添加到持仓';
+
+  @override
+  String get alreadyInHoldings => '该股票已在持仓中';
 
   @override
   String get closingPriceAuto => '收盘价自动填入';
@@ -1813,6 +1891,14 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get dailyUpdate => '每日早间更新';
+
+  @override
+  String get aiRefreshOnChange => '持仓变更时自动刷新';
+
+  @override
+  String lastUpdateTime(String time) {
+    return '最后更新: $time';
+  }
 
   @override
   String get viewAIAdvice => '查看AI建议';
@@ -1897,7 +1983,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get sectorMaterials => '原材料';
 
   @override
-  String get newsBubbleTitle => '24小时新闻气泡';
+  String get newsBubbleTitle => '24小时 Hot 新闻';
 
   @override
   String get newsBubbleLegendBullish => '看涨居多';
@@ -1938,13 +2024,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get macro3mTitle => '3个月';
 
   @override
-  String get macro3mHigh => '最高';
+  String get macro3mHigh => '3M 最高';
 
   @override
-  String get macro3mAvg => '均值';
+  String get macro3mAvg => '3M 均值';
 
   @override
-  String get macro3mLow => '最低';
+  String get macro3mLow => '3M 最低';
 
   @override
   String get tooltipClearSearch => '清除搜索';
@@ -1954,6 +2040,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get tooltipNextMonth => '下个月';
+
+  @override
+  String get tooltipSelectMonth => '选择月份';
 
   @override
   String get tooltipShowPassword => '显示密码';
@@ -1980,4 +2069,336 @@ class AppLocalizationsZh extends AppLocalizations {
   String nDaysAgo(int count) {
     return '$count天前';
   }
+
+  @override
+  String get tabHome => '首页';
+
+  @override
+  String get tabHomeTooltip => '首页';
+
+  @override
+  String get tabAIAnalysis => 'AI信号';
+
+  @override
+  String get tabToday => '今日';
+
+  @override
+  String get tabUpDown => '涨跌';
+
+  @override
+  String get tabIndexes => '指标';
+
+  @override
+  String get macroCurrentLabel => '当前值';
+
+  @override
+  String get macroChangeLabel => '变动';
+
+  @override
+  String get tradingVolumeTop => '成交额';
+
+  @override
+  String get gainersTop => '涨幅';
+
+  @override
+  String get losersTop => '跌幅';
+
+  @override
+  String get topByMarketCap => '市值排名';
+
+  @override
+  String get viewMore => '查看更多';
+
+  @override
+  String get gaugeStrongNegativeDesc => '强烈负面：股价下跌概率极高';
+
+  @override
+  String get gaugeNegativeDesc => '负面：股价下跌概率较高';
+
+  @override
+  String get gaugePositiveDesc => '正面：股价上涨概率较高';
+
+  @override
+  String get gaugeStrongPositiveDesc => '强烈正面：股价上涨概率极高';
+
+  @override
+  String aiRecommended20(int count) {
+    return 'AI分析推荐 $count 只';
+  }
+
+  @override
+  String aiCaution20(int count) {
+    return 'AI分析警示 $count 只';
+  }
+
+  @override
+  String get seeMore => '查看更多';
+
+  @override
+  String get holdingsSummary => '持仓概况';
+
+  @override
+  String get returnRate => '收益率';
+
+  @override
+  String get purchaseAmount => '买入金额';
+
+  @override
+  String get profitAmount => '盈亏金额';
+
+  @override
+  String get evaluationAmount => '市值';
+
+  @override
+  String get watchAdToUnlock => '观看短视频广告查看AI分析';
+
+  @override
+  String get watchAd => '观看广告';
+
+  @override
+  String get adNotReady => '广告加载中，请稍后重试';
+
+  @override
+  String get holdingsLimitTitle => '持仓限制';
+
+  @override
+  String get holdingsLimitMessage =>
+      '免费用户最多可持有3只股票。升级为Gold会员即可享受无限持仓管理和无广告AI分析。';
+
+  @override
+  String get upgradeToGold => '升级为Gold';
+
+  @override
+  String get goldBenefitUnlimitedHoldings => '无限持仓管理';
+
+  @override
+  String get goldBenefitAIUnlimited => '无广告AI分析';
+
+  @override
+  String get goldBenefitNoAds => '完全去除广告';
+
+  @override
+  String get newAiAnalysisAvailable => '新的AI分析已到达';
+
+  @override
+  String get viewingPreviousAnalysis => '查看上次分析';
+
+  @override
+  String get goldUpgradeComingSoon => 'Gold会员即将推出！敬请期待。';
+
+  @override
+  String get close => '关闭';
+
+  @override
+  String goldMonthlyPrice(String price) {
+    return '月 $price';
+  }
+
+  @override
+  String get subscribeNow => '立即订阅';
+
+  @override
+  String get restorePurchases => '恢复购买';
+
+  @override
+  String get purchaseRestored => '购买已成功恢复';
+
+  @override
+  String get purchaseRestoreFailed => '未找到以前的购买记录';
+
+  @override
+  String get purchaseFailed => '购买失败，请重试。';
+
+  @override
+  String get purchaseCancelled => '购买已取消';
+
+  @override
+  String get subscriptionActive => '已激活';
+
+  @override
+  String subscriptionExpires(String date) {
+    return '$date 到期';
+  }
+
+  @override
+  String get subscriptionManage => '管理订阅';
+
+  @override
+  String get subscriptionTermsIos =>
+      '付款将从您的App Store账户中扣除。如果在当前周期结束前24小时内未取消，订阅将自动续订。';
+
+  @override
+  String get subscriptionTermsAndroid =>
+      '付款将从您的Google Play账户中扣除。如果在当前周期结束前24小时内未取消，订阅将自动续订。';
+
+  @override
+  String get goldMembershipTitle => 'Gold会员';
+
+  @override
+  String get subscription => '订阅';
+
+  @override
+  String get freeTrialStart => '开始7天免费试用';
+
+  @override
+  String freeTrialInfo(String price) {
+    return '7天免费，之后$price/月。随时可取消。';
+  }
+
+  @override
+  String get onFreeTrial => '免费试用中';
+
+  @override
+  String trialEndsOn(String date) {
+    return '试用结束: $date';
+  }
+
+  @override
+  String get trialExpired => '免费试用已结束';
+
+  @override
+  String get manageSubscription => '管理订阅';
+
+  @override
+  String get restorePurchaseTitle => '恢复之前的购买';
+
+  @override
+  String get restorePurchaseDescription => '更换设备或重新安装应用后订阅未生效时使用。';
+
+  @override
+  String calendarPremiumEvents(int count) {
+    return '$count个高级事件';
+  }
+
+  @override
+  String get calendarUnlockWithAd => '看广告解锁6小时';
+
+  @override
+  String calendarUnlockedUntil(String time) {
+    return '解锁至$time';
+  }
+
+  @override
+  String get treemapLegend => '大小 = 成交量  |  绿色 = 上涨  |  红色 = 下跌';
+
+  @override
+  String get aiScoreSubtitle => 'AI评分 (0: 卖出信号 ~ 100: 买入信号)';
+
+  @override
+  String get aiSignalStrongBuyDesc => '强力买入 (80-100): 技术和财务指标均显示强烈买入信号';
+
+  @override
+  String get aiSignalBuyDesc => '买入 (60-79): 整体积极信号';
+
+  @override
+  String get aiSignalHoldDesc => '持有 (40-59): 信号混合，维持当前仓位';
+
+  @override
+  String get aiSignalSellDesc => '卖出 (20-39): 整体消极信号';
+
+  @override
+  String get aiSignalStrongSellDesc => '强力卖出 (0-19): 技术和财务指标均显示强烈卖出信号';
+
+  @override
+  String get watchlistSubtitle => '收藏您关注的股票';
+
+  @override
+  String get holdingsSubtitle => '管理您的持仓';
+
+  @override
+  String get filterActiveLabel => '筛选已启用';
+
+  @override
+  String get tapToRemoveFilter => '点击取消';
+
+  @override
+  String get searchTickersCta => '搜索股票';
+
+  @override
+  String get addTickersCta => '添加股票';
+
+  @override
+  String get beFirstToPost => '来写第一篇帖子吧！';
+
+  @override
+  String totalPosts(int count) {
+    return '$count篇帖子';
+  }
+
+  @override
+  String get recentComments => '最近评论';
+
+  @override
+  String get coachMarkDashboardTreemap => '颜色表示股价变动，大小表示成交量';
+
+  @override
+  String get coachMarkAiLens => 'AI分析的个股买卖信号分布';
+
+  @override
+  String get coachMarkWatchlist => '添加您关注的股票！';
+
+  @override
+  String get coachMarkHoldings => '注册持仓以追踪收益率';
+
+  @override
+  String get coachMarkTickerScore => '查看AI评分趋势。70以上为买入信号';
+
+  @override
+  String get coachMarkMacroGauge => '左右滑动查看经济指标';
+
+  @override
+  String get coachMarkGotIt => '知道了';
+
+  @override
+  String get resetTutorials => '重新查看教程';
+
+  @override
+  String get resetTutorialsDesc => '所有教程将重新显示';
+
+  @override
+  String get tutorialsReset => '教程已重置';
+
+  @override
+  String get purchaseStoreUnavailable => '无法连接App Store';
+
+  @override
+  String get purchaseTemporarilyUnavailable => '订阅暂时不可用';
+
+  @override
+  String get purchaseStoreProblem =>
+      '无法连接App Store。请检查您的Apple ID设置，确保已启用付款功能，然后重试。';
+
+  @override
+  String get purchaseRetry => '重试';
+
+  @override
+  String get purchaseInitializing => '正在连接App Store...';
+
+  @override
+  String get loginRequiredForPurchase => '购买Gold会员需要登录。订阅信息将同步到您的账户。';
+
+  @override
+  String get aiScoreGuideTitle => 'AI评分指南';
+
+  @override
+  String get aiScoreGuideDescription => 'AI评分基于中长期（3至12个月）投资视角计算。';
+
+  @override
+  String get aiScoreGuideStrongPositive => '80–100: 强烈看涨 – 上涨概率非常高';
+
+  @override
+  String get aiScoreGuidePositive => '60–79: 看涨 – 上涨概率较高';
+
+  @override
+  String get aiScoreGuideNeutral => '40–59: 中性 – 信号混合';
+
+  @override
+  String get aiScoreGuideNegative => '20–39: 看跌 – 下跌概率较高';
+
+  @override
+  String get aiScoreGuideStrongNegative => '0–19: 强烈看跌 – 下跌概率非常高';
+
+  @override
+  String get subscriptionPaymentAccountWarning =>
+      '付款通过本设备登录的 App Store / Google Play 账户处理。如果您在他人设备上购买，可能会从设备所有者的账户中扣款。';
 }

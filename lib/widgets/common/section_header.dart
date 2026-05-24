@@ -3,25 +3,21 @@ import '../../theme/app_colors.dart';
 import '../../theme/app_spacing.dart';
 import '../../theme/app_typography.dart';
 
-/// 섹션 제목 Row — 타이틀 + 선택적 우측 액션
-///
-/// ```dart
-/// SectionHeader(
-///   title: '뉴스',
-///   trailing: Icon(Icons.chevron_right),
-///   onTrailingTap: () => ...,
-/// )
-/// ```
+/// Section header with consistent hierarchy and optional action.
 class SectionHeader extends StatelessWidget {
   const SectionHeader({
     super.key,
     required this.title,
+    this.subtitle,
+    this.leading,
     this.trailing,
     this.onTrailingTap,
     this.padding,
   });
 
   final String title;
+  final String? subtitle;
+  final Widget? leading;
   final Widget? trailing;
   final VoidCallback? onTrailingTap;
   final EdgeInsetsGeometry? padding;
@@ -31,23 +27,48 @@ class SectionHeader extends StatelessWidget {
     final colors = context.mlColors;
 
     return Padding(
-      padding: padding ??
+      padding:
+          padding ??
           const EdgeInsets.symmetric(
             horizontal: AppSpacing.xl,
-            vertical: AppSpacing.lg,
+            vertical: AppSpacing.md,
           ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: AppTypography.headlineMedium,
-              fontWeight: AppTypography.bold,
-              color: colors.accentBlue,
+          if (leading != null) ...[
+            IconTheme(
+              data: IconThemeData(color: colors.accentBlue, size: 20),
+              child: leading!,
+            ),
+            const SizedBox(width: AppSpacing.sm),
+          ],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: AppTypography.sectionTitle.copyWith(
+                    color: colors.textPrimary,
+                  ),
+                ),
+                if (subtitle != null && subtitle!.isNotEmpty) ...[
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    subtitle!,
+                    style: AppTypography.label.copyWith(
+                      color: colors.textTertiary,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ],
             ),
           ),
           if (trailing != null) ...[
-            const Spacer(),
+            const SizedBox(width: AppSpacing.md),
             GestureDetector(
               onTap: onTrailingTap,
               behavior: HitTestBehavior.opaque,

@@ -15,8 +15,12 @@ import 'profile_edit_screen.dart';
 import '../settings/change_password_screen.dart';
 import '../auth/login_screen.dart';
 import '../../theme/app_colors.dart';
+import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 import '../../theme/app_typography.dart';
+import '../../utils/app_page_route.dart';
+import '../../widgets/common/bento_card.dart';
+import '../../widgets/common/section_header.dart';
 import '../../l10n/app_localizations.dart';
 
 /// 사용자 프로필 화면
@@ -109,9 +113,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _editPost(Post post) async {
     final result = await Navigator.push<bool>(
       context,
-      MaterialPageRoute(
-        builder: (context) => CreatePostScreen(editPost: post),
-      ),
+      appPageRoute(builder: (_) => CreatePostScreen(editPost: post)),
     );
 
     if (result == true) {
@@ -136,7 +138,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             TextButton(
               onPressed: () => Navigator.pop(context, true),
-              style: TextButton.styleFrom(foregroundColor: context.mlColors.dangerColor),
+              style: TextButton.styleFrom(
+                foregroundColor: context.mlColors.dangerColor,
+              ),
               child: Text(l10n.delete),
             ),
           ],
@@ -149,15 +153,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       await _apiClient.deletePost(post.id);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.postDeleted)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.postDeleted)));
         _loadMyActivity();
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.postDeleteFailed(ErrorLocalizer.getMessage(context, e)))),
+          SnackBar(
+            content: Text(
+              l10n.postDeleteFailed(ErrorLocalizer.getMessage(context, e)),
+            ),
+          ),
         );
       }
     }
@@ -195,9 +203,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (confirmed == true) {
       await authProvider.logout();
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.logout)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.logout)));
         Navigator.of(context).pop(); // 프로필 화면 닫기
       }
     }
@@ -213,9 +221,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.profile),
-      ),
+      appBar: AppBar(title: Text(l10n.profile)),
       body: Consumer<AuthProvider>(
         builder: (context, authProvider, child) {
           final l10n = AppLocalizations.of(context);
@@ -242,7 +248,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ElevatedButton(
                     onPressed: () => Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_) => const LoginScreen()),
+                      appPageRoute(builder: (_) => const LoginScreen()),
                     ),
                     child: Text(l10n.login),
                   ),
@@ -293,14 +299,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   /// 사용자 정보 섹션
   Widget _buildUserInfoCard(user) {
     final l10n = AppLocalizations.of(context);
-    return Container(
-      decoration: BoxDecoration(
-        border: Border(
-          top: BorderSide(color: context.mlColors.subtleBorder, width: 1),
-          bottom: BorderSide(color: context.mlColors.subtleBorder, width: 1),
-        ),
-      ),
-      padding: const EdgeInsets.all(AppSpacing.xxl),
+    return BentoCard(
       child: Column(
         children: [
           // 편집 버튼 (우상단)
@@ -310,9 +309,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               onTap: () async {
                 final result = await Navigator.push<bool>(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => ProfileEditScreen(user: user),
-                  ),
+                  appPageRoute(builder: (_) => ProfileEditScreen(user: user)),
                 );
                 if (result == true && mounted) {
                   _loadMyActivity();
@@ -321,13 +318,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.edit, size: 16, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                  Icon(
+                    Icons.edit_rounded,
+                    size: 16,
+                    color: context.mlColors.textSecondary,
+                  ),
                   const SizedBox(width: AppSpacing.xs),
                   Text(
                     l10n.edit,
                     style: TextStyle(
                       fontSize: AppTypography.bodyMedium,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      color: context.mlColors.textSecondary,
                     ),
                   ),
                 ],
@@ -346,10 +347,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 radius: 40,
                 backgroundColor: context.mlColors.accentBlue,
                 child: Text(
-                  user.nickname.isNotEmpty ? user.nickname[0].toUpperCase() : 'U',
+                  user.nickname.isNotEmpty
+                      ? user.nickname[0].toUpperCase()
+                      : 'U',
                   style: TextStyle(
                     fontSize: AppTypography.heroMedium,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: AppTypography.bold,
                     color: context.mlColors.onPrimary,
                   ),
                 ),
@@ -364,9 +367,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   children: [
                     Text(
                       user.nickname,
-                      style: const TextStyle(
-                        fontSize: AppTypography.displayMedium,
-                        fontWeight: FontWeight.bold,
+                      style: AppTypography.screenTitle.copyWith(
+                        color: context.mlColors.textPrimary,
                       ),
                     ),
                     const SizedBox(height: AppSpacing.xs),
@@ -374,7 +376,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       user.email,
                       style: TextStyle(
                         fontSize: AppTypography.bodyLarge,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        color: context.mlColors.textSecondary,
                       ),
                     ),
                     const SizedBox(height: AppSpacing.xs),
@@ -382,7 +384,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       l10n.joinDate(_formatDate(user.createdAt)),
                       style: TextStyle(
                         fontSize: AppTypography.bodySmall,
-                        color: Theme.of(context).colorScheme.outline,
+                        color: context.mlColors.textTertiary,
                       ),
                     ),
                   ],
@@ -401,32 +403,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // 헤더
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              _myPosts != null
-                  ? '${l10n.myPosts} (${_formatCount(_myPostsCount)})'
-                  : l10n.myPosts,
-              style: const TextStyle(
-                fontSize: AppTypography.headlineLarge,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            if (_myPosts != null && _myPosts!.isNotEmpty)
-              TextButton(
-                onPressed: () {
+        SectionHeader(
+          title: _myPosts != null
+              ? '${l10n.myPosts} (${_formatCount(_myPostsCount)})'
+              : l10n.myPosts,
+          padding: EdgeInsets.zero,
+          trailing: _myPosts != null && _myPosts!.isNotEmpty
+              ? Text(
+                  l10n.viewAll,
+                  style: TextStyle(
+                    color: context.mlColors.accentBlue,
+                    fontWeight: AppTypography.semiBold,
+                  ),
+                )
+              : null,
+          onTrailingTap: _myPosts != null && _myPosts!.isNotEmpty
+              ? () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder: (context) => const MyPostsScreen(),
-                    ),
+                    appPageRoute(builder: (_) => const MyPostsScreen()),
                   );
-                },
-                child: Text(l10n.viewAll),
-              ),
-          ],
+                }
+              : null,
         ),
 
         const SizedBox(height: AppSpacing.lg),
@@ -440,20 +438,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           )
         else if (_myPosts == null || _myPosts!.isEmpty)
-          Container(
-            decoration: BoxDecoration(
-              border: Border(
-                top: BorderSide(color: context.mlColors.subtleBorder, width: 1),
-                bottom: BorderSide(color: context.mlColors.subtleBorder, width: 1),
-              ),
-            ),
+          BentoCard(
             padding: const EdgeInsets.all(AppSpacing.xxxl),
             child: Center(
               child: Column(
                 children: [
                   CircleAvatar(
                     radius: 32,
-                    backgroundColor: context.mlColors.accentBlue.withValues(alpha: 0.1),
+                    backgroundColor: context.mlColors.accentBlue.withValues(
+                      alpha: 0.1,
+                    ),
                     child: Icon(
                       Icons.article_outlined,
                       size: 32,
@@ -488,8 +482,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => PostDetailScreen(postId: post.id),
+                  appPageRoute(
+                    builder: (_) => PostDetailScreen(postId: post.id),
                   ),
                 );
               },
@@ -507,32 +501,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // 헤더
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              _myComments != null
-                  ? '${l10n.myComments} (${_formatCount(_myCommentsCount)})'
-                  : l10n.myComments,
-              style: const TextStyle(
-                fontSize: AppTypography.headlineLarge,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            if (_myComments != null && _myComments!.isNotEmpty)
-              TextButton(
-                onPressed: () {
+        SectionHeader(
+          title: _myComments != null
+              ? '${l10n.myComments} (${_formatCount(_myCommentsCount)})'
+              : l10n.myComments,
+          padding: EdgeInsets.zero,
+          trailing: _myComments != null && _myComments!.isNotEmpty
+              ? Text(
+                  l10n.viewAll,
+                  style: TextStyle(
+                    color: context.mlColors.accentBlue,
+                    fontWeight: AppTypography.semiBold,
+                  ),
+                )
+              : null,
+          onTrailingTap: _myComments != null && _myComments!.isNotEmpty
+              ? () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder: (context) => const MyCommentsScreen(),
-                    ),
+                    appPageRoute(builder: (_) => const MyCommentsScreen()),
                   );
-                },
-                child: Text(l10n.viewAll),
-              ),
-          ],
+                }
+              : null,
         ),
 
         const SizedBox(height: AppSpacing.lg),
@@ -546,20 +536,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           )
         else if (_myComments == null || _myComments!.isEmpty)
-          Container(
-            decoration: BoxDecoration(
-              border: Border(
-                top: BorderSide(color: context.mlColors.subtleBorder, width: 1),
-                bottom: BorderSide(color: context.mlColors.subtleBorder, width: 1),
-              ),
-            ),
+          BentoCard(
             padding: const EdgeInsets.all(AppSpacing.xxxl),
             child: Center(
               child: Column(
                 children: [
                   CircleAvatar(
                     radius: 32,
-                    backgroundColor: context.mlColors.accentBlue.withValues(alpha: 0.1),
+                    backgroundColor: context.mlColors.accentBlue.withValues(
+                      alpha: 0.1,
+                    ),
                     child: Icon(
                       Icons.comment_outlined,
                       size: 32,
@@ -588,13 +574,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           )
         else
-          Container(
-            decoration: BoxDecoration(
-              border: Border(
-                top: BorderSide(color: context.mlColors.subtleBorder, width: 1),
-                bottom: BorderSide(color: context.mlColors.subtleBorder, width: 1),
-              ),
-            ),
+          BentoCard(
+            padding: EdgeInsets.zero,
             child: Column(
               children: _myComments!.take(3).map((comment) {
                 return ListTile(
@@ -612,8 +593,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(
-                        builder: (context) => PostDetailScreen(postId: comment.postId),
+                      appPageRoute(
+                        builder: (_) =>
+                            PostDetailScreen(postId: comment.postId),
                       ),
                     );
                   },
@@ -633,23 +615,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final l10n = AppLocalizations.of(context);
     return Container(
       decoration: BoxDecoration(
-        border: Border(
-          top: BorderSide(color: context.mlColors.subtleBorder, width: 1),
-          bottom: BorderSide(color: context.mlColors.subtleBorder, width: 1),
-        ),
+        borderRadius: BorderRadius.circular(AppRadius.card),
       ),
-      child: ListTile(
-        leading: const Icon(Icons.lock_reset),
-        title: Text(l10n.changePassword),
-        trailing: const Icon(Icons.chevron_right),
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const ChangePasswordScreen(),
+      child: BentoCard(
+        padding: EdgeInsets.zero,
+        child: ListTile(
+          leading: CircleAvatar(
+            backgroundColor: context.mlColors.infoBg,
+            child: Icon(
+              Icons.lock_reset_rounded,
+              color: context.mlColors.accentBlue,
             ),
-          );
-        },
+          ),
+          title: Text(l10n.changePassword),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () {
+            Navigator.push(
+              context,
+              appPageRoute(builder: (_) => const ChangePasswordScreen()),
+            );
+          },
+        ),
       ),
     );
   }
@@ -711,7 +697,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             TextButton(
               onPressed: () => Navigator.pop(context, true),
-              style: TextButton.styleFrom(foregroundColor: context.mlColors.dangerColor),
+              style: TextButton.styleFrom(
+                foregroundColor: context.mlColors.dangerColor,
+              ),
               child: Text(l10n.confirm),
             ),
           ],
@@ -762,16 +750,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
       );
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.withdrawAccountSuccess)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.withdrawAccountSuccess)));
         Navigator.of(context).pop();
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.withdrawAccountFailed)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.withdrawAccountFailed)));
       }
     }
   }

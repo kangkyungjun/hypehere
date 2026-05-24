@@ -8,14 +8,31 @@ User = get_user_model()
 
 class UserSerializer(serializers.ModelSerializer):
     """사용자 정보 Serializer (Flutter CommunityUser 호환)"""
+    is_iap_gold = serializers.SerializerMethodField()
+    has_used_trial = serializers.SerializerMethodField()
 
     class Meta:
         model = User
         fields = [
             'id', 'email', 'nickname', 'profile_picture', 'bio',
-            'watchlist_tickers', 'role', 'is_email_verified', 'created_at'
+            'watchlist_tickers', 'role', 'is_email_verified', 'created_at',
+            'is_iap_gold', 'has_used_trial',
         ]
-        read_only_fields = ['id', 'email', 'role', 'is_email_verified', 'created_at']
+        read_only_fields = ['id', 'email', 'role', 'is_email_verified', 'created_at', 'is_iap_gold', 'has_used_trial']
+
+    def get_is_iap_gold(self, obj):
+        """IAP 결제로 Gold가 된 유저인지 여부 (관리자 구분용)"""
+        try:
+            return obj.subscription.original_purchase_date is not None
+        except Exception:
+            return False
+
+    def get_has_used_trial(self, obj):
+        """무료 체험 사용 이력 (악용 방지용)"""
+        try:
+            return obj.subscription.has_used_trial
+        except Exception:
+            return False
 
 
 class RegisterSerializer(serializers.ModelSerializer):

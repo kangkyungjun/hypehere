@@ -50,6 +50,10 @@
   "passwordHint": "Enter your password",
   "passwordRequired": "Please enter your password",
   "passwordTooShort": "Password must be at least 8 characters",
+  "passwordAllNumeric": "Password cannot be entirely numbers",
+  "passwordTooCommon": "This password is too common. Please choose a more unique one",
+  "passwordTooSimilar": "Password is too similar to your email or nickname",
+  "passwordRequirements": "At least 8 characters. Cannot be all numbers or a common password.",
   "passwordConfirm": "Confirm Password",
   "passwordConfirmHint": "Re-enter your password",
   "passwordConfirmRequired": "Please confirm your password",
@@ -139,11 +143,11 @@
     }
   },
 
-  "scoreStrongBuy": "Strong Buy",
-  "scoreBuy": "Buy",
-  "scoreHold": "Hold",
-  "scoreSell": "Sell",
-  "scoreStrongSell": "Strong Sell",
+  "scoreStrongBuy": "Strong Positive",
+  "scoreBuy": "Positive",
+  "scoreHold": "Neutral",
+  "scoreSell": "Negative",
+  "scoreStrongSell": "Strong Negative",
   "score": "Score",
 
   "myWatchlist": "My Watchlist",
@@ -172,6 +176,8 @@
   "watchlistDiscoveryTitle": "Add to your watchlist",
   "watchlistDiscoverySubtitle": "Get news & signal alerts for your picks",
   "topTradingVolume": "Top Trading Volume Today",
+  "addWatchlistSearch": "Search & add to watchlist",
+  "bookmarkGuide": "Tap the bookmark icon to add to your watchlist",
 
   "communitySearchHint": "Search by title or content...",
   "writePost": "Write Post",
@@ -537,6 +543,11 @@
   "marketlensAIOpinion": "MarketLens AI Opinion",
   "bullishFactors": "Bullish Factors",
   "bearishFactors": "Bearish Factors",
+  "expertAnalysis": "Expert Analysis",
+  "expertKeyFactors": "Key Factors",
+  "predictionBullish": "Bullish",
+  "predictionBearish": "Bearish",
+  "predictionNeutral": "Neutral",
   "target": "Target ",
   "stopLoss": "Stop ",
   "averageTargetPrice": "Avg Target Price",
@@ -821,11 +832,26 @@
   "recTechnicalInsight": "Technical Analysis",
   "recMarketIntelligence": "Market Intelligence",
   "recActionSummary": "Action Summary",
+  "recCompanyClassification": "Company Classification",
+  "recAnalystSummary": "Analyst Summary",
+  "recMarketSummary": "Market Summary",
+  "recUpcomingEvents": "Upcoming Events",
+  "recBuyRecommend": "Increase Position (Buy)",
+  "recHoldRecommend": "Hold Position (Watch)",
+  "recSellRecommend": "Reduce Position (Sell)",
   "recommendedAction": "Recommended Action",
   "analysisWaiting": "AI analysis pending...",
   "alreadyHeld": "Held",
   "goToWatchlistTab": "Go to Watchlist",
   "noHoldingsHint": "Add holdings from the Watchlist tab",
+  "addHoldingDirect": "Add Stock",
+  "aiPortfolioBenefitTitle": "Register your stocks and get\ndaily AI investment insights",
+  "aiPortfolioBenefit1": "Portfolio rebalancing suggestions",
+  "aiPortfolioBenefit2": "Technical trading signal analysis",
+  "aiPortfolioBenefit3": "Market news impact assessment",
+  "searchTickerHint": "Search by name or ticker",
+  "addToPortfolio": "Add to Portfolio",
+  "alreadyInHoldings": "Already in your holdings",
   "closingPriceAuto": "Closing price auto-filled",
   "holidayPriceNotice": "Closing price from {date} (prior trading day)",
   "@holidayPriceNotice": {
@@ -864,6 +890,13 @@
   "avgPriceLabel": "Avg Price",
   "currentValueLabel": "Current Value",
   "dailyUpdate": "Updated daily in the morning",
+  "aiRefreshOnChange": "Auto-refreshes on changes",
+  "lastUpdateTime": "Last updated: {time}",
+  "@lastUpdateTime": {
+    "placeholders": {
+      "time": { "type": "String" }
+    }
+  },
   "viewAIAdvice": "View AI Advice",
   "noAnalysisYet": "No analysis available yet",
   "recentTransactions": "Recent Transactions",
@@ -903,7 +936,7 @@
   "sectorRealEstate": "Real Estate",
   "sectorMaterials": "Materials",
 
-  "newsBubbleTitle": "24h News Bubble",
+  "newsBubbleTitle": "24h Hot News",
   "newsBubbleLegendBullish": "Mostly Bullish",
   "newsBubbleLegendBearish": "Mostly Bearish",
   "newsBubbleLegendMixed": "Mixed",
@@ -922,12 +955,13 @@
   "krwSuffix": " KRW",
   "taxTradeCount": " sells",
   "macro3mTitle": "3M",
-  "macro3mHigh": "High",
-  "macro3mAvg": "Avg",
-  "macro3mLow": "Low",
+  "macro3mHigh": "3M High",
+  "macro3mAvg": "3M Avg",
+  "macro3mLow": "3M Low",
   "tooltipClearSearch": "Clear search",
   "tooltipPreviousMonth": "Previous month",
   "tooltipNextMonth": "Next month",
+  "tooltipSelectMonth": "Select month",
   "tooltipShowPassword": "Show password",
   "tooltipHidePassword": "Hide password",
   "tooltipChangePhoto": "Change photo",
@@ -940,5 +974,166 @@
     "placeholders": {
       "count": { "type": "int" }
     }
-  }
+  },
+
+  "tabHome": "Home",
+  "tabHomeTooltip": "Home",
+  "tabAIAnalysis": "AI Signal",
+  "tabToday": "Today",
+  "tabUpDown": "Up & Down",
+  "tabIndexes": "Indexes",
+  "macroCurrentLabel": "Current",
+  "macroChangeLabel": "Change",
+  "tradingVolumeTop": "Trading Volume",
+  "gainersTop": "Gainers",
+  "losersTop": "Losers",
+  "topByMarketCap": "Top by Market Cap",
+  "viewMore": "View More",
+
+  "gaugeStrongNegativeDesc": "Strong Negative: Very high probability of decline",
+  "gaugeNegativeDesc": "Negative: High probability of decline",
+  "gaugePositiveDesc": "Positive: High probability of rise",
+  "gaugeStrongPositiveDesc": "Strong Positive: Very high probability of rise",
+  "aiRecommended20": "AI Top {count} Recommended",
+  "@aiRecommended20": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "aiCaution20": "AI Top {count} Caution",
+  "@aiCaution20": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "seeMore": "See More",
+
+  "holdingsSummary": "Holdings Summary",
+  "returnRate": "Return",
+  "purchaseAmount": "Cost Basis",
+  "profitAmount": "Profit/Loss",
+  "evaluationAmount": "Market Value",
+
+  "watchAdToUnlock": "Watch a short ad to view AI analysis",
+  "watchAd": "Watch Ad",
+  "adNotReady": "Ad is loading, please try again",
+
+  "holdingsLimitTitle": "Holdings Limit",
+  "holdingsLimitMessage": "Free users can track up to 3 holdings. Upgrade to Gold for unlimited holdings and ad-free AI analysis.",
+  "upgradeToGold": "Upgrade to Gold",
+  "goldBenefitUnlimitedHoldings": "Unlimited holdings",
+  "goldBenefitAIUnlimited": "Ad-free AI analysis",
+  "goldBenefitNoAds": "Ad-free experience",
+  "newAiAnalysisAvailable": "New AI analysis available",
+  "viewingPreviousAnalysis": "View previous analysis",
+  "goldUpgradeComingSoon": "Gold membership coming soon! Stay tuned.",
+  "close": "Close",
+
+  "goldMonthlyPrice": "{price}/month",
+  "@goldMonthlyPrice": {
+    "placeholders": {
+      "price": { "type": "String" }
+    }
+  },
+  "subscribeNow": "Subscribe Now",
+  "restorePurchases": "Restore Purchases",
+  "purchaseRestored": "Purchases restored successfully",
+  "purchaseRestoreFailed": "No previous purchases found",
+  "purchaseFailed": "Purchase failed. Please try again.",
+  "purchaseCancelled": "Purchase cancelled",
+  "subscriptionActive": "Active",
+  "subscriptionExpires": "Expires {date}",
+  "@subscriptionExpires": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "subscriptionManage": "Manage Subscription",
+  "subscriptionTermsIos": "Payment will be charged to your App Store account. Subscription renews automatically unless cancelled 24 hours before the end of the current period.",
+  "subscriptionTermsAndroid": "Payment will be charged to your Google Play account. Subscription renews automatically unless cancelled 24 hours before the end of the current period.",
+  "goldMembershipTitle": "Gold Membership",
+  "subscription": "Subscription",
+
+  "freeTrialStart": "Start 7-Day Free Trial",
+  "freeTrialInfo": "Free for 7 days, then {price}/month. Cancel anytime.",
+  "@freeTrialInfo": {
+    "placeholders": {
+      "price": { "type": "String" }
+    }
+  },
+  "onFreeTrial": "Free Trial",
+  "trialEndsOn": "Trial ends: {date}",
+  "@trialEndsOn": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "trialExpired": "Your free trial has ended",
+
+  "manageSubscription": "Manage Subscription",
+  "restorePurchaseTitle": "Restore Previous Purchase",
+  "restorePurchaseDescription": "Use this if your subscription is not reflected after changing devices or reinstalling the app.",
+
+  "calendarPremiumEvents": "{count} premium events",
+  "@calendarPremiumEvents": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "calendarUnlockWithAd": "Watch ad for 6h access",
+  "calendarUnlockedUntil": "Unlocked until {time}",
+  "@calendarUnlockedUntil": {
+    "placeholders": {
+      "time": { "type": "String" }
+    }
+  },
+
+  "treemapLegend": "Size = Volume  |  Green = Up  |  Red = Down",
+  "aiScoreSubtitle": "AI Score (0: Sell Signal ~ 100: Buy Signal)",
+  "aiSignalStrongBuyDesc": "Strong Buy (80-100): Technical and financial indicators show strong buy signals",
+  "aiSignalBuyDesc": "Buy (60-79): Overall positive indicators suggest buying",
+  "aiSignalHoldDesc": "Hold (40-59): Mixed signals, maintain current position",
+  "aiSignalSellDesc": "Sell (20-39): Overall negative indicators suggest selling",
+  "aiSignalStrongSellDesc": "Strong Sell (0-19): Technical and financial indicators show strong sell signals",
+  "watchlistSubtitle": "Collect and track your favorite stocks",
+  "holdingsSubtitle": "Manage your portfolio and track returns",
+  "filterActiveLabel": "Filter Active",
+  "tapToRemoveFilter": "Tap to remove",
+  "searchTickersCta": "Search Tickers",
+  "addTickersCta": "Add Tickers",
+  "beFirstToPost": "Be the first to share your thoughts!",
+  "totalPosts": "{count} posts",
+  "@totalPosts": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "recentComments": "Recent Comments",
+  "coachMarkDashboardTreemap": "Colors show price changes, size represents trading volume",
+  "coachMarkAiLens": "AI-analyzed buy/sell signal distribution for stocks",
+  "coachMarkWatchlist": "Add your favorite stocks to track!",
+  "coachMarkHoldings": "Register holdings to track your returns",
+  "coachMarkTickerScore": "Check the AI score trend. Above 70 indicates a buy signal",
+  "coachMarkMacroGauge": "Swipe left and right to view economic indicators",
+  "coachMarkGotIt": "Got it",
+  "resetTutorials": "Reset Tutorials",
+  "resetTutorialsDesc": "All tutorials will be shown again",
+  "tutorialsReset": "Tutorials have been reset",
+
+  "purchaseStoreUnavailable": "App Store Unavailable",
+  "purchaseTemporarilyUnavailable": "Subscription Temporarily Unavailable",
+  "purchaseStoreProblem": "Unable to connect to the App Store. Please check your Apple ID settings, ensure payments are enabled, and try again.",
+  "purchaseRetry": "Try Again",
+  "purchaseInitializing": "Connecting to App Store...",
+
+  "loginRequiredForPurchase": "Please log in to purchase Gold membership. Your subscription will be synced to your account.",
+
+  "aiScoreGuideTitle": "AI Score Guide",
+  "aiScoreGuideDescription": "AI scores are calculated based on a mid-to-long-term (3–12 month) investment perspective.",
+  "aiScoreGuideStrongPositive": "80–100: Strong Positive – Very high probability of rise",
+  "aiScoreGuidePositive": "60–79: Positive – High probability of rise",
+  "aiScoreGuideNeutral": "40–59: Neutral – Mixed signals",
+  "aiScoreGuideNegative": "20–39: Negative – High probability of decline",
+  "aiScoreGuideStrongNegative": "0–19: Strong Negative – Very high probability of decline",
+  "subscriptionPaymentAccountWarning": "Payment is processed through the App Store / Google Play account signed in on this device. If you purchase on someone else's device, the device owner's account may be charged."
 }

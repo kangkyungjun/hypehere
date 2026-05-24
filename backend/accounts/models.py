@@ -182,6 +182,41 @@ class NotificationHistory(models.Model):
         return f"{self.user_id} [{self.notification_type}] {self.title}"
 
 
+class SubscriptionInfo(models.Model):
+    """IAP 구독 정보 — RevenueCat webhook 기반 업데이트"""
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='subscription',
+        primary_key=True,
+    )
+    revenuecat_app_user_id = models.CharField(max_length=100, blank=True, db_index=True)
+    product_id = models.CharField(max_length=100, blank=True)
+    store = models.CharField(max_length=20, blank=True)  # APP_STORE | PLAY_STORE
+
+    is_active = models.BooleanField(default=False)
+    original_purchase_date = models.DateTimeField(null=True, blank=True)
+    expiration_date = models.DateTimeField(null=True, blank=True)
+    unsubscribe_detected_at = models.DateTimeField(null=True, blank=True)
+
+    # Trial (무료 체험) 관련
+    is_trial = models.BooleanField(default=False)                    # 현재 체험 중?
+    has_used_trial = models.BooleanField(default=False)              # 체험 사용 이력 (한번 True면 영구)
+    trial_started_at = models.DateTimeField(null=True, blank=True)   # 체험 시작일
+
+    last_webhook_event = models.CharField(max_length=50, blank=True)
+    last_webhook_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'accounts_subscription_info'
+
+    def __str__(self):
+        status = 'active' if self.is_active else 'inactive'
+        return f"{self.user_id} [{self.store}] {status}"
+
+
 class EmailVerificationCode(models.Model):
     """이메일 인증 코드 (회원가입 / 비밀번호 재설정)"""
     PURPOSE_CHOICES = [

@@ -15,8 +15,9 @@ import '../../utils/multilingual.dart';
 class MarketNewsModal {
   MarketNewsModal._();
 
-  /// Returns true if the news item is a market-wide news (ticker == "MARKET").
-  static bool isMarketNews(NewsItem item) => item.ticker == 'MARKET';
+  /// Returns true if the news item is a non-stock news (MARKET, GEO, etc.).
+  static bool isMarketNews(NewsItem item) =>
+      item.ticker == 'MARKET' || item.ticker == 'GEO';
 
   /// Show the market news detail modal bottom sheet.
   static void show(BuildContext context, NewsItem item) {
@@ -59,7 +60,7 @@ class MarketNewsModal {
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 3),
+                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xxs),
                     decoration: BoxDecoration(
                       color: Theme.of(ctx).colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(AppRadius.xs),
@@ -68,14 +69,14 @@ class MarketNewsModal {
                       isMarketNews(item) ? l10n.marketNews : item.ticker,
                       style: TextStyle(
                         fontSize: AppTypography.caption,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: AppTypography.bold,
                         color: ctx.mlColors.textSecondary,
                       ),
                     ),
                   ),
                   const SizedBox(width: AppSpacing.md),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 3),
+                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xxs),
                     decoration: BoxDecoration(
                       color: dotColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(AppRadius.xs),
@@ -84,7 +85,7 @@ class MarketNewsModal {
                       item.sentimentLabelLocalized(l10n),
                       style: TextStyle(
                         fontSize: AppTypography.caption,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: AppTypography.bold,
                         color: dotColor,
                       ),
                     ),
@@ -111,7 +112,7 @@ class MarketNewsModal {
                 ),
               ],
 
-              const SizedBox(height: 20),
+              const SizedBox(height: AppSpacing.xxl),
 
               // AI summary section
               Row(
@@ -133,7 +134,7 @@ class MarketNewsModal {
                   ),
                 ],
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: AppSpacing.lg),
 
               Text(
                 item.aiSummary.localize(langCode),

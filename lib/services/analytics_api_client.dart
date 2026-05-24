@@ -377,7 +377,7 @@ class AnalyticsApiClient {
   /// ```dart
   /// final data = await client.getTreemapData();
   /// ```
-  Future<TreemapData> getTreemapData({DateTime? date, String? index}) async {
+  Future<TreemapData> getTreemapData({DateTime? date, String? index, String? classification}) async {
     try {
       final params = <String, String>{};
       if (date != null) {
@@ -385,6 +385,9 @@ class AnalyticsApiClient {
       }
       if (index != null) {
         params['index'] = index;
+      }
+      if (classification != null) {
+        params['classification'] = classification;
       }
 
       final uri = Uri.parse('$_baseUrl/api/v1/market/treemap')
@@ -600,6 +603,7 @@ class AnalyticsApiClient {
     String? sentiment,
     String? sectors,
     bool? isBreaking,
+    bool? excludeMarket,
   }) async {
     try {
       final params = <String, String>{
@@ -610,6 +614,7 @@ class AnalyticsApiClient {
       if (sentiment != null) params['sentiment'] = sentiment;
       if (sectors != null) params['sectors'] = sectors;
       if (isBreaking != null) params['is_breaking'] = isBreaking.toString();
+      if (excludeMarket != null) params['exclude_market'] = excludeMarket.toString();
 
       final uri = Uri.parse('$_baseUrl/api/v1/news/latest')
           .replace(queryParameters: params);
@@ -670,13 +675,21 @@ class AnalyticsApiClient {
   }
 
   /// Get mention bubble data (top tickers by mention count in last N hours)
-  Future<MentionBubbleData> getMentionBubble({int hours = 24, int limit = 15}) async {
+  Future<MentionBubbleData> getMentionBubble({
+    int hours = 24,
+    int limit = 15,
+    String? sectors,
+    String? tickers,
+  }) async {
     try {
-      final uri = Uri.parse('$_baseUrl/api/v1/news/mention-bubble')
-          .replace(queryParameters: {
+      final params = <String, String>{
         'hours': hours.toString(),
         'limit': limit.toString(),
-      });
+      };
+      if (sectors != null) params['sectors'] = sectors;
+      if (tickers != null) params['tickers'] = tickers;
+      final uri = Uri.parse('$_baseUrl/api/v1/news/mention-bubble')
+          .replace(queryParameters: params);
 
       final response = await _httpClient.get(uri).timeout(
         const Duration(seconds: 10),
@@ -693,6 +706,29 @@ class AnalyticsApiClient {
       }
     } catch (e) {
       return MentionBubbleData(items: [], periodHours: hours);
+    }
+  }
+
+  /// Get available news sectors from DB
+  Future<List<String>> getNewsSectors() async {
+    try {
+      final uri = Uri.parse('$_baseUrl/api/v1/news/sectors');
+
+      final response = await _httpClient.get(uri).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          throw TimeoutException('News sectors timeout');
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+        return List<String>.from(json['sectors'] ?? []);
+      } else {
+        return [];
+      }
+    } catch (e) {
+      return [];
     }
   }
 
@@ -794,6 +830,43 @@ class AnalyticsApiClient {
     return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   }
 
+  /// Get macro indicator history (latest N entries, date DESC)
+  Future<MacroHistoryData> getMacroHistory(String code, {int limit = 15}) async {
+    try {
+      final uri = Uri.parse('$_baseUrl/api/v1/macro/history/$code')
+          .replace(queryParameters: {'limit': limit.toString()});
+
+      debugPrint('[API] GET $_baseUrl/api/v1/macro/history/$code?limit=$limit');
+
+      final response = await _httpClient.get(uri).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          throw TimeoutException('Macro history timeout');
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+        return MacroHistoryData.fromJson(json);
+      } else {
+        throw ApiException(
+          ApiErrorCode.genericError,
+          debugMessage: 'Failed to load macro history: ${response.statusCode}',
+          statusCode: response.statusCode,
+        );
+      }
+    } on TimeoutException {
+      throw ApiException(ApiErrorCode.timeout10s, debugMessage: 'Macro history');
+    } on SocketException {
+      throw ApiException(ApiErrorCode.networkFailed, debugMessage: 'Macro history');
+    } on FormatException {
+      throw ApiException(ApiErrorCode.responseFormat, debugMessage: 'Macro history');
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(ApiErrorCode.genericError, debugMessage: '$e');
+    }
+  }
+
   /// Get market indices (SPY, QQQ, DIA) for dashboard header
   Future<MarketIndicesData> getMarketIndices() async {
     try {
@@ -852,6 +925,40 @@ class AnalyticsApiClient {
     } catch (e) {
       if (e is ApiException) rethrow;
       return (date: _formatDate(date), close: null);
+    }
+  }
+
+  /// Get classification summary (category → count)
+  Future<Map<String, int>> getClassificationSummary() async {
+    final uri = Uri.parse('$_baseUrl/api/v1/market/classifications/summary');
+    try {
+      final response = await _httpClient.get(uri).timeout(const Duration(seconds: 10));
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body) as Map<String, dynamic>;
+        return json.map((k, v) => MapEntry(k, (v as num).toInt()));
+      }
+      throw ApiException(ApiErrorCode.serverError, statusCode: response.statusCode);
+    } on TimeoutException {
+      throw ApiException(ApiErrorCode.timeout10s);
+    } on SocketException {
+      throw ApiException(ApiErrorCode.networkFailed);
+    }
+  }
+
+  /// Get stocks by classification category
+  Future<List<Map<String, dynamic>>> getStocksByClassification(String category, {int limit = 100}) async {
+    final uri = Uri.parse('$_baseUrl/api/v1/market/classifications/stocks?category=$category&limit=$limit');
+    try {
+      final response = await _httpClient.get(uri).timeout(const Duration(seconds: 10));
+      if (response.statusCode == 200) {
+        final list = jsonDecode(response.body) as List;
+        return list.cast<Map<String, dynamic>>();
+      }
+      throw ApiException(ApiErrorCode.serverError, statusCode: response.statusCode);
+    } on TimeoutException {
+      throw ApiException(ApiErrorCode.timeout10s);
+    } on SocketException {
+      throw ApiException(ApiErrorCode.networkFailed);
     }
   }
 

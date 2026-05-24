@@ -5,6 +5,7 @@ import '../../../models/portfolio_data.dart';
 import '../../../providers/portfolio_provider.dart';
 import '../../../theme/app_colors.dart';
 import '../../../theme/app_spacing.dart';
+import '../../../theme/app_stroke.dart';
 import '../../../theme/app_radius.dart';
 import '../../../theme/app_typography.dart';
 import '../../../utils/multilingual.dart';
@@ -83,13 +84,14 @@ class _HoldingDetailContentState extends State<_HoldingDetailContent> {
     return context.mlColors.neutralColor;
   }
 
-  String _signalLabel(String? signal) {
+  String _signalLabel(BuildContext context, String? signal) {
+    final l10n = AppLocalizations.of(context);
     final s = signal?.toUpperCase() ?? '';
-    if (s == 'BUY' || s == '매수권고') return 'BUY';
-    if (s == 'STRONG_BUY' || s == '적극매수') return 'STRONG BUY';
-    if (s == 'SELL' || s == '매도권고') return 'SELL';
-    if (s == 'STRONG_SELL' || s == '적극매도') return 'STRONG SELL';
-    if (s == 'HOLD' || s == '관망') return 'HOLD';
+    if (s == 'BUY' || s == '매수권고') return l10n.scoreBuy;
+    if (s == 'STRONG_BUY' || s == '적극매수') return l10n.scoreStrongBuy;
+    if (s == 'SELL' || s == '매도권고') return l10n.scoreSell;
+    if (s == 'STRONG_SELL' || s == '적극매도') return l10n.scoreStrongSell;
+    if (s == 'HOLD' || s == '관망') return l10n.scoreHold;
     return '';
   }
 
@@ -176,7 +178,7 @@ class _HoldingDetailContentState extends State<_HoldingDetailContent> {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('+ ', style: TextStyle(color: context.mlColors.gainColor, fontWeight: FontWeight.bold, fontSize: AppTypography.bodySmall)),
+                    Text('+ ', style: TextStyle(color: context.mlColors.gainColor, fontWeight: AppTypography.bold, fontSize: AppTypography.bodySmall)),
                     Expanded(child: Text(localizePacked(r, langCode), style: const TextStyle(fontSize: AppTypography.bodySmall))),
                   ],
                 ),
@@ -191,7 +193,7 @@ class _HoldingDetailContentState extends State<_HoldingDetailContent> {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('- ', style: TextStyle(color: context.mlColors.lossColor, fontWeight: FontWeight.bold, fontSize: AppTypography.bodySmall)),
+                    Text('- ', style: TextStyle(color: context.mlColors.lossColor, fontWeight: AppTypography.bold, fontSize: AppTypography.bodySmall)),
                     Expanded(child: Text(localizePacked(r, langCode), style: const TextStyle(fontSize: AppTypography.bodySmall))),
                   ],
                 ),
@@ -217,7 +219,8 @@ class _HoldingDetailContentState extends State<_HoldingDetailContent> {
 
     return ListView(
       controller: widget.scrollController,
-      padding: const EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.md, AppSpacing.xl, AppSpacing.xxl),
+      padding: EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.md, AppSpacing.xl,
+          AppSpacing.xxl + MediaQuery.of(context).viewPadding.bottom),
       children: [
         // Drag handle
         Center(
@@ -243,7 +246,7 @@ class _HoldingDetailContentState extends State<_HoldingDetailContent> {
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(h.ticker, style: TextStyle(fontSize: AppTypography.displayMedium, fontWeight: FontWeight.bold, color: theme.colorScheme.primary)),
+                        Text(h.ticker, style: TextStyle(fontSize: AppTypography.displayMedium, fontWeight: AppTypography.bold, color: theme.colorScheme.primary)),
                         const SizedBox(width: AppSpacing.xs),
                         Icon(Icons.open_in_new, size: 14, color: theme.colorScheme.primary),
                       ],
@@ -257,16 +260,16 @@ class _HoldingDetailContentState extends State<_HoldingDetailContent> {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 if (h.currentPrice != null)
-                  Text('\$${h.currentPrice!.toStringAsFixed(2)}', style: const TextStyle(fontSize: AppTypography.headlineMedium, fontWeight: AppTypography.semiBold))
+                  Text('\$${h.currentPrice!.toStringAsFixed(2)}', style: const TextStyle(fontSize: AppTypography.headlineMedium, fontWeight: AppTypography.semiBold, fontFeatures: AppTypography.tabularFigures))
                 else
                   Text('—', style: TextStyle(fontSize: AppTypography.headlineMedium, color: theme.colorScheme.outline)),
                 Text(
                   '${(h.changePct ?? 0) >= 0 ? '+' : ''}${(h.changePct ?? 0).toStringAsFixed(2)}%',
-                  style: TextStyle(fontSize: AppTypography.bodyMedium, color: (h.changePct ?? 0) >= 0 ? context.mlColors.gainColor : context.mlColors.lossColor),
+                  style: TextStyle(fontSize: AppTypography.bodyMedium, color: (h.changePct ?? 0) >= 0 ? context.mlColors.gainColor : context.mlColors.lossColor, fontFeatures: AppTypography.tabularFigures),
                 ),
               ],
             ),
-            if (h.signal != null && _signalLabel(h.signal).isNotEmpty) ...[
+            if (h.signal != null && _signalLabel(context, h.signal).isNotEmpty) ...[
               const SizedBox(width: AppSpacing.md),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.xs),
@@ -275,8 +278,8 @@ class _HoldingDetailContentState extends State<_HoldingDetailContent> {
                   borderRadius: BorderRadius.circular(AppRadius.lg),
                 ),
                 child: Text(
-                  _signalLabel(h.signal),
-                  style: TextStyle(color: context.mlColors.onPrimary, fontSize: AppTypography.caption, fontWeight: FontWeight.bold),
+                  _signalLabel(context, h.signal),
+                  style: TextStyle(color: context.mlColors.onPrimary, fontSize: AppTypography.caption, fontWeight: AppTypography.bold),
                 ),
               ),
             ],
@@ -316,6 +319,7 @@ class _HoldingDetailContentState extends State<_HoldingDetailContent> {
                         fontSize: AppTypography.bodySmall,
                         fontWeight: AppTypography.semiBold,
                         color: h.pnl >= 0 ? context.mlColors.gainColor : context.mlColors.lossColor,
+                        fontFeatures: AppTypography.tabularFigures,
                       ),
                     ),
                   ],
@@ -336,7 +340,7 @@ class _HoldingDetailContentState extends State<_HoldingDetailContent> {
         if (_loadingTxn)
           const Center(child: Padding(
             padding: EdgeInsets.all(AppSpacing.xl),
-            child: CircularProgressIndicator(strokeWidth: 2),
+            child: CircularProgressIndicator(strokeWidth: AppStroke.medium),
           ))
         else if (_transactions.isEmpty)
           Padding(
@@ -440,7 +444,7 @@ class _InfoItem extends StatelessWidget {
         children: [
           Text(label, style: TextStyle(fontSize: AppTypography.caption, color: Theme.of(context).colorScheme.outline)),
           const SizedBox(height: AppSpacing.xxs),
-          Text(value, style: const TextStyle(fontSize: AppTypography.bodyMedium, fontWeight: AppTypography.semiBold)),
+          Text(value, style: const TextStyle(fontSize: AppTypography.bodyMedium, fontWeight: AppTypography.semiBold, fontFeatures: AppTypography.tabularFigures)),
         ],
       ),
     );

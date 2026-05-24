@@ -6,6 +6,7 @@ import '../../theme/app_colors.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_shadow.dart';
 import '../../theme/app_spacing.dart';
+import '../../theme/app_stroke.dart';
 import '../../theme/app_typography.dart';
 
 /// Bollinger Bands 차트 위젯
@@ -59,9 +60,7 @@ class BollingerBandsChartWidget extends StatelessWidget {
       decoration: BoxDecoration(
         color: context.mlColors.cardBackground,
         borderRadius: BorderRadius.circular(AppRadius.lg),
-        boxShadow: [
-          AppShadow.md(context.mlColors.overlayDim),
-        ],
+        boxShadow: AppShadow.md(context.mlColors.overlayDim),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -71,7 +70,7 @@ class BollingerBandsChartWidget extends StatelessWidget {
             'Bollinger Bands',
             style: TextStyle(
               fontSize: AppTypography.headlineMedium,
-              fontWeight: FontWeight.bold,
+              fontWeight: AppTypography.bold,
             ),
           ),
           const SizedBox(height: AppSpacing.xl),
@@ -88,7 +87,7 @@ class BollingerBandsChartWidget extends StatelessWidget {
                   getDrawingHorizontalLine: (value) {
                     return FlLine(
                       color: context.mlColors.chartGridLine,
-                      strokeWidth: 1,
+                      strokeWidth: AppStroke.thin,
                     );
                   },
                 ),
@@ -261,7 +260,7 @@ class BollingerBandsChartWidget extends StatelessWidget {
                   AppLocalizations.of(context).bbInterpretation,
                   style: TextStyle(
                     fontSize: AppTypography.bodySmall,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: AppTypography.bold,
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),

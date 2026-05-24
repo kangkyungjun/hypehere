@@ -13,6 +13,8 @@ import '../../theme/app_colors.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_shadow.dart';
 import '../../theme/app_spacing.dart';
+import '../../theme/app_stroke.dart';
+import '../../widgets/ads/banner_ad_widget.dart';
 import '../../widgets/common/empty_state_view.dart';
 import '../../theme/app_typography.dart';
 
@@ -273,7 +275,7 @@ class _CompareScreenState extends State<CompareScreen> {
                         child: SizedBox(
                           width: 16,
                           height: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2),
+                          child: CircularProgressIndicator(strokeWidth: AppStroke.medium),
                         ),
                       )
                     : null,
@@ -319,9 +321,7 @@ class _CompareScreenState extends State<CompareScreen> {
                 right: BorderSide(color: context.mlColors.subtleBorder),
                 bottom: BorderSide(color: context.mlColors.subtleBorder),
               ),
-              boxShadow: [
-                AppShadow.md(context.mlColors.overlayDim),
-              ],
+              boxShadow: AppShadow.md(context.mlColors.overlayDim),
             ),
             child: ListView.builder(
               shrinkWrap: true,
@@ -392,6 +392,11 @@ class _CompareScreenState extends State<CompareScreen> {
           // RSI 비교
           _buildRsiComparison(),
 
+          const SizedBox(height: AppSpacing.xxl),
+
+          // 배너 광고
+          const BannerAdWidget(),
+
           const SizedBox(height: AppSpacing.xxxl),
         ],
       ),
@@ -405,9 +410,7 @@ class _CompareScreenState extends State<CompareScreen> {
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(AppRadius.lg),
-        boxShadow: [
-          AppShadow.md(context.mlColors.overlayDim),
-        ],
+        boxShadow: AppShadow.md(context.mlColors.overlayDim),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -417,7 +420,7 @@ class _CompareScreenState extends State<CompareScreen> {
             padding: const EdgeInsets.all(AppSpacing.xl),
             child: Text(
               AppLocalizations.of(context).keyMetricsComparison,
-              style: TextStyle(fontSize: AppTypography.headlineMedium, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: AppTypography.headlineMedium, fontWeight: AppTypography.bold),
             ),
           ),
 
@@ -538,8 +541,9 @@ class _CompareScreenState extends State<CompareScreen> {
         text,
         style: TextStyle(
           fontSize: isHeader ? AppTypography.bodySmall : AppTypography.bodyMedium,
-          fontWeight: isHeader ? FontWeight.bold : FontWeight.normal,
+          fontWeight: isHeader ? AppTypography.bold : AppTypography.regular,
           color: isHeader ? context.mlColors.textSecondary : context.mlColors.textPrimary,
+          fontFeatures: isHeader ? null : AppTypography.tabularFigures,
         ),
         textAlign: isHeader ? TextAlign.center : TextAlign.left,
       ),
@@ -554,16 +558,14 @@ class _CompareScreenState extends State<CompareScreen> {
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(AppRadius.lg),
-        boxShadow: [
-          AppShadow.md(context.mlColors.overlayDim),
-        ],
+        boxShadow: AppShadow.md(context.mlColors.overlayDim),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             AppLocalizations.of(context).priceTrendComparison,
-            style: TextStyle(fontSize: AppTypography.headlineMedium, fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: AppTypography.headlineMedium, fontWeight: AppTypography.bold),
           ),
           const SizedBox(height: AppSpacing.xl),
 
@@ -610,7 +612,7 @@ class _CompareScreenState extends State<CompareScreen> {
       children: [
         Text(
           ticker,
-          style: const TextStyle(fontSize: AppTypography.bodyLarge, fontWeight: FontWeight.bold),
+          style: const TextStyle(fontSize: AppTypography.bodyLarge, fontWeight: AppTypography.bold),
         ),
         const SizedBox(height: AppSpacing.md),
         SizedBox(
@@ -704,16 +706,14 @@ class _CompareScreenState extends State<CompareScreen> {
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(AppRadius.lg),
-        boxShadow: [
-          AppShadow.md(context.mlColors.overlayDim),
-        ],
+        boxShadow: AppShadow.md(context.mlColors.overlayDim),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             AppLocalizations.of(context).rsiComparison,
-            style: TextStyle(fontSize: AppTypography.headlineMedium, fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: AppTypography.headlineMedium, fontWeight: AppTypography.bold),
           ),
           const SizedBox(height: AppSpacing.xl),
 
@@ -729,7 +729,7 @@ class _CompareScreenState extends State<CompareScreen> {
                       ticker,
                       style: const TextStyle(
                         fontSize: AppTypography.bodyLarge,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: AppTypography.bold,
                       ),
                     ),
                   ),

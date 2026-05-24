@@ -6,6 +6,7 @@ from rest_framework_simplejwt.views import (
 )
 from .views import (
     register_view,
+    register_with_verification_view,
     login_view,
     profile_view,
     update_profile_view,
@@ -26,6 +27,8 @@ from .views import (
     broadcast_push_view,
     notification_history_view,
     notification_mark_read_view,
+    revenuecat_webhook_view,
+    subscription_status_view,
 )
 
 app_name = 'accounts'
@@ -33,6 +36,7 @@ app_name = 'accounts'
 urlpatterns = [
     # Flutter 호환 인증 엔드포인트
     path('register/', register_view, name='register'),
+    path('register-with-verification/', register_with_verification_view, name='register-with-verification'),
     path('login/', login_view, name='login'),
     path('profile/', profile_view, name='profile'),
     path('update/', update_profile_view, name='update-profile'),
@@ -67,6 +71,10 @@ urlpatterns = [
     # 알림 인박스
     path('notifications/', notification_history_view, name='notification-history'),
     path('notifications/read/', notification_mark_read_view, name='notification-mark-read'),
+
+    # RevenueCat IAP Webhook + 구독 상태
+    path('webhook/revenuecat/', revenuecat_webhook_view, name='revenuecat-webhook'),
+    path('subscription/status/', subscription_status_view, name='subscription-status'),
 
     # JWT 엔드포인트 (하위 호환)
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),

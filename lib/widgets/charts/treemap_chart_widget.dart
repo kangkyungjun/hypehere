@@ -5,7 +5,9 @@ import '../../l10n/app_localizations.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
+import '../../theme/app_shadow.dart';
 import '../../theme/app_typography.dart';
+import '../common/ml_divider.dart';
 
 /// 2-level drilldown treemap widget
 ///
@@ -85,6 +87,7 @@ class _TreemapChartWidgetState extends State<TreemapChartWidget> {
                       nodes: nodes,
                       isSectorView: _currentSector == null,
                       borderColor: context.mlColors.cardBackground,
+                      mlColors: context.mlColors,
                     ),
                   ),
                 );
@@ -195,126 +198,129 @@ class _TreemapChartWidgetState extends State<TreemapChartWidget> {
       backgroundColor: Colors.transparent,
       builder: (ctx) {
         final mlc = ctx.mlColors;
-        return Container(
-          constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(ctx).size.height * 0.75,
-          ),
-          decoration: BoxDecoration(
-            color: mlc.cardBackground,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(height: AppSpacing.md),
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: mlc.textSecondary,
-                  borderRadius: BorderRadius.circular(AppRadius.xxs),
+        return SafeArea(
+          top: false,
+          child: Container(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(ctx).size.height * 0.75,
+            ),
+            decoration: BoxDecoration(
+              color: mlc.cardBackground,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: AppSpacing.md),
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: mlc.textSecondary,
+                    borderRadius: BorderRadius.circular(AppRadius.xxs),
+                  ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.xl, AppSpacing.xl, AppSpacing.md),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        l10n.otherSectors,
-                        style: TextStyle(
-                          fontSize: AppTypography.headlineMedium,
-                          fontWeight: FontWeight.bold,
-                          color: mlc.textPrimary,
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.xl, AppSpacing.xl, AppSpacing.md),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          l10n.otherSectors,
+                          style: TextStyle(
+                            fontSize: AppTypography.headlineMedium,
+                            fontWeight: AppTypography.bold,
+                            color: mlc.textPrimary,
+                          ),
                         ),
                       ),
-                    ),
-                    Text(
-                      l10n.nItems(smallSectors.length),
-                      style: TextStyle(
-                        fontSize: AppTypography.bodyMedium,
-                        color: mlc.textTertiary,
+                      Text(
+                        l10n.nItems(smallSectors.length),
+                        style: TextStyle(
+                          fontSize: AppTypography.bodyMedium,
+                          color: mlc.textTertiary,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              Divider(color: mlc.subtleBorder, height: 1),
-              Flexible(
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-                  itemCount: smallSectors.length,
-                  itemBuilder: (ctx, i) {
-                    final sector = smallSectors[i];
-                    final changePct = sector.avgChangePct;
-                    final changeText = changePct != null
-                        ? '${changePct >= 0 ? '+' : ''}${changePct.toStringAsFixed(2)}%'
-                        : '-';
-                    final itemMlc = ctx.mlColors;
-                    final changeColor = changePct == null
-                        ? itemMlc.neutralColor
-                        : changePct >= 0
-                            ? itemMlc.gainColor
-                            : itemMlc.lossColor;
+                const MlDivider(),
+                Flexible(
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+                    itemCount: smallSectors.length,
+                    itemBuilder: (ctx, i) {
+                      final sector = smallSectors[i];
+                      final changePct = sector.avgChangePct;
+                      final changeText = changePct != null
+                          ? '${changePct >= 0 ? '+' : ''}${changePct.toStringAsFixed(2)}%'
+                          : '-';
+                      final itemMlc = ctx.mlColors;
+                      final changeColor = changePct == null
+                          ? itemMlc.neutralColor
+                          : changePct >= 0
+                              ? itemMlc.gainColor
+                              : itemMlc.lossColor;
 
-                    return InkWell(
-                      onTap: () {
-                        Navigator.of(ctx).pop();
-                        setState(() => _currentSector = sector);
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: AppSpacing.xl, vertical: AppSpacing.lg),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                sector.sector,
-                                style: TextStyle(
-                                  fontSize: AppTypography.bodyLarge,
-                                  fontWeight: FontWeight.bold,
-                                  color: itemMlc.textPrimary,
+                      return InkWell(
+                        onTap: () {
+                          Navigator.of(ctx).pop();
+                          setState(() => _currentSector = sector);
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.xl, vertical: AppSpacing.lg),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  sector.sector,
+                                  style: TextStyle(
+                                    fontSize: AppTypography.bodyLarge,
+                                    fontWeight: AppTypography.bold,
+                                    color: itemMlc.textPrimary,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
                                 ),
-                                overflow: TextOverflow.ellipsis,
                               ),
-                            ),
-                            Text(
-                              l10n.nTickers(sector.tickerCount),
-                              style: TextStyle(
-                                fontSize: AppTypography.bodySmall,
-                                color: itemMlc.textTertiary,
-                              ),
-                            ),
-                            const SizedBox(width: AppSpacing.lg),
-                            Text(
-                              changeText,
-                              style: TextStyle(
-                                fontSize: AppTypography.bodyLarge,
-                                fontWeight: AppTypography.semiBold,
-                                color: changeColor,
-                              ),
-                            ),
-                            const SizedBox(width: AppSpacing.lg),
-                            SizedBox(
-                              width: 60,
-                              child: Text(
-                                sector.formattedTradingValue,
+                              Text(
+                                l10n.nTickers(sector.tickerCount),
                                 style: TextStyle(
                                   fontSize: AppTypography.bodySmall,
                                   color: itemMlc.textTertiary,
                                 ),
-                                textAlign: TextAlign.right,
                               ),
-                            ),
-                          ],
+                              const SizedBox(width: AppSpacing.lg),
+                              Text(
+                                changeText,
+                                style: TextStyle(
+                                  fontSize: AppTypography.bodyLarge,
+                                  fontWeight: AppTypography.semiBold,
+                                  color: changeColor,
+                                ),
+                              ),
+                              const SizedBox(width: AppSpacing.lg),
+                              SizedBox(
+                                width: 60,
+                                child: Text(
+                                  sector.formattedTradingValue,
+                                  style: TextStyle(
+                                    fontSize: AppTypography.bodySmall,
+                                    color: itemMlc.textTertiary,
+                                  ),
+                                  textAlign: TextAlign.right,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },
@@ -338,61 +344,64 @@ class _TreemapChartWidgetState extends State<TreemapChartWidget> {
       backgroundColor: Colors.transparent,
       builder: (ctx) {
         final mlc = ctx.mlColors;
-        return Container(
-          constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(ctx).size.height * 0.75,
-          ),
-          decoration: BoxDecoration(
-            color: mlc.cardBackground,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(height: AppSpacing.md),
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: mlc.textSecondary,
-                  borderRadius: BorderRadius.circular(AppRadius.xxs),
+        return SafeArea(
+          top: false,
+          child: Container(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(ctx).size.height * 0.75,
+            ),
+            decoration: BoxDecoration(
+              color: mlc.cardBackground,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: AppSpacing.md),
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: mlc.textSecondary,
+                    borderRadius: BorderRadius.circular(AppRadius.xxs),
+                  ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.xl, AppSpacing.xl, AppSpacing.md),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        l10n.otherTickers,
-                        style: TextStyle(
-                          fontSize: AppTypography.headlineMedium,
-                          fontWeight: FontWeight.bold,
-                          color: mlc.textPrimary,
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.xl, AppSpacing.xl, AppSpacing.md),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          l10n.otherTickers,
+                          style: TextStyle(
+                            fontSize: AppTypography.headlineMedium,
+                            fontWeight: AppTypography.bold,
+                            color: mlc.textPrimary,
+                          ),
                         ),
                       ),
-                    ),
-                    Text(
-                      l10n.nItems(smallTickers.length),
-                      style: TextStyle(
-                        fontSize: AppTypography.bodyMedium,
-                        color: mlc.textTertiary,
+                      Text(
+                        l10n.nItems(smallTickers.length),
+                        style: TextStyle(
+                          fontSize: AppTypography.bodyMedium,
+                          color: mlc.textTertiary,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              Divider(color: mlc.subtleBorder, height: 1),
-              Flexible(
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-                  itemCount: smallTickers.length,
-                  itemBuilder: (ctx, i) =>
-                      _buildTickerRow(ctx, smallTickers[i]),
+                const MlDivider(),
+                Flexible(
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+                    itemCount: smallTickers.length,
+                    itemBuilder: (ctx, i) =>
+                        _buildTickerRow(ctx, smallTickers[i]),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },
@@ -428,7 +437,7 @@ class _TreemapChartWidgetState extends State<TreemapChartWidget> {
                     item.ticker,
                     style: TextStyle(
                       fontSize: AppTypography.bodyLarge,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: AppTypography.bold,
                       color: ctx.mlColors.textPrimary,
                     ),
                   ),
@@ -596,8 +605,9 @@ class _TreemapPainter extends CustomPainter {
   final List<_TreemapNode> nodes;
   final bool isSectorView;
   final Color borderColor;
+  final MarketLensColors mlColors;
 
-  _TreemapPainter({required this.nodes, required this.isSectorView, required this.borderColor});
+  _TreemapPainter({required this.nodes, required this.isSectorView, required this.borderColor, required this.mlColors});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -613,9 +623,9 @@ class _TreemapPainter extends CustomPainter {
       // Fill color
       final Color fillColor;
       if (isSectorView) {
-        fillColor = (node.data as TreemapSector).changeColor;
+        fillColor = (node.data as TreemapSector).changeColorOf(mlColors);
       } else {
-        fillColor = (node.data as TreemapItem).changeColor;
+        fillColor = (node.data as TreemapItem).changeColorOf(mlColors);
       }
 
       canvas.drawRect(rect, Paint()..color = fillColor);
@@ -647,16 +657,16 @@ class _TreemapPainter extends CustomPainter {
 
     if (w >= 100 && h >= 60) {
       // Large: sector name + change% + trading value
-      lines.add(_TextLine(_shortenSector(sector.sector, w), AppTypography.bodyMedium, FontWeight.bold));
+      lines.add(_TextLine(_shortenSector(sector.sector, w), AppTypography.bodyMedium, AppTypography.bold));
       if (sector.avgChangePct != null) {
         final sign = sector.avgChangePct! >= 0 ? '+' : '';
         lines.add(_TextLine(
             '$sign${sector.avgChangePct!.toStringAsFixed(2)}%', AppTypography.bodySmall, AppTypography.medium));
       }
-      lines.add(_TextLine(sector.formattedTradingValue, AppTypography.caption, FontWeight.normal));
+      lines.add(_TextLine(sector.formattedTradingValue, AppTypography.caption, AppTypography.regular));
     } else if (w >= 60 && h >= 40) {
       // Medium: sector name + change%
-      lines.add(_TextLine(_shortenSector(sector.sector, w), AppTypography.caption, FontWeight.bold));
+      lines.add(_TextLine(_shortenSector(sector.sector, w), AppTypography.caption, AppTypography.bold));
       if (sector.avgChangePct != null) {
         final sign = sector.avgChangePct! >= 0 ? '+' : '';
         lines.add(_TextLine(
@@ -664,7 +674,7 @@ class _TreemapPainter extends CustomPainter {
       }
     } else {
       // Small: abbreviated sector name only
-      lines.add(_TextLine(_abbreviateSector(sector.sector), 9, FontWeight.bold));
+      lines.add(_TextLine(_abbreviateSector(sector.sector), 9, AppTypography.bold));
     }
 
     _paintLines(canvas, rect, lines);
@@ -678,21 +688,21 @@ class _TreemapPainter extends CustomPainter {
 
     if (w >= 80 && h >= 55) {
       // Large: ticker + name + change% + trading value
-      lines.add(_TextLine(item.ticker, AppTypography.bodyMedium, FontWeight.bold));
+      lines.add(_TextLine(item.ticker, AppTypography.bodyMedium, AppTypography.bold));
       if (item.name != null) {
         final displayName =
             item.name!.length > 12 ? '${item.name!.substring(0, 10)}..' : item.name!;
-        lines.add(_TextLine(displayName, AppTypography.micro, FontWeight.normal));
+        lines.add(_TextLine(displayName, AppTypography.micro, AppTypography.regular));
       }
       if (item.changePct != null) {
         final sign = item.changePct! >= 0 ? '+' : '';
         lines.add(_TextLine(
             '$sign${item.changePct!.toStringAsFixed(2)}%', AppTypography.caption, AppTypography.medium));
       }
-      lines.add(_TextLine(item.formattedTradingValue, AppTypography.micro, FontWeight.normal));
+      lines.add(_TextLine(item.formattedTradingValue, AppTypography.micro, AppTypography.regular));
     } else if (w >= 50 && h >= 30) {
       // Medium: ticker + change%
-      lines.add(_TextLine(item.ticker, AppTypography.caption, FontWeight.bold));
+      lines.add(_TextLine(item.ticker, AppTypography.caption, AppTypography.bold));
       if (item.changePct != null) {
         final sign = item.changePct! >= 0 ? '+' : '';
         lines.add(_TextLine(
@@ -700,7 +710,7 @@ class _TreemapPainter extends CustomPainter {
       }
     } else if (w >= 30) {
       // Small: ticker only
-      lines.add(_TextLine(item.ticker, 9, FontWeight.bold));
+      lines.add(_TextLine(item.ticker, 9, AppTypography.bold));
     }
 
     _paintLines(canvas, rect, lines);
@@ -718,12 +728,10 @@ class _TreemapPainter extends CustomPainter {
         text: TextSpan(
           text: line.text,
           style: TextStyle(
-            color: const Color(0xFFFFFFFF),
+            color: mlColors.onPrimary,
             fontSize: line.fontSize,
             fontWeight: line.fontWeight,
-            shadows: const [
-              Shadow(offset: Offset(0, 1), blurRadius: 2, color: Color(0x99000000)),
-            ],
+            shadows: AppShadow.textDrop,
           ),
         ),
         textAlign: TextAlign.center,

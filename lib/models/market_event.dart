@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_colors.dart';
 
 class MarketCalendarEvent {
   final String id;
@@ -31,15 +32,15 @@ class MarketCalendarEvent {
     );
   }
 
-  Color get color => switch (eventType) {
-    'fomc' || 'fed_speech' => const Color(0xFFE53935),
-    'earnings' => const Color(0xFF43A047),
-    'economic' => const Color(0xFF1E88E5),
-    'options_expiry' => const Color(0xFFFF9800),
-    'conference' || 'product_launch' => const Color(0xFF8E24AA),
-    'dividend' => const Color(0xFF78909C),
-    'shareholder' => const Color(0xFFFDD835),
-    _ => const Color(0xFF757575),
+  Color colorOf(MarketLensColors mlc) => switch (eventType) {
+    'fomc' || 'fed_speech' => mlc.eventFedColor,
+    'earnings' => mlc.eventEarningsColor,
+    'economic' => mlc.eventEconomicColor,
+    'options_expiry' => mlc.eventOptionsColor,
+    'conference' || 'product_launch' => mlc.eventConferenceColor,
+    'dividend' => mlc.eventDividendColor,
+    'shareholder' => mlc.eventShareholderColor,
+    _ => mlc.roleRegularColor,
   };
 
   IconData get icon => switch (eventType) {

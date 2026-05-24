@@ -43,7 +43,7 @@ class NewsCard extends StatelessWidget {
                   l10n.aiSummaryNews,
                   style: TextStyle(
                     fontSize: AppTypography.headlineSmall,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: AppTypography.bold,
                     color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
@@ -158,7 +158,7 @@ class NewsCard extends StatelessWidget {
                                       : item.ticker,
                               style: TextStyle(
                                 fontSize: AppTypography.caption,
-                                fontWeight: FontWeight.bold,
+                                fontWeight: AppTypography.bold,
                                 color: isMarket
                                     ? context.mlColors.textSecondary
                                     : Theme.of(context).colorScheme.onPrimaryContainer,
@@ -184,7 +184,7 @@ class NewsCard extends StatelessWidget {
                               item.sentimentLabelLocalized(l10n),
                               style: TextStyle(
                                 fontSize: AppTypography.micro,
-                                fontWeight: FontWeight.bold,
+                                fontWeight: AppTypography.bold,
                                 color: dotColor,
                               ),
                             ),

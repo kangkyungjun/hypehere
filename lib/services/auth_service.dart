@@ -77,6 +77,46 @@ class AuthService {
     }
   }
 
+  // Register with verification (atomic: verify code + register in one call)
+  Future<CommunityUser> registerWithVerification({
+    required String email,
+    required String nickname,
+    required String password,
+    required String passwordConfirm,
+    required String code,
+  }) async {
+    final http.Response response;
+    try {
+      response = await http.post(
+        Uri.parse('$_baseUrl/register-with-verification/'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'email': email,
+          'nickname': nickname,
+          'password': password,
+          'password_confirm': passwordConfirm,
+          'code': code,
+        }),
+      ).timeout(_timeout);
+    } on SocketException {
+      throw ApiException(ApiErrorCode.serverConnection, debugMessage: 'Register');
+    } on TimeoutException {
+      throw ApiException(ApiErrorCode.serverConnection, debugMessage: 'Register timeout');
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(ApiErrorCode.serverConnectionShort, debugMessage: '$e');
+    }
+
+    final body = _parseResponseBody(response);
+
+    if (response.statusCode == 201) {
+      await _saveToken(body['token'] as String);
+      return CommunityUser.fromJson(body['user'] as Map<String, dynamic>);
+    } else {
+      throw _extractApiException(response.statusCode, body);
+    }
+  }
+
   // Login
   Future<CommunityUser> login({
     required String email,

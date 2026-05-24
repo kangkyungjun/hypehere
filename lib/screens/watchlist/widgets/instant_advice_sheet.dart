@@ -6,6 +6,7 @@ import '../../../theme/app_radius.dart';
 import '../../../theme/app_spacing.dart';
 import '../../../theme/app_typography.dart';
 import '../../../utils/multilingual.dart';
+import '../../../widgets/common/ml_divider.dart';
 
 /// Bottom sheet showing instant AI advice after a stock purchase.
 class InstantAdviceSheet extends StatelessWidget {
@@ -37,13 +38,14 @@ class InstantAdviceSheet extends StatelessWidget {
     return mlc.neutralColor;
   }
 
-  String _signalLabel(String? signal) {
+  String _signalLabel(BuildContext context, String? signal) {
+    final l10n = AppLocalizations.of(context);
     final s = signal?.toUpperCase() ?? '';
-    if (s == 'BUY' || s == '매수권고') return 'BUY';
-    if (s == 'STRONG_BUY' || s == '적극매수') return 'STRONG BUY';
-    if (s == 'SELL' || s == '매도권고') return 'SELL';
-    if (s == 'STRONG_SELL' || s == '적극매도') return 'STRONG SELL';
-    if (s == 'HOLD' || s == '관망') return 'HOLD';
+    if (s == 'BUY' || s == '매수권고') return l10n.scoreBuy;
+    if (s == 'STRONG_BUY' || s == '적극매수') return l10n.scoreStrongBuy;
+    if (s == 'SELL' || s == '매도권고') return l10n.scoreSell;
+    if (s == 'STRONG_SELL' || s == '적극매도') return l10n.scoreStrongSell;
+    if (s == 'HOLD' || s == '관망') return l10n.scoreHold;
     return signal ?? 'N/A';
   }
 
@@ -59,10 +61,12 @@ class InstantAdviceSheet extends StatelessWidget {
       minChildSize: 0.3,
       maxChildSize: 0.85,
       builder: (_, scrollController) {
+        final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+        final bottomPadding = MediaQuery.of(context).viewPadding.bottom;
         return SingleChildScrollView(
           controller: scrollController,
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(AppSpacing.xxl, AppSpacing.md, AppSpacing.xxl, AppSpacing.xxxl),
+            padding: EdgeInsets.fromLTRB(AppSpacing.xxl, AppSpacing.md, AppSpacing.xxl, AppSpacing.xxxl + bottomInset + bottomPadding),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -86,7 +90,7 @@ class InstantAdviceSheet extends StatelessWidget {
                       advice.ticker,
                       style: const TextStyle(
                         fontSize: AppTypography.displaySmall,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: AppTypography.bold,
                       ),
                     ),
                     if (isKo && advice.nameKo != null) ...[
@@ -117,11 +121,11 @@ class InstantAdviceSheet extends StatelessWidget {
                           borderRadius: BorderRadius.circular(AppRadius.lg),
                         ),
                         child: Text(
-                          _signalLabel(advice.signal),
+                          _signalLabel(context, advice.signal),
                           style: TextStyle(
                             color: context.mlColors.onPrimary,
                             fontSize: AppTypography.bodySmall,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: AppTypography.bold,
                           ),
                         ),
                       ),
@@ -136,6 +140,7 @@ class InstantAdviceSheet extends StatelessWidget {
                     style: TextStyle(
                       fontSize: AppTypography.bodyMedium,
                       color: theme.colorScheme.onSurfaceVariant,
+                      fontFeatures: AppTypography.tabularFigures,
                     ),
                   ),
                 ],
@@ -181,7 +186,7 @@ class InstantAdviceSheet extends StatelessWidget {
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('+ ', style: TextStyle(color: context.mlColors.gainColor, fontWeight: FontWeight.bold)),
+                            Text('+ ', style: TextStyle(color: context.mlColors.gainColor, fontWeight: AppTypography.bold)),
                             Expanded(
                               child: Text(
                                 localizePacked(r, effectiveLanguageCode(context)),
@@ -210,7 +215,7 @@ class InstantAdviceSheet extends StatelessWidget {
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('- ', style: TextStyle(color: context.mlColors.lossColor, fontWeight: FontWeight.bold)),
+                            Text('- ', style: TextStyle(color: context.mlColors.lossColor, fontWeight: AppTypography.bold)),
                             Expanded(
                               child: Text(
                                 localizePacked(r, effectiveLanguageCode(context)),
@@ -224,7 +229,7 @@ class InstantAdviceSheet extends StatelessWidget {
                 ],
 
                 // Footer
-                const Divider(),
+                const MlDivider(),
                 const SizedBox(height: AppSpacing.md),
                 Row(
                   children: [

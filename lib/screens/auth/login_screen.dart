@@ -5,11 +5,14 @@ import '../../providers/auth_provider.dart';
 import '../../exceptions/api_error_codes.dart';
 import '../../exceptions/api_exception.dart';
 import '../../services/auth_service.dart';
+import '../../utils/app_page_route.dart';
 import '../../utils/error_localizer.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
+import '../../theme/app_stroke.dart';
 import '../../theme/app_typography.dart';
+import '../../widgets/common/bento_card.dart';
 import 'email_verification_screen.dart';
 import 'forgot_password_screen.dart';
 import 'signup_screen.dart';
@@ -57,18 +60,21 @@ class _LoginScreenState extends State<LoginScreen> {
         if (e is ApiException && e.code == ApiErrorCode.emailNotVerified) {
           final email = _emailController.text.trim();
           try {
-            await AuthService().sendVerificationCode(email: email, purpose: 'signup');
+            await AuthService().sendVerificationCode(
+              email: email,
+              purpose: 'signup',
+            );
           } catch (e) {
             debugPrint('sendVerificationCode error: $e');
           }
           if (mounted) {
             Navigator.push(
               context,
-              MaterialPageRoute(
-                builder: (context) => EmailVerificationScreen(
+              appPageRoute(
+                builder: (_) => EmailVerificationScreen(
                   email: email,
                   purpose: 'signup',
-                  onVerified: () {
+                  onVerified: () async {
                     if (context.mounted) {
                       Navigator.of(context).popUntil((route) => route.isFirst);
                     }
@@ -85,7 +91,11 @@ class _LoginScreenState extends State<LoginScreen> {
           SnackBar(
             content: Row(
               children: [
-                Icon(Icons.error_outline, color: context.mlColors.onPrimary, size: 20),
+                Icon(
+                  Icons.error_outline,
+                  color: context.mlColors.onPrimary,
+                  size: 20,
+                ),
                 const SizedBox(width: AppSpacing.md),
                 Expanded(child: Text(message)),
               ],
@@ -110,141 +120,156 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.login),
-      ),
+      backgroundColor: context.mlColors.sectionBackground,
+      appBar: AppBar(title: Text(l10n.login)),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppSpacing.xxl),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const SizedBox(height: AppSpacing.xxxl),
-                // Logo or Title
-                Icon(
-                  Icons.trending_up,
-                  size: 64,
-                  color: Theme.of(context).primaryColor,
-                ),
-                const SizedBox(height: AppSpacing.xl),
-                const Text(
-                  'MarketLens',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: AppTypography.displayLarge,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 48),
-                // Email field
-                TextFormField(
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: InputDecoration(
-                    labelText: l10n.email,
-                    hintText: l10n.emailHint,
-                    prefixIcon: const Icon(Icons.email_outlined),
-                    border: const OutlineInputBorder(),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return l10n.emailRequired;
-                    }
-                    if (!value.contains('@')) {
-                      return l10n.emailInvalid;
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: AppSpacing.xl),
-                // Password field
-                TextFormField(
-                  controller: _passwordController,
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    labelText: l10n.password,
-                    hintText: l10n.passwordHint,
-                    prefixIcon: const Icon(Icons.lock_outlined),
-                    border: const OutlineInputBorder(),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return l10n.passwordRequired;
-                    }
-                    return null;
-                  },
-                  onFieldSubmitted: (_) => _handleLogin(),
-                ),
-                const SizedBox(height: AppSpacing.xxl),
-                // Login button
-                ElevatedButton(
-                  onPressed: _isLoading ? null : _handleLogin,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
-                    backgroundColor: Theme.of(context).primaryColor,
-                    foregroundColor: context.mlColors.onPrimary,
-                  ),
-                  child: _isLoading
-                      ? SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(context.mlColors.onPrimary),
-                          ),
-                        )
-                      : Text(
-                          l10n.login,
-                          style: const TextStyle(fontSize: AppTypography.headlineMedium),
-                        ),
-                ),
-                const SizedBox(height: AppSpacing.xl),
-                // Sign up & Forgot password row
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+          padding: const EdgeInsets.all(AppSpacing.xl),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 480),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.push<bool>(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const SignupScreen(),
-                          ),
-                        );
-                      },
-                      child: Text(
-                        l10n.signup,
-                        style: TextStyle(
-                          color: Theme.of(context).primaryColor,
-                        ),
+                    const SizedBox(height: AppSpacing.xxl),
+                    Container(
+                      width: 56,
+                      height: 56,
+                      decoration: BoxDecoration(
+                        color: context.mlColors.infoBg,
+                        borderRadius: BorderRadius.circular(AppRadius.lg),
+                      ),
+                      child: Icon(
+                        Icons.trending_up_rounded,
+                        size: 30,
+                        color: context.mlColors.accentBlue,
                       ),
                     ),
+                    const SizedBox(height: AppSpacing.lg),
                     Text(
-                      '|',
-                      style: TextStyle(color: context.mlColors.textTertiary),
+                      'MarketLens',
+                      style: AppTypography.screenTitle.copyWith(
+                        color: context.mlColors.textPrimary,
+                      ),
                     ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const ForgotPasswordScreen(),
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      l10n.loginSubtitle,
+                      style: AppTypography.body.copyWith(
+                        color: context.mlColors.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xxl),
+                    BentoCard(
+                      child: Column(
+                        children: [
+                          TextFormField(
+                            controller: _emailController,
+                            keyboardType: TextInputType.emailAddress,
+                            decoration: InputDecoration(
+                              labelText: l10n.email,
+                              hintText: l10n.emailHint,
+                              prefixIcon: const Icon(Icons.email_outlined),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return l10n.emailRequired;
+                              }
+                              if (!value.contains('@')) {
+                                return l10n.emailInvalid;
+                              }
+                              return null;
+                            },
                           ),
-                        );
-                      },
-                      child: Text(
-                        l10n.forgotPassword,
-                        style: TextStyle(
-                          color: context.mlColors.textSecondary,
+                          const SizedBox(height: AppSpacing.lg),
+                          TextFormField(
+                            controller: _passwordController,
+                            obscureText: true,
+                            decoration: InputDecoration(
+                              labelText: l10n.password,
+                              hintText: l10n.passwordHint,
+                              prefixIcon: const Icon(Icons.lock_outlined),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return l10n.passwordRequired;
+                              }
+                              return null;
+                            },
+                            onFieldSubmitted: (_) => _handleLogin(),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xl),
+                    FilledButton(
+                      onPressed: _isLoading ? null : _handleLogin,
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: AppSpacing.lg,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(AppRadius.lg),
                         ),
                       ),
+                      child: _isLoading
+                          ? SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: AppStroke.medium,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  context.mlColors.onPrimary,
+                                ),
+                              ),
+                            )
+                          : Text(
+                              l10n.login,
+                              style: const TextStyle(
+                                fontSize: AppTypography.headlineMedium,
+                                fontWeight: AppTypography.semiBold,
+                              ),
+                            ),
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.push<bool>(
+                              context,
+                              appPageRoute(
+                                builder: (_) => const SignupScreen(),
+                              ),
+                            );
+                          },
+                          child: Text(l10n.signup),
+                        ),
+                        Text(
+                          '|',
+                          style: TextStyle(
+                            color: context.mlColors.textTertiary,
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              appPageRoute(
+                                builder: (_) => const ForgotPasswordScreen(),
+                              ),
+                            );
+                          },
+                          child: Text(l10n.forgotPassword),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
+              ),
             ),
           ),
         ),

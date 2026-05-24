@@ -1,0 +1,87 @@
+MarketLens - AI-Powered Stock Signal Analysis Platform
+
+MarketLens is a smart investment companion that leverages artificial intelligence to analyze complex stock market data and deliver actionable signals and insights to investors.
+
+
+Key Features
+
+    1. AI-Powered Stock Signal Analysis
+- Statistical analysis based on historical data
+- Clear Buy / Sell / Hold signals at a glance
+- Reference indicators including target prices and stop-loss levels
+
+    2. Real-Time Market Dashboard
+- Market trends and top movers in one view
+- Live charts with technical indicators
+- Major index and sector-level analysis
+
+    3. Smart Stock Search & Discovery
+- Fast ticker search
+- Filter by signal type or sector
+- Automatic search history
+
+    4. Personalized Watchlist Management
+- Your own watchlist workspace
+- Real-time alerts for watchlist stocks (coming soon)
+- Portfolio management tools (coming soon)
+
+    5. Investor Community
+- Share and discuss investment ideas
+- Stock-specific boards and comments
+- Connect and exchange insights with fellow investors
+
+
+    What Are AI Signals?
+
+    MarketLens AI signals are statistical analysis results derived from historical data.
+
+- Comprehensive analysis of past price data, volume, and technical indicators
+- Signal generation through pattern recognition and trend analysis
+- Provided for informational purposes only; all investment decisions are yours to make
+
+
+    Investment Disclaimer (Please Read Carefully)
+
+    Important: Please review these terms thoroughly.
+
+    1. MarketLens is an informational service only and does not constitute investment advice or a solicitation to invest.
+
+    2. AI signals are based on statistical analysis of historical data and do not guarantee future returns.
+
+    3. Stock investing carries the risk of losing your principal. All investment decisions and resulting gains or losses are solely the responsibility of the investor.
+
+    4. The information provided by this service is for reference only. You should always conduct your own research and exercise your own judgment before making any investment decisions.
+
+    5. MarketLens assumes no legal liability for investment outcomes.
+
+
+    Why Choose MarketLens
+
+- Data-Driven Objectivity: Insights grounded in data, not emotion
+- Intuitive User Experience: Complex market data presented clearly and simply
+- Community-Powered Insights: Share opinions and analysis with other investors
+- Continuous Improvement: Regular updates reflecting the latest market trends
+
+
+    Who Is MarketLens For?
+
+- Beginner investors getting started in the stock market
+- Investors seeking objective, data-driven analysis
+- Investors who want to stay on top of market trends quickly
+- Investors looking to exchange ideas in an active community
+
+
+    Privacy
+
+    - Privacy Policy: https://www.hypehere.net/marketlens/privacy/
+    - Terms of Service: https://www.hypehere.net/marketlens/terms/
+
+    Support
+
+    - Email: marketlens.service@gmail.com
+    - Questions and suggestions are always welcome
+
+
+Start your smarter investing journey with MarketLens!
+
+All investment decisions are your own responsibility. Please invest carefully.

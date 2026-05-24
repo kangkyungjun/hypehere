@@ -3,11 +3,11 @@ import 'package:provider/provider.dart';
 import '../../models/news_data.dart';
 import '../../models/news_filter.dart';
 import '../../utils/multilingual.dart';
+import '../../utils/app_page_route.dart';
 import '../../services/analytics_api_client.dart';
 import '../../utils/error_localizer.dart';
 import '../../widgets/ads/banner_ad_widget.dart';
 import '../../widgets/news/market_news_modal.dart';
-import '../../widgets/news/hot_topic_toast.dart';
 import '../../widgets/news/mention_bubble_card.dart';
 import '../../models/mention_bubble_data.dart';
 import '../../theme/app_colors.dart';
@@ -52,9 +52,9 @@ class _NewsListScreenState extends State<NewsListScreen> {
   bool _isLoadingMore = false;
   String? _error;
 
-  // Hot topics
+  // Hot topics (data loaded for future use; toast display disabled)
+  // ignore: unused_field
   List<NewsItem> _hotTopics = [];
-  bool _hotTopicDismissed = false;
 
   // Mention bubble
   MentionBubbleData? _mentionBubble;
@@ -77,11 +77,12 @@ class _NewsListScreenState extends State<NewsListScreen> {
   @override
   void didUpdateWidget(NewsListScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Reload when filter changes
+    // Reload when filter changes (including category)
     if (widget.filterState != _currentFilter) {
       _currentFilter = widget.filterState;
       _items.clear();
       _loadInitial();
+      _loadMentionBubble();
     }
   }
 
@@ -100,22 +101,37 @@ class _NewsListScreenState extends State<NewsListScreen> {
   }
 
   /// Build API filter parameters from current filter state
-  ({String? tickers, String? sentiment, String? sectors, bool? isBreaking})
-      _buildFilterParams() {
+  ({
+    String? tickers,
+    String? sentiment,
+    String? sectors,
+    bool? isBreaking,
+    bool? excludeMarket,
+  })
+  _buildFilterParams() {
     final f = widget.filterState;
     String? tickers;
     String? sentiment;
     String? sectors;
     bool? isBreaking;
+    bool? excludeMarket;
 
-    // Source filter
-    if (f.sourceFilter == NewsSourceFilter.watchlist) {
-      final wl = context.read<WatchlistProvider>().watchlist;
-      if (wl.isNotEmpty) {
-        tickers = wl.join(',');
-      }
-    } else if (f.sourceFilter == NewsSourceFilter.marketOnly) {
-      tickers = 'MARKET';
+    // Category filter
+    switch (f.category) {
+      case NewsCategory.all:
+        break;
+      case NewsCategory.biz:
+        excludeMarket = true;
+        break;
+      case NewsCategory.world:
+        tickers = 'MARKET';
+        break;
+      case NewsCategory.watchlist:
+        final wl = context.read<WatchlistProvider>().watchlist;
+        if (wl.isNotEmpty) {
+          tickers = wl.join(',');
+        }
+        break;
     }
 
     // Sentiment filter
@@ -138,6 +154,7 @@ class _NewsListScreenState extends State<NewsListScreen> {
       sentiment: sentiment,
       sectors: sectors,
       isBreaking: isBreaking,
+      excludeMarket: excludeMarket,
     );
   }
 
@@ -156,6 +173,7 @@ class _NewsListScreenState extends State<NewsListScreen> {
         sentiment: params.sentiment,
         sectors: params.sectors,
         isBreaking: params.isBreaking,
+        excludeMarket: params.excludeMarket,
       );
       if (!mounted) return;
       setState(() {
@@ -187,6 +205,7 @@ class _NewsListScreenState extends State<NewsListScreen> {
         sentiment: params.sentiment,
         sectors: params.sectors,
         isBreaking: params.isBreaking,
+        excludeMarket: params.excludeMarket,
       );
       if (!mounted) return;
       setState(() {
@@ -213,9 +232,21 @@ class _NewsListScreenState extends State<NewsListScreen> {
 
   Future<void> _loadMentionBubble() async {
     try {
-      final data = await _apiClient.getMentionBubble();
-      if (data.items.isNotEmpty && mounted) {
-        setState(() => _mentionBubble = data);
+      final f = widget.filterState;
+      String? sectors = f.sectors.isNotEmpty ? f.sectors.join(',') : null;
+      String? tickers;
+
+      if (f.category == NewsCategory.watchlist) {
+        final wl = context.read<WatchlistProvider>().watchlist;
+        if (wl.isNotEmpty) tickers = wl.join(',');
+      }
+
+      final data = await _apiClient.getMentionBubble(
+        sectors: sectors,
+        tickers: tickers,
+      );
+      if (mounted) {
+        setState(() => _mentionBubble = data.items.isNotEmpty ? data : null);
       }
     } catch (_) {
       // Silently fail — bubble is optional
@@ -225,9 +256,7 @@ class _NewsListScreenState extends State<NewsListScreen> {
   void _onTickerTap(String ticker) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => TickerDetailScreen(ticker: ticker),
-      ),
+      appPageRoute(builder: (_) => TickerDetailScreen(ticker: ticker)),
     );
   }
 
@@ -238,9 +267,7 @@ class _NewsListScreenState extends State<NewsListScreen> {
       return _buildBody();
     }
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.marketNews),
-      ),
+      appBar: AppBar(title: Text(l10n.marketNews)),
       body: _buildBody(),
     );
   }
@@ -266,41 +293,34 @@ class _NewsListScreenState extends State<NewsListScreen> {
       );
     }
 
-    final showToast = _hotTopics.isNotEmpty && !_hotTopicDismissed;
-
     return RefreshIndicator(
       onRefresh: () async {
-        await Future.wait([_loadInitial(), _loadHotTopics(), _loadMentionBubble()]);
-        _hotTopicDismissed = false;
+        await Future.wait([
+          _loadInitial(),
+          _loadHotTopics(),
+          _loadMentionBubble(),
+        ]);
       },
-      child: Stack(
-        children: [
-          ListView.builder(
-            controller: _scrollController,
-            padding: EdgeInsets.fromLTRB(
-              AppSpacing.xl,
-              showToast ? 120 : AppSpacing.xl, // Extra top padding when toast visible
-              AppSpacing.xl,
-              AppSpacing.xl,
-            ),
-            itemCount: _buildListItemCount(),
-            itemBuilder: (context, index) => _buildListItem(index),
-          ),
-          if (showToast)
-            HotTopicToast(
-              hotTopics: _hotTopics,
-              onDismiss: () => setState(() => _hotTopicDismissed = true),
-            ),
-        ],
+      child: ListView.builder(
+        controller: _scrollController,
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.xl,
+          AppSpacing.lg,
+          AppSpacing.xl,
+          AppSpacing.xxl,
+        ),
+        itemCount: _buildListItemCount(),
+        itemBuilder: (context, index) => _buildListItem(index),
       ),
     );
   }
 
-  bool get _hasBubble => _mentionBubble != null && _mentionBubble!.items.isNotEmpty;
+  bool get _hasBubble =>
+      _mentionBubble != null && _mentionBubble!.items.isNotEmpty;
 
   /// Calculate total item count including bubble card, date headers, and ads
   int _buildListItemCount() {
-    int count = _hasBubble ? 1 : 0; // bubble card slot
+    int count = _hasBubble ? 2 : 0; // bubble card + banner ad slot
     String? lastDateGroup;
     int newsIndex = 0;
 
@@ -334,8 +354,16 @@ class _NewsListScreenState extends State<NewsListScreen> {
       return MentionBubbleCard(data: _mentionBubble!);
     }
 
-    // Offset for the bubble card
-    final adjusted = _hasBubble ? virtualIndex - 1 : virtualIndex;
+    // Banner ad after bubble card
+    if (_hasBubble && virtualIndex == 1) {
+      return const Padding(
+        padding: EdgeInsets.only(bottom: AppSpacing.lg),
+        child: Center(child: BannerAdWidget()),
+      );
+    }
+
+    // Offset for the bubble card + banner ad
+    final adjusted = _hasBubble ? virtualIndex - 2 : virtualIndex;
 
     int currentVirtual = 0;
     String? lastDateGroup;
@@ -355,7 +383,8 @@ class _NewsListScreenState extends State<NewsListScreen> {
 
       // News item
       if (currentVirtual == adjusted) {
-        final isLastInGroup = (i == _items.length - 1) ||
+        final isLastInGroup =
+            (i == _items.length - 1) ||
             _getDateGroup(_items[i + 1]) != dateGroup;
         return _buildNewsItem(context, _items[i], isLastInGroup: isLastInGroup);
       }
@@ -389,13 +418,14 @@ class _NewsListScreenState extends State<NewsListScreen> {
   Widget _buildDateHeader(BuildContext context, NewsItem item) {
     final label = _formatDateLabel(item.date);
     return Padding(
-      padding: const EdgeInsets.only(top: AppSpacing.xl, bottom: AppSpacing.md),
+      padding: const EdgeInsets.only(
+        top: AppSpacing.xxl,
+        bottom: AppSpacing.md,
+      ),
       child: Text(
         label,
-        style: TextStyle(
-          fontSize: AppTypography.bodyMedium,
-          fontWeight: FontWeight.bold,
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        style: AppTypography.cardTitle.copyWith(
+          color: context.mlColors.textSecondary,
         ),
       ),
     );
@@ -410,7 +440,15 @@ class _NewsListScreenState extends State<NewsListScreen> {
       final diff = today.difference(target).inDays;
 
       final l10n = AppLocalizations.of(context);
-      final weekdays = [l10n.weekdayMon, l10n.weekdayTue, l10n.weekdayWed, l10n.weekdayThu, l10n.weekdayFri, l10n.weekdaySat, l10n.weekdaySun];
+      final weekdays = [
+        l10n.weekdayMon,
+        l10n.weekdayTue,
+        l10n.weekdayWed,
+        l10n.weekdayThu,
+        l10n.weekdayFri,
+        l10n.weekdaySat,
+        l10n.weekdaySun,
+      ];
       final dayLabel = weekdays[date.weekday - 1];
       final formatted = '${date.month}/${date.day} $dayLabel';
 
@@ -423,10 +461,15 @@ class _NewsListScreenState extends State<NewsListScreen> {
     }
   }
 
-  Widget _buildNewsItem(BuildContext context, NewsItem item, {required bool isLastInGroup}) {
+  Widget _buildNewsItem(
+    BuildContext context,
+    NewsItem item, {
+    required bool isLastInGroup,
+  }) {
     final l10n = AppLocalizations.of(context);
     final langCode = Localizations.localeOf(context).languageCode;
     final dotColor = item.sentimentColor(context.mlColors);
+    final mlc = context.mlColors;
 
     final isMarket = MarketNewsModal.isMarketNews(item);
 
@@ -447,8 +490,8 @@ class _NewsListScreenState extends State<NewsListScreen> {
                   children: [
                     const SizedBox(height: AppSpacing.sm),
                     Container(
-                      width: 10,
-                      height: 10,
+                      width: 9,
+                      height: 9,
                       decoration: BoxDecoration(
                         color: dotColor,
                         shape: BoxShape.circle,
@@ -456,20 +499,17 @@ class _NewsListScreenState extends State<NewsListScreen> {
                     ),
                     if (!isLastInGroup)
                       Expanded(
-                        child: Container(
-                          width: 1.5,
-                          color: context.mlColors.chartGridLine,
-                        ),
+                        child: Container(width: 1, color: mlc.chartGridLine),
                       ),
                   ],
                 ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: AppSpacing.lg),
 
               // Content
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.only(bottom: AppSpacing.xl),
+                  padding: const EdgeInsets.only(bottom: AppSpacing.xxl),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -477,45 +517,62 @@ class _NewsListScreenState extends State<NewsListScreen> {
                       Row(
                         children: [
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xxs),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.sm,
+                              vertical: AppSpacing.xs,
+                            ),
                             decoration: BoxDecoration(
                               color: isMarket
-                                  ? Theme.of(context).colorScheme.surfaceContainerHighest
-                                  : Theme.of(context).colorScheme.primaryContainer,
-                              borderRadius: BorderRadius.circular(AppRadius.xs),
+                                  ? mlc.sectionBackground
+                                  : mlc.infoBg,
+                              borderRadius: BorderRadius.circular(
+                                AppRadius.badge,
+                              ),
+                              border: Border.all(color: mlc.subtleBorder),
                             ),
                             child: Text(
                               isMarket
                                   ? l10n.marketNews
-                                  : (langCode == 'ko' && item.tickerNameKo != null)
-                                      ? '${item.ticker} ${item.tickerNameKo}'
-                                      : item.ticker,
+                                  : (langCode == 'ko' &&
+                                        item.tickerNameKo != null)
+                                  ? '${item.ticker} ${item.tickerNameKo}'
+                                  : item.ticker,
                               style: TextStyle(
                                 fontSize: AppTypography.caption,
-                                fontWeight: FontWeight.bold,
+                                fontWeight: AppTypography.bold,
                                 color: isMarket
-                                    ? context.mlColors.textSecondary
-                                    : Theme.of(context).colorScheme.onPrimaryContainer,
+                                    ? mlc.textSecondary
+                                    : mlc.accentBlue,
                               ),
                             ),
                           ),
                           const SizedBox(width: AppSpacing.sm),
                           // Breaking badge
                           if (item.isBreaking) ...[
-                            const Text('\u{1F6A8}', style: TextStyle(fontSize: AppTypography.bodySmall)),
+                            const Text(
+                              '\u{1F6A8}',
+                              style: TextStyle(
+                                fontSize: AppTypography.bodySmall,
+                              ),
+                            ),
                             const SizedBox(width: AppSpacing.xs),
                           ],
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xxs),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.sm,
+                              vertical: AppSpacing.xs,
+                            ),
                             decoration: BoxDecoration(
                               color: dotColor.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(AppRadius.xs),
+                              borderRadius: BorderRadius.circular(
+                                AppRadius.badge,
+                              ),
                             ),
                             child: Text(
                               item.sentimentLabelLocalized(l10n),
                               style: TextStyle(
                                 fontSize: AppTypography.micro,
-                                fontWeight: FontWeight.bold,
+                                fontWeight: AppTypography.bold,
                                 color: dotColor,
                               ),
                             ),
@@ -527,7 +584,7 @@ class _NewsListScreenState extends State<NewsListScreen> {
                               item.sectorShort!,
                               style: TextStyle(
                                 fontSize: AppTypography.micro,
-                                color: Theme.of(context).colorScheme.outline,
+                                color: mlc.textTertiary,
                               ),
                             ),
                             const SizedBox(width: AppSpacing.sm),
@@ -536,33 +593,30 @@ class _NewsListScreenState extends State<NewsListScreen> {
                             item.timeAgoLocalized(l10n),
                             style: TextStyle(
                               fontSize: AppTypography.micro,
-                              color: Theme.of(context).colorScheme.outline,
+                              color: mlc.textTertiary,
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: AppSpacing.xs),
+                      const SizedBox(height: AppSpacing.sm),
 
                       // Row 2: AI summary (localized)
                       Text(
                         item.aiSummary.localize(langCode),
-                        style: TextStyle(
-                          fontSize: AppTypography.bodyMedium,
-                          fontWeight: AppTypography.semiBold,
-                          color: Theme.of(context).colorScheme.onSurface,
-                          height: 1.4,
+                        style: AppTypography.bodyStrong.copyWith(
+                          color: mlc.textPrimary,
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
                       // Row 3: source
                       if (item.source != null) ...[
-                        const SizedBox(height: 3),
+                        const SizedBox(height: AppSpacing.xs),
                         Text(
                           item.source!,
                           style: TextStyle(
-                            fontSize: AppTypography.micro,
-                            color: Theme.of(context).colorScheme.outline,
+                            fontSize: AppTypography.caption,
+                            color: mlc.textTertiary,
                           ),
                         ),
                       ],

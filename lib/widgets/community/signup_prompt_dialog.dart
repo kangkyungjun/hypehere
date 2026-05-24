@@ -30,7 +30,7 @@ class SignupPromptDialog extends StatelessWidget {
               l10n.loginRequired,
               style: const TextStyle(
                 fontSize: AppTypography.displayMedium,
-                fontWeight: FontWeight.bold,
+                fontWeight: AppTypography.bold,
               ),
             ),
             const SizedBox(height: AppSpacing.md),

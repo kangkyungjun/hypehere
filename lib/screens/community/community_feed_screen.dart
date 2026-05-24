@@ -8,6 +8,7 @@ import '../../models/ticker_info.dart';
 import '../../services/community_api_client.dart';
 import '../../services/analytics_api_client.dart';
 import '../../utils/error_localizer.dart';
+import '../../utils/app_page_route.dart';
 import '../../providers/auth_provider.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_radius.dart';
@@ -31,10 +32,7 @@ class CommunityFeedScreen extends StatefulWidget {
   /// 초기 필터 종목 (null이면 전체)
   final String? initialTicker;
 
-  const CommunityFeedScreen({
-    super.key,
-    this.initialTicker,
-  });
+  const CommunityFeedScreen({super.key, this.initialTicker});
 
   @override
   State<CommunityFeedScreen> createState() => _CommunityFeedScreenState();
@@ -54,7 +52,15 @@ class _CommunityFeedScreenState extends State<CommunityFeedScreen> {
   String? _currentTicker;
 
   /// 티커 필터 칩에 표시할 목록
-  final List<String> _filterTickers = ['AAPL', 'TSLA', 'NVDA', 'MSFT', 'AMZN', 'META', 'GOOGL'];
+  final List<String> _filterTickers = [
+    'AAPL',
+    'TSLA',
+    'NVDA',
+    'MSFT',
+    'AMZN',
+    'META',
+    'GOOGL',
+  ];
 
   /// 게시글 목록
   List<Post> _posts = [];
@@ -80,7 +86,8 @@ class _CommunityFeedScreenState extends State<CommunityFeedScreen> {
     super.initState();
     _currentTicker = widget.initialTicker;
     // initialTicker가 있으면 필터 목록에 추가
-    if (widget.initialTicker != null && !_filterTickers.contains(widget.initialTicker)) {
+    if (widget.initialTicker != null &&
+        !_filterTickers.contains(widget.initialTicker)) {
       _filterTickers.insert(0, widget.initialTicker!);
     }
     _scrollController.addListener(_onScroll);
@@ -139,14 +146,20 @@ class _CommunityFeedScreenState extends State<CommunityFeedScreen> {
     try {
       if (_searchQuery.isNotEmpty) {
         // 검색 모드 (페이지네이션 미적용)
-        final posts = await _apiClient.searchPosts(_searchQuery, ticker: _currentTicker);
+        final posts = await _apiClient.searchPosts(
+          _searchQuery,
+          ticker: _currentTicker,
+        );
         setState(() {
           _posts = posts;
           _isLoading = false;
         });
       } else {
         // 일반 모드 (페이지네이션 적용)
-        final result = await _apiClient.getPosts(ticker: _currentTicker, page: 1);
+        final result = await _apiClient.getPosts(
+          ticker: _currentTicker,
+          page: 1,
+        );
         setState(() {
           _posts = result.items;
           _hasNext = result.hasNext;
@@ -219,9 +232,7 @@ class _CommunityFeedScreenState extends State<CommunityFeedScreen> {
   Future<void> _editPost(Post post) async {
     final result = await Navigator.push<bool>(
       context,
-      MaterialPageRoute(
-        builder: (context) => CreatePostScreen(editPost: post),
-      ),
+      appPageRoute(builder: (_) => CreatePostScreen(editPost: post)),
     );
 
     if (result == true) {
@@ -244,7 +255,9 @@ class _CommunityFeedScreenState extends State<CommunityFeedScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: context.mlColors.dangerColor),
+            style: TextButton.styleFrom(
+              foregroundColor: context.mlColors.dangerColor,
+            ),
             child: Text(l10n.delete),
           ),
         ],
@@ -256,15 +269,19 @@ class _CommunityFeedScreenState extends State<CommunityFeedScreen> {
     try {
       await _apiClient.deletePost(post.id);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.postDeleted)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.postDeleted)));
         _loadPosts();
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.postDeleteFailed(ErrorLocalizer.getMessage(context, e)))),
+          SnackBar(
+            content: Text(
+              l10n.postDeleteFailed(ErrorLocalizer.getMessage(context, e)),
+            ),
+          ),
         );
       }
     }
@@ -295,19 +312,20 @@ class _CommunityFeedScreenState extends State<CommunityFeedScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    ...reportTypes.entries.map((entry) =>
-                        RadioListTile<String>(
-                          title: Text(entry.value),
-                          value: entry.key,
-                          groupValue: selectedType,
-                          onChanged: (value) {
-                            setDialogState(() {
-                              selectedType = value;
-                            });
-                          },
-                          dense: true,
-                          contentPadding: EdgeInsets.zero,
-                        )),
+                    ...reportTypes.entries.map(
+                      (entry) => RadioListTile<String>(
+                        title: Text(entry.value),
+                        value: entry.key,
+                        groupValue: selectedType,
+                        onChanged: (value) {
+                          setDialogState(() {
+                            selectedType = value;
+                          });
+                        },
+                        dense: true,
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                    ),
                     if (selectedType == 'other') ...[
                       const SizedBox(height: AppSpacing.md),
                       TextField(
@@ -336,7 +354,9 @@ class _CommunityFeedScreenState extends State<CommunityFeedScreen> {
                           });
                         }
                       : null,
-                  style: TextButton.styleFrom(foregroundColor: context.mlColors.reportColor),
+                  style: TextButton.styleFrom(
+                    foregroundColor: context.mlColors.reportColor,
+                  ),
                   child: Text(l10n.reportSubmit),
                 ),
               ],
@@ -356,9 +376,9 @@ class _CommunityFeedScreenState extends State<CommunityFeedScreen> {
         description: result['description'] ?? '',
       );
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.reportSubmitted)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.reportSubmitted)));
       }
     } catch (e) {
       if (mounted) {
@@ -373,9 +393,7 @@ class _CommunityFeedScreenState extends State<CommunityFeedScreen> {
   void _navigateToPostDetail(int postId) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => PostDetailScreen(postId: postId),
-      ),
+      appPageRoute(builder: (_) => PostDetailScreen(postId: postId)),
     ).then((_) {
       _loadPosts();
     });
@@ -395,18 +413,14 @@ class _CommunityFeedScreenState extends State<CommunityFeedScreen> {
         if (!mounted) return;
         final success = await Navigator.push<bool>(
           context,
-          MaterialPageRoute(
-            builder: (context) => const LoginScreen(),
-          ),
+          appPageRoute(builder: (_) => const LoginScreen()),
         );
         if (success == true) _navigateToCreatePost();
       } else if (result == 'signup') {
         if (!mounted) return;
         final success = await Navigator.push<bool>(
           context,
-          MaterialPageRoute(
-            builder: (context) => const SignupScreen(),
-          ),
+          appPageRoute(builder: (_) => const SignupScreen()),
         );
         if (success == true) _navigateToCreatePost();
       }
@@ -420,10 +434,8 @@ class _CommunityFeedScreenState extends State<CommunityFeedScreen> {
   Future<void> _navigateToCreatePost() async {
     final result = await Navigator.push<bool>(
       context,
-      MaterialPageRoute(
-        builder: (context) => CreatePostScreen(
-          prefilledTicker: _currentTicker,
-        ),
+      appPageRoute(
+        builder: (_) => CreatePostScreen(prefilledTicker: _currentTicker),
       ),
     );
 
@@ -467,16 +479,14 @@ class _CommunityFeedScreenState extends State<CommunityFeedScreen> {
           children: [
             _buildSearchBar(),
             _buildTickerFilterChips(),
-            Expanded(
-              child: _buildBody(),
-            ),
+            Expanded(child: _buildBody()),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _onCreatePostPressed,
         tooltip: l10n.writePost,
-        child: const Icon(Icons.add),
+        child: const Icon(Icons.edit_rounded),
       ),
     );
   }
@@ -485,7 +495,12 @@ class _CommunityFeedScreenState extends State<CommunityFeedScreen> {
   Widget _buildSearchBar() {
     final l10n = AppLocalizations.of(context);
     return Padding(
-      padding: const EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.md, AppSpacing.xl, AppSpacing.xs),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.xl,
+        AppSpacing.lg,
+        AppSpacing.xl,
+        AppSpacing.sm,
+      ),
       child: TextField(
         controller: _searchController,
         onChanged: _onSearchChanged,
@@ -500,19 +515,25 @@ class _CommunityFeedScreenState extends State<CommunityFeedScreen> {
                 )
               : null,
           filled: true,
-          fillColor: context.mlColors.sectionBackground,
-          contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: 9),
+          fillColor: context.mlColors.cardBackground,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.xl,
+            vertical: AppSpacing.md,
+          ),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppRadius.lg),
-            borderSide: BorderSide.none,
+            borderRadius: BorderRadius.circular(AppRadius.badge),
+            borderSide: BorderSide(color: context.mlColors.subtleBorder),
           ),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppRadius.lg),
-            borderSide: BorderSide.none,
+            borderRadius: BorderRadius.circular(AppRadius.badge),
+            borderSide: BorderSide(color: context.mlColors.subtleBorder),
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppRadius.lg),
-            borderSide: BorderSide(color: Theme.of(context).primaryColor, width: 1),
+            borderRadius: BorderRadius.circular(AppRadius.badge),
+            borderSide: BorderSide(
+              color: context.mlColors.accentBlue,
+              width: 1,
+            ),
           ),
         ),
         textInputAction: TextInputAction.search,
@@ -524,48 +545,79 @@ class _CommunityFeedScreenState extends State<CommunityFeedScreen> {
   Widget _buildTickerFilterChips() {
     final l10n = AppLocalizations.of(context);
     return SizedBox(
-      height: 32,
+      height: 44,
       child: ListView(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xxs),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.xl,
+          vertical: AppSpacing.xs,
+        ),
         children: [
           // "전체" 칩
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxs),
             child: ChoiceChip(
-              label: Text(l10n.all, style: const TextStyle(fontSize: AppTypography.bodySmall)),
+              label: Text(l10n.all),
               selected: _currentTicker == null,
               onSelected: (_) => _selectTicker(null),
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-              labelPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-              visualDensity: VisualDensity.compact,
+              selectedColor: context.mlColors.infoBg,
+              backgroundColor: context.mlColors.sectionBackground,
+              side: BorderSide(
+                color: _currentTicker == null
+                    ? context.mlColors.accentBlue
+                    : context.mlColors.subtleBorder,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppRadius.badge),
+              ),
+              labelStyle: AppTypography.label.copyWith(
+                color: _currentTicker == null
+                    ? context.mlColors.accentBlue
+                    : context.mlColors.textSecondary,
+              ),
             ),
           ),
           // 티커 칩들
-          ..._filterTickers.map((ticker) => Padding(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxs),
-                child: ChoiceChip(
-                  label: Text(ticker, style: const TextStyle(fontSize: AppTypography.bodySmall)),
-                  selected: _currentTicker == ticker,
-                  onSelected: (_) => _selectTicker(ticker),
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-                  labelPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-                  visualDensity: VisualDensity.compact,
+          ..._filterTickers.map(
+            (ticker) => Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxs),
+              child: ChoiceChip(
+                label: Text(ticker),
+                selected: _currentTicker == ticker,
+                onSelected: (_) => _selectTicker(ticker),
+                selectedColor: context.mlColors.infoBg,
+                backgroundColor: context.mlColors.sectionBackground,
+                side: BorderSide(
+                  color: _currentTicker == ticker
+                      ? context.mlColors.accentBlue
+                      : context.mlColors.subtleBorder,
                 ),
-              )),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppRadius.badge),
+                ),
+                labelStyle: AppTypography.label.copyWith(
+                  color: _currentTicker == ticker
+                      ? context.mlColors.accentBlue
+                      : context.mlColors.textSecondary,
+                ),
+              ),
+            ),
+          ),
           // ➕ 버튼
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxs),
             child: ActionChip(
               avatar: const Icon(Icons.add, size: 14),
-              label: Text(l10n.add, style: const TextStyle(fontSize: AppTypography.bodySmall)),
+              label: Text(l10n.add),
               onPressed: _showTickerSearchSheet,
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-              labelPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxs),
-              visualDensity: VisualDensity.compact,
+              backgroundColor: context.mlColors.sectionBackground,
+              side: BorderSide(color: context.mlColors.subtleBorder),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppRadius.badge),
+              ),
+              labelStyle: AppTypography.label.copyWith(
+                color: context.mlColors.textSecondary,
+              ),
             ),
           ),
         ],
@@ -578,9 +630,7 @@ class _CommunityFeedScreenState extends State<CommunityFeedScreen> {
     final l10n = AppLocalizations.of(context);
     // 1) 로딩 중
     if (_isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
+      return const Center(child: CircularProgressIndicator());
     }
 
     // 2) 네트워크 에러
@@ -593,7 +643,10 @@ class _CommunityFeedScreenState extends State<CommunityFeedScreen> {
             const SizedBox(height: AppSpacing.xl),
             Text(
               _errorMessage ?? l10n.checkNetwork,
-              style: TextStyle(fontSize: AppTypography.headlineMedium, color: Theme.of(context).colorScheme.onSurfaceVariant),
+              style: TextStyle(
+                fontSize: AppTypography.headlineMedium,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
             const SizedBox(height: AppSpacing.xxl),
             ElevatedButton.icon(
@@ -640,7 +693,10 @@ class _CommunityFeedScreenState extends State<CommunityFeedScreen> {
             const SizedBox(height: AppSpacing.md),
             Text(
               isFiltering ? l10n.tryDifferentFilter : l10n.writeFirstPost,
-              style: TextStyle(fontSize: AppTypography.bodyLarge, color: Theme.of(context).colorScheme.outline),
+              style: TextStyle(
+                fontSize: AppTypography.bodyLarge,
+                color: Theme.of(context).colorScheme.outline,
+              ),
             ),
             if (!isFiltering) ...[
               const SizedBox(height: AppSpacing.xxl),
@@ -655,49 +711,55 @@ class _CommunityFeedScreenState extends State<CommunityFeedScreen> {
       );
     }
 
-    // 5) 게시글 목록 (5개마다 광고 배너 삽입 + 무한스크롤)
-    final adCount = _posts.length ~/ 5;
+    // 5) 게시글 목록 (10개마다 광고 배너 삽입 + 무한스크롤)
+    final adCount = _posts.length ~/ 10;
     final totalItems = _posts.length + adCount + (_hasNext ? 1 : 0);
     return RefreshIndicator(
       onRefresh: _loadPosts,
       child: ListView.builder(
-      controller: _scrollController,
-      itemCount: totalItems,
-      padding: const EdgeInsets.only(bottom: 80),
-      itemBuilder: (context, index) {
-        // 하단 로딩 인디케이터 (마지막 아이템)
-        if (_hasNext && index == totalItems - 1) {
-          return const Padding(
-            padding: EdgeInsets.all(AppSpacing.xl),
-            child: Center(child: CircularProgressIndicator()),
+        controller: _scrollController,
+        itemCount: totalItems,
+        padding: const EdgeInsets.only(bottom: 80),
+        itemBuilder: (context, index) {
+          // 하단 로딩 인디케이터 (마지막 아이템)
+          if (_hasNext && index == totalItems - 1) {
+            return const Padding(
+              padding: EdgeInsets.all(AppSpacing.xl),
+              child: Center(child: CircularProgressIndicator()),
+            );
+          }
+
+          final adsBefore = (index + 1) ~/ 11;
+          final isAd =
+              index > 0 && (index + 1) % 11 == 0 && adsBefore <= adCount;
+
+          if (isAd) {
+            return const Padding(
+              padding: EdgeInsets.symmetric(vertical: AppSpacing.xl),
+              child: BannerAdWidget(),
+            );
+          }
+
+          final postIndex = index - adsBefore;
+          if (postIndex >= _posts.length || postIndex < 0) {
+            return const SizedBox.shrink();
+          }
+          final post = _posts[postIndex];
+          final authProvider = Provider.of<AuthProvider>(
+            context,
+            listen: false,
           );
-        }
-
-        final adsBefore = (index + 1) ~/ 6;
-        final isAd = index > 0 && (index + 1) % 6 == 0 && adsBefore <= adCount;
-
-        if (isAd) {
-          return const Padding(
-            padding: EdgeInsets.symmetric(vertical: AppSpacing.xl),
-            child: BannerAdWidget(),
+          final isOwnPost = authProvider.currentUser?.id == post.author.id;
+          final canReport = authProvider.isLoggedIn && !isOwnPost;
+          return PostCard(
+            post: post,
+            onTap: () => _navigateToPostDetail(post.id),
+            onEdit: post.canEdit ? () => _editPost(post) : null,
+            onDelete: post.canDelete ? () => _deletePost(post) : null,
+            onReport: canReport ? () => _reportPost(post) : null,
           );
-        }
-
-        final postIndex = index - adsBefore;
-        if (postIndex >= _posts.length || postIndex < 0) return const SizedBox.shrink();
-        final post = _posts[postIndex];
-        final authProvider = Provider.of<AuthProvider>(context, listen: false);
-        final isOwnPost = authProvider.currentUser?.id == post.author.id;
-        final canReport = authProvider.isLoggedIn && !isOwnPost;
-        return PostCard(
-          post: post,
-          onTap: () => _navigateToPostDetail(post.id),
-          onEdit: post.canEdit ? () => _editPost(post) : null,
-          onDelete: post.canDelete ? () => _deletePost(post) : null,
-          onReport: canReport ? () => _reportPost(post) : null,
-        );
-      },
-    ),
+        },
+      ),
     );
   }
 }
@@ -797,7 +859,9 @@ class _TickerSearchSheetState extends State<_TickerSearchSheet> {
                   prefixIcon: const Icon(Icons.search, size: 20),
                   suffixIcon: _controller.text.isNotEmpty
                       ? IconButton(
-                          tooltip: AppLocalizations.of(context).tooltipClearSearch,
+                          tooltip: AppLocalizations.of(
+                            context,
+                          ).tooltipClearSearch,
                           icon: const Icon(Icons.close, size: 20),
                           onPressed: () {
                             _controller.clear();
@@ -810,7 +874,10 @@ class _TickerSearchSheetState extends State<_TickerSearchSheet> {
                       : null,
                   filled: true,
                   fillColor: context.mlColors.sectionBackground,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.lg),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.xl,
+                    vertical: AppSpacing.lg,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(AppRadius.lg),
                     borderSide: BorderSide.none,
@@ -825,8 +892,8 @@ class _TickerSearchSheetState extends State<_TickerSearchSheet> {
               child: _isSearching
                   ? const Center(child: CircularProgressIndicator())
                   : _searchResults != null
-                      ? _buildSearchResults(scrollController)
-                      : _buildPopularTickers(scrollController),
+                  ? _buildSearchResults(scrollController)
+                  : _buildPopularTickers(scrollController),
             ),
           ],
         );
@@ -870,7 +937,10 @@ class _TickerSearchSheetState extends State<_TickerSearchSheet> {
       return Center(
         child: Text(
           AppLocalizations.of(context).noSearchResultsCommunity,
-          style: TextStyle(fontSize: AppTypography.headlineMedium, color: Theme.of(context).colorScheme.outline),
+          style: TextStyle(
+            fontSize: AppTypography.headlineMedium,
+            color: Theme.of(context).colorScheme.outline,
+          ),
         ),
       );
     }
@@ -895,7 +965,10 @@ class _TickerSearchSheetState extends State<_TickerSearchSheet> {
           trailing: ticker.category != null
               ? Text(
                   ticker.category!,
-                  style: TextStyle(fontSize: AppTypography.bodySmall, color: Theme.of(context).colorScheme.outline),
+                  style: TextStyle(
+                    fontSize: AppTypography.bodySmall,
+                    color: Theme.of(context).colorScheme.outline,
+                  ),
                 )
               : null,
           onTap: () => widget.onTickerSelected(ticker.ticker),

@@ -5,6 +5,7 @@ import '../../../services/analytics_api_client.dart';
 import '../../../theme/app_colors.dart';
 import '../../../theme/app_radius.dart';
 import '../../../theme/app_spacing.dart';
+import '../../../theme/app_stroke.dart';
 import '../../../theme/app_typography.dart';
 
 /// Bottom sheet for selling shares with date picker + auto close price.
@@ -173,7 +174,7 @@ class _SellHoldingSheetState extends State<SellHoldingSheet> {
 
             Text(
               l10n.sellHoldingTitle(widget.ticker),
-              style: const TextStyle(fontSize: AppTypography.headlineLarge, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: AppTypography.headlineLarge, fontWeight: AppTypography.bold),
             ),
             Text(
               '${l10n.currentHoldings}: ${widget.currentShares.toStringAsFixed(widget.currentShares == widget.currentShares.truncateToDouble() ? 0 : 2)}${l10n.shares} (${l10n.avgPriceLabel} \$${widget.avgPrice.toStringAsFixed(2)})',
@@ -217,7 +218,7 @@ class _SellHoldingSheetState extends State<SellHoldingSheet> {
                 suffixIcon: _loadingPrice
                     ? const Padding(
                         padding: EdgeInsets.all(AppSpacing.lg),
-                        child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
+                        child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: AppStroke.medium)),
                       )
                     : _priceError && _priceController.text.isEmpty
                         ? IconButton(
@@ -315,7 +316,7 @@ class _SellHoldingSheetState extends State<SellHoldingSheet> {
                       Text(l10n.sellAmount, style: TextStyle(fontSize: AppTypography.bodyMedium, color: theme.colorScheme.onSurfaceVariant)),
                       Text(
                         _sellAmount != null ? '\$${_sellAmount!.toStringAsFixed(2)}' : '—',
-                        style: const TextStyle(fontSize: AppTypography.bodyLarge, fontWeight: AppTypography.semiBold),
+                        style: const TextStyle(fontSize: AppTypography.bodyLarge, fontWeight: AppTypography.semiBold, fontFeatures: AppTypography.tabularFigures),
                       ),
                     ],
                   ),
@@ -329,12 +330,13 @@ class _SellHoldingSheetState extends State<SellHoldingSheet> {
                           '${_realizedPnl! >= 0 ? '+' : ''}\$${_realizedPnl!.toStringAsFixed(2)} (${_realizedPnlPct != null ? '${_realizedPnlPct! >= 0 ? '+' : ''}${_realizedPnlPct!.toStringAsFixed(1)}%' : ''})',
                           style: TextStyle(
                             fontSize: AppTypography.bodyLarge,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: AppTypography.bold,
                             color: _realizedPnl! >= 0 ? context.mlColors.gainColor : context.mlColors.lossColor,
+                            fontFeatures: AppTypography.tabularFigures,
                           ),
                         )
                       else
-                        const Text('—', style: TextStyle(fontSize: AppTypography.bodyLarge, fontWeight: FontWeight.bold)),
+                        const Text('—', style: TextStyle(fontSize: AppTypography.bodyLarge, fontWeight: AppTypography.bold)),
                     ],
                   ),
                 ],

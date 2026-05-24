@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../theme/app_colors.dart';
 import '../../theme/app_spacing.dart';
 
 /// 스켈레톤 로딩 — 외부 패키지 없이 경량 shimmer 효과
@@ -90,10 +91,9 @@ class _ShimmerLoadingState extends State<ShimmerLoading>
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final baseColor = isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE0E0E0);
-    final highlightColor =
-        isDark ? const Color(0xFF3A3A3A) : const Color(0xFFF5F5F5);
+    final mlc = context.mlColors;
+    final baseColor = mlc.shimmerBase;
+    final highlightColor = mlc.shimmerHighlight;
 
     return AnimatedBuilder(
       animation: _controller,

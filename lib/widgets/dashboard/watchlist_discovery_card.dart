@@ -42,7 +42,7 @@ class WatchlistDiscoveryCard extends StatelessWidget {
                     l10n.watchlistDiscoveryTitle,
                     style: TextStyle(
                       fontSize: AppTypography.headlineSmall,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: AppTypography.bold,
                       color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
@@ -170,7 +170,7 @@ class _TickerTile extends StatelessWidget {
                     item.ticker,
                     style: const TextStyle(
                       fontSize: AppTypography.bodyMedium,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: AppTypography.bold,
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),

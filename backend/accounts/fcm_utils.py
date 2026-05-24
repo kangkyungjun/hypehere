@@ -45,6 +45,58 @@ MESSAGES = {
     },
 }
 
+SUBSCRIPTION_MESSAGES = {
+    "INITIAL_PURCHASE": {
+        "en": {"title": "Gold Membership Activated", "body": "Welcome to Gold! Enjoy unlimited holdings, ad-free AI analysis, and more."},
+        "ko": {"title": "Gold 멤버십이 활성화되었습니다", "body": "Gold에 오신 것을 환영합니다! 무제한 보유종목, 광고 없는 AI 분석 등을 즐기세요."},
+        "ja": {"title": "Goldメンバーシップが有効になりました", "body": "Goldへようこそ！無制限の保有銘柄、広告なしAI分析などをお楽しみください。"},
+        "zh": {"title": "Gold会员已激活", "body": "欢迎加入Gold！享受无限持仓、无广告AI分析等功能。"},
+        "es": {"title": "Membresía Gold activada", "body": "¡Bienvenido a Gold! Disfruta de posiciones ilimitadas, análisis AI sin anuncios y más."},
+    },
+    "RENEWAL": {
+        "en": {"title": "Gold Membership Renewed", "body": "Your Gold membership has been renewed. Next renewal: {expiration_date}."},
+        "ko": {"title": "Gold 멤버십이 갱신되었습니다", "body": "Gold 멤버십이 갱신되었습니다. 다음 갱신일: {expiration_date}."},
+        "ja": {"title": "Goldメンバーシップが更新されました", "body": "Goldメンバーシップが更新されました。次回更新日: {expiration_date}。"},
+        "zh": {"title": "Gold会员已续费", "body": "Gold会员已续费。下次续费日期: {expiration_date}。"},
+        "es": {"title": "Membresía Gold renovada", "body": "Tu membresía Gold ha sido renovada. Próxima renovación: {expiration_date}."},
+    },
+    "CANCELLATION": {
+        "en": {"title": "Gold Auto-Renewal Cancelled", "body": "Your Gold membership will remain active until {expiration_date}."},
+        "ko": {"title": "Gold 자동 갱신이 취소되었습니다", "body": "{expiration_date}까지 Gold 멤버십을 이용할 수 있습니다."},
+        "ja": {"title": "Gold自動更新がキャンセルされました", "body": "{expiration_date}までGoldメンバーシップをご利用いただけます。"},
+        "zh": {"title": "Gold自动续费已取消", "body": "您的Gold会员将在{expiration_date}之前保持有效。"},
+        "es": {"title": "Renovación automática de Gold cancelada", "body": "Tu membresía Gold seguirá activa hasta {expiration_date}."},
+    },
+    "EXPIRATION": {
+        "en": {"title": "Gold Membership Expired", "body": "Your Gold membership has expired. Subscribe again to continue enjoying Gold benefits."},
+        "ko": {"title": "Gold 멤버십이 만료되었습니다", "body": "Gold 멤버십이 만료되었습니다. 다시 구독하여 Gold 혜택을 계속 이용하세요."},
+        "ja": {"title": "Goldメンバーシップが期限切れです", "body": "Goldメンバーシップが期限切れです。再購読してGold特典をお楽しみください。"},
+        "zh": {"title": "Gold会员已过期", "body": "Gold会员已过期。重新订阅以继续享受Gold权益。"},
+        "es": {"title": "Membresía Gold expirada", "body": "Tu membresía Gold ha expirado. Suscríbete de nuevo para seguir disfrutando de los beneficios."},
+    },
+    "BILLING_ISSUE": {
+        "en": {"title": "Payment Issue", "body": "There was an issue with your Gold membership payment. Please check your payment method."},
+        "ko": {"title": "결제 문제 발생", "body": "Gold 멤버십 결제에 문제가 발생했습니다. 결제 수단을 확인해주세요."},
+        "ja": {"title": "お支払いの問題", "body": "Goldメンバーシップの支払いに問題が発生しました。お支払い方法を確認してください。"},
+        "zh": {"title": "付款问题", "body": "Gold会员付款出现问题。请检查您的付款方式。"},
+        "es": {"title": "Problema de pago", "body": "Hubo un problema con el pago de tu membresía Gold. Verifica tu método de pago."},
+    },
+    "TRANSFER_OUT": {
+        "en": {"title": "Subscription Transferred", "body": "Your Gold subscription has been transferred to another account."},
+        "ko": {"title": "구독이 이전되었습니다", "body": "Gold 구독이 다른 계정으로 이전되었습니다."},
+        "ja": {"title": "サブスクリプションが移行されました", "body": "Goldサブスクリプションが別のアカウントに移行されました。"},
+        "zh": {"title": "订阅已转移", "body": "您的Gold订阅已转移到其他账户。"},
+        "es": {"title": "Suscripción transferida", "body": "Tu suscripción Gold ha sido transferida a otra cuenta."},
+    },
+    "TRANSFER_IN": {
+        "en": {"title": "Subscription Received", "body": "A Gold subscription has been transferred to your account."},
+        "ko": {"title": "구독이 이전되었습니다", "body": "Gold 구독이 내 계정으로 이전되었습니다."},
+        "ja": {"title": "サブスクリプションを受け取りました", "body": "Goldサブスクリプションがあなたのアカウントに移行されました。"},
+        "zh": {"title": "收到订阅", "body": "一个Gold订阅已转移到您的账户。"},
+        "es": {"title": "Suscripción recibida", "body": "Una suscripción Gold ha sido transferida a tu cuenta."},
+    },
+}
+
 DEFAULT_LANG = "en"
 
 
@@ -311,4 +363,51 @@ def send_comment_notification(user_id, msg_key, msg_params=None, data=None):
     title, body = _get_msg(lang, msg_key, **params)
     success, _, _ = _send_fcm(all_tokens, title, body, data)
 
+    return success
+
+
+def send_subscription_notification(user, event_type, context=None):
+    """
+    구독 이벤트 FCM 알림: 특정 사용자에게 다국어 즉시 발송 (rate limit 면제)
+    event_type: INITIAL_PURCHASE | RENEWAL | CANCELLATION | EXPIRATION | BILLING_ISSUE | TRANSFER_OUT | TRANSFER_IN
+    context: {'expiration_date': str, ...}
+    """
+    templates = SUBSCRIPTION_MESSAGES.get(event_type)
+    if not templates:
+        logger.warning(f"Unknown subscription event type: {event_type}")
+        return 0
+
+    ctx = context or {}
+
+    devices = list(
+        DeviceToken.objects.filter(
+            user_id=user.id, is_active=True
+        ).values_list('token', 'language')
+    )
+
+    # 언어 결정
+    first_lang = DEFAULT_LANG
+    if devices:
+        first_lang = devices[0][1] or DEFAULT_LANG
+
+    t = templates.get(first_lang) or templates.get(DEFAULT_LANG, {})
+    title = t.get("title", "").format(**ctx)
+    body = t.get("body", "").format(**ctx)
+
+    # 히스토리 저장 (디바이스 없어도 기록)
+    _save_notification_history(
+        [user.id], title, body,
+        notification_type=f"SUBSCRIPTION_{event_type}",
+    )
+
+    if not devices:
+        return 0
+
+    all_tokens = [token for token, _ in devices]
+    success, _, _ = _send_fcm(all_tokens, title, body, data={
+        "type": f"SUBSCRIPTION_{event_type}",
+        "channel": "subscription",
+    })
+
+    logger.info(f"Subscription FCM [{event_type}]: user={user.email}, success={success}")
     return success

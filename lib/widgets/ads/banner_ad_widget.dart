@@ -71,9 +71,9 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
 
   @override
   Widget build(BuildContext context) {
-    // 관리자가 광고를 OFF한 경우 숨김
+    // Gold: 항상 숨김 / Manager·Master: 토글로 제어 / Regular: 항상 표시
     final authProvider = context.watch<AuthProvider>();
-    if (!authProvider.adsEnabled) {
+    if (authProvider.shouldHideAds) {
       return const SizedBox.shrink();
     }
 

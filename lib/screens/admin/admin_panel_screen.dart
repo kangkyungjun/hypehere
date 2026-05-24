@@ -6,6 +6,7 @@ import '../../utils/error_localizer.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
+import '../../theme/app_stroke.dart';
 import '../../theme/app_typography.dart';
 import '../../l10n/app_localizations.dart';
 import '../../utils/badge_colors.dart';
@@ -138,7 +139,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFFFA000),
+              backgroundColor: context.mlColors.roleGoldColor,
             ),
             child: Text(l10n.confirm, style: TextStyle(color: context.mlColors.onPrimary)),
           ),
@@ -184,7 +185,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFF57C00),
+              backgroundColor: context.mlColors.roleManagerColor,
             ),
             child: Text(l10n.confirm, style: TextStyle(color: context.mlColors.onPrimary)),
           ),
@@ -322,7 +323,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                                     authProvider.roleDisplayName,
                                     style: const TextStyle(
                                       fontSize: AppTypography.headlineLarge,
-                                      fontWeight: FontWeight.bold,
+                                      fontWeight: AppTypography.bold,
                                     ),
                                   ),
                                   const SizedBox(height: AppSpacing.xs),
@@ -386,7 +387,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                                   width: 20,
                                   height: 20,
                                   child: CircularProgressIndicator(
-                                    strokeWidth: 2,
+                                    strokeWidth: AppStroke.medium,
                                     color: context.mlColors.onPrimary,
                                   ),
                                 )
@@ -403,7 +404,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                         l10n.nItems(_totalCount),
                         style: TextStyle(
                           fontSize: AppTypography.bodyLarge,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: AppTypography.bold,
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
@@ -494,7 +495,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                   backgroundColor: context.mlColors.accentBlue,
                   child: Text(
                     nickname.isNotEmpty ? nickname[0].toUpperCase() : 'U',
-                    style: TextStyle(color: context.mlColors.onPrimary, fontWeight: FontWeight.bold),
+                    style: TextStyle(color: context.mlColors.onPrimary, fontWeight: AppTypography.bold),
                   ),
                 ),
                 const SizedBox(width: AppSpacing.lg),
@@ -508,11 +509,16 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                             nickname,
                             style: const TextStyle(
                               fontSize: AppTypography.headlineMedium,
-                              fontWeight: FontWeight.bold,
+                              fontWeight: AppTypography.bold,
                             ),
                           ),
                           const SizedBox(width: AppSpacing.md),
                           _buildRoleBadge(role),
+                          // IAP 결제 Gold vs 수동 승급 Gold 구분 표시
+                          if (role == 'gold') ...[
+                            const SizedBox(width: AppSpacing.xs),
+                            _buildGoldTypeBadge(user['is_iap_gold'] == true),
+                          ],
                         ],
                       ),
                       const SizedBox(height: AppSpacing.xs),
@@ -539,7 +545,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                       icon: const Icon(Icons.workspace_premium),
                       label: Text(l10n.promoteToGold),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: const Color(0xFFFFA000),
+                        foregroundColor: context.mlColors.roleGoldColor,
                       ),
                     ),
                   ),
@@ -571,7 +577,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                         l10n.roleMaster,
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: AppTypography.bold,
                         ),
                       ),
                     ),
@@ -603,10 +609,33 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
     );
   }
 
+  /// Gold 유형 배지 (IAP 결제 vs 수동 승급)
+  Widget _buildGoldTypeBadge(bool isIapGold) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xxs),
+      decoration: BoxDecoration(
+        color: isIapGold ? Colors.blue.shade100 : Colors.orange.shade100,
+        borderRadius: BorderRadius.circular(AppRadius.sm),
+        border: Border.all(
+          color: isIapGold ? Colors.blue.shade300 : Colors.orange.shade300,
+          width: 1,
+        ),
+      ),
+      child: Text(
+        isIapGold ? 'IAP' : 'Manual',
+        style: TextStyle(
+          color: isIapGold ? Colors.blue.shade700 : Colors.orange.shade700,
+          fontSize: AppTypography.micro,
+          fontWeight: AppTypography.bold,
+        ),
+      ),
+    );
+  }
+
   /// 역할 배지
   Widget _buildRoleBadge(String role) {
     final l10n = AppLocalizations.of(context);
-    final badgeColor = BadgeColors.roleBadge(role);
+    final badgeColor = BadgeColors.roleBadge(role, context.mlColors);
     String badgeText;
 
     switch (role) {
@@ -636,7 +665,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
         style: TextStyle(
           color: context.mlColors.onPrimary,
           fontSize: AppTypography.micro,
-          fontWeight: FontWeight.bold,
+          fontWeight: AppTypography.bold,
         ),
       ),
     );

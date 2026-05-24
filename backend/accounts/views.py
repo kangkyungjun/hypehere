@@ -1,7 +1,10 @@
+import json
+import logging
 from datetime import timedelta
 
+from django.conf import settings as django_settings
 from rest_framework import status
-from rest_framework.decorators import api_view, permission_classes, parser_classes
+from rest_framework.decorators import api_view, authentication_classes, permission_classes, parser_classes
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -9,14 +12,16 @@ from rest_framework.authtoken.models import Token
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 from django.utils import timezone
+
+logger = logging.getLogger(__name__)
 from .serializers import (
     RegisterSerializer, LoginSerializer, UserSerializer, ChangePasswordSerializer,
     DeviceTokenSerializer, SubscriptionSyncSerializer,
     SendVerificationCodeSerializer, VerifyCodeSerializer, PasswordResetConfirmSerializer,
 )
-from .models import DeviceToken, NotificationSubscription, NotificationHistory
-from .email_utils import create_and_send_code, verify_code
-from .fcm_utils import send_general_to_all, _send_fcm
+from .models import DeviceToken, NotificationSubscription, NotificationHistory, SubscriptionInfo
+from .email_utils import create_and_send_code, verify_code, send_subscription_email
+from .fcm_utils import send_general_to_all, _send_fcm, send_subscription_notification
 
 User = get_user_model()
 
@@ -58,6 +63,62 @@ def register_view(request):
             'message': '회원가입이 완료되었습니다.',
         }, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def register_with_verification_view(request):
+    """
+    인증코드 검증 + 회원가입 원자적 처리
+    비밀번호 검증을 먼저 수행하여, 실패 시 인증코드를 소진하지 않음
+    Flutter: POST /api/accounts/register-with-verification/
+    """
+    serializer = RegisterSerializer(data=request.data)
+    if not serializer.is_valid():
+        # 비밀번호 검증 실패 등 → 인증코드 미소진 상태로 반환
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    email = serializer.validated_data['email']
+    code = request.data.get('code', '').strip()
+
+    if not code:
+        return Response(
+            {'error': '인증코드를 입력해주세요.'},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    # 이미 가입된 이메일 체크
+    if User.objects.filter(email=email).exists():
+        return Response(
+            {'error': '이미 가입된 이메일입니다.'},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    # 인증코드 검증 (여기서 is_used=True로 마킹)
+    success, error_type = verify_code(email, code, 'signup')
+    if not success:
+        error_messages = {
+            'not_found': '인증코드를 찾을 수 없습니다. 새 코드를 요청해주세요.',
+            'expired': '인증코드가 만료되었습니다. 새 코드를 요청해주세요.',
+            'max_attempts': '입력 횟수를 초과했습니다. 새 코드를 요청해주세요.',
+            'invalid_code': '인증코드가 올바르지 않습니다.',
+        }
+        return Response(
+            {'error': error_messages.get(error_type, '인증에 실패했습니다.'), 'error_type': error_type},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    # 유저 생성 (검증 + 인증코드 모두 통과)
+    user = serializer.save()
+    user.is_email_verified = True
+    user.save(update_fields=['is_email_verified'])
+
+    token, _ = Token.objects.get_or_create(user=user)
+    return Response({
+        'user': UserSerializer(user).data,
+        'token': token.key,
+        'message': '회원가입이 완료되었습니다.',
+    }, status=status.HTTP_201_CREATED)
 
 
 @api_view(['POST'])
@@ -729,3 +790,187 @@ def notification_mark_read_view(request):
     ).update(is_read=True)
 
     return Response({'marked_read': updated})
+
+
+# ========================================
+# RevenueCat IAP Webhook + Subscription API
+# ========================================
+
+@api_view(['POST'])
+@authentication_classes([])
+@permission_classes([AllowAny])
+def revenuecat_webhook_view(request):
+    """
+    RevenueCat webhook 수신 → SubscriptionInfo 업데이트 + role 승급/강등
+    URL: POST /api/marketlens/accounts/webhook/revenuecat/
+    """
+    # Bearer 토큰 검증
+    auth_header = request.headers.get('Authorization', '')
+    expected = f'Bearer {django_settings.REVENUECAT_WEBHOOK_SECRET}'
+    if not django_settings.REVENUECAT_WEBHOOK_SECRET or auth_header != expected:
+        return Response({'error': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
+
+    try:
+        body = request.data if isinstance(request.data, dict) else json.loads(request.body)
+        event = body.get('event', {})
+    except (json.JSONDecodeError, Exception):
+        return Response({'error': 'Invalid JSON'}, status=status.HTTP_400_BAD_REQUEST)
+
+    event_type = event.get('type', '')
+    app_user_id = event.get('app_user_id', '')
+    product_id = event.get('product_id', '')
+    store = event.get('store', '')
+    period_type = event.get('period_type', '')  # 'TRIAL' | 'NORMAL' | 'INTRO'
+    expiration_at_ms = event.get('expiration_at_ms')
+    purchase_at_ms = event.get('original_purchase_date_ms') or event.get('purchased_at_ms')
+
+    if not app_user_id:
+        return Response({'error': 'Missing app_user_id'}, status=status.HTTP_400_BAD_REQUEST)
+
+    # app_user_id = Django user PK (문자열)
+    try:
+        user = User.objects.get(pk=int(app_user_id))
+    except (User.DoesNotExist, ValueError):
+        logger.warning(f'[RevenueCat] User not found: {app_user_id}')
+        return Response({'ok': True})  # RevenueCat에 200 반환 (재시도 방지)
+
+    # SubscriptionInfo upsert
+    sub, _ = SubscriptionInfo.objects.get_or_create(user=user)
+    sub.revenuecat_app_user_id = app_user_id
+    sub.last_webhook_event = event_type
+    sub.last_webhook_at = timezone.now()
+
+    if product_id:
+        sub.product_id = product_id
+    if store:
+        sub.store = store
+
+    if expiration_at_ms:
+        from datetime import datetime as dt, timezone as tz
+        sub.expiration_date = dt.fromtimestamp(
+            int(expiration_at_ms) / 1000, tz=tz.utc,
+        )
+
+    if purchase_at_ms and not sub.original_purchase_date:
+        from datetime import datetime as dt, timezone as tz
+        sub.original_purchase_date = dt.fromtimestamp(
+            int(purchase_at_ms) / 1000, tz=tz.utc,
+        )
+
+    activate_events = {'INITIAL_PURCHASE', 'RENEWAL', 'UNCANCELLATION', 'NON_RENEWING_PURCHASE'}
+    deactivate_events = {'CANCELLATION', 'EXPIRATION', 'BILLING_ISSUE'}
+
+    # 만료일 포맷 (알림 메시지용)
+    expiration_str = ''
+    if sub.expiration_date:
+        expiration_str = sub.expiration_date.strftime('%Y-%m-%d')
+
+    if event_type in activate_events:
+        sub.is_active = True
+        sub.unsubscribe_detected_at = None
+
+        # Trial 처리
+        if event_type == 'INITIAL_PURCHASE' and period_type == 'TRIAL':
+            sub.is_trial = True
+            sub.has_used_trial = True  # 영구 플래그 — 재체험 방지
+            sub.trial_started_at = timezone.now()
+            logger.info(f'[RevenueCat] {user.email} started free trial')
+        elif event_type == 'RENEWAL':
+            sub.is_trial = False  # 체험→유료 전환 완료
+
+        if user.role == 'regular':
+            user.role = 'gold'
+            user.save(update_fields=['role'])
+            logger.info(f'[RevenueCat] {user.email} upgraded to gold via {event_type}')
+
+        # FCM + 이메일 알림 발송
+        if event_type in ('INITIAL_PURCHASE', 'RENEWAL'):
+            store_name = 'App Store' if store == 'APP_STORE' else 'Google Play'
+            notification_ctx = {'expiration_date': expiration_str, 'store': store_name}
+            try:
+                send_subscription_notification(user, event_type, context=notification_ctx)
+            except Exception as e:
+                logger.error(f'[RevenueCat] FCM error for {event_type}: {e}')
+            try:
+                send_subscription_email(user, event_type, context=notification_ctx)
+            except Exception as e:
+                logger.error(f'[RevenueCat] Email error for {event_type}: {e}')
+
+    elif event_type in deactivate_events:
+        sub.is_active = False
+        sub.is_trial = False  # 만료/취소 시 체험 상태도 해제
+        if event_type == 'CANCELLATION':
+            sub.unsubscribe_detected_at = timezone.now()
+        # IAP로 승급된 Gold만 강등 (수동 승급 Gold 보호 — webhook 자동 강등만 차단)
+        if user.role == 'gold' and sub.original_purchase_date is not None:
+            user.role = 'regular'
+            user.save(update_fields=['role'])
+            logger.info(f'[RevenueCat] {user.email} downgraded to regular via {event_type}')
+
+        # FCM + 이메일 알림 발송
+        notification_ctx = {'expiration_date': expiration_str}
+        try:
+            send_subscription_notification(user, event_type, context=notification_ctx)
+        except Exception as e:
+            logger.error(f'[RevenueCat] FCM error for {event_type}: {e}')
+        if event_type == 'EXPIRATION':
+            try:
+                send_subscription_email(user, event_type, context=notification_ctx)
+            except Exception as e:
+                logger.error(f'[RevenueCat] Email error for {event_type}: {e}')
+
+    elif event_type == 'TRANSFER':
+        # 구독이 다른 app_user_id로 이동할 때
+        transferred_from = event.get('transferred_from', [''])[0] if isinstance(event.get('transferred_from'), list) else event.get('transferred_from', '')
+        transferred_to = event.get('transferred_to', [''])[0] if isinstance(event.get('transferred_to'), list) else event.get('transferred_to', '')
+
+        # 이전 소유자에게 알림
+        if transferred_from:
+            try:
+                old_user = User.objects.get(pk=int(transferred_from))
+                send_subscription_notification(old_user, 'TRANSFER_OUT')
+            except (User.DoesNotExist, ValueError, Exception) as e:
+                logger.warning(f'[RevenueCat] TRANSFER_OUT notification failed: {e}')
+
+        # 새 소유자에게 알림
+        if transferred_to:
+            try:
+                new_user = User.objects.get(pk=int(transferred_to))
+                send_subscription_notification(new_user, 'TRANSFER_IN')
+            except (User.DoesNotExist, ValueError, Exception) as e:
+                logger.warning(f'[RevenueCat] TRANSFER_IN notification failed: {e}')
+
+        logger.info(f'[RevenueCat] TRANSFER: {transferred_from} → {transferred_to}')
+
+    sub.save()
+    return Response({'ok': True})
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def subscription_status_view(request):
+    """
+    현재 유저의 구독 상태 조회
+    GET /api/marketlens/accounts/subscription/status/
+    """
+    try:
+        sub = request.user.subscription
+        return Response({
+            'is_active': sub.is_active,
+            'product_id': sub.product_id,
+            'store': sub.store,
+            'expiration_date': sub.expiration_date.isoformat() if sub.expiration_date else None,
+            'is_iap_gold': sub.original_purchase_date is not None,
+            'is_trial': sub.is_trial,
+            'has_used_trial': sub.has_used_trial,
+        })
+    except SubscriptionInfo.DoesNotExist:
+        return Response({
+            'is_active': False,
+            'product_id': '',
+            'store': '',
+            'expiration_date': None,
+            'is_iap_gold': False,
+            'is_trial': False,
+            'has_used_trial': False,
+        })

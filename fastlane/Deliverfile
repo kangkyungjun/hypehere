@@ -1,0 +1,13 @@
+app_identifier("com.marketlens.marketlens")
+team_id("47S7L6T8KR")
+app(6759358693)
+
+skip_metadata(false)
+metadata_path("./fastlane/metadata")
+skip_app_version_update(false)
+overwrite_screenshots(true)
+submit_for_review(false)
+automatic_release(false)
+precheck_include_in_app_purchases(false)
+
+screenshots_path("./fastlane/screenshots")

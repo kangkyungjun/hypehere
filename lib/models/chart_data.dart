@@ -1,4 +1,5 @@
 import 'news_data.dart';
+import 'stock_classification.dart';
 
 /// Chart data models for MarketLens analytics API
 ///
@@ -33,6 +34,9 @@ class CompleteChartData {
   final List<NewsItem>? news;
   final NewsSentimentStats? newsSentimentStats;
 
+  // Classification (Peter Lynch)
+  final StockClassification? classification;
+
   CompleteChartData({
     required this.ticker,
     required this.data,
@@ -52,6 +56,7 @@ class CompleteChartData {
     this.earningsHistory,
     this.news,
     this.newsSentimentStats,
+    this.classification,
   });
 
   /// Safe accessor: returns last data point or null if empty.
@@ -106,6 +111,9 @@ class CompleteChartData {
           : null,
       newsSentimentStats: json['news_sentiment_stats'] != null
           ? NewsSentimentStats.fromJson(json['news_sentiment_stats'] as Map<String, dynamic>)
+          : null,
+      classification: json['classification'] != null
+          ? StockClassification.fromJson(json['classification'] as Map<String, dynamic>)
           : null,
     );
   }
@@ -195,6 +203,15 @@ class ChartDataPoint {
   final List<String>? aiBearishReasons;
   final String? aiFinalComment;
 
+  // Expert analysis (5-language, per-field)
+  final String? aiAnalysisKo;
+  final String? aiAnalysisEn;
+  final String? aiAnalysisZh;
+  final String? aiAnalysisJa;
+  final String? aiAnalysisEs;
+  final String? aiExpertPrediction;    // "bullish" / "bearish" / "neutral"
+  final List<String>? aiExpertKeyFactors;
+
   ChartDataPoint({
     required this.date,
     this.open,
@@ -229,6 +246,13 @@ class ChartDataPoint {
     this.aiBullishReasons,
     this.aiBearishReasons,
     this.aiFinalComment,
+    this.aiAnalysisKo,
+    this.aiAnalysisEn,
+    this.aiAnalysisZh,
+    this.aiAnalysisJa,
+    this.aiAnalysisEs,
+    this.aiExpertPrediction,
+    this.aiExpertKeyFactors,
   });
 
   factory ChartDataPoint.fromJson(Map<String, dynamic> json) {
@@ -270,6 +294,15 @@ class ChartDataPoint {
           ? List<String>.from(json['ai_bearish_reasons'] as List)
           : null,
       aiFinalComment: json['ai_final_comment'] as String?,
+      aiAnalysisKo: json['ai_analysis_ko'] as String?,
+      aiAnalysisEn: json['ai_analysis_en'] as String?,
+      aiAnalysisZh: json['ai_analysis_zh'] as String?,
+      aiAnalysisJa: json['ai_analysis_ja'] as String?,
+      aiAnalysisEs: json['ai_analysis_es'] as String?,
+      aiExpertPrediction: json['ai_expert_prediction'] as String?,
+      aiExpertKeyFactors: json['ai_expert_key_factors'] != null
+          ? List<String>.from(json['ai_expert_key_factors'] as List)
+          : null,
     );
   }
 
@@ -308,6 +341,13 @@ class ChartDataPoint {
       'ai_bullish_reasons': aiBullishReasons,
       'ai_bearish_reasons': aiBearishReasons,
       'ai_final_comment': aiFinalComment,
+      'ai_analysis_ko': aiAnalysisKo,
+      'ai_analysis_en': aiAnalysisEn,
+      'ai_analysis_zh': aiAnalysisZh,
+      'ai_analysis_ja': aiAnalysisJa,
+      'ai_analysis_es': aiAnalysisEs,
+      'ai_expert_prediction': aiExpertPrediction,
+      'ai_expert_key_factors': aiExpertKeyFactors,
     };
   }
 
@@ -335,6 +375,17 @@ class ChartDataPoint {
         return SignalType.hold;
       default:
         return SignalType.neutral;
+    }
+  }
+
+  /// Returns expert analysis text matching the given locale
+  String? expertAnalysisForLang(String langCode) {
+    switch (langCode) {
+      case 'ko': return aiAnalysisKo;
+      case 'zh': return aiAnalysisZh;
+      case 'ja': return aiAnalysisJa;
+      case 'es': return aiAnalysisEs;
+      default:   return aiAnalysisEn;
     }
   }
 }

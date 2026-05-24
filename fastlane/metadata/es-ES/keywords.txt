@@ -1,0 +1,1 @@
+acciones,bolsa,IA,analisis,senal,S&P500,treemap,inversion,mercado,compra,venta,grafico,RSI,MACD

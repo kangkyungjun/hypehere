@@ -6,7 +6,9 @@ import '../../providers/watchlist_provider.dart';
 import '../../providers/recent_search_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/locale_provider.dart';
+import '../../providers/subscription_provider.dart';
 import '../../services/auth_service.dart';
+import '../../widgets/common/gold_upgrade_sheet.dart';
 import '../auth/login_screen.dart';
 import '../auth/signup_screen.dart';
 import '../profile/profile_screen.dart';
@@ -16,8 +18,13 @@ import '../../l10n/app_localizations.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
+import '../../theme/app_stroke.dart';
 import '../../theme/app_typography.dart';
+import '../../utils/app_page_route.dart';
 import '../../utils/badge_colors.dart';
+import '../../providers/coach_mark_provider.dart';
+import '../../widgets/common/bento_card.dart';
+import '../../widgets/common/section_header.dart';
 
 /// Settings Screen - 앱 설정
 ///
@@ -37,9 +44,7 @@ class SettingsScreen extends StatelessWidget {
         final l10n = AppLocalizations.of(context);
         return AlertDialog(
           title: Text(l10n.clearRecentSearches),
-          content: Text(
-            l10n.clearRecentSearchesConfirm,
-          ),
+          content: Text(l10n.clearRecentSearchesConfirm),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
@@ -78,9 +83,7 @@ class SettingsScreen extends StatelessWidget {
         final l10n = AppLocalizations.of(context);
         return AlertDialog(
           title: Text(l10n.clearWatchlist),
-          content: Text(
-            l10n.clearWatchlistConfirm,
-          ),
+          content: Text(l10n.clearWatchlistConfirm),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
@@ -119,9 +122,7 @@ class SettingsScreen extends StatelessWidget {
         final l10n = AppLocalizations.of(context);
         return AlertDialog(
           title: Text(l10n.deleteAllData),
-          content: Text(
-            l10n.deleteAllDataConfirm,
-          ),
+          content: Text(l10n.deleteAllDataConfirm),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
@@ -178,9 +179,7 @@ class SettingsScreen extends StatelessWidget {
       ),
       children: [
         const SizedBox(height: AppSpacing.xl),
-        Text(
-          l10n.appDescription,
-        ),
+        Text(l10n.appDescription),
         const SizedBox(height: AppSpacing.xl),
         Text(
           '© 2026 MarketLens',
@@ -198,8 +197,8 @@ class SettingsScreen extends StatelessWidget {
     final lang = Localizations.localeOf(context).languageCode;
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => WebViewScreen(
+      appPageRoute(
+        builder: (_) => WebViewScreen(
           title: l10n.privacyPolicy,
           url: 'https://www.hypehere.net/marketlens/privacy/?lang=$lang',
         ),
@@ -212,8 +211,8 @@ class SettingsScreen extends StatelessWidget {
     final lang = Localizations.localeOf(context).languageCode;
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => WebViewScreen(
+      appPageRoute(
+        builder: (_) => WebViewScreen(
           title: l10n.termsOfService,
           url: 'https://www.hypehere.net/marketlens/terms/?lang=$lang',
         ),
@@ -225,11 +224,9 @@ class SettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.settings),
-        elevation: 0,
-      ),
+      appBar: AppBar(title: Text(l10n.settings), elevation: 0),
       body: ListView(
+        padding: const EdgeInsets.only(bottom: AppSpacing.xxxl),
         children: [
           // Account Section
           _buildAccountSection(context),
@@ -241,39 +238,45 @@ class SettingsScreen extends StatelessWidget {
               if (authProvider.isManagerOrAbove) {
                 return Column(
                   children: [
-                    const Divider(height: 32),
                     _buildSectionHeader(context, l10n.admin),
-                    ListTile(
-                      leading: Icon(Icons.admin_panel_settings, color: context.mlColors.warningColor),
-                      title: Text(
-                        l10n.adminPanel,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      subtitle: Text(l10n.adminPanelSubtitle),
-                      trailing: const Icon(Icons.chevron_right),
-                      onTap: () => _navigateToAdminPanel(context),
-                    ),
-                    ListTile(
-                      leading: Icon(Icons.campaign, color: context.mlColors.accentBlue),
-                      title: Text(
-                        l10n.sendPushNotification,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      subtitle: Text(l10n.sendPushNotificationSubtitle),
-                      trailing: const Icon(Icons.chevron_right),
-                      onTap: () => _showBroadcastPushDialog(context),
-                    ),
-                    SwitchListTile(
-                      secondary: Icon(
-                        authProvider.adsEnabled ? Icons.ads_click : Icons.block,
-                        color: authProvider.adsEnabled ? context.mlColors.gainColor : context.mlColors.neutralColor,
-                      ),
-                      title: Text(l10n.showAds),
-                      subtitle: Text(authProvider.adsEnabled ? l10n.adsEnabledDescription : l10n.adsDisabledDescription),
-                      value: authProvider.adsEnabled,
-                      onChanged: (value) {
-                        authProvider.setAdsEnabled(value);
-                      },
+                    _buildSettingsCard(
+                      context,
+                      children: [
+                        _buildSettingsTile(
+                          context,
+                          icon: Icons.admin_panel_settings_rounded,
+                          iconColor: context.mlColors.warningColor,
+                          title: l10n.adminPanel,
+                          subtitle: l10n.adminPanelSubtitle,
+                          onTap: () => _navigateToAdminPanel(context),
+                        ),
+                        _buildSettingsTile(
+                          context,
+                          icon: Icons.campaign_rounded,
+                          iconColor: context.mlColors.accentBlue,
+                          title: l10n.sendPushNotification,
+                          subtitle: l10n.sendPushNotificationSubtitle,
+                          onTap: () => _showBroadcastPushDialog(context),
+                        ),
+                        SwitchListTile(
+                          secondary: Icon(
+                            authProvider.adsEnabled
+                                ? Icons.ads_click
+                                : Icons.block,
+                            color: authProvider.adsEnabled
+                                ? context.mlColors.gainColor
+                                : context.mlColors.neutralColor,
+                          ),
+                          title: Text(l10n.showAds),
+                          subtitle: Text(
+                            authProvider.adsEnabled
+                                ? l10n.adsEnabledDescription
+                                : l10n.adsDisabledDescription,
+                          ),
+                          value: authProvider.adsEnabled,
+                          onChanged: authProvider.setAdsEnabled,
+                        ),
+                      ],
                     ),
                   ],
                 );
@@ -282,7 +285,8 @@ class SettingsScreen extends StatelessWidget {
             },
           ),
 
-          const Divider(height: 32),
+          // Subscription Section
+          _buildSubscriptionSection(context),
 
           // Language Section
           Consumer<LocaleProvider>(
@@ -307,41 +311,54 @@ class SettingsScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildSectionHeader(context, l10n.languageSettings),
-                  ListTile(
-                    leading: const Icon(Icons.language),
-                    title: Text(l10n.language),
-                    subtitle: Text(currentLanguageLabel),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () => _showLanguageBottomSheet(context, localeProvider),
+                  _buildSettingsCard(
+                    context,
+                    children: [
+                      _buildSettingsTile(
+                        context,
+                        icon: Icons.language_rounded,
+                        title: l10n.language,
+                        subtitle: currentLanguageLabel,
+                        onTap: () =>
+                            _showLanguageBottomSheet(context, localeProvider),
+                      ),
+                    ],
                   ),
                 ],
               );
             },
           ),
 
-          const Divider(height: 32),
-
           // Community Section
           Builder(
             builder: (context) {
               final l10n = AppLocalizations.of(context);
-              return ListTile(
-                leading: const Icon(Icons.forum),
-                title: Text(l10n.tabCommunity),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () {
-                  Navigator.push(
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildSectionHeader(context, l10n.tabCommunity),
+                  _buildSettingsCard(
                     context,
-                    MaterialPageRoute(
-                      builder: (context) => const CommunityFeedScreen(),
-                    ),
-                  );
-                },
+                    children: [
+                      _buildSettingsTile(
+                        context,
+                        icon: Icons.forum_rounded,
+                        title: l10n.tabCommunity,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            appPageRoute(
+                              builder: (_) => const CommunityFeedScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ],
               );
             },
           ),
-
-          const Divider(height: 32),
 
           // Data Management Section
           Builder(
@@ -351,48 +368,72 @@ class SettingsScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildSectionHeader(context, l10n.dataManagement),
-                  Consumer<RecentSearchProvider>(
-                    builder: (context, recentSearchProvider, child) {
-                      final l10n = AppLocalizations.of(context);
-                      final searchCount = recentSearchProvider.recentSearches.length;
-                      return ListTile(
-                        leading: const Icon(Icons.history),
-                        title: Text(l10n.clearRecentSearches),
-                        subtitle: Text(l10n.nSearchRecords(searchCount)),
-                        trailing: const Icon(Icons.chevron_right),
-                        onTap: () => _clearRecentSearches(context, recentSearchProvider),
-                      );
-                    },
-                  ),
-                  Consumer<WatchlistProvider>(
-                    builder: (context, watchlistProvider, child) {
-                      final l10n = AppLocalizations.of(context);
-                      final watchlistCount = watchlistProvider.watchlist.length;
-                      return ListTile(
-                        leading: const Icon(Icons.bookmark),
-                        title: Text(l10n.clearWatchlist),
-                        subtitle: Text(l10n.nTickers(watchlistCount)),
-                        trailing: const Icon(Icons.chevron_right),
-                        onTap: () => _clearWatchlist(context, watchlistProvider),
-                      );
-                    },
-                  ),
-                  ListTile(
-                    leading: Icon(Icons.delete_sweep, color: context.mlColors.dangerColor),
-                    title: Text(
-                      l10n.deleteAllData,
-                      style: TextStyle(color: context.mlColors.dangerColor),
-                    ),
-                    subtitle: Text(l10n.removeAllLocalData),
-                    trailing: Icon(Icons.chevron_right, color: context.mlColors.dangerColor),
-                    onTap: () => _clearAllData(context),
+                  _buildSettingsCard(
+                    context,
+                    children: [
+                      Consumer<RecentSearchProvider>(
+                        builder: (context, recentSearchProvider, child) {
+                          final searchCount =
+                              recentSearchProvider.recentSearches.length;
+                          return _buildSettingsTile(
+                            context,
+                            icon: Icons.history_rounded,
+                            title: l10n.clearRecentSearches,
+                            subtitle: l10n.nSearchRecords(searchCount),
+                            onTap: () => _clearRecentSearches(
+                              context,
+                              recentSearchProvider,
+                            ),
+                          );
+                        },
+                      ),
+                      Consumer<WatchlistProvider>(
+                        builder: (context, watchlistProvider, child) {
+                          final watchlistCount =
+                              watchlistProvider.watchlist.length;
+                          return _buildSettingsTile(
+                            context,
+                            icon: Icons.bookmark_rounded,
+                            title: l10n.clearWatchlist,
+                            subtitle: l10n.nTickers(watchlistCount),
+                            onTap: () =>
+                                _clearWatchlist(context, watchlistProvider),
+                          );
+                        },
+                      ),
+                      Consumer<CoachMarkProvider>(
+                        builder: (context, coachMark, child) {
+                          return _buildSettingsTile(
+                            context,
+                            icon: Icons.school_outlined,
+                            title: l10n.resetTutorials,
+                            subtitle: l10n.resetTutorialsDesc,
+                            onTap: () async {
+                              await coachMark.resetAll();
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(l10n.tutorialsReset)),
+                                );
+                              }
+                            },
+                          );
+                        },
+                      ),
+                      _buildSettingsTile(
+                        context,
+                        icon: Icons.delete_sweep_rounded,
+                        iconColor: context.mlColors.dangerColor,
+                        title: l10n.deleteAllData,
+                        subtitle: l10n.removeAllLocalData,
+                        titleColor: context.mlColors.dangerColor,
+                        onTap: () => _clearAllData(context),
+                      ),
+                    ],
                   ),
                 ],
               );
             },
           ),
-
-          const Divider(height: 32),
 
           // App Info Section
           Builder(
@@ -402,12 +443,17 @@ class SettingsScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildSectionHeader(context, l10n.info),
-                  ListTile(
-                    leading: const Icon(Icons.info_outline),
-                    title: Text(l10n.aboutMarketLens),
-                    subtitle: Text(l10n.version('1.0.0')),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () => _showAbout(context),
+                  _buildSettingsCard(
+                    context,
+                    children: [
+                      _buildSettingsTile(
+                        context,
+                        icon: Icons.info_outline_rounded,
+                        title: l10n.aboutMarketLens,
+                        subtitle: l10n.version('1.0.0'),
+                        onTap: () => _showAbout(context),
+                      ),
+                    ],
                   ),
                 ],
               );
@@ -434,7 +480,7 @@ class SettingsScreen extends StatelessWidget {
                       'MarketLens',
                       style: TextStyle(
                         fontSize: AppTypography.headlineMedium,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: AppTypography.bold,
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
@@ -457,13 +503,17 @@ class SettingsScreen extends StatelessWidget {
                             l10n.privacyPolicy,
                             style: TextStyle(
                               fontSize: AppTypography.caption,
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
                               decoration: TextDecoration.underline,
                             ),
                           ),
                         ),
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.md,
+                          ),
                           child: Text(
                             '|',
                             style: TextStyle(
@@ -478,7 +528,9 @@ class SettingsScreen extends StatelessWidget {
                             l10n.termsOfService,
                             style: TextStyle(
                               fontSize: AppTypography.caption,
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
                               decoration: TextDecoration.underline,
                             ),
                           ),
@@ -503,6 +555,164 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
+  /// Subscription Section
+  Widget _buildSubscriptionSection(BuildContext context) {
+    return Consumer2<AuthProvider, SubscriptionProvider>(
+      builder: (context, auth, sub, child) {
+        final l10n = AppLocalizations.of(context);
+
+        // 비로그인 또는 Manager/Master → 표시 안 함
+        if (!auth.isLoggedIn || auth.isManagerOrAbove) {
+          return const SizedBox.shrink();
+        }
+
+        if (auth.isGoldOrAbove) {
+          // Gold 유저: 구독 상태 + 구독 관리 + 구매 복원
+          final formattedDate = sub.expirationDate != null
+              ? '${sub.expirationDate!.year}-${sub.expirationDate!.month.toString().padLeft(2, '0')}-${sub.expirationDate!.day.toString().padLeft(2, '0')}'
+              : '';
+          final subtitleText = sub.isOnTrial && formattedDate.isNotEmpty
+              ? l10n.trialEndsOn(formattedDate)
+              : formattedDate.isNotEmpty
+              ? l10n.subscriptionExpires(formattedDate)
+              : '';
+          final badgeText = sub.isOnTrial
+              ? l10n.onFreeTrial
+              : l10n.subscriptionActive;
+          final badgeColor = sub.isOnTrial
+              ? Colors.orange.shade600
+              : Colors.green.shade600;
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildSectionHeader(context, l10n.subscription),
+              _buildSettingsCard(
+                context,
+                children: [
+                  ListTile(
+                    leading: Icon(
+                      Icons.workspace_premium_rounded,
+                      color: Colors.amber.shade700,
+                    ),
+                    title: Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            l10n.goldMembershipTitle,
+                            style: AppTypography.bodyStrong.copyWith(
+                              color: context.mlColors.textPrimary,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(width: AppSpacing.md),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.md,
+                            vertical: AppSpacing.xs,
+                          ),
+                          decoration: BoxDecoration(
+                            color: badgeColor,
+                            borderRadius: BorderRadius.circular(
+                              AppRadius.badge,
+                            ),
+                          ),
+                          child: Text(
+                            badgeText,
+                            style: TextStyle(
+                              color: context.mlColors.onPrimary,
+                              fontSize: AppTypography.micro,
+                              fontWeight: AppTypography.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    subtitle: subtitleText.isNotEmpty
+                        ? Text(subtitleText)
+                        : null,
+                  ),
+                  _buildSettingsTile(
+                    context,
+                    icon: Icons.settings_rounded,
+                    title: l10n.manageSubscription,
+                    onTap: () => sub.openManagement(),
+                  ),
+                  _buildSettingsTile(
+                    context,
+                    icon: Icons.restore_rounded,
+                    title: l10n.restorePurchaseTitle,
+                    subtitle: l10n.restorePurchaseDescription,
+                    onTap: () async {
+                      final success = await sub.restorePurchases();
+                      if (!context.mounted) return;
+                      if (success) {
+                        await auth.refreshUserInfo();
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(l10n.purchaseRestored)),
+                          );
+                        }
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(l10n.purchaseRestoreFailed)),
+                        );
+                      }
+                    },
+                  ),
+                ],
+              ),
+            ],
+          );
+        }
+
+        // Regular 유저: 업그레이드 유도 + 구매 복원
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildSectionHeader(context, l10n.subscription),
+            _buildSettingsCard(
+              context,
+              children: [
+                _buildSettingsTile(
+                  context,
+                  icon: Icons.workspace_premium_rounded,
+                  iconColor: Colors.amber.shade700,
+                  title: l10n.upgradeToGold,
+                  subtitle: l10n.goldBenefitNoAds,
+                  onTap: () =>
+                      GoldUpgradeSheet.show(context, source: 'settings'),
+                ),
+                _buildSettingsTile(
+                  context,
+                  icon: Icons.restore_rounded,
+                  title: l10n.restorePurchaseTitle,
+                  subtitle: l10n.restorePurchaseDescription,
+                  onTap: () async {
+                    final success = await sub.restorePurchases();
+                    if (!context.mounted) return;
+                    if (success) {
+                      await auth.refreshUserInfo();
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(l10n.purchaseRestored)),
+                        );
+                      }
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(l10n.purchaseRestoreFailed)),
+                      );
+                    }
+                  },
+                ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   /// Account Section
   Widget _buildAccountSection(BuildContext context) {
     return Consumer<AuthProvider>(
@@ -522,51 +732,68 @@ class SettingsScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildSectionHeader(context, l10n.account),
-              Card(
-                margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.md),
-                elevation: 2,
-                child: ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor: context.mlColors.accentBlue,
-                    child: Text(
-                      user.nickname.isNotEmpty
-                          ? user.nickname[0].toUpperCase()
-                          : 'U',
-                      style: TextStyle(
-                        color: context.mlColors.onPrimary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  title: Row(
-                    children: [
-                      Text(
-                        user.nickname,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: AppTypography.headlineMedium,
-                        ),
-                      ),
-                      const SizedBox(width: AppSpacing.md),
-                      _buildRoleBadge(context, user.role),
-                    ],
-                  ),
-                  subtitle: Text(
-                    user.email,
-                    style: TextStyle(
-                      fontSize: AppTypography.bodySmall,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  trailing: const Icon(Icons.chevron_right),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
+                child: BentoCard(
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(
-                        builder: (context) => const ProfileScreen(),
-                      ),
+                      appPageRoute(builder: (_) => const ProfileScreen()),
                     );
                   },
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 24,
+                        backgroundColor: context.mlColors.accentBlue,
+                        child: Text(
+                          user.nickname.isNotEmpty
+                              ? user.nickname[0].toUpperCase()
+                              : 'U',
+                          style: TextStyle(
+                            color: context.mlColors.onPrimary,
+                            fontWeight: AppTypography.bold,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.md),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    user.nickname,
+                                    style: AppTypography.cardTitle.copyWith(
+                                      color: context.mlColors.textPrimary,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                const SizedBox(width: AppSpacing.sm),
+                                _buildRoleBadge(context, user.role),
+                              ],
+                            ),
+                            const SizedBox(height: AppSpacing.xs),
+                            Text(
+                              user.email,
+                              style: AppTypography.label.copyWith(
+                                color: context.mlColors.textSecondary,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.md),
+                      Icon(
+                        Icons.chevron_right,
+                        color: context.mlColors.textTertiary,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -577,27 +804,41 @@ class SettingsScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildSectionHeader(context, l10n.account),
-              Card(
-                margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.md),
-                elevation: 2,
-                child: Column(
-                  children: [
-                    ListTile(
-                      leading: const Icon(Icons.login),
-                      title: Text(l10n.login),
-                      subtitle: Text(l10n.loginSubtitle),
-                      trailing: const Icon(Icons.chevron_right),
-                      onTap: () => _navigateToLogin(context),
-                    ),
-                    const Divider(height: 1),
-                    ListTile(
-                      leading: const Icon(Icons.person_add),
-                      title: Text(l10n.signup),
-                      subtitle: Text(l10n.signupSubtitle),
-                      trailing: const Icon(Icons.chevron_right),
-                      onTap: () => _navigateToSignup(context),
-                    ),
-                  ],
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
+                child: BentoCard(
+                  padding: EdgeInsets.zero,
+                  child: Column(
+                    children: [
+                      ListTile(
+                        leading: CircleAvatar(
+                          backgroundColor: context.mlColors.infoBg,
+                          child: Icon(
+                            Icons.login_rounded,
+                            color: context.mlColors.accentBlue,
+                          ),
+                        ),
+                        title: Text(l10n.login),
+                        subtitle: Text(l10n.loginSubtitle),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: () => _navigateToLogin(context),
+                      ),
+                      const Divider(height: 1),
+                      ListTile(
+                        leading: CircleAvatar(
+                          backgroundColor: context.mlColors.infoBg,
+                          child: Icon(
+                            Icons.person_add_alt_1_rounded,
+                            color: context.mlColors.accentBlue,
+                          ),
+                        ),
+                        title: Text(l10n.signup),
+                        subtitle: Text(l10n.signupSubtitle),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: () => _navigateToSignup(context),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -611,9 +852,7 @@ class SettingsScreen extends StatelessWidget {
   Future<void> _navigateToLogin(BuildContext context) async {
     final result = await Navigator.push<bool>(
       context,
-      MaterialPageRoute(
-        builder: (context) => const LoginScreen(),
-      ),
+      appPageRoute(builder: (_) => const LoginScreen()),
     );
 
     // 로그인 성공 시 AuthProvider 자동 업데이트됨
@@ -632,9 +871,7 @@ class SettingsScreen extends StatelessWidget {
   Future<void> _navigateToSignup(BuildContext context) async {
     final result = await Navigator.push<bool>(
       context,
-      MaterialPageRoute(
-        builder: (context) => const SignupScreen(),
-      ),
+      appPageRoute(builder: (_) => const SignupScreen()),
     );
 
     // 회원가입 성공 시 AuthProvider 자동 업데이트됨
@@ -653,9 +890,7 @@ class SettingsScreen extends StatelessWidget {
   void _navigateToAdminPanel(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => const AdminPanelScreen(),
-      ),
+      appPageRoute(builder: (_) => const AdminPanelScreen()),
     );
   }
 
@@ -698,7 +933,9 @@ class SettingsScreen extends StatelessWidget {
               ),
               actions: [
                 TextButton(
-                  onPressed: isSending ? null : () => Navigator.pop(dialogContext),
+                  onPressed: isSending
+                      ? null
+                      : () => Navigator.pop(dialogContext),
                   child: Text(l10n.cancel),
                 ),
                 FilledButton(
@@ -721,7 +958,9 @@ class SettingsScreen extends StatelessWidget {
                             if (context.mounted) {
                               final sent = result['sent'] ?? 0;
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(l10n.pushSentResult(sent))),
+                                SnackBar(
+                                  content: Text(l10n.pushSentResult(sent)),
+                                ),
                               );
                             }
                           } catch (e) {
@@ -737,7 +976,9 @@ class SettingsScreen extends StatelessWidget {
                       ? const SizedBox(
                           width: 20,
                           height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
+                          child: CircularProgressIndicator(
+                            strokeWidth: AppStroke.medium,
+                          ),
                         )
                       : Text(l10n.send),
                 ),
@@ -750,7 +991,10 @@ class SettingsScreen extends StatelessWidget {
   }
 
   /// Language selection bottom sheet
-  void _showLanguageBottomSheet(BuildContext context, LocaleProvider localeProvider) {
+  void _showLanguageBottomSheet(
+    BuildContext context,
+    LocaleProvider localeProvider,
+  ) {
     final l10n = AppLocalizations.of(context);
     final currentLocale = localeProvider.locale;
 
@@ -767,7 +1011,7 @@ class SettingsScreen extends StatelessWidget {
                   l10n.languageSettings,
                   style: const TextStyle(
                     fontSize: AppTypography.headlineLarge,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: AppTypography.bold,
                   ),
                 ),
               ),
@@ -854,11 +1098,62 @@ class SettingsScreen extends StatelessWidget {
     required VoidCallback onTap,
   }) {
     return ListTile(
-      leading: Text(flag, style: TextStyle(fontSize: AppTypography.displayLarge)),
+      leading: Text(
+        flag,
+        style: TextStyle(fontSize: AppTypography.displayLarge),
+      ),
       title: Text(label),
       trailing: isSelected
           ? Icon(Icons.check, color: context.mlColors.accentBlue)
           : null,
+      onTap: onTap,
+    );
+  }
+
+  Widget _buildSettingsCard(
+    BuildContext context, {
+    required List<Widget> children,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
+      child: BentoCard(
+        padding: EdgeInsets.zero,
+        child: Column(children: children),
+      ),
+    );
+  }
+
+  Widget _buildSettingsTile(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    String? subtitle,
+    Color? iconColor,
+    Color? titleColor,
+    VoidCallback? onTap,
+  }) {
+    final mlc = context.mlColors;
+    return ListTile(
+      leading: CircleAvatar(
+        backgroundColor: (iconColor ?? mlc.accentBlue).withValues(alpha: 0.10),
+        child: Icon(icon, color: iconColor ?? mlc.accentBlue, size: 20),
+      ),
+      title: Text(
+        title,
+        style: AppTypography.bodyStrong.copyWith(
+          color: titleColor ?? mlc.textPrimary,
+        ),
+      ),
+      subtitle: subtitle != null
+          ? Text(
+              subtitle,
+              style: AppTypography.label.copyWith(color: mlc.textSecondary),
+            )
+          : null,
+      trailing: Icon(
+        Icons.chevron_right,
+        color: titleColor ?? mlc.textTertiary,
+      ),
       onTap: onTap,
     );
   }
@@ -876,22 +1171,20 @@ class SettingsScreen extends StatelessWidget {
 
   /// Section header
   Widget _buildSectionHeader(BuildContext context, String title) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.xl, AppSpacing.xl, AppSpacing.md),
-      child: Text(
-        title,
-        style: TextStyle(
-          fontSize: AppTypography.bodyLarge,
-          fontWeight: FontWeight.bold,
-          color: context.mlColors.accentBlue,
-        ),
+    return SectionHeader(
+      title: title,
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.xl,
+        AppSpacing.xxl,
+        AppSpacing.xl,
+        AppSpacing.md,
       ),
     );
   }
 
   /// MarketLens 역할 배지
   Widget _buildRoleBadge(BuildContext context, String role) {
-    final badgeColor = BadgeColors.roleBadge(role);
+    final badgeColor = BadgeColors.roleBadge(role, context.mlColors);
     String badgeText;
 
     switch (role) {
@@ -911,17 +1204,20 @@ class SettingsScreen extends StatelessWidget {
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xs),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.xs,
+      ),
       decoration: BoxDecoration(
         color: badgeColor,
-        borderRadius: BorderRadius.circular(AppRadius.lg),
+        borderRadius: BorderRadius.circular(AppRadius.badge),
       ),
       child: Text(
         badgeText,
         style: TextStyle(
           color: context.mlColors.onPrimary,
           fontSize: AppTypography.micro,
-          fontWeight: FontWeight.bold,
+          fontWeight: AppTypography.bold,
         ),
       ),
     );

@@ -368,6 +368,30 @@ abstract class AppLocalizations {
   /// **'Password must be at least 8 characters'**
   String get passwordTooShort;
 
+  /// No description provided for @passwordAllNumeric.
+  ///
+  /// In en, this message translates to:
+  /// **'Password cannot be entirely numbers'**
+  String get passwordAllNumeric;
+
+  /// No description provided for @passwordTooCommon.
+  ///
+  /// In en, this message translates to:
+  /// **'This password is too common. Please choose a more unique one'**
+  String get passwordTooCommon;
+
+  /// No description provided for @passwordTooSimilar.
+  ///
+  /// In en, this message translates to:
+  /// **'Password is too similar to your email or nickname'**
+  String get passwordTooSimilar;
+
+  /// No description provided for @passwordRequirements.
+  ///
+  /// In en, this message translates to:
+  /// **'At least 8 characters. Cannot be all numbers or a common password.'**
+  String get passwordRequirements;
+
   /// No description provided for @passwordConfirm.
   ///
   /// In en, this message translates to:
@@ -689,31 +713,31 @@ abstract class AppLocalizations {
   /// No description provided for @scoreStrongBuy.
   ///
   /// In en, this message translates to:
-  /// **'Strong Buy'**
+  /// **'Strong Positive'**
   String get scoreStrongBuy;
 
   /// No description provided for @scoreBuy.
   ///
   /// In en, this message translates to:
-  /// **'Buy'**
+  /// **'Positive'**
   String get scoreBuy;
 
   /// No description provided for @scoreHold.
   ///
   /// In en, this message translates to:
-  /// **'Hold'**
+  /// **'Neutral'**
   String get scoreHold;
 
   /// No description provided for @scoreSell.
   ///
   /// In en, this message translates to:
-  /// **'Sell'**
+  /// **'Negative'**
   String get scoreSell;
 
   /// No description provided for @scoreStrongSell.
   ///
   /// In en, this message translates to:
-  /// **'Strong Sell'**
+  /// **'Strong Negative'**
   String get scoreStrongSell;
 
   /// No description provided for @score.
@@ -817,6 +841,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Top Trading Volume Today'**
   String get topTradingVolume;
+
+  /// No description provided for @addWatchlistSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search & add to watchlist'**
+  String get addWatchlistSearch;
+
+  /// No description provided for @bookmarkGuide.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the bookmark icon to add to your watchlist'**
+  String get bookmarkGuide;
 
   /// No description provided for @communitySearchHint.
   ///
@@ -2342,6 +2378,36 @@ abstract class AppLocalizations {
   /// **'Bearish Factors'**
   String get bearishFactors;
 
+  /// No description provided for @expertAnalysis.
+  ///
+  /// In en, this message translates to:
+  /// **'Expert Analysis'**
+  String get expertAnalysis;
+
+  /// No description provided for @expertKeyFactors.
+  ///
+  /// In en, this message translates to:
+  /// **'Key Factors'**
+  String get expertKeyFactors;
+
+  /// No description provided for @predictionBullish.
+  ///
+  /// In en, this message translates to:
+  /// **'Bullish'**
+  String get predictionBullish;
+
+  /// No description provided for @predictionBearish.
+  ///
+  /// In en, this message translates to:
+  /// **'Bearish'**
+  String get predictionBearish;
+
+  /// No description provided for @predictionNeutral.
+  ///
+  /// In en, this message translates to:
+  /// **'Neutral'**
+  String get predictionNeutral;
+
   /// No description provided for @target.
   ///
   /// In en, this message translates to:
@@ -3410,6 +3476,48 @@ abstract class AppLocalizations {
   /// **'Action Summary'**
   String get recActionSummary;
 
+  /// No description provided for @recCompanyClassification.
+  ///
+  /// In en, this message translates to:
+  /// **'Company Classification'**
+  String get recCompanyClassification;
+
+  /// No description provided for @recAnalystSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Analyst Summary'**
+  String get recAnalystSummary;
+
+  /// No description provided for @recMarketSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Market Summary'**
+  String get recMarketSummary;
+
+  /// No description provided for @recUpcomingEvents.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming Events'**
+  String get recUpcomingEvents;
+
+  /// No description provided for @recBuyRecommend.
+  ///
+  /// In en, this message translates to:
+  /// **'Increase Position (Buy)'**
+  String get recBuyRecommend;
+
+  /// No description provided for @recHoldRecommend.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold Position (Watch)'**
+  String get recHoldRecommend;
+
+  /// No description provided for @recSellRecommend.
+  ///
+  /// In en, this message translates to:
+  /// **'Reduce Position (Sell)'**
+  String get recSellRecommend;
+
   /// No description provided for @recommendedAction.
   ///
   /// In en, this message translates to:
@@ -3439,6 +3547,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add holdings from the Watchlist tab'**
   String get noHoldingsHint;
+
+  /// No description provided for @addHoldingDirect.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Stock'**
+  String get addHoldingDirect;
+
+  /// No description provided for @aiPortfolioBenefitTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Register your stocks and get\ndaily AI investment insights'**
+  String get aiPortfolioBenefitTitle;
+
+  /// No description provided for @aiPortfolioBenefit1.
+  ///
+  /// In en, this message translates to:
+  /// **'Portfolio rebalancing suggestions'**
+  String get aiPortfolioBenefit1;
+
+  /// No description provided for @aiPortfolioBenefit2.
+  ///
+  /// In en, this message translates to:
+  /// **'Technical trading signal analysis'**
+  String get aiPortfolioBenefit2;
+
+  /// No description provided for @aiPortfolioBenefit3.
+  ///
+  /// In en, this message translates to:
+  /// **'Market news impact assessment'**
+  String get aiPortfolioBenefit3;
+
+  /// No description provided for @searchTickerHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by name or ticker'**
+  String get searchTickerHint;
+
+  /// No description provided for @addToPortfolio.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to Portfolio'**
+  String get addToPortfolio;
+
+  /// No description provided for @alreadyInHoldings.
+  ///
+  /// In en, this message translates to:
+  /// **'Already in your holdings'**
+  String get alreadyInHoldings;
 
   /// No description provided for @closingPriceAuto.
   ///
@@ -3517,6 +3673,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Updated daily in the morning'**
   String get dailyUpdate;
+
+  /// No description provided for @aiRefreshOnChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-refreshes on changes'**
+  String get aiRefreshOnChange;
+
+  /// No description provided for @lastUpdateTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Last updated: {time}'**
+  String lastUpdateTime(String time);
 
   /// No description provided for @viewAIAdvice.
   ///
@@ -3677,7 +3845,7 @@ abstract class AppLocalizations {
   /// No description provided for @newsBubbleTitle.
   ///
   /// In en, this message translates to:
-  /// **'24h News Bubble'**
+  /// **'24h Hot News'**
   String get newsBubbleTitle;
 
   /// No description provided for @newsBubbleLegendBullish.
@@ -3755,19 +3923,19 @@ abstract class AppLocalizations {
   /// No description provided for @macro3mHigh.
   ///
   /// In en, this message translates to:
-  /// **'High'**
+  /// **'3M High'**
   String get macro3mHigh;
 
   /// No description provided for @macro3mAvg.
   ///
   /// In en, this message translates to:
-  /// **'Avg'**
+  /// **'3M Avg'**
   String get macro3mAvg;
 
   /// No description provided for @macro3mLow.
   ///
   /// In en, this message translates to:
-  /// **'Low'**
+  /// **'3M Low'**
   String get macro3mLow;
 
   /// No description provided for @tooltipClearSearch.
@@ -3787,6 +3955,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Next month'**
   String get tooltipNextMonth;
+
+  /// No description provided for @tooltipSelectMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Select month'**
+  String get tooltipSelectMonth;
 
   /// No description provided for @tooltipShowPassword.
   ///
@@ -3835,6 +4009,624 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count}D ago'**
   String nDaysAgo(int count);
+
+  /// No description provided for @tabHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get tabHome;
+
+  /// No description provided for @tabHomeTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get tabHomeTooltip;
+
+  /// No description provided for @tabAIAnalysis.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Signal'**
+  String get tabAIAnalysis;
+
+  /// No description provided for @tabToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get tabToday;
+
+  /// No description provided for @tabUpDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Up & Down'**
+  String get tabUpDown;
+
+  /// No description provided for @tabIndexes.
+  ///
+  /// In en, this message translates to:
+  /// **'Indexes'**
+  String get tabIndexes;
+
+  /// No description provided for @macroCurrentLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Current'**
+  String get macroCurrentLabel;
+
+  /// No description provided for @macroChangeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get macroChangeLabel;
+
+  /// No description provided for @tradingVolumeTop.
+  ///
+  /// In en, this message translates to:
+  /// **'Trading Volume'**
+  String get tradingVolumeTop;
+
+  /// No description provided for @gainersTop.
+  ///
+  /// In en, this message translates to:
+  /// **'Gainers'**
+  String get gainersTop;
+
+  /// No description provided for @losersTop.
+  ///
+  /// In en, this message translates to:
+  /// **'Losers'**
+  String get losersTop;
+
+  /// No description provided for @topByMarketCap.
+  ///
+  /// In en, this message translates to:
+  /// **'Top by Market Cap'**
+  String get topByMarketCap;
+
+  /// No description provided for @viewMore.
+  ///
+  /// In en, this message translates to:
+  /// **'View More'**
+  String get viewMore;
+
+  /// No description provided for @gaugeStrongNegativeDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Strong Negative: Very high probability of decline'**
+  String get gaugeStrongNegativeDesc;
+
+  /// No description provided for @gaugeNegativeDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Negative: High probability of decline'**
+  String get gaugeNegativeDesc;
+
+  /// No description provided for @gaugePositiveDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Positive: High probability of rise'**
+  String get gaugePositiveDesc;
+
+  /// No description provided for @gaugeStrongPositiveDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Strong Positive: Very high probability of rise'**
+  String get gaugeStrongPositiveDesc;
+
+  /// No description provided for @aiRecommended20.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Top {count} Recommended'**
+  String aiRecommended20(int count);
+
+  /// No description provided for @aiCaution20.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Top {count} Caution'**
+  String aiCaution20(int count);
+
+  /// No description provided for @seeMore.
+  ///
+  /// In en, this message translates to:
+  /// **'See More'**
+  String get seeMore;
+
+  /// No description provided for @holdingsSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Holdings Summary'**
+  String get holdingsSummary;
+
+  /// No description provided for @returnRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Return'**
+  String get returnRate;
+
+  /// No description provided for @purchaseAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Cost Basis'**
+  String get purchaseAmount;
+
+  /// No description provided for @profitAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Profit/Loss'**
+  String get profitAmount;
+
+  /// No description provided for @evaluationAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Market Value'**
+  String get evaluationAmount;
+
+  /// No description provided for @watchAdToUnlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch a short ad to view AI analysis'**
+  String get watchAdToUnlock;
+
+  /// No description provided for @watchAd.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch Ad'**
+  String get watchAd;
+
+  /// No description provided for @adNotReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Ad is loading, please try again'**
+  String get adNotReady;
+
+  /// No description provided for @holdingsLimitTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Holdings Limit'**
+  String get holdingsLimitTitle;
+
+  /// No description provided for @holdingsLimitMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Free users can track up to 3 holdings. Upgrade to Gold for unlimited holdings and ad-free AI analysis.'**
+  String get holdingsLimitMessage;
+
+  /// No description provided for @upgradeToGold.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade to Gold'**
+  String get upgradeToGold;
+
+  /// No description provided for @goldBenefitUnlimitedHoldings.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited holdings'**
+  String get goldBenefitUnlimitedHoldings;
+
+  /// No description provided for @goldBenefitAIUnlimited.
+  ///
+  /// In en, this message translates to:
+  /// **'Ad-free AI analysis'**
+  String get goldBenefitAIUnlimited;
+
+  /// No description provided for @goldBenefitNoAds.
+  ///
+  /// In en, this message translates to:
+  /// **'Ad-free experience'**
+  String get goldBenefitNoAds;
+
+  /// No description provided for @newAiAnalysisAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'New AI analysis available'**
+  String get newAiAnalysisAvailable;
+
+  /// No description provided for @viewingPreviousAnalysis.
+  ///
+  /// In en, this message translates to:
+  /// **'View previous analysis'**
+  String get viewingPreviousAnalysis;
+
+  /// No description provided for @goldUpgradeComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Gold membership coming soon! Stay tuned.'**
+  String get goldUpgradeComingSoon;
+
+  /// No description provided for @close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get close;
+
+  /// No description provided for @goldMonthlyPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'{price}/month'**
+  String goldMonthlyPrice(String price);
+
+  /// No description provided for @subscribeNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscribe Now'**
+  String get subscribeNow;
+
+  /// No description provided for @restorePurchases.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore Purchases'**
+  String get restorePurchases;
+
+  /// No description provided for @purchaseRestored.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchases restored successfully'**
+  String get purchaseRestored;
+
+  /// No description provided for @purchaseRestoreFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'No previous purchases found'**
+  String get purchaseRestoreFailed;
+
+  /// No description provided for @purchaseFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchase failed. Please try again.'**
+  String get purchaseFailed;
+
+  /// No description provided for @purchaseCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchase cancelled'**
+  String get purchaseCancelled;
+
+  /// No description provided for @subscriptionActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get subscriptionActive;
+
+  /// No description provided for @subscriptionExpires.
+  ///
+  /// In en, this message translates to:
+  /// **'Expires {date}'**
+  String subscriptionExpires(String date);
+
+  /// No description provided for @subscriptionManage.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Subscription'**
+  String get subscriptionManage;
+
+  /// No description provided for @subscriptionTermsIos.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment will be charged to your App Store account. Subscription renews automatically unless cancelled 24 hours before the end of the current period.'**
+  String get subscriptionTermsIos;
+
+  /// No description provided for @subscriptionTermsAndroid.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment will be charged to your Google Play account. Subscription renews automatically unless cancelled 24 hours before the end of the current period.'**
+  String get subscriptionTermsAndroid;
+
+  /// No description provided for @goldMembershipTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Gold Membership'**
+  String get goldMembershipTitle;
+
+  /// No description provided for @subscription.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription'**
+  String get subscription;
+
+  /// No description provided for @freeTrialStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start 7-Day Free Trial'**
+  String get freeTrialStart;
+
+  /// No description provided for @freeTrialInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Free for 7 days, then {price}/month. Cancel anytime.'**
+  String freeTrialInfo(String price);
+
+  /// No description provided for @onFreeTrial.
+  ///
+  /// In en, this message translates to:
+  /// **'Free Trial'**
+  String get onFreeTrial;
+
+  /// No description provided for @trialEndsOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Trial ends: {date}'**
+  String trialEndsOn(String date);
+
+  /// No description provided for @trialExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Your free trial has ended'**
+  String get trialExpired;
+
+  /// No description provided for @manageSubscription.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Subscription'**
+  String get manageSubscription;
+
+  /// No description provided for @restorePurchaseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore Previous Purchase'**
+  String get restorePurchaseTitle;
+
+  /// No description provided for @restorePurchaseDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Use this if your subscription is not reflected after changing devices or reinstalling the app.'**
+  String get restorePurchaseDescription;
+
+  /// No description provided for @calendarPremiumEvents.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} premium events'**
+  String calendarPremiumEvents(int count);
+
+  /// No description provided for @calendarUnlockWithAd.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch ad for 6h access'**
+  String get calendarUnlockWithAd;
+
+  /// No description provided for @calendarUnlockedUntil.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlocked until {time}'**
+  String calendarUnlockedUntil(String time);
+
+  /// No description provided for @treemapLegend.
+  ///
+  /// In en, this message translates to:
+  /// **'Size = Volume  |  Green = Up  |  Red = Down'**
+  String get treemapLegend;
+
+  /// No description provided for @aiScoreSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Score (0: Sell Signal ~ 100: Buy Signal)'**
+  String get aiScoreSubtitle;
+
+  /// No description provided for @aiSignalStrongBuyDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Strong Buy (80-100): Technical and financial indicators show strong buy signals'**
+  String get aiSignalStrongBuyDesc;
+
+  /// No description provided for @aiSignalBuyDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Buy (60-79): Overall positive indicators suggest buying'**
+  String get aiSignalBuyDesc;
+
+  /// No description provided for @aiSignalHoldDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold (40-59): Mixed signals, maintain current position'**
+  String get aiSignalHoldDesc;
+
+  /// No description provided for @aiSignalSellDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Sell (20-39): Overall negative indicators suggest selling'**
+  String get aiSignalSellDesc;
+
+  /// No description provided for @aiSignalStrongSellDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Strong Sell (0-19): Technical and financial indicators show strong sell signals'**
+  String get aiSignalStrongSellDesc;
+
+  /// No description provided for @watchlistSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Collect and track your favorite stocks'**
+  String get watchlistSubtitle;
+
+  /// No description provided for @holdingsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage your portfolio and track returns'**
+  String get holdingsSubtitle;
+
+  /// No description provided for @filterActiveLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter Active'**
+  String get filterActiveLabel;
+
+  /// No description provided for @tapToRemoveFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to remove'**
+  String get tapToRemoveFilter;
+
+  /// No description provided for @searchTickersCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Search Tickers'**
+  String get searchTickersCta;
+
+  /// No description provided for @addTickersCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Tickers'**
+  String get addTickersCta;
+
+  /// No description provided for @beFirstToPost.
+  ///
+  /// In en, this message translates to:
+  /// **'Be the first to share your thoughts!'**
+  String get beFirstToPost;
+
+  /// No description provided for @totalPosts.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} posts'**
+  String totalPosts(int count);
+
+  /// No description provided for @recentComments.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Comments'**
+  String get recentComments;
+
+  /// No description provided for @coachMarkDashboardTreemap.
+  ///
+  /// In en, this message translates to:
+  /// **'Colors show price changes, size represents trading volume'**
+  String get coachMarkDashboardTreemap;
+
+  /// No description provided for @coachMarkAiLens.
+  ///
+  /// In en, this message translates to:
+  /// **'AI-analyzed buy/sell signal distribution for stocks'**
+  String get coachMarkAiLens;
+
+  /// No description provided for @coachMarkWatchlist.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your favorite stocks to track!'**
+  String get coachMarkWatchlist;
+
+  /// No description provided for @coachMarkHoldings.
+  ///
+  /// In en, this message translates to:
+  /// **'Register holdings to track your returns'**
+  String get coachMarkHoldings;
+
+  /// No description provided for @coachMarkTickerScore.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the AI score trend. Above 70 indicates a buy signal'**
+  String get coachMarkTickerScore;
+
+  /// No description provided for @coachMarkMacroGauge.
+  ///
+  /// In en, this message translates to:
+  /// **'Swipe left and right to view economic indicators'**
+  String get coachMarkMacroGauge;
+
+  /// No description provided for @coachMarkGotIt.
+  ///
+  /// In en, this message translates to:
+  /// **'Got it'**
+  String get coachMarkGotIt;
+
+  /// No description provided for @resetTutorials.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset Tutorials'**
+  String get resetTutorials;
+
+  /// No description provided for @resetTutorialsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'All tutorials will be shown again'**
+  String get resetTutorialsDesc;
+
+  /// No description provided for @tutorialsReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Tutorials have been reset'**
+  String get tutorialsReset;
+
+  /// No description provided for @purchaseStoreUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'App Store Unavailable'**
+  String get purchaseStoreUnavailable;
+
+  /// No description provided for @purchaseTemporarilyUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription Temporarily Unavailable'**
+  String get purchaseTemporarilyUnavailable;
+
+  /// No description provided for @purchaseStoreProblem.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to connect to the App Store. Please check your Apple ID settings, ensure payments are enabled, and try again.'**
+  String get purchaseStoreProblem;
+
+  /// No description provided for @purchaseRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try Again'**
+  String get purchaseRetry;
+
+  /// No description provided for @purchaseInitializing.
+  ///
+  /// In en, this message translates to:
+  /// **'Connecting to App Store...'**
+  String get purchaseInitializing;
+
+  /// No description provided for @loginRequiredForPurchase.
+  ///
+  /// In en, this message translates to:
+  /// **'Please log in to purchase Gold membership. Your subscription will be synced to your account.'**
+  String get loginRequiredForPurchase;
+
+  /// No description provided for @aiScoreGuideTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Score Guide'**
+  String get aiScoreGuideTitle;
+
+  /// No description provided for @aiScoreGuideDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'AI scores are calculated based on a mid-to-long-term (3–12 month) investment perspective.'**
+  String get aiScoreGuideDescription;
+
+  /// No description provided for @aiScoreGuideStrongPositive.
+  ///
+  /// In en, this message translates to:
+  /// **'80–100: Strong Positive – Very high probability of rise'**
+  String get aiScoreGuideStrongPositive;
+
+  /// No description provided for @aiScoreGuidePositive.
+  ///
+  /// In en, this message translates to:
+  /// **'60–79: Positive – High probability of rise'**
+  String get aiScoreGuidePositive;
+
+  /// No description provided for @aiScoreGuideNeutral.
+  ///
+  /// In en, this message translates to:
+  /// **'40–59: Neutral – Mixed signals'**
+  String get aiScoreGuideNeutral;
+
+  /// No description provided for @aiScoreGuideNegative.
+  ///
+  /// In en, this message translates to:
+  /// **'20–39: Negative – High probability of decline'**
+  String get aiScoreGuideNegative;
+
+  /// No description provided for @aiScoreGuideStrongNegative.
+  ///
+  /// In en, this message translates to:
+  /// **'0–19: Strong Negative – Very high probability of decline'**
+  String get aiScoreGuideStrongNegative;
+
+  /// No description provided for @subscriptionPaymentAccountWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment is processed through the App Store / Google Play account signed in on this device. If you purchase on someone else\'s device, the device owner\'s account may be charged.'**
+  String get subscriptionPaymentAccountWarning;
 }
 
 class _AppLocalizationsDelegate

@@ -15,7 +15,7 @@
   "tabMarketTooltip": "시장 현황",
   "tabAILens": "AI",
   "tabAILensTooltip": "AI 분석",
-  "tabWatchlist": "관심",
+  "tabWatchlist": "관심종목",
   "tabWatchlistTooltip": "나의 관심목록",
   "tabHoldingsTooltip": "나의 보유종목",
 
@@ -49,6 +49,10 @@
   "passwordHint": "비밀번호를 입력하세요",
   "passwordRequired": "비밀번호를 입력하세요",
   "passwordTooShort": "비밀번호는 8자 이상이어야 합니다",
+  "passwordAllNumeric": "비밀번호는 숫자로만 구성할 수 없습니다",
+  "passwordTooCommon": "너무 흔한 비밀번호입니다. 더 안전한 비밀번호를 사용하세요",
+  "passwordTooSimilar": "비밀번호가 이메일 또는 닉네임과 너무 유사합니다",
+  "passwordRequirements": "8자 이상, 숫자만 불가, 흔한 비밀번호 불가",
   "passwordConfirm": "비밀번호 확인",
   "passwordConfirmHint": "비밀번호를 다시 입력하세요",
   "passwordConfirmRequired": "비밀번호 확인을 입력하세요",
@@ -108,11 +112,11 @@
   "showMore": "더 보기 ({remaining}개 남음)",
   "nItems": "{count}개",
 
-  "scoreStrongBuy": "강력매수",
-  "scoreBuy": "매수권고",
-  "scoreHold": "관망",
-  "scoreSell": "매도권고",
-  "scoreStrongSell": "강력매도",
+  "scoreStrongBuy": "강력긍정",
+  "scoreBuy": "긍정",
+  "scoreHold": "중립",
+  "scoreSell": "부정",
+  "scoreStrongSell": "강력부정",
   "score": "점수",
 
   "myWatchlist": "나의 관심종목",
@@ -131,6 +135,8 @@
   "watchlistDiscoveryTitle": "관심종목을 등록해보세요",
   "watchlistDiscoverySubtitle": "등록하면 관련 뉴스·시그널 알림을 받을 수 있어요",
   "topTradingVolume": "오늘의 거래량 TOP",
+  "addWatchlistSearch": "종목 검색하고 추가하기",
+  "bookmarkGuide": "북마크를 눌러 관심종목에 추가하세요",
 
   "communitySearchHint": "제목, 내용으로 검색...",
   "writePost": "글쓰기",
@@ -426,6 +432,11 @@
   "marketlensAIOpinion": "마켓랜즈 AI 의견",
   "bullishFactors": "강세 요인",
   "bearishFactors": "약세 요인",
+  "expertAnalysis": "전문가 분석",
+  "expertKeyFactors": "핵심 요인",
+  "predictionBullish": "상승",
+  "predictionBearish": "하락",
+  "predictionNeutral": "중립",
   "target": "목표 ",
   "stopLoss": "손절 ",
   "averageTargetPrice": "평균 목표가",
@@ -705,11 +716,26 @@
   "recTechnicalInsight": "기술적 분석",
   "recMarketIntelligence": "시장 인텔리전스",
   "recActionSummary": "실행 요약",
+  "recCompanyClassification": "기업분류",
+  "recAnalystSummary": "애널리스트 요약",
+  "recMarketSummary": "시장 요약",
+  "recUpcomingEvents": "향후 주요 이벤트",
+  "recBuyRecommend": "보유 확대 (추가매수 추천)",
+  "recHoldRecommend": "보유 유지 (관망 필요)",
+  "recSellRecommend": "보유 축소 (매도 추천)",
   "recommendedAction": "권고 사항",
   "analysisWaiting": "AI 분석 대기 중...",
   "alreadyHeld": "보유중",
   "goToWatchlistTab": "관심종목 탭으로 이동",
   "noHoldingsHint": "관심종목에서 보유 종목을 추가하세요",
+  "addHoldingDirect": "종목 추가하기",
+  "aiPortfolioBenefitTitle": "종목을 등록하면 매일 아침\nAI가 맞춤 투자 인사이트를 제공합니다",
+  "aiPortfolioBenefit1": "포트폴리오 리밸런싱 제안",
+  "aiPortfolioBenefit2": "기술적 매매 신호 분석",
+  "aiPortfolioBenefit3": "시장 뉴스 기반 영향도 평가",
+  "searchTickerHint": "종목명 또는 티커 검색",
+  "addToPortfolio": "보유종목에 추가",
+  "alreadyInHoldings": "이미 보유 중인 종목입니다",
   "closingPriceAuto": "종가 자동 입력",
   "holidayPriceNotice": "{date} 종가 기준 (직전 거래일)",
   "@holidayPriceNotice": {
@@ -748,6 +774,13 @@
   "avgPriceLabel": "평균단가",
   "currentValueLabel": "평가액",
   "dailyUpdate": "매일 오전 업데이트",
+  "aiRefreshOnChange": "종목 변경 시 자동 갱신",
+  "lastUpdateTime": "마지막 업데이트: {time}",
+  "@lastUpdateTime": {
+    "placeholders": {
+      "time": { "type": "String" }
+    }
+  },
   "viewAIAdvice": "AI 의견 보기",
   "noAnalysisYet": "아직 분석이 없습니다",
   "recentTransactions": "최근 거래",
@@ -787,7 +820,7 @@
   "sectorRealEstate": "부동산",
   "sectorMaterials": "소재",
 
-  "newsBubbleTitle": "24시간 뉴스 버블",
+  "newsBubbleTitle": "24시간 Hot 뉴스",
   "newsBubbleLegendBullish": "강세 다수",
   "newsBubbleLegendBearish": "약세 다수",
   "newsBubbleLegendMixed": "혼합",
@@ -806,12 +839,13 @@
   "krwSuffix": "원",
   "taxTradeCount": "건 매도",
   "macro3mTitle": "3개월",
-  "macro3mHigh": "최고",
-  "macro3mAvg": "평균",
-  "macro3mLow": "최저",
+  "macro3mHigh": "3M 최고",
+  "macro3mAvg": "3M 평균",
+  "macro3mLow": "3M 최저",
   "tooltipClearSearch": "검색 지우기",
   "tooltipPreviousMonth": "이전 달",
   "tooltipNextMonth": "다음 달",
+  "tooltipSelectMonth": "월 선택",
   "tooltipShowPassword": "비밀번호 표시",
   "tooltipHidePassword": "비밀번호 숨기기",
   "tooltipChangePhoto": "사진 변경",
@@ -819,5 +853,166 @@
   "tooltipRemove": "삭제",
   "otherSectors": "기타 섹터",
   "otherTickers": "기타 종목",
-  "nDaysAgo": "{count}일전"
+  "nDaysAgo": "{count}일전",
+
+  "tabHome": "홈",
+  "tabHomeTooltip": "홈",
+  "tabAIAnalysis": "AI 신호",
+  "tabToday": "오늘",
+  "tabUpDown": "등락",
+  "tabIndexes": "지표",
+  "macroCurrentLabel": "현재값",
+  "macroChangeLabel": "변동",
+  "tradingVolumeTop": "거래대금",
+  "gainersTop": "상승률",
+  "losersTop": "하락률",
+  "topByMarketCap": "시가총액 상위",
+  "viewMore": "더보기",
+
+  "gaugeStrongNegativeDesc": "강력부정: 주가 하락 확률 매우 높음",
+  "gaugeNegativeDesc": "부정: 주가 하락 확률 높음",
+  "gaugePositiveDesc": "긍정: 주가 상승 확률 높음",
+  "gaugeStrongPositiveDesc": "강력긍정: 주가 상승 확률 매우 높음",
+  "aiRecommended20": "AI 분석 추천 {count} 종목",
+  "@aiRecommended20": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "aiCaution20": "AI 분석 주의 {count} 종목",
+  "@aiCaution20": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "seeMore": "더보기",
+
+  "holdingsSummary": "보유현황",
+  "returnRate": "수익률",
+  "purchaseAmount": "매수금",
+  "profitAmount": "수익금",
+  "evaluationAmount": "평가금",
+
+  "watchAdToUnlock": "짧은 광고를 보고 AI 분석을 확인하세요",
+  "watchAd": "광고 보기",
+  "adNotReady": "광고를 준비 중입니다. 잠시 후 다시 시도하세요",
+
+  "holdingsLimitTitle": "보유종목 제한",
+  "holdingsLimitMessage": "무료 회원은 최대 3개 종목까지 보유할 수 있습니다. Gold으로 업그레이드하면 무제한 종목 관리와 광고 없는 AI 분석을 이용하세요.",
+  "upgradeToGold": "Gold 업그레이드",
+  "goldBenefitUnlimitedHoldings": "무제한 보유종목 관리",
+  "goldBenefitAIUnlimited": "광고 없는 AI 분석",
+  "goldBenefitNoAds": "광고 완전 제거",
+  "newAiAnalysisAvailable": "새로운 AI 분석이 도착했습니다",
+  "viewingPreviousAnalysis": "이전 분석 보기",
+  "goldUpgradeComingSoon": "Gold 멤버십이 곧 출시됩니다! 기대해주세요.",
+  "close": "닫기",
+
+  "goldMonthlyPrice": "월 {price}",
+  "@goldMonthlyPrice": {
+    "placeholders": {
+      "price": { "type": "String" }
+    }
+  },
+  "subscribeNow": "구독하기",
+  "restorePurchases": "구매 복원",
+  "purchaseRestored": "구매가 복원되었습니다",
+  "purchaseRestoreFailed": "복원할 구매 내역이 없습니다",
+  "purchaseFailed": "구매에 실패했습니다. 다시 시도해주세요.",
+  "purchaseCancelled": "구매가 취소되었습니다",
+  "subscriptionActive": "활성",
+  "subscriptionExpires": "{date} 만료",
+  "@subscriptionExpires": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "subscriptionManage": "구독 관리",
+  "subscriptionTermsIos": "결제는 App Store 계정으로 청구됩니다. 현재 기간 종료 24시간 전에 취소하지 않으면 자동으로 갱신됩니다.",
+  "subscriptionTermsAndroid": "결제는 Google Play 계정으로 청구됩니다. 현재 기간 종료 24시간 전에 취소하지 않으면 자동으로 갱신됩니다.",
+  "goldMembershipTitle": "Gold 멤버십",
+  "subscription": "구독",
+
+  "freeTrialStart": "7일 무료 체험 시작하기",
+  "freeTrialInfo": "7일 무료, 이후 {price}/월. 언제든 취소 가능.",
+  "@freeTrialInfo": {
+    "placeholders": {
+      "price": { "type": "String" }
+    }
+  },
+  "onFreeTrial": "무료 체험 중",
+  "trialEndsOn": "체험 종료: {date}",
+  "@trialEndsOn": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "trialExpired": "무료 체험이 종료되었습니다",
+
+  "manageSubscription": "구독 관리",
+  "restorePurchaseTitle": "이전 구매 복원",
+  "restorePurchaseDescription": "기기 변경이나 앱 재설치 후 구독이 반영되지 않을 때 사용하세요.",
+
+  "calendarPremiumEvents": "{count}개 프리미엄 일정",
+  "@calendarPremiumEvents": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "calendarUnlockWithAd": "광고 보고 6시간 이용",
+  "calendarUnlockedUntil": "{time}까지 잠금 해제",
+  "@calendarUnlockedUntil": {
+    "placeholders": {
+      "time": { "type": "String" }
+    }
+  },
+
+  "treemapLegend": "크기 = 거래대금  |  초록 = 상승  |  빨강 = 하락",
+  "aiScoreSubtitle": "AI 점수 (0: 매도 신호 ~ 100: 매수 신호)",
+  "aiSignalStrongBuyDesc": "강력 매수 (80-100): 기술적·재무적 지표가 모두 강한 매수 신호",
+  "aiSignalBuyDesc": "매수 (60-79): 전반적으로 긍정적 신호",
+  "aiSignalHoldDesc": "보유 (40-59): 혼합 신호, 현재 포지션 유지",
+  "aiSignalSellDesc": "매도 (20-39): 전반적으로 부정적 신호",
+  "aiSignalStrongSellDesc": "강력 매도 (0-19): 기술적·재무적 지표가 모두 강한 매도 신호",
+  "watchlistSubtitle": "관심 종목을 모아보세요",
+  "holdingsSubtitle": "보유 중인 종목을 관리하세요",
+  "filterActiveLabel": "필터 적용 중",
+  "tapToRemoveFilter": "탭하여 해제",
+  "searchTickersCta": "종목 검색하기",
+  "addTickersCta": "종목 추가하기",
+  "beFirstToPost": "첫 글을 작성해보세요!",
+  "totalPosts": "{count}개 게시글",
+  "@totalPosts": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "recentComments": "최근 댓글",
+  "coachMarkDashboardTreemap": "색상은 주가 변동, 크기는 거래량을 나타냅니다",
+  "coachMarkAiLens": "AI가 분석한 종목별 매수/매도 신호 분포입니다",
+  "coachMarkWatchlist": "관심 종목을 추가해보세요!",
+  "coachMarkHoldings": "보유 종목을 등록하면 수익률을 추적할 수 있습니다",
+  "coachMarkTickerScore": "AI 점수 추이를 확인하세요. 70 이상은 매수 신호입니다",
+  "coachMarkMacroGauge": "좌우로 스와이프하여 경제 지표를 확인하세요",
+  "coachMarkGotIt": "확인",
+  "resetTutorials": "튜토리얼 다시 보기",
+  "resetTutorialsDesc": "모든 튜토리얼이 다시 표시됩니다",
+  "tutorialsReset": "튜토리얼이 초기화되었습니다",
+
+  "purchaseStoreUnavailable": "App Store 연결 불가",
+  "purchaseStoreProblem": "App Store에 연결할 수 없습니다. Apple ID 설정을 확인하고, 결제가 활성화되어 있는지 확인한 후 다시 시도해주세요.",
+  "purchaseTemporarilyUnavailable": "구독을 일시적으로 이용할 수 없습니다",
+  "purchaseRetry": "다시 시도",
+  "purchaseInitializing": "App Store에 연결 중...",
+
+  "loginRequiredForPurchase": "Gold 멤버십 구매를 위해 로그인이 필요합니다. 구독 정보가 계정에 동기화됩니다.",
+
+  "aiScoreGuideTitle": "AI 점수 안내",
+  "aiScoreGuideDescription": "AI 점수는 중장기(3~12개월) 투자 관점을 기반으로 산출됩니다.",
+  "aiScoreGuideStrongPositive": "80–100: 강력 긍정 – 상승 가능성 매우 높음",
+  "aiScoreGuidePositive": "60–79: 긍정 – 상승 가능성 높음",
+  "aiScoreGuideNeutral": "40–59: 중립 – 혼합 신호",
+  "aiScoreGuideNegative": "20–39: 부정 – 하락 가능성 높음",
+  "aiScoreGuideStrongNegative": "0–19: 강력 부정 – 하락 가능성 매우 높음",
+  "subscriptionPaymentAccountWarning": "결제는 이 기기에 로그인된 App Store / Google Play 계정으로 처리됩니다. 다른 사람의 기기에서 구매 시, 기기 소유자의 계정으로 청구될 수 있습니다."
 }

@@ -1,35 +1,30 @@
 import 'package:flutter/material.dart';
-
 import '../l10n/app_localizations.dart';
 import '../theme/app_colors.dart';
 
 /// MarketLens 점수 체계 - 단일 진실 원천 (Single Source of Truth)
 ///
 /// 점수 구간:
-/// - 80-100: 강력매수 (Red, 🔥)
-/// - 60-79:  매수권고 (Pink)
-/// - 40-59:  하락관망 (Gray)
-/// - 20-39:  매도권고 (Sky Blue)
-/// - 0-19:   강력매도 (Blue, 📉)
+/// - 80-100: 강력긍정 (Green, 🔥)
+/// - 60-79:  긍정 (Light Green)
+/// - 40-59:  중립 (Orange)
+/// - 20-39:  부정 (Deep Orange)
+/// - 0-19:   강력부정 (Red, 📉)
 ///
 /// ⚠️ 주의: 이 파일의 기준을 변경하면 전체 앱에 적용됩니다.
 
 /// 점수 레벨 (5단계)
 enum ScoreLevel {
-  strongBuy, // 80-100: 강력매수
-  buy, // 60-79: 매수권고
-  hold, // 40-59: 하락관망
-  sell, // 20-39: 매도권고
-  strongSell, // 0-19: 강력매도
+  strongBuy, // 80-100: 강력긍정
+  buy, // 60-79: 긍정
+  hold, // 40-59: 중립
+  sell, // 20-39: 부정
+  strongSell, // 0-19: 강력부정
 }
 
 /// 점수 매핑 유틸리티
 class ScoreMapper {
-  /// 매수권고 (Pink) — 5단계 점수 팔레트 전용
-  static const _buyColor = Color(0xFFE91E63);
 
-  /// 매도권고 (Light Blue) — 5단계 점수 팔레트 전용
-  static const _sellColor = Color(0xFF03A9F4);
   /// 점수 → 레벨 변환
   static ScoreLevel getScoreLevel(double score) {
     if (score >= 80) return ScoreLevel.strongBuy;
@@ -39,28 +34,28 @@ class ScoreMapper {
     return ScoreLevel.strongSell;
   }
 
-  /// 점수 → 색상 변환 (명세서 기준)
+  /// 점수 → 색상 변환 (Green=긍정, Red=부정)
   static Color getScoreColor(double score, MarketLensColors colors) {
-    if (score >= 80) return colors.lossColor; // 강력매수 (red)
-    if (score >= 60) return _buyColor; // 매수권고
-    if (score >= 40) return colors.neutralColor; // 하락관망
-    if (score >= 20) return _sellColor; // 매도권고
-    return colors.accentBlue; // 강력매도
+    if (score >= 80) return colors.gainColor; // 강력긍정 (green)
+    if (score >= 60) return colors.scoreBuyColor; // 긍정
+    if (score >= 40) return colors.scoreHoldColor; // 중립
+    if (score >= 20) return colors.scoreSellColor; // 부정
+    return colors.lossColor; // 강력부정 (red)
   }
 
   /// 점수 → 한국어 라벨 변환
   static String getScoreLabel(double score) {
-    if (score >= 80) return '강력매수';
-    if (score >= 60) return '매수권고';
-    if (score >= 40) return '하락관망';
-    if (score >= 20) return '매도권고';
-    return '강력매도';
+    if (score >= 80) return '강력긍정';
+    if (score >= 60) return '긍정';
+    if (score >= 40) return '중립';
+    if (score >= 20) return '부정';
+    return '강력부정';
   }
 
   /// 점수 → 이모지 (선택적)
   static String? getScoreEmoji(double score) {
-    if (score >= 80) return '🔥'; // 강력매수
-    if (score < 20) return '📉'; // 강력매도
+    if (score >= 80) return '🔥'; // 강력긍정
+    if (score < 20) return '📉'; // 강력부정
     return null; // 중간 단계는 이모지 없음
   }
 
@@ -68,15 +63,15 @@ class ScoreMapper {
   static Color getColorForLevel(ScoreLevel level, MarketLensColors colors) {
     switch (level) {
       case ScoreLevel.strongBuy:
-        return colors.lossColor; // red
+        return colors.gainColor; // green
       case ScoreLevel.buy:
-        return _buyColor;
+        return colors.scoreBuyColor;
       case ScoreLevel.hold:
-        return colors.neutralColor;
+        return colors.scoreHoldColor;
       case ScoreLevel.sell:
-        return _sellColor;
+        return colors.scoreSellColor;
       case ScoreLevel.strongSell:
-        return colors.accentBlue;
+        return colors.lossColor; // red
     }
   }
 
@@ -84,15 +79,15 @@ class ScoreMapper {
   static String getLabelForLevel(ScoreLevel level) {
     switch (level) {
       case ScoreLevel.strongBuy:
-        return '강력매수';
+        return '강력긍정';
       case ScoreLevel.buy:
-        return '매수권고';
+        return '긍정';
       case ScoreLevel.hold:
-        return '하락관망';
+        return '중립';
       case ScoreLevel.sell:
-        return '매도권고';
+        return '부정';
       case ScoreLevel.strongSell:
-        return '강력매도';
+        return '강력부정';
     }
   }
 

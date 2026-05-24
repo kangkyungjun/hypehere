@@ -6,18 +6,27 @@ import '../../services/analytics_api_client.dart';
 import '../../utils/error_localizer.dart';
 import '../../models/chart_data.dart';
 import '../../models/ticker_info.dart';
+import '../../providers/auth_provider.dart';
+import '../../providers/portfolio_provider.dart';
 import '../../providers/watchlist_provider.dart';
 import '../../widgets/charts/rsi_chart_widget.dart';
 import '../../widgets/charts/company_profile_card.dart';
 import '../../widgets/charts/events_calendar_widget.dart';
 import '../../widgets/charts/ticker_news_card.dart';
 import '../../widgets/ads/banner_ad_widget.dart';
+import '../../widgets/ads/interstitial_ad_helper.dart';
 import '../../widgets/common/ml_divider.dart';
+import '../../widgets/common/gold_upgrade_sheet.dart';
+import '../../widgets/community/signup_prompt_dialog.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_duration.dart';
 import '../../theme/app_spacing.dart';
 import '../../widgets/common/error_state_view.dart';
 import '../../l10n/app_localizations.dart';
+import '../auth/login_screen.dart';
+import '../auth/signup_screen.dart';
+import '../watchlist/widgets/add_holding_sheet.dart';
+import '../watchlist/widgets/instant_advice_sheet.dart';
 import 'widgets/ticker_header_widget.dart';
 import 'widgets/ticker_summary_cards.dart';
 import 'widgets/ticker_price_chart.dart';
@@ -35,6 +44,7 @@ import 'widgets/ticker_community_section.dart';
 /// - 차트 중심 구조
 class TickerDetailScreen extends StatefulWidget {
   final String ticker;
+
   /// Optional: scroll to a specific section on load ('news', etc.)
   final String? initialSection;
 
@@ -77,6 +87,7 @@ class _TickerDetailScreenState extends State<TickerDetailScreen> {
   @override
   void initState() {
     super.initState();
+    InterstitialAdHelper.instance.onTickerDetailViewed();
     _loadChartData();
   }
 
@@ -119,9 +130,11 @@ class _TickerDetailScreenState extends State<TickerDetailScreen> {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           final ctx = _newsKey.currentContext;
           if (ctx != null) {
-            Scrollable.ensureVisible(ctx,
-                duration: AppDuration.slow,
-                curve: Curves.easeInOut);
+            Scrollable.ensureVisible(
+              ctx,
+              duration: AppDuration.slow,
+              curve: AppDuration.emphasized,
+            );
           }
         });
       }
@@ -170,48 +183,228 @@ class _TickerDetailScreenState extends State<TickerDetailScreen> {
       Scrollable.ensureVisible(
         ctx,
         duration: AppDuration.slower,
-        curve: Curves.easeInOut,
+        curve: AppDuration.emphasized,
       );
+    }
+  }
+
+  /// 보유종목에 추가 (종목 상세에서 직접)
+  Future<void> _onAddToPortfolio(BuildContext context) async {
+    final auth = context.read<AuthProvider>();
+    final l10n = AppLocalizations.of(context);
+
+    // Login check
+    if (!auth.isLoggedIn) {
+      final result = await showDialog<String>(
+        context: context,
+        builder: (_) => const SignupPromptDialog(),
+      );
+      if (result == null || !context.mounted) return;
+      if (result == 'login') {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
+        );
+      } else if (result == 'signup') {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const SignupScreen()),
+        );
+      }
+      return;
+    }
+
+    final portfolio = context.read<PortfolioProvider>();
+    final ticker = widget.ticker;
+
+    // Free user limit check (new ticker only)
+    final isNewTicker = !portfolio.isInHoldings(ticker);
+    if (isNewTicker && !auth.isGoldOrAbove && portfolio.holdings.length >= 3) {
+      if (!context.mounted) return;
+      final upgradeResult = await showDialog<String>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Row(
+            children: [
+              Icon(Icons.workspace_premium, color: Colors.amber.shade700),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(child: Text(l10n.holdingsLimitTitle)),
+            ],
+          ),
+          content: Text(l10n.holdingsLimitMessage),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(l10n.cancel),
+            ),
+            FilledButton.icon(
+              onPressed: () => Navigator.pop(ctx, 'upgrade'),
+              icon: const Icon(Icons.workspace_premium, size: 18),
+              label: Text(l10n.upgradeToGold),
+              style: FilledButton.styleFrom(
+                backgroundColor: Colors.amber.shade700,
+                foregroundColor: Colors.white,
+              ),
+            ),
+          ],
+        ),
+      );
+      if (upgradeResult == 'upgrade' && context.mounted) {
+        GoldUpgradeSheet.show(context, source: 'holdings_limit');
+      }
+      return;
+    }
+
+    // Display name from loaded ticker info
+    final isKo = Localizations.localeOf(context).languageCode == 'ko';
+    final displayName = _tickerInfo != null
+        ? (isKo && _tickerInfo!.nameKo != null
+              ? _tickerInfo!.nameKo!
+              : _tickerInfo!.name ?? ticker)
+        : ticker;
+
+    final result = await AddHoldingSheet.show(
+      context,
+      ticker: ticker,
+      name: displayName,
+    );
+    if (result == null || !context.mounted) return;
+
+    try {
+      final existing = portfolio.holdings
+          .where((h) => h.ticker == ticker.toUpperCase())
+          .toList();
+
+      if (existing.isNotEmpty) {
+        final h = existing.first;
+        final oldShares = h.shares ?? 0.0;
+        final oldAvg = h.avgPrice ?? 0.0;
+        final newTotalShares = oldShares + result.shares;
+        final newAvgPrice = newTotalShares > 0
+            ? ((oldShares * oldAvg) + (result.shares * result.avgPrice)) /
+                  newTotalShares
+            : result.avgPrice;
+
+        await portfolio.addTransaction(
+          ticker: ticker,
+          type: 'BUY',
+          shares: result.shares,
+          price: result.avgPrice,
+          date: result.date,
+        );
+        await portfolio.addOrUpdateHolding(
+          ticker: ticker,
+          shares: newTotalShares,
+          avgPrice: newAvgPrice,
+        );
+      } else {
+        await portfolio.addTransaction(
+          ticker: ticker,
+          type: 'BUY',
+          shares: result.shares,
+          price: result.avgPrice,
+          date: result.date,
+        );
+        await portfolio.addOrUpdateHolding(
+          ticker: ticker,
+          shares: result.shares,
+          avgPrice: result.avgPrice,
+        );
+      }
+
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.holdingAdded(ticker))));
+
+      // Show instant advice if available
+      final holdingMatch = portfolio.holdings.where(
+        (h) => h.ticker == ticker.toUpperCase(),
+      );
+      if (holdingMatch.isNotEmpty && context.mounted) {
+        final holding = holdingMatch.first;
+        if (holding.instantAdvice != null) {
+          await InstantAdviceSheet.show(context, holding.instantAdvice!);
+          return;
+        }
+      }
+      final adviceMatch = portfolio.advice.where(
+        (a) => a.ticker == ticker.toUpperCase(),
+      );
+      if (adviceMatch.isNotEmpty && context.mounted) {
+        await InstantAdviceSheet.show(context, adviceMatch.first);
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(ErrorLocalizer.getMessage(context, e))),
+        );
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.ticker),
-        actions: [
-          // 관심종목 추가/삭제 버튼 (즐겨찾기 시 알림도 자동 구독)
-          Consumer<WatchlistProvider>(
-            builder: (context, watchlistProvider, child) {
-              final isInWatchlist =
-                  watchlistProvider.isInWatchlist(widget.ticker);
-              return IconButton(
-                icon: Icon(
-                  isInWatchlist ? Icons.bookmark : Icons.bookmark_outline,
-                ),
-                tooltip:
-                    isInWatchlist ? l10n.removeFromWatchlist : l10n.addToWatchlist,
-                onPressed: () {
-                  watchlistProvider.toggleWatchlist(widget.ticker);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        isInWatchlist
-                            ? l10n.removedFromWatchlist
-                            : l10n.addedToWatchlist,
+    return PopScope(
+      canPop: true,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) {
+          InterstitialAdHelper.instance.tryShowAd(context);
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(widget.ticker),
+          actions: [
+            // 보유종목에 추가 버튼
+            Consumer<PortfolioProvider>(
+              builder: (context, portfolio, child) {
+                final isHeld = portfolio.isInHoldings(widget.ticker);
+                return IconButton(
+                  icon: Icon(
+                    isHeld ? Icons.business_center : Icons.add_business,
+                  ),
+                  tooltip: isHeld
+                      ? l10n.alreadyInHoldings
+                      : l10n.addToPortfolio,
+                  onPressed: () => _onAddToPortfolio(context),
+                );
+              },
+            ),
+            // 관심종목 추가/삭제 버튼 (즐겨찾기 시 알림도 자동 구독)
+            Consumer<WatchlistProvider>(
+              builder: (context, watchlistProvider, child) {
+                final isInWatchlist = watchlistProvider.isInWatchlist(
+                  widget.ticker,
+                );
+                return IconButton(
+                  icon: Icon(
+                    isInWatchlist ? Icons.bookmark : Icons.bookmark_outline,
+                  ),
+                  tooltip: isInWatchlist
+                      ? l10n.removeFromWatchlist
+                      : l10n.addToWatchlist,
+                  onPressed: () {
+                    watchlistProvider.toggleWatchlist(widget.ticker);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          isInWatchlist
+                              ? l10n.removedFromWatchlist
+                              : l10n.addedToWatchlist,
+                        ),
+                        duration: const Duration(seconds: 1),
                       ),
-                      duration: const Duration(seconds: 1),
-                    ),
-                  );
-                },
-              );
-            },
-          ),
-        ],
+                    );
+                  },
+                );
+              },
+            ),
+          ],
+        ),
+        body: _buildBody(),
       ),
-      body: _buildBody(),
     );
   }
 
@@ -219,9 +412,7 @@ class _TickerDetailScreenState extends State<TickerDetailScreen> {
     final l10n = AppLocalizations.of(context);
     // 로딩 상태
     if (_isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
+      return const Center(child: CircularProgressIndicator());
     }
 
     // 에러 상태
@@ -240,12 +431,13 @@ class _TickerDetailScreenState extends State<TickerDetailScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.data_usage_outlined, size: 48, color: Theme.of(context).colorScheme.outline),
-            const SizedBox(height: AppSpacing.xl),
-            Text(
-              l10n.noData,
-              style: Theme.of(context).textTheme.titleLarge,
+            Icon(
+              Icons.data_usage_outlined,
+              size: 48,
+              color: Theme.of(context).colorScheme.outline,
             ),
+            const SizedBox(height: AppSpacing.xl),
+            Text(l10n.noData, style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: AppSpacing.md),
             Text(
               l10n.tryDifferentSearch,
@@ -374,14 +566,10 @@ class _TickerDetailScreenState extends State<TickerDetailScreen> {
 
             // MACD 차트 - 임시 숨김
             // MacdChartWidget(dataPoints: _chartData!.data),
-
             const SizedBox(height: AppSpacing.xl),
 
             // 19. 실시간 토크 섹션 (커뮤니티 통합)
-            TickerCommunitySection(
-              key: _communityKey,
-              ticker: widget.ticker,
-            ),
+            TickerCommunitySection(key: _communityKey, ticker: widget.ticker),
 
             const SizedBox(height: AppSpacing.xl),
           ],

@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
@@ -15,13 +15,14 @@ import 'theme/app_colors.dart';
 import 'theme/app_radius.dart';
 import 'theme/app_shadow.dart';
 import 'theme/app_spacing.dart';
-import 'theme/app_duration.dart';
 import 'theme/app_typography.dart';
 import 'providers/watchlist_provider.dart';
 import 'providers/recent_search_provider.dart';
 import 'providers/auth_provider.dart';
 import 'providers/locale_provider.dart';
 import 'providers/portfolio_provider.dart';
+import 'providers/subscription_provider.dart';
+import 'providers/coach_mark_provider.dart';
 import 'screens/dashboard/dashboard_screen.dart';
 import 'screens/explore/explore_screen.dart';
 import 'screens/watchlist/watchlist_screen.dart';
@@ -29,12 +30,14 @@ import 'screens/settings/settings_screen.dart';
 import 'screens/news/news_combined_screen.dart';
 import 'screens/ai_lens/ai_lens_screen.dart';
 import 'screens/holdings/holdings_screen.dart';
-import 'models/indices_data.dart';
-import 'services/analytics_api_client.dart';
 import 'services/notification_service.dart';
 import 'screens/notifications/notification_inbox_screen.dart';
 import 'screens/ticker_detail/ticker_detail_screen.dart';
 import 'screens/community/post_detail_screen.dart';
+import 'models/news_data.dart';
+import 'widgets/news/market_news_modal.dart';
+import 'widgets/ads/app_open_ad_helper.dart';
+import 'package:upgrader/upgrader.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -63,13 +66,25 @@ void main() async {
     debugPrint('FCM init error: $e');
   }
 
+  // Initialize RevenueCat (IAP 구독) — fire-and-forget, 내부 재시도 처리
+  final subscriptionProvider = SubscriptionProvider();
+  subscriptionProvider.initialize();
+
   // Initialize Google AdMob (timeout: iPad 호환 모드 hang 방지)
   try {
     await MobileAds.instance.initialize()
         .timeout(const Duration(seconds: 10));
+    if (kDebugMode) {
+      MobileAds.instance.updateRequestConfiguration(
+        RequestConfiguration(testDeviceIds: ['GADSimulatorID']),
+      );
+    }
   } catch (e) {
     debugPrint('AdMob init error: $e');
   }
+
+  // Preload App Open Ad
+  AppOpenAdHelper.instance.loadAd();
 
   // Initialize Providers
   final watchlistProvider = WatchlistProvider();
@@ -96,6 +111,14 @@ void main() async {
     debugPrint('LocaleProvider init error: $e');
   }
 
+  final coachMarkProvider = CoachMarkProvider();
+  try {
+    await coachMarkProvider.load()
+        .timeout(const Duration(seconds: 5));
+  } catch (e) {
+    debugPrint('CoachMarkProvider init error: $e');
+  }
+
   runApp(
     MultiProvider(
       providers: [
@@ -104,6 +127,8 @@ void main() async {
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider.value(value: localeProvider),
         ChangeNotifierProvider(create: (_) => PortfolioProvider()),
+        ChangeNotifierProvider.value(value: subscriptionProvider),
+        ChangeNotifierProvider.value(value: coachMarkProvider),
       ],
       child: const MarketLensApp(),
     ),
@@ -137,7 +162,7 @@ class MarketLensApp extends StatelessWidget {
       theme: ThemeData(
         // MarketLens brand colors (HypeHere와 다름!)
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF1E88E5), // Professional blue (seed — not a display color)
+          seedColor: const Color(0xFF1A56DB), // Deep Trust Blue (brand seed)
           brightness: Brightness.light,
         ),
         useMaterial3: true,
@@ -158,10 +183,19 @@ class MarketLensApp extends StatelessWidget {
         // Bottom navigation theme
         bottomNavigationBarTheme: BottomNavigationBarThemeData(
           selectedItemColor: MarketLensColors.light.accentBlue,
-          unselectedItemColor: MarketLensColors.light.neutralColor,
+          unselectedItemColor: MarketLensColors.light.textTertiary,
           showUnselectedLabels: true,
           type: BottomNavigationBarType.fixed,
-          elevation: 8,
+          elevation: 0,
+          backgroundColor: Colors.white,
+          selectedLabelStyle: const TextStyle(
+            fontSize: AppTypography.caption,
+            fontWeight: AppTypography.semiBold,
+          ),
+          unselectedLabelStyle: const TextStyle(
+            fontSize: AppTypography.caption,
+            fontWeight: AppTypography.regular,
+          ),
         ),
 
         // Input decoration theme
@@ -177,7 +211,7 @@ class MarketLensApp extends StatelessWidget {
       // Dark theme
       darkTheme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF1E88E5), // seed — same brand blue
+          seedColor: const Color(0xFF1A56DB), // Deep Trust Blue (brand seed)
           brightness: Brightness.dark,
         ),
         useMaterial3: true,
@@ -196,10 +230,19 @@ class MarketLensApp extends StatelessWidget {
 
         bottomNavigationBarTheme: BottomNavigationBarThemeData(
           selectedItemColor: MarketLensColors.dark.accentBlue,
-          unselectedItemColor: Color(0xFF9E9E9E), // intentional grey 500 for both themes
+          unselectedItemColor: MarketLensColors.dark.textTertiary,
           showUnselectedLabels: true,
           type: BottomNavigationBarType.fixed,
-          elevation: 8,
+          elevation: 0,
+          backgroundColor: const Color(0xFF1E1E1E),
+          selectedLabelStyle: const TextStyle(
+            fontSize: AppTypography.caption,
+            fontWeight: AppTypography.semiBold,
+          ),
+          unselectedLabelStyle: const TextStyle(
+            fontSize: AppTypography.caption,
+            fontWeight: AppTypography.regular,
+          ),
         ),
 
         inputDecorationTheme: InputDecorationTheme(
@@ -212,15 +255,93 @@ class MarketLensApp extends StatelessWidget {
       ),
 
       themeMode: ThemeMode.system,
-      home: const MainNavigationScreen(),
+      home: UpgradeAlert(
+        upgrader: Upgrader(
+          messages: _MarketLensUpgraderMessages(
+            code: localeProvider.locale?.languageCode ?? 'en',
+          ),
+          durationUntilAlertAgain: const Duration(days: 1),
+        ),
+        showIgnore: false,
+        showLater: true,
+        showReleaseNotes: false,
+        dialogStyle: UpgradeDialogStyle.material,
+        child: const MainNavigationScreen(),
+      ),
     );
   }
 }
 
+/// Custom upgrader messages matching MarketLens tone.
+class _MarketLensUpgraderMessages extends UpgraderMessages {
+  _MarketLensUpgraderMessages({super.code});
+
+  @override
+  String? message(UpgraderMessage messageKey) {
+    String? custom;
+    switch (languageCode) {
+      case 'ko': custom = _ko(messageKey);
+      case 'en': custom = _en(messageKey);
+      case 'ja': custom = _ja(messageKey);
+      case 'zh': custom = _zh(messageKey);
+      case 'es': custom = _es(messageKey);
+    }
+    if (custom != null) return custom;
+    return super.message(messageKey);
+  }
+
+  String? _ko(UpgraderMessage key) => switch (key) {
+    UpgraderMessage.title => '새 버전이 출시되었습니다',
+    UpgraderMessage.body => '더 나은 MarketLens를 만나보세요.\n최신 기능과 개선 사항이 준비되어 있습니다.',
+    UpgraderMessage.prompt => '',
+    UpgraderMessage.buttonTitleUpdate => '업데이트하기',
+    UpgraderMessage.buttonTitleLater => '나중에',
+    UpgraderMessage.buttonTitleIgnore => '무시',
+    UpgraderMessage.releaseNotes => '새로운 기능',
+  };
+
+  String? _en(UpgraderMessage key) => switch (key) {
+    UpgraderMessage.title => 'Update Available',
+    UpgraderMessage.body => 'A new version of MarketLens is available\nwith the latest features and improvements.',
+    UpgraderMessage.prompt => '',
+    UpgraderMessage.buttonTitleUpdate => 'Update Now',
+    UpgraderMessage.buttonTitleLater => 'Later',
+    UpgraderMessage.buttonTitleIgnore => 'Skip',
+    UpgraderMessage.releaseNotes => 'Release Notes',
+  };
+
+  String? _ja(UpgraderMessage key) => switch (key) {
+    UpgraderMessage.title => '新しいバージョンがあります',
+    UpgraderMessage.body => 'MarketLensの最新バージョンが公開されました。\n新機能と改善をお試しください。',
+    UpgraderMessage.prompt => '',
+    UpgraderMessage.buttonTitleUpdate => 'アップデート',
+    UpgraderMessage.buttonTitleLater => '後で',
+    _ => null,
+  };
+
+  String? _zh(UpgraderMessage key) => switch (key) {
+    UpgraderMessage.title => '新版本已发布',
+    UpgraderMessage.body => 'MarketLens 新版本已上线，\n包含最新功能和改进。',
+    UpgraderMessage.prompt => '',
+    UpgraderMessage.buttonTitleUpdate => '立即更新',
+    UpgraderMessage.buttonTitleLater => '稍后',
+    _ => null,
+  };
+
+  String? _es(UpgraderMessage key) => switch (key) {
+    UpgraderMessage.title => 'Nueva versión disponible',
+    UpgraderMessage.body => 'Una nueva versión de MarketLens está disponible\ncon las últimas funciones y mejoras.',
+    UpgraderMessage.prompt => '',
+    UpgraderMessage.buttonTitleUpdate => 'Actualizar',
+    UpgraderMessage.buttonTitleLater => 'Más tarde',
+    _ => null,
+  };
+}
+
 /// 메인 네비게이션 (5탭 구조)
 ///
-/// ⚠️ Settings는 AppBar 우측 아이콘으로 분리
-/// 📊 Market → 📰 News → 🤖 AI Lens → ⭐ Watchlist → 💼 Holdings
+/// Settings는 AppBar 우측 아이콘으로 분리
+/// Home → News → AI Analysis → Watchlist → Holdings
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
 
@@ -230,10 +351,7 @@ class MainNavigationScreen extends StatefulWidget {
 
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _currentIndex = 0;
-  bool _showIndicesBar = true;
-  MarketIndicesData? _indicesData;
   int _unreadNotificationCount = 0;
-  final AnalyticsApiClient _apiClient = AnalyticsApiClient();
   AuthProvider? _authProvider;
   VoidCallback? _authListener;
 
@@ -249,7 +367,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   static final String _authBaseUrl =
       dotenv.env['AUTH_API_BASE_URL'] ?? 'http://43.201.45.60:8000/api/accounts';
 
-  // 5개 탭: Market, News, AI Lens, Watchlist, Holdings
+  // 5개 탭: Home, News, AI Analysis, Watchlist, Holdings
   final List<Widget> _screens = const [
     DashboardScreen(), // 마켓 (기존 대시보드)
     NewsCombinedScreen(), // 뉴스 (캘린더+뉴스 내부탭)
@@ -261,14 +379,18 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   @override
   void initState() {
     super.initState();
-    _loadIndices();
     _fetchUnreadCount();
 
-    // 앱 resume 시 뱃지 카운트 갱신
+    // 앱 resume 시 뱃지 카운트 + 구독/권한 자동 동기화
     _lifecycleListener = AppLifecycleListener(
       onResume: () {
         _fetchUnreadCount();
-        _loadIndices();
+        // 자동 구독/권한 동기화 (매니저 승급 등 즉시 반영)
+        if (_authProvider?.isLoggedIn ?? false) {
+          final sub = context.read<SubscriptionProvider>();
+          sub.checkStatus();
+          _authProvider?.refreshUserInfo();
+        }
       },
     );
 
@@ -278,6 +400,12 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       SystemChrome.setSystemUIOverlayStyle(
         isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
       );
+
+      // Show App Open Ad on first launch (Gold users excluded)
+      final auth = context.read<AuthProvider>();
+      if (!auth.shouldHideAds) {
+        AppOpenAdHelper.instance.showAdIfAvailable();
+      }
     });
 
     // FCM 포그라운드 수신 시 뱃지 카운트 갱신
@@ -306,26 +434,36 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       NotificationService().onNotificationTap = _handleNotificationNavigation;
     });
 
-    // Auth ↔ Watchlist/Portfolio 동기화: 로그인/로그아웃 시 유저별 데이터 전환
+    // Auth ↔ Watchlist/Portfolio/Subscription 동기화
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _authProvider = context.read<AuthProvider>();
       final watchlist = context.read<WatchlistProvider>();
       final portfolio = context.read<PortfolioProvider>();
+      final sub = context.read<SubscriptionProvider>();
 
       // 초기 동기화 (앱 시작 시 auth 상태 확인 완료 후)
       watchlist.switchUser(_authProvider!.currentUser?.id);
       if (_authProvider!.isLoggedIn) {
         portfolio.initialize();
+        // logIn 내부에서 미초기화 시 자동 initialize() 호출
+        sub.logIn(_authProvider!.currentUser!.id.toString());
       }
+
+      // RevenueCat 실시간 리스너 → role 변경 시 userInfo 갱신
+      sub.setupListener(() {
+        _authProvider?.refreshUserInfo();
+      });
 
       // 이후 auth 변경 감지
       _authListener = () {
         watchlist.switchUser(_authProvider!.currentUser?.id);
         if (_authProvider!.isLoggedIn) {
           portfolio.initialize();
+          sub.logIn(_authProvider!.currentUser!.id.toString());
           _fetchUnreadCount(); // 로그인 직후 뱃지 갱신
         } else {
           portfolio.clear();
+          sub.logOut();
           setState(() => _unreadNotificationCount = 0); // 로그아웃 시 뱃지 초기화
         }
       };
@@ -340,17 +478,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     if (_authListener != null && _authProvider != null) {
       _authProvider!.removeListener(_authListener!);
     }
-    _apiClient.dispose();
     super.dispose();
-  }
-
-  Future<void> _loadIndices() async {
-    try {
-      final data = await _apiClient.getMarketIndices();
-      if (mounted) {
-        setState(() => _indicesData = data);
-      }
-    } catch (_) {}
   }
 
   Future<void> _fetchUnreadCount() async {
@@ -378,7 +506,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     }
   }
 
-  /// FCM 알림 탭 시 내비게이션 처리
+  /// FCM 알림 탭 시 내비게이션 처리 (type 기반 우선 라우팅)
   void _handleNotificationNavigation(Map<String, dynamic> data) {
     if (!mounted) return;
 
@@ -387,79 +515,111 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     final topTicker = data['top_ticker'] as String?;
     final postId = data['post_id'] as String?;
 
-    // 커뮤니티 알림 (post_id 있음) → PostDetailScreen
+    // ── 1. 커뮤니티 (post_id) → PostDetailScreen ──
     if (postId != null && postId.isNotEmpty) {
       final id = int.tryParse(postId);
       if (id != null) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => PostDetailScreen(postId: id)),
-        );
+        Navigator.push(context,
+            MaterialPageRoute(builder: (_) => PostDetailScreen(postId: id)));
         _fetchUnreadCount();
         return;
       }
     }
 
-    // MARKET 뉴스 알림 → News 탭 (index 1)
-    if (ticker == 'MARKET' || type == 'MARKET_NEWS') {
-      setState(() => _currentIndex = 1);
-      _fetchUnreadCount();
-      return;
-    }
-
-    // 종목 관련 알림 → TickerDetailScreen
-    if (ticker != null && ticker.isNotEmpty) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => TickerDetailScreen(ticker: ticker)),
-      );
-      _fetchUnreadCount();
-      return;
-    }
-
-    // 시장 전체 알림 (top_ticker 있음) → TickerDetailScreen
-    if (topTicker != null && topTicker.isNotEmpty) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => TickerDetailScreen(ticker: topTicker)),
-      );
-      _fetchUnreadCount();
-      return;
-    }
-
-    // 그 외 (MORNING_BRIEFING 등) → Dashboard 탭
-    setState(() => _currentIndex = 0);
-    _loadIndices();
-    _fetchUnreadCount();
-  }
-
-  /// 지수 이름 축약
-  String _shortName(String code) {
-    switch (code) {
-      case 'SPY':
-        return 'S&P';
-      case 'QQQ':
-        return 'NAS';
-      case 'DIA':
-        return 'DOW';
-      default:
-        return code;
-    }
-  }
-
-  /// 숫자 콤마 포맷
-  String _formatClose(double value) {
-    if (value >= 1000) {
-      final intPart = value.toInt();
-      final str = intPart.toString();
-      final buffer = StringBuffer();
-      for (int i = 0; i < str.length; i++) {
-        if (i > 0 && (str.length - i) % 3 == 0) buffer.write(',');
-        buffer.write(str[i]);
+    // ── 2. 뉴스 알림 → 모달 or TickerDetail(news 섹션) ──
+    if (type == 'NEWS_BULLISH' || type == 'NEWS_BEARISH' ||
+        type == 'BREAKING_NEWS' || type == 'MARKET_NEWS') {
+      if (ticker == 'MARKET' || type == 'MARKET_NEWS') {
+        // MARKET 뉴스 → News 탭 + 모달 표시
+        setState(() => _currentIndex = 1);
+        final title = data['title'] as String?;
+        if (title != null && title.isNotEmpty) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              MarketNewsModal.show(context, NewsItem.fromNotification(data));
+            }
+          });
+        }
+      } else if (ticker != null && ticker.isNotEmpty) {
+        // 종목 뉴스 → TickerDetail 뉴스 섹션 스크롤
+        Navigator.push(context, MaterialPageRoute(
+            builder: (_) => TickerDetailScreen(
+                ticker: ticker, initialSection: 'news')));
       }
-      return buffer.toString();
+      _fetchUnreadCount();
+      return;
     }
-    return value.toStringAsFixed(2);
+
+    // ── 3. 호재 급상승 → TickerDetail 뉴스 섹션 ──
+    if (type == 'BULLISH_NEWS_SURGE') {
+      if (ticker != null && ticker.isNotEmpty) {
+        Navigator.push(context, MaterialPageRoute(
+            builder: (_) => TickerDetailScreen(
+                ticker: ticker, initialSection: 'news')));
+      }
+      _fetchUnreadCount();
+      return;
+    }
+
+    // ── 4. 시그널 (STRONG_BUY/SELL) → TickerDetail ──
+    if (type == 'STRONG_BUY' || type == 'STRONG_SELL') {
+      if (ticker != null && ticker.isNotEmpty) {
+        Navigator.push(context, MaterialPageRoute(
+            builder: (_) => TickerDetailScreen(ticker: ticker)));
+      }
+      _fetchUnreadCount();
+      return;
+    }
+
+    // ── 5. 포트폴리오 자문 → TickerDetail ──
+    if (type == 'PORTFOLIO_ADVICE') {
+      if (ticker != null && ticker.isNotEmpty) {
+        Navigator.push(context, MaterialPageRoute(
+            builder: (_) => TickerDetailScreen(ticker: ticker)));
+      }
+      _fetchUnreadCount();
+      return;
+    }
+
+    // ── 6. 예약 알림 (top_ticker로 라우팅) ──
+    if (type == 'MORNING_BRIEFING' || type == 'CLOSING_REPORT' ||
+        type == 'MARKET_OPEN') {
+      if (topTicker != null && topTicker.isNotEmpty) {
+        Navigator.push(context, MaterialPageRoute(
+            builder: (_) => TickerDetailScreen(ticker: topTicker)));
+        _fetchUnreadCount();
+        return;
+      }
+      setState(() => _currentIndex = 0);
+      _fetchUnreadCount();
+      return;
+    }
+
+    // ── 7. 일일 요약 → Dashboard ──
+    if (type == 'DAILY_SUMMARY') {
+      setState(() => _currentIndex = 0);
+      _fetchUnreadCount();
+      return;
+    }
+
+    // ── 8. 기타 ticker → TickerDetail ──
+    if (ticker != null && ticker.isNotEmpty) {
+      Navigator.push(context, MaterialPageRoute(
+          builder: (_) => TickerDetailScreen(ticker: ticker)));
+      _fetchUnreadCount();
+      return;
+    }
+
+    if (topTicker != null && topTicker.isNotEmpty) {
+      Navigator.push(context, MaterialPageRoute(
+          builder: (_) => TickerDetailScreen(ticker: topTicker)));
+      _fetchUnreadCount();
+      return;
+    }
+
+    // ── 9. default → Dashboard ──
+    setState(() => _currentIndex = 0);
+    _fetchUnreadCount();
   }
 
   void _dismissBreakingToast() {
@@ -502,9 +662,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
               color: theme.colorScheme.error.withValues(alpha: 0.4),
               width: 1,
             ),
-            boxShadow: [
-              AppShadow.lg(theme.colorScheme.error.withValues(alpha: 0.15)),
-            ],
+            boxShadow: AppShadow.lg(theme.colorScheme.error.withValues(alpha: 0.15)),
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -523,7 +681,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                       _breakingTitle ?? '',
                       style: TextStyle(
                         fontSize: AppTypography.bodyMedium,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: AppTypography.bold,
                         color: theme.colorScheme.onErrorContainer,
                       ),
                       maxLines: 1,
@@ -564,83 +722,16 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     );
   }
 
-  /// AppBar bottom: indices bar only
-  PreferredSize _buildAppBarBottom(bool hasIndices) {
-    final indicesHeight = (hasIndices && _showIndicesBar) ? 30.0 : 0.0;
-
-    return PreferredSize(
-      preferredSize: Size.fromHeight(indicesHeight),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (hasIndices)
-            AnimatedContainer(
-              duration: AppDuration.fast,
-              height: _showIndicesBar ? 30 : 0,
-              clipBehavior: Clip.hardEdge,
-              decoration: const BoxDecoration(),
-              child: _buildCompactIndicesRow(),
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCompactIndicesRow() {
-    if (_indicesData == null || _indicesData!.indices.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: 0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: _indicesData!.indices.map((idx) {
-          final isPositive = idx.changePct >= 0;
-          final mlc = context.mlColors;
-          final changeColor = idx.changePct > 0
-              ? mlc.gainColor
-              : idx.changePct < 0
-                  ? mlc.lossColor
-                  : mlc.neutralColor;
-          final arrow = idx.changePct > 0 ? '▲' : idx.changePct < 0 ? '▼' : '─';
-          final sign = isPositive ? '+' : '';
-
-          return Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                _shortName(idx.code),
-                style: TextStyle(fontSize: AppTypography.caption, fontWeight: AppTypography.medium),
-              ),
-              const SizedBox(width: 3),
-              Text(
-                _formatClose(idx.close),
-                style: TextStyle(fontSize: AppTypography.caption, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(width: AppSpacing.xxs),
-              Text(
-                '$arrow$sign${idx.changePct.toStringAsFixed(2)}%',
-                style: TextStyle(fontSize: AppTypography.micro, color: changeColor, fontWeight: AppTypography.semiBold),
-              ),
-            ],
-          );
-        }).toList(),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final hasIndices = _indicesData != null && _indicesData!.indices.isNotEmpty;
 
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 34,
         title: const Text(
           'MarketLens',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: AppTypography.bold),
         ),
         actions: [
           // 검색 아이콘
@@ -678,7 +769,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           ),
           // Settings 아이콘 (별도 탭 아님!)
           IconButton(
-            icon: const Icon(Icons.more_vert),
+            icon: const Icon(Icons.settings_outlined),
             tooltip: l10n.settings,
             onPressed: () {
               Navigator.push(
@@ -690,23 +781,12 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             },
           ),
         ],
-        bottom: _buildAppBarBottom(hasIndices),
       ),
       body: Stack(
         children: [
-          NotificationListener<UserScrollNotification>(
-            onNotification: (notification) {
-              if (notification.direction == ScrollDirection.reverse && _showIndicesBar) {
-                setState(() => _showIndicesBar = false);
-              } else if (notification.direction == ScrollDirection.forward && !_showIndicesBar) {
-                setState(() => _showIndicesBar = true);
-              }
-              return false;
-            },
-            child: IndexedStack(
-              index: _currentIndex,
-              children: _screens,
-            ),
+          IndexedStack(
+            index: _currentIndex,
+            children: _screens,
           ),
           // 속보 토스트
           if (_breakingTitle != null)
@@ -728,26 +808,26 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         type: BottomNavigationBarType.fixed, // 5개 탭 고정 표시
         items: [
           BottomNavigationBarItem(
-            icon: const Icon(Icons.show_chart_outlined),
-            activeIcon: const Icon(Icons.show_chart),
-            label: l10n.tabMarket,
-            tooltip: l10n.tabMarketTooltip,
+            icon: const Icon(Icons.home_outlined),
+            activeIcon: const Icon(Icons.home),
+            label: l10n.tabHome,
+            tooltip: l10n.tabHomeTooltip,
           ),
           BottomNavigationBarItem(
-            icon: const Icon(Icons.article_outlined),
-            activeIcon: const Icon(Icons.article),
+            icon: const Icon(Icons.newspaper_outlined),
+            activeIcon: const Icon(Icons.newspaper),
             label: l10n.tabNews,
             tooltip: l10n.tabNewsTooltip,
           ),
           BottomNavigationBarItem(
             icon: const Icon(Icons.auto_awesome_outlined),
             activeIcon: const Icon(Icons.auto_awesome),
-            label: l10n.tabAILens,
+            label: l10n.tabAIAnalysis,
             tooltip: l10n.tabAILensTooltip,
           ),
           BottomNavigationBarItem(
-            icon: const Icon(Icons.bookmark_outline),
-            activeIcon: const Icon(Icons.bookmark),
+            icon: const Icon(Icons.star_border),
+            activeIcon: const Icon(Icons.star),
             label: l10n.tabWatchlist,
             tooltip: l10n.tabWatchlistTooltip,
           ),

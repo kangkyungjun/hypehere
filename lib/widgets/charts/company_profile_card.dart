@@ -65,7 +65,7 @@ class _CompanyProfileCardState extends State<CompanyProfileCard> {
                   child: Text(
                     l10n.companyOverview,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
+                          fontWeight: AppTypography.bold,
                         ),
                   ),
                 ),
@@ -159,10 +159,10 @@ class _CompanyProfileCardState extends State<CompanyProfileCard> {
               Text(
                 AppLocalizations.of(ctx).companyDetails,
                 style: Theme.of(ctx).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
+                      fontWeight: AppTypography.bold,
                     ),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: AppSpacing.lg),
 
               // Company name
               if (p.longName != null)
@@ -205,7 +205,7 @@ class _CompanyProfileCardState extends State<CompanyProfileCard> {
 
               // --- Summary ---
               if (p.summary != null) ...[
-                const SizedBox(height: 10),
+                const SizedBox(height: AppSpacing.lg),
                 _buildSectionLabel(ctx, AppLocalizations.of(ctx).companyIntro),
                 const SizedBox(height: AppSpacing.sm),
                 Text(

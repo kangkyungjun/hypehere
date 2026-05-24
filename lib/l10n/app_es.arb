@@ -15,7 +15,7 @@
   "tabMarketTooltip": "Resumen del Mercado",
   "tabAILens": "IA",
   "tabAILensTooltip": "Análisis IA",
-  "tabWatchlist": "Favoritos",
+  "tabWatchlist": "Seguimiento",
   "tabWatchlistTooltip": "Mi lista de seguimiento",
   "tabHoldingsTooltip": "Mis Posiciones",
 
@@ -49,6 +49,10 @@
   "passwordHint": "Introduce tu contraseña",
   "passwordRequired": "Introduce tu contraseña",
   "passwordTooShort": "La contraseña debe tener al menos 8 caracteres",
+  "passwordAllNumeric": "La contraseña no puede ser solo números",
+  "passwordTooCommon": "Esta contraseña es muy común. Elige una más segura",
+  "passwordTooSimilar": "La contraseña es muy similar a tu email o nombre",
+  "passwordRequirements": "Mínimo 8 caracteres. No puede ser solo números ni una contraseña común.",
   "passwordConfirm": "Confirmar contraseña",
   "passwordConfirmHint": "Vuelve a introducir tu contraseña",
   "passwordConfirmRequired": "Confirma tu contraseña",
@@ -108,11 +112,11 @@
   "showMore": "Ver más ({remaining} restantes)",
   "nItems": "{count} elementos",
 
-  "scoreStrongBuy": "Compra fuerte",
-  "scoreBuy": "Compra",
-  "scoreHold": "Mantener",
-  "scoreSell": "Venta",
-  "scoreStrongSell": "Venta fuerte",
+  "scoreStrongBuy": "Muy Positivo",
+  "scoreBuy": "Positivo",
+  "scoreHold": "Neutral",
+  "scoreSell": "Negativo",
+  "scoreStrongSell": "Muy Negativo",
   "score": "Puntuación",
 
   "myWatchlist": "Mi lista de seguimiento",
@@ -131,6 +135,8 @@
   "watchlistDiscoveryTitle": "Añade a tu lista de seguimiento",
   "watchlistDiscoverySubtitle": "Recibe alertas de noticias y señales de tus acciones",
   "topTradingVolume": "Mayor volumen de hoy",
+  "addWatchlistSearch": "Buscar y agregar a favoritos",
+  "bookmarkGuide": "Toca el icono de marcador para agregar a tu lista",
 
   "communitySearchHint": "Buscar por título o contenido...",
   "writePost": "Escribir publicación",
@@ -406,6 +412,11 @@
   "marketlensAIOpinion": "Opinión de MarketLens AI",
   "bullishFactors": "Factores alcistas",
   "bearishFactors": "Factores bajistas",
+  "expertAnalysis": "Análisis Experto",
+  "expertKeyFactors": "Factores Clave",
+  "predictionBullish": "Alcista",
+  "predictionBearish": "Bajista",
+  "predictionNeutral": "Neutral",
   "target": "Objetivo ",
   "stopLoss": "Stop ",
   "averageTargetPrice": "Precio objetivo promedio",
@@ -645,11 +656,26 @@
   "recTechnicalInsight": "Análisis Técnico",
   "recMarketIntelligence": "Inteligencia de Mercado",
   "recActionSummary": "Resumen de Acciones",
+  "recCompanyClassification": "Clasificación de Empresa",
+  "recAnalystSummary": "Resumen de Analistas",
+  "recMarketSummary": "Resumen del Mercado",
+  "recUpcomingEvents": "Próximos Eventos",
+  "recBuyRecommend": "Aumentar Posición (Comprar)",
+  "recHoldRecommend": "Mantener Posición (Observar)",
+  "recSellRecommend": "Reducir Posición (Vender)",
   "recommendedAction": "Acción Recomendada",
   "analysisWaiting": "Análisis IA pendiente...",
   "alreadyHeld": "En cartera",
   "goToWatchlistTab": "Ir a seguimiento",
   "noHoldingsHint": "Añade posiciones desde la pestaña de seguimiento",
+  "addHoldingDirect": "Añadir acción",
+  "aiPortfolioBenefitTitle": "Registra tus acciones y recibe\nanálisis de inversión con IA cada mañana",
+  "aiPortfolioBenefit1": "Sugerencias de rebalanceo de cartera",
+  "aiPortfolioBenefit2": "Análisis de señales técnicas",
+  "aiPortfolioBenefit3": "Evaluación de impacto de noticias",
+  "searchTickerHint": "Buscar por nombre o ticker",
+  "addToPortfolio": "Añadir a cartera",
+  "alreadyInHoldings": "Ya está en tu cartera",
   "closingPriceAuto": "Precio de cierre automático",
   "holidayPriceNotice": "Precio de cierre del {date} (día hábil anterior)",
   "addToHoldings": "Añadir a posiciones",
@@ -663,6 +689,13 @@
   "avgPriceLabel": "Precio promedio",
   "currentValueLabel": "Valor actual",
   "dailyUpdate": "Actualización diaria por la mañana",
+  "aiRefreshOnChange": "Se actualiza automáticamente al modificar",
+  "lastUpdateTime": "Última actualización: {time}",
+  "@lastUpdateTime": {
+    "placeholders": {
+      "time": { "type": "String" }
+    }
+  },
   "viewAIAdvice": "Ver consejo AI",
   "noAnalysisYet": "Aún no hay análisis disponible",
   "recentTransactions": "Transacciones recientes",
@@ -702,7 +735,7 @@
   "sectorRealEstate": "Inmobiliario",
   "sectorMaterials": "Materiales",
 
-  "newsBubbleTitle": "Burbuja de noticias 24h",
+  "newsBubbleTitle": "Noticias Hot 24h",
   "newsBubbleLegendBullish": "Mayoría alcista",
   "newsBubbleLegendBearish": "Mayoría bajista",
   "newsBubbleLegendMixed": "Mixto",
@@ -721,12 +754,13 @@
   "krwSuffix": " KRW",
   "taxTradeCount": " ventas",
   "macro3mTitle": "3M",
-  "macro3mHigh": "Máx",
-  "macro3mAvg": "Med",
-  "macro3mLow": "Mín",
+  "macro3mHigh": "3M Máx",
+  "macro3mAvg": "3M Med",
+  "macro3mLow": "3M Mín",
   "tooltipClearSearch": "Borrar búsqueda",
   "tooltipPreviousMonth": "Mes anterior",
   "tooltipNextMonth": "Mes siguiente",
+  "tooltipSelectMonth": "Seleccionar mes",
   "tooltipShowPassword": "Mostrar contraseña",
   "tooltipHidePassword": "Ocultar contraseña",
   "tooltipChangePhoto": "Cambiar foto",
@@ -734,5 +768,166 @@
   "tooltipRemove": "Eliminar",
   "otherSectors": "Otros sectores",
   "otherTickers": "Otras acciones",
-  "nDaysAgo": "Hace {count}d"
+  "nDaysAgo": "Hace {count}d",
+
+  "tabHome": "Inicio",
+  "tabHomeTooltip": "Inicio",
+  "tabAIAnalysis": "Señal IA",
+  "tabToday": "Hoy",
+  "tabUpDown": "Subidas/Bajadas",
+  "tabIndexes": "Índices",
+  "macroCurrentLabel": "Actual",
+  "macroChangeLabel": "Cambio",
+  "tradingVolumeTop": "Volumen",
+  "gainersTop": "Ganadores",
+  "losersTop": "Perdedores",
+  "topByMarketCap": "Top por capitalización",
+  "viewMore": "Ver más",
+
+  "gaugeStrongNegativeDesc": "Muy Negativo: Muy alta probabilidad de caída",
+  "gaugeNegativeDesc": "Negativo: Alta probabilidad de caída",
+  "gaugePositiveDesc": "Positivo: Alta probabilidad de subida",
+  "gaugeStrongPositiveDesc": "Muy Positivo: Muy alta probabilidad de subida",
+  "aiRecommended20": "AI Top {count} Recomendados",
+  "@aiRecommended20": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "aiCaution20": "AI Top {count} Precaución",
+  "@aiCaution20": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "seeMore": "Ver más",
+
+  "holdingsSummary": "Resumen de Posiciones",
+  "returnRate": "Rendimiento",
+  "purchaseAmount": "Costo de Compra",
+  "profitAmount": "Ganancia/Pérdida",
+  "evaluationAmount": "Valor de Mercado",
+
+  "watchAdToUnlock": "Mira un anuncio corto para ver el analisis",
+  "watchAd": "Ver anuncio",
+  "adNotReady": "El anuncio se esta cargando, intentalo de nuevo",
+
+  "holdingsLimitTitle": "Límite de posiciones",
+  "holdingsLimitMessage": "Los usuarios gratuitos pueden tener hasta 3 posiciones. Actualiza a Gold para posiciones ilimitadas y análisis IA sin anuncios.",
+  "upgradeToGold": "Actualizar a Gold",
+  "goldBenefitUnlimitedHoldings": "Posiciones ilimitadas",
+  "goldBenefitAIUnlimited": "Análisis IA sin anuncios",
+  "goldBenefitNoAds": "Experiencia sin anuncios",
+  "newAiAnalysisAvailable": "Nuevo análisis IA disponible",
+  "viewingPreviousAnalysis": "Ver análisis anterior",
+  "goldUpgradeComingSoon": "¡La membresía Gold llegará pronto! Estén atentos.",
+  "close": "Cerrar",
+
+  "goldMonthlyPrice": "{price}/mes",
+  "@goldMonthlyPrice": {
+    "placeholders": {
+      "price": { "type": "String" }
+    }
+  },
+  "subscribeNow": "Suscribirse",
+  "restorePurchases": "Restaurar compras",
+  "purchaseRestored": "Compras restauradas exitosamente",
+  "purchaseRestoreFailed": "No se encontraron compras anteriores",
+  "purchaseFailed": "Error en la compra. Inténtalo de nuevo.",
+  "purchaseCancelled": "Compra cancelada",
+  "subscriptionActive": "Activa",
+  "subscriptionExpires": "Expira el {date}",
+  "@subscriptionExpires": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "subscriptionManage": "Gestionar suscripción",
+  "subscriptionTermsIos": "El pago se cargará a tu cuenta de App Store. La suscripción se renueva automáticamente a menos que se cancele 24 horas antes del final del período actual.",
+  "subscriptionTermsAndroid": "El pago se cargará a tu cuenta de Google Play. La suscripción se renueva automáticamente a menos que se cancele 24 horas antes del final del período actual.",
+  "goldMembershipTitle": "Membresía Gold",
+  "subscription": "Suscripción",
+
+  "freeTrialStart": "Iniciar prueba gratuita de 7 días",
+  "freeTrialInfo": "7 días gratis, luego {price}/mes. Cancela en cualquier momento.",
+  "@freeTrialInfo": {
+    "placeholders": {
+      "price": { "type": "String" }
+    }
+  },
+  "onFreeTrial": "Prueba gratuita",
+  "trialEndsOn": "Prueba termina: {date}",
+  "@trialEndsOn": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "trialExpired": "Tu prueba gratuita ha terminado",
+
+  "manageSubscription": "Gestionar suscripción",
+  "restorePurchaseTitle": "Restaurar compra anterior",
+  "restorePurchaseDescription": "Úsalo si tu suscripción no se refleja después de cambiar de dispositivo o reinstalar la app.",
+
+  "calendarPremiumEvents": "{count} eventos premium",
+  "@calendarPremiumEvents": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "calendarUnlockWithAd": "Ver anuncio para 6h de acceso",
+  "calendarUnlockedUntil": "Desbloqueado hasta {time}",
+  "@calendarUnlockedUntil": {
+    "placeholders": {
+      "time": { "type": "String" }
+    }
+  },
+
+  "treemapLegend": "Tamaño = Volumen  |  Verde = Alza  |  Rojo = Baja",
+  "aiScoreSubtitle": "Puntuación IA (0: Señal de Venta ~ 100: Señal de Compra)",
+  "aiSignalStrongBuyDesc": "Compra Fuerte (80-100): Indicadores técnicos y financieros muestran fuertes señales de compra",
+  "aiSignalBuyDesc": "Compra (60-79): Indicadores generalmente positivos",
+  "aiSignalHoldDesc": "Mantener (40-59): Señales mixtas, mantener posición actual",
+  "aiSignalSellDesc": "Venta (20-39): Indicadores generalmente negativos",
+  "aiSignalStrongSellDesc": "Venta Fuerte (0-19): Indicadores técnicos y financieros muestran fuertes señales de venta",
+  "watchlistSubtitle": "Recopila y sigue tus acciones favoritas",
+  "holdingsSubtitle": "Gestiona tu cartera y sigue tus rendimientos",
+  "filterActiveLabel": "Filtro activo",
+  "tapToRemoveFilter": "Toca para quitar",
+  "searchTickersCta": "Buscar acciones",
+  "addTickersCta": "Agregar acciones",
+  "beFirstToPost": "¡Sé el primero en compartir tu opinión!",
+  "totalPosts": "{count} publicaciones",
+  "@totalPosts": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "recentComments": "Comentarios recientes",
+  "coachMarkDashboardTreemap": "Los colores muestran cambios de precio, el tamaño representa el volumen",
+  "coachMarkAiLens": "Distribución de señales de compra/venta analizadas por IA",
+  "coachMarkWatchlist": "¡Agrega tus acciones favoritas para seguirlas!",
+  "coachMarkHoldings": "Registra tus tenencias para rastrear rendimientos",
+  "coachMarkTickerScore": "Consulta la tendencia del puntaje IA. Más de 70 indica señal de compra",
+  "coachMarkMacroGauge": "Desliza para ver indicadores económicos",
+  "coachMarkGotIt": "Entendido",
+  "resetTutorials": "Reiniciar tutoriales",
+  "resetTutorialsDesc": "Todos los tutoriales se mostrarán de nuevo",
+  "tutorialsReset": "Tutoriales reiniciados",
+
+  "purchaseStoreUnavailable": "App Store no disponible",
+  "purchaseStoreProblem": "No se puede conectar a App Store. Verifica la configuración de tu Apple ID, asegúrate de que los pagos estén habilitados e intenta de nuevo.",
+  "purchaseTemporarilyUnavailable": "Suscripción no disponible temporalmente",
+  "purchaseRetry": "Reintentar",
+  "purchaseInitializing": "Conectando con App Store...",
+
+  "loginRequiredForPurchase": "Inicia sesión para comprar la membresía Gold. Tu suscripción se sincronizará con tu cuenta.",
+
+  "aiScoreGuideTitle": "Guía de puntuación IA",
+  "aiScoreGuideDescription": "Las puntuaciones de IA se calculan desde una perspectiva de inversión a medio-largo plazo (3 a 12 meses).",
+  "aiScoreGuideStrongPositive": "80–100: Fuerte positivo – Probabilidad de subida muy alta",
+  "aiScoreGuidePositive": "60–79: Positivo – Probabilidad de subida alta",
+  "aiScoreGuideNeutral": "40–59: Neutral – Señales mixtas",
+  "aiScoreGuideNegative": "20–39: Negativo – Probabilidad de caída alta",
+  "aiScoreGuideStrongNegative": "0–19: Fuerte negativo – Probabilidad de caída muy alta",
+  "subscriptionPaymentAccountWarning": "El pago se procesa a través de la cuenta de App Store / Google Play iniciada en este dispositivo. Si compras en el dispositivo de otra persona, se puede cobrar a la cuenta del propietario del dispositivo."
 }

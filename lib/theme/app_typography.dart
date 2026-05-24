@@ -52,6 +52,44 @@ abstract final class AppTypography {
   /// 극소 차트 텍스트, 캘린더 보조 (8px)
   static const double chartMicro = 8.0;
 
+  // ── Semantic Text Styles ───────────────────────────────
+
+  static const TextStyle screenTitle = TextStyle(
+    fontSize: displayLarge,
+    fontWeight: bold,
+    height: 1.22,
+  );
+
+  static const TextStyle sectionTitle = TextStyle(
+    fontSize: headlineLarge,
+    fontWeight: bold,
+    height: 1.28,
+  );
+
+  static const TextStyle cardTitle = TextStyle(
+    fontSize: headlineMedium,
+    fontWeight: semiBold,
+    height: 1.3,
+  );
+
+  static const TextStyle body = TextStyle(
+    fontSize: bodyLarge,
+    fontWeight: regular,
+    height: 1.45,
+  );
+
+  static const TextStyle bodyStrong = TextStyle(
+    fontSize: bodyLarge,
+    fontWeight: semiBold,
+    height: 1.4,
+  );
+
+  static const TextStyle label = TextStyle(
+    fontSize: bodySmall,
+    fontWeight: medium,
+    height: 1.25,
+  );
+
   // ── Font Weights ────────────────────────────────────────
 
   /// 강한 강조, 주요 헤더 (w700)
@@ -62,4 +100,49 @@ abstract final class AppTypography {
 
   /// 약한 강조, 보조 레이블 (w500)
   static const FontWeight medium = FontWeight.w500;
+
+  /// 기본 굵기, 일반 본문 텍스트 (w400)
+  static const FontWeight regular = FontWeight.normal;
+
+  // ── Numeric Styles (주가, 수익률 등 숫자 강조용) ──────────
+
+  /// 숫자 정렬을 위한 fontFeatures
+  static const List<FontFeature> tabularFigures = [
+    FontFeature.tabularFigures(),
+  ];
+
+  /// 대형 주가 표시 (heroMedium + bold + tabular)
+  static const TextStyle priceHero = TextStyle(
+    fontSize: heroMedium,
+    fontWeight: bold,
+    fontFeatures: tabularFigures,
+  );
+
+  /// 중형 주가 표시 (displayMedium + semiBold + tabular)
+  static const TextStyle priceLarge = TextStyle(
+    fontSize: displayMedium,
+    fontWeight: semiBold,
+    fontFeatures: tabularFigures,
+  );
+
+  /// 카드 내 주가 (headlineMedium + semiBold + tabular)
+  static const TextStyle priceCard = TextStyle(
+    fontSize: headlineMedium,
+    fontWeight: semiBold,
+    fontFeatures: tabularFigures,
+  );
+
+  /// 변동률 배지 텍스트 (bodyLarge + semiBold + tabular)
+  static const TextStyle changeBadge = TextStyle(
+    fontSize: bodyLarge,
+    fontWeight: semiBold,
+    fontFeatures: tabularFigures,
+  );
+
+  /// 보조 숫자 — 거래량, 시가총액 등 (bodySmall + medium + tabular)
+  static const TextStyle numericSecondary = TextStyle(
+    fontSize: bodySmall,
+    fontWeight: medium,
+    fontFeatures: tabularFigures,
+  );
 }

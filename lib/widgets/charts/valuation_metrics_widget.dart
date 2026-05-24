@@ -41,7 +41,7 @@ class ValuationMetricsWidget extends StatelessWidget {
               Text(
                 l10n.valuation,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
+                      fontWeight: AppTypography.bold,
                     ),
               ),
               if (m.marketCap != null)
@@ -73,7 +73,7 @@ class ValuationMetricsWidget extends StatelessWidget {
           Text(
             l10n.profitabilityGrowth,
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
+                  fontWeight: AppTypography.bold,
                 ),
           ),
           const SizedBox(height: AppSpacing.sm),
@@ -117,7 +117,7 @@ class ValuationMetricsWidget extends StatelessWidget {
 
   Widget _buildMetricTile(BuildContext context, String label, String value) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 3),
+      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xxs),
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg, horizontal: AppSpacing.md),
       decoration: BoxDecoration(
         color: context.mlColors.cardBackground,
@@ -139,6 +139,7 @@ class ValuationMetricsWidget extends StatelessWidget {
             style: const TextStyle(
               fontSize: AppTypography.headlineSmall,
               fontWeight: AppTypography.semiBold,
+              fontFeatures: AppTypography.tabularFigures,
             ),
           ),
         ],
@@ -172,7 +173,7 @@ class ValuationMetricsWidget extends StatelessWidget {
                 style: TextStyle(
                   color: context.mlColors.onPrimary,
                   fontSize: AppTypography.headlineLarge,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: AppTypography.bold,
                 ),
               ),
             ),

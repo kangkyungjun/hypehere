@@ -143,6 +143,21 @@ class AppLocalizationsEs extends AppLocalizations {
       'La contraseña debe tener al menos 8 caracteres';
 
   @override
+  String get passwordAllNumeric => 'La contraseña no puede ser solo números';
+
+  @override
+  String get passwordTooCommon =>
+      'Esta contraseña es muy común. Elige una más segura';
+
+  @override
+  String get passwordTooSimilar =>
+      'La contraseña es muy similar a tu email o nombre';
+
+  @override
+  String get passwordRequirements =>
+      'Mínimo 8 caracteres. No puede ser solo números ni una contraseña común.';
+
+  @override
   String get passwordConfirm => 'Confirmar contraseña';
 
   @override
@@ -318,19 +333,19 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get scoreStrongBuy => 'Compra fuerte';
+  String get scoreStrongBuy => 'Muy Positivo';
 
   @override
-  String get scoreBuy => 'Compra';
+  String get scoreBuy => 'Positivo';
 
   @override
-  String get scoreHold => 'Mantener';
+  String get scoreHold => 'Neutral';
 
   @override
-  String get scoreSell => 'Venta';
+  String get scoreSell => 'Negativo';
 
   @override
-  String get scoreStrongSell => 'Venta fuerte';
+  String get scoreStrongSell => 'Muy Negativo';
 
   @override
   String get score => 'Puntuación';
@@ -388,6 +403,13 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get topTradingVolume => 'Mayor volumen de hoy';
+
+  @override
+  String get addWatchlistSearch => 'Buscar y agregar a favoritos';
+
+  @override
+  String get bookmarkGuide =>
+      'Toca el icono de marcador para agregar a tu lista';
 
   @override
   String get communitySearchHint => 'Buscar por título o contenido...';
@@ -1208,6 +1230,21 @@ class AppLocalizationsEs extends AppLocalizations {
   String get bearishFactors => 'Factores bajistas';
 
   @override
+  String get expertAnalysis => 'Análisis Experto';
+
+  @override
+  String get expertKeyFactors => 'Factores Clave';
+
+  @override
+  String get predictionBullish => 'Alcista';
+
+  @override
+  String get predictionBearish => 'Bajista';
+
+  @override
+  String get predictionNeutral => 'Neutral';
+
+  @override
   String get target => 'Objetivo ';
 
   @override
@@ -1796,6 +1833,27 @@ class AppLocalizationsEs extends AppLocalizations {
   String get recActionSummary => 'Resumen de Acciones';
 
   @override
+  String get recCompanyClassification => 'Clasificación de Empresa';
+
+  @override
+  String get recAnalystSummary => 'Resumen de Analistas';
+
+  @override
+  String get recMarketSummary => 'Resumen del Mercado';
+
+  @override
+  String get recUpcomingEvents => 'Próximos Eventos';
+
+  @override
+  String get recBuyRecommend => 'Aumentar Posición (Comprar)';
+
+  @override
+  String get recHoldRecommend => 'Mantener Posición (Observar)';
+
+  @override
+  String get recSellRecommend => 'Reducir Posición (Vender)';
+
+  @override
   String get recommendedAction => 'Acción Recomendada';
 
   @override
@@ -1810,6 +1868,31 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get noHoldingsHint =>
       'Añade posiciones desde la pestaña de seguimiento';
+
+  @override
+  String get addHoldingDirect => 'Añadir acción';
+
+  @override
+  String get aiPortfolioBenefitTitle =>
+      'Registra tus acciones y recibe\nanálisis de inversión con IA cada mañana';
+
+  @override
+  String get aiPortfolioBenefit1 => 'Sugerencias de rebalanceo de cartera';
+
+  @override
+  String get aiPortfolioBenefit2 => 'Análisis de señales técnicas';
+
+  @override
+  String get aiPortfolioBenefit3 => 'Evaluación de impacto de noticias';
+
+  @override
+  String get searchTickerHint => 'Buscar por nombre o ticker';
+
+  @override
+  String get addToPortfolio => 'Añadir a cartera';
+
+  @override
+  String get alreadyInHoldings => 'Ya está en tu cartera';
 
   @override
   String get closingPriceAuto => 'Precio de cierre automático';
@@ -1859,6 +1942,14 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get dailyUpdate => 'Actualización diaria por la mañana';
+
+  @override
+  String get aiRefreshOnChange => 'Se actualiza automáticamente al modificar';
+
+  @override
+  String lastUpdateTime(String time) {
+    return 'Última actualización: $time';
+  }
 
   @override
   String get viewAIAdvice => 'Ver consejo AI';
@@ -1943,7 +2034,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get sectorMaterials => 'Materiales';
 
   @override
-  String get newsBubbleTitle => 'Burbuja de noticias 24h';
+  String get newsBubbleTitle => 'Noticias Hot 24h';
 
   @override
   String get newsBubbleLegendBullish => 'Mayoría alcista';
@@ -1984,13 +2075,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get macro3mTitle => '3M';
 
   @override
-  String get macro3mHigh => 'Máx';
+  String get macro3mHigh => '3M Máx';
 
   @override
-  String get macro3mAvg => 'Med';
+  String get macro3mAvg => '3M Med';
 
   @override
-  String get macro3mLow => 'Mín';
+  String get macro3mLow => '3M Mín';
 
   @override
   String get tooltipClearSearch => 'Borrar búsqueda';
@@ -2000,6 +2091,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get tooltipNextMonth => 'Mes siguiente';
+
+  @override
+  String get tooltipSelectMonth => 'Seleccionar mes';
 
   @override
   String get tooltipShowPassword => 'Mostrar contraseña';
@@ -2026,4 +2120,359 @@ class AppLocalizationsEs extends AppLocalizations {
   String nDaysAgo(int count) {
     return 'Hace ${count}d';
   }
+
+  @override
+  String get tabHome => 'Inicio';
+
+  @override
+  String get tabHomeTooltip => 'Inicio';
+
+  @override
+  String get tabAIAnalysis => 'Señal IA';
+
+  @override
+  String get tabToday => 'Hoy';
+
+  @override
+  String get tabUpDown => 'Subidas/Bajadas';
+
+  @override
+  String get tabIndexes => 'Índices';
+
+  @override
+  String get macroCurrentLabel => 'Actual';
+
+  @override
+  String get macroChangeLabel => 'Cambio';
+
+  @override
+  String get tradingVolumeTop => 'Volumen';
+
+  @override
+  String get gainersTop => 'Ganadores';
+
+  @override
+  String get losersTop => 'Perdedores';
+
+  @override
+  String get topByMarketCap => 'Top por capitalización';
+
+  @override
+  String get viewMore => 'Ver más';
+
+  @override
+  String get gaugeStrongNegativeDesc =>
+      'Muy Negativo: Muy alta probabilidad de caída';
+
+  @override
+  String get gaugeNegativeDesc => 'Negativo: Alta probabilidad de caída';
+
+  @override
+  String get gaugePositiveDesc => 'Positivo: Alta probabilidad de subida';
+
+  @override
+  String get gaugeStrongPositiveDesc =>
+      'Muy Positivo: Muy alta probabilidad de subida';
+
+  @override
+  String aiRecommended20(int count) {
+    return 'AI Top $count Recomendados';
+  }
+
+  @override
+  String aiCaution20(int count) {
+    return 'AI Top $count Precaución';
+  }
+
+  @override
+  String get seeMore => 'Ver más';
+
+  @override
+  String get holdingsSummary => 'Resumen de Posiciones';
+
+  @override
+  String get returnRate => 'Rendimiento';
+
+  @override
+  String get purchaseAmount => 'Costo de Compra';
+
+  @override
+  String get profitAmount => 'Ganancia/Pérdida';
+
+  @override
+  String get evaluationAmount => 'Valor de Mercado';
+
+  @override
+  String get watchAdToUnlock => 'Mira un anuncio corto para ver el analisis';
+
+  @override
+  String get watchAd => 'Ver anuncio';
+
+  @override
+  String get adNotReady => 'El anuncio se esta cargando, intentalo de nuevo';
+
+  @override
+  String get holdingsLimitTitle => 'Límite de posiciones';
+
+  @override
+  String get holdingsLimitMessage =>
+      'Los usuarios gratuitos pueden tener hasta 3 posiciones. Actualiza a Gold para posiciones ilimitadas y análisis IA sin anuncios.';
+
+  @override
+  String get upgradeToGold => 'Actualizar a Gold';
+
+  @override
+  String get goldBenefitUnlimitedHoldings => 'Posiciones ilimitadas';
+
+  @override
+  String get goldBenefitAIUnlimited => 'Análisis IA sin anuncios';
+
+  @override
+  String get goldBenefitNoAds => 'Experiencia sin anuncios';
+
+  @override
+  String get newAiAnalysisAvailable => 'Nuevo análisis IA disponible';
+
+  @override
+  String get viewingPreviousAnalysis => 'Ver análisis anterior';
+
+  @override
+  String get goldUpgradeComingSoon =>
+      '¡La membresía Gold llegará pronto! Estén atentos.';
+
+  @override
+  String get close => 'Cerrar';
+
+  @override
+  String goldMonthlyPrice(String price) {
+    return '$price/mes';
+  }
+
+  @override
+  String get subscribeNow => 'Suscribirse';
+
+  @override
+  String get restorePurchases => 'Restaurar compras';
+
+  @override
+  String get purchaseRestored => 'Compras restauradas exitosamente';
+
+  @override
+  String get purchaseRestoreFailed => 'No se encontraron compras anteriores';
+
+  @override
+  String get purchaseFailed => 'Error en la compra. Inténtalo de nuevo.';
+
+  @override
+  String get purchaseCancelled => 'Compra cancelada';
+
+  @override
+  String get subscriptionActive => 'Activa';
+
+  @override
+  String subscriptionExpires(String date) {
+    return 'Expira el $date';
+  }
+
+  @override
+  String get subscriptionManage => 'Gestionar suscripción';
+
+  @override
+  String get subscriptionTermsIos =>
+      'El pago se cargará a tu cuenta de App Store. La suscripción se renueva automáticamente a menos que se cancele 24 horas antes del final del período actual.';
+
+  @override
+  String get subscriptionTermsAndroid =>
+      'El pago se cargará a tu cuenta de Google Play. La suscripción se renueva automáticamente a menos que se cancele 24 horas antes del final del período actual.';
+
+  @override
+  String get goldMembershipTitle => 'Membresía Gold';
+
+  @override
+  String get subscription => 'Suscripción';
+
+  @override
+  String get freeTrialStart => 'Iniciar prueba gratuita de 7 días';
+
+  @override
+  String freeTrialInfo(String price) {
+    return '7 días gratis, luego $price/mes. Cancela en cualquier momento.';
+  }
+
+  @override
+  String get onFreeTrial => 'Prueba gratuita';
+
+  @override
+  String trialEndsOn(String date) {
+    return 'Prueba termina: $date';
+  }
+
+  @override
+  String get trialExpired => 'Tu prueba gratuita ha terminado';
+
+  @override
+  String get manageSubscription => 'Gestionar suscripción';
+
+  @override
+  String get restorePurchaseTitle => 'Restaurar compra anterior';
+
+  @override
+  String get restorePurchaseDescription =>
+      'Úsalo si tu suscripción no se refleja después de cambiar de dispositivo o reinstalar la app.';
+
+  @override
+  String calendarPremiumEvents(int count) {
+    return '$count eventos premium';
+  }
+
+  @override
+  String get calendarUnlockWithAd => 'Ver anuncio para 6h de acceso';
+
+  @override
+  String calendarUnlockedUntil(String time) {
+    return 'Desbloqueado hasta $time';
+  }
+
+  @override
+  String get treemapLegend =>
+      'Tamaño = Volumen  |  Verde = Alza  |  Rojo = Baja';
+
+  @override
+  String get aiScoreSubtitle =>
+      'Puntuación IA (0: Señal de Venta ~ 100: Señal de Compra)';
+
+  @override
+  String get aiSignalStrongBuyDesc =>
+      'Compra Fuerte (80-100): Indicadores técnicos y financieros muestran fuertes señales de compra';
+
+  @override
+  String get aiSignalBuyDesc =>
+      'Compra (60-79): Indicadores generalmente positivos';
+
+  @override
+  String get aiSignalHoldDesc =>
+      'Mantener (40-59): Señales mixtas, mantener posición actual';
+
+  @override
+  String get aiSignalSellDesc =>
+      'Venta (20-39): Indicadores generalmente negativos';
+
+  @override
+  String get aiSignalStrongSellDesc =>
+      'Venta Fuerte (0-19): Indicadores técnicos y financieros muestran fuertes señales de venta';
+
+  @override
+  String get watchlistSubtitle => 'Recopila y sigue tus acciones favoritas';
+
+  @override
+  String get holdingsSubtitle => 'Gestiona tu cartera y sigue tus rendimientos';
+
+  @override
+  String get filterActiveLabel => 'Filtro activo';
+
+  @override
+  String get tapToRemoveFilter => 'Toca para quitar';
+
+  @override
+  String get searchTickersCta => 'Buscar acciones';
+
+  @override
+  String get addTickersCta => 'Agregar acciones';
+
+  @override
+  String get beFirstToPost => '¡Sé el primero en compartir tu opinión!';
+
+  @override
+  String totalPosts(int count) {
+    return '$count publicaciones';
+  }
+
+  @override
+  String get recentComments => 'Comentarios recientes';
+
+  @override
+  String get coachMarkDashboardTreemap =>
+      'Los colores muestran cambios de precio, el tamaño representa el volumen';
+
+  @override
+  String get coachMarkAiLens =>
+      'Distribución de señales de compra/venta analizadas por IA';
+
+  @override
+  String get coachMarkWatchlist =>
+      '¡Agrega tus acciones favoritas para seguirlas!';
+
+  @override
+  String get coachMarkHoldings =>
+      'Registra tus tenencias para rastrear rendimientos';
+
+  @override
+  String get coachMarkTickerScore =>
+      'Consulta la tendencia del puntaje IA. Más de 70 indica señal de compra';
+
+  @override
+  String get coachMarkMacroGauge => 'Desliza para ver indicadores económicos';
+
+  @override
+  String get coachMarkGotIt => 'Entendido';
+
+  @override
+  String get resetTutorials => 'Reiniciar tutoriales';
+
+  @override
+  String get resetTutorialsDesc => 'Todos los tutoriales se mostrarán de nuevo';
+
+  @override
+  String get tutorialsReset => 'Tutoriales reiniciados';
+
+  @override
+  String get purchaseStoreUnavailable => 'App Store no disponible';
+
+  @override
+  String get purchaseTemporarilyUnavailable =>
+      'Suscripción no disponible temporalmente';
+
+  @override
+  String get purchaseStoreProblem =>
+      'No se puede conectar a App Store. Verifica la configuración de tu Apple ID, asegúrate de que los pagos estén habilitados e intenta de nuevo.';
+
+  @override
+  String get purchaseRetry => 'Reintentar';
+
+  @override
+  String get purchaseInitializing => 'Conectando con App Store...';
+
+  @override
+  String get loginRequiredForPurchase =>
+      'Inicia sesión para comprar la membresía Gold. Tu suscripción se sincronizará con tu cuenta.';
+
+  @override
+  String get aiScoreGuideTitle => 'Guía de puntuación IA';
+
+  @override
+  String get aiScoreGuideDescription =>
+      'Las puntuaciones de IA se calculan desde una perspectiva de inversión a medio-largo plazo (3 a 12 meses).';
+
+  @override
+  String get aiScoreGuideStrongPositive =>
+      '80–100: Fuerte positivo – Probabilidad de subida muy alta';
+
+  @override
+  String get aiScoreGuidePositive =>
+      '60–79: Positivo – Probabilidad de subida alta';
+
+  @override
+  String get aiScoreGuideNeutral => '40–59: Neutral – Señales mixtas';
+
+  @override
+  String get aiScoreGuideNegative =>
+      '20–39: Negativo – Probabilidad de caída alta';
+
+  @override
+  String get aiScoreGuideStrongNegative =>
+      '0–19: Fuerte negativo – Probabilidad de caída muy alta';
+
+  @override
+  String get subscriptionPaymentAccountWarning =>
+      'El pago se procesa a través de la cuenta de App Store / Google Play iniciada en este dispositivo. Si compras en el dispositivo de otra persona, se puede cobrar a la cuenta del propietario del dispositivo.';
 }

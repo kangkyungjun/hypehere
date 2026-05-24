@@ -10,8 +10,12 @@ import '../../utils/error_localizer.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
+import '../../theme/app_stroke.dart';
 import '../../theme/app_duration.dart';
 import '../../theme/app_typography.dart';
+import '../../utils/app_page_route.dart';
+import '../../widgets/common/bento_card.dart';
+import '../../widgets/common/section_header.dart';
 import '../../widgets/community/comment_card.dart';
 import '../../widgets/community/signup_prompt_dialog.dart';
 import '../auth/login_screen.dart';
@@ -31,10 +35,7 @@ class PostDetailScreen extends StatefulWidget {
   /// 조회할 게시글 ID
   final int postId;
 
-  const PostDetailScreen({
-    super.key,
-    required this.postId,
-  });
+  const PostDetailScreen({super.key, required this.postId});
 
   @override
   State<PostDetailScreen> createState() => _PostDetailScreenState();
@@ -99,7 +100,10 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
 
     try {
       final post = await _apiClient.getPost(widget.postId);
-      final commentResult = await _apiClient.getComments(widget.postId, page: 1);
+      final commentResult = await _apiClient.getComments(
+        widget.postId,
+        page: 1,
+      );
 
       setState(() {
         _post = post;
@@ -119,11 +123,14 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   Future<void> _loadMoreComments() async {
     if (_isLoadingMoreComments || !_hasNextComments) return;
 
-    setState(() { _isLoadingMoreComments = true; });
+    setState(() {
+      _isLoadingMoreComments = true;
+    });
 
     try {
       final result = await _apiClient.getComments(
-        widget.postId, page: _commentPage + 1,
+        widget.postId,
+        page: _commentPage + 1,
       );
       setState(() {
         _commentPage++;
@@ -132,7 +139,9 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
         _isLoadingMoreComments = false;
       });
     } catch (e) {
-      setState(() { _isLoadingMoreComments = false; });
+      setState(() {
+        _isLoadingMoreComments = false;
+      });
     }
   }
 
@@ -153,9 +162,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
         if (!mounted) return;
         final success = await Navigator.push<bool>(
           context,
-          MaterialPageRoute(
-            builder: (context) => const LoginScreen(),
-          ),
+          appPageRoute(builder: (_) => const LoginScreen()),
         );
 
         if (success == true) {
@@ -166,9 +173,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
         if (!mounted) return;
         final success = await Navigator.push<bool>(
           context,
-          MaterialPageRoute(
-            builder: (context) => const SignupScreen(),
-          ),
+          appPageRoute(builder: (_) => const SignupScreen()),
         );
 
         if (success == true) {
@@ -233,9 +238,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
         if (!mounted) return;
         final success = await Navigator.push<bool>(
           context,
-          MaterialPageRoute(
-            builder: (context) => const LoginScreen(),
-          ),
+          appPageRoute(builder: (_) => const LoginScreen()),
         );
 
         if (success == true) {
@@ -246,9 +249,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
         if (!mounted) return;
         final success = await Navigator.push<bool>(
           context,
-          MaterialPageRoute(
-            builder: (context) => const SignupScreen(),
-          ),
+          appPageRoute(builder: (_) => const SignupScreen()),
         );
 
         if (success == true) {
@@ -282,7 +283,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
         _scrollController.animateTo(
           _scrollController.position.maxScrollExtent,
           duration: AppDuration.normal,
-          curve: Curves.easeOut,
+          curve: AppDuration.standard,
         );
       });
 
@@ -319,7 +320,9 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: context.mlColors.dangerColor),
+            style: TextButton.styleFrom(
+              foregroundColor: context.mlColors.dangerColor,
+            ),
             child: Text(l10n.delete),
           ),
         ],
@@ -331,9 +334,9 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     try {
       await _apiClient.deletePost(widget.postId);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.postDeleted)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.postDeleted)));
         Navigator.pop(context, true);
       }
     } catch (e) {
@@ -349,9 +352,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   Future<void> _editPost() async {
     final result = await Navigator.push<bool>(
       context,
-      MaterialPageRoute(
-        builder: (context) => CreatePostScreen(editPost: _post),
-      ),
+      appPageRoute(builder: (_) => CreatePostScreen(editPost: _post)),
     );
 
     if (result == true) {
@@ -372,7 +373,9 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     setState(() {
       _comments[index] = original.copyWith(
         isLiked: !original.isLiked,
-        likeCount: original.isLiked ? original.likeCount - 1 : original.likeCount + 1,
+        likeCount: original.isLiked
+            ? original.likeCount - 1
+            : original.likeCount + 1,
       );
     });
 
@@ -405,7 +408,9 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: context.mlColors.dangerColor),
+            style: TextButton.styleFrom(
+              foregroundColor: context.mlColors.dangerColor,
+            ),
             child: Text(l10n.delete),
           ),
         ],
@@ -421,9 +426,9 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
         _post = _post!.copyWith(commentCount: _post!.commentCount - 1);
       });
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.commentDeleted)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.commentDeleted)));
       }
     } catch (e) {
       if (mounted) {
@@ -484,9 +489,9 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
         }
       });
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.commentUpdated)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.commentUpdated)));
       }
     } catch (e) {
       if (mounted) {
@@ -522,19 +527,20 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    ...reportTypes.entries.map((entry) =>
-                        RadioListTile<String>(
-                          title: Text(entry.value),
-                          value: entry.key,
-                          groupValue: selectedType,
-                          onChanged: (value) {
-                            setDialogState(() {
-                              selectedType = value;
-                            });
-                          },
-                          dense: true,
-                          contentPadding: EdgeInsets.zero,
-                        )),
+                    ...reportTypes.entries.map(
+                      (entry) => RadioListTile<String>(
+                        title: Text(entry.value),
+                        value: entry.key,
+                        groupValue: selectedType,
+                        onChanged: (value) {
+                          setDialogState(() {
+                            selectedType = value;
+                          });
+                        },
+                        dense: true,
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                    ),
                     if (selectedType == 'other') ...[
                       const SizedBox(height: AppSpacing.md),
                       TextField(
@@ -563,7 +569,9 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                           });
                         }
                       : null,
-                  style: TextButton.styleFrom(foregroundColor: context.mlColors.reportColor),
+                  style: TextButton.styleFrom(
+                    foregroundColor: context.mlColors.reportColor,
+                  ),
                   child: Text(l10n.reportSubmit),
                 ),
               ],
@@ -658,10 +666,15 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
           if (_post != null)
             Builder(
               builder: (context) {
-                final authProvider = Provider.of<AuthProvider>(context, listen: false);
-                final isOwnPost = authProvider.currentUser?.id == _post!.author.id;
+                final authProvider = Provider.of<AuthProvider>(
+                  context,
+                  listen: false,
+                );
+                final isOwnPost =
+                    authProvider.currentUser?.id == _post!.author.id;
                 final canReport = authProvider.isLoggedIn && !isOwnPost;
-                final showMenu = _post!.canEdit || _post!.canDelete || canReport;
+                final showMenu =
+                    _post!.canEdit || _post!.canDelete || canReport;
                 if (!showMenu) return const SizedBox.shrink();
                 return PopupMenuButton<String>(
                   onSelected: (value) {
@@ -678,7 +691,10 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                       PopupMenuItem(
                         value: 'edit',
                         height: 24,
-                        padding: const EdgeInsets.only(left: AppSpacing.md, right: AppSpacing.xl),
+                        padding: const EdgeInsets.only(
+                          left: AppSpacing.md,
+                          right: AppSpacing.xl,
+                        ),
                         child: Row(
                           children: [
                             const Icon(Icons.edit, size: 20),
@@ -691,12 +707,24 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                       PopupMenuItem(
                         value: 'delete',
                         height: 24,
-                        padding: const EdgeInsets.only(left: AppSpacing.md, right: AppSpacing.xl),
+                        padding: const EdgeInsets.only(
+                          left: AppSpacing.md,
+                          right: AppSpacing.xl,
+                        ),
                         child: Row(
                           children: [
-                            Icon(Icons.delete, size: 20, color: context.mlColors.dangerColor),
+                            Icon(
+                              Icons.delete,
+                              size: 20,
+                              color: context.mlColors.dangerColor,
+                            ),
                             const SizedBox(width: AppSpacing.md),
-                            Text(AppLocalizations.of(context).delete, style: TextStyle(color: context.mlColors.dangerColor)),
+                            Text(
+                              AppLocalizations.of(context).delete,
+                              style: TextStyle(
+                                color: context.mlColors.dangerColor,
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -704,12 +732,24 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                       PopupMenuItem(
                         value: 'report',
                         height: 24,
-                        padding: const EdgeInsets.only(left: AppSpacing.md, right: AppSpacing.xl),
+                        padding: const EdgeInsets.only(
+                          left: AppSpacing.md,
+                          right: AppSpacing.xl,
+                        ),
                         child: Row(
                           children: [
-                            Icon(Icons.flag_outlined, size: 20, color: context.mlColors.reportColor),
+                            Icon(
+                              Icons.flag_outlined,
+                              size: 20,
+                              color: context.mlColors.reportColor,
+                            ),
                             const SizedBox(width: AppSpacing.md),
-                            Text(AppLocalizations.of(context).report, style: TextStyle(color: context.mlColors.reportColor)),
+                            Text(
+                              AppLocalizations.of(context).report,
+                              style: TextStyle(
+                                color: context.mlColors.reportColor,
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -722,40 +762,41 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _errorMessage != null
-              ? _buildErrorView()
-              : _post == null
-                  ? _buildErrorView()
-                  : Column(
-                      children: [
-                        // 게시글 + 댓글 영역 (스크롤 가능)
-                        Expanded(
-                          child: RefreshIndicator(
-                            onRefresh: _loadPostAndComments,
-                            child: SingleChildScrollView(
-                              controller: _scrollController,
-                              physics: const AlwaysScrollableScrollPhysics(),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  _buildPostHeader(),
-                                  _buildPostContent(),
-                                  _buildPostActions(),
-                                const Padding(
-                                  padding: EdgeInsets.symmetric(vertical: AppSpacing.xl),
-                                  child: BannerAdWidget(),
-                                ),
-                                const Divider(height: 2, thickness: 2),
-                                  _buildCommentsSection(),
-                                ],
-                              ),
+          ? _buildErrorView()
+          : _post == null
+          ? _buildErrorView()
+          : Column(
+              children: [
+                // 게시글 + 댓글 영역 (스크롤 가능)
+                Expanded(
+                  child: RefreshIndicator(
+                    onRefresh: _loadPostAndComments,
+                    child: SingleChildScrollView(
+                      controller: _scrollController,
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildPostHeader(),
+                          _buildPostContent(),
+                          _buildPostActions(),
+                          const Padding(
+                            padding: EdgeInsets.symmetric(
+                              vertical: AppSpacing.lg,
                             ),
+                            child: BannerAdWidget(),
                           ),
-                        ),
-
-                        // 댓글 입력란 (하단 고정)
-                        _buildCommentInput(),
-                      ],
+                          _buildCommentsSection(),
+                        ],
+                      ),
                     ),
+                  ),
+                ),
+
+                // 댓글 입력란 (하단 고정)
+                _buildCommentInput(),
+              ],
+            ),
     );
   }
 
@@ -792,79 +833,84 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   /// 게시글 헤더 (Ticker 배지 + 제목 + 작성자 + 시간)
   Widget _buildPostHeader() {
     final ticker = _post!.ticker;
-    final displayTicker = ticker.isEmpty ? AppLocalizations.of(context).freePost : ticker;
+    final displayTicker = ticker.isEmpty
+        ? AppLocalizations.of(context).freePost
+        : ticker;
 
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.xl),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Ticker 배지
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xs),
-            decoration: BoxDecoration(
-              color: _getTickerColor(ticker),
-              borderRadius: BorderRadius.circular(AppRadius.xs),
-            ),
-            child: Text(
-              displayTicker,
-              style: TextStyle(
-                color: context.mlColors.onPrimary,
-                fontSize: AppTypography.bodySmall,
-                fontWeight: FontWeight.bold,
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.xl,
+        AppSpacing.lg,
+        AppSpacing.xl,
+        AppSpacing.sm,
+      ),
+      child: BentoCard(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.md,
+                vertical: AppSpacing.xs,
               ),
-            ),
-          ),
-
-          const SizedBox(height: AppSpacing.sm),
-
-          // 제목
-          Text(
-            _post!.title,
-            style: const TextStyle(
-              fontSize: AppTypography.displayMedium,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-
-          const SizedBox(height: AppSpacing.xs),
-
-          // 작성자 + 시간
-          Row(
-            children: [
-              Text(
-                _post!.author.nickname,
-                style: const TextStyle(
-                  fontSize: AppTypography.bodyLarge,
-                  fontWeight: AppTypography.medium,
-                ),
+              decoration: BoxDecoration(
+                color: _getTickerColor(ticker),
+                borderRadius: BorderRadius.circular(AppRadius.badge),
               ),
-              const SizedBox(width: AppSpacing.md),
-              Text(
-                _formatTimeAgo(_post!.createdAt),
+              child: Text(
+                displayTicker,
                 style: TextStyle(
+                  color: context.mlColors.onPrimary,
                   fontSize: AppTypography.bodySmall,
-                  color: Theme.of(context).colorScheme.outline,
+                  fontWeight: AppTypography.bold,
                 ),
               ),
-            ],
-          ),
-        ],
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            Text(
+              _post!.title,
+              style: AppTypography.screenTitle.copyWith(
+                color: context.mlColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Row(
+              children: [
+                Text(
+                  _post!.author.nickname,
+                  style: AppTypography.bodyStrong.copyWith(
+                    color: context.mlColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.md),
+                Text(
+                  _formatTimeAgo(_post!.createdAt),
+                  style: AppTypography.label.copyWith(
+                    color: context.mlColors.textTertiary,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
 
   /// 게시글 본문
   Widget _buildPostContent() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(AppSpacing.xl),
-      child: Text(
-        _post!.content,
-        style: TextStyle(
-          fontSize: AppTypography.bodyLarge,
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
-          height: 1.5,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
+      child: BentoCard(
+        child: SizedBox(
+          width: double.infinity,
+          child: Text(
+            _post!.content,
+            style: AppTypography.body.copyWith(
+              color: context.mlColors.textPrimary,
+              height: 1.55,
+            ),
+          ),
         ),
       ),
     );
@@ -872,39 +918,46 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
 
   /// 게시글 액션 (좋아요/댓글 버튼)
   Widget _buildPostActions() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.md),
-      child: Row(
-        children: [
-          // 좋아요 버튼
-          IconButton(
-            icon: Icon(
-              _post!.isLiked ? Icons.favorite : Icons.favorite_border,
-              color: _post!.isLiked ? context.mlColors.dangerColor : context.mlColors.neutralColor,
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.xl,
+        AppSpacing.sm,
+        AppSpacing.xl,
+        AppSpacing.md,
+      ),
+      child: BentoCard(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.sm,
+        ),
+        child: Row(
+          children: [
+            IconButton(
+              icon: Icon(
+                _post!.isLiked ? Icons.favorite : Icons.favorite_border,
+                color: _post!.isLiked
+                    ? context.mlColors.dangerColor
+                    : context.mlColors.textTertiary,
+              ),
+              onPressed: _toggleLike,
             ),
-            onPressed: _toggleLike,
-          ),
-          Text(
-            '${_post!.likeCount}',
-            style: TextStyle(
-              fontSize: AppTypography.bodyLarge,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            Text(
+              '${_post!.likeCount}',
+              style: AppTypography.bodyStrong.copyWith(
+                color: context.mlColors.textSecondary,
+              ),
             ),
-          ),
-
-          const SizedBox(width: AppSpacing.xl),
-
-          // 댓글 아이콘 (클릭 불가, 표시용)
-          Icon(Icons.comment_outlined, color: Theme.of(context).colorScheme.onSurfaceVariant),
-          const SizedBox(width: AppSpacing.xs),
-          Text(
-            '${_post!.commentCount}',
-            style: TextStyle(
-              fontSize: AppTypography.bodyLarge,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            const SizedBox(width: AppSpacing.xl),
+            Icon(Icons.comment_outlined, color: context.mlColors.textTertiary),
+            const SizedBox(width: AppSpacing.xs),
+            Text(
+              '${_post!.commentCount}',
+              style: AppTypography.bodyStrong.copyWith(
+                color: context.mlColors.textSecondary,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -915,90 +968,77 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       builder: (context, authProvider, child) {
         // 비회원: 댓글 차단 + 회원가입 유도 UI
         if (!authProvider.isLoggedIn) {
-          return Container(
-            padding: const EdgeInsets.all(AppSpacing.xl),
+          return Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.xl,
+              AppSpacing.md,
+              AppSpacing.xl,
+              AppSpacing.xxl,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 댓글 헤더
-                Text(
-                  AppLocalizations.of(context).commentsCount(_post?.commentCount ?? 0),
-                  style: const TextStyle(
-                    fontSize: AppTypography.headlineMedium,
-                    fontWeight: FontWeight.bold,
-                  ),
+                SectionHeader(
+                  title: AppLocalizations.of(
+                    context,
+                  ).commentsCount(_post?.commentCount ?? 0),
                 ),
                 const SizedBox(height: AppSpacing.md),
-
-                // 회원가입 유도 카드
-                Card(
-                  color: context.mlColors.sectionBackground,
-                  elevation: 0,
-                  child: Padding(
-                    padding: const EdgeInsets.all(AppSpacing.xxl),
-                    child: Column(
-                      children: [
-                        Icon(
-                          Icons.lock_outline,
-                          size: 48,
-                          color: Theme.of(context).colorScheme.outline,
+                BentoCard(
+                  padding: const EdgeInsets.all(AppSpacing.xxl),
+                  child: Column(
+                    children: [
+                      Icon(
+                        Icons.lock_outline,
+                        size: 44,
+                        color: context.mlColors.textTertiary,
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                      Text(
+                        AppLocalizations.of(context).loginToViewComments,
+                        style: AppTypography.sectionTitle.copyWith(
+                          color: context.mlColors.textPrimary,
                         ),
-                        const SizedBox(height: AppSpacing.md),
-                        Text(
-                          AppLocalizations.of(context).loginToViewComments,
-                          style: TextStyle(
-                            fontSize: AppTypography.headlineMedium,
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.onSurface,
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(
+                        AppLocalizations.of(context).loginPromptComments,
+                        style: AppTypography.body.copyWith(
+                          color: context.mlColors.textSecondary,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: AppSpacing.lg),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          OutlinedButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                appPageRoute(
+                                  builder: (_) => const LoginScreen(),
+                                ),
+                              );
+                            },
+                            child: Text(AppLocalizations.of(context).login),
                           ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: AppSpacing.xs),
-                        Text(
-                          AppLocalizations.of(context).loginPromptComments,
-                          style: TextStyle(
-                            fontSize: AppTypography.bodyLarge,
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          const SizedBox(width: AppSpacing.lg),
+                          FilledButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                appPageRoute(
+                                  builder: (_) => const SignupScreen(),
+                                ),
+                              );
+                            },
+                            child: Text(AppLocalizations.of(context).signup),
                           ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: AppSpacing.lg),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            OutlinedButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => const LoginScreen(),
-                                  ),
-                                );
-                              },
-                              child: Text(AppLocalizations.of(context).login),
-                            ),
-                            const SizedBox(width: AppSpacing.lg),
-                            ElevatedButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => const SignupScreen(),
-                                  ),
-                                );
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: context.mlColors.accentBlue,
-                              ),
-                              child: Text(
-                                AppLocalizations.of(context).signup,
-                                style: TextStyle(color: context.mlColors.onPrimary),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -1007,27 +1047,30 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
         }
 
         // 로그인 사용자: 정상 댓글 표시
-        return Container(
-          padding: const EdgeInsets.all(AppSpacing.xl),
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.xl,
+            AppSpacing.md,
+            AppSpacing.xl,
+            AppSpacing.xxl,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 댓글 헤더
-              Text(
-                AppLocalizations.of(context).commentsCount(_comments.length),
-                style: const TextStyle(
-                  fontSize: AppTypography.headlineMedium,
-                  fontWeight: FontWeight.bold,
-                ),
+              SectionHeader(
+                title: AppLocalizations.of(
+                  context,
+                ).commentsCount(_comments.length),
               ),
-
               const SizedBox(height: AppSpacing.md),
 
               // 댓글 목록
               if (_comments.isEmpty)
                 Center(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxxl),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppSpacing.xxxl,
+                    ),
                     child: Text(
                       AppLocalizations.of(context).writeFirstComment,
                       style: TextStyle(
@@ -1061,19 +1104,23 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final isOwnComment = authProvider.currentUser?.id == comment.author.id;
       final canReportComment = authProvider.isLoggedIn && !isOwnComment;
-      widgets.add(CommentCard(
-        comment: comment,
-        onEdit: comment.canEdit ? () => _editComment(comment) : null,
-        onDelete: comment.canDelete ? () => _deleteComment(comment) : null,
-        onReport: canReportComment ? () => _reportComment(comment) : null,
-        onLike: () => _toggleCommentLike(comment),
-      ));
+      widgets.add(
+        CommentCard(
+          comment: comment,
+          onEdit: comment.canEdit ? () => _editComment(comment) : null,
+          onDelete: comment.canDelete ? () => _deleteComment(comment) : null,
+          onReport: canReportComment ? () => _reportComment(comment) : null,
+          onLike: () => _toggleCommentLike(comment),
+        ),
+      );
       // 10개마다 광고 삽입 (마지막 댓글 뒤에는 미삽입)
       if ((i + 1) % 10 == 0 && i + 1 < _comments.length) {
-        widgets.add(const Padding(
-          padding: EdgeInsets.symmetric(vertical: AppSpacing.lg),
-          child: BannerAdWidget(),
-        ));
+        widgets.add(
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: AppSpacing.lg),
+            child: BannerAdWidget(),
+          ),
+        );
       }
     }
     return widgets;
@@ -1086,11 +1133,12 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       child: Container(
         decoration: BoxDecoration(
           color: context.mlColors.cardBackground,
-          border: Border(
-            top: BorderSide(color: context.mlColors.subtleBorder),
-          ),
+          border: Border(top: BorderSide(color: context.mlColors.subtleBorder)),
         ),
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.md),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.xl,
+          vertical: AppSpacing.md,
+        ),
         child: Row(
           children: [
             // 입력 필드
@@ -1099,8 +1147,23 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                 controller: _commentController,
                 decoration: InputDecoration(
                   hintText: AppLocalizations.of(context).commentHint,
+                  filled: true,
+                  fillColor: context.mlColors.sectionBackground,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(AppRadius.xxxl),
+                    borderSide: BorderSide(
+                      color: context.mlColors.subtleBorder,
+                    ),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(AppRadius.xxxl),
+                    borderSide: BorderSide(
+                      color: context.mlColors.subtleBorder,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(AppRadius.xxxl),
+                    borderSide: BorderSide(color: context.mlColors.accentBlue),
                   ),
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: AppSpacing.xl,
@@ -1120,12 +1183,11 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                   ? const SizedBox(
                       width: 24,
                       height: 24,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+                      child: CircularProgressIndicator(
+                        strokeWidth: AppStroke.medium,
+                      ),
                     )
-                  : Icon(
-                      Icons.send,
-                      color: Theme.of(context).primaryColor,
-                    ),
+                  : Icon(Icons.send, color: context.mlColors.accentBlue),
               onPressed: _isSubmittingComment ? null : _submitComment,
             ),
           ],

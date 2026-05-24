@@ -51,38 +51,75 @@ class TickerCommunitySectionState extends State<TickerCommunitySection> {
       decoration: BoxDecoration(
         color: context.mlColors.cardBackground,
         borderRadius: BorderRadius.circular(AppRadius.lg),
-        boxShadow: [
-          AppShadow.md(context.mlColors.overlayDim),
-        ],
+        boxShadow: AppShadow.md(context.mlColors.overlayDim),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 헤더 (타이틀 + 전체보기 버튼)
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                l10n.liveTalk,
-                style: TextStyle(
-                  fontSize: AppTypography.headlineMedium,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              TextButton(
-                onPressed: _navigateToCommunity,
-                child: Row(
-                  children: [
-                    Text(
-                      AppLocalizations.of(context).viewAll,
-                      style: TextStyle(fontSize: AppTypography.bodyLarge),
+          // 헤더 (타이틀 + 게시글 수 + 전체보기 버튼)
+          FutureBuilder<({List<Post> items, int count, bool hasNext})>(
+            future: _communityFuture,
+            builder: (context, snapshot) {
+              final postCount = snapshot.data?.count ?? 0;
+              return Row(
+                children: [
+                  Text(
+                    l10n.liveTalk,
+                    style: TextStyle(
+                      fontSize: AppTypography.headlineMedium,
+                      fontWeight: AppTypography.bold,
                     ),
-                    const SizedBox(width: AppSpacing.xs),
-                    const Icon(Icons.arrow_forward_ios, size: 14),
+                  ),
+                  if (postCount > 0) ...[
+                    const SizedBox(width: AppSpacing.sm),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xxs),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primaryContainer,
+                        borderRadius: BorderRadius.circular(AppRadius.sm),
+                      ),
+                      child: Text(
+                        l10n.totalPosts(postCount),
+                        style: TextStyle(
+                          fontSize: AppTypography.micro,
+                          fontWeight: AppTypography.bold,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                    ),
                   ],
-                ),
+                  const Spacer(),
+                  TextButton(
+                    onPressed: _navigateToCommunity,
+                    child: Row(
+                      children: [
+                        Text(
+                          l10n.viewAll,
+                          style: TextStyle(fontSize: AppTypography.bodyLarge),
+                        ),
+                        const SizedBox(width: AppSpacing.xs),
+                        const Icon(Icons.arrow_forward_ios, size: 14),
+                      ],
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+
+          const SizedBox(height: AppSpacing.sm),
+
+          // 글쓰기 인라인 버튼
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: () => _navigateToCreatePost(),
+              icon: const Icon(Icons.edit_outlined, size: 16),
+              label: Text(l10n.writePost),
+              style: OutlinedButton.styleFrom(
+                visualDensity: VisualDensity.compact,
               ),
-            ],
+            ),
           ),
 
           const SizedBox(height: AppSpacing.lg),
@@ -117,7 +154,7 @@ class TickerCommunitySectionState extends State<TickerCommunitySection> {
                 );
               }
 
-              // 데이터 없음
+              // 데이터 없음 — CTA로 첫 글 작성 유도
               if (!snapshot.hasData || snapshot.data!.items.isEmpty) {
                 return Center(
                   child: Padding(
@@ -137,13 +174,11 @@ class TickerCommunitySectionState extends State<TickerCommunitySection> {
                             color: Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                         ),
-                        const SizedBox(height: AppSpacing.xs),
-                        Text(
-                          l10n.writeFirstPostInTicker,
-                          style: TextStyle(
-                            fontSize: AppTypography.bodySmall,
-                            color: Theme.of(context).colorScheme.outline,
-                          ),
+                        const SizedBox(height: AppSpacing.sm),
+                        FilledButton.icon(
+                          onPressed: () => _navigateToCreatePost(),
+                          icon: const Icon(Icons.edit, size: 16),
+                          label: Text(l10n.beFirstToPost),
                         ),
                       ],
                     ),
@@ -228,6 +263,21 @@ class TickerCommunitySectionState extends State<TickerCommunitySection> {
           SnackBar(content: Text(ErrorLocalizer.getMessage(context, e))),
         );
       }
+    }
+  }
+
+  /// 글쓰기 화면으로 이동
+  Future<void> _navigateToCreatePost() async {
+    final result = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CreatePostScreen(prefilledTicker: widget.ticker),
+      ),
+    );
+    if (result == true && mounted) {
+      setState(() {
+        _communityFuture = _communityApiClient.getPosts(ticker: widget.ticker);
+      });
     }
   }
 

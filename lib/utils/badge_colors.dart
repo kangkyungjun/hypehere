@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_colors.dart';
 
 /// Shared badge color helpers used across community and admin screens.
 ///
@@ -15,6 +16,7 @@ class BadgeColors {
   /// Empty ticker (자유 게시글) → grey, then per-ticker overrides:
   /// TSLA → blue, AAPL → dark grey, NVDA → NVIDIA green.
   /// Everything else falls back to blue.
+  /// Brand colors are intentionally fixed across themes.
   static Color tickerBadge(String ticker) {
     if (ticker.isEmpty) return const Color(0xFF757575); // 자유 게시글 회색
     switch (ticker) {
@@ -31,18 +33,18 @@ class BadgeColors {
 
   // ── Role badge colours ──────────────────────────────────────────────
 
-  /// Returns the background colour for a user-role badge.
-  static Color roleBadge(String role) {
+  /// Returns the background colour for a user-role badge (theme-aware).
+  static Color roleBadge(String role, MarketLensColors mlc) {
     switch (role) {
       case 'master':
-        return const Color(0xFFD32F2F); // 빨강 (Master)
+        return mlc.roleMasterColor;
       case 'manager':
-        return const Color(0xFFF57C00); // 주황 (Manager)
+        return mlc.roleManagerColor;
       case 'gold':
-        return const Color(0xFFFFA000); // 골드 (Gold)
+        return mlc.roleGoldColor;
       case 'regular':
       default:
-        return const Color(0xFF757575); // 회색 (Regular)
+        return mlc.roleRegularColor;
     }
   }
 }

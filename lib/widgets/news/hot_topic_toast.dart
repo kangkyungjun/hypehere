@@ -16,12 +16,12 @@ import 'market_news_modal.dart';
 /// Additional items shown as "+N more" count.
 class HotTopicToast extends StatelessWidget {
   final List<NewsItem> hotTopics;
-  final VoidCallback onDismiss;
+  final void Function(int index) onDismissItem;
 
   const HotTopicToast({
     super.key,
     required this.hotTopics,
-    required this.onDismiss,
+    required this.onDismissItem,
   });
 
   @override
@@ -48,9 +48,7 @@ class HotTopicToast extends StatelessWidget {
             decoration: BoxDecoration(
               color: theme.colorScheme.errorContainer.withValues(alpha: 0.92),
               borderRadius: BorderRadius.circular(AppRadius.lg),
-              boxShadow: [
-                AppShadow.lg(context.mlColors.overlayDim),
-              ],
+              boxShadow: AppShadow.lg(context.mlColors.overlayDim),
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -75,17 +73,17 @@ class HotTopicToast extends StatelessWidget {
                             thickness: 0.5,
                             color: theme.colorScheme.onErrorContainer.withValues(alpha: 0.15),
                           ),
-                        GestureDetector(
-                          behavior: HitTestBehavior.opaque,
-                          onTap: () => MarketNewsModal.show(context, previewItems[i]),
-                          child: Row(
-                            children: [
-                              Expanded(
+                        Row(
+                          children: [
+                            Expanded(
+                              child: GestureDetector(
+                                behavior: HitTestBehavior.opaque,
+                                onTap: () => MarketNewsModal.show(context, previewItems[i]),
                                 child: Text(
                                   previewItems[i].aiSummary.localize(langCode),
                                   style: TextStyle(
                                     fontSize: AppTypography.bodySmall,
-                                    fontWeight: i == 0 ? AppTypography.semiBold : FontWeight.normal,
+                                    fontWeight: i == 0 ? AppTypography.semiBold : AppTypography.regular,
                                     color: theme.colorScheme.onErrorContainer,
                                     height: 1.3,
                                   ),
@@ -93,14 +91,20 @@ class HotTopicToast extends StatelessWidget {
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
-                              const SizedBox(width: AppSpacing.xs),
-                              Icon(
-                                Icons.chevron_right,
-                                size: 14,
-                                color: theme.colorScheme.onErrorContainer.withValues(alpha: 0.4),
+                            ),
+                            const SizedBox(width: AppSpacing.xs),
+                            GestureDetector(
+                              onTap: () => onDismissItem(i),
+                              child: Padding(
+                                padding: const EdgeInsets.all(AppSpacing.xxs),
+                                child: Icon(
+                                  Icons.close,
+                                  size: 14,
+                                  color: theme.colorScheme.onErrorContainer.withValues(alpha: 0.5),
+                                ),
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ],
                       if (moreCount > 0) ...[
@@ -125,18 +129,6 @@ class HotTopicToast extends StatelessWidget {
                   ),
                 ),
 
-                // Close button
-                GestureDetector(
-                  onTap: onDismiss,
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: AppSpacing.xs),
-                    child: Icon(
-                      Icons.close,
-                      size: 18,
-                      color: theme.colorScheme.onErrorContainer.withValues(alpha: 0.6),
-                    ),
-                  ),
-                ),
               ],
             ),
           ),

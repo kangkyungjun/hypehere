@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../theme/app_colors.dart';
+import '../../../theme/app_radius.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../models/portfolio_data.dart';
 import '../../../providers/portfolio_provider.dart';
 import '../../../theme/app_spacing.dart';
 import '../../../theme/app_typography.dart';
 import '../../../widgets/common/ml_divider.dart';
+import '../../../widgets/common/section_header.dart';
 import '../../../utils/error_localizer.dart';
 import 'portfolio_summary_card.dart';
 import 'tax_estimate_card.dart';
@@ -19,18 +21,22 @@ import 'sell_holding_sheet.dart';
 import 'edit_holding_sheet.dart';
 import 'transaction_row.dart';
 import 'login_required_banner.dart';
+import '../../../widgets/common/coach_mark_overlay.dart';
+import '../../../providers/coach_mark_provider.dart';
 
 /// Holdings tab: summary card, AI card, holdings list, recent transactions, empty state.
 class HoldingsTab extends StatefulWidget {
   final void Function(String) onTickerTap;
   final VoidCallback onSwitchToWatchlist;
   final Future<void> Function() onRefresh;
+  final VoidCallback? onAddHolding;
 
   const HoldingsTab({
     super.key,
     required this.onTickerTap,
     required this.onSwitchToWatchlist,
     required this.onRefresh,
+    this.onAddHolding,
   });
 
   @override
@@ -53,7 +59,10 @@ class _HoldingsTabState extends State<HoldingsTab> {
     }
   }
 
-  Future<void> _onEditHolding(BuildContext context, PortfolioHolding holding) async {
+  Future<void> _onEditHolding(
+    BuildContext context,
+    PortfolioHolding holding,
+  ) async {
     final action = await HoldingDetailSheet.show(context, holding);
     if (action == null || !context.mounted) return;
 
@@ -71,13 +80,22 @@ class _HoldingsTabState extends State<HoldingsTab> {
     }
   }
 
-  Future<void> _handleAdditionalBuy(BuildContext context, PortfolioHolding holding) async {
+  Future<void> _handleAdditionalBuy(
+    BuildContext context,
+    PortfolioHolding holding,
+  ) async {
     final l10n = AppLocalizations.of(context);
     final h = holding;
     final isKo = Localizations.localeOf(context).languageCode == 'ko';
-    final displayName = isKo && h.nameKo != null ? h.nameKo! : h.name ?? h.ticker;
+    final displayName = isKo && h.nameKo != null
+        ? h.nameKo!
+        : h.name ?? h.ticker;
 
-    final result = await AddHoldingSheet.show(context, ticker: h.ticker, name: displayName);
+    final result = await AddHoldingSheet.show(
+      context,
+      ticker: h.ticker,
+      name: displayName,
+    );
     if (result == null || !context.mounted) return;
 
     final portfolio = context.read<PortfolioProvider>();
@@ -85,20 +103,28 @@ class _HoldingsTabState extends State<HoldingsTab> {
       final oldShares = h.shares ?? 0.0;
       final oldAvg = h.avgPrice ?? 0.0;
       final newTotalShares = oldShares + result.shares;
-      final newAvgPrice = ((oldShares * oldAvg) + (result.shares * result.avgPrice)) / newTotalShares;
+      final newAvgPrice = newTotalShares > 0
+          ? ((oldShares * oldAvg) + (result.shares * result.avgPrice)) /
+                newTotalShares
+          : result.avgPrice;
 
       await portfolio.addTransaction(
-        ticker: h.ticker, type: 'BUY', shares: result.shares,
-        price: result.avgPrice, date: result.date,
+        ticker: h.ticker,
+        type: 'BUY',
+        shares: result.shares,
+        price: result.avgPrice,
+        date: result.date,
       );
       await portfolio.addOrUpdateHolding(
-        ticker: h.ticker, shares: newTotalShares, avgPrice: newAvgPrice,
+        ticker: h.ticker,
+        shares: newTotalShares,
+        avgPrice: newAvgPrice,
       );
 
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.holdingAdded(h.ticker))),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.holdingAdded(h.ticker))));
       }
     } catch (e) {
       if (context.mounted) {
@@ -109,7 +135,10 @@ class _HoldingsTabState extends State<HoldingsTab> {
     }
   }
 
-  Future<void> _handleSell(BuildContext context, PortfolioHolding holding) async {
+  Future<void> _handleSell(
+    BuildContext context,
+    PortfolioHolding holding,
+  ) async {
     final l10n = AppLocalizations.of(context);
     final h = holding;
 
@@ -133,9 +162,9 @@ class _HoldingsTabState extends State<HoldingsTab> {
         currentShares: h.shares ?? 0,
       );
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.holdingSold(h.ticker))),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.holdingSold(h.ticker))));
       }
     } catch (e) {
       if (context.mounted) {
@@ -146,7 +175,10 @@ class _HoldingsTabState extends State<HoldingsTab> {
     }
   }
 
-  Future<void> _handleEdit(BuildContext context, PortfolioHolding holding) async {
+  Future<void> _handleEdit(
+    BuildContext context,
+    PortfolioHolding holding,
+  ) async {
     final l10n = AppLocalizations.of(context);
     final h = holding;
 
@@ -163,12 +195,14 @@ class _HoldingsTabState extends State<HoldingsTab> {
     final portfolio = context.read<PortfolioProvider>();
     try {
       await portfolio.addOrUpdateHolding(
-        ticker: h.ticker, shares: result.shares, avgPrice: result.avgPrice,
+        ticker: h.ticker,
+        shares: result.shares,
+        avgPrice: result.avgPrice,
       );
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.holdingUpdated(h.ticker))),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.holdingUpdated(h.ticker))));
       }
     } catch (e) {
       if (context.mounted) {
@@ -179,7 +213,10 @@ class _HoldingsTabState extends State<HoldingsTab> {
     }
   }
 
-  Future<void> _handleDelete(BuildContext context, PortfolioHolding holding) async {
+  Future<void> _handleDelete(
+    BuildContext context,
+    PortfolioHolding holding,
+  ) async {
     final l10n = AppLocalizations.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
@@ -187,10 +224,15 @@ class _HoldingsTabState extends State<HoldingsTab> {
         title: Text(l10n.confirm),
         content: Text(l10n.removeHoldingConfirm(holding.ticker)),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.cancel)),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.cancel),
+          ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            style: TextButton.styleFrom(foregroundColor: context.mlColors.dangerColor),
+            style: TextButton.styleFrom(
+              foregroundColor: context.mlColors.dangerColor,
+            ),
             child: Text(l10n.delete),
           ),
         ],
@@ -219,8 +261,30 @@ class _HoldingsTabState extends State<HoldingsTab> {
     final l10n = AppLocalizations.of(context);
     final portfolio = context.read<PortfolioProvider>();
     portfolio.deleteHolding(ticker);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.holdingRemoved(ticker))),
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(l10n.holdingRemoved(ticker))));
+  }
+
+  Widget _benefitItem(ThemeData theme, String text) {
+    return Row(
+      children: [
+        Icon(
+          Icons.check_circle_outline,
+          size: 16,
+          color: theme.colorScheme.primary,
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        Expanded(
+          child: Text(
+            text,
+            style: TextStyle(
+              fontSize: AppTypography.bodyMedium,
+              color: theme.colorScheme.onSurface,
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -274,8 +338,9 @@ class _HoldingsTabState extends State<HoldingsTab> {
 
     final holdings = portfolio.holdings;
 
-    // Empty state (logged in but no holdings) — centered
+    // Empty state (logged in but no holdings) — AI benefit preview + direct add
     if (holdings.isEmpty) {
+      final theme = Theme.of(context);
       return RefreshIndicator(
         onRefresh: widget.onRefresh,
         child: LayoutBuilder(
@@ -285,29 +350,89 @@ class _HoldingsTabState extends State<HoldingsTab> {
               constraints: BoxConstraints(minHeight: constraints.maxHeight),
               child: Center(
                 child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.xxxl),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.xxxl,
+                  ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
-                        Icons.business_center_outlined,
-                        size: 64,
-                        color: Theme.of(context).colorScheme.outline,
+                      CoachMark(
+                        coachKey: CoachMarkProvider.keyHoldings,
+                        message: l10n.coachMarkHoldings,
+                        child: const SizedBox.shrink(),
                       ),
-                      const SizedBox(height: AppSpacing.xl),
-                      Text(
-                        l10n.noHoldingsHint,
-                        style: TextStyle(
-                          fontSize: AppTypography.bodyLarge,
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      // AI benefit preview card
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(AppSpacing.xl),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.primaryContainer.withValues(
+                            alpha: 0.08,
+                          ),
+                          borderRadius: BorderRadius.circular(AppRadius.lg),
                         ),
-                        textAlign: TextAlign.center,
+                        child: Column(
+                          children: [
+                            Text(
+                              l10n.portfolioAIAnalysis,
+                              style: TextStyle(
+                                fontSize: AppTypography.headlineMedium,
+                                fontWeight: AppTypography.bold,
+                                color: theme.colorScheme.primary,
+                              ),
+                            ),
+                            const SizedBox(height: AppSpacing.lg),
+                            Text(
+                              l10n.aiPortfolioBenefitTitle,
+                              style: TextStyle(
+                                fontSize: AppTypography.bodyLarge,
+                                color: theme.colorScheme.onSurface,
+                                height: 1.5,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: AppSpacing.xl),
+                            _benefitItem(theme, l10n.aiPortfolioBenefit1),
+                            const SizedBox(height: AppSpacing.sm),
+                            _benefitItem(theme, l10n.aiPortfolioBenefit2),
+                            const SizedBox(height: AppSpacing.sm),
+                            _benefitItem(theme, l10n.aiPortfolioBenefit3),
+                          ],
+                        ),
                       ),
-                      const SizedBox(height: AppSpacing.xl),
-                      OutlinedButton.icon(
+                      const SizedBox(height: AppSpacing.xxxl),
+
+                      // Primary CTA — direct add holding
+                      SizedBox(
+                        width: double.infinity,
+                        child: FilledButton.icon(
+                          onPressed: widget.onAddHolding,
+                          icon: const Icon(Icons.add, size: 20),
+                          label: Text(
+                            l10n.addHoldingDirect,
+                            style: const TextStyle(
+                              fontSize: AppTypography.headlineSmall,
+                            ),
+                          ),
+                          style: FilledButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                              vertical: AppSpacing.lg,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+
+                      // Secondary — go to watchlist
+                      TextButton(
                         onPressed: widget.onSwitchToWatchlist,
-                        icon: const Icon(Icons.bookmark_outline, size: 18),
-                        label: Text(l10n.goToWatchlistTab),
+                        child: Text(
+                          l10n.goToWatchlistTab,
+                          style: TextStyle(
+                            fontSize: AppTypography.bodySmall,
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -321,7 +446,9 @@ class _HoldingsTabState extends State<HoldingsTab> {
 
     // Recent transactions for all holdings
     final allTxn = portfolio.transactions;
-    final displayRecentTxn = _showAllRecentTxn ? allTxn : allTxn.take(5).toList();
+    final displayRecentTxn = _showAllRecentTxn
+        ? allTxn
+        : allTxn.take(5).toList();
     final hasMoreRecentTxn = allTxn.length > 5;
 
     // Has holdings
@@ -329,106 +456,117 @@ class _HoldingsTabState extends State<HoldingsTab> {
       onRefresh: widget.onRefresh,
       child: CustomScrollView(
         slivers: [
-          // Portfolio summary card
+          // Holdings subtitle
           SliverToBoxAdapter(
-            child: PortfolioSummaryCard(portfolio: portfolio),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.xl,
+                vertical: AppSpacing.sm,
+              ),
+              child: Text(
+                l10n.holdingsSubtitle,
+                style: TextStyle(
+                  fontSize: AppTypography.caption,
+                  color: Theme.of(context).colorScheme.outline,
+                ),
+              ),
+            ),
           ),
+          // Portfolio summary card
+          SliverToBoxAdapter(child: PortfolioSummaryCard(portfolio: portfolio)),
 
           // Tax estimate card (Korean only)
           const SliverToBoxAdapter(child: MlDivider()),
-          SliverToBoxAdapter(
-            child: TaxEstimateCard(portfolio: portfolio),
-          ),
+          SliverToBoxAdapter(child: TaxEstimateCard(portfolio: portfolio)),
 
           // Portfolio AI card
           const SliverToBoxAdapter(child: MlDivider()),
           SliverToBoxAdapter(
-            child: PortfolioAICard(summary: portfolio.summary),
+            child: PortfolioAICard(
+              summary: portfolio.summary,
+              isAdFree: auth.shouldHideAds,
+            ),
           ),
 
           // Holdings section header
           SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.md, AppSpacing.lg, AppSpacing.xxs),
-              child: Row(
-                children: [
-                  Text(
-                    l10n.myHoldings,
-                    style: const TextStyle(
-                      fontSize: AppTypography.headlineMedium,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  Text(
-                    l10n.nHoldings(holdings.length),
-                    style: TextStyle(
-                      fontSize: AppTypography.bodySmall,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
+            child: SectionHeader(
+              title: l10n.myHoldings,
+              subtitle: l10n.nHoldings(holdings.length),
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.xl,
+                AppSpacing.lg,
+                AppSpacing.xl,
+                AppSpacing.xs,
               ),
             ),
           ),
 
           // Holdings list
           SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                final holding = holdings[index];
-                return HoldingListItem(
-                  holding: holding,
-                  onTap: () => _onEditHolding(context, holding),
-                  onDelete: () => _onDeleteHolding(context, holding.ticker),
-                );
-              },
-              childCount: holdings.length,
-            ),
+            delegate: SliverChildBuilderDelegate((context, index) {
+              final holding = holdings[index];
+              return HoldingListItem(
+                holding: holding,
+                onTap: () => _onEditHolding(context, holding),
+                onDelete: () => _onDeleteHolding(context, holding.ticker),
+              );
+            }, childCount: holdings.length),
           ),
 
           // Recent transactions section
           if (allTxn.isNotEmpty) ...[
             SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.xl, AppSpacing.lg, AppSpacing.sm),
-                child: Text(
-                  l10n.recentTransactions,
-                  style: const TextStyle(fontSize: AppTypography.headlineMedium, fontWeight: FontWeight.bold),
+              child: SectionHeader(
+                title: l10n.recentTransactions,
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.xl,
+                  AppSpacing.xxl,
+                  AppSpacing.xl,
+                  AppSpacing.sm,
                 ),
               ),
             ),
             SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final txn = displayRecentTxn[index];
-                  // Find matching holding for avg price
-                  final matchingHolding = holdings.where((h) => h.ticker == txn.ticker).toList();
-                  final avgPrice = matchingHolding.isNotEmpty ? (matchingHolding.first.avgPrice ?? 0.0) : 0.0;
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (index == 0 || displayRecentTxn[index - 1].ticker != txn.ticker)
-                          Padding(
-                            padding: const EdgeInsets.only(top: AppSpacing.xs, bottom: AppSpacing.xxs),
-                            child: Text(
-                              txn.ticker,
-                              style: TextStyle(
-                                fontSize: AppTypography.bodySmall,
-                                fontWeight: AppTypography.semiBold,
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                              ),
+              delegate: SliverChildBuilderDelegate((context, index) {
+                final txn = displayRecentTxn[index];
+                // Find matching holding for avg price
+                final matchingHolding = holdings
+                    .where((h) => h.ticker == txn.ticker)
+                    .toList();
+                final avgPrice = matchingHolding.isNotEmpty
+                    ? (matchingHolding.first.avgPrice ?? 0.0)
+                    : 0.0;
+                return Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.lg,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (index == 0 ||
+                          displayRecentTxn[index - 1].ticker != txn.ticker)
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            top: AppSpacing.xs,
+                            bottom: AppSpacing.xxs,
+                          ),
+                          child: Text(
+                            txn.ticker,
+                            style: TextStyle(
+                              fontSize: AppTypography.bodySmall,
+                              fontWeight: AppTypography.semiBold,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
                             ),
                           ),
-                        TransactionRow(txn: txn, avgPrice: avgPrice),
-                      ],
-                    ),
-                  );
-                },
-                childCount: displayRecentTxn.length,
-              ),
+                        ),
+                      TransactionRow(txn: txn, avgPrice: avgPrice),
+                    ],
+                  ),
+                );
+              }, childCount: displayRecentTxn.length),
             ),
             if (hasMoreRecentTxn && !_showAllRecentTxn)
               SliverToBoxAdapter(
@@ -437,7 +575,10 @@ class _HoldingsTabState extends State<HoldingsTab> {
                     onPressed: () => setState(() => _showAllRecentTxn = true),
                     child: Text(
                       l10n.viewAllTransactions(allTxn.length),
-                      style: TextStyle(fontSize: AppTypography.bodySmall, color: Theme.of(context).colorScheme.primary),
+                      style: TextStyle(
+                        fontSize: AppTypography.bodySmall,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                     ),
                   ),
                 ),
@@ -447,10 +588,19 @@ class _HoldingsTabState extends State<HoldingsTab> {
                 child: Center(
                   child: TextButton.icon(
                     onPressed: () => setState(() => _showAllRecentTxn = false),
-                    icon: Icon(Icons.keyboard_arrow_up, size: 16, color: Theme.of(context).colorScheme.primary),
+                    icon: Icon(
+                      Icons.keyboard_arrow_up,
+                      size: 16,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
                     label: Text(
-                      Localizations.localeOf(context).languageCode == 'ko' ? '줄이기' : 'Show less',
-                      style: TextStyle(fontSize: AppTypography.bodySmall, color: Theme.of(context).colorScheme.primary),
+                      Localizations.localeOf(context).languageCode == 'ko'
+                          ? '줄이기'
+                          : 'Show less',
+                      style: TextStyle(
+                        fontSize: AppTypography.bodySmall,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                     ),
                   ),
                 ),
@@ -458,9 +608,7 @@ class _HoldingsTabState extends State<HoldingsTab> {
           ],
 
           // Bottom padding
-          const SliverToBoxAdapter(
-            child: SizedBox(height: AppSpacing.xl),
-          ),
+          const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xl)),
         ],
       ),
     );

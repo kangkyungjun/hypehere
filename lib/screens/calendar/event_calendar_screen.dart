@@ -1,12 +1,20 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/market_event.dart';
+import '../../providers/auth_provider.dart';
 import '../../services/analytics_api_client.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 import '../../theme/app_typography.dart';
+import '../../widgets/ads/banner_ad_widget.dart';
+import '../../widgets/ads/rewarded_ad_helper.dart';
 import '../../widgets/common/empty_state_view.dart';
+import '../../widgets/common/gold_upgrade_sheet.dart';
 import '../ticker_detail/ticker_detail_screen.dart';
 
 class EventCalendarScreen extends StatefulWidget {
@@ -17,6 +25,8 @@ class EventCalendarScreen extends StatefulWidget {
 }
 
 class _EventCalendarScreenState extends State<EventCalendarScreen> {
+  static const _prefKeyAdUnlock = 'calendar_ad_unlock_until';
+
   final AnalyticsApiClient _apiClient = AnalyticsApiClient();
 
   late int _year;
@@ -25,6 +35,7 @@ class _EventCalendarScreenState extends State<EventCalendarScreen> {
   EventCalendarData? _calendarData;
   bool _isLoading = false;
   String? _error;
+  DateTime? _adUnlockExpiry;
 
   @override
   void initState() {
@@ -33,6 +44,7 @@ class _EventCalendarScreenState extends State<EventCalendarScreen> {
     _year = now.year;
     _month = now.month;
     _selectedDate = DateTime(now.year, now.month, now.day);
+    _loadAdUnlock();
   }
 
   @override
@@ -223,7 +235,8 @@ class _EventCalendarScreenState extends State<EventCalendarScreen> {
             left: AppSpacing.xxl,
             right: AppSpacing.xxl,
             top: AppSpacing.xxl,
-            bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+            bottom: MediaQuery.of(context).viewInsets.bottom +
+                MediaQuery.of(context).viewPadding.bottom + AppSpacing.md,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -231,12 +244,12 @@ class _EventCalendarScreenState extends State<EventCalendarScreen> {
             children: [
               Row(
                 children: [
-                  Icon(event.icon, color: event.color, size: 24),
-                  const SizedBox(width: 10),
+                  Icon(event.icon, color: event.colorOf(context.mlColors), size: 24),
+                  const SizedBox(width: AppSpacing.lg),
                   Expanded(
                     child: Text(
                       event.title,
-                      style: TextStyle(fontSize: AppTypography.headlineMedium, fontWeight: FontWeight.bold),
+                      style: TextStyle(fontSize: AppTypography.headlineMedium, fontWeight: AppTypography.bold),
                     ),
                   ),
                 ],
@@ -247,12 +260,12 @@ class _EventCalendarScreenState extends State<EventCalendarScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xxs),
                     decoration: BoxDecoration(
-                      color: event.color.withValues(alpha: 0.15),
+                      color: event.colorOf(context.mlColors).withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(AppRadius.xs),
                     ),
                     child: Text(
                       _eventTypeLabel(event.eventType, l10n),
-                      style: TextStyle(fontSize: AppTypography.caption, color: event.color, fontWeight: AppTypography.semiBold),
+                      style: TextStyle(fontSize: AppTypography.caption, color: event.colorOf(context.mlColors), fontWeight: AppTypography.semiBold),
                     ),
                   ),
                   const SizedBox(width: AppSpacing.md),
@@ -270,21 +283,21 @@ class _EventCalendarScreenState extends State<EventCalendarScreen> {
                       ),
                       child: Text(
                         'HIGH',
-                        style: TextStyle(fontSize: AppTypography.micro, color: context.mlColors.lossColor, fontWeight: FontWeight.bold),
+                        style: TextStyle(fontSize: AppTypography.micro, color: context.mlColors.lossColor, fontWeight: AppTypography.bold),
                       ),
                     ),
                   ],
                 ],
               ),
               if (event.description != null && event.description!.isNotEmpty) ...[
-                const SizedBox(height: 14),
+                const SizedBox(height: AppSpacing.xl),
                 Text(
                   event.description!,
                   style: TextStyle(fontSize: AppTypography.bodyLarge, color: context.mlColors.textPrimary, height: 1.5),
                 ),
               ],
               if (event.ticker != null && event.ticker!.isNotEmpty) ...[
-                const SizedBox(height: 14),
+                const SizedBox(height: AppSpacing.xl),
                 OutlinedButton.icon(
                   onPressed: () {
                     Navigator.pop(context);
@@ -304,6 +317,168 @@ class _EventCalendarScreenState extends State<EventCalendarScreen> {
           ),
         );
       },
+    );
+  }
+
+  // ── Premium gating helpers ──
+
+  Future<void> _loadAdUnlock() async {
+    final auth = context.read<AuthProvider>();
+    final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
+    final millis = prefs.getInt(_prefKeyAdUnlock);
+    if (millis != null) {
+      final expiry = DateTime.fromMillisecondsSinceEpoch(millis);
+      if (expiry.isAfter(DateTime.now())) {
+        setState(() => _adUnlockExpiry = expiry);
+      }
+    }
+    // Preload ad for non-Gold users
+    if (!auth.shouldHideAds) {
+      RewardedAdHelper.instance.preloadAd();
+    }
+  }
+
+  bool _isCalendarUnlocked() {
+    final auth = context.read<AuthProvider>();
+    if (auth.shouldHideAds) return true;
+    return _adUnlockExpiry != null && _adUnlockExpiry!.isAfter(DateTime.now());
+  }
+
+  DateTime _cutoffDate() {
+    final now = DateTime.now();
+    return DateTime(now.year, now.month, now.day).add(const Duration(days: 14));
+  }
+
+  bool _isEventLocked(MarketCalendarEvent event) {
+    final eventDate = DateTime.tryParse(event.date);
+    if (eventDate == null) return false;
+    return eventDate.isAfter(_cutoffDate());
+  }
+
+  Future<void> _onWatchCalendarAd() async {
+    final l10n = AppLocalizations.of(context);
+    RewardedAdHelper.instance.showAd(
+      onRewarded: () async {
+        final expiry = DateTime.now().add(const Duration(hours: 6));
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setInt(_prefKeyAdUnlock, expiry.millisecondsSinceEpoch);
+        if (mounted) {
+          setState(() => _adUnlockExpiry = expiry);
+        }
+      },
+      onFailed: () {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.adNotReady)),
+          );
+        }
+      },
+    );
+  }
+
+  Widget _buildLockedSection(
+    List<MarketCalendarEvent> lockedEvents,
+    AppLocalizations l10n,
+  ) {
+    final newsEvents = lockedEvents.where((e) => !_economicTypes.contains(e.eventType)).toList();
+    final econEvents = lockedEvents.where((e) => _economicTypes.contains(e.eventType)).toList();
+
+    return Stack(
+      children: [
+        // Blurred content
+        ClipRRect(
+          borderRadius: BorderRadius.circular(AppRadius.md),
+          child: ImageFiltered(
+            imageFilter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+            child: IgnorePointer(
+              child: IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: _buildEventColumn(
+                        l10n.calendarNewsAnnouncements,
+                        Icons.campaign,
+                        context.mlColors.eventEarningsColor,
+                        newsEvents,
+                        l10n,
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    Expanded(
+                      child: _buildEventColumn(
+                        l10n.calendarEconomicIndicators,
+                        Icons.show_chart,
+                        context.mlColors.accentBlue,
+                        econEvents,
+                        l10n,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+        // CTA overlay
+        Positioned.fill(
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(AppRadius.md),
+              color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.3),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.lock, size: 28, color: context.mlColors.textSecondary),
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  l10n.calendarPremiumEvents(lockedEvents.length),
+                  style: TextStyle(
+                    fontSize: AppTypography.bodyMedium,
+                    fontWeight: AppTypography.bold,
+                    color: context.mlColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.xxs),
+                Text(
+                  l10n.calendarUnlockWithAd,
+                  style: TextStyle(
+                    fontSize: AppTypography.caption,
+                    color: context.mlColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.md),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    FilledButton.icon(
+                      onPressed: _onWatchCalendarAd,
+                      icon: const Icon(Icons.play_circle_outline, size: 18),
+                      label: Text(l10n.watchAd),
+                      style: FilledButton.styleFrom(
+                        visualDensity: VisualDensity.compact,
+                        textStyle: const TextStyle(fontSize: AppTypography.bodySmall),
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    OutlinedButton.icon(
+                      onPressed: () => GoldUpgradeSheet.show(context, source: 'calendar'),
+                      icon: const Icon(Icons.workspace_premium, size: 18),
+                      label: Text(l10n.upgradeToGold),
+                      style: OutlinedButton.styleFrom(
+                        visualDensity: VisualDensity.compact,
+                        textStyle: const TextStyle(fontSize: AppTypography.bodySmall),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -328,6 +503,9 @@ class _EventCalendarScreenState extends State<EventCalendarScreen> {
           // Calendar grid
           _buildCalendarGrid(lang, today),
           const SizedBox(height: AppSpacing.lg),
+          // Banner ad between calendar and event list
+          const Center(child: BannerAdWidget()),
+          const SizedBox(height: AppSpacing.lg),
           // Event list for selected date
           _buildEventList(l10n),
         ],
@@ -339,61 +517,70 @@ class _EventCalendarScreenState extends State<EventCalendarScreen> {
     final isCurrentMonth = _year == today.year && _month == today.month;
 
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
+        // Left: year/month text + count badge + today badge
+        Expanded(
+          child: GestureDetector(
+            onTap: isCurrentMonth ? null : _goToToday,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  _monthName(_month, lang),
+                  style: TextStyle(fontSize: AppTypography.bodyLarge, fontWeight: AppTypography.bold, color: context.mlColors.textSecondary),
+                ),
+                if (_calendarData != null && _calendarData!.totalCount > 0) ...[
+                  const SizedBox(width: AppSpacing.sm),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 1),
+                    decoration: BoxDecoration(
+                      color: context.mlColors.subtleBorder,
+                      borderRadius: BorderRadius.circular(AppRadius.lg),
+                    ),
+                    child: Text(
+                      l10n.nEvents(_calendarData!.totalCount),
+                      style: TextStyle(
+                        fontSize: AppTypography.bodySmall,
+                        color: context.mlColors.textSecondary,
+                        fontWeight: AppTypography.semiBold,
+                      ),
+                    ),
+                  ),
+                ],
+                if (!isCurrentMonth) ...[
+                  const SizedBox(width: AppSpacing.sm),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 1),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primaryContainer,
+                      borderRadius: BorderRadius.circular(AppRadius.xs),
+                    ),
+                    child: Text(
+                      l10n.today,
+                      style: TextStyle(
+                        fontSize: AppTypography.micro,
+                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                        fontWeight: AppTypography.semiBold,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+        // Right: calendar picker + prev/next arrows
+        IconButton(
+          tooltip: l10n.tooltipSelectMonth,
+          icon: const Icon(Icons.calendar_month, size: 22),
+          onPressed: () => _showYearMonthPicker(lang, l10n),
+          visualDensity: VisualDensity.compact,
+        ),
         IconButton(
           tooltip: l10n.tooltipPreviousMonth,
           icon: const Icon(Icons.chevron_left),
           onPressed: _goToPreviousMonth,
           visualDensity: VisualDensity.compact,
-        ),
-        GestureDetector(
-          onTap: isCurrentMonth ? null : _goToToday,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                _monthName(_month, lang),
-                style: const TextStyle(fontSize: AppTypography.headlineLarge, fontWeight: FontWeight.bold),
-              ),
-              if (_calendarData != null && _calendarData!.totalCount > 0) ...[
-                const SizedBox(width: AppSpacing.sm),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 1),
-                  decoration: BoxDecoration(
-                    color: context.mlColors.subtleBorder,
-                    borderRadius: BorderRadius.circular(AppRadius.lg),
-                  ),
-                  child: Text(
-                    '${_calendarData!.totalCount}',
-                    style: TextStyle(
-                      fontSize: AppTypography.caption,
-                      color: context.mlColors.textSecondary,
-                      fontWeight: AppTypography.semiBold,
-                    ),
-                  ),
-                ),
-              ],
-              if (!isCurrentMonth) ...[
-                const SizedBox(width: AppSpacing.sm),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 1),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primaryContainer,
-                    borderRadius: BorderRadius.circular(AppRadius.xs),
-                  ),
-                  child: Text(
-                    l10n.today,
-                    style: TextStyle(
-                      fontSize: AppTypography.micro,
-                      color: Theme.of(context).colorScheme.onPrimaryContainer,
-                      fontWeight: AppTypography.semiBold,
-                    ),
-                  ),
-                ),
-              ],
-            ],
-          ),
         ),
         IconButton(
           tooltip: l10n.tooltipNextMonth,
@@ -403,6 +590,146 @@ class _EventCalendarScreenState extends State<EventCalendarScreen> {
         ),
       ],
     );
+  }
+
+  void _showYearMonthPicker(String lang, AppLocalizations l10n) {
+    final now = DateTime.now();
+    final minYear = now.year - 5;
+    final maxYear = now.year + 1;
+
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
+      ),
+      builder: (modalContext) {
+        int pickerYear = _year;
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            final shortMonths = _shortMonthNames(lang);
+
+            return Padding(
+              padding: EdgeInsets.only(
+                left: AppSpacing.xxl,
+                right: AppSpacing.xxl,
+                top: AppSpacing.lg,
+                bottom: MediaQuery.of(modalContext).viewInsets.bottom + AppSpacing.xxl,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Year selector row
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.chevron_left),
+                        onPressed: pickerYear > minYear
+                            ? () => setModalState(() => pickerYear--)
+                            : null,
+                        visualDensity: VisualDensity.compact,
+                      ),
+                      const SizedBox(width: AppSpacing.md),
+                      Text(
+                        '$pickerYear',
+                        style: const TextStyle(
+                          fontSize: AppTypography.headlineLarge,
+                          fontWeight: AppTypography.bold,
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.md),
+                      IconButton(
+                        icon: const Icon(Icons.chevron_right),
+                        onPressed: pickerYear < maxYear
+                            ? () => setModalState(() => pickerYear++)
+                            : null,
+                        visualDensity: VisualDensity.compact,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  // Month grid (4 columns x 3 rows)
+                  GridView.count(
+                    crossAxisCount: 4,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    mainAxisSpacing: AppSpacing.sm,
+                    crossAxisSpacing: AppSpacing.sm,
+                    childAspectRatio: 2.0,
+                    children: List.generate(12, (index) {
+                      final m = index + 1;
+                      final isSelected = pickerYear == _year && m == _month;
+                      final isTodayMonth = pickerYear == now.year && m == now.month;
+                      final primary = Theme.of(context).colorScheme.primary;
+
+                      return GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _year = pickerYear;
+                            _month = m;
+                            _selectedDate = null;
+                            _calendarData = null;
+                          });
+                          Navigator.pop(modalContext);
+                          _loadCalendar();
+                        },
+                        child: Container(
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: isSelected ? primary : null,
+                            border: (!isSelected && isTodayMonth)
+                                ? Border.all(color: primary, width: 1.5)
+                                : null,
+                            borderRadius: BorderRadius.circular(AppRadius.md),
+                          ),
+                          child: Text(
+                            shortMonths[m],
+                            style: TextStyle(
+                              fontSize: AppTypography.bodyLarge,
+                              fontWeight: (isSelected || isTodayMonth)
+                                  ? AppTypography.bold
+                                  : AppTypography.regular,
+                              color: isSelected
+                                  ? Theme.of(context).colorScheme.onPrimary
+                                  : null,
+                            ),
+                          ),
+                        ),
+                      );
+                    }),
+                  ),
+                  // "Go to today" button - only when not viewing current month
+                  if (!(pickerYear == now.year && _month == now.month)) ...[
+                    const SizedBox(height: AppSpacing.lg),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton(
+                        onPressed: () {
+                          Navigator.pop(modalContext);
+                          _goToToday();
+                        },
+                        child: Text(l10n.today),
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: AppSpacing.sm),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  List<String> _shortMonthNames(String lang) {
+    return switch (lang) {
+      'ko' => ['', '1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],
+      'zh' => ['', '1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
+      'ja' => ['', '1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
+      'es' => ['', 'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+      _ => ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+    };
   }
 
   Widget _buildCalendarGrid(String lang, DateTime today) {
@@ -427,7 +754,7 @@ class _EventCalendarScreenState extends State<EventCalendarScreen> {
                     fontSize: AppTypography.bodySmall,
                     fontWeight: AppTypography.semiBold,
                     color: isSunday
-                        ? const Color(0xFFE53935)
+                        ? context.mlColors.sundayColor
                         : isSaturday
                             ? context.mlColors.accentBlue
                             : context.mlColors.textSecondary,
@@ -496,11 +823,11 @@ class _EventCalendarScreenState extends State<EventCalendarScreen> {
                           '$day',
                           style: TextStyle(
                             fontSize: AppTypography.bodyMedium,
-                            fontWeight: isToday || isSelected ? FontWeight.bold : FontWeight.normal,
+                            fontWeight: isToday || isSelected ? AppTypography.bold : AppTypography.regular,
                             color: isToday
                                 ? Theme.of(context).colorScheme.onPrimary
                                 : col == 0
-                                    ? const Color(0xFFE53935)
+                                    ? context.mlColors.sundayColor
                                     : col == 6
                                         ? context.mlColors.accentBlue
                                         : null,
@@ -517,7 +844,7 @@ class _EventCalendarScreenState extends State<EventCalendarScreen> {
                           ),
                         )
                       else
-                        const SizedBox(height: 5),
+                        const SizedBox(height: AppSpacing.xs),
                     ],
                   ),
                 ),
@@ -596,9 +923,14 @@ class _EventCalendarScreenState extends State<EventCalendarScreen> {
       );
     }
 
-    // Split into two categories
-    final newsEvents = allEvents.where((e) => !_economicTypes.contains(e.eventType)).toList();
-    final econEvents = allEvents.where((e) => _economicTypes.contains(e.eventType)).toList();
+    // Premium gating: split into free / locked events
+    final isUnlocked = _isCalendarUnlocked();
+    final freeEvents = isUnlocked ? allEvents : allEvents.where((e) => !_isEventLocked(e)).toList();
+    final lockedEvents = isUnlocked ? <MarketCalendarEvent>[] : allEvents.where((e) => _isEventLocked(e)).toList();
+
+    // Split free events into two categories
+    final newsEvents = freeEvents.where((e) => !_economicTypes.contains(e.eventType)).toList();
+    final econEvents = freeEvents.where((e) => _economicTypes.contains(e.eventType)).toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -608,7 +940,7 @@ class _EventCalendarScreenState extends State<EventCalendarScreen> {
             padding: const EdgeInsets.only(left: AppSpacing.xxs, bottom: AppSpacing.xs),
             child: Row(
               children: [
-                Text(headerDate, style: const TextStyle(fontSize: AppTypography.bodyMedium, fontWeight: AppTypography.semiBold)),
+                Text(headerDate, style: TextStyle(fontSize: AppTypography.bodyLarge, fontWeight: AppTypography.bold, color: context.mlColors.textSecondary)),
                 const SizedBox(width: AppSpacing.sm),
                 Text(l10n.nEvents(allEvents.length),
                     style: TextStyle(fontSize: AppTypography.bodySmall, color: context.mlColors.textSecondary)),
@@ -618,37 +950,57 @@ class _EventCalendarScreenState extends State<EventCalendarScreen> {
         else
           Padding(
             padding: const EdgeInsets.only(left: AppSpacing.xxs, bottom: AppSpacing.xs),
-            child: Text(l10n.nEvents(allEvents.length),
-                style: TextStyle(fontSize: AppTypography.bodySmall, color: context.mlColors.textSecondary, fontWeight: AppTypography.medium)),
+            child: Row(
+              children: [
+                Text(l10n.nEvents(allEvents.length),
+                    style: TextStyle(fontSize: AppTypography.bodySmall, color: context.mlColors.textSecondary, fontWeight: AppTypography.medium)),
+                if (isUnlocked && _adUnlockExpiry != null) ...[
+                  const SizedBox(width: AppSpacing.sm),
+                  Text(
+                    l10n.calendarUnlockedUntil(
+                      '${_adUnlockExpiry!.hour.toString().padLeft(2, '0')}:${_adUnlockExpiry!.minute.toString().padLeft(2, '0')}',
+                    ),
+                    style: TextStyle(fontSize: AppTypography.micro, color: Theme.of(context).colorScheme.primary),
+                  ),
+                ],
+              ],
+            ),
           ),
-        IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Left column - News/Announcements
-              Expanded(
-                child: _buildEventColumn(
-                  l10n.calendarNewsAnnouncements,
-                  Icons.campaign,
-                  const Color(0xFF43A047),
-                  newsEvents,
-                  l10n,
+        // Free events two-column layout
+        if (freeEvents.isNotEmpty)
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Left column - News/Announcements
+                Expanded(
+                  child: _buildEventColumn(
+                    l10n.calendarNewsAnnouncements,
+                    Icons.campaign,
+                    context.mlColors.eventEarningsColor,
+                    newsEvents,
+                    l10n,
+                  ),
                 ),
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              // Right column - US Economic Indicators
-              Expanded(
-                child: _buildEventColumn(
-                  l10n.calendarEconomicIndicators,
-                  Icons.show_chart,
-                  context.mlColors.accentBlue,
-                  econEvents,
-                  l10n,
+                const SizedBox(width: AppSpacing.sm),
+                // Right column - US Economic Indicators
+                Expanded(
+                  child: _buildEventColumn(
+                    l10n.calendarEconomicIndicators,
+                    Icons.show_chart,
+                    context.mlColors.accentBlue,
+                    econEvents,
+                    l10n,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
+        // Locked events with blur + CTA
+        if (lockedEvents.isNotEmpty) ...[
+          const SizedBox(height: AppSpacing.md),
+          _buildLockedSection(lockedEvents, l10n),
+        ],
       ],
     );
   }
@@ -723,9 +1075,9 @@ class _EventCalendarScreenState extends State<EventCalendarScreen> {
               margin: const EdgeInsets.only(top: AppSpacing.xs),
               width: 6,
               height: 6,
-              decoration: BoxDecoration(color: event.color, shape: BoxShape.circle),
+              decoration: BoxDecoration(color: event.colorOf(context.mlColors), shape: BoxShape.circle),
             ),
-            const SizedBox(width: 5),
+            const SizedBox(width: AppSpacing.xs),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -736,7 +1088,7 @@ class _EventCalendarScreenState extends State<EventCalendarScreen> {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 1),
+                  const SizedBox(height: AppSpacing.xxs),
                   Row(
                     children: [
                       Text(
@@ -744,7 +1096,7 @@ class _EventCalendarScreenState extends State<EventCalendarScreen> {
                         style: TextStyle(fontSize: AppTypography.chartLabel, color: context.mlColors.textTertiary),
                       ),
                       if (event.ticker != null) ...[
-                        const SizedBox(width: 3),
+                        const SizedBox(width: AppSpacing.xxs),
                         Flexible(
                           child: Text(
                             event.ticker!,
@@ -758,16 +1110,16 @@ class _EventCalendarScreenState extends State<EventCalendarScreen> {
                         ),
                       ],
                       if (event.importance == 'high') ...[
-                        const SizedBox(width: 3),
+                        const SizedBox(width: AppSpacing.xxs),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 0.5),
+                          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxs, vertical: 0.5),
                           decoration: BoxDecoration(
                             color: context.mlColors.lossColor.withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(AppRadius.xxs),
                           ),
                           child: Text(
                             '!',
-                            style: TextStyle(fontSize: AppTypography.chartMicro, color: context.mlColors.lossColor, fontWeight: FontWeight.bold),
+                            style: TextStyle(fontSize: AppTypography.chartMicro, color: context.mlColors.lossColor, fontWeight: AppTypography.bold),
                           ),
                         ),
                       ],

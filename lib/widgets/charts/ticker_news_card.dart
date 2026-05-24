@@ -48,7 +48,7 @@ class TickerNewsCard extends StatelessWidget {
                   l10n.tickerNews(ticker),
                   style: TextStyle(
                     fontSize: AppTypography.headlineSmall,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: AppTypography.bold,
                     color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
@@ -64,13 +64,13 @@ class TickerNewsCard extends StatelessWidget {
                       l10n.newsCount(items.length),
                       style: TextStyle(
                         fontSize: AppTypography.caption,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: AppTypography.bold,
                         color: context.mlColors.warningColor,
                       ),
                     ),
                   ),
 
-                const SizedBox(width: 10),
+                const SizedBox(width: AppSpacing.lg),
 
                 // Center: sentiment stats (2 lines)
                 if (stats != null)
@@ -157,9 +157,9 @@ class TickerNewsCard extends StatelessWidget {
         ),
         const SizedBox(width: AppSpacing.xs),
         _buildStatChip(l10n.sentimentBullish, counts.bullish, context.mlColors.gainColor),
-        const SizedBox(width: 3),
+        const SizedBox(width: AppSpacing.xxs),
         _buildStatChip(l10n.sentimentNeutral, counts.neutral, context.mlColors.neutralColor),
-        const SizedBox(width: 3),
+        const SizedBox(width: AppSpacing.xxs),
         _buildStatChip(l10n.sentimentBearish, counts.bearish, context.mlColors.lossColor),
       ],
     );
@@ -245,7 +245,7 @@ class TickerNewsCard extends StatelessWidget {
                               item.sentimentLabelLocalized(AppLocalizations.of(context)),
                               style: TextStyle(
                                 fontSize: AppTypography.micro,
-                                fontWeight: FontWeight.bold,
+                                fontWeight: AppTypography.bold,
                                 color: dotColor,
                               ),
                             ),

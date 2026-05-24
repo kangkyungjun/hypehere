@@ -9,21 +9,21 @@ abstract final class AppSpacing {
   /// 4px — 인접 요소 간 최소 간격
   static const double xs = 4.0;
 
-  /// 6px — 밀접 요소 간 간격
-  static const double sm = 6.0;
+  /// 8px — 밀접 요소 간 간격
+  static const double sm = 8.0;
 
-  /// 8px — 기본 간격 (가장 빈번하게 사용)
-  static const double md = 8.0;
+  /// 12px — 관련 요소 간 기본 간격
+  static const double md = 12.0;
 
-  /// 12px — 관련 그룹 내 간격
-  static const double lg = 12.0;
+  /// 16px — 카드 내부 패딩, 리스트 그룹 간격
+  static const double lg = 16.0;
 
-  /// 16px — 섹션 내 요소 간 간격, 기본 패딩
-  static const double xl = 16.0;
+  /// 20px — 화면 좌우 여백, 큰 그룹 간격
+  static const double xl = 20.0;
 
   /// 24px — 섹션 간 간격
   static const double xxl = 24.0;
 
-  /// 32px — 대형 섹션 간 간격, 화면 여백
+  /// 32px — 대형 섹션 간 간격
   static const double xxxl = 32.0;
 }

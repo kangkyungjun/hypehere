@@ -5,6 +5,7 @@ import '../../../theme/app_colors.dart';
 import '../../../theme/app_radius.dart';
 import '../../../theme/app_shadow.dart';
 import '../../../theme/app_spacing.dart';
+import '../../../theme/app_stroke.dart';
 import '../../../theme/app_typography.dart';
 import '../../../l10n/app_localizations.dart';
 
@@ -65,7 +66,7 @@ class _TickerPriceChartState extends State<TickerPriceChart> {
               Text(
                 'Price',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
+                      fontWeight: AppTypography.bold,
                     ),
               ),
               const SizedBox(width: AppSpacing.lg),
@@ -77,7 +78,7 @@ class _TickerPriceChartState extends State<TickerPriceChart> {
                   child: GestureDetector(
                     onTap: () => widget.onPeriodChanged(period),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: 3),
+                      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.xxs),
                       decoration: BoxDecoration(
                         color: isSelected ? Theme.of(context).colorScheme.inverseSurface : Colors.transparent,
                         borderRadius: BorderRadius.circular(AppRadius.lg),
@@ -89,7 +90,7 @@ class _TickerPriceChartState extends State<TickerPriceChart> {
                         period,
                         style: TextStyle(
                           fontSize: AppTypography.caption,
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                          fontWeight: isSelected ? AppTypography.bold : AppTypography.regular,
                           color: isSelected ? context.mlColors.onPrimary : Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
@@ -151,13 +152,13 @@ class _TickerPriceChartState extends State<TickerPriceChart> {
                   getDrawingHorizontalLine: (value) {
                     return FlLine(
                       color: context.mlColors.chartGridLine,
-                      strokeWidth: 1,
+                      strokeWidth: AppStroke.thin,
                     );
                   },
                   getDrawingVerticalLine: (value) {
                     return FlLine(
                       color: context.mlColors.chartGridLine,
-                      strokeWidth: 1,
+                      strokeWidth: AppStroke.thin,
                     );
                   },
                 ),
@@ -176,10 +177,9 @@ class _TickerPriceChartState extends State<TickerPriceChart> {
                             final dateStr = '${date.month}/${date.day}';
                             return LineTooltipItem(
                               '$dateStr\n\$${spot.y.toStringAsFixed(2)}',
-                              TextStyle(
-                                fontSize: AppTypography.bodyLarge,
+                              AppTypography.changeBadge.copyWith(
+                                fontWeight: AppTypography.bold,
                                 color: context.mlColors.onPrimary,
-                                fontWeight: FontWeight.bold,
                               ),
                             );
 
@@ -305,7 +305,7 @@ class _TickerPriceChartState extends State<TickerPriceChart> {
                       HorizontalLine(
                         y: latestData.targetPrice!,
                         color: context.mlColors.gainColor,
-                        strokeWidth: 2,
+                        strokeWidth: AppStroke.medium,
                         label: HorizontalLineLabel(
                           show: true,
                           labelResolver: (line) =>
@@ -313,7 +313,7 @@ class _TickerPriceChartState extends State<TickerPriceChart> {
                           style: TextStyle(
                             color: context.mlColors.gainColor,
                             fontSize: AppTypography.micro,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: AppTypography.bold,
                           ),
                         ),
                       ),
@@ -321,7 +321,7 @@ class _TickerPriceChartState extends State<TickerPriceChart> {
                       HorizontalLine(
                         y: latestData.stopLoss!,
                         color: context.mlColors.lossColor,
-                        strokeWidth: 2,
+                        strokeWidth: AppStroke.medium,
                         label: HorizontalLineLabel(
                           show: true,
                           labelResolver: (line) =>
@@ -329,7 +329,7 @@ class _TickerPriceChartState extends State<TickerPriceChart> {
                           style: TextStyle(
                             color: context.mlColors.lossColor,
                             fontSize: AppTypography.micro,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: AppTypography.bold,
                           ),
                         ),
                       ),
@@ -350,9 +350,7 @@ class _TickerPriceChartState extends State<TickerPriceChart> {
                     color: context.mlColors.cardBackground.withValues(alpha: 0.9),
                     borderRadius: BorderRadius.circular(AppRadius.xs),
                     border: Border.all(color: context.mlColors.subtleBorder),
-                    boxShadow: [
-                      AppShadow.md(context.mlColors.overlayDim),
-                    ],
+                    boxShadow: AppShadow.md(context.mlColors.overlayDim),
                   ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,

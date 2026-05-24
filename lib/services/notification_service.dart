@@ -78,10 +78,18 @@ class NotificationService {
       importance: Importance.high,
     );
 
-    await _localNotifications
+    const subscriptionChannel = AndroidNotificationChannel(
+      'marketlens_subscription',
+      'Subscription Alerts',
+      description: '구독 결제, 갱신, 만료 알림',
+      importance: Importance.high,
+    );
+
+    final androidPlugin = _localNotifications
         .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
-        ?.createNotificationChannel(androidChannel);
+            AndroidFlutterLocalNotificationsPlugin>();
+    await androidPlugin?.createNotificationChannel(androidChannel);
+    await androidPlugin?.createNotificationChannel(subscriptionChannel);
 
     // 로컬 알림 초기화
     const androidSettings =
@@ -271,18 +279,29 @@ class NotificationService {
       return;
     }
 
+    // 구독 알림은 별도 채널로 라우팅
+    final isSubscription = message.data['type']?.toString().startsWith('SUBSCRIPTION_') ?? false;
+    final androidDetails = isSubscription
+        ? const AndroidNotificationDetails(
+            'marketlens_subscription',
+            'Subscription Alerts',
+            importance: Importance.high,
+            priority: Priority.high,
+          )
+        : const AndroidNotificationDetails(
+            'marketlens_default',
+            'MarketLens 알림',
+            importance: Importance.high,
+            priority: Priority.high,
+          );
+
     _localNotifications.show(
       message.hashCode,
       notification.title,
       notification.body,
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          'marketlens_default',
-          'MarketLens 알림',
-          importance: Importance.high,
-          priority: Priority.high,
-        ),
-        iOS: DarwinNotificationDetails(
+      NotificationDetails(
+        android: androidDetails,
+        iOS: const DarwinNotificationDetails(
           presentAlert: true,
           presentBadge: true,
           presentSound: true,

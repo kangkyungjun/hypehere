@@ -6,6 +6,7 @@ import '../../providers/auth_provider.dart';
 import '../../models/community/community_user.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_spacing.dart';
+import '../../theme/app_stroke.dart';
 import '../../theme/app_typography.dart';
 import '../../l10n/app_localizations.dart';
 import '../../utils/error_localizer.dart';
@@ -124,9 +125,9 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                 ? const SizedBox(
                     width: 20,
                     height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
+                    child: CircularProgressIndicator(strokeWidth: AppStroke.medium),
                   )
-                : Text(l10n.done, style: const TextStyle(fontWeight: FontWeight.bold)),
+                : Text(l10n.done, style: const TextStyle(fontWeight: AppTypography.bold)),
           ),
         ],
       ),
@@ -227,7 +228,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                       Text(
                         l10n.profileEditGuide,
                         style: TextStyle(
-                          fontWeight: FontWeight.bold,
+                          fontWeight: AppTypography.bold,
                           color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),

@@ -6,10 +6,47 @@ import '../../services/auth_service.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
+import '../../theme/app_stroke.dart';
 import '../../theme/app_typography.dart';
+import '../../utils/app_page_route.dart';
 import '../../utils/error_localizer.dart';
+import '../../widgets/common/bento_card.dart';
 import 'email_verification_screen.dart';
 import 'login_screen.dart';
+
+// Django CommonPasswordValidator top entries
+const _commonPasswords = <String>{
+  'password',
+  'password1',
+  'password123',
+  '12345678',
+  '123456789',
+  '1234567890',
+  'qwerty123',
+  'qwertyuiop',
+  'abcdefgh',
+  'abcd1234',
+  'abc12345',
+  'iloveyou',
+  'sunshine',
+  'princess',
+  'football',
+  'charlie',
+  'shadow',
+  'michael',
+  'qwerty',
+  'baseball',
+  'dragon',
+  'master',
+  'monkey',
+  'letmein',
+  'mustang',
+  'access',
+  'trustno1',
+  'superman',
+  'batman',
+  'passw0rd',
+};
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -35,6 +72,35 @@ class _SignupScreenState extends State<SignupScreen> {
     super.dispose();
   }
 
+  String? _validatePassword(String? value, AppLocalizations l10n) {
+    if (value == null || value.isEmpty) {
+      return l10n.passwordHint;
+    }
+    if (value.length < 8) {
+      return l10n.passwordTooShort;
+    }
+    if (RegExp(r'^\d+$').hasMatch(value)) {
+      return l10n.passwordAllNumeric;
+    }
+    if (_commonPasswords.contains(value.toLowerCase())) {
+      return l10n.passwordTooCommon;
+    }
+    final emailLocal = _emailController.text
+        .trim()
+        .split('@')
+        .first
+        .toLowerCase();
+    final nickname = _nicknameController.text.trim().toLowerCase();
+    final lower = value.toLowerCase();
+    if (emailLocal.length >= 3 && lower.contains(emailLocal)) {
+      return l10n.passwordTooSimilar;
+    }
+    if (nickname.length >= 3 && lower.contains(nickname)) {
+      return l10n.passwordTooSimilar;
+    }
+    return null;
+  }
+
   Future<void> _handleSignup() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -50,48 +116,30 @@ class _SignupScreenState extends State<SignupScreen> {
     try {
       // 1. 이메일 인증코드 발송
       final authService = AuthService();
-      await authService.sendVerificationCode(
-        email: email,
-        purpose: 'signup',
-      );
+      await authService.sendVerificationCode(email: email, purpose: 'signup');
 
       if (mounted) {
-        // 2. 인증 화면으로 이동
+        // 2. 인증 화면으로 이동 (통합 endpoint 사용)
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (context) => EmailVerificationScreen(
+          appPageRoute(
+            builder: (_) => EmailVerificationScreen(
               email: email,
               purpose: 'signup',
-              onVerified: () async {
-                // 3. 인증 완료 후 실제 가입
-                try {
-                  await context.read<AuthProvider>().register(
-                    email: email,
-                    nickname: nickname,
-                    password: password,
-                    passwordConfirm: passwordConfirm,
-                  );
+              onVerifiedWithCode: (code) async {
+                final auth = context.read<AuthProvider>();
+                final navigator = Navigator.of(context);
+                // 3. 인증코드 + 가입을 한 번에 처리
+                await auth.registerWithVerification(
+                  email: email,
+                  nickname: nickname,
+                  password: password,
+                  passwordConfirm: passwordConfirm,
+                  code: code,
+                );
 
-                  if (context.mounted) {
-                    // 가입 성공 → 루트까지 pop
-                    Navigator.of(context).popUntil((route) => route.isFirst);
-                  }
-                } catch (e) {
-                  if (context.mounted) {
-                    final message = ErrorLocalizer.getMessage(context, e);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(message),
-                        backgroundColor: context.mlColors.dangerColor,
-                        behavior: SnackBarBehavior.floating,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(AppRadius.md),
-                        ),
-                        margin: const EdgeInsets.all(AppSpacing.xl),
-                      ),
-                    );
-                  }
+                if (navigator.mounted) {
+                  navigator.popUntil((route) => route.isFirst);
                 }
               },
             ),
@@ -105,7 +153,11 @@ class _SignupScreenState extends State<SignupScreen> {
           SnackBar(
             content: Row(
               children: [
-                Icon(Icons.error_outline, color: context.mlColors.onPrimary, size: 20),
+                Icon(
+                  Icons.error_outline,
+                  color: context.mlColors.onPrimary,
+                  size: 20,
+                ),
                 const SizedBox(width: AppSpacing.md),
                 Expanded(child: Text(message)),
               ],
@@ -130,160 +182,167 @@ class _SignupScreenState extends State<SignupScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.signupTitle),
-      ),
+      backgroundColor: context.mlColors.sectionBackground,
+      appBar: AppBar(title: Text(l10n.signupTitle)),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppSpacing.xxl),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const SizedBox(height: AppSpacing.xxl),
-                // Logo or Title
-                Icon(
-                  Icons.trending_up,
-                  size: 64,
-                  color: Theme.of(context).primaryColor,
-                ),
-                const SizedBox(height: AppSpacing.xl),
-                Text(
-                  'MarketLens ${l10n.signupTitle}',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: AppTypography.displayLarge,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 48),
-                // Email field
-                TextFormField(
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: InputDecoration(
-                    labelText: l10n.email,
-                    hintText: l10n.emailHint,
-                    prefixIcon: const Icon(Icons.email_outlined),
-                    border: const OutlineInputBorder(),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return l10n.emailRequired;
-                    }
-                    if (!value.contains('@')) {
-                      return l10n.emailInvalid;
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: AppSpacing.xl),
-                // Nickname field
-                TextFormField(
-                  controller: _nicknameController,
-                  decoration: InputDecoration(
-                    labelText: l10n.nickname,
-                    hintText: l10n.nicknameHint,
-                    prefixIcon: const Icon(Icons.person_outlined),
-                    border: const OutlineInputBorder(),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return l10n.nicknameRequired;
-                    }
-                    if (value.length < 2) {
-                      return l10n.nicknameTooShort;
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: AppSpacing.xl),
-                // Password field
-                TextFormField(
-                  controller: _passwordController,
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    labelText: l10n.password,
-                    hintText: l10n.passwordHint,
-                    prefixIcon: const Icon(Icons.lock_outlined),
-                    border: const OutlineInputBorder(),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return l10n.passwordHint;
-                    }
-                    if (value.length < 8) {
-                      return l10n.passwordTooShort;
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: AppSpacing.xl),
-                // Password confirm field
-                TextFormField(
-                  controller: _passwordConfirmController,
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    labelText: l10n.passwordConfirm,
-                    hintText: l10n.passwordConfirmHint,
-                    prefixIcon: const Icon(Icons.lock_outlined),
-                    border: const OutlineInputBorder(),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return l10n.passwordConfirmRequired;
-                    }
-                    if (value != _passwordController.text) {
-                      return l10n.passwordMismatch;
-                    }
-                    return null;
-                  },
-                  onFieldSubmitted: (_) => _handleSignup(),
-                ),
-                const SizedBox(height: AppSpacing.xxl),
-                // Signup button
-                ElevatedButton(
-                  onPressed: _isLoading ? null : _handleSignup,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
-                    backgroundColor: Theme.of(context).primaryColor,
-                    foregroundColor: context.mlColors.onPrimary,
-                  ),
-                  child: _isLoading
-                      ? SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(context.mlColors.onPrimary),
-                          ),
-                        )
-                      : Text(
-                          l10n.signup,
-                          style: const TextStyle(fontSize: AppTypography.headlineMedium),
-                        ),
-                ),
-                const SizedBox(height: AppSpacing.xl),
-                // Login link
-                TextButton(
-                  onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const LoginScreen(),
+          padding: const EdgeInsets.all(AppSpacing.xl),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 480),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const SizedBox(height: AppSpacing.xxl),
+                    Container(
+                      width: 56,
+                      height: 56,
+                      decoration: BoxDecoration(
+                        color: context.mlColors.infoBg,
+                        borderRadius: BorderRadius.circular(AppRadius.lg),
                       ),
-                    );
-                  },
-                  child: Text(
-                    l10n.hasAccountLogin,
-                    style: TextStyle(
-                      color: Theme.of(context).primaryColor,
+                      child: Icon(
+                        Icons.person_add_alt_1_rounded,
+                        size: 30,
+                        color: context.mlColors.accentBlue,
+                      ),
                     ),
-                  ),
+                    const SizedBox(height: AppSpacing.lg),
+                    Text(
+                      l10n.signupTitle,
+                      style: AppTypography.screenTitle.copyWith(
+                        color: context.mlColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      l10n.signupSubtitle,
+                      style: AppTypography.body.copyWith(
+                        color: context.mlColors.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xxl),
+                    BentoCard(
+                      child: Column(
+                        children: [
+                          TextFormField(
+                            controller: _emailController,
+                            keyboardType: TextInputType.emailAddress,
+                            decoration: InputDecoration(
+                              labelText: l10n.email,
+                              hintText: l10n.emailHint,
+                              prefixIcon: const Icon(Icons.email_outlined),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return l10n.emailRequired;
+                              }
+                              if (!value.contains('@')) {
+                                return l10n.emailInvalid;
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: AppSpacing.lg),
+                          TextFormField(
+                            controller: _nicknameController,
+                            decoration: InputDecoration(
+                              labelText: l10n.nickname,
+                              hintText: l10n.nicknameHint,
+                              prefixIcon: const Icon(Icons.person_outlined),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return l10n.nicknameRequired;
+                              }
+                              if (value.length < 2) {
+                                return l10n.nicknameTooShort;
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: AppSpacing.lg),
+                          TextFormField(
+                            controller: _passwordController,
+                            obscureText: true,
+                            decoration: InputDecoration(
+                              labelText: l10n.password,
+                              hintText: l10n.passwordHint,
+                              prefixIcon: const Icon(Icons.lock_outlined),
+                              helperText: l10n.passwordRequirements,
+                              helperMaxLines: 2,
+                            ),
+                            validator: (value) =>
+                                _validatePassword(value, l10n),
+                          ),
+                          const SizedBox(height: AppSpacing.lg),
+                          TextFormField(
+                            controller: _passwordConfirmController,
+                            obscureText: true,
+                            decoration: InputDecoration(
+                              labelText: l10n.passwordConfirm,
+                              hintText: l10n.passwordConfirmHint,
+                              prefixIcon: const Icon(Icons.lock_outlined),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return l10n.passwordConfirmRequired;
+                              }
+                              if (value != _passwordController.text) {
+                                return l10n.passwordMismatch;
+                              }
+                              return null;
+                            },
+                            onFieldSubmitted: (_) => _handleSignup(),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xl),
+                    FilledButton(
+                      onPressed: _isLoading ? null : _handleSignup,
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: AppSpacing.lg,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(AppRadius.lg),
+                        ),
+                      ),
+                      child: _isLoading
+                          ? SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: AppStroke.medium,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  context.mlColors.onPrimary,
+                                ),
+                              ),
+                            )
+                          : Text(
+                              l10n.signup,
+                              style: const TextStyle(
+                                fontSize: AppTypography.headlineMedium,
+                                fontWeight: AppTypography.semiBold,
+                              ),
+                            ),
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pushReplacement(
+                          context,
+                          appPageRoute(builder: (_) => const LoginScreen()),
+                        );
+                      },
+                      child: Text(l10n.hasAccountLogin),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         ),

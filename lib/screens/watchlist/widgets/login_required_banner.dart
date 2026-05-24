@@ -55,7 +55,7 @@ class LoginRequiredBanner extends StatelessWidget {
                   size: 20,
                   color: theme.colorScheme.primary,
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: AppSpacing.lg),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,

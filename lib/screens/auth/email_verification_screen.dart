@@ -9,13 +9,14 @@ import '../../utils/error_localizer.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
+import '../../theme/app_stroke.dart';
 import '../../theme/app_typography.dart';
 
 class EmailVerificationScreen extends StatefulWidget {
   final String email;
   final String purpose; // 'signup' or 'password_reset'
-  final VoidCallback? onVerified;
-  final void Function(String code)? onVerifiedWithCode;
+  final Future<void> Function()? onVerified;
+  final Future<void> Function(String code)? onVerifiedWithCode;
 
   const EmailVerificationScreen({
     super.key,
@@ -33,6 +34,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
   final _codeController = TextEditingController();
   final _authService = AuthService();
   bool _isLoading = false;
+  bool _isVerified = false;
   bool _isResending = false;
   int _cooldownSeconds = 0;
   Timer? _cooldownTimer;
@@ -87,6 +89,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
   }
 
   Future<void> _handleVerify() async {
+    if (_isVerified) return;
     final code = _codeController.text.trim();
     if (code.length != 6) return;
 
@@ -94,8 +97,9 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
 
     try {
       if (widget.onVerifiedWithCode != null) {
-        // password_reset: 코드를 바로 전달 (verify는 confirm에서 함께 처리)
-        widget.onVerifiedWithCode!(code);
+        // 코드를 콜백에 전달 (signup: 통합 endpoint / password_reset: confirm에서 처리)
+        await widget.onVerifiedWithCode!(code);
+        _isVerified = true;
         return;
       }
 
@@ -105,8 +109,10 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
         purpose: widget.purpose,
       );
 
+      _isVerified = true;
+
       if (mounted) {
-        widget.onVerified?.call();
+        await widget.onVerified?.call();
       }
     } catch (e) {
       if (mounted) {
@@ -209,7 +215,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
               Text(
                 l10n.verificationTitle,
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: AppTypography.displayLarge, fontWeight: FontWeight.bold),
+                style: const TextStyle(fontSize: AppTypography.displayLarge, fontWeight: AppTypography.bold),
               ),
               const SizedBox(height: AppSpacing.lg),
               Text(
@@ -236,7 +242,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
                 maxLength: 6,
                 style: const TextStyle(
                   fontSize: AppTypography.heroSmall,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: AppTypography.bold,
                   letterSpacing: 12,
                 ),
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -269,7 +275,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
                         height: 20,
                         width: 20,
                         child: CircularProgressIndicator(
-                          strokeWidth: 2,
+                          strokeWidth: AppStroke.medium,
                           valueColor: AlwaysStoppedAnimation<Color>(context.mlColors.onPrimary),
                         ),
                       )

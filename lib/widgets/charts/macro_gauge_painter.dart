@@ -10,20 +10,30 @@ class MacroGaugePainter extends CustomPainter {
   final String? riskLevel;
   final Color needleColor;
   final Color innerDotColor;
+  final Color bearishColor;
+  final Color cautiousColor;
+  final Color neutralSegColor;
+  final Color positiveColor;
+  final Color bullishColor;
 
   MacroGaugePainter({
     required this.riskLevel,
     required this.needleColor,
     required this.innerDotColor,
+    required this.bearishColor,
+    required this.cautiousColor,
+    required this.neutralSegColor,
+    required this.positiveColor,
+    required this.bullishColor,
   });
 
-  // 5 segments, each 36° of the 180° semicircle
-  static const _segments = [
-    ('BEARISH', Color(0xFFF44336)),   // red — matches MarketLensColors.lossColor
-    ('CAUTIOUS', Color(0xFFFB8C00)),  // orange
-    ('NEUTRAL', Color(0xFF9E9E9E)),   // grey — matches MarketLensColors.neutralColor
-    ('POSITIVE', Color(0xFF4CAF50)),  // green — matches MarketLensColors.gainColor
-    ('BULLISH', Color(0xFF1E88E5)),   // blue
+  /// 5 segments, each 36° of the 180° semicircle
+  List<(String, Color)> get _segments => [
+    ('BEARISH', bearishColor),
+    ('CAUTIOUS', cautiousColor),
+    ('NEUTRAL', neutralSegColor),
+    ('POSITIVE', positiveColor),
+    ('BULLISH', bullishColor),
   ];
 
   /// Map riskLevel to needle angle (radians from left = π)
@@ -49,7 +59,7 @@ class MacroGaugePainter extends CustomPainter {
     final centerX = size.width / 2;
     final centerY = size.height * 0.78; // push center down so arc fits nicely
     final radius = min(centerX, size.height * 0.72);
-    final arcWidth = radius * 0.18;
+    final arcWidth = radius * 0.28;
 
     final center = Offset(centerX, centerY);
     final arcRect = Rect.fromCircle(center: center, radius: radius);
@@ -104,6 +114,11 @@ class MacroGaugePainter extends CustomPainter {
   bool shouldRepaint(covariant MacroGaugePainter oldDelegate) {
     return oldDelegate.riskLevel != riskLevel ||
         oldDelegate.needleColor != needleColor ||
-        oldDelegate.innerDotColor != innerDotColor;
+        oldDelegate.innerDotColor != innerDotColor ||
+        oldDelegate.bearishColor != bearishColor ||
+        oldDelegate.cautiousColor != cautiousColor ||
+        oldDelegate.neutralSegColor != neutralSegColor ||
+        oldDelegate.positiveColor != positiveColor ||
+        oldDelegate.bullishColor != bullishColor;
   }
 }

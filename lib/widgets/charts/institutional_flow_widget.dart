@@ -36,7 +36,7 @@ class InstitutionalFlowWidget extends StatelessWidget {
           Text(
             l10n.institutionalInsiderFlow,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
+                  fontWeight: AppTypography.bold,
                 ),
           ),
           const SizedBox(height: AppSpacing.md),
@@ -111,10 +111,10 @@ class InstitutionalFlowWidget extends StatelessWidget {
             ownership != null ? '${ownership.toStringAsFixed(1)}%' : 'N/A',
             style: const TextStyle(
               fontSize: AppTypography.displayLarge,
-              fontWeight: FontWeight.bold,
+              fontWeight: AppTypography.bold,
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: AppSpacing.lg),
           if (chg1d != null) ...[
             _buildChangeBadge(context, AppLocalizations.of(context).oneDay, chg1d),
             const SizedBox(height: AppSpacing.sm),
@@ -142,7 +142,7 @@ class InstitutionalFlowWidget extends StatelessWidget {
         style: TextStyle(
           color: isPositive ? context.mlColors.gainColor : context.mlColors.lossColor,
           fontSize: AppTypography.caption,
-          fontWeight: FontWeight.bold,
+          fontWeight: AppTypography.bold,
         ),
       ),
     );

@@ -4,6 +4,7 @@ import '../../../models/chart_data.dart';
 import '../../../theme/app_colors.dart';
 import '../../../theme/app_radius.dart';
 import '../../../theme/app_spacing.dart';
+import '../../../theme/app_stroke.dart';
 import '../../../theme/app_typography.dart';
 import '../../../l10n/app_localizations.dart';
 
@@ -75,7 +76,7 @@ class TickerVolumeChart extends StatelessWidget {
                 Text(
                   l10n.volume,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
+                        fontWeight: AppTypography.bold,
                       ),
                 ),
                 Text(
@@ -156,10 +157,9 @@ class TickerVolumeChart extends StatelessWidget {
 
                       return BarTooltipItem(
                         '$dateStr\n${l10n.volume}: $volStr$tradingValueStr',
-                        TextStyle(
+                        AppTypography.numericSecondary.copyWith(
+                          fontWeight: AppTypography.bold,
                           color: context.mlColors.onPrimary,
-                          fontWeight: FontWeight.bold,
-                          fontSize: AppTypography.bodySmall,
                         ),
                       );
                     },
@@ -210,7 +210,7 @@ class TickerVolumeChart extends StatelessWidget {
                     HorizontalLine(
                       y: avgVolume,
                       color: Theme.of(context).colorScheme.outline,
-                      strokeWidth: 1,
+                      strokeWidth: AppStroke.thin,
                       dashArray: [4, 4],
                       label: HorizontalLineLabel(
                         show: false,

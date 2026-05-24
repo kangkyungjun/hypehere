@@ -5,6 +5,7 @@ import '../../models/chart_data.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
+import '../../theme/app_stroke.dart';
 import '../../theme/app_typography.dart';
 
 /// Earnings History bar chart widget (EPS estimate vs reported)
@@ -68,7 +69,7 @@ class EarningsChartWidget extends StatelessWidget {
               Text(
                 l10n.earningsHistoryEPS,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
+                      fontWeight: AppTypography.bold,
                     ),
               ),
             ],
@@ -117,7 +118,7 @@ class EarningsChartWidget extends StatelessWidget {
                         TextStyle(
                           color: context.mlColors.onPrimary,
                           fontSize: AppTypography.caption,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: AppTypography.bold,
                         ),
                       );
                     },
@@ -131,7 +132,7 @@ class EarningsChartWidget extends StatelessWidget {
                   getDrawingHorizontalLine: (value) {
                     return FlLine(
                       color: context.mlColors.chartGridLine,
-                      strokeWidth: 0.5,
+                      strokeWidth: AppStroke.hairline,
                     );
                   },
                 ),
@@ -185,7 +186,7 @@ class EarningsChartWidget extends StatelessWidget {
                                   '${e.surprisePct! >= 0 ? '+' : ''}${e.surprisePct!.toStringAsFixed(1)}%',
                                   style: TextStyle(
                                     fontSize: AppTypography.chartMicro,
-                                    fontWeight: FontWeight.bold,
+                                    fontWeight: AppTypography.bold,
                                     color: e.isBeat
                                         ? context.mlColors.gainColor
                                         : context.mlColors.lossColor,

@@ -8,10 +8,13 @@ import '../../utils/error_localizer.dart';
 import '../../models/ticker_score.dart';
 import '../../models/treemap_data.dart';
 import '../../widgets/community/signup_prompt_dialog.dart';
+import '../../widgets/common/gold_upgrade_sheet.dart';
 import '../ticker_detail/ticker_detail_screen.dart';
 import '../auth/login_screen.dart';
 import '../auth/signup_screen.dart';
 import '../../l10n/app_localizations.dart';
+import '../../theme/app_spacing.dart';
+import '../../theme/app_typography.dart';
 import 'widgets/add_holding_sheet.dart';
 import 'widgets/instant_advice_sheet.dart';
 import 'widgets/watchlist_tab.dart';
@@ -129,6 +132,15 @@ class _WatchlistScreenState extends State<WatchlistScreen> {
       return;
     }
 
+    // 무료 유저 보유종목 3개 제한 (새 종목만 체크)
+    final portfolio = context.read<PortfolioProvider>();
+    final isNewTicker = !portfolio.isInHoldings(ticker);
+    if (isNewTicker && !auth.isGoldOrAbove && portfolio.holdings.length >= 3) {
+      if (!mounted) return;
+      _showHoldingsLimitDialog();
+      return;
+    }
+
     final isKo = Localizations.localeOf(context).languageCode == 'ko';
     final displayName = score != null
         ? (isKo && score.nameKo != null ? score.nameKo! : score.name ?? ticker)
@@ -142,7 +154,6 @@ class _WatchlistScreenState extends State<WatchlistScreen> {
     if (result == null || !mounted) return;
 
     final l10n = AppLocalizations.of(context);
-    final portfolio = context.read<PortfolioProvider>();
 
     try {
       await portfolio.addTransaction(
@@ -187,6 +198,72 @@ class _WatchlistScreenState extends State<WatchlistScreen> {
         );
       }
     }
+  }
+
+  Future<void> _showHoldingsLimitDialog() async {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+
+    final result = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(Icons.workspace_premium, color: Colors.amber.shade700),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(child: Text(l10n.holdingsLimitTitle)),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(l10n.holdingsLimitMessage),
+            const SizedBox(height: AppSpacing.lg),
+            _benefitRow(Icons.all_inclusive, l10n.goldBenefitUnlimitedHoldings, theme),
+            _benefitRow(Icons.smart_toy, l10n.goldBenefitAIUnlimited, theme),
+            _benefitRow(Icons.block, l10n.goldBenefitNoAds, theme),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton.icon(
+            onPressed: () => Navigator.pop(ctx, 'upgrade'),
+            icon: const Icon(Icons.workspace_premium, size: 18),
+            label: Text(l10n.upgradeToGold),
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.amber.shade700,
+              foregroundColor: Colors.white,
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (result == 'upgrade' && mounted) {
+      GoldUpgradeSheet.show(context, source: 'holdings_limit');
+    }
+  }
+
+  Widget _benefitRow(IconData icon, String text, ThemeData theme) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+      child: Row(
+        children: [
+          Icon(Icons.check_circle, size: 18, color: Colors.green.shade600),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(fontSize: AppTypography.bodyMedium, color: theme.colorScheme.onSurface),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override

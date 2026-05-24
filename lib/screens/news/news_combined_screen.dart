@@ -6,13 +6,17 @@ import '../../providers/watchlist_provider.dart';
 import '../../widgets/news/news_filter_sheet.dart';
 import '../calendar/event_calendar_screen.dart';
 import 'news_list_screen.dart';
+import '../../theme/app_colors.dart';
+import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
+import '../../theme/app_typography.dart';
 
 /// Combined News screen with internal tabs: Calendar | News
 ///
 /// Reuses WatchlistScreen's TabBar+TabBarView pattern.
 /// - Tab 0: EventCalendarScreen (existing)
 /// - Tab 1: NewsListScreen(embedded: true) with filter support
+/// - Category chip bar (전체/Biz/World/관심종목) when news tab is active
 class NewsCombinedScreen extends StatefulWidget {
   const NewsCombinedScreen({super.key});
 
@@ -52,6 +56,12 @@ class _NewsCombinedScreenState extends State<NewsCombinedScreen>
     }
   }
 
+  void _onCategoryChanged(NewsCategory category) {
+    setState(() {
+      _filterState = _filterState.copyWith(category: category);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -70,9 +80,20 @@ class _NewsCombinedScreenState extends State<NewsCombinedScreen>
                   Tab(text: l10n.tabCalendar),
                   Tab(text: l10n.tabNews),
                 ],
-                labelColor: theme.colorScheme.primary,
-                unselectedLabelColor: theme.colorScheme.onSurfaceVariant,
-                indicatorColor: theme.colorScheme.primary,
+                labelColor: context.mlColors.accentBlue,
+                unselectedLabelColor: context.mlColors.textTertiary,
+                indicatorColor: context.mlColors.accentBlue,
+                indicatorWeight: 3,
+                labelStyle: const TextStyle(
+                  fontSize: AppTypography.headlineSmall,
+                  fontWeight: AppTypography.semiBold,
+                  height: 1.25,
+                ),
+                unselectedLabelStyle: const TextStyle(
+                  fontSize: AppTypography.headlineSmall,
+                  fontWeight: AppTypography.medium,
+                  height: 1.25,
+                ),
               ),
               // Filter button (only visible on News tab)
               if (_isNewsTab)
@@ -86,8 +107,8 @@ class _NewsCombinedScreenState extends State<NewsCombinedScreen>
                         Icons.tune,
                         size: 20,
                         color: _filterState.isActive
-                            ? theme.colorScheme.primary
-                            : theme.colorScheme.onSurfaceVariant,
+                            ? context.mlColors.accentBlue
+                            : context.mlColors.textSecondary,
                       ),
                     ),
                     onPressed: _openFilterSheet,
@@ -97,19 +118,119 @@ class _NewsCombinedScreenState extends State<NewsCombinedScreen>
             ],
           ),
         ),
+        // Category chip bar (only visible on News tab)
+        if (_isNewsTab) _buildCategoryChips(context, l10n),
+        // Filter active indicator
+        if (_isNewsTab && _filterState.isActive)
+          GestureDetector(
+            onTap: () {
+              setState(() => _filterState = const NewsFilterState());
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.xl,
+                vertical: AppSpacing.sm,
+              ),
+              child: Row(
+                children: [
+                  Chip(
+                    label: Text(
+                      l10n.filterActiveLabel,
+                      style: TextStyle(
+                        fontSize: AppTypography.caption,
+                        color: context.mlColors.accentBlue,
+                      ),
+                    ),
+                    deleteIcon: Icon(
+                      Icons.close,
+                      size: 16,
+                      color: context.mlColors.accentBlue,
+                    ),
+                    onDeleted: () {
+                      setState(() => _filterState = const NewsFilterState());
+                    },
+                    backgroundColor: context.mlColors.infoBg,
+                    side: BorderSide.none,
+                    visualDensity: VisualDensity.compact,
+                  ),
+                ],
+              ),
+            ),
+          ),
         Expanded(
           child: TabBarView(
             controller: _tabController,
             children: [
               const EventCalendarScreen(),
-              NewsListScreen(
-                embedded: true,
-                filterState: _filterState,
-              ),
+              NewsListScreen(embedded: true, filterState: _filterState),
             ],
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildCategoryChips(BuildContext context, AppLocalizations l10n) {
+    final watchlist = context.watch<WatchlistProvider>().watchlist;
+    final options = [
+      (NewsCategory.all, l10n.filterAll),
+      (NewsCategory.biz, 'Biz'),
+      (NewsCategory.world, 'World'),
+      (NewsCategory.watchlist, l10n.filterMyWatchlist),
+    ];
+
+    return Container(
+      color: Theme.of(context).colorScheme.surface,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.xl,
+        vertical: AppSpacing.sm,
+      ),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: options.map((opt) {
+            final isSelected = _filterState.category == opt.$1;
+            final isDisabled =
+                opt.$1 == NewsCategory.watchlist && watchlist.isEmpty;
+            return Padding(
+              padding: const EdgeInsets.only(right: AppSpacing.xs),
+              child: GestureDetector(
+                onTap: isDisabled ? null : () => _onCategoryChanged(opt.$1),
+                child: Opacity(
+                  opacity: isDisabled ? 0.4 : 1.0,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.md,
+                      vertical: AppSpacing.sm,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? context.mlColors.accentBlue
+                          : context.mlColors.sectionBackground,
+                      borderRadius: BorderRadius.circular(AppRadius.badge),
+                      border: Border.all(
+                        color: isSelected
+                            ? context.mlColors.accentBlue
+                            : context.mlColors.subtleBorder,
+                      ),
+                    ),
+                    child: Text(
+                      opt.$2,
+                      style: TextStyle(
+                        fontSize: AppTypography.bodySmall,
+                        fontWeight: AppTypography.semiBold,
+                        color: isSelected
+                            ? context.mlColors.onPrimary
+                            : context.mlColors.textSecondary,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ),
     );
   }
 }

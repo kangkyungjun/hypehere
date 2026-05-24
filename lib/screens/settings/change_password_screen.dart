@@ -3,6 +3,7 @@ import '../../services/auth_service.dart';
 import '../../l10n/app_localizations.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
+import '../../theme/app_stroke.dart';
 import '../../theme/app_typography.dart';
 import '../../utils/error_localizer.dart';
 import '../../theme/app_colors.dart';
@@ -110,7 +111,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                         Text(
                           l10n.changePasswordGuide,
                           style: TextStyle(
-                            fontWeight: FontWeight.bold,
+                            fontWeight: AppTypography.bold,
                             color: context.mlColors.accentBlue,
                           ),
                         ),
@@ -240,7 +241,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                         width: 20,
                         height: 20,
                         child: CircularProgressIndicator(
-                          strokeWidth: 2,
+                          strokeWidth: AppStroke.medium,
                           color: context.mlColors.onPrimary,
                         ),
                       )
@@ -248,7 +249,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                         l10n.changePassword,
                         style: const TextStyle(
                           fontSize: AppTypography.headlineMedium,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: AppTypography.bold,
                         ),
                       ),
               ),

@@ -1,4 +1,5 @@
 import 'dart:ui';
+import '../theme/app_colors.dart';
 
 /// Treemap API response model
 ///
@@ -54,8 +55,8 @@ class TreemapSector {
     );
   }
 
-  /// Color based on avg_change_pct
-  Color get changeColor => getChangeColor(avgChangePct);
+  /// Color based on avg_change_pct (theme-aware)
+  Color changeColorOf(MarketLensColors mlc) => getThemedChangeColor(avgChangePct, mlc);
 
   /// Formatted trading value: $50.2B, $1.3M, etc.
   String get formattedTradingValue => formatDollar(totalTradingValue);
@@ -65,6 +66,7 @@ class TreemapSector {
 class TreemapItem {
   final String ticker;
   final String? name;
+  final String? nameKo;
   final String? sector;
   final String? subIndustry;
   final double? changePct;
@@ -77,6 +79,7 @@ class TreemapItem {
   TreemapItem({
     required this.ticker,
     this.name,
+    this.nameKo,
     this.sector,
     this.subIndustry,
     this.changePct,
@@ -91,6 +94,7 @@ class TreemapItem {
     return TreemapItem(
       ticker: json['ticker'] as String,
       name: json['name'] as String?,
+      nameKo: json['name_ko'] as String?,
       sector: json['sector'] as String?,
       subIndustry: json['sub_industry'] as String?,
       changePct: (json['change_pct'] as num?)?.toDouble(),
@@ -102,31 +106,30 @@ class TreemapItem {
     );
   }
 
+  /// Locale-aware display name
+  String? displayName(String langCode) {
+    if (langCode == 'ko' && nameKo != null) return nameKo;
+    return name;
+  }
+
   /// Color based on change_pct
-  Color get changeColor => getChangeColor(changePct);
+  /// Color based on changePct (theme-aware)
+  Color changeColorOf(MarketLensColors mlc) => getThemedChangeColor(changePct, mlc);
 
   /// Formatted trading value
   String get formattedTradingValue => formatDollar(tradingValue);
 }
 
-/// Color mapping: green for positive, red for negative, grey for null
-/// Clamped to +/-5% range for intensity
-Color getChangeColor(double? changePct) {
-  if (changePct == null) return const Color(0xFF757575);
+/// Theme-aware color mapping: green for positive, red for negative, grey for null.
+/// Clamped to +/-5% range for intensity.
+Color getThemedChangeColor(double? changePct, MarketLensColors mlc) {
+  if (changePct == null) return mlc.neutralColor;
   final clamped = changePct.clamp(-5.0, 5.0);
   final t = clamped.abs() / 5.0;
   if (changePct >= 0) {
-    return Color.lerp(
-      const Color(0xFF2D4A2D),
-      const Color(0xFF00C853),
-      t,
-    )!;
+    return Color.lerp(mlc.treemapGainBase, mlc.treemapGainFull, t)!;
   } else {
-    return Color.lerp(
-      const Color(0xFF4A2D2D),
-      const Color(0xFFD50000),
-      t,
-    )!;
+    return Color.lerp(mlc.treemapLossBase, mlc.treemapLossFull, t)!;
   }
 }
 

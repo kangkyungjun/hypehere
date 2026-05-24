@@ -36,20 +36,20 @@ class TransactionRow extends StatelessWidget {
             ),
             child: Text(
               txn.type,
-              style: TextStyle(fontSize: AppTypography.caption, fontWeight: FontWeight.bold, color: isBuy ? mlc.gainColor : mlc.lossColor),
+              style: TextStyle(fontSize: AppTypography.caption, fontWeight: AppTypography.bold, color: isBuy ? mlc.gainColor : mlc.lossColor),
             ),
           ),
           const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Text(
               '${txn.shares.toStringAsFixed(txn.shares == txn.shares.truncateToDouble() ? 0 : 2)} x \$${txn.price.toStringAsFixed(2)} = \$${txn.totalValue.toStringAsFixed(2)}',
-              style: TextStyle(fontSize: AppTypography.bodySmall, color: theme.colorScheme.onSurface),
+              style: TextStyle(fontSize: AppTypography.bodySmall, color: theme.colorScheme.onSurface, fontFeatures: AppTypography.tabularFigures),
             ),
           ),
           if (realizedPnl != null)
             Text(
               '${realizedPnl >= 0 ? '+' : ''}\$${realizedPnl.toStringAsFixed(2)}',
-              style: TextStyle(fontSize: AppTypography.caption, fontWeight: AppTypography.semiBold, color: realizedPnl >= 0 ? mlc.gainColor : mlc.lossColor),
+              style: TextStyle(fontSize: AppTypography.caption, fontWeight: AppTypography.semiBold, color: realizedPnl >= 0 ? mlc.gainColor : mlc.lossColor, fontFeatures: AppTypography.tabularFigures),
             ),
         ],
       ),

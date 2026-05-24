@@ -211,7 +211,7 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
                 l10n.startWithFirstPost,
                 style: TextStyle(
                   fontSize: AppTypography.displayMedium,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: AppTypography.bold,
                   color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),

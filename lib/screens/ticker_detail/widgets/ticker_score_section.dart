@@ -4,8 +4,11 @@ import '../../../models/chart_data.dart';
 import '../../../theme/app_colors.dart';
 import '../../../theme/app_radius.dart';
 import '../../../theme/app_spacing.dart';
+import '../../../theme/app_stroke.dart';
 import '../../../theme/app_typography.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../widgets/common/coach_mark_overlay.dart';
+import '../../../providers/coach_mark_provider.dart';
 
 class TickerScoreSection extends StatefulWidget {
   final CompleteChartData chartData;
@@ -20,48 +23,126 @@ class TickerScoreSection extends StatefulWidget {
 }
 
 class _TickerScoreSectionState extends State<TickerScoreSection> {
-  bool _showScoreChart = false;
+  bool _showScoreChart = true;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return Container(
-      decoration: BoxDecoration(
-        color: context.mlColors.cardBackground,
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: context.mlColors.chartGridLine),
-      ),
-      child: Column(
-        children: [
-          InkWell(
-            onTap: () => setState(() => _showScoreChart = !_showScoreChart),
-            borderRadius: BorderRadius.circular(AppRadius.lg),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.xl),
-              child: Row(
-                children: [
-                  Icon(Icons.bar_chart_rounded, size: 20, color: context.mlColors.warningColor),
-                  const SizedBox(width: AppSpacing.md),
-                  Text(
-                    'AI ${l10n.score}',
-                    style: TextStyle(
-                      fontSize: AppTypography.headlineSmall,
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.onSurface,
+    return CoachMark(
+      coachKey: CoachMarkProvider.keyTickerScore,
+      message: l10n.coachMarkTickerScore,
+      child: Container(
+        decoration: BoxDecoration(
+          color: context.mlColors.cardBackground,
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+          border: Border.all(color: context.mlColors.chartGridLine),
+        ),
+        child: Column(
+          children: [
+            InkWell(
+              onTap: () => setState(() => _showScoreChart = !_showScoreChart),
+              borderRadius: BorderRadius.circular(AppRadius.lg),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.xl),
+                child: Row(
+                  children: [
+                    Icon(Icons.bar_chart_rounded, size: 20, color: context.mlColors.warningColor),
+                    const SizedBox(width: AppSpacing.md),
+                    Text(
+                      'AI ${l10n.score}',
+                      style: TextStyle(
+                        fontSize: AppTypography.headlineSmall,
+                        fontWeight: AppTypography.bold,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
                     ),
-                  ),
-                  const Spacer(),
-                  Icon(
-                    _showScoreChart ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
-                    color: Theme.of(context).colorScheme.outline,
-                  ),
-                ],
+                    const SizedBox(width: AppSpacing.xs),
+                    GestureDetector(
+                      onTap: () => _showScoreGuide(context, l10n),
+                      child: Icon(
+                        Icons.info_outline,
+                        size: 16,
+                        color: Theme.of(context).colorScheme.outline,
+                      ),
+                    ),
+                    const Spacer(),
+                    Icon(
+                      _showScoreChart ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                      color: Theme.of(context).colorScheme.outline,
+                    ),
+                  ],
+                ),
               ),
             ),
+            if (_showScoreChart) _buildScoreChart(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showScoreGuide(BuildContext context, AppLocalizations l10n) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.aiScoreGuideTitle),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l10n.aiScoreGuideDescription,
+              style: TextStyle(
+                fontSize: AppTypography.bodyMedium,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            _scoreRangeRow(l10n.aiScoreGuideStrongPositive, context.mlColors.gainColor),
+            const SizedBox(height: AppSpacing.xs),
+            _scoreRangeRow(l10n.aiScoreGuidePositive, context.mlColors.gainColor),
+            const SizedBox(height: AppSpacing.xs),
+            _scoreRangeRow(l10n.aiScoreGuideNeutral, Theme.of(context).colorScheme.outline),
+            const SizedBox(height: AppSpacing.xs),
+            _scoreRangeRow(l10n.aiScoreGuideNegative, context.mlColors.lossColor),
+            const SizedBox(height: AppSpacing.xs),
+            _scoreRangeRow(l10n.aiScoreGuideStrongNegative, context.mlColors.lossColor),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(l10n.confirm),
           ),
-          if (_showScoreChart) _buildScoreChart(),
         ],
       ),
+    );
+  }
+
+  Widget _scoreRangeRow(String text, Color color) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 8,
+          height: 8,
+          margin: const EdgeInsets.only(top: 5),
+          decoration: BoxDecoration(
+            color: color,
+            shape: BoxShape.circle,
+          ),
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        Expanded(
+          child: Text(
+            text,
+            style: TextStyle(
+              fontSize: AppTypography.bodySmall,
+              color: color,
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -94,13 +175,13 @@ class _TickerScoreSectionState extends State<TickerScoreSection> {
                   getDrawingHorizontalLine: (value) {
                     return FlLine(
                       color: context.mlColors.chartGridLine,
-                      strokeWidth: 1,
+                      strokeWidth: AppStroke.thin,
                     );
                   },
                   getDrawingVerticalLine: (value) {
                     return FlLine(
                       color: context.mlColors.chartGridLine,
-                      strokeWidth: 1,
+                      strokeWidth: AppStroke.thin,
                     );
                   },
                 ),
@@ -118,7 +199,7 @@ class _TickerScoreSectionState extends State<TickerScoreSection> {
                           '$dateStr\nScore: ${spot.y.toStringAsFixed(1)}',
                           TextStyle(
                             color: context.mlColors.onPrimary,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: AppTypography.bold,
                           ),
                         );
                       }).toList();
@@ -232,7 +313,7 @@ class _TickerScoreSectionState extends State<TickerScoreSection> {
                     HorizontalLine(
                       y: 70,
                       color: context.mlColors.gainColor.withValues(alpha: 0.5),
-                      strokeWidth: 1,
+                      strokeWidth: AppStroke.thin,
                       dashArray: [3, 3],
                       label: HorizontalLineLabel(
                         show: true,
@@ -248,7 +329,7 @@ class _TickerScoreSectionState extends State<TickerScoreSection> {
                     HorizontalLine(
                       y: 30,
                       color: context.mlColors.lossColor.withValues(alpha: 0.5),
-                      strokeWidth: 1,
+                      strokeWidth: AppStroke.thin,
                       dashArray: [3, 3],
                       label: HorizontalLineLabel(
                         show: true,

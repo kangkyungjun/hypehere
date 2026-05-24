@@ -9,6 +9,7 @@ import '../../theme/app_colors.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_shadow.dart';
 import '../../theme/app_spacing.dart';
+import '../../theme/app_stroke.dart';
 import '../../theme/app_typography.dart';
 import '../../l10n/app_localizations.dart';
 
@@ -222,7 +223,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
               l10n.done,
               style: const TextStyle(
                 fontSize: AppTypography.headlineMedium,
-                fontWeight: FontWeight.bold,
+                fontWeight: AppTypography.bold,
               ),
             ),
           ),
@@ -291,7 +292,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
               style: TextStyle(
                 color: context.mlColors.onPrimary,
                 fontSize: AppTypography.bodyLarge,
-                fontWeight: FontWeight.bold,
+                fontWeight: AppTypography.bold,
               ),
             ),
           ),
@@ -347,11 +348,11 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                   style: TextStyle(
                     color: context.mlColors.onPrimary,
                     fontSize: AppTypography.bodyMedium,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: AppTypography.bold,
                   ),
                 ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: AppSpacing.lg),
               Expanded(
                 child: Text(
                   _tickerSubtitle(ticker),
@@ -401,7 +402,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                     child: SizedBox(
                       width: 20,
                       height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+                      child: CircularProgressIndicator(strokeWidth: AppStroke.medium),
                     ),
                   )
                 : (_searchController.text.isNotEmpty
@@ -438,9 +439,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
               color: context.mlColors.cardBackground,
               borderRadius: BorderRadius.circular(AppRadius.lg),
               border: Border.all(color: context.mlColors.subtleBorder),
-              boxShadow: [
-                AppShadow.lg(context.mlColors.overlayDim),
-              ],
+              boxShadow: AppShadow.lg(context.mlColors.overlayDim),
             ),
             child: ListView.separated(
               shrinkWrap: true,
@@ -499,12 +498,12 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                 item.ticker,
                 style: TextStyle(
                   fontSize: AppTypography.bodyMedium,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: AppTypography.bold,
                   color: context.mlColors.accentBlue,
                 ),
               ),
             ),
-            const SizedBox(width: 10),
+            const SizedBox(width: AppSpacing.lg),
             // 이름 + 카테고리
             Expanded(
               child: Column(
@@ -624,7 +623,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
               height: 20,
               width: 20,
               child: CircularProgressIndicator(
-                strokeWidth: 2,
+                strokeWidth: AppStroke.medium,
                 valueColor: AlwaysStoppedAnimation<Color>(context.mlColors.onPrimary),
               ),
             )
@@ -632,7 +631,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
               _isEditMode ? l10n.updatePostButton : l10n.submitPost,
               style: const TextStyle(
                 fontSize: AppTypography.headlineMedium,
-                fontWeight: FontWeight.bold,
+                fontWeight: AppTypography.bold,
               ),
             ),
     );

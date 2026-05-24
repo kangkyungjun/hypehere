@@ -102,7 +102,7 @@ class _EventsCalendarWidgetState extends State<EventsCalendarWidget>
                   child: Text(
                     l10n.keyEvents,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
+                          fontWeight: AppTypography.bold,
                         ),
                   ),
                 ),
@@ -143,7 +143,7 @@ class _EventsCalendarWidgetState extends State<EventsCalendarWidget>
                 ),
               ],
 
-              const SizedBox(height: 10),
+              const SizedBox(height: AppSpacing.lg),
             ],
 
             // Ex-Dividend Date
@@ -203,7 +203,12 @@ class _EventsCalendarWidgetState extends State<EventsCalendarWidget>
           ),
           child: ListView(
             controller: scrollController,
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl, vertical: AppSpacing.lg),
+            padding: EdgeInsets.fromLTRB(
+              AppSpacing.xxl,
+              AppSpacing.lg,
+              AppSpacing.xxl,
+              AppSpacing.lg + MediaQuery.of(ctx).viewPadding.bottom,
+            ),
             children: [
               // Handle bar
               Center(
@@ -222,10 +227,10 @@ class _EventsCalendarWidgetState extends State<EventsCalendarWidget>
               Text(
                 l10n.eventDetails,
                 style: Theme.of(ctx).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
+                      fontWeight: AppTypography.bold,
                     ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: AppSpacing.xxl),
 
               // --- Upcoming Schedule ---
               _buildSectionLabel(ctx, l10n.upcomingEvents),
@@ -447,7 +452,7 @@ class _EventsCalendarWidgetState extends State<EventsCalendarWidget>
                   '${entry.surprisePct! >= 0 ? '+' : ''}${entry.surprisePct!.toStringAsFixed(1)}%',
                   style: TextStyle(
                     fontSize: AppTypography.bodySmall,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: AppTypography.bold,
                     color: surpriseColor,
                   ),
                 ),
@@ -542,7 +547,7 @@ class _EventsCalendarWidgetState extends State<EventsCalendarWidget>
     final String label = days <= 0 ? 'D-Day' : 'D-$days';
 
     Widget badge = Container(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 3),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xxs),
       decoration: BoxDecoration(
         color: bgColor,
         borderRadius: BorderRadius.circular(AppRadius.lg),
@@ -551,7 +556,7 @@ class _EventsCalendarWidgetState extends State<EventsCalendarWidget>
         label,
         style: TextStyle(
           fontSize: AppTypography.caption,
-          fontWeight: FontWeight.bold,
+          fontWeight: AppTypography.bold,
           color: textColor,
         ),
       ),

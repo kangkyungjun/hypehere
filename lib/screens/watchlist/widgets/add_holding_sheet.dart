@@ -4,6 +4,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../../services/analytics_api_client.dart';
 import '../../../theme/app_radius.dart';
 import '../../../theme/app_spacing.dart';
+import '../../../theme/app_stroke.dart';
 import '../../../theme/app_typography.dart';
 
 /// Bottom sheet for adding a holding with date picker + auto close price.
@@ -146,7 +147,7 @@ class _AddHoldingSheetState extends State<AddHoldingSheet> {
             // Title
             Text(
               l10n.addHoldingTitle(widget.ticker),
-              style: const TextStyle(fontSize: AppTypography.headlineLarge, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: AppTypography.headlineLarge, fontWeight: AppTypography.bold),
             ),
             if (widget.name != null)
               Text(
@@ -191,7 +192,7 @@ class _AddHoldingSheetState extends State<AddHoldingSheet> {
                 suffixIcon: _loadingPrice
                     ? const Padding(
                         padding: EdgeInsets.all(AppSpacing.lg),
-                        child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
+                        child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: AppStroke.medium)),
                       )
                     : _priceError && _priceController.text.isEmpty
                         ? IconButton(
@@ -277,7 +278,7 @@ class _AddHoldingSheetState extends State<AddHoldingSheet> {
                   Text(l10n.totalCost, style: TextStyle(fontSize: AppTypography.bodyMedium, color: theme.colorScheme.onSurfaceVariant)),
                   Text(
                     _totalCost != null ? '\$${_totalCost!.toStringAsFixed(2)}' : '—',
-                    style: const TextStyle(fontSize: AppTypography.headlineSmall, fontWeight: FontWeight.bold),
+                    style: const TextStyle(fontSize: AppTypography.headlineSmall, fontWeight: AppTypography.bold),
                   ),
                 ],
               ),

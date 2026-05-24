@@ -7,6 +7,7 @@ import '../../utils/error_localizer.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
+import '../../theme/app_stroke.dart';
 import '../../theme/app_typography.dart';
 import 'email_verification_screen.dart';
 import 'reset_password_screen.dart';
@@ -48,7 +49,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             builder: (context) => EmailVerificationScreen(
               email: email,
               purpose: 'password_reset',
-              onVerifiedWithCode: (code) {
+              onVerifiedWithCode: (code) async {
                 // 코드를 가지고 비밀번호 재설정 화면으로
                 Navigator.pushReplacement(
                   context,
@@ -127,7 +128,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 Text(
                   l10n.forgotPassword,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: AppTypography.displayLarge, fontWeight: FontWeight.bold),
+                  style: const TextStyle(fontSize: AppTypography.displayLarge, fontWeight: AppTypography.bold),
                 ),
                 const SizedBox(height: AppSpacing.lg),
                 Text(
@@ -169,7 +170,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                           height: 20,
                           width: 20,
                           child: CircularProgressIndicator(
-                            strokeWidth: 2,
+                            strokeWidth: AppStroke.medium,
                             valueColor: AlwaysStoppedAnimation<Color>(context.mlColors.onPrimary),
                           ),
                         )

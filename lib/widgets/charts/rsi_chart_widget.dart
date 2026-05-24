@@ -5,6 +5,7 @@ import '../../theme/app_colors.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_shadow.dart';
 import '../../theme/app_spacing.dart';
+import '../../theme/app_stroke.dart';
 import '../../theme/app_typography.dart';
 
 /// RSI / MFI Crossover 차트 위젯
@@ -48,9 +49,7 @@ class RsiChartWidget extends StatelessWidget {
       decoration: BoxDecoration(
         color: context.mlColors.cardBackground,
         borderRadius: BorderRadius.circular(AppRadius.lg),
-        boxShadow: [
-          AppShadow.md(context.mlColors.overlayDim),
-        ],
+        boxShadow: AppShadow.md(context.mlColors.overlayDim),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -60,7 +59,7 @@ class RsiChartWidget extends StatelessWidget {
             hasMfi ? 'RSI / MFI Crossover' : 'RSI (Relative Strength Index)',
             style: const TextStyle(
               fontSize: AppTypography.headlineMedium,
-              fontWeight: FontWeight.bold,
+              fontWeight: AppTypography.bold,
             ),
           ),
           const SizedBox(height: AppSpacing.xl),
@@ -308,7 +307,7 @@ class RsiChartWidget extends StatelessWidget {
       getDrawingHorizontalLine: (value) {
         return FlLine(
           color: gridColor,
-          strokeWidth: 1,
+          strokeWidth: AppStroke.thin,
         );
       },
     );
@@ -389,7 +388,7 @@ class RsiChartWidget extends StatelessWidget {
         HorizontalLine(
           y: 80,
           color: context.mlColors.gainColor,
-          strokeWidth: 1,
+          strokeWidth: AppStroke.thin,
           dashArray: [5, 5],
           label: HorizontalLineLabel(
             show: true,
@@ -403,7 +402,7 @@ class RsiChartWidget extends StatelessWidget {
         HorizontalLine(
           y: 20,
           color: context.mlColors.lossColor,
-          strokeWidth: 1,
+          strokeWidth: AppStroke.thin,
           dashArray: [5, 5],
           label: HorizontalLineLabel(
             show: true,

@@ -28,6 +28,13 @@ class PortfolioProvider with ChangeNotifier {
   bool _isInitialized = false;
   String? _error;
 
+  /// When portfolio data (prices, holdings) was last fetched from server.
+  DateTime? _lastRefreshedAt;
+
+  /// Incremented on portfolio changes (add/update/delete/sell).
+  /// Used by PortfolioAICard to detect changes and re-lock ad content.
+  int _portfolioVersion = 0;
+
   PortfolioProvider({PortfolioApiClient? apiClient})
       : _apiClient = apiClient ?? PortfolioApiClient();
 
@@ -42,6 +49,8 @@ class PortfolioProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   bool get isInitialized => _isInitialized;
   String? get error => _error;
+  int get portfolioVersion => _portfolioVersion;
+  DateTime? get lastRefreshedAt => _lastRefreshedAt;
 
   /// Watchlist ticker list (for compatibility with existing code)
   List<String> get watchlistTickers =>
@@ -198,6 +207,8 @@ class PortfolioProvider with ChangeNotifier {
 
       // Await AI data so UI has complete state on first render
       await _refreshAIData();
+
+      _lastRefreshedAt = DateTime.now();
     } catch (e) {
       _error = e.toString();
       debugPrint('PortfolioProvider refresh error: $e');
@@ -241,7 +252,9 @@ class PortfolioProvider with ChangeNotifier {
       }
 
       // Refresh holdings to get enriched data (current price, score)
+      _portfolioVersion++;
       _holdings = await _apiClient.getHoldings();
+      _lastRefreshedAt = DateTime.now();
       notifyListeners();
 
       // Refresh AI data so advice + summary reflect the change
@@ -255,6 +268,7 @@ class PortfolioProvider with ChangeNotifier {
   Future<void> deleteHolding(String ticker) async {
     try {
       await _apiClient.deleteHolding(ticker);
+      _portfolioVersion++;
       _holdings.removeWhere((h) => h.ticker == ticker.toUpperCase());
       _advice.removeWhere((a) => a.ticker == ticker.toUpperCase());
       notifyListeners();
@@ -284,6 +298,7 @@ class PortfolioProvider with ChangeNotifier {
         price: price,
         date: date,
       );
+      _portfolioVersion++;
 
       // 2) Update or delete holding
       final remaining = currentShares - shares;
@@ -498,6 +513,8 @@ class PortfolioProvider with ChangeNotifier {
     _summary = null;
     _alerts = [];
     _exchangeRate = null;
+    _portfolioVersion = 0;
+    _lastRefreshedAt = null;
     _isInitialized = false;
     _error = null;
     notifyListeners();

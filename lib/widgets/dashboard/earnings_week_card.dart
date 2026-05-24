@@ -50,7 +50,7 @@ class EarningsWeekCard extends StatelessWidget {
                   l10n.thisWeekEarnings,
                   style: TextStyle(
                     fontSize: AppTypography.headlineSmall,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: AppTypography.bold,
                     color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
@@ -65,7 +65,7 @@ class EarningsWeekCard extends StatelessWidget {
                     l10n.earningsCount(data.totalCount),
                     style: TextStyle(
                       fontSize: AppTypography.bodySmall,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: AppTypography.bold,
                       color: context.mlColors.accentBlue,
                     ),
                   ),
@@ -144,19 +144,19 @@ class EarningsWeekCard extends StatelessWidget {
                     event.surpriseLabel,
                     style: TextStyle(
                       fontSize: AppTypography.micro,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: AppTypography.bold,
                       color: event.surpriseColor(context.mlColors),
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(width: 10),
+            const SizedBox(width: AppSpacing.lg),
 
             // Ticker
             Text(
               event.ticker,
-              style: const TextStyle(fontSize: AppTypography.bodyMedium, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: AppTypography.bodyMedium, fontWeight: AppTypography.bold),
             ),
             const SizedBox(width: AppSpacing.md),
 
@@ -182,7 +182,7 @@ class EarningsWeekCard extends StatelessWidget {
                   'TODAY',
                   style: TextStyle(
                     fontSize: AppTypography.chartLabel,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: AppTypography.bold,
                     color: context.mlColors.lossColor,
                   ),
                 ),

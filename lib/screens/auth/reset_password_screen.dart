@@ -4,6 +4,7 @@ import '../../services/auth_service.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
+import '../../theme/app_stroke.dart';
 import '../../theme/app_typography.dart';
 import '../../utils/error_localizer.dart';
 
@@ -108,7 +109,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 Text(
                   l10n.resetPassword,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: AppTypography.displayLarge, fontWeight: FontWeight.bold),
+                  style: const TextStyle(fontSize: AppTypography.displayLarge, fontWeight: AppTypography.bold),
                 ),
                 const SizedBox(height: AppSpacing.lg),
                 Text(
@@ -172,7 +173,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                           height: 20,
                           width: 20,
                           child: CircularProgressIndicator(
-                            strokeWidth: 2,
+                            strokeWidth: AppStroke.medium,
                             valueColor: AlwaysStoppedAnimation<Color>(context.mlColors.onPrimary),
                           ),
                         )

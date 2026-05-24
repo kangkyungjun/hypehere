@@ -6,6 +6,7 @@ import '../../screens/ticker_detail/ticker_detail_screen.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
+import '../../theme/app_shadow.dart';
 import '../../theme/app_typography.dart';
 
 /// Circle-packing bubble chart showing the most-mentioned tickers
@@ -36,8 +37,8 @@ class MentionBubbleCard extends StatelessWidget {
               l10n.newsBubbleTitle,
               style: TextStyle(
                 fontSize: AppTypography.bodyLarge,
-                fontWeight: FontWeight.bold,
-                color: theme.colorScheme.onSurface,
+                fontWeight: AppTypography.bold,
+                color: context.mlColors.textSecondary,
               ),
             ),
             const SizedBox(height: AppSpacing.md),
@@ -75,6 +76,8 @@ class MentionBubbleCard extends StatelessWidget {
                         formatMentions: (count) => l10n.newsBubbleMentions(count),
                         gainColor: context.mlColors.gainColor,
                         lossColor: context.mlColors.lossColor,
+                        neutralSentimentColor: context.mlColors.neutralColor,
+                        bubbleTextColor: context.mlColors.onPrimary,
                       ),
                     ),
                   );
@@ -215,8 +218,10 @@ class _BubblePainter extends CustomPainter {
   final String Function(int) formatMentions;
   final Color gainColor;
   final Color lossColor;
+  final Color neutralSentimentColor;
+  final Color bubbleTextColor;
 
-  _BubblePainter({required this.nodes, required this.brightness, required this.formatMentions, required this.gainColor, required this.lossColor});
+  _BubblePainter({required this.nodes, required this.brightness, required this.formatMentions, required this.gainColor, required this.lossColor, required this.neutralSentimentColor, required this.bubbleTextColor});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -241,14 +246,14 @@ class _BubblePainter extends CustomPainter {
       );
 
       // Text: ticker + (count)
-      final textColor = const Color(0xFFF5F5F5);
+      final textColor = bubbleTextColor;
       if (node.radius >= 26) {
         // Large: ticker + count
-        _drawText(canvas, node.x, node.y - 6, node.item.ticker, AppTypography.caption, FontWeight.bold, textColor, node.radius * 2 - 6);
-        _drawText(canvas, node.x, node.y + 7, formatMentions(node.item.mentionCount), 9, FontWeight.normal, textColor.withValues(alpha: 0.85), node.radius * 2 - 6);
+        _drawText(canvas, node.x, node.y - 6, node.item.ticker, AppTypography.caption, AppTypography.bold, textColor, node.radius * 2 - 6);
+        _drawText(canvas, node.x, node.y + 7, formatMentions(node.item.mentionCount), 9, AppTypography.regular, textColor.withValues(alpha: 0.85), node.radius * 2 - 6);
       } else if (node.radius >= 20) {
         // Medium: ticker only
-        _drawText(canvas, node.x, node.y, node.item.ticker, 9, FontWeight.bold, textColor, node.radius * 2 - 4);
+        _drawText(canvas, node.x, node.y, node.item.ticker, 9, AppTypography.bold, textColor, node.radius * 2 - 4);
       }
       // Small: no text
     }
@@ -263,9 +268,7 @@ class _BubblePainter extends CustomPainter {
           color: color,
           fontSize: fontSize,
           fontWeight: weight,
-          shadows: const [
-            Shadow(offset: Offset(0, 1), blurRadius: 2, color: Color(0x99000000)),
-          ],
+          shadows: AppShadow.textDrop,
         ),
       ),
       textAlign: TextAlign.center,
@@ -284,11 +287,12 @@ class _BubblePainter extends CustomPainter {
       case 'bearish':
         return lossColor;
       default:
-        return const Color(0xFF78909C);
+        return neutralSentimentColor;
     }
   }
 
   @override
   bool shouldRepaint(_BubblePainter oldDelegate) =>
-      oldDelegate.nodes != nodes || oldDelegate.brightness != brightness || oldDelegate.formatMentions != formatMentions;
+      oldDelegate.nodes != nodes || oldDelegate.brightness != brightness || oldDelegate.formatMentions != formatMentions ||
+      oldDelegate.neutralSentimentColor != neutralSentimentColor || oldDelegate.bubbleTextColor != bubbleTextColor;
 }

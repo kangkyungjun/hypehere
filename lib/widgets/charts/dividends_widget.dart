@@ -45,7 +45,7 @@ class DividendsWidget extends StatelessWidget {
           Text(
             l10n.dividends,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
+                  fontWeight: AppTypography.bold,
                 ),
           ),
           const SizedBox(height: AppSpacing.sm),

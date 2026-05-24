@@ -160,7 +160,7 @@ class _MyCommentsScreenState extends State<MyCommentsScreen> {
                 l10n.writeFirstCommentPrompt,
                 style: TextStyle(
                   fontSize: AppTypography.displayMedium,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: AppTypography.bold,
                   color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),

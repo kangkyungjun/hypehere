@@ -48,6 +48,15 @@ class AuthProvider with ChangeNotifier {
   /// 광고 제거 권한 (Gold 이상)
   bool get hasAdFreeAccess => _currentUser?.hasAdFreeAccess ?? false;
 
+  /// 광고 면제 여부 (중앙 판단)
+  /// - Gold(role='gold'): 항상 광고 면제 (결제/수동 승급 혜택)
+  /// - Manager/Master: adsEnabled 토글로 제어 (테스트용)
+  /// - Regular/비로그인: 항상 광고 대상
+  bool get shouldHideAds {
+    if (isManagerOrAbove) return !_adsEnabled;
+    return _currentUser?.role == 'gold';
+  }
+
   /// 모든 게시글 삭제 권한 (Manager 이상)
   bool get canDeleteAnyPost => _currentUser?.canDeleteAnyPost ?? false;
 
@@ -146,6 +155,8 @@ class AuthProvider with ChangeNotifier {
       _currentUser = user;
       _isLoggedIn = true;
 
+      // RevenueCat logIn은 main.dart의 authListener에서 통합 처리
+
       // FCM 토큰 등록 + watchlist 구독 동기화
       NotificationService().requestPermissionAndRegister();
       if (user.watchlistTickers != null && user.watchlistTickers!.isNotEmpty) {
@@ -201,6 +212,41 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  Future<void> registerWithVerification({
+    required String email,
+    required String nickname,
+    required String password,
+    required String passwordConfirm,
+    required String code,
+  }) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final user = await _authService.registerWithVerification(
+        email: email,
+        nickname: nickname,
+        password: password,
+        passwordConfirm: passwordConfirm,
+        code: code,
+      );
+
+      _currentUser = user;
+      _isLoggedIn = true;
+
+      // FCM 토큰 등록
+      NotificationService().requestPermissionAndRegister();
+
+      debugPrint('[AuthProvider] Registration with verification successful: ${user.nickname}');
+    } catch (e) {
+      debugPrint('[AuthProvider] Registration with verification failed: $e');
+      rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   /// 로그아웃 처리
   ///
   /// - 서버 토큰 삭제
@@ -210,6 +256,8 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
 
     try {
+      // RevenueCat logOut은 main.dart의 authListener에서 통합 처리
+
       // FCM 토큰 비활성화 + 스트림 구독 정리 (로그아웃 전에 실행)
       final notifService = NotificationService();
       await notifService.deactivateToken();

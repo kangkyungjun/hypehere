@@ -36,7 +36,7 @@ class ShortInterestWidget extends StatelessWidget {
           Text(
             l10n.shortInterest,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
+                  fontWeight: AppTypography.bold,
                 ),
           ),
           const SizedBox(height: AppSpacing.md),
@@ -67,7 +67,7 @@ class ShortInterestWidget extends StatelessWidget {
           ),
           // 하단 상태 표시
           if (dp.shortPercentFloat != null) ...[
-            const SizedBox(height: 7),
+            const SizedBox(height: AppSpacing.md),
             _buildStatusIndicator(context, dp.shortPercentFloat!),
           ],
         ],
@@ -112,7 +112,7 @@ class ShortInterestWidget extends StatelessWidget {
             value,
             style: const TextStyle(
               fontSize: AppTypography.displaySmall,
-              fontWeight: FontWeight.bold,
+              fontWeight: AppTypography.bold,
             ),
           ),
         ],

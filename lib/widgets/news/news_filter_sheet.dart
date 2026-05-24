@@ -2,10 +2,13 @@
 import 'package:flutter/material.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/news_filter.dart';
+import '../../services/analytics_api_client.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
+import '../../theme/app_stroke.dart';
 import '../../theme/app_typography.dart';
+import '../common/ml_divider.dart';
 
 /// Bottom sheet for filtering news list.
 ///
@@ -43,24 +46,41 @@ class NewsFilterSheet extends StatefulWidget {
 }
 
 class _NewsFilterSheetState extends State<NewsFilterSheet> {
-  late NewsSourceFilter _sourceFilter;
+  late NewsCategory _category;
   late Set<String> _sentimentGrades;
   late Set<String> _sectors;
   late bool _breakingOnly;
-  bool _sectorExpanded = false;
+
+  List<String> _availableSectors = NewsFilterState.fallbackSectors;
+  bool _sectorsLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _sourceFilter = widget.initialState.sourceFilter;
+    _category = widget.initialState.category;
     _sentimentGrades = Set.from(widget.initialState.sentimentGrades);
     _sectors = Set.from(widget.initialState.sectors);
     _breakingOnly = widget.initialState.breakingOnly;
+    _loadSectors();
+  }
+
+  Future<void> _loadSectors() async {
+    setState(() => _sectorsLoading = true);
+    try {
+      final sectors = await AnalyticsApiClient().getNewsSectors();
+      if (sectors.isNotEmpty && mounted) {
+        setState(() => _availableSectors = sectors);
+      }
+    } catch (_) {
+      // fallback already set
+    } finally {
+      if (mounted) setState(() => _sectorsLoading = false);
+    }
   }
 
   int get _activeCount {
     int count = 0;
-    if (_sourceFilter != NewsSourceFilter.all) count++;
+    if (_category != NewsCategory.all) count++;
     if (_sentimentGrades.isNotEmpty) count++;
     if (_sectors.isNotEmpty) count++;
     if (_breakingOnly) count++;
@@ -69,7 +89,7 @@ class _NewsFilterSheetState extends State<NewsFilterSheet> {
 
   void _reset() {
     setState(() {
-      _sourceFilter = NewsSourceFilter.all;
+      _category = NewsCategory.all;
       _sentimentGrades = {};
       _sectors = {};
       _breakingOnly = false;
@@ -78,7 +98,7 @@ class _NewsFilterSheetState extends State<NewsFilterSheet> {
 
   void _apply() {
     Navigator.of(context).pop(NewsFilterState(
-      sourceFilter: _sourceFilter,
+      category: _category,
       sentimentGrades: _sentimentGrades,
       sectors: _sectors,
       breakingOnly: _breakingOnly,
@@ -123,8 +143,11 @@ class _NewsFilterSheetState extends State<NewsFilterSheet> {
 
     return Container(
       constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height * 0.7
+        maxHeight: MediaQuery.of(context).size.height * 0.65
                  - MediaQuery.of(context).viewPadding.bottom,
+      ),
+      margin: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewPadding.bottom + AppSpacing.md,
       ),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
@@ -134,7 +157,7 @@ class _NewsFilterSheetState extends State<NewsFilterSheet> {
         mainAxisSize: MainAxisSize.min,
         children: [
           // Handle bar
-          const SizedBox(height: AppSpacing.lg),
+          const SizedBox(height: AppSpacing.md),
           Container(
             width: 40,
             height: 4,
@@ -143,11 +166,11 @@ class _NewsFilterSheetState extends State<NewsFilterSheet> {
               borderRadius: BorderRadius.circular(AppRadius.xxs),
             ),
           ),
-          const SizedBox(height: AppSpacing.lg),
+          const SizedBox(height: AppSpacing.sm),
 
           // Header: Reset + Apply
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -167,36 +190,36 @@ class _NewsFilterSheetState extends State<NewsFilterSheet> {
             ),
           ),
 
-          const Divider(),
+          const MlDivider(),
 
           // Scrollable content
           Flexible(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Source filter
+                  // Source filter (horizontal chips)
                   Text(
                     l10n.filterSource,
                     style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
+                      fontWeight: AppTypography.bold,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.md),
-                  _buildSourceRadios(l10n, theme),
-                  const SizedBox(height: AppSpacing.xl),
+                  _buildSourceChips(l10n),
+                  const SizedBox(height: AppSpacing.md),
 
                   // Sentiment filter
                   Text(
                     l10n.filterSentiment,
                     style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
+                      fontWeight: AppTypography.bold,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.md),
                   _buildSentimentChips(l10n, theme),
-                  const SizedBox(height: AppSpacing.xl),
+                  const SizedBox(height: AppSpacing.md),
 
                   // Breaking only
                   CheckboxListTile(
@@ -206,10 +229,10 @@ class _NewsFilterSheetState extends State<NewsFilterSheet> {
                     onChanged: (v) => setState(() => _breakingOnly = v ?? false),
                   ),
 
-                  // Sector filter (expandable)
+                  // Sector filter (always expanded)
                   _buildSectorSection(l10n, theme),
 
-                  const SizedBox(height: AppSpacing.xxl),
+                  const SizedBox(height: AppSpacing.lg),
                 ],
               ),
             ),
@@ -219,42 +242,53 @@ class _NewsFilterSheetState extends State<NewsFilterSheet> {
     );
   }
 
-  Widget _buildSourceRadios(AppLocalizations l10n, ThemeData theme) {
-    return Column(
-      children: [
-        RadioListTile<NewsSourceFilter>(
-          contentPadding: EdgeInsets.zero,
-          title: Text(l10n.filterAll),
-          value: NewsSourceFilter.all,
-          groupValue: _sourceFilter,
-          onChanged: (v) => setState(() => _sourceFilter = v!),
-        ),
-        RadioListTile<NewsSourceFilter>(
-          contentPadding: EdgeInsets.zero,
-          title: Text(l10n.filterMyWatchlist),
-          subtitle: widget.watchlistTickers.isEmpty
-              ? Text(
-                  l10n.filterNoWatchlist,
-                  style: TextStyle(
-                    fontSize: AppTypography.bodySmall,
-                    color: theme.colorScheme.outline,
-                  ),
-                )
-              : null,
-          value: NewsSourceFilter.watchlist,
-          groupValue: _sourceFilter,
-          onChanged: widget.watchlistTickers.isEmpty
-              ? null
-              : (v) => setState(() => _sourceFilter = v!),
-        ),
-        RadioListTile<NewsSourceFilter>(
-          contentPadding: EdgeInsets.zero,
-          title: Text(l10n.filterMarketOnly),
-          value: NewsSourceFilter.marketOnly,
-          groupValue: _sourceFilter,
-          onChanged: (v) => setState(() => _sourceFilter = v!),
-        ),
-      ],
+  Widget _buildSourceChips(AppLocalizations l10n) {
+    final options = [
+      (NewsCategory.all, l10n.filterAll),
+      (NewsCategory.biz, 'Biz'),
+      (NewsCategory.world, 'World'),
+      (NewsCategory.watchlist, l10n.filterMyWatchlist),
+    ];
+
+    return Wrap(
+      spacing: AppSpacing.sm,
+      children: options.map((opt) {
+        final selected = _category == opt.$1;
+        final isDisabled = opt.$1 == NewsCategory.watchlist && widget.watchlistTickers.isEmpty;
+        return GestureDetector(
+          onTap: isDisabled ? null : () => setState(() => _category = opt.$1),
+          child: Opacity(
+            opacity: isDisabled ? 0.4 : 1.0,
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.lg,
+                vertical: AppSpacing.xxs,
+              ),
+              decoration: BoxDecoration(
+                color: selected
+                    ? Theme.of(context).colorScheme.primary
+                    : context.mlColors.sectionBackground,
+                borderRadius: BorderRadius.circular(AppRadius.lg),
+                border: Border.all(
+                  color: selected
+                      ? Theme.of(context).colorScheme.primary
+                      : context.mlColors.subtleBorder,
+                ),
+              ),
+              child: Text(
+                opt.$2,
+                style: TextStyle(
+                  fontSize: AppTypography.caption,
+                  fontWeight: selected ? AppTypography.bold : AppTypography.regular,
+                  color: selected
+                      ? context.mlColors.onPrimary
+                      : Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+          ),
+        );
+      }).toList(),
     );
   }
 
@@ -290,47 +324,59 @@ class _NewsFilterSheetState extends State<NewsFilterSheet> {
   }
 
   Widget _buildSectorSection(AppLocalizations l10n, ThemeData theme) {
-    return ExpansionTile(
-      tilePadding: EdgeInsets.zero,
-      title: Text(
-        l10n.filterSector,
-        style: theme.textTheme.titleSmall?.copyWith(
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      trailing: _sectors.isNotEmpty
-          ? Text(
-              '${_sectors.length}',
-              style: TextStyle(
-                color: theme.colorScheme.primary,
-                fontWeight: FontWeight.bold,
-              ),
-            )
-          : null,
-      initiallyExpanded: _sectorExpanded,
-      onExpansionChanged: (v) => _sectorExpanded = v,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Wrap(
-          spacing: 8,
-          runSpacing: 4,
-          children: NewsFilterState.allSectors.map((sector) {
-            final selected = _sectors.contains(sector);
-            return FilterChip(
-              label: Text(_sectorLabel(context, sector)),
-              selected: selected,
-              onSelected: (sel) {
-                setState(() {
-                  if (sel) {
-                    _sectors.add(sector);
-                  } else {
-                    _sectors.remove(sector);
-                  }
-                });
-              },
-            );
-          }).toList(),
+        Row(
+          children: [
+            Text(
+              l10n.filterSector,
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: AppTypography.bold,
+              ),
+            ),
+            if (_sectors.isNotEmpty) ...[
+              const SizedBox(width: AppSpacing.sm),
+              Text(
+                '${_sectors.length}',
+                style: TextStyle(
+                  color: theme.colorScheme.primary,
+                  fontWeight: AppTypography.bold,
+                ),
+              ),
+            ],
+          ],
         ),
         const SizedBox(height: AppSpacing.md),
+        if (_sectorsLoading)
+          const Padding(
+            padding: EdgeInsets.all(AppSpacing.md),
+            child: Center(child: SizedBox(
+              width: 20, height: 20,
+              child: CircularProgressIndicator(strokeWidth: AppStroke.medium),
+            )),
+          )
+        else
+          Wrap(
+            spacing: 8,
+            runSpacing: 4,
+            children: _availableSectors.map((sector) {
+              final selected = _sectors.contains(sector);
+              return FilterChip(
+                label: Text(_sectorLabel(context, sector)),
+                selected: selected,
+                onSelected: (sel) {
+                  setState(() {
+                    if (sel) {
+                      _sectors.add(sector);
+                    } else {
+                      _sectors.remove(sector);
+                    }
+                  });
+                },
+              );
+            }).toList(),
+          ),
       ],
     );
   }

@@ -3,26 +3,32 @@ import '../../services/analytics_api_client.dart';
 import '../../utils/error_localizer.dart';
 import '../../models/treemap_data.dart';
 import '../../models/macro_data.dart';
-import '../../models/earnings_data.dart';
+import '../../models/indices_data.dart';
+import '../../models/ticker_score.dart';
 import '../ticker_detail/ticker_detail_screen.dart';
 import '../../widgets/ads/banner_ad_widget.dart';
 import '../../widgets/charts/treemap_chart_widget.dart';
 import '../../widgets/charts/macro_banner_widget.dart';
-import '../../widgets/dashboard/earnings_week_card.dart';
-import '../../widgets/dashboard/news_card.dart';
-import '../../models/news_data.dart';
+import '../../widgets/dashboard/indices_bar_widget.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_radius.dart';
-import '../../widgets/common/ml_divider.dart';
+import '../../widgets/common/bento_card.dart';
 import '../../theme/app_spacing.dart';
 import '../../theme/app_typography.dart';
 import '../../l10n/app_localizations.dart';
 import '../../widgets/common/error_state_view.dart';
+import '../../widgets/common/coach_mark_overlay.dart';
+import '../../providers/coach_mark_provider.dart';
+import 'widgets/top_stocks_section.dart';
+import 'widgets/up_down_tab.dart';
+import 'widgets/indexes_tab.dart';
+import 'movers_list_screen.dart';
+import 'top_stocks_list_screen.dart';
+import '../indexes/indexes_detail_screen.dart';
 
-/// Dashboard Screen - Market 탭 (시장 스냅샷)
+/// Dashboard Screen - Home 탭 (시장 스냅샷)
 ///
-/// AI 시그널 분석은 AI Lens 탭으로 이동됨.
-/// 트리맵, 매크로, 실적, 뉴스 미리보기 표시.
+/// 내부 3탭: Today / Up&Down / Indexes
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
 
@@ -30,8 +36,10 @@ class DashboardScreen extends StatefulWidget {
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
-class _DashboardScreenState extends State<DashboardScreen> {
+class _DashboardScreenState extends State<DashboardScreen>
+    with TickerProviderStateMixin {
   final AnalyticsApiClient _apiClient = AnalyticsApiClient();
+  late TabController _tabController;
 
   // Treemap data
   TreemapData? _treemapData;
@@ -44,11 +52,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
   // Macro signals (yield_curve, m2_liquidity, overall_macro)
   MacroSignalsData? _signalsData;
 
-  // Earnings week data
-  EarningsUpcomingData? _earningsData;
+  // Market indices (S&P, NASDAQ, DOW)
+  MarketIndicesData? _indicesData;
 
-  // News items (dashboard preview)
-  List<NewsItem> _newsItems = [];
+  // Top stocks by market cap
+  List<TickerScore> _topStocks = [];
 
   // Index filter state (null=전체, 'SP500', 'DOW30', 'NASDAQ100')
   String? _selectedIndex;
@@ -59,16 +67,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   void initState() {
     super.initState();
-    _loadSignals();
+    _tabController = TabController(length: 3, vsync: this);
+    _loadData();
   }
 
   @override
   void dispose() {
+    _tabController.dispose();
     _apiClient.dispose();
     super.dispose();
   }
 
-  Future<void> _loadSignals() async {
+  Future<void> _loadData() async {
     setState(() {
       _isLoading = true;
       _isTreemapLoading = true;
@@ -80,16 +90,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
       final results = await Future.wait<dynamic>([
         _apiClient.getTreemapData(index: _selectedIndex).catchError((e) => e),
         _apiClient.getMacroIndicators().catchError((e) => e),
-        _apiClient.getUpcomingEarnings(days: 7).catchError((e) => e),
         _apiClient.getMacroSignals().catchError((e) => e),
-        _apiClient.getLatestNews(limit: 3).catchError((e) => e),
+        _apiClient.getMarketIndices().catchError((e) => e),
+        _apiClient.getTopTickers(limit: 5).catchError((e) => e),
       ]);
 
       TreemapData? treemap;
       MacroIndicatorsData? macro;
-      EarningsUpcomingData? earnings;
       MacroSignalsData? signals;
-      List<NewsItem>? newsItems;
+      MarketIndicesData? indices;
+      List<TickerScore>? topStocks;
       String? treemapError;
 
       // Process treemap result
@@ -106,28 +116,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
         macro = macroResult as MacroIndicatorsData;
       }
 
-      // Process earnings result
-      final earningsResult = results[2];
-      if (earningsResult is! Exception) {
-        earnings = earningsResult as EarningsUpcomingData;
-      }
-
       // Process signals result
-      final signalsResult = results[3];
+      final signalsResult = results[2];
       if (signalsResult is! Exception) {
         signals = signalsResult as MacroSignalsData;
       }
 
-      // Process news result
-      final newsResult = results[4];
-      if (newsResult is! Exception) {
-        final items = (newsResult as NewsListData).items;
-        // bearish 우선 정렬: bearish → neutral → bullish
-        items.sort((a, b) {
-          const order = {'bearish': 0, 'neutral': 1, 'bullish': 2};
-          return (order[a.sentimentGrade] ?? 1).compareTo(order[b.sentimentGrade] ?? 1);
-        });
-        newsItems = items;
+      // Process indices result
+      final indicesResult = results[3];
+      if (indicesResult is! Exception) {
+        indices = indicesResult as MarketIndicesData;
+      }
+
+      // Process top stocks result
+      final topStocksResult = results[4];
+      if (topStocksResult is! Exception) {
+        topStocks = topStocksResult as List<TickerScore>;
       }
 
       if (mounted) {
@@ -137,9 +141,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
           _treemapError = treemapError;
           _isTreemapLoading = false;
           if (macro != null) _macroData = macro;
-          if (earnings != null) _earningsData = earnings;
           if (signals != null) _signalsData = signals;
-          if (newsItems != null) _newsItems = newsItems;
+          if (indices != null) _indicesData = indices;
+          if (topStocks != null) _topStocks = topStocks;
         });
       }
     } catch (e) {
@@ -161,7 +165,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     _reloadFilteredData();
   }
 
-  /// 필터 변경 시 트리맵만 재로드 (macro, earnings, news는 유지)
+  /// 필터 변경 시 트리맵만 재로드
   Future<void> _reloadFilteredData() async {
     setState(() {
       _isTreemapLoading = true;
@@ -197,70 +201,215 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return RefreshIndicator(
-      onRefresh: _loadSignals,
-      child: _buildBody(),
+    final l10n = AppLocalizations.of(context);
+
+    return Column(
+      children: [
+        // 내부 TabBar
+        Container(
+          decoration: BoxDecoration(
+            border: Border(
+              bottom: BorderSide(
+                color: context.mlColors.subtleBorder,
+                width: 1,
+              ),
+            ),
+          ),
+          child: TabBar(
+            controller: _tabController,
+            labelColor: context.mlColors.accentBlue,
+            unselectedLabelColor: context.mlColors.textTertiary,
+            indicatorSize: TabBarIndicatorSize.label,
+            indicatorWeight: 3,
+            labelStyle: const TextStyle(
+              fontSize: AppTypography.headlineSmall,
+              fontWeight: AppTypography.semiBold,
+              height: 1.25,
+            ),
+            unselectedLabelStyle: const TextStyle(
+              fontSize: AppTypography.headlineSmall,
+              fontWeight: AppTypography.medium,
+              height: 1.25,
+            ),
+            tabs: [
+              Tab(text: l10n.tabToday),
+              Tab(text: l10n.tabUpDown),
+              Tab(text: l10n.tabIndexes),
+            ],
+          ),
+        ),
+        // TabBarView
+        Expanded(
+          child: TabBarView(
+            controller: _tabController,
+            children: [_buildTodayTab(), _buildUpDownTab(), _buildIndexesTab()],
+          ),
+        ),
+      ],
     );
   }
 
-  Widget _buildBody() {
+  /// Today 탭: 매크로 → 지수 → 트리맵 → 시총 Top 3
+  Widget _buildTodayTab() {
     final l10n = AppLocalizations.of(context);
 
-    // 로딩 상태
     if (_isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
+      return const Center(child: CircularProgressIndicator());
     }
 
-    // 에러 상태
     if (_error != null) {
       return ErrorStateView(
         message: l10n.signalLoadFailed,
         detail: _error!,
-        onRetry: _loadSignals,
+        onRetry: _loadData,
         retryLabel: l10n.tryAgain,
       );
     }
 
-    // 데이터 표시
-    return ListView(
-      key: const PageStorageKey('dashboard_list'),
-      padding: const EdgeInsets.all(AppSpacing.xl),
-      children: [
-        // ===== Macro Banner (최상단) =====
-        MacroBannerWidget(data: _macroData, signals: _signalsData),
-        if (_macroData != null || _signalsData != null)
-          const SizedBox(height: AppSpacing.xl),
-
-        // ===== Treemap Section =====
-        _buildTreemapHeader(),
-        const SizedBox(height: AppSpacing.lg),
-        _buildTreemapSection(),
-
-        // ===== Earnings Week Card =====
-        if (_earningsData != null && _earningsData!.totalCount > 0) ...[
-          const MlDivider(),
-          EarningsWeekCard(
-            data: _earningsData!,
-            onTickerTap: _onTickerTap,
+    return RefreshIndicator(
+      onRefresh: _loadData,
+      child: ListView(
+        key: const PageStorageKey('dashboard_today'),
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.xl,
+          AppSpacing.lg,
+          AppSpacing.xl,
+          AppSpacing.xl,
+        ),
+        children: [
+          // ===== Macro Banner Card =====
+          BentoCard(
+            padding: EdgeInsets.zero,
+            child: MacroBannerWidget(
+              data: _macroData,
+              signals: _signalsData,
+              onNavigateToIndexes: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => IndexesDetailScreen(
+                      data: _macroData,
+                      signals: _signalsData,
+                    ),
+                  ),
+                );
+              },
+            ),
           ),
-        ],
+          if (_macroData != null || _signalsData != null)
+            const SizedBox(height: AppSpacing.xxl),
 
-        // ===== News Card =====
-        if (_newsItems.isNotEmpty) ...[
-          const MlDivider(),
-          NewsCard(
-            items: _newsItems,
-            onTickerTap: _onTickerTap,
+          // ===== Indices Bar (S&P, NASDAQ, DOW) — individual cards =====
+          IndicesBarWidget(
+            data: _indicesData,
+            selectedIndex: _selectedIndex,
+            onIndexTap: (indexCode) {
+              // Toggle: tap again to deselect
+              final newIndex = _selectedIndex == indexCode ? null : indexCode;
+              _onIndexFilterChanged(newIndex);
+            },
           ),
-        ],
+          if (_indicesData != null && _indicesData!.indices.isNotEmpty)
+            const SizedBox(height: AppSpacing.xxl),
 
-        // Banner Ad
-        const MlDivider(),
-        const BannerAdWidget(),
-        const SizedBox(height: AppSpacing.xl),
-      ],
+          // ===== Treemap Card (header + chart combined) =====
+          CoachMark(
+            coachKey: CoachMarkProvider.keyDashboardTreemap,
+            message: AppLocalizations.of(context).coachMarkDashboardTreemap,
+            child: BentoCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildTreemapHeader(),
+                  const SizedBox(height: AppSpacing.md),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.xs,
+                    ),
+                    child: Text(
+                      AppLocalizations.of(context).treemapLegend,
+                      style: TextStyle(
+                        fontSize: AppTypography.caption,
+                        color: Theme.of(context).colorScheme.outline,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  _buildTreemapSection(),
+                ],
+              ),
+            ),
+          ),
+
+          // ===== Banner Ad =====
+          const SizedBox(height: AppSpacing.xxl),
+          const Center(child: BannerAdWidget()),
+
+          // ===== Top Stocks Card =====
+          if (_topStocks.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.xxl),
+            BentoCard(
+              child: TopStocksSection(
+                topStocks: _topStocks,
+                onTickerTap: _onTickerTap,
+                onViewMore: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const TopStocksListScreen(),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+
+          // ===== Bottom Ad =====
+          const SizedBox(height: AppSpacing.xxl),
+          const Center(child: BannerAdWidget()),
+          const SizedBox(height: AppSpacing.xxl),
+        ],
+      ),
+    );
+  }
+
+  /// Up&Down 탭: 거래대금/상승률/하락률 Top
+  Widget _buildUpDownTab() {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    return RefreshIndicator(
+      onRefresh: _loadData,
+      child: UpDownTab(
+        treemapData: _treemapData,
+        selectedIndex: _selectedIndex,
+        isLoading: _isTreemapLoading,
+        onIndexFilterChanged: _onIndexFilterChanged,
+        onTickerTap: _onTickerTap,
+        onViewMore: (sortBy) {
+          if (_treemapData == null) return;
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) =>
+                  MoversListScreen(treemapData: _treemapData!, sortBy: sortBy),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  /// Indexes 탭: 거시경제 지표 상세
+  Widget _buildIndexesTab() {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    return RefreshIndicator(
+      onRefresh: _loadData,
+      child: IndexesTab(data: _macroData, signals: _signalsData),
     );
   }
 
@@ -283,16 +432,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.error_outline, size: 32, color: context.mlColors.dangerColor),
+              Icon(
+                Icons.error_outline,
+                size: 32,
+                color: context.mlColors.dangerColor,
+              ),
               const SizedBox(height: AppSpacing.md),
               Text(
                 _treemapError!,
-                style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: AppTypography.bodyMedium),
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  fontSize: AppTypography.bodyMedium,
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: AppSpacing.md),
               TextButton(
-                onPressed: _loadSignals,
+                onPressed: _loadData,
                 child: Text(AppLocalizations.of(context).tryAgain),
               ),
             ],
@@ -302,10 +458,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
     if (_treemapData == null) return const SizedBox.shrink();
 
-    return TreemapChartWidget(
-      data: _treemapData!,
-      onTickerTap: _onTickerTap,
-    );
+    return TreemapChartWidget(data: _treemapData!, onTickerTap: _onTickerTap);
   }
 
   /// 트리맵 섹션 헤더 (전체 거래대금 + 변동률 포함)
@@ -330,95 +483,105 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final color = avgPct > 0
         ? mlc.gainColor
         : avgPct < 0
-            ? mlc.lossColor
-            : mlc.neutralColor;
-    final arrow = avgPct > 0 ? '▲' : avgPct < 0 ? '▼' : '─';
+        ? mlc.lossColor
+        : mlc.neutralColor;
+    final arrow = avgPct > 0
+        ? '▲'
+        : avgPct < 0
+        ? '▼'
+        : '─';
     final sign = avgPct >= 0 ? '+' : '';
 
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(Icons.grid_view, color: context.mlColors.accentBlue, size: 28),
-        const SizedBox(width: AppSpacing.md),
-        Text(
-          AppLocalizations.of(context).sectorMarketOverview,
-          style: const TextStyle(fontSize: AppTypography.displayMedium, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(width: AppSpacing.md),
-        Expanded(
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: _buildIndexFilterChips(),
-          ),
-        ),
-        const SizedBox(width: AppSpacing.md),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
+        Row(
           children: [
-            Text(
-              tradingStr,
-              style: const TextStyle(fontSize: AppTypography.headlineSmall, fontWeight: FontWeight.bold),
-            ),
-            Text(
-              '$arrow $sign${avgPct.toStringAsFixed(2)}%',
-              style: TextStyle(
-                fontSize: AppTypography.bodyMedium,
-                fontWeight: AppTypography.semiBold,
-                color: color,
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: mlc.infoBg,
+                borderRadius: BorderRadius.circular(AppRadius.lg),
               ),
+              child: Icon(
+                Icons.grid_view_rounded,
+                color: mlc.accentBlue,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Text(
+                AppLocalizations.of(context).sectorMarketOverview,
+                style: AppTypography.cardTitle.copyWith(color: mlc.textPrimary),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  tradingStr,
+                  style: AppTypography.priceCard.copyWith(
+                    color: mlc.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  '$arrow $sign${avgPct.toStringAsFixed(2)}%',
+                  style: AppTypography.numericSecondary.copyWith(
+                    color: color,
+                    fontWeight: AppTypography.semiBold,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
+        const SizedBox(height: AppSpacing.md),
+        _buildIndexFilterChips(),
       ],
     );
   }
 
-  /// 지수 필터 칩 빌더
+  /// 지수 필터 "전체" 칩 (지수 카드 클릭으로 필터 선택, 여기서는 리셋만)
   Widget _buildIndexFilterChips() {
     final l10n = AppLocalizations.of(context);
-    final filters = [
-      (null, l10n.filterAll),
-      ('SP500', 'S&P'),
-      ('NASDAQ100', l10n.filterNasdaq),
-      ('DOW30', l10n.filterDow),
-    ];
+    final isAllSelected = _selectedIndex == null;
 
-    return Row(
-      children: filters.map((f) {
-        final code = f.$1;
-        final label = f.$2;
-        final isSelected = _selectedIndex == code;
-        return Padding(
-          padding: const EdgeInsets.only(right: AppSpacing.xs),
-          child: GestureDetector(
-            onTap: () => _onIndexFilterChanged(code),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: 3),
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? Theme.of(context).colorScheme.primary
-                    : context.mlColors.sectionBackground,
-                borderRadius: BorderRadius.circular(AppRadius.lg),
-                border: Border.all(
-                  color: isSelected
-                      ? Theme.of(context).colorScheme.primary
-                      : context.mlColors.subtleBorder,
-                ),
-              ),
-              child: Text(
-                label,
-                style: TextStyle(
-                  fontSize: AppTypography.caption,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                  color: isSelected
-                      ? context.mlColors.onPrimary
-                      : Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
+    return GestureDetector(
+      onTap: () => _onIndexFilterChanged(null),
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.sm,
+        ),
+        decoration: BoxDecoration(
+          color: isAllSelected
+              ? context.mlColors.accentBlue
+              : context.mlColors.sectionBackground,
+          borderRadius: BorderRadius.circular(AppRadius.badge),
+          border: Border.all(
+            color: isAllSelected
+                ? context.mlColors.accentBlue
+                : context.mlColors.subtleBorder,
+          ),
+        ),
+        child: Center(
+          child: Text(
+            l10n.filterAll,
+            style: TextStyle(
+              fontSize: AppTypography.bodySmall,
+              fontWeight: AppTypography.semiBold,
+              color: isAllSelected
+                  ? context.mlColors.onPrimary
+                  : context.mlColors.textSecondary,
             ),
           ),
-        );
-      }).toList(),
+        ),
+      ),
     );
   }
-
 }

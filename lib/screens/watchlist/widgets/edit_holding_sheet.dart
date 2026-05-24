@@ -136,7 +136,7 @@ class _EditHoldingSheetState extends State<EditHoldingSheet> {
 
             Text(
               l10n.editHoldingTitle(widget.ticker),
-              style: const TextStyle(fontSize: AppTypography.headlineLarge, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: AppTypography.headlineLarge, fontWeight: AppTypography.bold),
             ),
             if (widget.name != null)
               Text(widget.name!, style: TextStyle(fontSize: AppTypography.bodyMedium, color: theme.colorScheme.onSurfaceVariant)),

@@ -17,6 +17,12 @@ class CommunityUser {
   // 이메일 인증 여부
   final bool isEmailVerified;
 
+  // IAP 결제 Gold 여부 (관리자 구분용)
+  final bool isIapGold;
+
+  // 무료 체험 사용 이력 (악용 방지용)
+  final bool hasUsedTrial;
+
   CommunityUser({
     required this.id,
     required this.email,
@@ -27,6 +33,8 @@ class CommunityUser {
     this.watchlistTickers,
     this.role = 'regular', // 기본값: 일반 회원
     this.isEmailVerified = false,
+    this.isIapGold = false,
+    this.hasUsedTrial = false,
   });
 
   factory CommunityUser.fromJson(Map<String, dynamic> json) {
@@ -42,6 +50,8 @@ class CommunityUser {
           : null,
       role: json['role'] as String? ?? 'regular', // 기본값: regular
       isEmailVerified: json['is_email_verified'] as bool? ?? false,
+      isIapGold: json['is_iap_gold'] as bool? ?? false,
+      hasUsedTrial: json['has_used_trial'] as bool? ?? false,
     );
   }
 

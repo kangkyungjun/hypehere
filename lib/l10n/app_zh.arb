@@ -15,7 +15,7 @@
   "tabMarketTooltip": "市场概况",
   "tabAILens": "AI",
   "tabAILensTooltip": "AI分析",
-  "tabWatchlist": "自选",
+  "tabWatchlist": "自选股",
   "tabWatchlistTooltip": "我的自选股",
   "tabHoldingsTooltip": "我的持仓",
 
@@ -49,6 +49,10 @@
   "passwordHint": "请输入密码",
   "passwordRequired": "请输入密码",
   "passwordTooShort": "密码至少需要8个字符",
+  "passwordAllNumeric": "密码不能全部由数字组成",
+  "passwordTooCommon": "此密码过于常见，请选择更安全的密码",
+  "passwordTooSimilar": "密码与您的邮箱或昵称过于相似",
+  "passwordRequirements": "至少8个字符，不能全为数字，不能是常见密码",
   "passwordConfirm": "确认密码",
   "passwordConfirmHint": "请再次输入密码",
   "passwordConfirmRequired": "请确认密码",
@@ -108,11 +112,11 @@
   "showMore": "查看更多（剩余 {remaining} 个）",
   "nItems": "{count} 个",
 
-  "scoreStrongBuy": "强烈买入",
-  "scoreBuy": "买入",
-  "scoreHold": "观望",
-  "scoreSell": "卖出",
-  "scoreStrongSell": "强烈卖出",
+  "scoreStrongBuy": "强烈正面",
+  "scoreBuy": "正面",
+  "scoreHold": "中立",
+  "scoreSell": "负面",
+  "scoreStrongSell": "强烈负面",
   "score": "评分",
 
   "myWatchlist": "我的自选股",
@@ -131,6 +135,8 @@
   "watchlistDiscoveryTitle": "添加到自选股",
   "watchlistDiscoverySubtitle": "添加后可接收相关新闻和信号提醒",
   "topTradingVolume": "今日成交额TOP",
+  "addWatchlistSearch": "搜索并添加到自选",
+  "bookmarkGuide": "点击书签图标添加到自选列表",
 
   "communitySearchHint": "按标题或内容搜索...",
   "writePost": "发帖",
@@ -406,6 +412,11 @@
   "marketlensAIOpinion": "MarketLens AI 观点",
   "bullishFactors": "看涨因素",
   "bearishFactors": "看跌因素",
+  "expertAnalysis": "专家分析",
+  "expertKeyFactors": "关键因素",
+  "predictionBullish": "看涨",
+  "predictionBearish": "看跌",
+  "predictionNeutral": "中性",
   "target": "目标 ",
   "stopLoss": "止损 ",
   "averageTargetPrice": "平均目标价",
@@ -645,11 +656,26 @@
   "recTechnicalInsight": "技术分析",
   "recMarketIntelligence": "市场情报",
   "recActionSummary": "行动摘要",
+  "recCompanyClassification": "企业分类",
+  "recAnalystSummary": "分析师摘要",
+  "recMarketSummary": "市场摘要",
+  "recUpcomingEvents": "即将到来的重要事件",
+  "recBuyRecommend": "增持（建议买入）",
+  "recHoldRecommend": "持有（建议观望）",
+  "recSellRecommend": "减持（建议卖出）",
   "recommendedAction": "建议操作",
   "analysisWaiting": "AI分析等待中...",
   "alreadyHeld": "已持有",
   "goToWatchlistTab": "前往自选股",
   "noHoldingsHint": "从自选股中添加持仓",
+  "addHoldingDirect": "添加股票",
+  "aiPortfolioBenefitTitle": "注册股票后\n每天早晨AI将提供投资建议",
+  "aiPortfolioBenefit1": "投资组合再平衡建议",
+  "aiPortfolioBenefit2": "技术交易信号分析",
+  "aiPortfolioBenefit3": "市场新闻影响评估",
+  "searchTickerHint": "搜索股票名称或代码",
+  "addToPortfolio": "添加到持仓",
+  "alreadyInHoldings": "该股票已在持仓中",
   "closingPriceAuto": "收盘价自动填入",
   "holidayPriceNotice": "{date} 收盘价（上一交易日）",
   "addToHoldings": "添加到持仓",
@@ -663,6 +689,13 @@
   "avgPriceLabel": "均价",
   "currentValueLabel": "市值",
   "dailyUpdate": "每日早间更新",
+  "aiRefreshOnChange": "持仓变更时自动刷新",
+  "lastUpdateTime": "最后更新: {time}",
+  "@lastUpdateTime": {
+    "placeholders": {
+      "time": { "type": "String" }
+    }
+  },
   "viewAIAdvice": "查看AI建议",
   "noAnalysisYet": "暂无分析",
   "recentTransactions": "最近交易",
@@ -702,7 +735,7 @@
   "sectorRealEstate": "房地产",
   "sectorMaterials": "原材料",
 
-  "newsBubbleTitle": "24小时新闻气泡",
+  "newsBubbleTitle": "24小时 Hot 新闻",
   "newsBubbleLegendBullish": "看涨居多",
   "newsBubbleLegendBearish": "看跌居多",
   "newsBubbleLegendMixed": "混合",
@@ -721,12 +754,13 @@
   "krwSuffix": "韩元",
   "taxTradeCount": "笔卖出",
   "macro3mTitle": "3个月",
-  "macro3mHigh": "最高",
-  "macro3mAvg": "均值",
-  "macro3mLow": "最低",
+  "macro3mHigh": "3M 最高",
+  "macro3mAvg": "3M 均值",
+  "macro3mLow": "3M 最低",
   "tooltipClearSearch": "清除搜索",
   "tooltipPreviousMonth": "上个月",
   "tooltipNextMonth": "下个月",
+  "tooltipSelectMonth": "选择月份",
   "tooltipShowPassword": "显示密码",
   "tooltipHidePassword": "隐藏密码",
   "tooltipChangePhoto": "更换照片",
@@ -734,5 +768,166 @@
   "tooltipRemove": "删除",
   "otherSectors": "其他板块",
   "otherTickers": "其他股票",
-  "nDaysAgo": "{count}天前"
+  "nDaysAgo": "{count}天前",
+
+  "tabHome": "首页",
+  "tabHomeTooltip": "首页",
+  "tabAIAnalysis": "AI信号",
+  "tabToday": "今日",
+  "tabUpDown": "涨跌",
+  "tabIndexes": "指标",
+  "macroCurrentLabel": "当前值",
+  "macroChangeLabel": "变动",
+  "tradingVolumeTop": "成交额",
+  "gainersTop": "涨幅",
+  "losersTop": "跌幅",
+  "topByMarketCap": "市值排名",
+  "viewMore": "查看更多",
+
+  "gaugeStrongNegativeDesc": "强烈负面：股价下跌概率极高",
+  "gaugeNegativeDesc": "负面：股价下跌概率较高",
+  "gaugePositiveDesc": "正面：股价上涨概率较高",
+  "gaugeStrongPositiveDesc": "强烈正面：股价上涨概率极高",
+  "aiRecommended20": "AI分析推荐 {count} 只",
+  "@aiRecommended20": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "aiCaution20": "AI分析警示 {count} 只",
+  "@aiCaution20": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "seeMore": "查看更多",
+
+  "holdingsSummary": "持仓概况",
+  "returnRate": "收益率",
+  "purchaseAmount": "买入金额",
+  "profitAmount": "盈亏金额",
+  "evaluationAmount": "市值",
+
+  "watchAdToUnlock": "观看短视频广告查看AI分析",
+  "watchAd": "观看广告",
+  "adNotReady": "广告加载中，请稍后重试",
+
+  "holdingsLimitTitle": "持仓限制",
+  "holdingsLimitMessage": "免费用户最多可持有3只股票。升级为Gold会员即可享受无限持仓管理和无广告AI分析。",
+  "upgradeToGold": "升级为Gold",
+  "goldBenefitUnlimitedHoldings": "无限持仓管理",
+  "goldBenefitAIUnlimited": "无广告AI分析",
+  "goldBenefitNoAds": "完全去除广告",
+  "newAiAnalysisAvailable": "新的AI分析已到达",
+  "viewingPreviousAnalysis": "查看上次分析",
+  "goldUpgradeComingSoon": "Gold会员即将推出！敬请期待。",
+  "close": "关闭",
+
+  "goldMonthlyPrice": "月 {price}",
+  "@goldMonthlyPrice": {
+    "placeholders": {
+      "price": { "type": "String" }
+    }
+  },
+  "subscribeNow": "立即订阅",
+  "restorePurchases": "恢复购买",
+  "purchaseRestored": "购买已成功恢复",
+  "purchaseRestoreFailed": "未找到以前的购买记录",
+  "purchaseFailed": "购买失败，请重试。",
+  "purchaseCancelled": "购买已取消",
+  "subscriptionActive": "已激活",
+  "subscriptionExpires": "{date} 到期",
+  "@subscriptionExpires": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "subscriptionManage": "管理订阅",
+  "subscriptionTermsIos": "付款将从您的App Store账户中扣除。如果在当前周期结束前24小时内未取消，订阅将自动续订。",
+  "subscriptionTermsAndroid": "付款将从您的Google Play账户中扣除。如果在当前周期结束前24小时内未取消，订阅将自动续订。",
+  "goldMembershipTitle": "Gold会员",
+  "subscription": "订阅",
+
+  "freeTrialStart": "开始7天免费试用",
+  "freeTrialInfo": "7天免费，之后{price}/月。随时可取消。",
+  "@freeTrialInfo": {
+    "placeholders": {
+      "price": { "type": "String" }
+    }
+  },
+  "onFreeTrial": "免费试用中",
+  "trialEndsOn": "试用结束: {date}",
+  "@trialEndsOn": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "trialExpired": "免费试用已结束",
+
+  "manageSubscription": "管理订阅",
+  "restorePurchaseTitle": "恢复之前的购买",
+  "restorePurchaseDescription": "更换设备或重新安装应用后订阅未生效时使用。",
+
+  "calendarPremiumEvents": "{count}个高级事件",
+  "@calendarPremiumEvents": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "calendarUnlockWithAd": "看广告解锁6小时",
+  "calendarUnlockedUntil": "解锁至{time}",
+  "@calendarUnlockedUntil": {
+    "placeholders": {
+      "time": { "type": "String" }
+    }
+  },
+
+  "treemapLegend": "大小 = 成交量  |  绿色 = 上涨  |  红色 = 下跌",
+  "aiScoreSubtitle": "AI评分 (0: 卖出信号 ~ 100: 买入信号)",
+  "aiSignalStrongBuyDesc": "强力买入 (80-100): 技术和财务指标均显示强烈买入信号",
+  "aiSignalBuyDesc": "买入 (60-79): 整体积极信号",
+  "aiSignalHoldDesc": "持有 (40-59): 信号混合，维持当前仓位",
+  "aiSignalSellDesc": "卖出 (20-39): 整体消极信号",
+  "aiSignalStrongSellDesc": "强力卖出 (0-19): 技术和财务指标均显示强烈卖出信号",
+  "watchlistSubtitle": "收藏您关注的股票",
+  "holdingsSubtitle": "管理您的持仓",
+  "filterActiveLabel": "筛选已启用",
+  "tapToRemoveFilter": "点击取消",
+  "searchTickersCta": "搜索股票",
+  "addTickersCta": "添加股票",
+  "beFirstToPost": "来写第一篇帖子吧！",
+  "totalPosts": "{count}篇帖子",
+  "@totalPosts": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "recentComments": "最近评论",
+  "coachMarkDashboardTreemap": "颜色表示股价变动，大小表示成交量",
+  "coachMarkAiLens": "AI分析的个股买卖信号分布",
+  "coachMarkWatchlist": "添加您关注的股票！",
+  "coachMarkHoldings": "注册持仓以追踪收益率",
+  "coachMarkTickerScore": "查看AI评分趋势。70以上为买入信号",
+  "coachMarkMacroGauge": "左右滑动查看经济指标",
+  "coachMarkGotIt": "知道了",
+  "resetTutorials": "重新查看教程",
+  "resetTutorialsDesc": "所有教程将重新显示",
+  "tutorialsReset": "教程已重置",
+
+  "purchaseStoreUnavailable": "无法连接App Store",
+  "purchaseStoreProblem": "无法连接App Store。请检查您的Apple ID设置，确保已启用付款功能，然后重试。",
+  "purchaseTemporarilyUnavailable": "订阅暂时不可用",
+  "purchaseRetry": "重试",
+  "purchaseInitializing": "正在连接App Store...",
+
+  "loginRequiredForPurchase": "购买Gold会员需要登录。订阅信息将同步到您的账户。",
+
+  "aiScoreGuideTitle": "AI评分指南",
+  "aiScoreGuideDescription": "AI评分基于中长期（3至12个月）投资视角计算。",
+  "aiScoreGuideStrongPositive": "80–100: 强烈看涨 – 上涨概率非常高",
+  "aiScoreGuidePositive": "60–79: 看涨 – 上涨概率较高",
+  "aiScoreGuideNeutral": "40–59: 中性 – 信号混合",
+  "aiScoreGuideNegative": "20–39: 看跌 – 下跌概率较高",
+  "aiScoreGuideStrongNegative": "0–19: 强烈看跌 – 下跌概率非常高",
+  "subscriptionPaymentAccountWarning": "付款通过本设备登录的 App Store / Google Play 账户处理。如果您在他人设备上购买，可能会从设备所有者的账户中扣款。"
 }
