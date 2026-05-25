@@ -1,0 +1,87 @@
+MarketLens - Plataforma de analisis bursatil con senales basadas en IA
+
+MarketLens es una plataforma inteligente de apoyo a la inversion que utiliza tecnologia de inteligencia artificial para analizar datos complejos del mercado de valores y ofrecer a los inversores senales e informacion util.
+
+
+Funciones principales
+
+    1. Analisis de senales bursatiles con IA
+- Resultados de analisis estadistico basados en datos historicos
+- Informacion clara mediante senales de compra, venta y neutral
+- Indicadores de referencia como precio objetivo y stop-loss
+
+    2. Panel de mercado en tiempo real
+- Vision general de las tendencias del mercado y los principales valores
+- Graficos en tiempo real e indicadores tecnicos
+- Analisis por indices de mercado y sectores
+
+    3. Busqueda y exploracion inteligente de valores
+- Funcion de busqueda rapida de valores
+- Filtrado por senal y por sector
+- Guardado automatico del historial de busqueda reciente
+
+    4. Gestion personalizada de valores favoritos
+- Tu propio espacio de seguimiento de valores
+- Alertas en tiempo real para valores favoritos (disponible proximamente)
+- Funcion de gestion de cartera (disponible proximamente)
+
+    5. Comunidad de inversores
+- Comparte y debate ideas de inversion
+- Foro por valores y funcion de comentarios
+- Intercambio de informacion entre inversores
+
+
+    Que son las senales de IA?
+
+    Las senales de IA de MarketLens son resultados de analisis estadistico basados en datos historicos.
+
+- Analisis integral de datos historicos de cotizaciones, volumen de negociacion e indicadores tecnicos
+- Generacion de senales mediante reconocimiento de patrones y analisis de tendencias
+- Proporcionadas como informacion de referencia; las decisiones de inversion son responsabilidad del usuario
+
+
+    Responsabilidad de inversion y exencion de responsabilidad (lectura obligatoria)
+
+    Importante: Lea atentamente las siguientes clausulas.
+
+    1. MarketLens es unicamente un servicio de informacion sobre inversiones; no constituye asesoramiento ni recomendacion de inversion.
+
+    2. Las senales de IA son simplemente resultados de analisis estadistico basados en datos historicos y no garantizan rentabilidad futura.
+
+    3. La inversion en acciones conlleva riesgo de perdida de capital. Todas las decisiones de inversion y las ganancias o perdidas resultantes son responsabilidad exclusiva del inversor.
+
+    4. La informacion proporcionada por este servicio es solo orientativa. Antes de tomar decisiones de inversion, es imprescindible realizar su propio analisis e investigacion.
+
+    5. MarketLens no asume ninguna responsabilidad legal por los resultados de las inversiones.
+
+
+    Por que elegir MarketLens
+
+- Analisis objetivo basado en datos: informacion fundamentada en datos, no en emociones
+- Experiencia de usuario intuitiva: informacion de inversion compleja presentada de forma clara y sencilla
+- Informacion basada en la comunidad: comparte opiniones y analisis con otros inversores
+- Actualizaciones continuas: mejoras periodicas que reflejan las ultimas tendencias del mercado
+
+
+Recomendado para
+
+- Inversores principiantes que comienzan en bolsa
+- Inversores que buscan un analisis objetivo basado en datos
+- Inversores que desean conocer rapidamente las tendencias del mercado
+- Inversores que quieren intercambiar informacion en una comunidad
+
+
+    Proteccion de datos
+
+    • Politica de privacidad: https://www.hypehere.net/marketlens/privacy/
+    • Condiciones de uso: https://www.hypehere.net/marketlens/terms/
+
+    Atencion al cliente
+
+    • Correo electronico: marketlens.service@gmail.com
+    • Cualquier consulta o sugerencia es siempre bienvenida.
+
+
+Comienza tu camino hacia una inversion inteligente con MarketLens!
+
+Las decisiones son responsabilidad del usuario; invierta con prudencia.

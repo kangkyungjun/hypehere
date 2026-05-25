@@ -1,0 +1,29 @@
+# MarketLens Django Backend Requirements
+
+# Django and Django REST Framework
+Django==5.1.11
+djangorestframework==3.14.0
+djangorestframework-simplejwt==5.2.2
+django-cors-headers==4.3.1
+
+# API Documentation
+drf-spectacular==0.26.5
+
+# Database
+psycopg2-binary==2.9.9
+
+# WSGI Server
+gunicorn==21.2.0
+
+# Environment Variables
+python-dotenv==1.0.0
+
+# Additional utilities
+Pillow==10.0.0
+
+# Firebase Cloud Messaging
+firebase-admin==6.4.0
+
+# Email (AWS SES)
+django-ses==4.3.0
+boto3==1.35.0
