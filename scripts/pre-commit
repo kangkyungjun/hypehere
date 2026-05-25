@@ -38,26 +38,28 @@ for pattern in "${SENSITIVE_PATTERNS[@]}"; do
     fi
 done
 
-# 2. Scan staged content for secret patterns
-# Using simple substring patterns for macOS grep compatibility
+# 2. Scan staged content for secret patterns (fixed-string matching for macOS compat)
 SECRET_PATTERNS=(
     'PRIVATE KEY'
     'AIzaSy'
     'sk_live_'
     'sk_test_'
-    'AKIA[0-9A-Z]'
-    'ghp_[A-Za-z0-9]'
-    'gho_[A-Za-z0-9]'
+    'AKIA'
+    'ghp_'
+    'gho_'
     'glpat-'
 )
 
-for pattern in "${SECRET_PATTERNS[@]}"; do
-    MATCHES=$(git diff --cached -U0 --diff-filter=ACM | grep -E "^\+" | grep -v "^\+\+\+" | grep -E "$pattern" 2>/dev/null || true)
-    if [ -n "$MATCHES" ]; then
-        echo -e "${RED}[SECRET DETECTED]${NC} Secret pattern found in staged changes: ${YELLOW}${pattern}${NC}"
-        BLOCKED=1
-    fi
-done
+DIFF_ADDITIONS=$(git diff --cached -U0 --diff-filter=ACM 2>/dev/null | grep '^+' | grep -v '^+++' || true)
+
+if [ -n "$DIFF_ADDITIONS" ]; then
+    for pattern in "${SECRET_PATTERNS[@]}"; do
+        if echo "$DIFF_ADDITIONS" | grep -qF "$pattern" 2>/dev/null; then
+            echo -e "${RED}[SECRET DETECTED]${NC} Secret pattern found in staged changes: ${YELLOW}${pattern}${NC}"
+            BLOCKED=1
+        fi
+    done
+fi
 
 if [ "$BLOCKED" -eq 1 ]; then
     echo ""
