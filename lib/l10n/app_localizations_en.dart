@@ -2449,4 +2449,154 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get subscriptionPaymentAccountWarning =>
       'Payment is processed through the App Store / Google Play account signed in on this device. If you purchase on someone else\'s device, the device owner\'s account may be charged.';
+
+  @override
+  String get investmentProfileTitle => 'Investment Profile';
+
+  @override
+  String get investmentProfileSection => 'Investment Profile';
+
+  @override
+  String get investmentProfileEditSubtitle =>
+      'View or edit your investment preferences';
+
+  @override
+  String get investmentProfileComplete => 'Complete';
+
+  @override
+  String get investmentProfileSaveFailed =>
+      'Failed to save profile. Please try again.';
+
+  @override
+  String get skip => 'Skip';
+
+  @override
+  String get next => 'Next';
+
+  @override
+  String get investmentStyleTitle => 'Investment Style';
+
+  @override
+  String get investmentStyleSubtitle =>
+      'What describes your investment approach?';
+
+  @override
+  String get investmentStyleConservative => 'Conservative';
+
+  @override
+  String get investmentStyleConservativeDesc =>
+      'Prioritize capital preservation with stable returns';
+
+  @override
+  String get investmentStyleBalanced => 'Balanced';
+
+  @override
+  String get investmentStyleBalancedDesc =>
+      'Balance between growth and stability';
+
+  @override
+  String get investmentStyleAggressive => 'Aggressive';
+
+  @override
+  String get investmentStyleAggressiveDesc =>
+      'Pursue high returns with higher risk tolerance';
+
+  @override
+  String get timeHorizonTitle => 'Investment Horizon';
+
+  @override
+  String get timeHorizonSubtitle => 'How long do you plan to invest?';
+
+  @override
+  String get timeHorizonShort => 'Short-term';
+
+  @override
+  String get timeHorizonShortDesc => 'Less than 1 year';
+
+  @override
+  String get timeHorizonMedium => 'Medium-term';
+
+  @override
+  String get timeHorizonMediumDesc => '1 to 5 years';
+
+  @override
+  String get timeHorizonLong => 'Long-term';
+
+  @override
+  String get timeHorizonLongDesc => '5+ years';
+
+  @override
+  String get riskToleranceTitle => 'Risk Tolerance';
+
+  @override
+  String get riskToleranceSubtitle => 'How much risk can you handle?';
+
+  @override
+  String get riskLevel1 => 'Very Low';
+
+  @override
+  String get riskLevel2 => 'Low';
+
+  @override
+  String get riskLevel3 => 'Moderate';
+
+  @override
+  String get riskLevel4 => 'High';
+
+  @override
+  String get riskLevel5 => 'Very High';
+
+  @override
+  String get riskLow => 'Low';
+
+  @override
+  String get riskHigh => 'High';
+
+  @override
+  String get targetReturnTitle => 'Target Annual Return';
+
+  @override
+  String get targetReturnSubtitle => 'What return are you aiming for?';
+
+  @override
+  String get targetReturn5Desc => 'Stable, low-risk investments';
+
+  @override
+  String get targetReturn10Desc => 'Moderate growth strategy';
+
+  @override
+  String get targetReturn20Desc => 'Aggressive growth strategy';
+
+  @override
+  String get targetReturnFlexible => 'Flexible';
+
+  @override
+  String get targetReturnFlexibleDesc =>
+      'No specific target, adapt to market conditions';
+
+  @override
+  String get maxLossTitle => 'Maximum Acceptable Loss';
+
+  @override
+  String get maxLossSubtitle =>
+      'What is the maximum drawdown you can tolerate?';
+
+  @override
+  String get maxLoss5Desc => 'Very conservative, minimal drawdown';
+
+  @override
+  String get maxLoss10Desc => 'Conservative, limited drawdown';
+
+  @override
+  String get maxLoss20Desc => 'Moderate, standard market volatility';
+
+  @override
+  String get maxLoss40Desc => 'Aggressive, can withstand significant drops';
+
+  @override
+  String get maxLossUnlimited => 'Unlimited';
+
+  @override
+  String get maxLossUnlimitedDesc =>
+      'No limit, fully committed to long-term gains';
 }

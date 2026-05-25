@@ -23,6 +23,9 @@ class CommunityUser {
   // 무료 체험 사용 이력 (악용 방지용)
   final bool hasUsedTrial;
 
+  // 투자 프로필 설정 여부 (온보딩 체크용)
+  final bool hasInvestmentProfile;
+
   CommunityUser({
     required this.id,
     required this.email,
@@ -35,6 +38,7 @@ class CommunityUser {
     this.isEmailVerified = false,
     this.isIapGold = false,
     this.hasUsedTrial = false,
+    this.hasInvestmentProfile = false,
   });
 
   factory CommunityUser.fromJson(Map<String, dynamic> json) {
@@ -52,6 +56,7 @@ class CommunityUser {
       isEmailVerified: json['is_email_verified'] as bool? ?? false,
       isIapGold: json['is_iap_gold'] as bool? ?? false,
       hasUsedTrial: json['has_used_trial'] as bool? ?? false,
+      hasInvestmentProfile: json['has_investment_profile'] as bool? ?? false,
     );
   }
 

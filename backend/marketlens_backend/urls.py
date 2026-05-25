@@ -17,6 +17,7 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
+from accounts.views import internal_user_profiles_view
 from drf_spectacular.views import (
     SpectacularAPIView,
     SpectacularSwaggerView,
@@ -28,6 +29,8 @@ urlpatterns = [
     # API endpoints
     path("api/accounts/", include("accounts.urls")),
     path("api/community/", include("community.urls")),
+    # Internal API (Mac mini)
+    path("api/v1/internal/users/profiles/", internal_user_profiles_view, name="internal-user-profiles"),
     # API Documentation
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),

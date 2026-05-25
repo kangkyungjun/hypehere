@@ -27,10 +27,20 @@ class AuthProvider with ChangeNotifier {
   /// 상태 확인 중 여부
   bool _isLoading = false;
 
+  /// 투자 프로필 온보딩 필요 여부
+  bool _needsInvestmentOnboarding = false;
+
   // Getters
   bool get isLoggedIn => _isLoggedIn;
   CommunityUser? get currentUser => _currentUser;
   bool get isLoading => _isLoading;
+  bool get needsInvestmentOnboarding => _needsInvestmentOnboarding;
+
+  /// 온보딩 완료 후 플래그 해제
+  void clearOnboardingFlag() {
+    _needsInvestmentOnboarding = false;
+    notifyListeners();
+  }
 
   // ========================================
   // MarketLens 권한 체크 메서드
@@ -121,6 +131,11 @@ class AuthProvider with ChangeNotifier {
         _currentUser = user;
         _isLoggedIn = true;
 
+        // 투자 프로필 온보딩 체크
+        if (!user.hasInvestmentProfile) {
+          _needsInvestmentOnboarding = true;
+        }
+
         // 앱 재시작 시 FCM 토큰 재등록 (기존 세션 유지 사용자)
         NotificationService().requestPermissionAndRegister();
       } else {
@@ -154,6 +169,11 @@ class AuthProvider with ChangeNotifier {
 
       _currentUser = user;
       _isLoggedIn = true;
+
+      // 투자 프로필 온보딩 체크
+      if (!user.hasInvestmentProfile) {
+        _needsInvestmentOnboarding = true;
+      }
 
       // RevenueCat logIn은 main.dart의 authListener에서 통합 처리
 
@@ -198,6 +218,7 @@ class AuthProvider with ChangeNotifier {
 
       _currentUser = user;
       _isLoggedIn = true;
+      _needsInvestmentOnboarding = true; // 신규 가입 → 항상 온보딩
 
       // FCM 토큰 등록
       NotificationService().requestPermissionAndRegister();
@@ -233,6 +254,7 @@ class AuthProvider with ChangeNotifier {
 
       _currentUser = user;
       _isLoggedIn = true;
+      _needsInvestmentOnboarding = true; // 신규 가입 → 항상 온보딩
 
       // FCM 토큰 등록
       NotificationService().requestPermissionAndRegister();
@@ -267,6 +289,7 @@ class AuthProvider with ChangeNotifier {
 
       _currentUser = null;
       _isLoggedIn = false;
+      _needsInvestmentOnboarding = false;
 
       debugPrint('[AuthProvider] Logout successful');
     } catch (e) {
@@ -274,6 +297,7 @@ class AuthProvider with ChangeNotifier {
       debugPrint('[AuthProvider] Logout warning: $e');
       _currentUser = null;
       _isLoggedIn = false;
+      _needsInvestmentOnboarding = false;
     } finally {
       _isLoading = false;
       notifyListeners();

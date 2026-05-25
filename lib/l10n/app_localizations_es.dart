@@ -2475,4 +2475,153 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get subscriptionPaymentAccountWarning =>
       'El pago se procesa a través de la cuenta de App Store / Google Play iniciada en este dispositivo. Si compras en el dispositivo de otra persona, se puede cobrar a la cuenta del propietario del dispositivo.';
+
+  @override
+  String get investmentProfileTitle => 'Perfil de inversión';
+
+  @override
+  String get investmentProfileSection => 'Perfil de inversión';
+
+  @override
+  String get investmentProfileEditSubtitle =>
+      'Ver o editar tus preferencias de inversión';
+
+  @override
+  String get investmentProfileComplete => 'Completar';
+
+  @override
+  String get investmentProfileSaveFailed =>
+      'No se pudo guardar el perfil. Inténtalo de nuevo.';
+
+  @override
+  String get skip => 'Omitir';
+
+  @override
+  String get next => 'Siguiente';
+
+  @override
+  String get investmentStyleTitle => 'Estilo de inversión';
+
+  @override
+  String get investmentStyleSubtitle =>
+      '¿Cuál describe tu enfoque de inversión?';
+
+  @override
+  String get investmentStyleConservative => 'Conservador';
+
+  @override
+  String get investmentStyleConservativeDesc =>
+      'Prioriza la preservación del capital con rendimientos estables';
+
+  @override
+  String get investmentStyleBalanced => 'Equilibrado';
+
+  @override
+  String get investmentStyleBalancedDesc =>
+      'Equilibrio entre crecimiento y estabilidad';
+
+  @override
+  String get investmentStyleAggressive => 'Agresivo';
+
+  @override
+  String get investmentStyleAggressiveDesc =>
+      'Busca altos rendimientos con mayor tolerancia al riesgo';
+
+  @override
+  String get timeHorizonTitle => 'Horizonte de inversión';
+
+  @override
+  String get timeHorizonSubtitle => '¿Cuánto tiempo planeas invertir?';
+
+  @override
+  String get timeHorizonShort => 'Corto plazo';
+
+  @override
+  String get timeHorizonShortDesc => 'Menos de 1 año';
+
+  @override
+  String get timeHorizonMedium => 'Mediano plazo';
+
+  @override
+  String get timeHorizonMediumDesc => '1 a 5 años';
+
+  @override
+  String get timeHorizonLong => 'Largo plazo';
+
+  @override
+  String get timeHorizonLongDesc => 'Más de 5 años';
+
+  @override
+  String get riskToleranceTitle => 'Tolerancia al riesgo';
+
+  @override
+  String get riskToleranceSubtitle => '¿Cuánto riesgo puedes manejar?';
+
+  @override
+  String get riskLevel1 => 'Muy bajo';
+
+  @override
+  String get riskLevel2 => 'Bajo';
+
+  @override
+  String get riskLevel3 => 'Moderado';
+
+  @override
+  String get riskLevel4 => 'Alto';
+
+  @override
+  String get riskLevel5 => 'Muy alto';
+
+  @override
+  String get riskLow => 'Bajo';
+
+  @override
+  String get riskHigh => 'Alto';
+
+  @override
+  String get targetReturnTitle => 'Rendimiento anual objetivo';
+
+  @override
+  String get targetReturnSubtitle => '¿Qué rendimiento esperas?';
+
+  @override
+  String get targetReturn5Desc => 'Inversiones estables y de bajo riesgo';
+
+  @override
+  String get targetReturn10Desc => 'Estrategia de crecimiento moderado';
+
+  @override
+  String get targetReturn20Desc => 'Estrategia de crecimiento agresivo';
+
+  @override
+  String get targetReturnFlexible => 'Flexible';
+
+  @override
+  String get targetReturnFlexibleDesc =>
+      'Sin objetivo específico, adaptarse a las condiciones del mercado';
+
+  @override
+  String get maxLossTitle => 'Pérdida máxima aceptable';
+
+  @override
+  String get maxLossSubtitle => '¿Cuál es la caída máxima que puedes tolerar?';
+
+  @override
+  String get maxLoss5Desc => 'Muy conservador, caída mínima';
+
+  @override
+  String get maxLoss10Desc => 'Conservador, caída limitada';
+
+  @override
+  String get maxLoss20Desc => 'Moderado, volatilidad estándar del mercado';
+
+  @override
+  String get maxLoss40Desc => 'Agresivo, puede soportar caídas significativas';
+
+  @override
+  String get maxLossUnlimited => 'Sin límite';
+
+  @override
+  String get maxLossUnlimitedDesc =>
+      'Sin límite, totalmente comprometido con ganancias a largo plazo';
 }

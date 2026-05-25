@@ -4627,6 +4627,288 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Payment is processed through the App Store / Google Play account signed in on this device. If you purchase on someone else\'s device, the device owner\'s account may be charged.'**
   String get subscriptionPaymentAccountWarning;
+
+  /// No description provided for @investmentProfileTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Investment Profile'**
+  String get investmentProfileTitle;
+
+  /// No description provided for @investmentProfileSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Investment Profile'**
+  String get investmentProfileSection;
+
+  /// No description provided for @investmentProfileEditSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'View or edit your investment preferences'**
+  String get investmentProfileEditSubtitle;
+
+  /// No description provided for @investmentProfileComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete'**
+  String get investmentProfileComplete;
+
+  /// No description provided for @investmentProfileSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save profile. Please try again.'**
+  String get investmentProfileSaveFailed;
+
+  /// No description provided for @skip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get skip;
+
+  /// No description provided for @next.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get next;
+
+  /// No description provided for @investmentStyleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Investment Style'**
+  String get investmentStyleTitle;
+
+  /// No description provided for @investmentStyleSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What describes your investment approach?'**
+  String get investmentStyleSubtitle;
+
+  /// No description provided for @investmentStyleConservative.
+  ///
+  /// In en, this message translates to:
+  /// **'Conservative'**
+  String get investmentStyleConservative;
+
+  /// No description provided for @investmentStyleConservativeDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Prioritize capital preservation with stable returns'**
+  String get investmentStyleConservativeDesc;
+
+  /// No description provided for @investmentStyleBalanced.
+  ///
+  /// In en, this message translates to:
+  /// **'Balanced'**
+  String get investmentStyleBalanced;
+
+  /// No description provided for @investmentStyleBalancedDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Balance between growth and stability'**
+  String get investmentStyleBalancedDesc;
+
+  /// No description provided for @investmentStyleAggressive.
+  ///
+  /// In en, this message translates to:
+  /// **'Aggressive'**
+  String get investmentStyleAggressive;
+
+  /// No description provided for @investmentStyleAggressiveDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Pursue high returns with higher risk tolerance'**
+  String get investmentStyleAggressiveDesc;
+
+  /// No description provided for @timeHorizonTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Investment Horizon'**
+  String get timeHorizonTitle;
+
+  /// No description provided for @timeHorizonSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How long do you plan to invest?'**
+  String get timeHorizonSubtitle;
+
+  /// No description provided for @timeHorizonShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Short-term'**
+  String get timeHorizonShort;
+
+  /// No description provided for @timeHorizonShortDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Less than 1 year'**
+  String get timeHorizonShortDesc;
+
+  /// No description provided for @timeHorizonMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium-term'**
+  String get timeHorizonMedium;
+
+  /// No description provided for @timeHorizonMediumDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'1 to 5 years'**
+  String get timeHorizonMediumDesc;
+
+  /// No description provided for @timeHorizonLong.
+  ///
+  /// In en, this message translates to:
+  /// **'Long-term'**
+  String get timeHorizonLong;
+
+  /// No description provided for @timeHorizonLongDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'5+ years'**
+  String get timeHorizonLongDesc;
+
+  /// No description provided for @riskToleranceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Risk Tolerance'**
+  String get riskToleranceTitle;
+
+  /// No description provided for @riskToleranceSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How much risk can you handle?'**
+  String get riskToleranceSubtitle;
+
+  /// No description provided for @riskLevel1.
+  ///
+  /// In en, this message translates to:
+  /// **'Very Low'**
+  String get riskLevel1;
+
+  /// No description provided for @riskLevel2.
+  ///
+  /// In en, this message translates to:
+  /// **'Low'**
+  String get riskLevel2;
+
+  /// No description provided for @riskLevel3.
+  ///
+  /// In en, this message translates to:
+  /// **'Moderate'**
+  String get riskLevel3;
+
+  /// No description provided for @riskLevel4.
+  ///
+  /// In en, this message translates to:
+  /// **'High'**
+  String get riskLevel4;
+
+  /// No description provided for @riskLevel5.
+  ///
+  /// In en, this message translates to:
+  /// **'Very High'**
+  String get riskLevel5;
+
+  /// No description provided for @riskLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Low'**
+  String get riskLow;
+
+  /// No description provided for @riskHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'High'**
+  String get riskHigh;
+
+  /// No description provided for @targetReturnTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Target Annual Return'**
+  String get targetReturnTitle;
+
+  /// No description provided for @targetReturnSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What return are you aiming for?'**
+  String get targetReturnSubtitle;
+
+  /// No description provided for @targetReturn5Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Stable, low-risk investments'**
+  String get targetReturn5Desc;
+
+  /// No description provided for @targetReturn10Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Moderate growth strategy'**
+  String get targetReturn10Desc;
+
+  /// No description provided for @targetReturn20Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Aggressive growth strategy'**
+  String get targetReturn20Desc;
+
+  /// No description provided for @targetReturnFlexible.
+  ///
+  /// In en, this message translates to:
+  /// **'Flexible'**
+  String get targetReturnFlexible;
+
+  /// No description provided for @targetReturnFlexibleDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'No specific target, adapt to market conditions'**
+  String get targetReturnFlexibleDesc;
+
+  /// No description provided for @maxLossTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum Acceptable Loss'**
+  String get maxLossTitle;
+
+  /// No description provided for @maxLossSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What is the maximum drawdown you can tolerate?'**
+  String get maxLossSubtitle;
+
+  /// No description provided for @maxLoss5Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Very conservative, minimal drawdown'**
+  String get maxLoss5Desc;
+
+  /// No description provided for @maxLoss10Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Conservative, limited drawdown'**
+  String get maxLoss10Desc;
+
+  /// No description provided for @maxLoss20Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Moderate, standard market volatility'**
+  String get maxLoss20Desc;
+
+  /// No description provided for @maxLoss40Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Aggressive, can withstand significant drops'**
+  String get maxLoss40Desc;
+
+  /// No description provided for @maxLossUnlimited.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited'**
+  String get maxLossUnlimited;
+
+  /// No description provided for @maxLossUnlimitedDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'No limit, fully committed to long-term gains'**
+  String get maxLossUnlimitedDesc;
 }
 
 class _AppLocalizationsDelegate

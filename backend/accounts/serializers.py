@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model, authenticate
 from django.contrib.auth.password_validation import validate_password
-from .models import DeviceToken
+from .models import DeviceToken, InvestmentProfile
 
 User = get_user_model()
 
@@ -10,15 +10,16 @@ class UserSerializer(serializers.ModelSerializer):
     """사용자 정보 Serializer (Flutter CommunityUser 호환)"""
     is_iap_gold = serializers.SerializerMethodField()
     has_used_trial = serializers.SerializerMethodField()
+    has_investment_profile = serializers.SerializerMethodField()
 
     class Meta:
         model = User
         fields = [
             'id', 'email', 'nickname', 'profile_picture', 'bio',
             'watchlist_tickers', 'role', 'is_email_verified', 'created_at',
-            'is_iap_gold', 'has_used_trial',
+            'is_iap_gold', 'has_used_trial', 'has_investment_profile',
         ]
-        read_only_fields = ['id', 'email', 'role', 'is_email_verified', 'created_at', 'is_iap_gold', 'has_used_trial']
+        read_only_fields = ['id', 'email', 'role', 'is_email_verified', 'created_at', 'is_iap_gold', 'has_used_trial', 'has_investment_profile']
 
     def get_is_iap_gold(self, obj):
         """IAP 결제로 Gold가 된 유저인지 여부 (관리자 구분용)"""
@@ -33,6 +34,28 @@ class UserSerializer(serializers.ModelSerializer):
             return obj.subscription.has_used_trial
         except Exception:
             return False
+
+    def get_has_investment_profile(self, obj):
+        """투자 프로필 설정 여부 (온보딩 체크용)"""
+        return InvestmentProfile.objects.filter(pk=obj.pk).exists()
+
+
+class InvestmentProfileSerializer(serializers.ModelSerializer):
+    """투자 프로필 Serializer"""
+
+    class Meta:
+        model = InvestmentProfile
+        fields = [
+            'investment_style', 'time_horizon', 'risk_tolerance',
+            'target_return', 'max_loss_tolerance',
+            'created_at', 'updated_at',
+        ]
+        read_only_fields = ['created_at', 'updated_at']
+
+    def validate_risk_tolerance(self, value):
+        if not (1 <= value <= 5):
+            raise serializers.ValidationError('risk_tolerance must be between 1 and 5.')
+        return value
 
 
 class RegisterSerializer(serializers.ModelSerializer):

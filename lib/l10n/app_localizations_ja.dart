@@ -2406,4 +2406,145 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get subscriptionPaymentAccountWarning =>
       'お支払いは、この端末にサインインしているApp Store / Google Playアカウントを通じて処理されます。他の方の端末で購入された場合、端末所有者のアカウントに請求される場合があります。';
+
+  @override
+  String get investmentProfileTitle => '投資プロフィール';
+
+  @override
+  String get investmentProfileSection => '投資プロフィール';
+
+  @override
+  String get investmentProfileEditSubtitle => '投資の傾向を確認・編集します';
+
+  @override
+  String get investmentProfileComplete => '完了';
+
+  @override
+  String get investmentProfileSaveFailed => 'プロフィールの保存に失敗しました。もう一度お試しください。';
+
+  @override
+  String get skip => 'スキップ';
+
+  @override
+  String get next => '次へ';
+
+  @override
+  String get investmentStyleTitle => '投資スタイル';
+
+  @override
+  String get investmentStyleSubtitle => 'あなたの投資アプローチは？';
+
+  @override
+  String get investmentStyleConservative => '保守的';
+
+  @override
+  String get investmentStyleConservativeDesc => '安定した収益で元本保全を優先します';
+
+  @override
+  String get investmentStyleBalanced => 'バランス型';
+
+  @override
+  String get investmentStyleBalancedDesc => '成長と安定のバランスを追求します';
+
+  @override
+  String get investmentStyleAggressive => '積極的';
+
+  @override
+  String get investmentStyleAggressiveDesc => '高リスクを許容し高リターンを追求します';
+
+  @override
+  String get timeHorizonTitle => '投資期間';
+
+  @override
+  String get timeHorizonSubtitle => 'どのくらいの期間投資を計画していますか？';
+
+  @override
+  String get timeHorizonShort => '短期';
+
+  @override
+  String get timeHorizonShortDesc => '1年未満';
+
+  @override
+  String get timeHorizonMedium => '中期';
+
+  @override
+  String get timeHorizonMediumDesc => '1〜5年';
+
+  @override
+  String get timeHorizonLong => '長期';
+
+  @override
+  String get timeHorizonLongDesc => '5年以上';
+
+  @override
+  String get riskToleranceTitle => 'リスク許容度';
+
+  @override
+  String get riskToleranceSubtitle => 'どの程度のリスクに耐えられますか？';
+
+  @override
+  String get riskLevel1 => '非常に低い';
+
+  @override
+  String get riskLevel2 => '低い';
+
+  @override
+  String get riskLevel3 => '普通';
+
+  @override
+  String get riskLevel4 => '高い';
+
+  @override
+  String get riskLevel5 => '非常に高い';
+
+  @override
+  String get riskLow => '低い';
+
+  @override
+  String get riskHigh => '高い';
+
+  @override
+  String get targetReturnTitle => '目標年間収益率';
+
+  @override
+  String get targetReturnSubtitle => 'どの程度の収益率を目指していますか？';
+
+  @override
+  String get targetReturn5Desc => '安定的な低リスク投資';
+
+  @override
+  String get targetReturn10Desc => '適度な成長戦略';
+
+  @override
+  String get targetReturn20Desc => '積極的な成長戦略';
+
+  @override
+  String get targetReturnFlexible => '柔軟';
+
+  @override
+  String get targetReturnFlexibleDesc => '特定の目標なし、市場状況に合わせて対応';
+
+  @override
+  String get maxLossTitle => '最大許容損失';
+
+  @override
+  String get maxLossSubtitle => '最大どの程度の下落まで耐えられますか？';
+
+  @override
+  String get maxLoss5Desc => '非常に保守的、最小限の下落のみ許容';
+
+  @override
+  String get maxLoss10Desc => '保守的、限定的な下落を許容';
+
+  @override
+  String get maxLoss20Desc => '普通、一般的な市場変動レベル';
+
+  @override
+  String get maxLoss40Desc => '積極的、大幅な下落にも耐えられる';
+
+  @override
+  String get maxLossUnlimited => '制限なし';
+
+  @override
+  String get maxLossUnlimitedDesc => '制限なく、長期的な利益に専念';
 }

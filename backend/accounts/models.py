@@ -217,6 +217,46 @@ class SubscriptionInfo(models.Model):
         return f"{self.user_id} [{self.store}] {status}"
 
 
+class InvestmentProfile(models.Model):
+    """사용자 투자 프로필 (온보딩 5문항)"""
+    INVESTMENT_STYLE_CHOICES = [
+        ('conservative', 'Conservative'),
+        ('balanced', 'Balanced'),
+        ('aggressive', 'Aggressive'),
+    ]
+    TIME_HORIZON_CHOICES = [
+        ('short', 'Short-term (< 1 year)'),
+        ('medium', 'Medium-term (1-5 years)'),
+        ('long', 'Long-term (5+ years)'),
+    ]
+    TARGET_RETURN_CHOICES = [
+        (5, '5%'), (10, '10%'), (20, '20%'), (0, 'Flexible'),
+    ]
+    MAX_LOSS_CHOICES = [
+        (-5, '-5%'), (-10, '-10%'), (-20, '-20%'), (-40, '-40%'), (-100, 'Unlimited'),
+    ]
+
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='investment_profile',
+        primary_key=True,
+    )
+    investment_style = models.CharField(max_length=15, choices=INVESTMENT_STYLE_CHOICES, default='balanced')
+    time_horizon = models.CharField(max_length=10, choices=TIME_HORIZON_CHOICES, default='medium')
+    risk_tolerance = models.IntegerField(default=3)  # 1-5
+    target_return = models.IntegerField(choices=TARGET_RETURN_CHOICES, default=10)
+    max_loss_tolerance = models.IntegerField(choices=MAX_LOSS_CHOICES, default=-20)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'accounts_investment_profile'
+
+    def __str__(self):
+        return f"{self.user_id} [{self.investment_style}] risk={self.risk_tolerance}"
+
+
 class EmailVerificationCode(models.Model):
     """이메일 인증 코드 (회원가입 / 비밀번호 재설정)"""
     PURPOSE_CHOICES = [

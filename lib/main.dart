@@ -24,6 +24,8 @@ import 'providers/locale_provider.dart';
 import 'providers/portfolio_provider.dart';
 import 'providers/subscription_provider.dart';
 import 'providers/coach_mark_provider.dart';
+import 'providers/investment_profile_provider.dart';
+import 'screens/onboarding/investment_profile_onboarding_screen.dart';
 import 'screens/dashboard/dashboard_screen.dart';
 import 'screens/explore/explore_screen.dart';
 import 'screens/watchlist/watchlist_screen.dart';
@@ -91,6 +93,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => PortfolioProvider()),
         ChangeNotifierProvider.value(value: subscriptionProvider),
         ChangeNotifierProvider.value(value: coachMarkProvider),
+        ChangeNotifierProvider(create: (_) => InvestmentProfileProvider()),
       ],
       child: const MarketLensApp(),
     ),
@@ -602,12 +605,30 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       final portfolio = context.read<PortfolioProvider>();
       final sub = context.read<SubscriptionProvider>();
 
+      final investmentProfile = context.read<InvestmentProfileProvider>();
+
       // 초기 동기화 (앱 시작 시 auth 상태 확인 완료 후)
       watchlist.switchUser(_authProvider!.currentUser?.id);
       if (_authProvider!.isLoggedIn) {
         portfolio.initialize();
         // logIn 내부에서 미초기화 시 자동 initialize() 호출
         sub.logIn(_authProvider!.currentUser!.id.toString());
+        investmentProfile.fetchProfile();
+
+        // 앱 시작 시 온보딩 트리거
+        if (_authProvider!.needsInvestmentOnboarding) {
+          _authProvider!.clearOnboardingFlag();
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const InvestmentProfileOnboardingScreen(),
+                ),
+              );
+            }
+          });
+        }
       }
 
       // RevenueCat 실시간 리스너 → role 변경 시 userInfo 갱신
@@ -621,10 +642,27 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         if (_authProvider!.isLoggedIn) {
           portfolio.initialize();
           sub.logIn(_authProvider!.currentUser!.id.toString());
+          investmentProfile.fetchProfile();
           _fetchUnreadCount(); // 로그인 직후 뱃지 갱신
+
+          // 투자 프로필 온보딩 트리거
+          if (_authProvider!.needsInvestmentOnboarding) {
+            _authProvider!.clearOnboardingFlag();
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const InvestmentProfileOnboardingScreen(),
+                  ),
+                );
+              }
+            });
+          }
         } else {
           portfolio.clear();
           sub.logOut();
+          investmentProfile.clear();
           setState(() => _unreadNotificationCount = 0); // 로그아웃 시 뱃지 초기화
         }
       };

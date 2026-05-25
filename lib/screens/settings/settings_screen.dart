@@ -14,6 +14,7 @@ import '../auth/signup_screen.dart';
 import '../profile/profile_screen.dart';
 import '../admin/admin_panel_screen.dart';
 import '../community/community_feed_screen.dart';
+import '../onboarding/investment_profile_onboarding_screen.dart';
 import '../../l10n/app_localizations.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_radius.dart';
@@ -230,6 +231,42 @@ class SettingsScreen extends StatelessWidget {
         children: [
           // Account Section
           _buildAccountSection(context),
+
+          // Investment Profile Section (로그인 상태에서만)
+          Consumer<AuthProvider>(
+            builder: (context, authProvider, child) {
+              if (!authProvider.isLoggedIn) return const SizedBox.shrink();
+              final l10n = AppLocalizations.of(context);
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildSectionHeader(context, l10n.investmentProfileSection),
+                  _buildSettingsCard(
+                    context,
+                    children: [
+                      _buildSettingsTile(
+                        context,
+                        icon: Icons.pie_chart_outline_rounded,
+                        iconColor: context.mlColors.accentBlue,
+                        title: l10n.investmentProfileTitle,
+                        subtitle: l10n.investmentProfileEditSubtitle,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            appPageRoute(
+                              builder: (_) =>
+                                  const InvestmentProfileOnboardingScreen(
+                                      isEditing: true),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              );
+            },
+          ),
 
           // Admin Panel Section (Manager 이상만 표시)
           Consumer<AuthProvider>(

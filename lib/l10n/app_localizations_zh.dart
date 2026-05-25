@@ -2401,4 +2401,145 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String get subscriptionPaymentAccountWarning =>
       '付款通过本设备登录的 App Store / Google Play 账户处理。如果您在他人设备上购买，可能会从设备所有者的账户中扣款。';
+
+  @override
+  String get investmentProfileTitle => '投资档案';
+
+  @override
+  String get investmentProfileSection => '投资档案';
+
+  @override
+  String get investmentProfileEditSubtitle => '查看或编辑您的投资偏好';
+
+  @override
+  String get investmentProfileComplete => '完成';
+
+  @override
+  String get investmentProfileSaveFailed => '保存失败，请重试。';
+
+  @override
+  String get skip => '跳过';
+
+  @override
+  String get next => '下一步';
+
+  @override
+  String get investmentStyleTitle => '投资风格';
+
+  @override
+  String get investmentStyleSubtitle => '您的投资方式是？';
+
+  @override
+  String get investmentStyleConservative => '保守型';
+
+  @override
+  String get investmentStyleConservativeDesc => '优先保全本金，追求稳定收益';
+
+  @override
+  String get investmentStyleBalanced => '平衡型';
+
+  @override
+  String get investmentStyleBalancedDesc => '在增长与稳定之间寻求平衡';
+
+  @override
+  String get investmentStyleAggressive => '激进型';
+
+  @override
+  String get investmentStyleAggressiveDesc => '承受较高风险，追求高回报';
+
+  @override
+  String get timeHorizonTitle => '投资期限';
+
+  @override
+  String get timeHorizonSubtitle => '您计划投资多长时间？';
+
+  @override
+  String get timeHorizonShort => '短期';
+
+  @override
+  String get timeHorizonShortDesc => '不到1年';
+
+  @override
+  String get timeHorizonMedium => '中期';
+
+  @override
+  String get timeHorizonMediumDesc => '1至5年';
+
+  @override
+  String get timeHorizonLong => '长期';
+
+  @override
+  String get timeHorizonLongDesc => '5年以上';
+
+  @override
+  String get riskToleranceTitle => '风险承受度';
+
+  @override
+  String get riskToleranceSubtitle => '您能承受多大的风险？';
+
+  @override
+  String get riskLevel1 => '非常低';
+
+  @override
+  String get riskLevel2 => '低';
+
+  @override
+  String get riskLevel3 => '中等';
+
+  @override
+  String get riskLevel4 => '高';
+
+  @override
+  String get riskLevel5 => '非常高';
+
+  @override
+  String get riskLow => '低';
+
+  @override
+  String get riskHigh => '高';
+
+  @override
+  String get targetReturnTitle => '目标年化收益率';
+
+  @override
+  String get targetReturnSubtitle => '您期望的收益率是多少？';
+
+  @override
+  String get targetReturn5Desc => '稳健、低风险投资';
+
+  @override
+  String get targetReturn10Desc => '适度增长策略';
+
+  @override
+  String get targetReturn20Desc => '激进增长策略';
+
+  @override
+  String get targetReturnFlexible => '灵活';
+
+  @override
+  String get targetReturnFlexibleDesc => '无具体目标，根据市场情况灵活调整';
+
+  @override
+  String get maxLossTitle => '最大可接受亏损';
+
+  @override
+  String get maxLossSubtitle => '您最多能承受多大的回撤？';
+
+  @override
+  String get maxLoss5Desc => '非常保守，仅允许最小回撤';
+
+  @override
+  String get maxLoss10Desc => '保守，允许有限回撤';
+
+  @override
+  String get maxLoss20Desc => '中等，标准市场波动水平';
+
+  @override
+  String get maxLoss40Desc => '激进，能承受大幅下跌';
+
+  @override
+  String get maxLossUnlimited => '不限';
+
+  @override
+  String get maxLossUnlimitedDesc => '无上限，全力追求长期收益';
 }

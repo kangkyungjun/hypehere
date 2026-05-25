@@ -30,6 +30,7 @@ from .views import (
     notification_mark_single_read_view,
     revenuecat_webhook_view,
     subscription_status_view,
+    investment_profile_view,
 )
 
 app_name = 'accounts'
@@ -73,6 +74,9 @@ urlpatterns = [
     path('notifications/', notification_history_view, name='notification-history'),
     path('notifications/read/', notification_mark_read_view, name='notification-mark-read'),
     path('notifications/<int:pk>/read/', notification_mark_single_read_view, name='notification-mark-single-read'),
+
+    # 투자 프로필
+    path('investment-profile/', investment_profile_view, name='investment-profile'),
 
     # RevenueCat IAP Webhook + 구독 상태
     path('webhook/revenuecat/', revenuecat_webhook_view, name='revenuecat-webhook'),

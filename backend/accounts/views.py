@@ -18,8 +18,9 @@ from .serializers import (
     RegisterSerializer, LoginSerializer, UserSerializer, ChangePasswordSerializer,
     DeviceTokenSerializer, SubscriptionSyncSerializer,
     SendVerificationCodeSerializer, VerifyCodeSerializer, PasswordResetConfirmSerializer,
+    InvestmentProfileSerializer,
 )
-from .models import DeviceToken, NotificationSubscription, NotificationHistory, SubscriptionInfo
+from .models import DeviceToken, NotificationSubscription, NotificationHistory, SubscriptionInfo, InvestmentProfile
 from .email_utils import create_and_send_code, verify_code, send_subscription_email
 from .fcm_utils import send_general_to_all, _send_fcm, send_subscription_notification
 
@@ -806,6 +807,74 @@ def notification_mark_single_read_view(request, pk):
     ).update(is_read=True)
 
     return Response({'marked_read': updated})
+
+
+# ========================================
+# 투자 프로필 API
+# ========================================
+
+@api_view(['GET', 'POST', 'PUT'])
+@permission_classes([IsAuthenticated])
+def investment_profile_view(request):
+    """
+    투자 프로필 조회/생성/수정
+    GET  → 프로필 조회 (없으면 404)
+    POST/PUT → upsert (get_or_create + partial update)
+    Flutter: /api/accounts/investment-profile/
+    """
+    if request.method == 'GET':
+        try:
+            profile = request.user.investment_profile
+            return Response(InvestmentProfileSerializer(profile).data)
+        except InvestmentProfile.DoesNotExist:
+            return Response(
+                {'detail': 'Investment profile not set.'},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+    # POST / PUT → upsert
+    profile, created = InvestmentProfile.objects.get_or_create(user=request.user)
+    serializer = InvestmentProfileSerializer(profile, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
+        )
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+@authentication_classes([])
+@permission_classes([AllowAny])
+def internal_user_profiles_view(request):
+    """
+    Mac mini 내부 API — 전체 투자 프로필 조회
+    X-API-Key 헤더 검증 (RevenueCat webhook과 동일한 패턴)
+    GET /api/v1/internal/users/profiles/
+    """
+    api_key = request.headers.get('X-API-Key', '')
+    expected_key = django_settings.INTERNAL_API_KEY
+    if not expected_key or api_key != expected_key:
+        return Response({'error': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
+
+    profiles = InvestmentProfile.objects.select_related('user').all()
+    data = []
+    for p in profiles:
+        data.append({
+            'user_id': p.user_id,
+            'email': p.user.email,
+            'nickname': p.user.nickname,
+            'role': p.user.role,
+            'investment_style': p.investment_style,
+            'time_horizon': p.time_horizon,
+            'risk_tolerance': p.risk_tolerance,
+            'target_return': p.target_return,
+            'max_loss_tolerance': p.max_loss_tolerance,
+            'updated_at': p.updated_at.isoformat(),
+        })
+
+    return Response({'profiles': data, 'count': len(data)})
 
 
 # ========================================
