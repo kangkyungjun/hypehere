@@ -10,9 +10,9 @@ import '../../../theme/app_colors.dart';
 import '../../../theme/app_radius.dart';
 import '../../../theme/app_spacing.dart';
 import '../../../theme/app_typography.dart';
-import '../../../widgets/common/ml_divider.dart';
 import '../../../widgets/dashboard/watchlist_discovery_card.dart';
 import '../../../widgets/ads/banner_ad_widget.dart';
+import '../../../widgets/common/bento_card.dart';
 import '../../../widgets/common/error_state_view.dart';
 import '../../../widgets/common/coach_mark_overlay.dart';
 import '../../../providers/coach_mark_provider.dart';
@@ -134,7 +134,12 @@ class WatchlistTab extends StatelessWidget {
         return RefreshIndicator(
           onRefresh: onRefresh,
           child: ListView.builder(
-            padding: EdgeInsets.zero,
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.xl,
+              AppSpacing.md,
+              AppSpacing.xl,
+              AppSpacing.xl,
+            ),
             itemCount: totalCount,
             itemBuilder: (context, index) {
               // Login banner as first item when not logged in
@@ -146,15 +151,17 @@ class WatchlistTab extends StatelessWidget {
               // Subtitle row
               if (adjusted == 0) {
                 return Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.xl,
-                    vertical: AppSpacing.sm,
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.xxs,
+                    AppSpacing.sm,
+                    AppSpacing.xxs,
+                    AppSpacing.md,
                   ),
                   child: Text(
                     l10n.watchlistSubtitle,
                     style: TextStyle(
                       fontSize: AppTypography.caption,
-                      color: Theme.of(context).colorScheme.outline,
+                      color: context.mlColors.textSecondary,
                     ),
                   ),
                 );
@@ -213,217 +220,208 @@ class WatchlistTab extends StatelessWidget {
       key: Key(ticker),
       direction: DismissDirection.endToStart,
       background: Container(
-        color: context.mlColors.dangerColor,
+        margin: const EdgeInsets.only(bottom: AppSpacing.md),
+        decoration: BoxDecoration(
+          color: mlc.dangerColor,
+          borderRadius: BorderRadius.circular(AppRadius.card),
+        ),
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: AppSpacing.xxl),
-        child: Icon(Icons.delete, color: context.mlColors.onPrimary),
+        child: Icon(Icons.delete, color: mlc.onPrimary),
       ),
       onDismissed: (_) => _onRemoveTicker(context, ticker, provider),
-      child: Column(
-        children: [
-          InkWell(
-            onTap: () => onTickerTap(ticker),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.xl,
-                vertical: AppSpacing.md,
-              ),
-              child: Row(
-                children: [
-                  // Score box
-                  if (hasScore)
-                    Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color: _getSignalColor(
-                          context,
-                          tickerScore.signalType,
-                        ).withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(AppRadius.card),
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            tickerScore.score.toStringAsFixed(0),
-                            style: TextStyle(
-                              fontSize: AppTypography.headlineMedium,
-                              fontWeight: AppTypography.bold,
-                              color: _getSignalColor(
-                                context,
-                                tickerScore.signalType,
-                              ),
-                            ),
-                          ),
-                          Text(
-                            l10n.score,
-                            style: TextStyle(
-                              fontSize: AppTypography.chartMicro,
-                              color: mlc.textTertiary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
-                  else
-                    Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color: mlc.sectionBackground,
-                        borderRadius: BorderRadius.circular(AppRadius.card),
-                      ),
-                      child: Icon(
-                        Icons.bookmark,
-                        color: mlc.textTertiary,
-                        size: 22,
+      child: BentoCard(
+        margin: const EdgeInsets.only(bottom: AppSpacing.md),
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        onTap: () => onTickerTap(ticker),
+        child: Row(
+          children: [
+            // Score box
+            if (hasScore)
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: _getSignalColor(
+                    context,
+                    tickerScore.signalType,
+                  ).withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(AppRadius.card),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      tickerScore.score.toStringAsFixed(0),
+                      style: TextStyle(
+                        fontSize: AppTypography.headlineMedium,
+                        fontWeight: AppTypography.bold,
+                        color: _getSignalColor(context, tickerScore.signalType),
                       ),
                     ),
+                    Text(
+                      l10n.score,
+                      style: TextStyle(
+                        fontSize: AppTypography.chartMicro,
+                        color: mlc.textTertiary,
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            else
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: mlc.sectionBackground,
+                  borderRadius: BorderRadius.circular(AppRadius.card),
+                ),
+                child: Icon(Icons.bookmark, color: mlc.textTertiary, size: 22),
+              ),
 
-                  const SizedBox(width: AppSpacing.lg),
+            const SizedBox(width: AppSpacing.lg),
 
-                  // Ticker + Name
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          ticker,
-                          style: TextStyle(
-                            fontSize: AppTypography.headlineSmall,
-                            fontWeight: AppTypography.bold,
-                            color: mlc.textPrimary,
-                          ),
-                        ),
-                        const SizedBox(height: AppSpacing.xxs),
-                        hasScore && tickerScore.name != null
-                            ? Text(
-                                Localizations.localeOf(context).languageCode ==
-                                            'ko' &&
-                                        tickerScore.nameKo != null
-                                    ? tickerScore.nameKo!
-                                    : tickerScore.name!,
-                                style: TextStyle(
-                                  fontSize: AppTypography.bodySmall,
-                                  color: mlc.textSecondary,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              )
-                            : Text(
-                                l10n.tapToViewDetails,
-                                style: TextStyle(
-                                  fontSize: AppTypography.bodySmall,
-                                  color: mlc.textTertiary,
-                                  fontStyle: FontStyle.italic,
-                                ),
-                              ),
-                      ],
+            // Ticker + Name
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    ticker,
+                    style: TextStyle(
+                      fontSize: AppTypography.headlineSmall,
+                      fontWeight: AppTypography.bold,
+                      color: mlc.textPrimary,
                     ),
                   ),
-
-                  // Price + Change%
-                  if (hasScore && tickerScore.close != null)
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          '\$${tickerScore.close!.toStringAsFixed(2)}',
-                          style: AppTypography.numericSecondary.copyWith(
-                            fontSize: AppTypography.bodyLarge,
-                            color: mlc.textPrimary,
+                  const SizedBox(height: AppSpacing.xxs),
+                  hasScore && tickerScore.name != null
+                      ? Text(
+                          Localizations.localeOf(context).languageCode ==
+                                      'ko' &&
+                                  tickerScore.nameKo != null
+                              ? tickerScore.nameKo!
+                              : tickerScore.name!,
+                          style: TextStyle(
+                            fontSize: AppTypography.bodySmall,
+                            color: mlc.textSecondary,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        )
+                      : Text(
+                          l10n.tapToViewDetails,
+                          style: TextStyle(
+                            fontSize: AppTypography.bodySmall,
+                            color: mlc.textTertiary,
+                            fontStyle: FontStyle.italic,
                           ),
                         ),
-                        if (tickerScore.changePct != null) ...[
-                          const SizedBox(height: AppSpacing.xxs),
-                          Text(
-                            '${tickerScore.changePct! >= 0 ? '+' : ''}${tickerScore.changePct!.toStringAsFixed(2)}%',
-                            style: TextStyle(
-                              fontSize: AppTypography.caption,
-                              fontWeight: AppTypography.semiBold,
-                              color: tickerScore.changePct! >= 0
-                                  ? context.mlColors.gainColor
-                                  : context.mlColors.lossColor,
-                              fontFeatures: AppTypography.tabularFigures,
-                            ),
-                          ),
-                        ],
-                      ],
+                ],
+              ),
+            ),
+
+            // Price + Change%
+            if (hasScore && tickerScore.close != null)
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    '\$${tickerScore.close!.toStringAsFixed(2)}',
+                    style: AppTypography.numericSecondary.copyWith(
+                      fontSize: AppTypography.bodyLarge,
+                      color: mlc.textPrimary,
                     ),
+                  ),
+                  if (tickerScore.changePct != null) ...[
+                    const SizedBox(height: AppSpacing.xxs),
+                    Text(
+                      '${tickerScore.changePct! >= 0 ? '+' : ''}${tickerScore.changePct!.toStringAsFixed(2)}%',
+                      style: TextStyle(
+                        fontSize: AppTypography.caption,
+                        fontWeight: AppTypography.semiBold,
+                        color: tickerScore.changePct! >= 0
+                            ? context.mlColors.gainColor
+                            : context.mlColors.lossColor,
+                        fontFeatures: AppTypography.tabularFigures,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
 
-                  const SizedBox(width: AppSpacing.sm),
+            const SizedBox(width: AppSpacing.sm),
 
-                  // Signal pill
-                  if (hasScore && tickerScore.signal != null)
-                    Container(
+            // Signal pill
+            if (hasScore && tickerScore.signal != null)
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                  vertical: AppSpacing.xs,
+                ),
+                decoration: BoxDecoration(
+                  color: _getSignalColor(context, tickerScore.signalType),
+                  borderRadius: BorderRadius.circular(AppRadius.badge),
+                ),
+                child: Text(
+                  tickerScore.signalLabelLocalized(l10n),
+                  style: TextStyle(
+                    color: context.mlColors.onPrimary,
+                    fontSize: AppTypography.micro,
+                    fontWeight: AppTypography.bold,
+                  ),
+                ),
+              ),
+
+            const SizedBox(width: AppSpacing.xs),
+
+            // [+💼] or "보유중" badge
+            if (isLoggedIn)
+              isHeld
+                  ? Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: AppSpacing.md,
                         vertical: AppSpacing.xs,
                       ),
                       decoration: BoxDecoration(
-                        color: _getSignalColor(context, tickerScore.signalType),
+                        color: theme.colorScheme.outline.withValues(
+                          alpha: 0.15,
+                        ),
                         borderRadius: BorderRadius.circular(AppRadius.badge),
                       ),
                       child: Text(
-                        tickerScore.signalLabelLocalized(l10n),
+                        l10n.alreadyHeld,
                         style: TextStyle(
-                          color: context.mlColors.onPrimary,
                           fontSize: AppTypography.micro,
-                          fontWeight: AppTypography.bold,
+                          color: mlc.textSecondary,
                         ),
                       ),
-                    ),
-
-                  const SizedBox(width: AppSpacing.xs),
-
-                  // [+💼] or "보유중" badge
-                  if (isLoggedIn)
-                    isHeld
-                        ? Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: AppSpacing.md,
-                              vertical: AppSpacing.xs,
-                            ),
-                            decoration: BoxDecoration(
-                              color: theme.colorScheme.outline.withValues(
-                                alpha: 0.15,
-                              ),
-                              borderRadius: BorderRadius.circular(
-                                AppRadius.badge,
-                              ),
-                            ),
-                            child: Text(
-                              l10n.alreadyHeld,
-                              style: TextStyle(
-                                fontSize: AppTypography.micro,
-                                color: mlc.textSecondary,
-                              ),
-                            ),
-                          )
-                        : SizedBox(
-                            width: 48,
-                            height: 48,
-                            child: IconButton(
-                              icon: Icon(
-                                Icons.add_business,
-                                size: 22,
-                                color: mlc.accentBlue,
-                              ),
-                              padding: EdgeInsets.zero,
-                              tooltip: l10n.addToHoldings,
-                              onPressed: () =>
-                                  onAddHolding(ticker, tickerScore),
-                            ),
-                          )
-                  else
-                    Icon(Icons.chevron_right, color: mlc.textTertiary),
-                ],
-              ),
-            ),
-          ),
-          const MlDivider(),
-        ],
+                    )
+                  : Tooltip(
+                      message: l10n.addToHoldings,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(AppRadius.lg),
+                        onTap: () => onAddHolding(ticker, tickerScore),
+                        child: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: mlc.infoBg,
+                            borderRadius: BorderRadius.circular(AppRadius.lg),
+                          ),
+                          child: Icon(
+                            Icons.add_business,
+                            size: 20,
+                            color: mlc.accentBlue,
+                          ),
+                        ),
+                      ),
+                    )
+            else
+              Icon(Icons.chevron_right, color: mlc.textTertiary),
+          ],
+        ),
       ),
     );
   }
@@ -440,42 +438,59 @@ class WatchlistTab extends StatelessWidget {
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.xxxl),
+          padding: const EdgeInsets.all(AppSpacing.xl),
           child: Column(
             children: [
               if (!auth.isLoggedIn) ...[
                 const LoginRequiredBanner(),
                 const SizedBox(height: AppSpacing.xl),
               ],
-              const SizedBox(height: AppSpacing.xxxl),
-              CoachMark(
-                coachKey: CoachMarkProvider.keyWatchlist,
-                message: l10n.coachMarkWatchlist,
-                child: Icon(
-                  Icons.bookmark_border,
-                  size: 80,
-                  color: Theme.of(context).colorScheme.outline,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.xxl),
-              Text(
-                l10n.watchlistEmpty,
-                style: const TextStyle(
-                  fontSize: AppTypography.displayMedium,
-                  fontWeight: AppTypography.bold,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              Text(
-                l10n.watchlistEmptyHint,
-                style: TextStyle(
-                  fontSize: AppTypography.bodyLarge,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-                textAlign: TextAlign.center,
-              ),
               const SizedBox(height: AppSpacing.xl),
-              _buildAddWatchlistButton(context, l10n),
+              BentoCard(
+                padding: const EdgeInsets.all(AppSpacing.xxl),
+                child: Column(
+                  children: [
+                    CoachMark(
+                      coachKey: CoachMarkProvider.keyWatchlist,
+                      message: l10n.coachMarkWatchlist,
+                      child: Container(
+                        width: 72,
+                        height: 72,
+                        decoration: BoxDecoration(
+                          color: context.mlColors.sectionBackground,
+                          borderRadius: BorderRadius.circular(AppRadius.xl),
+                        ),
+                        child: Icon(
+                          Icons.bookmark_border,
+                          size: 34,
+                          color: context.mlColors.textTertiary,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xl),
+                    Text(
+                      l10n.watchlistEmpty,
+                      style: TextStyle(
+                        fontSize: AppTypography.headlineMedium,
+                        fontWeight: AppTypography.bold,
+                        color: context.mlColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    Text(
+                      l10n.watchlistEmptyHint,
+                      style: TextStyle(
+                        fontSize: AppTypography.bodyMedium,
+                        color: context.mlColors.textSecondary,
+                        height: 1.45,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: AppSpacing.xl),
+                    _buildAddWatchlistButton(context, l10n),
+                  ],
+                ),
+              ),
               if (topVolumeItems.isNotEmpty) ...[
                 const SizedBox(height: AppSpacing.xxxl),
                 WatchlistDiscoveryCard(

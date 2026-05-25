@@ -10,6 +10,7 @@ import '../../theme/app_colors.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 import '../../theme/app_typography.dart';
+import '../../widgets/common/market_segmented_tabs.dart';
 
 /// Combined News screen with internal tabs: Calendar | News
 ///
@@ -65,58 +66,53 @@ class _NewsCombinedScreenState extends State<NewsCombinedScreen>
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
-
     return Column(
       children: [
-        Material(
-          color: theme.colorScheme.surface,
-          child: Stack(
-            alignment: Alignment.centerRight,
-            children: [
-              TabBar(
+        Row(
+          children: [
+            Expanded(
+              child: MarketSegmentedTabs(
                 controller: _tabController,
-                tabs: [
-                  Tab(text: l10n.tabCalendar),
-                  Tab(text: l10n.tabNews),
-                ],
-                labelColor: context.mlColors.accentBlue,
-                unselectedLabelColor: context.mlColors.textTertiary,
-                indicatorColor: context.mlColors.accentBlue,
-                indicatorWeight: 3,
-                labelStyle: const TextStyle(
-                  fontSize: AppTypography.headlineSmall,
-                  fontWeight: AppTypography.semiBold,
-                  height: 1.25,
-                ),
-                unselectedLabelStyle: const TextStyle(
-                  fontSize: AppTypography.headlineSmall,
-                  fontWeight: AppTypography.medium,
-                  height: 1.25,
+                tabs: [l10n.tabCalendar, l10n.tabNews],
+                padding: EdgeInsets.fromLTRB(
+                  AppSpacing.xl,
+                  AppSpacing.sm,
+                  _isNewsTab ? AppSpacing.sm : AppSpacing.xl,
+                  AppSpacing.md,
                 ),
               ),
-              // Filter button (only visible on News tab)
-              if (_isNewsTab)
-                Padding(
-                  padding: const EdgeInsets.only(right: AppSpacing.md),
+            ),
+            if (_isNewsTab)
+              Padding(
+                padding: const EdgeInsets.only(
+                  right: AppSpacing.xl,
+                  bottom: AppSpacing.xs,
+                ),
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: context.mlColors.cardBackground,
+                    borderRadius: BorderRadius.circular(AppRadius.full),
+                    border: Border.all(color: context.mlColors.subtleBorder),
+                  ),
                   child: IconButton(
+                    visualDensity: VisualDensity.compact,
+                    onPressed: _openFilterSheet,
+                    tooltip: l10n.newsFilter,
                     icon: Badge(
                       isLabelVisible: _filterState.isActive,
                       smallSize: 8,
                       child: Icon(
-                        Icons.tune,
+                        Icons.tune_rounded,
                         size: 20,
                         color: _filterState.isActive
                             ? context.mlColors.accentBlue
                             : context.mlColors.textSecondary,
                       ),
                     ),
-                    onPressed: _openFilterSheet,
-                    tooltip: l10n.newsFilter,
                   ),
                 ),
-            ],
-          ),
+              ),
+          ],
         ),
         // Category chip bar (only visible on News tab)
         if (_isNewsTab) _buildCategoryChips(context, l10n),

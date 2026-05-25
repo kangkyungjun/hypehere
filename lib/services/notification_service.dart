@@ -28,7 +28,8 @@ class NotificationService {
   static const _storage = FlutterSecureStorage();
 
   static final String _baseUrl =
-      dotenv.env['AUTH_API_BASE_URL'] ?? 'http://43.201.45.60:8000/api/accounts';
+      dotenv.env['AUTH_API_BASE_URL'] ??
+      'http://43.201.45.60:8000/api/accounts';
 
   String? _currentToken;
   bool _tokenRefreshListenerRegistered = false;
@@ -52,7 +53,8 @@ class NotificationService {
   }
 
   // 속보 뉴스 포그라운드 콜백 (토스트 표시용)
-  Function(String title, String body, Map<String, dynamic> data)? onBreakingNewsReceived;
+  Function(String title, String body, Map<String, dynamic> data)?
+  onBreakingNewsReceived;
 
   // 포그라운드 FCM 수신 콜백 (뱃지 카운트 갱신용)
   VoidCallback? onForegroundMessageReceived;
@@ -87,13 +89,15 @@ class NotificationService {
 
     final androidPlugin = _localNotifications
         .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>();
+          AndroidFlutterLocalNotificationsPlugin
+        >();
     await androidPlugin?.createNotificationChannel(androidChannel);
     await androidPlugin?.createNotificationChannel(subscriptionChannel);
 
     // 로컬 알림 초기화
-    const androidSettings =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+    const androidSettings = AndroidInitializationSettings(
+      '@mipmap/ic_launcher',
+    );
     const iosSettings = DarwinInitializationSettings(
       requestAlertPermission: false,
       requestBadgePermission: false,
@@ -101,10 +105,7 @@ class NotificationService {
     );
 
     await _localNotifications.initialize(
-      const InitializationSettings(
-        android: androidSettings,
-        iOS: iosSettings,
-      ),
+      const InitializationSettings(android: androidSettings, iOS: iosSettings),
       onDidReceiveNotificationResponse: _onLocalNotificationTap,
     );
 
@@ -113,10 +114,14 @@ class NotificationService {
     await _onMessageOpenedAppSub?.cancel();
 
     // 포그라운드 메시지 리스너
-    _onMessageSub = FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
+    _onMessageSub = FirebaseMessaging.onMessage.listen(
+      _handleForegroundMessage,
+    );
 
     // 알림 탭으로 앱 열었을 때
-    _onMessageOpenedAppSub = FirebaseMessaging.onMessageOpenedApp.listen(_handleNotificationOpen);
+    _onMessageOpenedAppSub = FirebaseMessaging.onMessageOpenedApp.listen(
+      _handleNotificationOpen,
+    );
 
     // 앱이 종료 상태에서 알림으로 열린 경우
     final initialMessage = await _messaging!.getInitialMessage();
@@ -134,6 +139,11 @@ class NotificationService {
 
   /// 권한 요청 + 토큰 등록 (로그인 후 호출)
   Future<void> requestPermissionAndRegister() async {
+    if (_messaging == null ||
+        _onMessageSub == null ||
+        _onMessageOpenedAppSub == null) {
+      await initialize();
+    }
     if (_messaging == null) return;
 
     final settings = await _messaging!.requestPermission(
@@ -145,7 +155,22 @@ class NotificationService {
     if (settings.authorizationStatus == AuthorizationStatus.authorized ||
         settings.authorizationStatus == AuthorizationStatus.provisional) {
       await _registerToken();
+    } else {
+      debugPrint(
+        '[FCM] Permission not granted: ${settings.authorizationStatus}',
+      );
     }
+  }
+
+  Map<String, dynamic> _payloadFromRemoteMessage(RemoteMessage message) {
+    return <String, dynamic>{
+      ...message.data,
+      if (message.notification?.title != null)
+        'title': message.notification!.title!,
+      if (message.notification?.body != null)
+        'body': message.notification!.body!,
+      if (message.messageId != null) 'message_id': message.messageId!,
+    };
   }
 
   /// FCM 토큰 서버 등록
@@ -161,7 +186,7 @@ class NotificationService {
       final platform = Platform.isIOS ? 'ios' : 'android';
       final language = PlatformDispatcher.instance.locale.languageCode;
 
-      await http.post(
+      final response = await http.post(
         Uri.parse('$_baseUrl/device/register/'),
         headers: {
           'Content-Type': 'application/json',
@@ -174,19 +199,29 @@ class NotificationService {
         }),
       );
 
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        debugPrint(
+          '[FCM] Token registration failed: '
+          '${response.statusCode} ${response.body}',
+        );
+        return;
+      }
+
       debugPrint('[FCM] Token registered: ${token.substring(0, 20)}...');
 
       // 토큰 갱신 리스너 (중복 등록 방지)
       if (!_tokenRefreshListenerRegistered) {
         _tokenRefreshListenerRegistered = true;
         await _onTokenRefreshSub?.cancel();
-        _onTokenRefreshSub = _messaging?.onTokenRefresh.listen((newToken) async {
+        _onTokenRefreshSub = _messaging?.onTokenRefresh.listen((
+          newToken,
+        ) async {
           _currentToken = newToken;
           final at = await _storage.read(key: 'auth_token');
           if (at != null) {
             final p = Platform.isIOS ? 'ios' : 'android';
             final lang = PlatformDispatcher.instance.locale.languageCode;
-            await http.post(
+            final response = await http.post(
               Uri.parse('$_baseUrl/device/register/'),
               headers: {
                 'Content-Type': 'application/json',
@@ -198,6 +233,12 @@ class NotificationService {
                 'language': lang,
               }),
             );
+            if (response.statusCode < 200 || response.statusCode >= 300) {
+              debugPrint(
+                '[FCM] Token refresh registration failed: '
+                '${response.statusCode} ${response.body}',
+              );
+            }
           }
         });
       }
@@ -208,13 +249,14 @@ class NotificationService {
 
   /// 로그아웃 시 토큰 비활성화
   Future<void> deactivateToken() async {
+    _currentToken ??= await _messaging?.getToken();
     if (_currentToken == null) return;
 
     try {
       final authToken = await _storage.read(key: 'auth_token');
       if (authToken == null) return;
 
-      await http.post(
+      final response = await http.post(
         Uri.parse('$_baseUrl/device/deactivate/'),
         headers: {
           'Content-Type': 'application/json',
@@ -222,6 +264,14 @@ class NotificationService {
         },
         body: jsonEncode({'token': _currentToken}),
       );
+
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        debugPrint(
+          '[FCM] Token deactivation failed: '
+          '${response.statusCode} ${response.body}',
+        );
+        return;
+      }
 
       debugPrint('[FCM] Token deactivated');
     } catch (e) {
@@ -246,7 +296,7 @@ class NotificationService {
       final authToken = await _storage.read(key: 'auth_token');
       if (authToken == null) return;
 
-      await http.put(
+      final response = await http.put(
         Uri.parse('$_baseUrl/device/subscriptions/'),
         headers: {
           'Content-Type': 'application/json',
@@ -254,6 +304,14 @@ class NotificationService {
         },
         body: jsonEncode({'tickers': tickers}),
       );
+
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        debugPrint(
+          '[FCM] Subscription sync failed: '
+          '${response.statusCode} ${response.body}',
+        );
+        return;
+      }
 
       debugPrint('[FCM] Subscriptions synced: ${tickers.length} tickers');
     } catch (e) {
@@ -270,17 +328,20 @@ class NotificationService {
     onForegroundMessageReceived?.call();
 
     // 속보 뉴스: in-app 토스트로 표시 (시스템 알림 대신)
-    if (message.data['type'] == 'BREAKING_NEWS' && onBreakingNewsReceived != null) {
+    final payload = _payloadFromRemoteMessage(message);
+
+    if (payload['type'] == 'BREAKING_NEWS' && onBreakingNewsReceived != null) {
       onBreakingNewsReceived!(
         notification.title ?? '',
         notification.body ?? '',
-        message.data,
+        payload,
       );
       return;
     }
 
     // 구독 알림은 별도 채널로 라우팅
-    final isSubscription = message.data['type']?.toString().startsWith('SUBSCRIPTION_') ?? false;
+    final isSubscription =
+        payload['type']?.toString().startsWith('SUBSCRIPTION_') ?? false;
     final androidDetails = isSubscription
         ? const AndroidNotificationDetails(
             'marketlens_subscription',
@@ -307,13 +368,13 @@ class NotificationService {
           presentSound: true,
         ),
       ),
-      payload: jsonEncode(message.data),
+      payload: jsonEncode(payload),
     );
   }
 
   /// 알림 탭으로 앱 진입 시 라우팅
   void _handleNotificationOpen(RemoteMessage message) {
-    final data = message.data;
+    final data = _payloadFromRemoteMessage(message);
     if (_onNotificationTap != null) {
       _onNotificationTap!(data);
     } else {

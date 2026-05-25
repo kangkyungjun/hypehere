@@ -140,6 +140,18 @@ def _update_rate_limit(user_id):
 
 
 # ── FCM 전송 ─────────────────────────────────────────────────────
+def _normalize_fcm_data(data=None, default_type=''):
+    """FCM data payload는 문자열 key/value만 허용하므로 안전하게 정규화한다."""
+    payload = {}
+    for key, value in (data or {}).items():
+        if value is None:
+            continue
+        payload[str(key)] = str(value)
+    if default_type and not payload.get('type'):
+        payload['type'] = default_type
+    return payload
+
+
 def _send_fcm(tokens, title, body, data=None):
     """
     firebase-admin send_each()로 배치 발송
@@ -150,11 +162,12 @@ def _send_fcm(tokens, title, body, data=None):
 
     _get_firebase_app()
 
+    payload = _normalize_fcm_data(data)
     messages = []
     for token in tokens:
         msg = messaging.Message(
             notification=messaging.Notification(title=title, body=body),
-            data=data or {},
+            data=payload,
             token=token,
         )
         messages.append(msg)
@@ -266,7 +279,8 @@ def send_general_to_ticker_subscribers(ticker, msg_key, msg_params=None, data=No
         all_tokens = [token for token, _ in devices]
         lang = devices[-1][1] or DEFAULT_LANG
         title, body = _get_msg(lang, msg_key, **params)
-        success, _, _ = _send_fcm(all_tokens, title, body, data)
+        payload = _normalize_fcm_data(data, default_type=msg_key)
+        success, _, _ = _send_fcm(all_tokens, title, body, payload)
 
         if success > 0:
             _update_rate_limit(sub.user_id)
@@ -317,7 +331,8 @@ def send_general_to_all(msg_key, msg_params=None, data=None):
             all_tokens.extend(tokens)
             last_lang = lang
         title, body = _get_msg(last_lang, msg_key, **params)
-        success, _, _ = _send_fcm(all_tokens, title, body, data)
+        payload = _normalize_fcm_data(data, default_type=msg_key)
+        success, _, _ = _send_fcm(all_tokens, title, body, payload)
 
         if success > 0:
             _update_rate_limit(user_id)
@@ -326,7 +341,8 @@ def send_general_to_all(msg_key, msg_params=None, data=None):
     # 비로그인 토큰: rate limit/history 없이 바로 발송
     for lang, tokens in anon_lang_tokens.items():
         title, body = _get_msg(lang, msg_key, **params)
-        success, _, _ = _send_fcm(tokens, title, body, data)
+        payload = _normalize_fcm_data(data, default_type=msg_key)
+        success, _, _ = _send_fcm(tokens, title, body, payload)
         if success > 0:
             sent += 1
 
@@ -361,7 +377,8 @@ def send_comment_notification(user_id, msg_key, msg_params=None, data=None):
     all_tokens = [token for token, _ in devices]
     lang = devices[-1][1] or DEFAULT_LANG
     title, body = _get_msg(lang, msg_key, **params)
-    success, _, _ = _send_fcm(all_tokens, title, body, data)
+    payload = _normalize_fcm_data(data, default_type=msg_key)
+    success, _, _ = _send_fcm(all_tokens, title, body, payload)
 
     return success
 

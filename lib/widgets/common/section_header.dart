@@ -31,7 +31,7 @@ class SectionHeader extends StatelessWidget {
           padding ??
           const EdgeInsets.symmetric(
             horizontal: AppSpacing.xl,
-            vertical: AppSpacing.md,
+            vertical: AppSpacing.sm,
           ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -51,6 +51,7 @@ class SectionHeader extends StatelessWidget {
                   title,
                   style: AppTypography.sectionTitle.copyWith(
                     color: colors.textPrimary,
+                    letterSpacing: -0.1,
                   ),
                 ),
                 if (subtitle != null && subtitle!.isNotEmpty) ...[

@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:marketlens/theme/app_colors.dart';
 import 'package:marketlens/utils/score_mapper.dart';
@@ -47,61 +46,61 @@ void main() {
   });
 
   group('getScoreColor', () {
-    test('score >= 80 returns lossColor (red)', () {
+    test('score >= 80 returns gainColor', () {
       expect(
         ScoreMapper.getScoreColor(85, MarketLensColors.light),
-        MarketLensColors.light.lossColor,
+        MarketLensColors.light.gainColor,
       );
     });
 
-    test('score 60-79 returns buy pink', () {
+    test('score 60-79 returns scoreBuyColor', () {
       expect(
         ScoreMapper.getScoreColor(70, MarketLensColors.light),
-        const Color(0xFFE91E63),
+        MarketLensColors.light.scoreBuyColor,
       );
     });
 
-    test('score 40-59 returns neutralColor (grey)', () {
+    test('score 40-59 returns scoreHoldColor', () {
       expect(
         ScoreMapper.getScoreColor(50, MarketLensColors.light),
-        MarketLensColors.light.neutralColor,
+        MarketLensColors.light.scoreHoldColor,
       );
     });
 
-    test('score 20-39 returns sell light blue', () {
+    test('score 20-39 returns scoreSellColor', () {
       expect(
         ScoreMapper.getScoreColor(30, MarketLensColors.light),
-        const Color(0xFF03A9F4),
+        MarketLensColors.light.scoreSellColor,
       );
     });
 
-    test('score < 20 returns accentBlue', () {
+    test('score < 20 returns lossColor', () {
       expect(
         ScoreMapper.getScoreColor(10, MarketLensColors.light),
-        MarketLensColors.light.accentBlue,
+        MarketLensColors.light.lossColor,
       );
     });
   });
 
   group('getScoreLabel', () {
-    test('score >= 80 returns 강력매수', () {
-      expect(ScoreMapper.getScoreLabel(90), '강력매수');
+    test('score >= 80 returns 강력긍정', () {
+      expect(ScoreMapper.getScoreLabel(90), '강력긍정');
     });
 
-    test('score 60-79 returns 매수권고', () {
-      expect(ScoreMapper.getScoreLabel(65), '매수권고');
+    test('score 60-79 returns 긍정', () {
+      expect(ScoreMapper.getScoreLabel(65), '긍정');
     });
 
-    test('score 40-59 returns 하락관망', () {
-      expect(ScoreMapper.getScoreLabel(50), '하락관망');
+    test('score 40-59 returns 중립', () {
+      expect(ScoreMapper.getScoreLabel(50), '중립');
     });
 
-    test('score 20-39 returns 매도권고', () {
-      expect(ScoreMapper.getScoreLabel(25), '매도권고');
+    test('score 20-39 returns 부정', () {
+      expect(ScoreMapper.getScoreLabel(25), '부정');
     });
 
-    test('score < 20 returns 강력매도', () {
-      expect(ScoreMapper.getScoreLabel(10), '강력매도');
+    test('score < 20 returns 강력부정', () {
+      expect(ScoreMapper.getScoreLabel(10), '강력부정');
     });
   });
 
@@ -124,61 +123,67 @@ void main() {
   });
 
   group('getColorForLevel', () {
-    test('strongBuy returns lossColor (red)', () {
+    test('strongBuy returns gainColor', () {
       expect(
-        ScoreMapper.getColorForLevel(ScoreLevel.strongBuy, MarketLensColors.light),
-        MarketLensColors.light.lossColor,
+        ScoreMapper.getColorForLevel(
+          ScoreLevel.strongBuy,
+          MarketLensColors.light,
+        ),
+        MarketLensColors.light.gainColor,
       );
     });
 
-    test('buy returns pink', () {
+    test('buy returns scoreBuyColor', () {
       expect(
         ScoreMapper.getColorForLevel(ScoreLevel.buy, MarketLensColors.light),
-        const Color(0xFFE91E63),
+        MarketLensColors.light.scoreBuyColor,
       );
     });
 
-    test('hold returns neutralColor', () {
+    test('hold returns scoreHoldColor', () {
       expect(
         ScoreMapper.getColorForLevel(ScoreLevel.hold, MarketLensColors.light),
-        MarketLensColors.light.neutralColor,
+        MarketLensColors.light.scoreHoldColor,
       );
     });
 
-    test('sell returns light blue', () {
+    test('sell returns scoreSellColor', () {
       expect(
         ScoreMapper.getColorForLevel(ScoreLevel.sell, MarketLensColors.light),
-        const Color(0xFF03A9F4),
+        MarketLensColors.light.scoreSellColor,
       );
     });
 
-    test('strongSell returns accentBlue', () {
+    test('strongSell returns lossColor', () {
       expect(
-        ScoreMapper.getColorForLevel(ScoreLevel.strongSell, MarketLensColors.light),
-        MarketLensColors.light.accentBlue,
+        ScoreMapper.getColorForLevel(
+          ScoreLevel.strongSell,
+          MarketLensColors.light,
+        ),
+        MarketLensColors.light.lossColor,
       );
     });
   });
 
   group('getLabelForLevel', () {
-    test('strongBuy returns 강력매수', () {
-      expect(ScoreMapper.getLabelForLevel(ScoreLevel.strongBuy), '강력매수');
+    test('strongBuy returns 강력긍정', () {
+      expect(ScoreMapper.getLabelForLevel(ScoreLevel.strongBuy), '강력긍정');
     });
 
-    test('buy returns 매수권고', () {
-      expect(ScoreMapper.getLabelForLevel(ScoreLevel.buy), '매수권고');
+    test('buy returns 긍정', () {
+      expect(ScoreMapper.getLabelForLevel(ScoreLevel.buy), '긍정');
     });
 
-    test('hold returns 하락관망', () {
-      expect(ScoreMapper.getLabelForLevel(ScoreLevel.hold), '하락관망');
+    test('hold returns 중립', () {
+      expect(ScoreMapper.getLabelForLevel(ScoreLevel.hold), '중립');
     });
 
-    test('sell returns 매도권고', () {
-      expect(ScoreMapper.getLabelForLevel(ScoreLevel.sell), '매도권고');
+    test('sell returns 부정', () {
+      expect(ScoreMapper.getLabelForLevel(ScoreLevel.sell), '부정');
     });
 
-    test('strongSell returns 강력매도', () {
-      expect(ScoreMapper.getLabelForLevel(ScoreLevel.strongSell), '강력매도');
+    test('strongSell returns 강력부정', () {
+      expect(ScoreMapper.getLabelForLevel(ScoreLevel.strongSell), '강력부정');
     });
   });
 

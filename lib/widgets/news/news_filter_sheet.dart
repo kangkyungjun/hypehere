@@ -9,6 +9,7 @@ import '../../theme/app_spacing.dart';
 import '../../theme/app_stroke.dart';
 import '../../theme/app_typography.dart';
 import '../common/ml_divider.dart';
+import '../common/modal_handle_bar.dart';
 
 /// Bottom sheet for filtering news list.
 ///
@@ -33,7 +34,7 @@ class NewsFilterSheet extends StatefulWidget {
     return showModalBottomSheet<NewsFilterState>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent,
+      useSafeArea: true,
       builder: (ctx) => NewsFilterSheet(
         initialState: currentState,
         watchlistTickers: watchlistTickers,
@@ -97,12 +98,14 @@ class _NewsFilterSheetState extends State<NewsFilterSheet> {
   }
 
   void _apply() {
-    Navigator.of(context).pop(NewsFilterState(
-      category: _category,
-      sentimentGrades: _sentimentGrades,
-      sectors: _sectors,
-      breakingOnly: _breakingOnly,
-    ));
+    Navigator.of(context).pop(
+      NewsFilterState(
+        category: _category,
+        sentimentGrades: _sentimentGrades,
+        sectors: _sectors,
+        breakingOnly: _breakingOnly,
+      ),
+    );
   }
 
   /// Localized sector name
@@ -140,44 +143,45 @@ class _NewsFilterSheetState extends State<NewsFilterSheet> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
+    final colors = context.mlColors;
 
     return Container(
       constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height * 0.65
-                 - MediaQuery.of(context).viewPadding.bottom,
-      ),
-      margin: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewPadding.bottom + AppSpacing.md,
+        maxHeight:
+            MediaQuery.of(context).size.height * 0.65 -
+            MediaQuery.of(context).viewPadding.bottom,
       ),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
+        color: colors.cardBackground,
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(AppRadius.xxxl),
+        ),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Handle bar
-          const SizedBox(height: AppSpacing.md),
-          Container(
-            width: 40,
-            height: 4,
-            decoration: BoxDecoration(
-              color: theme.colorScheme.outlineVariant,
-              borderRadius: BorderRadius.circular(AppRadius.xxs),
-            ),
-          ),
-          const SizedBox(height: AppSpacing.sm),
+          const ModalHandleBar(),
 
           // Header: Reset + Apply
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.xl,
+              0,
+              AppSpacing.xl,
+              AppSpacing.md,
+            ),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                TextButton(
-                  onPressed: _reset,
-                  child: Text(l10n.filterReset),
+                Expanded(
+                  child: Text(
+                    l10n.newsFilter,
+                    style: AppTypography.sectionTitle.copyWith(
+                      color: colors.textPrimary,
+                    ),
+                  ),
                 ),
+                TextButton(onPressed: _reset, child: Text(l10n.filterReset)),
+                const SizedBox(width: AppSpacing.xs),
                 FilledButton(
                   onPressed: _apply,
                   child: Text(
@@ -195,14 +199,20 @@ class _NewsFilterSheetState extends State<NewsFilterSheet> {
           // Scrollable content
           Flexible(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.xl,
+                AppSpacing.lg,
+                AppSpacing.xl,
+                AppSpacing.xl,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Source filter (horizontal chips)
                   Text(
                     l10n.filterSource,
-                    style: theme.textTheme.titleSmall?.copyWith(
+                    style: AppTypography.cardTitle.copyWith(
+                      color: colors.textPrimary,
                       fontWeight: AppTypography.bold,
                     ),
                   ),
@@ -213,7 +223,8 @@ class _NewsFilterSheetState extends State<NewsFilterSheet> {
                   // Sentiment filter
                   Text(
                     l10n.filterSentiment,
-                    style: theme.textTheme.titleSmall?.copyWith(
+                    style: AppTypography.cardTitle.copyWith(
+                      color: colors.textPrimary,
                       fontWeight: AppTypography.bold,
                     ),
                   ),
@@ -222,12 +233,22 @@ class _NewsFilterSheetState extends State<NewsFilterSheet> {
                   const SizedBox(height: AppSpacing.md),
 
                   // Breaking only
-                  CheckboxListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(l10n.filterBreakingOnly),
-                    value: _breakingOnly,
-                    onChanged: (v) => setState(() => _breakingOnly = v ?? false),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: colors.sectionBackground,
+                      borderRadius: BorderRadius.circular(AppRadius.lg),
+                    ),
+                    child: CheckboxListTile(
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.md,
+                      ),
+                      title: Text(l10n.filterBreakingOnly),
+                      value: _breakingOnly,
+                      onChanged: (v) =>
+                          setState(() => _breakingOnly = v ?? false),
+                    ),
                   ),
+                  const SizedBox(height: AppSpacing.lg),
 
                   // Sector filter (always expanded)
                   _buildSectorSection(l10n, theme),
@@ -254,7 +275,8 @@ class _NewsFilterSheetState extends State<NewsFilterSheet> {
       spacing: AppSpacing.sm,
       children: options.map((opt) {
         final selected = _category == opt.$1;
-        final isDisabled = opt.$1 == NewsCategory.watchlist && widget.watchlistTickers.isEmpty;
+        final isDisabled =
+            opt.$1 == NewsCategory.watchlist && widget.watchlistTickers.isEmpty;
         return GestureDetector(
           onTap: isDisabled ? null : () => setState(() => _category = opt.$1),
           child: Opacity(
@@ -279,7 +301,9 @@ class _NewsFilterSheetState extends State<NewsFilterSheet> {
                 opt.$2,
                 style: TextStyle(
                   fontSize: AppTypography.caption,
-                  fontWeight: selected ? AppTypography.bold : AppTypography.regular,
+                  fontWeight: selected
+                      ? AppTypography.bold
+                      : AppTypography.regular,
                   color: selected
                       ? context.mlColors.onPrimary
                       : Theme.of(context).colorScheme.onSurfaceVariant,
@@ -351,10 +375,13 @@ class _NewsFilterSheetState extends State<NewsFilterSheet> {
         if (_sectorsLoading)
           const Padding(
             padding: EdgeInsets.all(AppSpacing.md),
-            child: Center(child: SizedBox(
-              width: 20, height: 20,
-              child: CircularProgressIndicator(strokeWidth: AppStroke.medium),
-            )),
+            child: Center(
+              child: SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: AppStroke.medium),
+              ),
+            ),
           )
         else
           Wrap(

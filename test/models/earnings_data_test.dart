@@ -42,10 +42,7 @@ void main() {
 
     test('fromJson: earningsConfirmed 기본값 false', () {
       // Given: earnings_confirmed 필드가 없는 JSON
-      final json = {
-        'ticker': 'MSFT',
-        'earnings_date': '2026-04-22',
-      };
+      final json = {'ticker': 'MSFT', 'earnings_date': '2026-04-22'};
 
       // When: JSON -> Model 파싱
       final event = EarningsWeekEvent.fromJson(json);
@@ -56,10 +53,7 @@ void main() {
 
     test('fromJson: nullable 필드가 null', () {
       // Given: 선택적 필드가 없는 최소 JSON
-      final json = {
-        'ticker': 'TSLA',
-        'earnings_date': '2026-04-23',
-      };
+      final json = {'ticker': 'TSLA', 'earnings_date': '2026-04-23'};
 
       // When: JSON -> Model 파싱
       final event = EarningsWeekEvent.fromJson(json);
@@ -244,7 +238,10 @@ void main() {
         prevSurprisePct: 4.5,
       );
 
-      expect(event.surpriseColor, MarketLensColors.light.gainColor);
+      expect(
+        event.surpriseColor(MarketLensColors.light),
+        MarketLensColors.light.gainColor,
+      );
     });
 
     test('음수 -> lossColor', () {
@@ -254,7 +251,10 @@ void main() {
         prevSurprisePct: -2.6,
       );
 
-      expect(event.surpriseColor, MarketLensColors.light.lossColor);
+      expect(
+        event.surpriseColor(MarketLensColors.light),
+        MarketLensColors.light.lossColor,
+      );
     });
 
     test('null -> neutralColor', () {
@@ -263,7 +263,10 @@ void main() {
         earningsDate: '2026-04-24',
       );
 
-      expect(event.surpriseColor, MarketLensColors.light.neutralColor);
+      expect(
+        event.surpriseColor(MarketLensColors.light),
+        MarketLensColors.light.neutralColor,
+      );
     });
 
     test('0 -> gainColor (>= 0 조건)', () {
@@ -273,7 +276,10 @@ void main() {
         prevSurprisePct: 0.0,
       );
 
-      expect(event.surpriseColor, MarketLensColors.light.gainColor);
+      expect(
+        event.surpriseColor(MarketLensColors.light),
+        MarketLensColors.light.gainColor,
+      );
     });
   });
 

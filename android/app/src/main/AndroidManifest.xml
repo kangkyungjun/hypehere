@@ -1,6 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- Internet Permission for API calls -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Android 13+ runtime notification permission for FCM display -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!-- Billing Permission for In-App Purchases -->
     <uses-permission android:name="com.android.vending.BILLING" />
 

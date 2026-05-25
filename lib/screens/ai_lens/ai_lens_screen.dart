@@ -479,12 +479,13 @@ class _AILensScreenState extends State<AILensScreen> {
             contentPadding: EdgeInsets.zero,
             leading: CircleAvatar(
               radius: 16,
-              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+              backgroundColor: context.mlColors.infoBg,
               child: Text(
                 ticker[0],
                 style: TextStyle(
                   fontSize: 12,
-                  color: Theme.of(context).colorScheme.onPrimaryContainer,
+                  color: context.mlColors.accentBlue,
+                  fontWeight: AppTypography.bold,
                 ),
               ),
             ),
@@ -860,10 +861,8 @@ class _AILensScreenState extends State<AILensScreen> {
         child: SizedBox(
           height: 28,
           child: LinearProgressIndicator(
-            backgroundColor: Theme.of(
-              context,
-            ).colorScheme.surfaceContainerHighest,
-            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+            backgroundColor: context.mlColors.sectionBackground,
+            color: context.mlColors.accentBlue.withValues(alpha: 0.28),
           ),
         ),
       ),

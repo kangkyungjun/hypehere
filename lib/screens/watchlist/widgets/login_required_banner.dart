@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../widgets/community/signup_prompt_dialog.dart';
+import '../../../theme/app_colors.dart';
 import '../../../theme/app_radius.dart';
 import '../../../theme/app_spacing.dart';
 import '../../../theme/app_typography.dart';
+import '../../../widgets/common/bento_card.dart';
 import '../../auth/login_screen.dart';
 import '../../auth/signup_screen.dart';
 
@@ -35,65 +37,71 @@ class LoginRequiredBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
+    final mlc = context.mlColors;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.xs),
-      child: Card(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
-        elevation: 0,
-        color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-          onTap: () => _handleLogin(context),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.lg),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.lock_outline,
-                  size: 20,
-                  color: theme.colorScheme.primary,
-                ),
-                const SizedBox(width: AppSpacing.lg),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l10n.loginForPortfolio,
-                        style: TextStyle(
-                          fontSize: AppTypography.bodyMedium,
-                          fontWeight: AppTypography.semiBold,
-                          color: theme.colorScheme.onSurface,
-                        ),
-                      ),
-                      Text(
-                        l10n.loginForPortfolioHint,
-                        style: TextStyle(
-                          fontSize: AppTypography.caption,
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.md),
-                FilledButton.tonal(
-                  onPressed: () => _handleLogin(context),
-                  style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  child: Text(
-                    l10n.login,
-                    style: const TextStyle(fontSize: AppTypography.bodySmall),
-                  ),
-                ),
-              ],
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+      child: BentoCard(
+        emphasized: true,
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.xl,
+          vertical: AppSpacing.lg,
+        ),
+        onTap: () => _handleLogin(context),
+        child: Row(
+          children: [
+            Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                color: mlc.infoBg,
+                borderRadius: BorderRadius.circular(AppRadius.lg),
+              ),
+              child: Icon(Icons.lock_outline, size: 19, color: mlc.accentBlue),
             ),
-          ),
+            const SizedBox(width: AppSpacing.lg),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.loginForPortfolio,
+                    style: TextStyle(
+                      fontSize: AppTypography.bodyMedium,
+                      fontWeight: AppTypography.semiBold,
+                      color: mlc.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xxs),
+                  Text(
+                    l10n.loginForPortfolioHint,
+                    style: TextStyle(
+                      fontSize: AppTypography.caption,
+                      color: mlc.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            FilledButton.tonal(
+              onPressed: () => _handleLogin(context),
+              style: FilledButton.styleFrom(
+                backgroundColor: mlc.infoBg,
+                foregroundColor: mlc.accentBlue,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.lg,
+                  vertical: AppSpacing.sm,
+                ),
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: Text(
+                l10n.login,
+                style: const TextStyle(fontSize: AppTypography.bodySmall),
+              ),
+            ),
+          ],
         ),
       ),
     );

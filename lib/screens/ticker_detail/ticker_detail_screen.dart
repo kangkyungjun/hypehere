@@ -226,7 +226,7 @@ class _TickerDetailScreenState extends State<TickerDetailScreen> {
         builder: (ctx) => AlertDialog(
           title: Row(
             children: [
-              Icon(Icons.workspace_premium, color: Colors.amber.shade700),
+              Icon(Icons.workspace_premium, color: context.mlColors.accentBlue),
               const SizedBox(width: AppSpacing.sm),
               Expanded(child: Text(l10n.holdingsLimitTitle)),
             ],
@@ -242,8 +242,8 @@ class _TickerDetailScreenState extends State<TickerDetailScreen> {
               icon: const Icon(Icons.workspace_premium, size: 18),
               label: Text(l10n.upgradeToGold),
               style: FilledButton.styleFrom(
-                backgroundColor: Colors.amber.shade700,
-                foregroundColor: Colors.white,
+                backgroundColor: context.mlColors.accentBlue,
+                foregroundColor: context.mlColors.onPrimary,
               ),
             ),
           ],

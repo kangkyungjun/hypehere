@@ -11,7 +11,7 @@ abstract final class AppRadius {
   static const double full = 999.0;
 
   /// 카드 기본 코너 — 12px
-  static const double card = 12.0;
+  static const double card = 16.0;
 
   /// 배지/칩 코너 — 999px pill
   static const double badge = full;

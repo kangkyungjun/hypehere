@@ -5,13 +5,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'l10n/app_localizations.dart';
 import 'theme/app_colors.dart';
+import 'theme/app_duration.dart';
 import 'theme/app_radius.dart';
 import 'theme/app_shadow.dart';
 import 'theme/app_spacing.dart';
@@ -51,8 +52,7 @@ void main() async {
 
   // Initialize Firebase (timeout: iPad 호환 모드 hang 방지)
   try {
-    await Firebase.initializeApp()
-        .timeout(const Duration(seconds: 10));
+    await Firebase.initializeApp().timeout(const Duration(seconds: 10));
   } catch (e) {
     debugPrint('Firebase init error: $e');
   }
@@ -60,8 +60,7 @@ void main() async {
   // Initialize FCM Notification Service
   try {
     final notificationService = NotificationService();
-    await notificationService.initialize()
-        .timeout(const Duration(seconds: 10));
+    await notificationService.initialize().timeout(const Duration(seconds: 10));
   } catch (e) {
     debugPrint('FCM init error: $e');
   }
@@ -72,8 +71,7 @@ void main() async {
 
   // Initialize Google AdMob (timeout: iPad 호환 모드 hang 방지)
   try {
-    await MobileAds.instance.initialize()
-        .timeout(const Duration(seconds: 10));
+    await MobileAds.instance.initialize().timeout(const Duration(seconds: 10));
     if (kDebugMode) {
       MobileAds.instance.updateRequestConfiguration(
         RequestConfiguration(testDeviceIds: ['GADSimulatorID']),
@@ -89,32 +87,28 @@ void main() async {
   // Initialize Providers
   final watchlistProvider = WatchlistProvider();
   try {
-    await watchlistProvider.initialize()
-        .timeout(const Duration(seconds: 5));
+    await watchlistProvider.initialize().timeout(const Duration(seconds: 5));
   } catch (e) {
     debugPrint('WatchlistProvider init error: $e');
   }
 
   final recentSearchProvider = RecentSearchProvider();
   try {
-    await recentSearchProvider.initialize()
-        .timeout(const Duration(seconds: 5));
+    await recentSearchProvider.initialize().timeout(const Duration(seconds: 5));
   } catch (e) {
     debugPrint('RecentSearchProvider init error: $e');
   }
 
   final localeProvider = LocaleProvider();
   try {
-    await localeProvider.loadSavedLocale()
-        .timeout(const Duration(seconds: 5));
+    await localeProvider.loadSavedLocale().timeout(const Duration(seconds: 5));
   } catch (e) {
     debugPrint('LocaleProvider init error: $e');
   }
 
   final coachMarkProvider = CoachMarkProvider();
   try {
-    await coachMarkProvider.load()
-        .timeout(const Duration(seconds: 5));
+    await coachMarkProvider.load().timeout(const Duration(seconds: 5));
   } catch (e) {
     debugPrint('CoachMarkProvider init error: $e');
   }
@@ -151,10 +145,9 @@ class MarketLensApp extends StatelessWidget {
       builder: (context, child) {
         return MediaQuery(
           data: MediaQuery.of(context).copyWith(
-            textScaler: MediaQuery.of(context).textScaler.clamp(
-              minScaleFactor: 0.8,
-              maxScaleFactor: 1.3,
-            ),
+            textScaler: MediaQuery.of(
+              context,
+            ).textScaler.clamp(minScaleFactor: 0.8, maxScaleFactor: 1.3),
           ),
           child: child!,
         );
@@ -164,19 +157,88 @@ class MarketLensApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFF1A56DB), // Deep Trust Blue (brand seed)
           brightness: Brightness.light,
+          surface: MarketLensColors.light.cardBackground,
         ),
+        scaffoldBackgroundColor: MarketLensColors.light.sectionBackground,
         useMaterial3: true,
         extensions: const [MarketLensColors.light],
+        dividerTheme: DividerThemeData(
+          color: MarketLensColors.light.subtleBorder,
+          thickness: 1,
+          space: 1,
+        ),
 
         // AppBar theme
-        appBarTheme: const AppBarTheme(
+        appBarTheme: AppBarTheme(
           centerTitle: false,
           elevation: 0,
-          backgroundColor: Colors.transparent,
+          scrolledUnderElevation: 0,
+          backgroundColor: MarketLensColors.light.sectionBackground,
+          foregroundColor: MarketLensColors.light.textPrimary,
+          titleTextStyle: TextStyle(
+            color: MarketLensColors.light.textPrimary,
+            fontSize: AppTypography.displayMedium,
+            fontWeight: AppTypography.bold,
+            height: 1.2,
+          ),
           systemOverlayStyle: SystemUiOverlayStyle(
             statusBarColor: Colors.transparent,
-            statusBarIconBrightness: Brightness.dark,   // Android: 어두운 아이콘
-            statusBarBrightness: Brightness.light,      // iOS: 밝은 배경 → 어두운 아이콘
+            statusBarIconBrightness: Brightness.dark, // Android: 어두운 아이콘
+            statusBarBrightness: Brightness.light, // iOS: 밝은 배경 → 어두운 아이콘
+          ),
+        ),
+        cardTheme: CardThemeData(
+          elevation: 0,
+          color: MarketLensColors.light.cardBackground,
+          surfaceTintColor: Colors.transparent,
+          margin: EdgeInsets.zero,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadius.card),
+            side: BorderSide(color: MarketLensColors.light.subtleBorder),
+          ),
+        ),
+        chipTheme: ChipThemeData(
+          backgroundColor: MarketLensColors.light.sectionBackground,
+          selectedColor: MarketLensColors.light.infoBg,
+          disabledColor: MarketLensColors.light.sectionBackground,
+          side: BorderSide(color: MarketLensColors.light.subtleBorder),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadius.badge),
+          ),
+          labelStyle: TextStyle(
+            color: MarketLensColors.light.textSecondary,
+            fontSize: AppTypography.bodySmall,
+            fontWeight: AppTypography.semiBold,
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        ),
+        bottomSheetTheme: BottomSheetThemeData(
+          backgroundColor: MarketLensColors.light.cardBackground,
+          surfaceTintColor: Colors.transparent,
+          modalBackgroundColor: MarketLensColors.light.cardBackground,
+          modalBarrierColor: Color(0x660B111A),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(
+              top: Radius.circular(AppRadius.xxxl),
+            ),
+          ),
+          clipBehavior: Clip.antiAlias,
+        ),
+        dialogTheme: DialogThemeData(
+          backgroundColor: MarketLensColors.light.cardBackground,
+          surfaceTintColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadius.xxl),
+          ),
+          titleTextStyle: TextStyle(
+            color: MarketLensColors.light.textPrimary,
+            fontSize: AppTypography.headlineLarge,
+            fontWeight: AppTypography.bold,
+          ),
+          contentTextStyle: TextStyle(
+            color: MarketLensColors.light.textSecondary,
+            fontSize: AppTypography.bodyLarge,
+            height: 1.45,
           ),
         ),
 
@@ -187,7 +249,7 @@ class MarketLensApp extends StatelessWidget {
           showUnselectedLabels: true,
           type: BottomNavigationBarType.fixed,
           elevation: 0,
-          backgroundColor: Colors.white,
+          backgroundColor: MarketLensColors.light.cardBackground,
           selectedLabelStyle: const TextStyle(
             fontSize: AppTypography.caption,
             fontWeight: AppTypography.semiBold,
@@ -205,6 +267,10 @@ class MarketLensApp extends StatelessWidget {
           ),
           filled: true,
           fillColor: MarketLensColors.light.sectionBackground,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg,
+            vertical: AppSpacing.md,
+          ),
         ),
       ),
 
@@ -213,18 +279,87 @@ class MarketLensApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFF1A56DB), // Deep Trust Blue (brand seed)
           brightness: Brightness.dark,
+          surface: MarketLensColors.dark.cardBackground,
         ),
+        scaffoldBackgroundColor: MarketLensColors.dark.sectionBackground,
         useMaterial3: true,
         extensions: const [MarketLensColors.dark],
+        dividerTheme: DividerThemeData(
+          color: MarketLensColors.dark.subtleBorder,
+          thickness: 1,
+          space: 1,
+        ),
 
-        appBarTheme: const AppBarTheme(
+        appBarTheme: AppBarTheme(
           centerTitle: false,
           elevation: 0,
-          backgroundColor: Colors.transparent,
+          scrolledUnderElevation: 0,
+          backgroundColor: MarketLensColors.dark.sectionBackground,
+          foregroundColor: MarketLensColors.dark.textPrimary,
+          titleTextStyle: TextStyle(
+            color: MarketLensColors.dark.textPrimary,
+            fontSize: AppTypography.displayMedium,
+            fontWeight: AppTypography.bold,
+            height: 1.2,
+          ),
           systemOverlayStyle: SystemUiOverlayStyle(
             statusBarColor: Colors.transparent,
-            statusBarIconBrightness: Brightness.light,  // Android: 밝은 아이콘
-            statusBarBrightness: Brightness.dark,       // iOS: 어두운 배경 → 밝은 아이콘
+            statusBarIconBrightness: Brightness.light, // Android: 밝은 아이콘
+            statusBarBrightness: Brightness.dark, // iOS: 어두운 배경 → 밝은 아이콘
+          ),
+        ),
+        cardTheme: CardThemeData(
+          elevation: 0,
+          color: MarketLensColors.dark.cardBackground,
+          surfaceTintColor: Colors.transparent,
+          margin: EdgeInsets.zero,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadius.card),
+            side: BorderSide(color: MarketLensColors.dark.subtleBorder),
+          ),
+        ),
+        chipTheme: ChipThemeData(
+          backgroundColor: MarketLensColors.dark.cardBackground,
+          selectedColor: MarketLensColors.dark.infoBg,
+          disabledColor: MarketLensColors.dark.cardBackground,
+          side: BorderSide(color: MarketLensColors.dark.subtleBorder),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadius.badge),
+          ),
+          labelStyle: TextStyle(
+            color: MarketLensColors.dark.textSecondary,
+            fontSize: AppTypography.bodySmall,
+            fontWeight: AppTypography.semiBold,
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        ),
+        bottomSheetTheme: BottomSheetThemeData(
+          backgroundColor: MarketLensColors.dark.cardBackground,
+          surfaceTintColor: Colors.transparent,
+          modalBackgroundColor: MarketLensColors.dark.cardBackground,
+          modalBarrierColor: Color(0x99000000),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(
+              top: Radius.circular(AppRadius.xxxl),
+            ),
+          ),
+          clipBehavior: Clip.antiAlias,
+        ),
+        dialogTheme: DialogThemeData(
+          backgroundColor: MarketLensColors.dark.cardBackground,
+          surfaceTintColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadius.xxl),
+          ),
+          titleTextStyle: TextStyle(
+            color: MarketLensColors.dark.textPrimary,
+            fontSize: AppTypography.headlineLarge,
+            fontWeight: AppTypography.bold,
+          ),
+          contentTextStyle: TextStyle(
+            color: MarketLensColors.dark.textSecondary,
+            fontSize: AppTypography.bodyLarge,
+            height: 1.45,
           ),
         ),
 
@@ -251,6 +386,10 @@ class MarketLensApp extends StatelessWidget {
           ),
           filled: true,
           fillColor: MarketLensColors.dark.sectionBackground,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg,
+            vertical: AppSpacing.md,
+          ),
         ),
       ),
 
@@ -280,11 +419,16 @@ class _MarketLensUpgraderMessages extends UpgraderMessages {
   String? message(UpgraderMessage messageKey) {
     String? custom;
     switch (languageCode) {
-      case 'ko': custom = _ko(messageKey);
-      case 'en': custom = _en(messageKey);
-      case 'ja': custom = _ja(messageKey);
-      case 'zh': custom = _zh(messageKey);
-      case 'es': custom = _es(messageKey);
+      case 'ko':
+        custom = _ko(messageKey);
+      case 'en':
+        custom = _en(messageKey);
+      case 'ja':
+        custom = _ja(messageKey);
+      case 'zh':
+        custom = _zh(messageKey);
+      case 'es':
+        custom = _es(messageKey);
     }
     if (custom != null) return custom;
     return super.message(messageKey);
@@ -302,7 +446,8 @@ class _MarketLensUpgraderMessages extends UpgraderMessages {
 
   String? _en(UpgraderMessage key) => switch (key) {
     UpgraderMessage.title => 'Update Available',
-    UpgraderMessage.body => 'A new version of MarketLens is available\nwith the latest features and improvements.',
+    UpgraderMessage.body =>
+      'A new version of MarketLens is available\nwith the latest features and improvements.',
     UpgraderMessage.prompt => '',
     UpgraderMessage.buttonTitleUpdate => 'Update Now',
     UpgraderMessage.buttonTitleLater => 'Later',
@@ -330,7 +475,8 @@ class _MarketLensUpgraderMessages extends UpgraderMessages {
 
   String? _es(UpgraderMessage key) => switch (key) {
     UpgraderMessage.title => 'Nueva versión disponible',
-    UpgraderMessage.body => 'Una nueva versión de MarketLens está disponible\ncon las últimas funciones y mejoras.',
+    UpgraderMessage.body =>
+      'Una nueva versión de MarketLens está disponible\ncon las últimas funciones y mejoras.',
     UpgraderMessage.prompt => '',
     UpgraderMessage.buttonTitleUpdate => 'Actualizar',
     UpgraderMessage.buttonTitleLater => 'Más tarde',
@@ -365,7 +511,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   Timer? _breakingDismissTimer;
 
   static final String _authBaseUrl =
-      dotenv.env['AUTH_API_BASE_URL'] ?? 'http://43.201.45.60:8000/api/accounts';
+      dotenv.env['AUTH_API_BASE_URL'] ??
+      'http://43.201.45.60:8000/api/accounts';
+  static const _secureStorage = FlutterSecureStorage();
 
   // 5개 탭: Home, News, AI Analysis, Watchlist, Holdings
   final List<Widget> _screens = const [
@@ -483,17 +631,18 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
   Future<void> _fetchUnreadCount() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('auth_token');
+      final token = await _secureStorage.read(key: 'auth_token');
       if (token == null) return;
 
-      final response = await http.get(
-        Uri.parse('$_authBaseUrl/notifications/'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Token $token',
-        },
-      ).timeout(const Duration(seconds: 5));
+      final response = await http
+          .get(
+            Uri.parse('$_authBaseUrl/notifications/'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Token $token',
+            },
+          )
+          .timeout(const Duration(seconds: 5));
 
       if (response.statusCode == 200 && mounted) {
         final json = jsonDecode(response.body);
@@ -510,29 +659,55 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   void _handleNotificationNavigation(Map<String, dynamic> data) {
     if (!mounted) return;
 
-    final type = data['type'] as String? ?? '';
-    final ticker = data['ticker'] as String?;
-    final topTicker = data['top_ticker'] as String?;
-    final postId = data['post_id'] as String?;
+    String? valueOf(List<String> keys) {
+      for (final key in keys) {
+        final value = data[key];
+        if (value == null) continue;
+        final text = value.toString().trim();
+        if (text.isNotEmpty && text != 'null') return text;
+      }
+      return null;
+    }
+
+    final type =
+        valueOf([
+          'type',
+          'notification_type',
+          'event_type',
+          'category',
+          'kind',
+        ]) ??
+        '';
+    final normalizedType = type.toUpperCase();
+    final target = valueOf(['target', 'screen', 'route'])?.toLowerCase();
+    final ticker = valueOf(['ticker', 'symbol', 'stock', 'primary_ticker']);
+    final topTicker = valueOf(['top_ticker', 'topTicker', 'primary_ticker']);
+    final postId = valueOf(['post_id', 'postId', 'community_post_id']);
+    final isNewsNotification =
+        normalizedType.contains('NEWS') || target == 'news';
 
     // ── 1. 커뮤니티 (post_id) → PostDetailScreen ──
     if (postId != null && postId.isNotEmpty) {
       final id = int.tryParse(postId);
       if (id != null) {
-        Navigator.push(context,
-            MaterialPageRoute(builder: (_) => PostDetailScreen(postId: id)));
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => PostDetailScreen(postId: id)),
+        );
         _fetchUnreadCount();
         return;
       }
     }
 
     // ── 2. 뉴스 알림 → 모달 or TickerDetail(news 섹션) ──
-    if (type == 'NEWS_BULLISH' || type == 'NEWS_BEARISH' ||
-        type == 'BREAKING_NEWS' || type == 'MARKET_NEWS') {
-      if (ticker == 'MARKET' || type == 'MARKET_NEWS') {
+    if (isNewsNotification) {
+      if (ticker == null ||
+          ticker.isEmpty ||
+          ticker.toUpperCase() == 'MARKET' ||
+          normalizedType == 'MARKET_NEWS') {
         // MARKET 뉴스 → News 탭 + 모달 표시
         setState(() => _currentIndex = 1);
-        final title = data['title'] as String?;
+        final title = valueOf(['title']);
         if (title != null && title.isNotEmpty) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {
@@ -540,53 +715,70 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             }
           });
         }
-      } else if (ticker != null && ticker.isNotEmpty) {
+      } else {
         // 종목 뉴스 → TickerDetail 뉴스 섹션 스크롤
-        Navigator.push(context, MaterialPageRoute(
-            builder: (_) => TickerDetailScreen(
-                ticker: ticker, initialSection: 'news')));
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) =>
+                TickerDetailScreen(ticker: ticker, initialSection: 'news'),
+          ),
+        );
       }
       _fetchUnreadCount();
       return;
     }
 
     // ── 3. 호재 급상승 → TickerDetail 뉴스 섹션 ──
-    if (type == 'BULLISH_NEWS_SURGE') {
+    if (normalizedType == 'BULLISH_NEWS_SURGE') {
       if (ticker != null && ticker.isNotEmpty) {
-        Navigator.push(context, MaterialPageRoute(
-            builder: (_) => TickerDetailScreen(
-                ticker: ticker, initialSection: 'news')));
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) =>
+                TickerDetailScreen(ticker: ticker, initialSection: 'news'),
+          ),
+        );
       }
       _fetchUnreadCount();
       return;
     }
 
     // ── 4. 시그널 (STRONG_BUY/SELL) → TickerDetail ──
-    if (type == 'STRONG_BUY' || type == 'STRONG_SELL') {
+    if (normalizedType == 'STRONG_BUY' || normalizedType == 'STRONG_SELL') {
       if (ticker != null && ticker.isNotEmpty) {
-        Navigator.push(context, MaterialPageRoute(
-            builder: (_) => TickerDetailScreen(ticker: ticker)));
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => TickerDetailScreen(ticker: ticker)),
+        );
       }
       _fetchUnreadCount();
       return;
     }
 
     // ── 5. 포트폴리오 자문 → TickerDetail ──
-    if (type == 'PORTFOLIO_ADVICE') {
+    if (normalizedType == 'PORTFOLIO_ADVICE' || target == 'portfolio') {
       if (ticker != null && ticker.isNotEmpty) {
-        Navigator.push(context, MaterialPageRoute(
-            builder: (_) => TickerDetailScreen(ticker: ticker)));
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => TickerDetailScreen(ticker: ticker)),
+        );
       }
       _fetchUnreadCount();
       return;
     }
 
     // ── 6. 예약 알림 (top_ticker로 라우팅) ──
-    if (type == 'MORNING_BRIEFING' || type == 'CLOSING_REPORT' ||
-        type == 'MARKET_OPEN') {
+    if (normalizedType == 'MORNING_BRIEFING' ||
+        normalizedType == 'CLOSING_REPORT' ||
+        normalizedType == 'MARKET_OPEN') {
       if (topTicker != null && topTicker.isNotEmpty) {
-        Navigator.push(context, MaterialPageRoute(
-            builder: (_) => TickerDetailScreen(ticker: topTicker)));
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => TickerDetailScreen(ticker: topTicker),
+          ),
+        );
         _fetchUnreadCount();
         return;
       }
@@ -596,7 +788,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     }
 
     // ── 7. 일일 요약 → Dashboard ──
-    if (type == 'DAILY_SUMMARY') {
+    if (normalizedType == 'DAILY_SUMMARY' || target == 'dashboard') {
       setState(() => _currentIndex = 0);
       _fetchUnreadCount();
       return;
@@ -604,15 +796,21 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
     // ── 8. 기타 ticker → TickerDetail ──
     if (ticker != null && ticker.isNotEmpty) {
-      Navigator.push(context, MaterialPageRoute(
-          builder: (_) => TickerDetailScreen(ticker: ticker)));
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => TickerDetailScreen(ticker: ticker)),
+      );
       _fetchUnreadCount();
       return;
     }
 
     if (topTicker != null && topTicker.isNotEmpty) {
-      Navigator.push(context, MaterialPageRoute(
-          builder: (_) => TickerDetailScreen(ticker: topTicker)));
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => TickerDetailScreen(ticker: topTicker),
+        ),
+      );
       _fetchUnreadCount();
       return;
     }
@@ -634,7 +832,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   }
 
   void _onBreakingToastTap() {
-    final ticker = _breakingData?['ticker'] as String?;
+    final ticker = _breakingData?['ticker']?.toString();
     _dismissBreakingToast();
     if (ticker != null && ticker.isNotEmpty) {
       Navigator.push(
@@ -653,8 +851,18 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       child: GestureDetector(
         onTap: _onBreakingToastTap,
         child: Container(
-          margin: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.md, AppSpacing.lg, 0),
-          padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.md, AppSpacing.lg),
+          margin: const EdgeInsets.fromLTRB(
+            AppSpacing.lg,
+            AppSpacing.md,
+            AppSpacing.lg,
+            0,
+          ),
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.lg,
+            AppSpacing.lg,
+            AppSpacing.md,
+            AppSpacing.lg,
+          ),
           decoration: BoxDecoration(
             color: theme.colorScheme.errorContainer,
             borderRadius: BorderRadius.circular(AppRadius.lg),
@@ -662,14 +870,19 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
               color: theme.colorScheme.error.withValues(alpha: 0.4),
               width: 1,
             ),
-            boxShadow: AppShadow.lg(theme.colorScheme.error.withValues(alpha: 0.15)),
+            boxShadow: AppShadow.lg(
+              theme.colorScheme.error.withValues(alpha: 0.15),
+            ),
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Padding(
                 padding: EdgeInsets.only(top: AppSpacing.xxs),
-                child: Text('🚨', style: TextStyle(fontSize: AppTypography.headlineLarge)),
+                child: Text(
+                  '🚨',
+                  style: TextStyle(fontSize: AppTypography.headlineLarge),
+                ),
               ),
               const SizedBox(width: AppSpacing.md),
               Expanded(
@@ -693,7 +906,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                         _breakingBody!,
                         style: TextStyle(
                           fontSize: AppTypography.bodySmall,
-                          color: theme.colorScheme.onErrorContainer.withValues(alpha: 0.85),
+                          color: theme.colorScheme.onErrorContainer.withValues(
+                            alpha: 0.85,
+                          ),
                           height: 1.3,
                         ),
                         maxLines: 2,
@@ -711,7 +926,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                   child: Icon(
                     Icons.close,
                     size: 18,
-                    color: theme.colorScheme.onErrorContainer.withValues(alpha: 0.6),
+                    color: theme.colorScheme.onErrorContainer.withValues(
+                      alpha: 0.6,
+                    ),
                   ),
                 ),
               ),
@@ -774,9 +991,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => const SettingsScreen(),
-                ),
+                MaterialPageRoute(builder: (context) => const SettingsScreen()),
               );
             },
           ),
@@ -784,60 +999,120 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       ),
       body: Stack(
         children: [
-          IndexedStack(
-            index: _currentIndex,
-            children: _screens,
-          ),
+          IndexedStack(index: _currentIndex, children: _screens),
           // 속보 토스트
           if (_breakingTitle != null)
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              child: _buildBreakingToast(),
-            ),
+            Positioned(top: 0, left: 0, right: 0, child: _buildBreakingToast()),
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-        type: BottomNavigationBarType.fixed, // 5개 탭 고정 표시
-        items: [
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.home_outlined),
-            activeIcon: const Icon(Icons.home),
-            label: l10n.tabHome,
-            tooltip: l10n.tabHomeTooltip,
+      bottomNavigationBar: _buildModernBottomNav(l10n),
+    );
+  }
+
+  Widget _buildModernBottomNav(AppLocalizations l10n) {
+    final colors = context.mlColors;
+    final items = [
+      (
+        icon: Icons.home_outlined,
+        activeIcon: Icons.home_rounded,
+        label: l10n.tabHome,
+        tooltip: l10n.tabHomeTooltip,
+      ),
+      (
+        icon: Icons.newspaper_outlined,
+        activeIcon: Icons.newspaper_rounded,
+        label: l10n.tabNews,
+        tooltip: l10n.tabNewsTooltip,
+      ),
+      (
+        icon: Icons.auto_awesome_outlined,
+        activeIcon: Icons.auto_awesome_rounded,
+        label: l10n.tabAIAnalysis,
+        tooltip: l10n.tabAILensTooltip,
+      ),
+      (
+        icon: Icons.star_border_rounded,
+        activeIcon: Icons.star_rounded,
+        label: l10n.tabWatchlist,
+        tooltip: l10n.tabWatchlistTooltip,
+      ),
+      (
+        icon: Icons.account_balance_wallet_outlined,
+        activeIcon: Icons.account_balance_wallet_rounded,
+        label: l10n.tabHoldings,
+        tooltip: l10n.tabHoldingsTooltip,
+      ),
+    ];
+
+    return SafeArea(
+      top: false,
+      minimum: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.sm,
+        AppSpacing.lg,
+        AppSpacing.md,
+      ),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: colors.cardBackground,
+          borderRadius: BorderRadius.circular(AppRadius.xxxl),
+          border: Border.all(color: colors.subtleBorder),
+          boxShadow: AppShadow.md(Colors.black),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.xs),
+          child: Row(
+            children: List.generate(items.length, (index) {
+              final item = items[index];
+              final selected = _currentIndex == index;
+              return Expanded(
+                child: Tooltip(
+                  message: item.tooltip,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(AppRadius.xxl),
+                    onTap: () => setState(() => _currentIndex = index),
+                    child: AnimatedContainer(
+                      duration: AppDuration.fast,
+                      curve: Curves.easeOutCubic,
+                      height: 52,
+                      decoration: BoxDecoration(
+                        color: selected ? colors.infoBg : Colors.transparent,
+                        borderRadius: BorderRadius.circular(AppRadius.xxl),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            selected ? item.activeIcon : item.icon,
+                            size: 22,
+                            color: selected
+                                ? colors.accentBlue
+                                : colors.textTertiary,
+                          ),
+                          const SizedBox(height: AppSpacing.xxs),
+                          Text(
+                            item.label,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: AppTypography.micro,
+                              fontWeight: selected
+                                  ? AppTypography.bold
+                                  : AppTypography.medium,
+                              color: selected
+                                  ? colors.accentBlue
+                                  : colors.textTertiary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }),
           ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.newspaper_outlined),
-            activeIcon: const Icon(Icons.newspaper),
-            label: l10n.tabNews,
-            tooltip: l10n.tabNewsTooltip,
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.auto_awesome_outlined),
-            activeIcon: const Icon(Icons.auto_awesome),
-            label: l10n.tabAIAnalysis,
-            tooltip: l10n.tabAILensTooltip,
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.star_border),
-            activeIcon: const Icon(Icons.star),
-            label: l10n.tabWatchlist,
-            tooltip: l10n.tabWatchlistTooltip,
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.account_balance_wallet_outlined),
-            activeIcon: const Icon(Icons.account_balance_wallet),
-            label: l10n.tabHoldings,
-            tooltip: l10n.tabHoldingsTooltip,
-          ),
-        ],
+        ),
       ),
     );
   }

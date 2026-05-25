@@ -18,6 +18,7 @@ import '../../theme/app_typography.dart';
 import '../../l10n/app_localizations.dart';
 import '../../widgets/common/error_state_view.dart';
 import '../../widgets/common/coach_mark_overlay.dart';
+import '../../widgets/common/market_segmented_tabs.dart';
 import '../../providers/coach_mark_provider.dart';
 import 'widgets/top_stocks_section.dart';
 import 'widgets/up_down_tab.dart';
@@ -205,38 +206,9 @@ class _DashboardScreenState extends State<DashboardScreen>
 
     return Column(
       children: [
-        // 내부 TabBar
-        Container(
-          decoration: BoxDecoration(
-            border: Border(
-              bottom: BorderSide(
-                color: context.mlColors.subtleBorder,
-                width: 1,
-              ),
-            ),
-          ),
-          child: TabBar(
-            controller: _tabController,
-            labelColor: context.mlColors.accentBlue,
-            unselectedLabelColor: context.mlColors.textTertiary,
-            indicatorSize: TabBarIndicatorSize.label,
-            indicatorWeight: 3,
-            labelStyle: const TextStyle(
-              fontSize: AppTypography.headlineSmall,
-              fontWeight: AppTypography.semiBold,
-              height: 1.25,
-            ),
-            unselectedLabelStyle: const TextStyle(
-              fontSize: AppTypography.headlineSmall,
-              fontWeight: AppTypography.medium,
-              height: 1.25,
-            ),
-            tabs: [
-              Tab(text: l10n.tabToday),
-              Tab(text: l10n.tabUpDown),
-              Tab(text: l10n.tabIndexes),
-            ],
-          ),
+        MarketSegmentedTabs(
+          controller: _tabController,
+          tabs: [l10n.tabToday, l10n.tabUpDown, l10n.tabIndexes],
         ),
         // TabBarView
         Expanded(

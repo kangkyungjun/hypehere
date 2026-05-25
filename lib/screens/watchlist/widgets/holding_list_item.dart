@@ -5,7 +5,7 @@ import '../../../theme/app_colors.dart';
 import '../../../theme/app_radius.dart';
 import '../../../theme/app_spacing.dart';
 import '../../../theme/app_typography.dart';
-import '../../../widgets/common/ml_divider.dart';
+import '../../../widgets/common/bento_card.dart';
 
 /// A single holding row in the portfolio section.
 ///
@@ -86,186 +86,181 @@ class HoldingListItem extends StatelessWidget {
       },
       onDismissed: (_) => onDelete(),
       background: Container(
-        color: context.mlColors.dangerColor,
+        margin: const EdgeInsets.only(bottom: AppSpacing.md),
+        decoration: BoxDecoration(
+          color: context.mlColors.dangerColor,
+          borderRadius: BorderRadius.circular(AppRadius.card),
+        ),
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: AppSpacing.xxl),
         child: Icon(Icons.delete, color: context.mlColors.onPrimary),
       ),
-      child: Column(
-        children: [
-          InkWell(
-            onTap: onTap,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.xl,
-                vertical: AppSpacing.md,
+      child: BentoCard(
+        margin: const EdgeInsets.only(bottom: AppSpacing.md),
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        onTap: onTap,
+        child: Row(
+          children: [
+            // Score box
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: holding.score != null
+                    ? _signalColor(
+                        context,
+                        holding.signal,
+                      ).withValues(alpha: 0.1)
+                    : theme.colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(AppRadius.card),
               ),
-              child: Row(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Score box
-                  Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
+                  Text(
+                    holding.score?.toStringAsFixed(0) ?? '—',
+                    style: TextStyle(
+                      fontSize: AppTypography.headlineMedium,
+                      fontWeight: AppTypography.bold,
                       color: holding.score != null
-                          ? _signalColor(
-                              context,
-                              holding.signal,
-                            ).withValues(alpha: 0.1)
-                          : theme.colorScheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(AppRadius.card),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          holding.score?.toStringAsFixed(0) ?? '—',
-                          style: TextStyle(
-                            fontSize: AppTypography.headlineMedium,
-                            fontWeight: AppTypography.bold,
-                            color: holding.score != null
-                                ? _signalColor(context, holding.signal)
-                                : theme.colorScheme.outline,
-                            fontFeatures: AppTypography.tabularFigures,
-                          ),
-                        ),
-                        Text(
-                          l10n.score,
-                          style: TextStyle(
-                            fontSize: AppTypography.chartMicro,
-                            color: mlc.textTertiary,
-                          ),
-                        ),
-                      ],
+                          ? _signalColor(context, holding.signal)
+                          : theme.colorScheme.outline,
+                      fontFeatures: AppTypography.tabularFigures,
                     ),
                   ),
-
-                  const SizedBox(width: AppSpacing.lg),
-
-                  // Ticker + name + shares@price + date
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          holding.ticker,
-                          style: TextStyle(
-                            fontSize: AppTypography.headlineSmall,
-                            fontWeight: AppTypography.bold,
-                            color: mlc.textPrimary,
-                          ),
-                        ),
-                        Text(
-                          displayName,
-                          style: TextStyle(
-                            fontSize: AppTypography.bodySmall,
-                            color: mlc.textSecondary,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        if (holding.shares != null && holding.avgPrice != null)
-                          Row(
-                            children: [
-                              Text(
-                                l10n.sharesAtPrice(
-                                  holding.shares!.toStringAsFixed(
-                                    holding.shares! ==
-                                            holding.shares!.truncateToDouble()
-                                        ? 0
-                                        : 2,
-                                  ),
-                                  holding.avgPrice!.toStringAsFixed(2),
-                                ),
-                                style: TextStyle(
-                                  fontSize: AppTypography.micro,
-                                  color: mlc.textTertiary,
-                                ),
-                              ),
-                              if (holding.createdAt != null) ...[
-                                const SizedBox(width: AppSpacing.xs),
-                                Icon(
-                                  Icons.calendar_today,
-                                  size: 10,
-                                  color: mlc.textTertiary,
-                                ),
-                                const SizedBox(width: AppSpacing.xxs),
-                                Text(
-                                  _formatDate(holding.createdAt!),
-                                  style: TextStyle(
-                                    fontSize: AppTypography.micro,
-                                    color: mlc.textTertiary,
-                                  ),
-                                ),
-                              ],
-                            ],
-                          ),
-                      ],
+                  Text(
+                    l10n.score,
+                    style: TextStyle(
+                      fontSize: AppTypography.chartMicro,
+                      color: mlc.textTertiary,
                     ),
                   ),
-
-                  // Current value + P&L%
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      if (holding.currentPrice != null)
-                        Text(
-                          '\$${holding.currentValue.toStringAsFixed(2)}',
-                          style: TextStyle(
-                            fontSize: AppTypography.bodyLarge,
-                            fontWeight: AppTypography.semiBold,
-                            color: mlc.textPrimary,
-                            fontFeatures: AppTypography.tabularFigures,
-                          ),
-                        ),
-                      const SizedBox(height: AppSpacing.xxs),
-                      Text(
-                        '${holding.pnlPct >= 0 ? '+' : ''}${holding.pnlPct.toStringAsFixed(2)}%',
-                        style: TextStyle(
-                          fontSize: AppTypography.bodySmall,
-                          fontWeight: AppTypography.semiBold,
-                          color: holding.pnlPct >= 0
-                              ? context.mlColors.gainColor
-                              : context.mlColors.lossColor,
-                          fontFeatures: AppTypography.tabularFigures,
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(width: AppSpacing.sm),
-
-                  // Signal pill
-                  if (holding.signal != null &&
-                      _signalLabel(context, holding.signal).isNotEmpty)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.md,
-                        vertical: AppSpacing.xs,
-                      ),
-                      decoration: BoxDecoration(
-                        color: _signalColor(context, holding.signal),
-                        borderRadius: BorderRadius.circular(AppRadius.badge),
-                      ),
-                      child: Text(
-                        _signalLabel(context, holding.signal),
-                        style: TextStyle(
-                          color: context.mlColors.onPrimary,
-                          fontSize: AppTypography.micro,
-                          fontWeight: AppTypography.bold,
-                        ),
-                      ),
-                    ),
-
-                  // Chevron
-                  const SizedBox(width: AppSpacing.xs),
-                  Icon(Icons.chevron_right, color: mlc.textTertiary, size: 20),
                 ],
               ),
             ),
-          ),
-          const MlDivider(),
-        ],
+
+            const SizedBox(width: AppSpacing.lg),
+
+            // Ticker + name + shares@price + date
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    holding.ticker,
+                    style: TextStyle(
+                      fontSize: AppTypography.headlineSmall,
+                      fontWeight: AppTypography.bold,
+                      color: mlc.textPrimary,
+                    ),
+                  ),
+                  Text(
+                    displayName,
+                    style: TextStyle(
+                      fontSize: AppTypography.bodySmall,
+                      color: mlc.textSecondary,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (holding.shares != null && holding.avgPrice != null)
+                    Row(
+                      children: [
+                        Text(
+                          l10n.sharesAtPrice(
+                            holding.shares!.toStringAsFixed(
+                              holding.shares! ==
+                                      holding.shares!.truncateToDouble()
+                                  ? 0
+                                  : 2,
+                            ),
+                            holding.avgPrice!.toStringAsFixed(2),
+                          ),
+                          style: TextStyle(
+                            fontSize: AppTypography.micro,
+                            color: mlc.textTertiary,
+                          ),
+                        ),
+                        if (holding.createdAt != null) ...[
+                          const SizedBox(width: AppSpacing.xs),
+                          Icon(
+                            Icons.calendar_today,
+                            size: 10,
+                            color: mlc.textTertiary,
+                          ),
+                          const SizedBox(width: AppSpacing.xxs),
+                          Text(
+                            _formatDate(holding.createdAt!),
+                            style: TextStyle(
+                              fontSize: AppTypography.micro,
+                              color: mlc.textTertiary,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                ],
+              ),
+            ),
+
+            // Current value + P&L%
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                if (holding.currentPrice != null)
+                  Text(
+                    '\$${holding.currentValue.toStringAsFixed(2)}',
+                    style: TextStyle(
+                      fontSize: AppTypography.bodyLarge,
+                      fontWeight: AppTypography.semiBold,
+                      color: mlc.textPrimary,
+                      fontFeatures: AppTypography.tabularFigures,
+                    ),
+                  ),
+                const SizedBox(height: AppSpacing.xxs),
+                Text(
+                  '${holding.pnlPct >= 0 ? '+' : ''}${holding.pnlPct.toStringAsFixed(2)}%',
+                  style: TextStyle(
+                    fontSize: AppTypography.bodySmall,
+                    fontWeight: AppTypography.semiBold,
+                    color: holding.pnlPct >= 0
+                        ? context.mlColors.gainColor
+                        : context.mlColors.lossColor,
+                    fontFeatures: AppTypography.tabularFigures,
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(width: AppSpacing.sm),
+
+            // Signal pill
+            if (holding.signal != null &&
+                _signalLabel(context, holding.signal).isNotEmpty)
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                  vertical: AppSpacing.xs,
+                ),
+                decoration: BoxDecoration(
+                  color: _signalColor(context, holding.signal),
+                  borderRadius: BorderRadius.circular(AppRadius.badge),
+                ),
+                child: Text(
+                  _signalLabel(context, holding.signal),
+                  style: TextStyle(
+                    color: context.mlColors.onPrimary,
+                    fontSize: AppTypography.micro,
+                    fontWeight: AppTypography.bold,
+                  ),
+                ),
+              ),
+
+            // Chevron
+            const SizedBox(width: AppSpacing.xs),
+            Icon(Icons.chevron_right, color: mlc.textTertiary, size: 20),
+          ],
+        ),
       ),
     );
   }

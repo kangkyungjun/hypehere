@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../services/analytics_api_client.dart';
+import '../../../theme/app_colors.dart';
 import '../../../theme/app_radius.dart';
 import '../../../theme/app_spacing.dart';
 import '../../../theme/app_typography.dart';
+import '../../../widgets/common/modal_handle_bar.dart';
 
 /// Bottom sheet for editing holding info (date, price, shares).
 class EditHoldingSheet extends StatefulWidget {
@@ -34,8 +36,12 @@ class EditHoldingSheet extends StatefulWidget {
     return showModalBottomSheet<({double shares, double avgPrice})>(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xxl)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppRadius.xxl),
+        ),
       ),
       builder: (_) => EditHoldingSheet(
         ticker: ticker,
@@ -65,7 +71,8 @@ class _EditHoldingSheetState extends State<EditHoldingSheet> {
     _selectedDate = widget.purchaseDate ?? DateTime.now();
     _priceController.text = widget.avgPrice.toStringAsFixed(2);
     _sharesController.text = widget.currentShares.toStringAsFixed(
-        widget.currentShares == widget.currentShares.truncateToDouble() ? 0 : 2);
+      widget.currentShares == widget.currentShares.truncateToDouble() ? 0 : 2,
+    );
     _sharesController.addListener(_onChanged);
     _priceController.addListener(_onChanged);
   }
@@ -96,7 +103,10 @@ class _EditHoldingSheetState extends State<EditHoldingSheet> {
 
   Future<void> _fetchClosePrice() async {
     try {
-      final result = await _apiClient.getClosePrice(widget.ticker, _selectedDate);
+      final result = await _apiClient.getClosePrice(
+        widget.ticker,
+        _selectedDate,
+      );
       if (mounted && result.close != null) {
         setState(() {
           _priceController.text = result.close!.toStringAsFixed(2);
@@ -111,55 +121,78 @@ class _EditHoldingSheetState extends State<EditHoldingSheet> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
+    final mlc = context.mlColors;
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
     final bottomPadding = MediaQuery.of(context).viewPadding.bottom;
 
     return Padding(
-      padding: EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.md, AppSpacing.xl, AppSpacing.xxl + bottomInset + bottomPadding),
+      padding: EdgeInsets.fromLTRB(
+        AppSpacing.xl,
+        AppSpacing.md,
+        AppSpacing.xl,
+        AppSpacing.xxl + bottomInset + bottomPadding,
+      ),
       child: Form(
         key: _formKey,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Center(
-              child: Container(
-                width: 40, height: 4,
-                margin: const EdgeInsets.only(bottom: AppSpacing.lg),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(AppRadius.xxs),
-                ),
-              ),
-            ),
+            const Center(child: ModalHandleBar()),
 
             Text(
               l10n.editHoldingTitle(widget.ticker),
-              style: const TextStyle(fontSize: AppTypography.headlineLarge, fontWeight: AppTypography.bold),
+              style: TextStyle(
+                fontSize: AppTypography.headlineLarge,
+                fontWeight: AppTypography.bold,
+                color: mlc.textPrimary,
+              ),
             ),
             if (widget.name != null)
-              Text(widget.name!, style: TextStyle(fontSize: AppTypography.bodyMedium, color: theme.colorScheme.onSurfaceVariant)),
+              Text(
+                widget.name!,
+                style: TextStyle(
+                  fontSize: AppTypography.bodyMedium,
+                  color: mlc.textSecondary,
+                ),
+              ),
             const SizedBox(height: AppSpacing.xl),
 
             // Date
-            Text(l10n.purchaseDate, style: const TextStyle(fontSize: AppTypography.bodyMedium, fontWeight: AppTypography.medium)),
+            Text(
+              l10n.purchaseDate,
+              style: const TextStyle(
+                fontSize: AppTypography.bodyMedium,
+                fontWeight: AppTypography.medium,
+              ),
+            ),
             const SizedBox(height: AppSpacing.xs),
             InkWell(
               onTap: _pickDate,
               borderRadius: BorderRadius.circular(AppRadius.md),
               child: Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.lg),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.lg,
+                  vertical: AppSpacing.lg,
+                ),
                 decoration: BoxDecoration(
-                  border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.5)),
-                  borderRadius: BorderRadius.circular(AppRadius.md),
+                  color: mlc.sectionBackground,
+                  border: Border.all(color: mlc.subtleBorder),
+                  borderRadius: BorderRadius.circular(AppRadius.lg),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.calendar_today, size: 18, color: theme.colorScheme.primary),
+                    Icon(Icons.calendar_today, size: 18, color: mlc.accentBlue),
                     const SizedBox(width: AppSpacing.md),
-                    Text(_formatDate(_selectedDate), style: const TextStyle(fontSize: AppTypography.headlineSmall)),
+                    Text(
+                      _formatDate(_selectedDate),
+                      style: TextStyle(
+                        fontSize: AppTypography.headlineSmall,
+                        fontWeight: AppTypography.semiBold,
+                        color: mlc.textPrimary,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -167,17 +200,32 @@ class _EditHoldingSheetState extends State<EditHoldingSheet> {
             const SizedBox(height: AppSpacing.lg),
 
             // Avg price
-            Text(l10n.avgPriceLabel, style: const TextStyle(fontSize: AppTypography.bodyMedium, fontWeight: AppTypography.medium)),
+            Text(
+              l10n.avgPriceLabel,
+              style: const TextStyle(
+                fontSize: AppTypography.bodyMedium,
+                fontWeight: AppTypography.medium,
+              ),
+            ),
             const SizedBox(height: AppSpacing.xs),
             TextFormField(
               controller: _priceController,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*'))],
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+              ],
               decoration: InputDecoration(
                 prefixText: '\$ ',
                 isDense: true,
-                contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.lg),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.lg,
+                  vertical: AppSpacing.lg,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppRadius.md),
+                ),
               ),
               validator: (v) {
                 final n = double.tryParse(v ?? '');
@@ -188,17 +236,32 @@ class _EditHoldingSheetState extends State<EditHoldingSheet> {
             const SizedBox(height: AppSpacing.lg),
 
             // Shares
-            Text(l10n.shares, style: const TextStyle(fontSize: AppTypography.bodyMedium, fontWeight: AppTypography.medium)),
+            Text(
+              l10n.shares,
+              style: const TextStyle(
+                fontSize: AppTypography.bodyMedium,
+                fontWeight: AppTypography.medium,
+              ),
+            ),
             const SizedBox(height: AppSpacing.xs),
             TextFormField(
               controller: _sharesController,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*'))],
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+              ],
               decoration: InputDecoration(
                 prefixText: '# ',
                 isDense: true,
-                contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.lg),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.lg,
+                  vertical: AppSpacing.lg,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppRadius.md),
+                ),
               ),
               validator: (v) {
                 final n = double.tryParse(v ?? '');
@@ -220,7 +283,10 @@ class _EditHoldingSheetState extends State<EditHoldingSheet> {
                 style: FilledButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
                 ),
-                child: Text(l10n.saveChanges, style: const TextStyle(fontSize: AppTypography.headlineSmall)),
+                child: Text(
+                  l10n.saveChanges,
+                  style: const TextStyle(fontSize: AppTypography.headlineSmall),
+                ),
               ),
             ),
           ],

@@ -2,13 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../theme/app_colors.dart';
-import '../../../theme/app_radius.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../models/portfolio_data.dart';
 import '../../../providers/portfolio_provider.dart';
 import '../../../theme/app_spacing.dart';
 import '../../../theme/app_typography.dart';
-import '../../../widgets/common/ml_divider.dart';
+import '../../../widgets/common/bento_card.dart';
 import '../../../widgets/common/section_header.dart';
 import '../../../utils/error_localizer.dart';
 import 'portfolio_summary_card.dart';
@@ -267,20 +266,17 @@ class _HoldingsTabState extends State<HoldingsTab> {
   }
 
   Widget _benefitItem(ThemeData theme, String text) {
+    final mlc = context.mlColors;
     return Row(
       children: [
-        Icon(
-          Icons.check_circle_outline,
-          size: 16,
-          color: theme.colorScheme.primary,
-        ),
+        Icon(Icons.check_circle_outline, size: 16, color: mlc.accentBlue),
         const SizedBox(width: AppSpacing.sm),
         Expanded(
           child: Text(
             text,
             style: TextStyle(
               fontSize: AppTypography.bodyMedium,
-              color: theme.colorScheme.onSurface,
+              color: mlc.textPrimary,
             ),
           ),
         ),
@@ -297,6 +293,7 @@ class _HoldingsTabState extends State<HoldingsTab> {
 
     // Not logged in — centered empty state
     if (!isLoggedIn) {
+      final mlc = context.mlColors;
       return RefreshIndicator(
         onRefresh: widget.onRefresh,
         child: LayoutBuilder(
@@ -312,10 +309,18 @@ class _HoldingsTabState extends State<HoldingsTab> {
                     children: [
                       const LoginRequiredBanner(),
                       const SizedBox(height: 48),
-                      Icon(
-                        Icons.business_center_outlined,
-                        size: 64,
-                        color: Theme.of(context).colorScheme.outline,
+                      Container(
+                        width: 72,
+                        height: 72,
+                        decoration: BoxDecoration(
+                          color: mlc.sectionBackground,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Icon(
+                          Icons.business_center_outlined,
+                          size: 34,
+                          color: mlc.textTertiary,
+                        ),
                       ),
                       const SizedBox(height: AppSpacing.xl),
                       Text(
@@ -341,6 +346,7 @@ class _HoldingsTabState extends State<HoldingsTab> {
     // Empty state (logged in but no holdings) — AI benefit preview + direct add
     if (holdings.isEmpty) {
       final theme = Theme.of(context);
+      final mlc = context.mlColors;
       return RefreshIndicator(
         onRefresh: widget.onRefresh,
         child: LayoutBuilder(
@@ -361,24 +367,29 @@ class _HoldingsTabState extends State<HoldingsTab> {
                         message: l10n.coachMarkHoldings,
                         child: const SizedBox.shrink(),
                       ),
-                      // AI benefit preview card
-                      Container(
-                        width: double.infinity,
+                      BentoCard(
                         padding: const EdgeInsets.all(AppSpacing.xl),
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.primaryContainer.withValues(
-                            alpha: 0.08,
-                          ),
-                          borderRadius: BorderRadius.circular(AppRadius.lg),
-                        ),
                         child: Column(
                           children: [
+                            Container(
+                              width: 54,
+                              height: 54,
+                              decoration: BoxDecoration(
+                                color: mlc.infoBg,
+                                borderRadius: BorderRadius.circular(18),
+                              ),
+                              child: Icon(
+                                Icons.auto_awesome,
+                                color: mlc.accentBlue,
+                              ),
+                            ),
+                            const SizedBox(height: AppSpacing.lg),
                             Text(
                               l10n.portfolioAIAnalysis,
                               style: TextStyle(
                                 fontSize: AppTypography.headlineMedium,
                                 fontWeight: AppTypography.bold,
-                                color: theme.colorScheme.primary,
+                                color: mlc.textPrimary,
                               ),
                             ),
                             const SizedBox(height: AppSpacing.lg),
@@ -386,7 +397,7 @@ class _HoldingsTabState extends State<HoldingsTab> {
                               l10n.aiPortfolioBenefitTitle,
                               style: TextStyle(
                                 fontSize: AppTypography.bodyLarge,
-                                color: theme.colorScheme.onSurface,
+                                color: mlc.textSecondary,
                                 height: 1.5,
                               ),
                               textAlign: TextAlign.center,
@@ -461,13 +472,13 @@ class _HoldingsTabState extends State<HoldingsTab> {
             child: Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: AppSpacing.xl,
-                vertical: AppSpacing.sm,
+                vertical: AppSpacing.md,
               ),
               child: Text(
                 l10n.holdingsSubtitle,
                 style: TextStyle(
                   fontSize: AppTypography.caption,
-                  color: Theme.of(context).colorScheme.outline,
+                  color: context.mlColors.textSecondary,
                 ),
               ),
             ),
@@ -476,11 +487,11 @@ class _HoldingsTabState extends State<HoldingsTab> {
           SliverToBoxAdapter(child: PortfolioSummaryCard(portfolio: portfolio)),
 
           // Tax estimate card (Korean only)
-          const SliverToBoxAdapter(child: MlDivider()),
+          const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.md)),
           SliverToBoxAdapter(child: TaxEstimateCard(portfolio: portfolio)),
 
           // Portfolio AI card
-          const SliverToBoxAdapter(child: MlDivider()),
+          const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.md)),
           SliverToBoxAdapter(
             child: PortfolioAICard(
               summary: portfolio.summary,
@@ -503,15 +514,18 @@ class _HoldingsTabState extends State<HoldingsTab> {
           ),
 
           // Holdings list
-          SliverList(
-            delegate: SliverChildBuilderDelegate((context, index) {
-              final holding = holdings[index];
-              return HoldingListItem(
-                holding: holding,
-                onTap: () => _onEditHolding(context, holding),
-                onDelete: () => _onDeleteHolding(context, holding.ticker),
-              );
-            }, childCount: holdings.length),
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate((context, index) {
+                final holding = holdings[index];
+                return HoldingListItem(
+                  holding: holding,
+                  onTap: () => _onEditHolding(context, holding),
+                  onDelete: () => _onDeleteHolding(context, holding.ticker),
+                );
+              }, childCount: holdings.length),
+            ),
           ),
 
           // Recent transactions section

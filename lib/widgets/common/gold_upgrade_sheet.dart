@@ -7,6 +7,7 @@ import '../../l10n/app_localizations.dart';
 import '../../providers/auth_provider.dart';
 import '../../screens/auth/login_screen.dart';
 import '../../providers/subscription_provider.dart';
+import '../../theme/app_colors.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 import '../../theme/app_stroke.dart';
@@ -23,8 +24,12 @@ class GoldUpgradeSheet extends StatefulWidget {
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppRadius.xxl),
+        ),
       ),
       builder: (_) => GoldUpgradeSheet(source: source),
     );
@@ -105,9 +110,9 @@ class _GoldUpgradeSheetState extends State<GoldUpgradeSheet> {
         if (mounted) Navigator.pop(context);
       case PurchaseResult.cancelled:
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10n.purchaseCancelled)),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(l10n.purchaseCancelled)));
         }
       case PurchaseResult.notInitialized:
         if (mounted) {
@@ -211,33 +216,33 @@ class _GoldUpgradeSheetState extends State<GoldUpgradeSheet> {
       await auth.refreshUserInfo();
       if (mounted) {
         Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.purchaseRestored)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.purchaseRestored)));
       }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.purchaseRestoreFailed)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.purchaseRestoreFailed)));
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
+    final mlc = context.mlColors;
     final sub = context.watch<SubscriptionProvider>();
     final auth = context.watch<AuthProvider>();
 
     // 체험 가능 여부 = RevenueCat 체험 가능 AND 서버에서 체험 미사용
-    final canTrial = sub.isTrialAvailable &&
-        !(auth.currentUser?.hasUsedTrial ?? false);
+    final canTrial =
+        sub.isTrialAvailable && !(auth.currentUser?.hasUsedTrial ?? false);
 
     final priceText = canTrial
         ? l10n.freeTrialInfo(sub.priceString ?? '\$4.99')
         : sub.priceString != null
-            ? l10n.goldMonthlyPrice(sub.priceString!)
-            : l10n.goldMonthlyPrice('\$4.99');
+        ? l10n.goldMonthlyPrice(sub.priceString!)
+        : l10n.goldMonthlyPrice('\$4.99');
 
     final isAlreadyGold = auth.isGoldOrAbove || sub.isGoldActive;
 
@@ -250,33 +255,58 @@ class _GoldUpgradeSheetState extends State<GoldUpgradeSheet> {
             const ModalHandleBar(),
 
             // Title
-            Icon(Icons.workspace_premium, size: 40, color: Colors.amber.shade700),
+            Container(
+              width: 58,
+              height: 58,
+              decoration: BoxDecoration(
+                color: mlc.infoBg,
+                borderRadius: BorderRadius.circular(AppRadius.xl),
+              ),
+              child: Icon(
+                Icons.workspace_premium,
+                size: 30,
+                color: mlc.accentBlue,
+              ),
+            ),
             const SizedBox(height: AppSpacing.sm),
             Text(
               l10n.goldMembershipTitle,
               style: TextStyle(
                 fontSize: AppTypography.headlineLarge,
                 fontWeight: AppTypography.bold,
-                color: theme.colorScheme.onSurface,
+                color: mlc.textPrimary,
               ),
             ),
             const SizedBox(height: AppSpacing.xl),
 
             // Benefits
-            _benefitRow(Icons.all_inclusive, l10n.goldBenefitUnlimitedHoldings, theme),
+            _benefitRow(Icons.all_inclusive, l10n.goldBenefitUnlimitedHoldings),
             const SizedBox(height: AppSpacing.md),
-            _benefitRow(Icons.smart_toy, l10n.goldBenefitAIUnlimited, theme),
+            _benefitRow(Icons.smart_toy, l10n.goldBenefitAIUnlimited),
             const SizedBox(height: AppSpacing.md),
-            _benefitRow(Icons.block, l10n.goldBenefitNoAds, theme),
+            _benefitRow(Icons.block, l10n.goldBenefitNoAds),
             const SizedBox(height: AppSpacing.xl),
 
             // Price
-            Text(
-              priceText,
-              style: TextStyle(
-                fontSize: AppTypography.headlineMedium,
-                fontWeight: AppTypography.bold,
-                color: theme.colorScheme.onSurface,
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.lg,
+                vertical: AppSpacing.md,
+              ),
+              decoration: BoxDecoration(
+                color: mlc.sectionBackground,
+                borderRadius: BorderRadius.circular(AppRadius.lg),
+                border: Border.all(color: mlc.subtleBorder),
+              ),
+              child: Text(
+                priceText,
+                style: TextStyle(
+                  fontSize: AppTypography.headlineMedium,
+                  fontWeight: AppTypography.bold,
+                  color: mlc.textPrimary,
+                ),
+                textAlign: TextAlign.center,
               ),
             ),
             const SizedBox(height: AppSpacing.lg),
@@ -287,8 +317,8 @@ class _GoldUpgradeSheetState extends State<GoldUpgradeSheet> {
               child: FilledButton(
                 onPressed: _resolveButtonAction(sub, isAlreadyGold),
                 style: FilledButton.styleFrom(
-                  backgroundColor: Colors.amber.shade700,
-                  foregroundColor: Colors.white,
+                  backgroundColor: mlc.accentBlue,
+                  foregroundColor: mlc.onPrimary,
                   padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(AppRadius.lg),
@@ -306,7 +336,7 @@ class _GoldUpgradeSheetState extends State<GoldUpgradeSheet> {
                 l10n.restorePurchases,
                 style: TextStyle(
                   fontSize: AppTypography.bodySmall,
-                  color: theme.colorScheme.onSurfaceVariant,
+                  color: mlc.textSecondary,
                 ),
               ),
             ),
@@ -319,14 +349,15 @@ class _GoldUpgradeSheetState extends State<GoldUpgradeSheet> {
                 vertical: AppSpacing.sm,
               ),
               decoration: BoxDecoration(
-                border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.3)),
-                borderRadius: BorderRadius.circular(AppRadius.sm),
+                color: mlc.sectionBackground,
+                border: Border.all(color: mlc.subtleBorder),
+                borderRadius: BorderRadius.circular(AppRadius.lg),
               ),
               child: Text(
                 l10n.subscriptionPaymentAccountWarning,
                 style: TextStyle(
                   fontSize: AppTypography.micro,
-                  color: theme.colorScheme.outline,
+                  color: mlc.textSecondary,
                   height: 1.4,
                 ),
                 textAlign: TextAlign.center,
@@ -341,7 +372,7 @@ class _GoldUpgradeSheetState extends State<GoldUpgradeSheet> {
                   : l10n.subscriptionTermsAndroid,
               style: TextStyle(
                 fontSize: AppTypography.micro,
-                color: theme.colorScheme.outline,
+                color: mlc.textTertiary,
                 height: 1.4,
               ),
               textAlign: TextAlign.center,
@@ -360,19 +391,21 @@ class _GoldUpgradeSheetState extends State<GoldUpgradeSheet> {
                     l10n.termsOfService,
                     style: TextStyle(
                       fontSize: AppTypography.micro,
-                      color: theme.colorScheme.primary,
+                      color: mlc.accentBlue,
                       decoration: TextDecoration.underline,
-                      decorationColor: theme.colorScheme.primary,
+                      decorationColor: mlc.accentBlue,
                     ),
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.sm,
+                  ),
                   child: Text(
                     '|',
                     style: TextStyle(
                       fontSize: AppTypography.micro,
-                      color: theme.colorScheme.outline,
+                      color: mlc.textTertiary,
                     ),
                   ),
                 ),
@@ -384,9 +417,9 @@ class _GoldUpgradeSheetState extends State<GoldUpgradeSheet> {
                     l10n.privacyPolicy,
                     style: TextStyle(
                       fontSize: AppTypography.micro,
-                      color: theme.colorScheme.primary,
+                      color: mlc.accentBlue,
                       decoration: TextDecoration.underline,
-                      decorationColor: theme.colorScheme.primary,
+                      decorationColor: mlc.accentBlue,
                     ),
                   ),
                 ),
@@ -400,7 +433,10 @@ class _GoldUpgradeSheetState extends State<GoldUpgradeSheet> {
   }
 
   /// 버튼 onPressed 콜백 결정
-  VoidCallback? _resolveButtonAction(SubscriptionProvider sub, bool isAlreadyGold) {
+  VoidCallback? _resolveButtonAction(
+    SubscriptionProvider sub,
+    bool isAlreadyGold,
+  ) {
     if (isAlreadyGold || sub.isLoading) return null;
     if (sub.isInitializing) return null; // 초기화 중 — 비활성
     if (!sub.isInitialized && sub.initError != null) {
@@ -455,8 +491,8 @@ class _GoldUpgradeSheetState extends State<GoldUpgradeSheet> {
       isAlreadyGold
           ? l10n.subscriptionActive
           : canTrial
-              ? l10n.freeTrialStart
-              : l10n.subscribeNow,
+          ? l10n.freeTrialStart
+          : l10n.subscribeNow,
       style: const TextStyle(
         fontSize: AppTypography.bodyLarge,
         fontWeight: AppTypography.bold,
@@ -471,17 +507,27 @@ class _GoldUpgradeSheetState extends State<GoldUpgradeSheet> {
     }
   }
 
-  Widget _benefitRow(IconData icon, String text, ThemeData theme) {
+  Widget _benefitRow(IconData icon, String text) {
+    final mlc = context.mlColors;
     return Row(
       children: [
-        Icon(Icons.check_circle, size: 20, color: Colors.green.shade600),
+        Container(
+          width: 28,
+          height: 28,
+          decoration: BoxDecoration(
+            color: mlc.infoBg,
+            borderRadius: BorderRadius.circular(AppRadius.full),
+          ),
+          child: Icon(icon, size: 16, color: mlc.accentBlue),
+        ),
         const SizedBox(width: AppSpacing.md),
         Expanded(
           child: Text(
             text,
             style: TextStyle(
               fontSize: AppTypography.bodyMedium,
-              color: theme.colorScheme.onSurface,
+              color: mlc.textPrimary,
+              height: 1.35,
             ),
           ),
         ),

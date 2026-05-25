@@ -26,7 +26,8 @@ class NotificationInboxScreen extends StatefulWidget {
 
 class _NotificationInboxScreenState extends State<NotificationInboxScreen> {
   static final String _baseUrl =
-      dotenv.env['AUTH_API_BASE_URL'] ?? 'http://43.201.45.60:8000/api/accounts';
+      dotenv.env['AUTH_API_BASE_URL'] ??
+      'http://43.201.45.60:8000/api/accounts';
 
   List<NotificationItem> _notifications = [];
   bool _isLoading = true;
@@ -60,13 +61,15 @@ class _NotificationInboxScreenState extends State<NotificationInboxScreen> {
         return;
       }
 
-      final response = await http.get(
-        Uri.parse('$_baseUrl/notifications/'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Token $token',
-        },
-      ).timeout(const Duration(seconds: 10));
+      final response = await http
+          .get(
+            Uri.parse('$_baseUrl/notifications/'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Token $token',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
         final json = jsonDecode(response.body);
@@ -104,13 +107,15 @@ class _NotificationInboxScreenState extends State<NotificationInboxScreen> {
 
   Future<void> _markAllRead(String token) async {
     try {
-      await http.post(
-        Uri.parse('$_baseUrl/notifications/read/'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Token $token',
-        },
-      ).timeout(const Duration(seconds: 5));
+      await http
+          .post(
+            Uri.parse('$_baseUrl/notifications/read/'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Token $token',
+            },
+          )
+          .timeout(const Duration(seconds: 5));
     } catch (e) {
       debugPrint('markAllRead error: $e');
     }
@@ -149,10 +154,14 @@ class _NotificationInboxScreenState extends State<NotificationInboxScreen> {
         ),
       );
     } else if (item.ticker.isNotEmpty) {
+      final isNews = item.notificationType.toUpperCase().contains('NEWS');
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) => TickerDetailScreen(ticker: item.ticker),
+          builder: (_) => TickerDetailScreen(
+            ticker: item.ticker,
+            initialSection: isNews ? 'news' : null,
+          ),
         ),
       );
     }
@@ -185,39 +194,36 @@ class _NotificationInboxScreenState extends State<NotificationInboxScreen> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _error != null
-              ? Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(_error!, style: theme.textTheme.bodyMedium),
-                      const SizedBox(height: AppSpacing.md),
-                      TextButton(
-                        onPressed: _fetchNotifications,
-                        child: Text(l10n.retry),
-                      ),
-                    ],
+          ? Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(_error!, style: theme.textTheme.bodyMedium),
+                  const SizedBox(height: AppSpacing.md),
+                  TextButton(
+                    onPressed: _fetchNotifications,
+                    child: Text(l10n.retry),
                   ),
-                )
-              : _notifications.isEmpty
-                  ? _buildEmptyState(l10n, theme)
-                  : RefreshIndicator(
-                      onRefresh: _fetchNotifications,
-                      child: ListView.separated(
-                        itemCount: _notifications.length,
-                        separatorBuilder: (_, __) => const Divider(
-                          indent: 16,
-                          endIndent: 16,
-                          height: 1,
-                        ),
-                        itemBuilder: (context, index) {
-                          return _buildNotificationItem(
-                            _notifications[index],
-                            l10n,
-                            theme,
-                          );
-                        },
-                      ),
-                    ),
+                ],
+              ),
+            )
+          : _notifications.isEmpty
+          ? _buildEmptyState(l10n, theme)
+          : RefreshIndicator(
+              onRefresh: _fetchNotifications,
+              child: ListView.separated(
+                itemCount: _notifications.length,
+                separatorBuilder: (_, __) =>
+                    const Divider(indent: 16, endIndent: 16, height: 1),
+                itemBuilder: (context, index) {
+                  return _buildNotificationItem(
+                    _notifications[index],
+                    l10n,
+                    theme,
+                  );
+                },
+              ),
+            ),
     );
   }
 
@@ -235,11 +241,16 @@ class _NotificationInboxScreenState extends State<NotificationInboxScreen> {
     ThemeData theme,
   ) {
     return InkWell(
-      onTap: (item.ticker.isNotEmpty || (item.isCommunityNotification && item.postId != null))
+      onTap:
+          (item.ticker.isNotEmpty ||
+              (item.isCommunityNotification && item.postId != null))
           ? () => _onTapNotification(item)
           : null,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.md),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.xl,
+          vertical: AppSpacing.md,
+        ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

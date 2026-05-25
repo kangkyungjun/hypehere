@@ -17,16 +17,13 @@ class ModalHandleBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(
-        top: AppSpacing.md,
-        bottom: AppSpacing.xl,
-      ),
+      padding: const EdgeInsets.only(top: AppSpacing.md, bottom: AppSpacing.lg),
       child: Container(
-        width: 40,
+        width: 36,
         height: 4,
         decoration: BoxDecoration(
-          color: context.mlColors.subtleBorder,
-          borderRadius: BorderRadius.circular(AppRadius.xxs),
+          color: context.mlColors.textTertiary.withValues(alpha: 0.35),
+          borderRadius: BorderRadius.circular(AppRadius.full),
         ),
       ),
     );

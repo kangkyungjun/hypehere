@@ -180,47 +180,47 @@ class MarketLensColors extends ThemeExtension<MarketLensColors> {
 
   static const light = MarketLensColors(
     cardBackground: Colors.white,
-    chartBackground: Colors.white,
-    chartGridLine: Color(0xFFE0E0E0), // Colors.grey.shade300
-    chartTooltipBg: Color(0xDD000000), // Colors.black87
-    subtleBorder: Color(0xFFE0E0E0), // Colors.grey.shade300
-    sectionBackground: Color(0xFFF9FAFB), // Gray 50
-    gainColor: Color(0xFF10B981), // Emerald 500
-    lossColor: Color(0xFFEF4444), // Red 500
-    neutralColor: Color(0xFF9E9E9E), // grey 500
-    gainBg: Color(0xFFECFDF5), // Emerald 50
-    lossBg: Color(0xFFFEF2F2), // Red 50
-    textPrimary: Color(0xFF1F2937), // Gray 800
-    textSecondary: Color(0xFF6B7280), // Gray 500
-    textTertiary: Color(0xFF9CA3AF), // Gray 400
-    accentBlue: Color(0xFF1A56DB), // Deep Trust Blue
-    warningColor: Color(0xFFF57C00), // orange 700
-    warningBg: Color(0xFFFFF3E0), // orange 50
-    dangerColor: Color(0xFFF44336), // red 500
-    dangerBg: Color(0xFFFFEBEE), // red 50
+    chartBackground: Color(0xFFFFFFFF),
+    chartGridLine: Color(0xFFE8EDF5),
+    chartTooltipBg: Color(0xEE111827),
+    subtleBorder: Color(0xFFE5EAF2),
+    sectionBackground: Color(0xFFF6F8FB),
+    gainColor: Color(0xFF059669),
+    lossColor: Color(0xFFDC2626),
+    neutralColor: Color(0xFF8A94A6),
+    gainBg: Color(0xFFEAF8F1),
+    lossBg: Color(0xFFFFF0F0),
+    textPrimary: Color(0xFF111827),
+    textSecondary: Color(0xFF667085),
+    textTertiary: Color(0xFF98A2B3),
+    accentBlue: Color(0xFF2563EB),
+    warningColor: Color(0xFFD97706),
+    warningBg: Color(0xFFFFF7E8),
+    dangerColor: Color(0xFFDC2626),
+    dangerBg: Color(0xFFFFF0F0),
     onPrimary: Colors.white,
-    infoBg: Color(0xFFEFF6FF), // Blue 50
-    reportColor: Color(0xFFFF9800), // orange
+    infoBg: Color(0xFFEFF6FF),
+    reportColor: Color(0xFFD97706),
     overlayDim: Color(0x14000000), // 8% black
-    scoreBuyColor: Color(0xFF81C784), // Green 300
-    scoreHoldColor: Color(0xFFFFA726), // Orange 400
-    scoreSellColor: Color(0xFFFF7043), // Deep Orange 300
-    gaugeCautious: Color(0xFFFB8C00), // Orange 600
-    gaugeBullish: Color(0xFF1E88E5), // Blue 600
-    shimmerBase: Color(0xFFE0E0E0), // Grey 300
-    shimmerHighlight: Color(0xFFF5F5F5), // Grey 100
-    sundayColor: Color(0xFFE53935), // Red 600
-    eventFedColor: Color(0xFFE53935), // Red 600
-    eventEarningsColor: Color(0xFF43A047), // Green 600
-    eventEconomicColor: Color(0xFF1E88E5), // Blue 600
-    eventOptionsColor: Color(0xFFFF9800), // Orange
-    eventConferenceColor: Color(0xFF8E24AA), // Purple 600
-    eventDividendColor: Color(0xFF78909C), // BlueGrey 400
-    eventShareholderColor: Color(0xFFFDD835), // Yellow 600
-    roleMasterColor: Color(0xFFD32F2F), // Red 700
-    roleManagerColor: Color(0xFFF57C00), // Orange 700
-    roleGoldColor: Color(0xFFFFA000), // Amber 700
-    roleRegularColor: Color(0xFF757575), // Grey 600
+    scoreBuyColor: Color(0xFF5BBF8A),
+    scoreHoldColor: Color(0xFFD7A23A),
+    scoreSellColor: Color(0xFFE07A5F),
+    gaugeCautious: Color(0xFFD97706),
+    gaugeBullish: Color(0xFF2563EB),
+    shimmerBase: Color(0xFFE9EEF5),
+    shimmerHighlight: Color(0xFFF8FAFC),
+    sundayColor: Color(0xFFDC2626),
+    eventFedColor: Color(0xFFB45309),
+    eventEarningsColor: Color(0xFF059669),
+    eventEconomicColor: Color(0xFF2563EB),
+    eventOptionsColor: Color(0xFFD97706),
+    eventConferenceColor: Color(0xFF667085),
+    eventDividendColor: Color(0xFF64748B),
+    eventShareholderColor: Color(0xFF8A94A6),
+    roleMasterColor: Color(0xFFDC2626),
+    roleManagerColor: Color(0xFFD97706),
+    roleGoldColor: Color(0xFFB7791F),
+    roleRegularColor: Color(0xFF667085),
     treemapGainBase: Color(0xFF2D4A2D), // Dark green
     treemapGainFull: Color(0xFF00C853), // Bright green
     treemapLossBase: Color(0xFF4A2D2D), // Dark red
@@ -228,20 +228,20 @@ class MarketLensColors extends ThemeExtension<MarketLensColors> {
   );
 
   static const dark = MarketLensColors(
-    cardBackground: Color(0xFF1E1E1E),
-    chartBackground: Color(0xFF2A2A2A),
-    chartGridLine: Color(0xFF424242),
-    chartTooltipBg: Color(0xFF424242),
-    subtleBorder: Color(0xFF424242),
-    sectionBackground: Color(0xFF2A2A2A),
+    cardBackground: Color(0xFF151B24),
+    chartBackground: Color(0xFF151B24),
+    chartGridLine: Color(0xFF273244),
+    chartTooltipBg: Color(0xFF0B111A),
+    subtleBorder: Color(0xFF273244),
+    sectionBackground: Color(0xFF0B111A),
     gainColor: Color(0xFF34D399), // Emerald 400 — 다크 배경에 가독성 확보
     lossColor: Color(0xFFF87171), // Red 400 — 다크 배경에 가독성 확보
     neutralColor: Color(0xFFBDBDBD), // grey 400
     gainBg: Color(0xFF064E3B), // Emerald 900 계열
     lossBg: Color(0xFF450A0A), // Red 950 계열
-    textPrimary: Color(0xFFF3F4F6), // Gray 100
-    textSecondary: Color(0xFFD1D5DB), // Gray 300
-    textTertiary: Color(0xFF757575), // grey 600
+    textPrimary: Color(0xFFF8FAFC),
+    textSecondary: Color(0xFFCBD5E1),
+    textTertiary: Color(0xFF94A3B8),
     accentBlue: Color(0xFF60A5FA), // Blue 400 — 다크 배경에 선명
     warningColor: Color(0xFFFFB74D), // orange 300 — 다크 배경에 가독성 확보
     warningBg: Color(0xFF3E2A1E), // 다크 orange tint
@@ -363,7 +363,8 @@ class MarketLensColors extends ThemeExtension<MarketLensColors> {
       eventOptionsColor: eventOptionsColor ?? this.eventOptionsColor,
       eventConferenceColor: eventConferenceColor ?? this.eventConferenceColor,
       eventDividendColor: eventDividendColor ?? this.eventDividendColor,
-      eventShareholderColor: eventShareholderColor ?? this.eventShareholderColor,
+      eventShareholderColor:
+          eventShareholderColor ?? this.eventShareholderColor,
       roleMasterColor: roleMasterColor ?? this.roleMasterColor,
       roleManagerColor: roleManagerColor ?? this.roleManagerColor,
       roleGoldColor: roleGoldColor ?? this.roleGoldColor,
@@ -384,8 +385,11 @@ class MarketLensColors extends ThemeExtension<MarketLensColors> {
       chartGridLine: Color.lerp(chartGridLine, other.chartGridLine, t)!,
       chartTooltipBg: Color.lerp(chartTooltipBg, other.chartTooltipBg, t)!,
       subtleBorder: Color.lerp(subtleBorder, other.subtleBorder, t)!,
-      sectionBackground:
-          Color.lerp(sectionBackground, other.sectionBackground, t)!,
+      sectionBackground: Color.lerp(
+        sectionBackground,
+        other.sectionBackground,
+        t,
+      )!,
       gainColor: Color.lerp(gainColor, other.gainColor, t)!,
       lossColor: Color.lerp(lossColor, other.lossColor, t)!,
       neutralColor: Color.lerp(neutralColor, other.neutralColor, t)!,
@@ -409,19 +413,55 @@ class MarketLensColors extends ThemeExtension<MarketLensColors> {
       gaugeCautious: Color.lerp(gaugeCautious, other.gaugeCautious, t)!,
       gaugeBullish: Color.lerp(gaugeBullish, other.gaugeBullish, t)!,
       shimmerBase: Color.lerp(shimmerBase, other.shimmerBase, t)!,
-      shimmerHighlight: Color.lerp(shimmerHighlight, other.shimmerHighlight, t)!,
+      shimmerHighlight: Color.lerp(
+        shimmerHighlight,
+        other.shimmerHighlight,
+        t,
+      )!,
       sundayColor: Color.lerp(sundayColor, other.sundayColor, t)!,
       eventFedColor: Color.lerp(eventFedColor, other.eventFedColor, t)!,
-      eventEarningsColor: Color.lerp(eventEarningsColor, other.eventEarningsColor, t)!,
-      eventEconomicColor: Color.lerp(eventEconomicColor, other.eventEconomicColor, t)!,
-      eventOptionsColor: Color.lerp(eventOptionsColor, other.eventOptionsColor, t)!,
-      eventConferenceColor: Color.lerp(eventConferenceColor, other.eventConferenceColor, t)!,
-      eventDividendColor: Color.lerp(eventDividendColor, other.eventDividendColor, t)!,
-      eventShareholderColor: Color.lerp(eventShareholderColor, other.eventShareholderColor, t)!,
+      eventEarningsColor: Color.lerp(
+        eventEarningsColor,
+        other.eventEarningsColor,
+        t,
+      )!,
+      eventEconomicColor: Color.lerp(
+        eventEconomicColor,
+        other.eventEconomicColor,
+        t,
+      )!,
+      eventOptionsColor: Color.lerp(
+        eventOptionsColor,
+        other.eventOptionsColor,
+        t,
+      )!,
+      eventConferenceColor: Color.lerp(
+        eventConferenceColor,
+        other.eventConferenceColor,
+        t,
+      )!,
+      eventDividendColor: Color.lerp(
+        eventDividendColor,
+        other.eventDividendColor,
+        t,
+      )!,
+      eventShareholderColor: Color.lerp(
+        eventShareholderColor,
+        other.eventShareholderColor,
+        t,
+      )!,
       roleMasterColor: Color.lerp(roleMasterColor, other.roleMasterColor, t)!,
-      roleManagerColor: Color.lerp(roleManagerColor, other.roleManagerColor, t)!,
+      roleManagerColor: Color.lerp(
+        roleManagerColor,
+        other.roleManagerColor,
+        t,
+      )!,
       roleGoldColor: Color.lerp(roleGoldColor, other.roleGoldColor, t)!,
-      roleRegularColor: Color.lerp(roleRegularColor, other.roleRegularColor, t)!,
+      roleRegularColor: Color.lerp(
+        roleRegularColor,
+        other.roleRegularColor,
+        t,
+      )!,
       treemapGainBase: Color.lerp(treemapGainBase, other.treemapGainBase, t)!,
       treemapGainFull: Color.lerp(treemapGainFull, other.treemapGainFull, t)!,
       treemapLossBase: Color.lerp(treemapLossBase, other.treemapLossBase, t)!,

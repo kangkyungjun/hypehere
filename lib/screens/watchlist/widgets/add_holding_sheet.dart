@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../services/analytics_api_client.dart';
+import '../../../theme/app_colors.dart';
 import '../../../theme/app_radius.dart';
 import '../../../theme/app_spacing.dart';
 import '../../../theme/app_stroke.dart';
 import '../../../theme/app_typography.dart';
+import '../../../widgets/common/modal_handle_bar.dart';
 
 /// Bottom sheet for adding a holding with date picker + auto close price.
 ///
@@ -14,22 +16,24 @@ class AddHoldingSheet extends StatefulWidget {
   final String ticker;
   final String? name;
 
-  const AddHoldingSheet({
-    super.key,
-    required this.ticker,
-    this.name,
-  });
+  const AddHoldingSheet({super.key, required this.ticker, this.name});
 
   static Future<({double shares, double avgPrice, DateTime date})?> show(
     BuildContext context, {
     required String ticker,
     String? name,
   }) {
-    return showModalBottomSheet<({double shares, double avgPrice, DateTime date})>(
+    return showModalBottomSheet<
+      ({double shares, double avgPrice, DateTime date})
+    >(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xxl)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppRadius.xxl),
+        ),
       ),
       builder: (_) => AddHoldingSheet(ticker: ticker, name: name),
     );
@@ -70,7 +74,10 @@ class _AddHoldingSheetState extends State<AddHoldingSheet> {
   Future<void> _fetchClosePrice() async {
     setState(() => _loadingPrice = true);
     try {
-      final result = await _apiClient.getClosePrice(widget.ticker, _selectedDate);
+      final result = await _apiClient.getClosePrice(
+        widget.ticker,
+        _selectedDate,
+      );
       if (mounted) {
         setState(() {
           _loadingPrice = false;
@@ -118,62 +125,83 @@ class _AddHoldingSheetState extends State<AddHoldingSheet> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
+    final mlc = context.mlColors;
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
     final bottomPadding = MediaQuery.of(context).viewPadding.bottom;
 
     final dateStr = _formatDate(_selectedDate);
-    final isDifferentDate = _actualPriceDate != null && _actualPriceDate != dateStr;
+    final isDifferentDate =
+        _actualPriceDate != null && _actualPriceDate != dateStr;
 
     return Padding(
-      padding: EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.md, AppSpacing.xl, AppSpacing.xxl + bottomInset + bottomPadding),
+      padding: EdgeInsets.fromLTRB(
+        AppSpacing.xl,
+        AppSpacing.md,
+        AppSpacing.xl,
+        AppSpacing.xxl + bottomInset + bottomPadding,
+      ),
       child: Form(
         key: _formKey,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Drag handle
-            Center(
-              child: Container(
-                width: 40, height: 4,
-                margin: const EdgeInsets.only(bottom: AppSpacing.lg),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(AppRadius.xxs),
-                ),
-              ),
-            ),
+            const Center(child: ModalHandleBar()),
 
             // Title
             Text(
               l10n.addHoldingTitle(widget.ticker),
-              style: const TextStyle(fontSize: AppTypography.headlineLarge, fontWeight: AppTypography.bold),
+              style: TextStyle(
+                fontSize: AppTypography.headlineLarge,
+                fontWeight: AppTypography.bold,
+                color: mlc.textPrimary,
+              ),
             ),
             if (widget.name != null)
               Text(
                 widget.name!,
-                style: TextStyle(fontSize: AppTypography.bodyMedium, color: theme.colorScheme.onSurfaceVariant),
+                style: TextStyle(
+                  fontSize: AppTypography.bodyMedium,
+                  color: mlc.textSecondary,
+                ),
               ),
             const SizedBox(height: AppSpacing.xl),
 
             // Purchase date
-            Text(l10n.purchaseDate, style: const TextStyle(fontSize: AppTypography.bodyMedium, fontWeight: AppTypography.medium)),
+            Text(
+              l10n.purchaseDate,
+              style: const TextStyle(
+                fontSize: AppTypography.bodyMedium,
+                fontWeight: AppTypography.medium,
+              ),
+            ),
             const SizedBox(height: AppSpacing.xs),
             InkWell(
               onTap: _pickDate,
               borderRadius: BorderRadius.circular(AppRadius.md),
               child: Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.lg),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.lg,
+                  vertical: AppSpacing.lg,
+                ),
                 decoration: BoxDecoration(
-                  border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.5)),
-                  borderRadius: BorderRadius.circular(AppRadius.md),
+                  color: mlc.sectionBackground,
+                  border: Border.all(color: mlc.subtleBorder),
+                  borderRadius: BorderRadius.circular(AppRadius.lg),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.calendar_today, size: 18, color: theme.colorScheme.primary),
+                    Icon(Icons.calendar_today, size: 18, color: mlc.accentBlue),
                     const SizedBox(width: AppSpacing.md),
-                    Text(dateStr, style: const TextStyle(fontSize: AppTypography.headlineSmall)),
+                    Text(
+                      dateStr,
+                      style: TextStyle(
+                        fontSize: AppTypography.headlineSmall,
+                        fontWeight: AppTypography.semiBold,
+                        color: mlc.textPrimary,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -181,32 +209,53 @@ class _AddHoldingSheetState extends State<AddHoldingSheet> {
             const SizedBox(height: AppSpacing.lg),
 
             // Price input
-            Text(l10n.avgPrice, style: const TextStyle(fontSize: AppTypography.bodyMedium, fontWeight: AppTypography.medium)),
+            Text(
+              l10n.avgPrice,
+              style: const TextStyle(
+                fontSize: AppTypography.bodyMedium,
+                fontWeight: AppTypography.medium,
+              ),
+            ),
             const SizedBox(height: AppSpacing.xs),
             TextFormField(
               controller: _priceController,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*'))],
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+              ],
               decoration: InputDecoration(
                 prefixText: '\$ ',
                 suffixIcon: _loadingPrice
                     ? const Padding(
                         padding: EdgeInsets.all(AppSpacing.lg),
-                        child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: AppStroke.medium)),
+                        child: SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: AppStroke.medium,
+                          ),
+                        ),
                       )
                     : _priceError && _priceController.text.isEmpty
-                        ? IconButton(
-                            tooltip: l10n.refresh,
-                            icon: const Icon(Icons.refresh, size: 20),
-                            onPressed: () {
-                              setState(() => _priceError = false);
-                              _fetchClosePrice();
-                            },
-                          )
-                        : null,
+                    ? IconButton(
+                        tooltip: l10n.refresh,
+                        icon: const Icon(Icons.refresh, size: 20),
+                        onPressed: () {
+                          setState(() => _priceError = false);
+                          _fetchClosePrice();
+                        },
+                      )
+                    : null,
                 isDense: true,
-                contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.lg),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.lg,
+                  vertical: AppSpacing.lg,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppRadius.md),
+                ),
               ),
               validator: (v) {
                 final n = double.tryParse(v ?? '');
@@ -219,7 +268,10 @@ class _AddHoldingSheetState extends State<AddHoldingSheet> {
                 padding: const EdgeInsets.only(top: AppSpacing.xs),
                 child: Text(
                   l10n.holidayPriceNotice(_actualPriceDate!),
-                  style: TextStyle(fontSize: AppTypography.caption, color: theme.colorScheme.primary),
+                  style: TextStyle(
+                    fontSize: AppTypography.caption,
+                    color: mlc.accentBlue,
+                  ),
                 ),
               )
             else if (!_loadingPrice && _priceController.text.isNotEmpty)
@@ -227,7 +279,10 @@ class _AddHoldingSheetState extends State<AddHoldingSheet> {
                 padding: const EdgeInsets.only(top: AppSpacing.xs),
                 child: Text(
                   l10n.closingPriceAuto,
-                  style: TextStyle(fontSize: AppTypography.caption, color: theme.colorScheme.onSurfaceVariant),
+                  style: TextStyle(
+                    fontSize: AppTypography.caption,
+                    color: mlc.textSecondary,
+                  ),
                 ),
               ),
             if (_priceError && _priceController.text.isEmpty)
@@ -237,23 +292,41 @@ class _AddHoldingSheetState extends State<AddHoldingSheet> {
                   Localizations.localeOf(context).languageCode == 'ko'
                       ? '종가를 불러올 수 없습니다. 직접 입력해주세요.'
                       : 'Could not load close price. Please enter manually.',
-                  style: TextStyle(fontSize: AppTypography.caption, color: theme.colorScheme.error),
+                  style: TextStyle(
+                    fontSize: AppTypography.caption,
+                    color: theme.colorScheme.error,
+                  ),
                 ),
               ),
             const SizedBox(height: AppSpacing.lg),
 
             // Shares input
-            Text(l10n.shares, style: const TextStyle(fontSize: AppTypography.bodyMedium, fontWeight: AppTypography.medium)),
+            Text(
+              l10n.shares,
+              style: const TextStyle(
+                fontSize: AppTypography.bodyMedium,
+                fontWeight: AppTypography.medium,
+              ),
+            ),
             const SizedBox(height: AppSpacing.xs),
             TextFormField(
               controller: _sharesController,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*'))],
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+              ],
               decoration: InputDecoration(
                 prefixText: '# ',
                 isDense: true,
-                contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.lg),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.lg,
+                  vertical: AppSpacing.lg,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppRadius.md),
+                ),
               ),
               validator: (v) {
                 final n = double.tryParse(v ?? '');
@@ -267,18 +340,33 @@ class _AddHoldingSheetState extends State<AddHoldingSheet> {
             // Total cost
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.lg),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.lg,
+                vertical: AppSpacing.lg,
+              ),
               decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-                borderRadius: BorderRadius.circular(AppRadius.md),
+                color: mlc.sectionBackground,
+                border: Border.all(color: mlc.subtleBorder),
+                borderRadius: BorderRadius.circular(AppRadius.lg),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(l10n.totalCost, style: TextStyle(fontSize: AppTypography.bodyMedium, color: theme.colorScheme.onSurfaceVariant)),
                   Text(
-                    _totalCost != null ? '\$${_totalCost!.toStringAsFixed(2)}' : '—',
-                    style: const TextStyle(fontSize: AppTypography.headlineSmall, fontWeight: AppTypography.bold),
+                    l10n.totalCost,
+                    style: TextStyle(
+                      fontSize: AppTypography.bodyMedium,
+                      color: mlc.textSecondary,
+                    ),
+                  ),
+                  Text(
+                    _totalCost != null
+                        ? '\$${_totalCost!.toStringAsFixed(2)}'
+                        : '—',
+                    style: const TextStyle(
+                      fontSize: AppTypography.headlineSmall,
+                      fontWeight: AppTypography.bold,
+                    ),
                   ),
                 ],
               ),
@@ -293,12 +381,19 @@ class _AddHoldingSheetState extends State<AddHoldingSheet> {
                   if (!_formKey.currentState!.validate()) return;
                   final shares = double.parse(_sharesController.text);
                   final avgPrice = double.parse(_priceController.text);
-                  Navigator.pop(context, (shares: shares, avgPrice: avgPrice, date: _selectedDate));
+                  Navigator.pop(context, (
+                    shares: shares,
+                    avgPrice: avgPrice,
+                    date: _selectedDate,
+                  ));
                 },
                 style: FilledButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
                 ),
-                child: Text(l10n.addToHoldings, style: const TextStyle(fontSize: AppTypography.headlineSmall)),
+                child: Text(
+                  l10n.addToHoldings,
+                  style: const TextStyle(fontSize: AppTypography.headlineSmall),
+                ),
               ),
             ),
           ],
