@@ -305,9 +305,9 @@ class _NewsListScreenState extends State<NewsListScreen> {
         controller: _scrollController,
         padding: const EdgeInsets.fromLTRB(
           AppSpacing.xl,
-          AppSpacing.lg,
+          AppSpacing.md,
           AppSpacing.xl,
-          AppSpacing.xxl,
+          AppSpacing.xl,
         ),
         itemCount: _buildListItemCount(),
         itemBuilder: (context, index) => _buildListItem(index),
@@ -418,10 +418,7 @@ class _NewsListScreenState extends State<NewsListScreen> {
   Widget _buildDateHeader(BuildContext context, NewsItem item) {
     final label = _formatDateLabel(item.date);
     return Padding(
-      padding: const EdgeInsets.only(
-        top: AppSpacing.xxl,
-        bottom: AppSpacing.md,
-      ),
+      padding: const EdgeInsets.only(top: AppSpacing.xl, bottom: AppSpacing.sm),
       child: Text(
         label,
         style: AppTypography.cardTitle.copyWith(
@@ -504,12 +501,12 @@ class _NewsListScreenState extends State<NewsListScreen> {
                   ],
                 ),
               ),
-              const SizedBox(width: AppSpacing.lg),
+              const SizedBox(width: AppSpacing.md),
 
               // Content
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.only(bottom: AppSpacing.xxl),
+                  padding: const EdgeInsets.only(bottom: AppSpacing.lg),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [

@@ -476,8 +476,8 @@ class _TickerDetailScreenState extends State<TickerDetailScreen> {
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
               child: Divider(
                 color: context.mlColors.subtleBorder,
-                thickness: 4,
-                height: 24,
+                thickness: 1,
+                height: 16,
               ),
             ),
 

@@ -56,7 +56,7 @@ class EarningsChartWidget extends StatelessWidget {
       margin: margin ?? const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
       padding: const EdgeInsets.all(AppSpacing.xl),
       decoration: BoxDecoration(
-        color: context.mlColors.sectionBackground,
+        color: context.mlColors.cardBackground,
         borderRadius: BorderRadius.circular(AppRadius.lg),
       ),
       child: Column(
@@ -69,8 +69,8 @@ class EarningsChartWidget extends StatelessWidget {
               Text(
                 l10n.earningsHistoryEPS,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: AppTypography.bold,
-                    ),
+                  fontWeight: AppTypography.bold,
+                ),
               ),
             ],
           ),
@@ -79,11 +79,23 @@ class EarningsChartWidget extends StatelessWidget {
           // Legend
           Row(
             children: [
-              _buildLegendDot(context, context.mlColors.textTertiary, l10n.earningsEstimate),
+              _buildLegendDot(
+                context,
+                context.mlColors.textTertiary,
+                l10n.earningsEstimate,
+              ),
               const SizedBox(width: AppSpacing.lg),
-              _buildLegendDot(context, context.mlColors.gainColor, l10n.earningsBeat),
+              _buildLegendDot(
+                context,
+                context.mlColors.gainColor,
+                l10n.earningsBeat,
+              ),
               const SizedBox(width: AppSpacing.lg),
-              _buildLegendDot(context, context.mlColors.lossColor, l10n.earningsMiss),
+              _buildLegendDot(
+                context,
+                context.mlColors.lossColor,
+                l10n.earningsMiss,
+              ),
             ],
           ),
           const SizedBox(height: AppSpacing.xl),
@@ -105,7 +117,9 @@ class EarningsChartWidget extends StatelessWidget {
                       if (groupIndex >= entries.length) return null;
                       final e = entries[groupIndex];
                       final isEstimate = rodIndex == 0;
-                      final label = isEstimate ? l10n.earningsEstimate : l10n.earningsActual;
+                      final label = isEstimate
+                          ? l10n.earningsEstimate
+                          : l10n.earningsActual;
                       final value = isEstimate ? e.epsEstimate : e.reportedEps;
                       if (value == null) return null;
                       String text = '$label: \$${value.toStringAsFixed(2)}';
@@ -131,7 +145,9 @@ class EarningsChartWidget extends StatelessWidget {
                       ((maxY + yMargin) - (minY < 0 ? minY - yMargin : 0)) / 4,
                   getDrawingHorizontalLine: (value) {
                     return FlLine(
-                      color: context.mlColors.chartGridLine,
+                      color: context.mlColors.chartGridLine.withValues(
+                        alpha: 0.72,
+                      ),
                       strokeWidth: AppStroke.hairline,
                     );
                   },
@@ -146,7 +162,7 @@ class EarningsChartWidget extends StatelessWidget {
                           '\$${value.toStringAsFixed(2)}',
                           style: TextStyle(
                             fontSize: AppTypography.chartLabel,
-                            color: Theme.of(context).colorScheme.outline,
+                            color: context.mlColors.textTertiary,
                           ),
                         );
                       },
@@ -166,7 +182,8 @@ class EarningsChartWidget extends StatelessWidget {
                         final dateParts = e.date.split('-');
                         String label;
                         if (dateParts.length >= 2) {
-                          label = '${dateParts[0].substring(2)}/${dateParts[1]}';
+                          label =
+                              '${dateParts[0].substring(2)}/${dateParts[1]}';
                         } else {
                           label = e.date;
                         }
@@ -178,7 +195,9 @@ class EarningsChartWidget extends StatelessWidget {
                             children: [
                               Text(
                                 label,
-                                style: const TextStyle(fontSize: AppTypography.chartLabel),
+                                style: const TextStyle(
+                                  fontSize: AppTypography.chartLabel,
+                                ),
                               ),
                               // Surprise % below date
                               if (e.surprisePct != null)
@@ -223,7 +242,10 @@ class EarningsChartWidget extends StatelessWidget {
     );
   }
 
-  List<BarChartGroupData> _buildBarGroups(BuildContext context, List<EarningsHistoryEntry> entries) {
+  List<BarChartGroupData> _buildBarGroups(
+    BuildContext context,
+    List<EarningsHistoryEntry> entries,
+  ) {
     return entries.asMap().entries.map((entry) {
       final index = entry.key;
       final e = entry.value;
@@ -252,7 +274,9 @@ class EarningsChartWidget extends StatelessWidget {
             toY: estimateValue,
             color: context.mlColors.textTertiary,
             width: barWidth,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xxs)),
+            borderRadius: BorderRadius.vertical(
+              top: Radius.circular(AppRadius.xxs),
+            ),
           ),
           // Reported bar (green/red)
           if (reportedValue != null)
@@ -261,8 +285,9 @@ class EarningsChartWidget extends StatelessWidget {
               toY: reportedValue,
               color: reportedColor,
               width: barWidth,
-              borderRadius:
-                  BorderRadius.vertical(top: Radius.circular(AppRadius.xxs)),
+              borderRadius: BorderRadius.vertical(
+                top: Radius.circular(AppRadius.xxs),
+              ),
             ),
         ],
       );

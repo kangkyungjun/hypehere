@@ -21,10 +21,7 @@ import '../../theme/app_typography.dart';
 class RsiChartWidget extends StatelessWidget {
   final List<ChartDataPoint> dataPoints;
 
-  const RsiChartWidget({
-    super.key,
-    required this.dataPoints,
-  });
+  const RsiChartWidget({super.key, required this.dataPoints});
 
   @override
   Widget build(BuildContext context) {
@@ -75,22 +72,24 @@ class RsiChartWidget extends StatelessWidget {
           const SizedBox(height: AppSpacing.lg),
 
           // 범례
-          hasMfi ? _buildCrossoverLegend(context) : _buildRsiOnlyLegend(context),
+          hasMfi
+              ? _buildCrossoverLegend(context)
+              : _buildRsiOnlyLegend(context),
         ],
       ),
     );
   }
 
   /// RSI-only 차트 (MFI 없을 때 fallback)
-  Widget _buildRsiOnlyChart(BuildContext context, List<MapEntry<int, ChartDataPoint>> rsiData) {
+  Widget _buildRsiOnlyChart(
+    BuildContext context,
+    List<MapEntry<int, ChartDataPoint>> rsiData,
+  ) {
     return LineChart(
       LineChartData(
         gridData: _buildGridData(context),
         titlesData: _buildTitlesData(context),
-        borderData: FlBorderData(
-          show: true,
-          border: Border.all(color: context.mlColors.subtleBorder),
-        ),
+        borderData: FlBorderData(show: false),
         minY: 0,
         maxY: 100,
         minX: 0,
@@ -102,7 +101,7 @@ class RsiChartWidget extends StatelessWidget {
                 .toList(),
             isCurved: true,
             color: Theme.of(context).colorScheme.tertiary,
-            barWidth: 2,
+            barWidth: 1.5,
             isStrokeCapRound: true,
             dotData: const FlDotData(show: false),
             belowBarData: BarAreaData(show: false),
@@ -114,7 +113,10 @@ class RsiChartWidget extends StatelessWidget {
   }
 
   /// RSI-MFI 크로스오버 차트
-  Widget _buildCrossoverChart(BuildContext context, List<MapEntry<int, ChartDataPoint>> rsiData) {
+  Widget _buildCrossoverChart(
+    BuildContext context,
+    List<MapEntry<int, ChartDataPoint>> rsiData,
+  ) {
     // MFI 데이터 (인덱스 기반)
     final mfiData = dataPoints
         .asMap()
@@ -135,9 +137,7 @@ class RsiChartWidget extends StatelessWidget {
 
       // RSI subseries (invisible)
       final rsiHelper = LineChartBarData(
-        spots: segment.points
-            .map((p) => FlSpot(p.x, p.rsiY))
-            .toList(),
+        spots: segment.points.map((p) => FlSpot(p.x, p.rsiY)).toList(),
         isCurved: true,
         color: Colors.transparent,
         barWidth: 0,
@@ -147,9 +147,7 @@ class RsiChartWidget extends StatelessWidget {
 
       // MFI subseries (invisible)
       final mfiHelper = LineChartBarData(
-        spots: segment.points
-            .map((p) => FlSpot(p.x, p.mfiY))
-            .toList(),
+        spots: segment.points.map((p) => FlSpot(p.x, p.mfiY)).toList(),
         isCurved: true,
         color: Colors.transparent,
         barWidth: 0,
@@ -164,23 +162,22 @@ class RsiChartWidget extends StatelessWidget {
       final mfiBarIndex = barIndex + 1;
       barIndex += 2;
 
-      betweenBars.add(BetweenBarsData(
-        fromIndex: segment.isAccumulation ? mfiBarIndex : rsiBarIndex,
-        toIndex: segment.isAccumulation ? rsiBarIndex : mfiBarIndex,
-        color: segment.isAccumulation
-            ? context.mlColors.lossColor.withValues(alpha: 0.15)
-            : context.mlColors.accentBlue.withValues(alpha: 0.15),
-      ));
+      betweenBars.add(
+        BetweenBarsData(
+          fromIndex: segment.isAccumulation ? mfiBarIndex : rsiBarIndex,
+          toIndex: segment.isAccumulation ? rsiBarIndex : mfiBarIndex,
+          color: segment.isAccumulation
+              ? context.mlColors.lossColor.withValues(alpha: 0.15)
+              : context.mlColors.accentBlue.withValues(alpha: 0.15),
+        ),
+      );
     }
 
     return LineChart(
       LineChartData(
         gridData: _buildGridData(context),
         titlesData: _buildTitlesData(context),
-        borderData: FlBorderData(
-          show: true,
-          border: Border.all(color: context.mlColors.subtleBorder),
-        ),
+        borderData: FlBorderData(show: false),
         minY: 0,
         maxY: 100,
         minX: 0,
@@ -193,7 +190,7 @@ class RsiChartWidget extends StatelessWidget {
                 .toList(),
             isCurved: true,
             color: Theme.of(context).colorScheme.tertiary,
-            barWidth: 2,
+            barWidth: 1.5,
             isStrokeCapRound: true,
             dotData: const FlDotData(show: false),
             belowBarData: BarAreaData(show: false),
@@ -205,7 +202,7 @@ class RsiChartWidget extends StatelessWidget {
                 .toList(),
             isCurved: true,
             color: Theme.of(context).colorScheme.secondary,
-            barWidth: 2,
+            barWidth: 1.5,
             isStrokeCapRound: true,
             dotData: const FlDotData(show: false),
             belowBarData: BarAreaData(show: false),
@@ -228,11 +225,7 @@ class RsiChartWidget extends StatelessWidget {
     for (int i = 0; i < dataPoints.length; i++) {
       final dp = dataPoints[i];
       if (dp.rsi != null && dp.mfi != null) {
-        paired.add(_PairedPoint(
-          x: i.toDouble(),
-          rsiY: dp.rsi!,
-          mfiY: dp.mfi!,
-        ));
+        paired.add(_PairedPoint(x: i.toDouble(), rsiY: dp.rsi!, mfiY: dp.mfi!));
       }
     }
 
@@ -256,10 +249,12 @@ class RsiChartWidget extends StatelessWidget {
 
         // 현재 세그먼트에 교차점 추가 후 닫기
         currentPoints.add(crossPoint);
-        segments.add(_CrossoverSegment(
-          points: List.from(currentPoints),
-          isAccumulation: currentIsAccumulation,
-        ));
+        segments.add(
+          _CrossoverSegment(
+            points: List.from(currentPoints),
+            isAccumulation: currentIsAccumulation,
+          ),
+        );
 
         // 새 세그먼트 시작 (교차점부터)
         currentIsAccumulation = isAccumulation;
@@ -271,10 +266,12 @@ class RsiChartWidget extends StatelessWidget {
 
     // 마지막 세그먼트 닫기
     if (currentPoints.length >= 2) {
-      segments.add(_CrossoverSegment(
-        points: currentPoints,
-        isAccumulation: currentIsAccumulation,
-      ));
+      segments.add(
+        _CrossoverSegment(
+          points: currentPoints,
+          isAccumulation: currentIsAccumulation,
+        ),
+      );
     }
 
     return segments;
@@ -306,8 +303,8 @@ class RsiChartWidget extends StatelessWidget {
       horizontalInterval: 20,
       getDrawingHorizontalLine: (value) {
         return FlLine(
-          color: gridColor,
-          strokeWidth: AppStroke.thin,
+          color: gridColor.withValues(alpha: 0.72),
+          strokeWidth: AppStroke.hairline,
         );
       },
     );
@@ -326,7 +323,7 @@ class RsiChartWidget extends StatelessWidget {
               value.toInt().toString(),
               style: TextStyle(
                 fontSize: AppTypography.micro,
-                color: Theme.of(context).colorScheme.tertiary,
+                color: context.mlColors.textTertiary,
               ),
             );
           },
@@ -336,7 +333,9 @@ class RsiChartWidget extends StatelessWidget {
         sideTitles: SideTitles(
           showTitles: true,
           reservedSize: 30,
-          interval: dataPoints.length > 1 ? ((dataPoints.length / 0.6) / 4).ceilToDouble() : 1,
+          interval: dataPoints.length > 1
+              ? ((dataPoints.length / 0.6) / 4).ceilToDouble()
+              : 1,
           getTitlesWidget: (value, meta) {
             final index = value.toInt();
 
@@ -354,7 +353,9 @@ class RsiChartWidget extends StatelessWidget {
             if (index >= dataPoints.length) {
               final lastDate = dataPoints.last.date;
               final daysSinceLastDate = index - (dataPoints.length - 1);
-              final futureDate = lastDate.add(Duration(days: daysSinceLastDate));
+              final futureDate = lastDate.add(
+                Duration(days: daysSinceLastDate),
+              );
 
               return Padding(
                 padding: const EdgeInsets.only(top: AppSpacing.md),
@@ -372,12 +373,8 @@ class RsiChartWidget extends StatelessWidget {
           },
         ),
       ),
-      rightTitles: const AxisTitles(
-        sideTitles: SideTitles(showTitles: false),
-      ),
-      topTitles: const AxisTitles(
-        sideTitles: SideTitles(showTitles: false),
-      ),
+      rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+      topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
     );
   }
 
@@ -440,8 +437,14 @@ class RsiChartWidget extends StatelessWidget {
       children: [
         _buildLegendItem('RSI', Theme.of(context).colorScheme.tertiary),
         _buildLegendItem('MFI', Theme.of(context).colorScheme.secondary),
-        _buildFillLegendItem('Accumulation', context.mlColors.lossColor.withValues(alpha: 0.3)),
-        _buildFillLegendItem('Overheated', context.mlColors.accentBlue.withValues(alpha: 0.3)),
+        _buildFillLegendItem(
+          'Accumulation',
+          context.mlColors.lossColor.withValues(alpha: 0.3),
+        ),
+        _buildFillLegendItem(
+          'Overheated',
+          context.mlColors.accentBlue.withValues(alpha: 0.3),
+        ),
         _buildDashedLegendItem('80', context.mlColors.gainColor),
         _buildDashedLegendItem('20', context.mlColors.lossColor),
       ],
@@ -453,11 +456,7 @@ class RsiChartWidget extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Container(
-          width: 16,
-          height: 2,
-          color: color,
-        ),
+        Container(width: 16, height: 2, color: color),
         const SizedBox(width: AppSpacing.xs),
         Text(
           label,
@@ -505,9 +504,7 @@ class RsiChartWidget extends StatelessWidget {
         SizedBox(
           width: 16,
           height: 2,
-          child: CustomPaint(
-            painter: _DashedLinePainter(color: color),
-          ),
+          child: CustomPaint(painter: _DashedLinePainter(color: color)),
         ),
         const SizedBox(width: AppSpacing.xs),
         Text(

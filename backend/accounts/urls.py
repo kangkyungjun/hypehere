@@ -27,6 +27,7 @@ from .views import (
     broadcast_push_view,
     notification_history_view,
     notification_mark_read_view,
+    notification_mark_single_read_view,
     revenuecat_webhook_view,
     subscription_status_view,
 )
@@ -71,6 +72,7 @@ urlpatterns = [
     # 알림 인박스
     path('notifications/', notification_history_view, name='notification-history'),
     path('notifications/read/', notification_mark_read_view, name='notification-mark-read'),
+    path('notifications/<int:pk>/read/', notification_mark_single_read_view, name='notification-mark-single-read'),
 
     # RevenueCat IAP Webhook + 구독 상태
     path('webhook/revenuecat/', revenuecat_webhook_view, name='revenuecat-webhook'),

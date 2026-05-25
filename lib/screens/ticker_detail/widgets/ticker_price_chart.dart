@@ -49,14 +49,20 @@ class _TickerPriceChartState extends State<TickerPriceChart> {
     double minPrice = 0;
     double maxPrice = 100;
     if (prices.isNotEmpty) {
-      minPrice = prices.fold<double>(prices.first, (prev, curr) => prev < curr ? prev : curr);
-      maxPrice = prices.fold<double>(prices.first, (prev, curr) => prev > curr ? prev : curr);
+      minPrice = prices.fold<double>(
+        prices.first,
+        (prev, curr) => prev < curr ? prev : curr,
+      );
+      maxPrice = prices.fold<double>(
+        prices.first,
+        (prev, curr) => prev > curr ? prev : curr,
+      );
     }
     final priceRange = maxPrice - minPrice;
     final priceMargin = priceRange > 0 ? priceRange * 0.1 : maxPrice * 0.1;
 
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.xl),
+      padding: const EdgeInsets.all(AppSpacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -66,8 +72,8 @@ class _TickerPriceChartState extends State<TickerPriceChart> {
               Text(
                 'Price',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: AppTypography.bold,
-                    ),
+                  fontWeight: AppTypography.bold,
+                ),
               ),
               const SizedBox(width: AppSpacing.lg),
               // 기간 선택 버튼
@@ -78,20 +84,31 @@ class _TickerPriceChartState extends State<TickerPriceChart> {
                   child: GestureDetector(
                     onTap: () => widget.onPeriodChanged(period),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.xxs),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.lg,
+                        vertical: AppSpacing.xxs,
+                      ),
                       decoration: BoxDecoration(
-                        color: isSelected ? Theme.of(context).colorScheme.inverseSurface : Colors.transparent,
+                        color: isSelected
+                            ? Theme.of(context).colorScheme.inverseSurface
+                            : Colors.transparent,
                         borderRadius: BorderRadius.circular(AppRadius.lg),
                         border: Border.all(
-                          color: isSelected ? Theme.of(context).colorScheme.inverseSurface : context.mlColors.subtleBorder,
+                          color: isSelected
+                              ? Theme.of(context).colorScheme.inverseSurface
+                              : context.mlColors.subtleBorder,
                         ),
                       ),
                       child: Text(
                         period,
                         style: TextStyle(
                           fontSize: AppTypography.caption,
-                          fontWeight: isSelected ? AppTypography.bold : AppTypography.regular,
-                          color: isSelected ? context.mlColors.onPrimary : Theme.of(context).colorScheme.onSurfaceVariant,
+                          fontWeight: isSelected
+                              ? AppTypography.bold
+                              : AppTypography.regular,
+                          color: isSelected
+                              ? context.mlColors.onPrimary
+                              : Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ),
@@ -104,7 +121,10 @@ class _TickerPriceChartState extends State<TickerPriceChart> {
                 onTap: () => setState(() => _showLegend = !_showLegend),
                 borderRadius: BorderRadius.circular(AppRadius.xs),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xs),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.md,
+                    vertical: AppSpacing.xs,
+                  ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -128,249 +148,288 @@ class _TickerPriceChartState extends State<TickerPriceChart> {
               ),
             ],
           ),
-          const SizedBox(height: AppSpacing.xl),
+          const SizedBox(height: AppSpacing.md),
 
           // 차트
           Container(
             height: 250,
             decoration: BoxDecoration(
               color: context.mlColors.chartBackground,
-              border: Border.all(color: context.mlColors.subtleBorder),
               borderRadius: BorderRadius.circular(AppRadius.lg),
             ),
-            padding: const EdgeInsets.all(AppSpacing.xl),
+            padding: const EdgeInsets.all(AppSpacing.md),
             child: Stack(
               children: [
                 // Price Chart
                 LineChart(
-              LineChartData(
-                gridData: FlGridData(
-                  show: true,
-                  drawVerticalLine: true,
-                  horizontalInterval: priceRange > 0 ? priceRange / 5 : 1,
-                  verticalInterval: dataPoints.length > 1 ? ((dataPoints.length / 0.6) / 5).ceilToDouble() : 1,
-                  getDrawingHorizontalLine: (value) {
-                    return FlLine(
-                      color: context.mlColors.chartGridLine,
-                      strokeWidth: AppStroke.thin,
-                    );
-                  },
-                  getDrawingVerticalLine: (value) {
-                    return FlLine(
-                      color: context.mlColors.chartGridLine,
-                      strokeWidth: AppStroke.thin,
-                    );
-                  },
-                ),
-
-                lineTouchData: LineTouchData(
-                  enabled: true,
-                  touchTooltipData: LineTouchTooltipData(
-                    tooltipBgColor: context.mlColors.chartTooltipBg,
-                    getTooltipItems: (touchedSpots) {
-                      return touchedSpots.map((spot) {
-                        // barIndex: 0=Price, 1/2=Trendlines (BB hidden)
-                        switch (spot.barIndex) {
-                          case 0: // Price (종가)
-                            final idx = spot.x.toInt().clamp(0, dataPoints.length - 1);
-                            final date = dataPoints[idx].date;
-                            final dateStr = '${date.month}/${date.day}';
-                            return LineTooltipItem(
-                              '$dateStr\n\$${spot.y.toStringAsFixed(2)}',
-                              AppTypography.changeBadge.copyWith(
-                                fontWeight: AppTypography.bold,
-                                color: context.mlColors.onPrimary,
-                              ),
-                            );
-
-                          default: // Trendlines - 툴팁 표시 안함
-                            return null;
-                        }
-                      }).whereType<LineTooltipItem>().toList();
-                    },
-                  ),
-                ),
-
-                titlesData: FlTitlesData(
-                  leftTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      reservedSize: 50,
-                      getTitlesWidget: (value, meta) {
-                        return Text(
-                          '\$${value.toInt()}',
-                          style: TextStyle(
-                            fontSize: AppTypography.micro,
-                            color: context.mlColors.accentBlue,
+                  LineChartData(
+                    gridData: FlGridData(
+                      show: true,
+                      drawVerticalLine: true,
+                      horizontalInterval: priceRange > 0 ? priceRange / 5 : 1,
+                      verticalInterval: dataPoints.length > 1
+                          ? ((dataPoints.length / 0.6) / 5).ceilToDouble()
+                          : 1,
+                      getDrawingHorizontalLine: (value) {
+                        return FlLine(
+                          color: context.mlColors.chartGridLine.withValues(
+                            alpha: 0.72,
                           ),
+                          strokeWidth: AppStroke.hairline,
+                        );
+                      },
+                      getDrawingVerticalLine: (value) {
+                        return FlLine(
+                          color: context.mlColors.chartGridLine.withValues(
+                            alpha: 0.45,
+                          ),
+                          strokeWidth: AppStroke.hairline,
                         );
                       },
                     ),
-                  ),
-                  rightTitles: const AxisTitles(
-                    sideTitles: SideTitles(showTitles: false),
-                  ),
-                  bottomTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      reservedSize: 30,
-                      interval: ((dataPoints.length / 0.6) / 4).ceilToDouble(),  // 60:40 비율에 맞춰 간격 조정
-                      getTitlesWidget: (value, meta) {
-                        final index = value.toInt();
 
-                        // 과거 데이터 영역 (왼쪽 60%)
-                        if (index >= 0 && index < dataPoints.length) {
-                          final date = dataPoints[index].date;
-                          return Padding(
-                            padding: const EdgeInsets.only(top: AppSpacing.md),
-                            child: Text(
-                              '${date.month}/${date.day}',
-                              style: const TextStyle(fontSize: AppTypography.micro),
-                            ),
-                          );
-                        }
+                    lineTouchData: LineTouchData(
+                      enabled: true,
+                      touchTooltipData: LineTouchTooltipData(
+                        tooltipBgColor: context.mlColors.chartTooltipBg,
+                        getTooltipItems: (touchedSpots) {
+                          return touchedSpots
+                              .map((spot) {
+                                // barIndex: 0=Price, 1/2=Trendlines (BB hidden)
+                                switch (spot.barIndex) {
+                                  case 0: // Price (종가)
+                                    final idx = spot.x.toInt().clamp(
+                                      0,
+                                      dataPoints.length - 1,
+                                    );
+                                    final date = dataPoints[idx].date;
+                                    final dateStr = '${date.month}/${date.day}';
+                                    return LineTooltipItem(
+                                      '$dateStr\n\$${spot.y.toStringAsFixed(2)}',
+                                      AppTypography.changeBadge.copyWith(
+                                        fontWeight: AppTypography.bold,
+                                        color: context.mlColors.onPrimary,
+                                      ),
+                                    );
 
-                        // 미래 영역 (오른쪽 40%)
-                        if (index >= dataPoints.length) {
-                          final lastDate = dataPoints.last.date;
-                          final daysSinceLastDate = index - (dataPoints.length - 1);
-                          final futureDate = lastDate.add(Duration(days: daysSinceLastDate));
+                                  default: // Trendlines - 툴팁 표시 안함
+                                    return null;
+                                }
+                              })
+                              .whereType<LineTooltipItem>()
+                              .toList();
+                        },
+                      ),
+                    ),
 
-                          return Padding(
-                            padding: const EdgeInsets.only(top: AppSpacing.md),
-                            child: Text(
-                              '${futureDate.month}/${futureDate.day}',
+                    titlesData: FlTitlesData(
+                      leftTitles: AxisTitles(
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          reservedSize: 50,
+                          getTitlesWidget: (value, meta) {
+                            return Text(
+                              '\$${value.toInt()}',
                               style: TextStyle(
                                 fontSize: AppTypography.micro,
-                                color: Theme.of(context).colorScheme.outline,  // 미래 날짜는 회색으로 구분
+                                color: context.mlColors.textTertiary,
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      rightTitles: const AxisTitles(
+                        sideTitles: SideTitles(showTitles: false),
+                      ),
+                      bottomTitles: AxisTitles(
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          reservedSize: 30,
+                          interval: ((dataPoints.length / 0.6) / 4)
+                              .ceilToDouble(), // 60:40 비율에 맞춰 간격 조정
+                          getTitlesWidget: (value, meta) {
+                            final index = value.toInt();
+
+                            // 과거 데이터 영역 (왼쪽 60%)
+                            if (index >= 0 && index < dataPoints.length) {
+                              final date = dataPoints[index].date;
+                              return Padding(
+                                padding: const EdgeInsets.only(
+                                  top: AppSpacing.md,
+                                ),
+                                child: Text(
+                                  '${date.month}/${date.day}',
+                                  style: const TextStyle(
+                                    fontSize: AppTypography.micro,
+                                  ),
+                                ),
+                              );
+                            }
+
+                            // 미래 영역 (오른쪽 40%)
+                            if (index >= dataPoints.length) {
+                              final lastDate = dataPoints.last.date;
+                              final daysSinceLastDate =
+                                  index - (dataPoints.length - 1);
+                              final futureDate = lastDate.add(
+                                Duration(days: daysSinceLastDate),
+                              );
+
+                              return Padding(
+                                padding: const EdgeInsets.only(
+                                  top: AppSpacing.md,
+                                ),
+                                child: Text(
+                                  '${futureDate.month}/${futureDate.day}',
+                                  style: TextStyle(
+                                    fontSize: AppTypography.micro,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.outline, // 미래 날짜는 회색으로 구분
+                                  ),
+                                ),
+                              );
+                            }
+
+                            return const Text('');
+                          },
+                        ),
+                      ),
+                      topTitles: const AxisTitles(
+                        sideTitles: SideTitles(showTitles: false),
+                      ),
+                    ),
+
+                    borderData: FlBorderData(show: false),
+
+                    minY: minPrice - priceMargin,
+                    maxY: maxPrice + priceMargin,
+                    minX: 0,
+                    maxX: dataPoints.length > 1
+                        ? ((dataPoints.length - 1) / 0.6)
+                        : 1,
+
+                    lineBarsData: [
+                      // Bollinger Bands hidden (kept for future use)
+                      // if (dataPoints.any((d) => d.bbUpper != null))
+                      //   LineChartBarData( ... ),
+                      // if (dataPoints.any((d) => d.bbMiddle != null))
+                      //   LineChartBarData( ... ),
+                      // if (dataPoints.any((d) => d.bbLower != null))
+                      //   LineChartBarData( ... ),
+
+                      // Price Line
+                      LineChartBarData(
+                        spots: dataPoints
+                            .asMap()
+                            .entries
+                            .where((e) => e.value.close != null)
+                            .map(
+                              (e) => FlSpot(e.key.toDouble(), e.value.close!),
+                            )
+                            .toList(),
+                        isCurved: true,
+                        color: context.mlColors.textPrimary.withValues(
+                          alpha: 0.94,
+                        ),
+                        barWidth: 2.0,
+                        isStrokeCapRound: true,
+                        dotData: const FlDotData(show: false),
+                        belowBarData: BarAreaData(
+                          show: true,
+                          color: context.mlColors.textPrimary.withValues(
+                            alpha: 0.04,
+                          ),
+                        ),
+                      ),
+
+                      // 추세선 임시 비활성화 (나중에 재구현 예정)
+                      // 저항선 (High Trendline) / 지지선 (Low Trendline)
+                    ],
+
+                    extraLinesData: ExtraLinesData(
+                      horizontalLines: [
+                        if (latestData.targetPrice != null)
+                          HorizontalLine(
+                            y: latestData.targetPrice!,
+                            color: context.mlColors.gainColor,
+                            strokeWidth: AppStroke.medium,
+                            label: HorizontalLineLabel(
+                              show: true,
+                              labelResolver: (line) =>
+                                  'Target \$${line.y.toStringAsFixed(2)}',
+                              style: TextStyle(
+                                color: context.mlColors.gainColor,
+                                fontSize: AppTypography.micro,
+                                fontWeight: AppTypography.bold,
                               ),
                             ),
-                          );
-                        }
-
-                        return const Text('');
-                      },
-                    ),
-                  ),
-                  topTitles: const AxisTitles(
-                    sideTitles: SideTitles(showTitles: false),
-                  ),
-                ),
-
-                borderData: FlBorderData(
-                  show: true,
-                  border: Border.all(color: context.mlColors.subtleBorder),
-                ),
-
-                minY: minPrice - priceMargin,
-                maxY: maxPrice + priceMargin,
-                minX: 0,
-                maxX: dataPoints.length > 1 ? ((dataPoints.length - 1) / 0.6) : 1,
-
-                lineBarsData: [
-                  // Bollinger Bands hidden (kept for future use)
-                  // if (dataPoints.any((d) => d.bbUpper != null))
-                  //   LineChartBarData( ... ),
-                  // if (dataPoints.any((d) => d.bbMiddle != null))
-                  //   LineChartBarData( ... ),
-                  // if (dataPoints.any((d) => d.bbLower != null))
-                  //   LineChartBarData( ... ),
-
-                  // Price Line
-                  LineChartBarData(
-                    spots: dataPoints
-                        .asMap()
-                        .entries
-                        .where((e) => e.value.close != null)
-                        .map((e) => FlSpot(e.key.toDouble(), e.value.close!))
-                        .toList(),
-                    isCurved: true,
-                    color: Theme.of(context).colorScheme.onSurface,
-                    barWidth: 2,
-                    isStrokeCapRound: true,
-                    dotData: const FlDotData(show: false),
-                    belowBarData: BarAreaData(
-                      show: true,
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1),
-                    ),
-                  ),
-
-                  // 추세선 임시 비활성화 (나중에 재구현 예정)
-                  // 저항선 (High Trendline) / 지지선 (Low Trendline)
-                ],
-
-                extraLinesData: ExtraLinesData(
-                  horizontalLines: [
-                    if (latestData.targetPrice != null)
-                      HorizontalLine(
-                        y: latestData.targetPrice!,
-                        color: context.mlColors.gainColor,
-                        strokeWidth: AppStroke.medium,
-                        label: HorizontalLineLabel(
-                          show: true,
-                          labelResolver: (line) =>
-                              'Target \$${line.y.toStringAsFixed(2)}',
-                          style: TextStyle(
-                            color: context.mlColors.gainColor,
-                            fontSize: AppTypography.micro,
-                            fontWeight: AppTypography.bold,
                           ),
-                        ),
-                      ),
-                    if (latestData.stopLoss != null)
-                      HorizontalLine(
-                        y: latestData.stopLoss!,
-                        color: context.mlColors.lossColor,
-                        strokeWidth: AppStroke.medium,
-                        label: HorizontalLineLabel(
-                          show: true,
-                          labelResolver: (line) =>
-                              'Stop \$${line.y.toStringAsFixed(2)}',
-                          style: TextStyle(
+                        if (latestData.stopLoss != null)
+                          HorizontalLine(
+                            y: latestData.stopLoss!,
                             color: context.mlColors.lossColor,
-                            fontSize: AppTypography.micro,
-                            fontWeight: AppTypography.bold,
+                            strokeWidth: AppStroke.medium,
+                            label: HorizontalLineLabel(
+                              show: true,
+                              labelResolver: (line) =>
+                                  'Stop \$${line.y.toStringAsFixed(2)}',
+                              style: TextStyle(
+                                color: context.mlColors.lossColor,
+                                fontSize: AppTypography.micro,
+                                fontWeight: AppTypography.bold,
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                  ],
+                      ],
+                    ),
+                  ),
                 ),
-              ),
-            ),
 
-            // Legend (범례) - 토글 버튼으로 표시/숨김
-            if (_showLegend)
-              Positioned(
-                top: 8,
-                right: 8,
-                child: Container(
-                  constraints: const BoxConstraints(maxWidth: 150),
-                  padding: const EdgeInsets.all(AppSpacing.md),
-                  decoration: BoxDecoration(
-                    color: context.mlColors.cardBackground.withValues(alpha: 0.9),
-                    borderRadius: BorderRadius.circular(AppRadius.xs),
-                    border: Border.all(color: context.mlColors.subtleBorder),
-                    boxShadow: AppShadow.md(context.mlColors.overlayDim),
+                // Legend (범례) - 토글 버튼으로 표시/숨김
+                if (_showLegend)
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: Container(
+                      constraints: const BoxConstraints(maxWidth: 150),
+                      padding: const EdgeInsets.all(AppSpacing.md),
+                      decoration: BoxDecoration(
+                        color: context.mlColors.cardBackground.withValues(
+                          alpha: 0.9,
+                        ),
+                        borderRadius: BorderRadius.circular(AppRadius.xs),
+                        border: Border.all(
+                          color: context.mlColors.subtleBorder,
+                        ),
+                        boxShadow: AppShadow.md(context.mlColors.overlayDim),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildChartLegendItem(
+                            'Price',
+                            Theme.of(context).colorScheme.onSurface,
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildChartLegendItem('Price', Theme.of(context).colorScheme.onSurface),
-                    ],
-                  ),
-                ),
-              ),
-          ],
-        ),
+              ],
+            ),
+          ),
+        ],
       ),
-    ],
-    ),
     );
   }
 
   /// 차트 범례 아이템 (Legend)
-  Widget _buildChartLegendItem(String label, Color color, {bool dashed = false}) {
+  Widget _buildChartLegendItem(
+    String label,
+    Color color, {
+    bool dashed = false,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxs),
       child: Row(
@@ -381,13 +440,13 @@ class _TickerPriceChartState extends State<TickerPriceChart> {
             height: 2,
             decoration: BoxDecoration(
               color: dashed ? null : color,
-              border: dashed ? Border(
-                top: BorderSide(color: color, width: 1),
-              ) : null,
+              border: dashed
+                  ? Border(top: BorderSide(color: color, width: 1))
+                  : null,
             ),
-            child: dashed ? CustomPaint(
-              painter: _DashedLinePainter(color),
-            ) : null,
+            child: dashed
+                ? CustomPaint(painter: _DashedLinePainter(color))
+                : null,
           ),
           const SizedBox(width: AppSpacing.sm),
           Text(

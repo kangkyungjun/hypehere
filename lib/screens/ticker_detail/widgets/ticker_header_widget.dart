@@ -194,9 +194,8 @@ class TickerHeaderWidget extends StatelessWidget {
         vertical: AppSpacing.sm,
       ),
       decoration: BoxDecoration(
-        color: mlc.sectionBackground,
+        color: mlc.infoBg.withValues(alpha: 0.45),
         borderRadius: BorderRadius.circular(AppRadius.badge),
-        border: Border.all(color: mlc.subtleBorder),
       ),
       child: Text(
         label,

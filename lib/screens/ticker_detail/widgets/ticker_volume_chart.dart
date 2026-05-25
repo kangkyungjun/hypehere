@@ -59,8 +59,8 @@ class TickerVolumeChart extends StatelessWidget {
     final barWidth = dataPoints.length > 150
         ? 1.5
         : dataPoints.length > 60
-            ? 2.5
-            : 4.0;
+        ? 2.5
+        : 4.0;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
@@ -69,15 +69,18 @@ class TickerVolumeChart extends StatelessWidget {
         children: [
           // 헤더: Volume + Avg
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 0, vertical: AppSpacing.md),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 0,
+              vertical: AppSpacing.md,
+            ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
                   l10n.volume,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: AppTypography.bold,
-                      ),
+                    fontWeight: AppTypography.bold,
+                  ),
                 ),
                 Text(
                   l10n.averageVolume(_formatVolume(avgVolume.toInt())),
@@ -95,10 +98,14 @@ class TickerVolumeChart extends StatelessWidget {
             height: 120,
             decoration: BoxDecoration(
               color: context.mlColors.chartBackground,
-              border: Border.all(color: context.mlColors.subtleBorder),
               borderRadius: BorderRadius.circular(AppRadius.lg),
             ),
-            padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.lg, AppSpacing.md, AppSpacing.xs),
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.md,
+              AppSpacing.lg,
+              AppSpacing.md,
+              AppSpacing.xs,
+            ),
             child: BarChart(
               BarChartData(
                 alignment: BarChartAlignment.spaceBetween,
@@ -109,11 +116,17 @@ class TickerVolumeChart extends StatelessWidget {
                   // 양봉(close>open) → 초록, 음봉 → 빨강, 데이터 없으면 회색
                   Color barColor;
                   if (dp.isBullish) {
-                    barColor = context.mlColors.gainColor.withValues(alpha: 0.7);
+                    barColor = context.mlColors.gainColor.withValues(
+                      alpha: 0.52,
+                    );
                   } else if (dp.isBearish) {
-                    barColor = context.mlColors.lossColor.withValues(alpha: 0.7);
+                    barColor = context.mlColors.lossColor.withValues(
+                      alpha: 0.52,
+                    );
                   } else {
-                    barColor = context.mlColors.neutralColor.withValues(alpha: 0.5);
+                    barColor = context.mlColors.neutralColor.withValues(
+                      alpha: 0.38,
+                    );
                   }
 
                   return BarChartGroupData(
@@ -212,9 +225,7 @@ class TickerVolumeChart extends StatelessWidget {
                       color: Theme.of(context).colorScheme.outline,
                       strokeWidth: AppStroke.thin,
                       dashArray: [4, 4],
-                      label: HorizontalLineLabel(
-                        show: false,
-                      ),
+                      label: HorizontalLineLabel(show: false),
                     ),
                   ],
                 ),

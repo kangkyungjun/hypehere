@@ -235,7 +235,7 @@ class _NewsFilterSheetState extends State<NewsFilterSheet> {
                   // Breaking only
                   Container(
                     decoration: BoxDecoration(
-                      color: colors.sectionBackground,
+                      color: colors.infoBg.withValues(alpha: 0.45),
                       borderRadius: BorderRadius.circular(AppRadius.lg),
                     ),
                     child: CheckboxListTile(
@@ -288,13 +288,13 @@ class _NewsFilterSheetState extends State<NewsFilterSheet> {
               ),
               decoration: BoxDecoration(
                 color: selected
-                    ? Theme.of(context).colorScheme.primary
-                    : context.mlColors.sectionBackground,
+                    ? context.mlColors.infoBg.withValues(alpha: 0.72)
+                    : Colors.transparent,
                 borderRadius: BorderRadius.circular(AppRadius.lg),
                 border: Border.all(
                   color: selected
-                      ? Theme.of(context).colorScheme.primary
-                      : context.mlColors.subtleBorder,
+                      ? context.mlColors.accentBlue.withValues(alpha: 0.28)
+                      : Colors.transparent,
                 ),
               ),
               child: Text(
@@ -305,7 +305,7 @@ class _NewsFilterSheetState extends State<NewsFilterSheet> {
                       ? AppTypography.bold
                       : AppTypography.regular,
                   color: selected
-                      ? context.mlColors.onPrimary
+                      ? context.mlColors.accentBlue
                       : Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),

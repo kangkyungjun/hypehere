@@ -14,6 +14,44 @@ import 'package:http/http.dart' as http;
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
   debugPrint('[FCM] Background message: ${message.messageId}');
+
+  // 백그라운드에서도 로컬 알림 표시 (data-only 메시지 대응)
+  final notification = message.notification;
+  if (notification != null) {
+    final plugin = FlutterLocalNotificationsPlugin();
+    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const iosSettings = DarwinInitializationSettings();
+    await plugin.initialize(
+      const InitializationSettings(android: androidSettings, iOS: iosSettings),
+    );
+
+    final isSubscription =
+        message.data['type']?.toString().startsWith('SUBSCRIPTION_') ?? false;
+    final channelId =
+        isSubscription ? 'marketlens_subscription' : 'marketlens_default';
+    final channelName =
+        isSubscription ? 'Subscription Alerts' : 'MarketLens 알림';
+
+    await plugin.show(
+      message.hashCode,
+      notification.title,
+      notification.body,
+      NotificationDetails(
+        android: AndroidNotificationDetails(
+          channelId,
+          channelName,
+          importance: Importance.high,
+          priority: Priority.high,
+        ),
+        iOS: const DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+        ),
+      ),
+      payload: jsonEncode(message.data),
+    );
+  }
 }
 
 class NotificationService {
@@ -99,9 +137,9 @@ class NotificationService {
       '@mipmap/ic_launcher',
     );
     const iosSettings = DarwinInitializationSettings(
-      requestAlertPermission: false,
-      requestBadgePermission: false,
-      requestSoundPermission: false,
+      requestAlertPermission: true,
+      requestBadgePermission: true,
+      requestSoundPermission: true,
     );
 
     await _localNotifications.initialize(
@@ -303,7 +341,7 @@ class NotificationService {
           'Authorization': 'Token $authToken',
         },
         body: jsonEncode({'tickers': tickers}),
-      );
+      ).timeout(const Duration(seconds: 10));
 
       if (response.statusCode < 200 || response.statusCode >= 300) {
         debugPrint(

@@ -50,40 +50,6 @@ void main() async {
     debugPrint('dotenv load error: $e');
   }
 
-  // Initialize Firebase (timeout: iPad 호환 모드 hang 방지)
-  try {
-    await Firebase.initializeApp().timeout(const Duration(seconds: 10));
-  } catch (e) {
-    debugPrint('Firebase init error: $e');
-  }
-
-  // Initialize FCM Notification Service
-  try {
-    final notificationService = NotificationService();
-    await notificationService.initialize().timeout(const Duration(seconds: 10));
-  } catch (e) {
-    debugPrint('FCM init error: $e');
-  }
-
-  // Initialize RevenueCat (IAP 구독) — fire-and-forget, 내부 재시도 처리
-  final subscriptionProvider = SubscriptionProvider();
-  subscriptionProvider.initialize();
-
-  // Initialize Google AdMob (timeout: iPad 호환 모드 hang 방지)
-  try {
-    await MobileAds.instance.initialize().timeout(const Duration(seconds: 10));
-    if (kDebugMode) {
-      MobileAds.instance.updateRequestConfiguration(
-        RequestConfiguration(testDeviceIds: ['GADSimulatorID']),
-      );
-    }
-  } catch (e) {
-    debugPrint('AdMob init error: $e');
-  }
-
-  // Preload App Open Ad
-  AppOpenAdHelper.instance.loadAd();
-
   // Initialize Providers
   final watchlistProvider = WatchlistProvider();
   try {
@@ -113,6 +79,8 @@ void main() async {
     debugPrint('CoachMarkProvider init error: $e');
   }
 
+  final subscriptionProvider = SubscriptionProvider();
+
   runApp(
     MultiProvider(
       providers: [
@@ -127,6 +95,39 @@ void main() async {
       child: const MarketLensApp(),
     ),
   );
+
+  unawaited(_initializeRemoteServices(subscriptionProvider));
+}
+
+Future<void> _initializeRemoteServices(
+  SubscriptionProvider subscriptionProvider,
+) async {
+  try {
+    await Firebase.initializeApp().timeout(const Duration(seconds: 10));
+  } catch (e) {
+    debugPrint('Firebase init error: $e');
+  }
+
+  try {
+    final notificationService = NotificationService();
+    await notificationService.initialize().timeout(const Duration(seconds: 10));
+  } catch (e) {
+    debugPrint('FCM init error: $e');
+  }
+
+  unawaited(subscriptionProvider.initialize());
+
+  try {
+    await MobileAds.instance.initialize().timeout(const Duration(seconds: 10));
+    if (kDebugMode) {
+      MobileAds.instance.updateRequestConfiguration(
+        RequestConfiguration(testDeviceIds: ['GADSimulatorID']),
+      );
+    }
+    AppOpenAdHelper.instance.loadAd();
+  } catch (e) {
+    debugPrint('AdMob init error: $e');
+  }
 }
 
 class MarketLensApp extends StatelessWidget {
@@ -194,14 +195,20 @@ class MarketLensApp extends StatelessWidget {
           margin: EdgeInsets.zero,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppRadius.card),
-            side: BorderSide(color: MarketLensColors.light.subtleBorder),
+            side: BorderSide(
+              color: MarketLensColors.light.subtleBorder.withValues(
+                alpha: 0.72,
+              ),
+            ),
           ),
         ),
         chipTheme: ChipThemeData(
-          backgroundColor: MarketLensColors.light.sectionBackground,
+          backgroundColor: Colors.transparent,
           selectedColor: MarketLensColors.light.infoBg,
-          disabledColor: MarketLensColors.light.sectionBackground,
-          side: BorderSide(color: MarketLensColors.light.subtleBorder),
+          disabledColor: Colors.transparent,
+          side: BorderSide(
+            color: MarketLensColors.light.subtleBorder.withValues(alpha: 0.55),
+          ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppRadius.badge),
           ),
@@ -249,7 +256,7 @@ class MarketLensApp extends StatelessWidget {
           showUnselectedLabels: true,
           type: BottomNavigationBarType.fixed,
           elevation: 0,
-          backgroundColor: MarketLensColors.light.cardBackground,
+          backgroundColor: Colors.transparent,
           selectedLabelStyle: const TextStyle(
             fontSize: AppTypography.caption,
             fontWeight: AppTypography.semiBold,
@@ -266,7 +273,7 @@ class MarketLensApp extends StatelessWidget {
             borderRadius: BorderRadius.circular(AppRadius.lg),
           ),
           filled: true,
-          fillColor: MarketLensColors.light.sectionBackground,
+          fillColor: MarketLensColors.light.cardBackground,
           contentPadding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.lg,
             vertical: AppSpacing.md,
@@ -315,14 +322,18 @@ class MarketLensApp extends StatelessWidget {
           margin: EdgeInsets.zero,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppRadius.card),
-            side: BorderSide(color: MarketLensColors.dark.subtleBorder),
+            side: BorderSide(
+              color: MarketLensColors.dark.subtleBorder.withValues(alpha: 0.72),
+            ),
           ),
         ),
         chipTheme: ChipThemeData(
-          backgroundColor: MarketLensColors.dark.cardBackground,
+          backgroundColor: Colors.transparent,
           selectedColor: MarketLensColors.dark.infoBg,
-          disabledColor: MarketLensColors.dark.cardBackground,
-          side: BorderSide(color: MarketLensColors.dark.subtleBorder),
+          disabledColor: Colors.transparent,
+          side: BorderSide(
+            color: MarketLensColors.dark.subtleBorder.withValues(alpha: 0.55),
+          ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppRadius.badge),
           ),
@@ -369,7 +380,7 @@ class MarketLensApp extends StatelessWidget {
           showUnselectedLabels: true,
           type: BottomNavigationBarType.fixed,
           elevation: 0,
-          backgroundColor: const Color(0xFF1E1E1E),
+          backgroundColor: Colors.transparent,
           selectedLabelStyle: const TextStyle(
             fontSize: AppTypography.caption,
             fontWeight: AppTypography.semiBold,
@@ -385,7 +396,7 @@ class MarketLensApp extends StatelessWidget {
             borderRadius: BorderRadius.circular(AppRadius.lg),
           ),
           filled: true,
-          fillColor: MarketLensColors.dark.sectionBackground,
+          fillColor: MarketLensColors.dark.cardBackground,
           contentPadding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.lg,
             vertical: AppSpacing.md,
@@ -574,6 +585,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           const Duration(seconds: 10),
           _dismissBreakingToast,
         );
+        // 속보도 배지 카운트에 반영
+        _fetchUnreadCount();
       }
     };
 
@@ -998,6 +1011,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         ],
       ),
       body: Stack(
+        fit: StackFit.expand,
         children: [
           IndexedStack(index: _currentIndex, children: _screens),
           // 속보 토스트
@@ -1044,73 +1058,81 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       ),
     ];
 
-    return SafeArea(
-      top: false,
-      minimum: const EdgeInsets.fromLTRB(
-        AppSpacing.lg,
-        AppSpacing.sm,
-        AppSpacing.lg,
-        AppSpacing.md,
-      ),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: colors.cardBackground,
-          borderRadius: BorderRadius.circular(AppRadius.xxxl),
-          border: Border.all(color: colors.subtleBorder),
-          boxShadow: AppShadow.md(Colors.black),
+    return Material(
+      color: Colors.transparent,
+      child: SafeArea(
+        top: false,
+        minimum: const EdgeInsets.fromLTRB(
+          AppSpacing.md,
+          AppSpacing.xs,
+          AppSpacing.md,
+          AppSpacing.sm,
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.xs),
-          child: Row(
-            children: List.generate(items.length, (index) {
-              final item = items[index];
-              final selected = _currentIndex == index;
-              return Expanded(
-                child: Tooltip(
-                  message: item.tooltip,
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(AppRadius.xxl),
-                    onTap: () => setState(() => _currentIndex = index),
-                    child: AnimatedContainer(
-                      duration: AppDuration.fast,
-                      curve: Curves.easeOutCubic,
-                      height: 52,
-                      decoration: BoxDecoration(
-                        color: selected ? colors.infoBg : Colors.transparent,
-                        borderRadius: BorderRadius.circular(AppRadius.xxl),
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            selected ? item.activeIcon : item.icon,
-                            size: 22,
-                            color: selected
-                                ? colors.accentBlue
-                                : colors.textTertiary,
-                          ),
-                          const SizedBox(height: AppSpacing.xxs),
-                          Text(
-                            item.label,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: AppTypography.micro,
-                              fontWeight: selected
-                                  ? AppTypography.bold
-                                  : AppTypography.medium,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: colors.cardBackground,
+            borderRadius: BorderRadius.circular(AppRadius.xxxl),
+            border: Border.all(
+              color: colors.subtleBorder.withValues(alpha: 0.52),
+              width: 0.7,
+            ),
+            boxShadow: AppShadow.sm(Colors.black),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.xs),
+            child: Row(
+              children: List.generate(items.length, (index) {
+                final item = items[index];
+                final selected = _currentIndex == index;
+                return Expanded(
+                  child: Tooltip(
+                    message: item.tooltip,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(AppRadius.xxl),
+                      onTap: () => setState(() => _currentIndex = index),
+                      child: AnimatedContainer(
+                        duration: AppDuration.fast,
+                        curve: Curves.easeOutCubic,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: selected
+                              ? colors.infoBg.withValues(alpha: 0.58)
+                              : Colors.transparent,
+                          borderRadius: BorderRadius.circular(AppRadius.xxl),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              selected ? item.activeIcon : item.icon,
+                              size: 22,
                               color: selected
                                   ? colors.accentBlue
                                   : colors.textTertiary,
                             ),
-                          ),
-                        ],
+                            const SizedBox(height: AppSpacing.xxs),
+                            Text(
+                              item.label,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: AppTypography.micro,
+                                fontWeight: selected
+                                    ? AppTypography.bold
+                                    : AppTypography.medium,
+                                color: selected
+                                    ? colors.accentBlue
+                                    : colors.textTertiary,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-              );
-            }),
+                );
+              }),
+            ),
           ),
         ),
       ),

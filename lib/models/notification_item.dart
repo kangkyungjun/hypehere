@@ -53,6 +53,19 @@ class NotificationItem {
     return '${createdAt.month}/${createdAt.day}';
   }
 
+  NotificationItem copyWith({bool? isRead}) {
+    return NotificationItem(
+      id: id,
+      title: title,
+      body: body,
+      notificationType: notificationType,
+      ticker: ticker,
+      postId: postId,
+      isRead: isRead ?? this.isRead,
+      createdAt: createdAt,
+    );
+  }
+
   static DateTime _parseAsUtc(String s) {
     final parsed = DateTime.parse(s);
     if (parsed.isUtc) return parsed;

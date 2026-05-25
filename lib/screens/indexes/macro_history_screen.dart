@@ -71,23 +71,20 @@ class _MacroHistoryScreenState extends State<MacroHistoryScreen> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _error != null
-              ? Center(
-                  child: Text(
-                    _error!,
-                    style: TextStyle(color: mlc.textTertiary),
-                  ),
-                )
-              : _historyData == null || _historyData!.entries.isEmpty
-                  ? Center(
-                      child: Text(
-                        '\u2013',
-                        style: TextStyle(
-                          fontSize: AppTypography.bodyLarge,
-                          color: mlc.textTertiary,
-                        ),
-                      ),
-                    )
-                  : _buildContent(context, mlc),
+          ? Center(
+              child: Text(_error!, style: TextStyle(color: mlc.textTertiary)),
+            )
+          : _historyData == null || _historyData!.entries.isEmpty
+          ? Center(
+              child: Text(
+                '\u2013',
+                style: TextStyle(
+                  fontSize: AppTypography.bodyLarge,
+                  color: mlc.textTertiary,
+                ),
+              ),
+            )
+          : _buildContent(context, mlc),
     );
   }
 
@@ -178,7 +175,6 @@ class _MacroHistoryScreenState extends State<MacroHistoryScreen> {
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
         color: mlc.cardBackground,
-        border: Border.all(color: mlc.subtleBorder),
         borderRadius: BorderRadius.circular(AppRadius.lg),
       ),
       child: LineChart(
@@ -198,7 +194,7 @@ class _MacroHistoryScreenState extends State<MacroHistoryScreen> {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    trendColor.withValues(alpha: 0.2),
+                    trendColor.withValues(alpha: 0.06),
                     trendColor.withValues(alpha: 0.0),
                   ],
                 ),
@@ -210,14 +206,18 @@ class _MacroHistoryScreenState extends State<MacroHistoryScreen> {
             drawVerticalLine: false,
             horizontalInterval: range > 0 ? range / 3 : 0.1,
             getDrawingHorizontalLine: (value) => FlLine(
-              color: mlc.chartGridLine,
+              color: mlc.chartGridLine.withValues(alpha: 0.72),
               strokeWidth: AppStroke.hairline,
             ),
           ),
           borderData: FlBorderData(show: false),
           titlesData: FlTitlesData(
-            topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            topTitles: const AxisTitles(
+              sideTitles: SideTitles(showTitles: false),
+            ),
+            rightTitles: const AxisTitles(
+              sideTitles: SideTitles(showTitles: false),
+            ),
             leftTitles: AxisTitles(
               sideTitles: SideTitles(
                 showTitles: true,
@@ -300,8 +300,13 @@ class _MacroHistoryScreenState extends State<MacroHistoryScreen> {
   }
 
   bool get _showPercentSuffix {
-    return const ['FEDFUNDS', 'UNRATE', 'DGS10', 'DGS2', 'T10Y2Y']
-        .contains(widget.indicatorCode);
+    return const [
+      'FEDFUNDS',
+      'UNRATE',
+      'DGS10',
+      'DGS2',
+      'T10Y2Y',
+    ].contains(widget.indicatorCode);
   }
 
   // ── History Row ──────────────────────────────────────────
@@ -316,13 +321,15 @@ class _MacroHistoryScreenState extends State<MacroHistoryScreen> {
     final riskLabel = _riskLabel(context, entry.riskLevel);
 
     // Format value
-    final valueStr = '${entry.formattedValue}${entry.showPercentSuffix ? '%' : ''}';
+    final valueStr =
+        '${entry.formattedValue}${entry.showPercentSuffix ? '%' : ''}';
 
     // Change display
     String changeStr = '\u2013';
     Color changeColor = mlc.neutralColor;
     if (entry.changePct != null && entry.changePct != 0) {
-      changeStr = '${entry.changeArrow}${entry.changePct!.abs().toStringAsFixed(2)}%';
+      changeStr =
+          '${entry.changeArrow}${entry.changePct!.abs().toStringAsFixed(2)}%';
       changeColor = entry.changeColor(mlc);
     }
 

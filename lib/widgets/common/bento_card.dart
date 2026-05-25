@@ -26,7 +26,9 @@ class BentoCard extends StatelessWidget {
     final mlc = context.mlColors;
     final radius = BorderRadius.circular(AppRadius.card);
 
-    final borderColor = mlc.subtleBorder.withValues(alpha: emphasized ? 0 : 1);
+    final borderColor = mlc.subtleBorder.withValues(
+      alpha: emphasized ? 0 : 0.68,
+    );
 
     return Container(
       margin: margin,
@@ -43,10 +45,10 @@ class BentoCard extends StatelessWidget {
           onTap: onTap,
           borderRadius: radius,
           child: Ink(
-            padding: padding ?? const EdgeInsets.all(AppSpacing.xl),
+            padding: padding ?? const EdgeInsets.all(AppSpacing.lg),
             decoration: BoxDecoration(
               borderRadius: radius,
-              border: Border.all(color: borderColor),
+              border: Border.all(color: borderColor, width: 0.8),
             ),
             child: child,
           ),

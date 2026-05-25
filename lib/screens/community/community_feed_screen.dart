@@ -560,12 +560,12 @@ class _CommunityFeedScreenState extends State<CommunityFeedScreen> {
               label: Text(l10n.all),
               selected: _currentTicker == null,
               onSelected: (_) => _selectTicker(null),
-              selectedColor: context.mlColors.infoBg,
-              backgroundColor: context.mlColors.sectionBackground,
+              selectedColor: context.mlColors.infoBg.withValues(alpha: 0.72),
+              backgroundColor: Colors.transparent,
               side: BorderSide(
                 color: _currentTicker == null
-                    ? context.mlColors.accentBlue
-                    : context.mlColors.subtleBorder,
+                    ? context.mlColors.accentBlue.withValues(alpha: 0.28)
+                    : Colors.transparent,
               ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(AppRadius.badge),
@@ -585,12 +585,12 @@ class _CommunityFeedScreenState extends State<CommunityFeedScreen> {
                 label: Text(ticker),
                 selected: _currentTicker == ticker,
                 onSelected: (_) => _selectTicker(ticker),
-                selectedColor: context.mlColors.infoBg,
-                backgroundColor: context.mlColors.sectionBackground,
+                selectedColor: context.mlColors.infoBg.withValues(alpha: 0.72),
+                backgroundColor: Colors.transparent,
                 side: BorderSide(
                   color: _currentTicker == ticker
-                      ? context.mlColors.accentBlue
-                      : context.mlColors.subtleBorder,
+                      ? context.mlColors.accentBlue.withValues(alpha: 0.28)
+                      : Colors.transparent,
                 ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppRadius.badge),
@@ -610,8 +610,10 @@ class _CommunityFeedScreenState extends State<CommunityFeedScreen> {
               avatar: const Icon(Icons.add, size: 14),
               label: Text(l10n.add),
               onPressed: _showTickerSearchSheet,
-              backgroundColor: context.mlColors.sectionBackground,
-              side: BorderSide(color: context.mlColors.subtleBorder),
+              backgroundColor: Colors.transparent,
+              side: BorderSide(
+                color: context.mlColors.subtleBorder.withValues(alpha: 0.58),
+              ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(AppRadius.badge),
               ),

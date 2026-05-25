@@ -792,6 +792,22 @@ def notification_mark_read_view(request):
     return Response({'marked_read': updated})
 
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def notification_mark_single_read_view(request, pk):
+    """
+    개별 알림 읽음 처리
+    Flutter: POST /api/accounts/notifications/<id>/read/
+    """
+    updated = NotificationHistory.objects.filter(
+        id=pk,
+        user=request.user,
+        is_read=False,
+    ).update(is_read=True)
+
+    return Response({'marked_read': updated})
+
+
 # ========================================
 # RevenueCat IAP Webhook + Subscription API
 # ========================================

@@ -174,23 +174,24 @@ class UpDownTab extends StatelessWidget {
                 ),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? Theme.of(context).colorScheme.primary
-                      : context.mlColors.sectionBackground,
+                      ? context.mlColors.infoBg.withValues(alpha: 0.72)
+                      : Colors.transparent,
                   borderRadius: BorderRadius.circular(AppRadius.lg),
                   border: Border.all(
                     color: isSelected
-                        ? Theme.of(context).colorScheme.primary
-                        : context.mlColors.subtleBorder,
+                        ? context.mlColors.accentBlue.withValues(alpha: 0.28)
+                        : Colors.transparent,
                   ),
                 ),
                 child: Text(
                   label,
                   style: TextStyle(
                     fontSize: AppTypography.caption,
-                    fontWeight:
-                        isSelected ? AppTypography.bold : AppTypography.regular,
+                    fontWeight: isSelected
+                        ? AppTypography.bold
+                        : AppTypography.regular,
                     color: isSelected
-                        ? context.mlColors.onPrimary
+                        ? context.mlColors.accentBlue
                         : Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
@@ -291,16 +292,17 @@ class UpDownTab extends StatelessWidget {
     final color = pct > 0
         ? mlc.gainColor
         : pct < 0
-            ? mlc.lossColor
-            : mlc.neutralColor;
+        ? mlc.lossColor
+        : mlc.neutralColor;
     final arrow = pct > 0
         ? '\u25B2'
         : pct < 0
-            ? '\u25BC'
-            : '\u2500';
+        ? '\u25BC'
+        : '\u2500';
     final sign = pct >= 0 ? '+' : '';
-    final closeStr =
-        item.close != null ? '\$${item.close!.toStringAsFixed(2)}' : '-';
+    final closeStr = item.close != null
+        ? '\$${item.close!.toStringAsFixed(2)}'
+        : '-';
 
     return GestureDetector(
       onTap: () => onTickerTap(item.ticker),
@@ -339,9 +341,14 @@ class UpDownTab extends StatelessWidget {
                           color: mlc.textPrimary,
                         ),
                       ),
-                      if (item.displayName(Localizations.localeOf(context).languageCode) != null)
+                      if (item.displayName(
+                            Localizations.localeOf(context).languageCode,
+                          ) !=
+                          null)
                         Text(
-                          item.displayName(Localizations.localeOf(context).languageCode)!,
+                          item.displayName(
+                            Localizations.localeOf(context).languageCode,
+                          )!,
                           style: TextStyle(
                             fontSize: AppTypography.bodySmall,
                             color: mlc.textTertiary,

@@ -313,7 +313,7 @@ class _HoldingsTabState extends State<HoldingsTab> {
                         width: 72,
                         height: 72,
                         decoration: BoxDecoration(
-                          color: mlc.sectionBackground,
+                          color: mlc.infoBg.withValues(alpha: 0.48),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Icon(
@@ -375,7 +375,7 @@ class _HoldingsTabState extends State<HoldingsTab> {
                               width: 54,
                               height: 54,
                               decoration: BoxDecoration(
-                                color: mlc.infoBg,
+                                color: mlc.infoBg.withValues(alpha: 0.58),
                                 borderRadius: BorderRadius.circular(18),
                               ),
                               child: Icon(

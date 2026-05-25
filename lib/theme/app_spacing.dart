@@ -18,12 +18,12 @@ abstract final class AppSpacing {
   /// 16px — 카드 내부 패딩, 리스트 그룹 간격
   static const double lg = 16.0;
 
-  /// 20px — 화면 좌우 여백, 큰 그룹 간격
-  static const double xl = 20.0;
+  /// 16px — 화면 좌우 여백, 큰 그룹 간격
+  static const double xl = 16.0;
 
-  /// 24px — 섹션 간 간격
-  static const double xxl = 24.0;
+  /// 20px — 섹션 간 간격
+  static const double xxl = 20.0;
 
-  /// 32px — 대형 섹션 간 간격
-  static const double xxxl = 32.0;
+  /// 24px — 대형 섹션 간 간격
+  static const double xxxl = 24.0;
 }

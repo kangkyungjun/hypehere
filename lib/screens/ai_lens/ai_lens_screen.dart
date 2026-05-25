@@ -261,9 +261,9 @@ class _AILensScreenState extends State<AILensScreen> {
       key: const PageStorageKey('ai_lens_list'),
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.xl,
-        AppSpacing.lg,
+        AppSpacing.md,
         AppSpacing.xl,
-        AppSpacing.xxl,
+        AppSpacing.xl,
       ),
       children: [
         // Classification filter chips (최상단)
@@ -271,16 +271,16 @@ class _AILensScreenState extends State<AILensScreen> {
         if (_selectedClassification != null) ...[
           const SizedBox(height: AppSpacing.md),
           _buildClassificationResultsSection(),
-          const SizedBox(height: AppSpacing.xxxl),
+          const SizedBox(height: AppSpacing.xxl),
         ] else
           const SizedBox(height: AppSpacing.md),
 
         // AI Score Section (header + filter + distribution bar)
         BentoCard(child: _buildAIScoreSection()),
 
-        const SizedBox(height: AppSpacing.xxxl),
+        const SizedBox(height: AppSpacing.xxl),
         const BannerAdWidget(),
-        const SizedBox(height: AppSpacing.xxxl),
+        const SizedBox(height: AppSpacing.xxl),
 
         // Recommended section (top signals)
         BentoCard(
@@ -292,9 +292,9 @@ class _AILensScreenState extends State<AILensScreen> {
           ),
         ),
 
-        const SizedBox(height: AppSpacing.xxxl),
+        const SizedBox(height: AppSpacing.xxl),
         const BannerAdWidget(),
-        const SizedBox(height: AppSpacing.xxxl),
+        const SizedBox(height: AppSpacing.xxl),
 
         // Caution section (bottom signals)
         BentoCard(
@@ -306,11 +306,11 @@ class _AILensScreenState extends State<AILensScreen> {
           ),
         ),
 
-        const SizedBox(height: AppSpacing.xxxl),
+        const SizedBox(height: AppSpacing.xxl),
 
         // Banner before full signal list
         const BannerAdWidget(),
-        const SizedBox(height: AppSpacing.xxxl),
+        const SizedBox(height: AppSpacing.xxl),
 
         // Full Signal List (expandable)
         BentoCard(
@@ -324,7 +324,7 @@ class _AILensScreenState extends State<AILensScreen> {
                     width: 36,
                     height: 36,
                     decoration: BoxDecoration(
-                      color: context.mlColors.infoBg,
+                      color: context.mlColors.infoBg.withValues(alpha: 0.58),
                       borderRadius: BorderRadius.circular(AppRadius.lg),
                     ),
                     child: Icon(
@@ -402,12 +402,12 @@ class _AILensScreenState extends State<AILensScreen> {
             label: Text(label),
             selected: isSelected,
             onSelected: (_) => _onClassificationTap(code),
-            selectedColor: context.mlColors.infoBg,
-            backgroundColor: context.mlColors.sectionBackground,
+            selectedColor: context.mlColors.infoBg.withValues(alpha: 0.72),
+            backgroundColor: Colors.transparent,
             side: BorderSide(
               color: isSelected
-                  ? context.mlColors.accentBlue
-                  : context.mlColors.subtleBorder,
+                  ? context.mlColors.accentBlue.withValues(alpha: 0.28)
+                  : Colors.transparent,
             ),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(AppRadius.badge),
@@ -1257,7 +1257,7 @@ class _AILensScreenState extends State<AILensScreen> {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.xxl),
       decoration: BoxDecoration(
-        color: context.mlColors.sectionBackground,
+        color: context.mlColors.cardBackground,
         borderRadius: BorderRadius.circular(AppRadius.lg),
       ),
       child: Center(
@@ -1299,13 +1299,13 @@ class _AILensScreenState extends State<AILensScreen> {
                 ),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? context.mlColors.accentBlue
-                      : context.mlColors.sectionBackground,
+                      ? context.mlColors.infoBg.withValues(alpha: 0.72)
+                      : Colors.transparent,
                   borderRadius: BorderRadius.circular(AppRadius.badge),
                   border: Border.all(
                     color: isSelected
-                        ? context.mlColors.accentBlue
-                        : context.mlColors.subtleBorder,
+                        ? context.mlColors.accentBlue.withValues(alpha: 0.28)
+                        : Colors.transparent,
                   ),
                 ),
                 child: Text(
@@ -1314,7 +1314,7 @@ class _AILensScreenState extends State<AILensScreen> {
                     fontSize: AppTypography.bodySmall,
                     fontWeight: AppTypography.semiBold,
                     color: isSelected
-                        ? context.mlColors.onPrimary
+                        ? context.mlColors.accentBlue
                         : context.mlColors.textSecondary,
                   ),
                 ),

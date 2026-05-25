@@ -244,9 +244,9 @@ class _DashboardScreenState extends State<DashboardScreen>
         key: const PageStorageKey('dashboard_today'),
         padding: const EdgeInsets.fromLTRB(
           AppSpacing.xl,
+          AppSpacing.md,
+          AppSpacing.xl,
           AppSpacing.lg,
-          AppSpacing.xl,
-          AppSpacing.xl,
         ),
         children: [
           // ===== Macro Banner Card =====
@@ -269,7 +269,7 @@ class _DashboardScreenState extends State<DashboardScreen>
             ),
           ),
           if (_macroData != null || _signalsData != null)
-            const SizedBox(height: AppSpacing.xxl),
+            const SizedBox(height: AppSpacing.xl),
 
           // ===== Indices Bar (S&P, NASDAQ, DOW) — individual cards =====
           IndicesBarWidget(
@@ -282,7 +282,7 @@ class _DashboardScreenState extends State<DashboardScreen>
             },
           ),
           if (_indicesData != null && _indicesData!.indices.isNotEmpty)
-            const SizedBox(height: AppSpacing.xxl),
+            const SizedBox(height: AppSpacing.xl),
 
           // ===== Treemap Card (header + chart combined) =====
           CoachMark(
@@ -314,12 +314,12 @@ class _DashboardScreenState extends State<DashboardScreen>
           ),
 
           // ===== Banner Ad =====
-          const SizedBox(height: AppSpacing.xxl),
+          const SizedBox(height: AppSpacing.xl),
           const Center(child: BannerAdWidget()),
 
           // ===== Top Stocks Card =====
           if (_topStocks.isNotEmpty) ...[
-            const SizedBox(height: AppSpacing.xxl),
+            const SizedBox(height: AppSpacing.xl),
             BentoCard(
               child: TopStocksSection(
                 topStocks: _topStocks,
@@ -337,9 +337,9 @@ class _DashboardScreenState extends State<DashboardScreen>
           ],
 
           // ===== Bottom Ad =====
-          const SizedBox(height: AppSpacing.xxl),
+          const SizedBox(height: AppSpacing.xl),
           const Center(child: BannerAdWidget()),
-          const SizedBox(height: AppSpacing.xxl),
+          const SizedBox(height: AppSpacing.xl),
         ],
       ),
     );
@@ -473,7 +473,7 @@ class _DashboardScreenState extends State<DashboardScreen>
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                color: mlc.infoBg,
+                color: mlc.infoBg.withValues(alpha: 0.58),
                 borderRadius: BorderRadius.circular(AppRadius.lg),
               ),
               child: Icon(
@@ -532,13 +532,13 @@ class _DashboardScreenState extends State<DashboardScreen>
         ),
         decoration: BoxDecoration(
           color: isAllSelected
-              ? context.mlColors.accentBlue
-              : context.mlColors.sectionBackground,
+              ? context.mlColors.infoBg.withValues(alpha: 0.72)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(AppRadius.badge),
           border: Border.all(
             color: isAllSelected
-                ? context.mlColors.accentBlue
-                : context.mlColors.subtleBorder,
+                ? context.mlColors.accentBlue.withValues(alpha: 0.28)
+                : Colors.transparent,
           ),
         ),
         child: Center(
@@ -548,7 +548,7 @@ class _DashboardScreenState extends State<DashboardScreen>
               fontSize: AppTypography.bodySmall,
               fontWeight: AppTypography.semiBold,
               color: isAllSelected
-                  ? context.mlColors.onPrimary
+                  ? context.mlColors.accentBlue
                   : context.mlColors.textSecondary,
             ),
           ),

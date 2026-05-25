@@ -28,75 +28,103 @@ class WatchlistDiscoveryCard extends StatelessWidget {
     if (topItems.isEmpty) return const SizedBox.shrink();
 
     return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header
-          Padding(
-            padding: const EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.xl, AppSpacing.lg, 0),
-            child: Row(
-              children: [
-                Icon(Icons.bookmark_outline, size: 20, color: Theme.of(context).colorScheme.primary),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: Text(
-                    l10n.watchlistDiscoveryTitle,
-                    style: TextStyle(
-                      fontSize: AppTypography.headlineSmall,
-                      fontWeight: AppTypography.bold,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Header
+        Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.xl,
+            AppSpacing.xl,
+            AppSpacing.lg,
+            0,
+          ),
+          child: Row(
+            children: [
+              Icon(
+                Icons.bookmark_outline,
+                size: 20,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Text(
+                  l10n.watchlistDiscoveryTitle,
+                  style: TextStyle(
+                    fontSize: AppTypography.headlineSmall,
+                    fontWeight: AppTypography.bold,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
-              ],
-            ),
-          ),
-
-          // Subtitle
-          Padding(
-            padding: const EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.xs, AppSpacing.xl, 0),
-            child: Text(
-              l10n.watchlistDiscoverySubtitle,
-              style: TextStyle(
-                fontSize: AppTypography.bodySmall,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
-            ),
+            ],
           ),
+        ),
 
-          // Section label
-          Padding(
-            padding: const EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.lg, AppSpacing.xl, AppSpacing.md),
-            child: Text(
-              l10n.topTradingVolume,
-              style: TextStyle(
-                fontSize: AppTypography.bodyMedium,
-                fontWeight: AppTypography.semiBold,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+        // Subtitle
+        Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.xl,
+            AppSpacing.xs,
+            AppSpacing.xl,
+            0,
+          ),
+          child: Text(
+            l10n.watchlistDiscoverySubtitle,
+            style: TextStyle(
+              fontSize: AppTypography.bodySmall,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
+        ),
 
-          // Ticker tiles grid
-          Padding(
-            padding: const EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.xl),
-            child: Consumer<WatchlistProvider>(
-              builder: (context, watchlistProvider, _) {
-                return Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: topItems.map((item) {
-                    return _TickerTile(
-                      item: item,
-                      isInWatchlist: watchlistProvider.isInWatchlist(item.ticker),
-                      onToggle: () => _onToggleWatchlist(context, watchlistProvider, item.ticker),
-                      onTap: () => onTickerTap?.call(item.ticker),
-                    );
-                  }).toList(),
-                );
-              },
+        // Section label
+        Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.xl,
+            AppSpacing.lg,
+            AppSpacing.xl,
+            AppSpacing.md,
+          ),
+          child: Text(
+            l10n.topTradingVolume,
+            style: TextStyle(
+              fontSize: AppTypography.bodyMedium,
+              fontWeight: AppTypography.semiBold,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
-        ],
+        ),
+
+        // Ticker tiles grid
+        Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.lg,
+            0,
+            AppSpacing.lg,
+            AppSpacing.xl,
+          ),
+          child: Consumer<WatchlistProvider>(
+            builder: (context, watchlistProvider, _) {
+              return Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: topItems.map((item) {
+                  return _TickerTile(
+                    item: item,
+                    isInWatchlist: watchlistProvider.isInWatchlist(item.ticker),
+                    onToggle: () => _onToggleWatchlist(
+                      context,
+                      watchlistProvider,
+                      item.ticker,
+                    ),
+                    onTap: () => onTickerTap?.call(item.ticker),
+                  );
+                }).toList(),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 
@@ -143,9 +171,7 @@ class _TickerTile extends StatelessWidget {
     final changePct = item.changePct ?? 0;
     final isPositive = changePct >= 0;
     final mlc = context.mlColors;
-    final changeColor = isPositive
-        ? mlc.gainColor
-        : mlc.lossColor;
+    final changeColor = isPositive ? mlc.gainColor : mlc.lossColor;
     final arrow = isPositive ? '▲' : '▼';
     final sign = isPositive ? '+' : '';
 
@@ -153,11 +179,17 @@ class _TickerTile extends StatelessWidget {
       onTap: onTap,
       child: Container(
         width: 110,
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.md),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.md,
+        ),
         decoration: BoxDecoration(
-          color: context.mlColors.sectionBackground,
+          color: context.mlColors.cardBackground,
           borderRadius: BorderRadius.circular(AppRadius.lg),
-          border: Border.all(color: context.mlColors.subtleBorder),
+          border: Border.all(
+            color: context.mlColors.subtleBorder.withValues(alpha: 0.62),
+            width: 0.8,
+          ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -183,7 +215,9 @@ class _TickerTile extends StatelessWidget {
                     child: Icon(
                       isInWatchlist ? Icons.bookmark : Icons.bookmark_border,
                       size: 18,
-                      color: isInWatchlist ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.outline,
+                      color: isInWatchlist
+                          ? Theme.of(context).colorScheme.primary
+                          : Theme.of(context).colorScheme.outline,
                     ),
                   ),
                 ),

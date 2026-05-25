@@ -28,11 +28,7 @@ class CreatePostScreen extends StatefulWidget {
   /// 수정할 게시글 (null이면 새 작성, 있으면 수정 모드)
   final Post? editPost;
 
-  const CreatePostScreen({
-    super.key,
-    this.prefilledTicker,
-    this.editPost,
-  });
+  const CreatePostScreen({super.key, this.prefilledTicker, this.editPost});
 
   @override
   State<CreatePostScreen> createState() => _CreatePostScreenState();
@@ -192,7 +188,9 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
       if (mounted) {
         final l10n = AppLocalizations.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(_isEditMode ? l10n.postUpdated : l10n.postCreated)),
+          SnackBar(
+            content: Text(_isEditMode ? l10n.postUpdated : l10n.postCreated),
+          ),
         );
         Navigator.of(context).pop(true);
       }
@@ -282,7 +280,10 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.sm,
+            ),
             decoration: BoxDecoration(
               color: context.mlColors.accentBlue,
               borderRadius: BorderRadius.circular(AppRadius.sm),
@@ -299,10 +300,17 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
           const SizedBox(width: AppSpacing.md),
           Text(
             l10n.tickerOnlyBoard,
-            style: TextStyle(fontSize: AppTypography.bodyMedium, color: Theme.of(context).colorScheme.onSurfaceVariant),
+            style: TextStyle(
+              fontSize: AppTypography.bodyMedium,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
           const Spacer(),
-          Icon(Icons.lock, size: 18, color: Theme.of(context).colorScheme.outline),
+          Icon(
+            Icons.lock,
+            size: 18,
+            color: Theme.of(context).colorScheme.outline,
+          ),
         ],
       ),
     );
@@ -356,7 +364,10 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
               Expanded(
                 child: Text(
                   _tickerSubtitle(ticker),
-                  style: TextStyle(fontSize: AppTypography.bodyMedium, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                  style: TextStyle(
+                    fontSize: AppTypography.bodyMedium,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -368,7 +379,11 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                     color: context.mlColors.subtleBorder,
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(Icons.close, size: 16, color: context.mlColors.onPrimary),
+                  child: Icon(
+                    Icons.close,
+                    size: 16,
+                    color: context.mlColors.onPrimary,
+                  ),
                 ),
               ),
             ],
@@ -402,19 +417,21 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                     child: SizedBox(
                       width: 20,
                       height: 20,
-                      child: CircularProgressIndicator(strokeWidth: AppStroke.medium),
+                      child: CircularProgressIndicator(
+                        strokeWidth: AppStroke.medium,
+                      ),
                     ),
                   )
                 : (_searchController.text.isNotEmpty
-                    ? IconButton(
-                        tooltip: l10n.tooltipClearSearch,
-                        icon: const Icon(Icons.clear, size: 20),
-                        onPressed: () {
-                          _searchController.clear();
-                          _onSearchChanged('');
-                        },
-                      )
-                    : null),
+                      ? IconButton(
+                          tooltip: l10n.tooltipClearSearch,
+                          icon: const Icon(Icons.clear, size: 20),
+                          onPressed: () {
+                            _searchController.clear();
+                            _onSearchChanged('');
+                          },
+                        )
+                      : null),
             filled: true,
             fillColor: context.mlColors.sectionBackground,
             border: OutlineInputBorder(
@@ -424,10 +441,16 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
         ),
         // 안내 문구
         Padding(
-          padding: const EdgeInsets.only(top: AppSpacing.md, left: AppSpacing.xs),
+          padding: const EdgeInsets.only(
+            top: AppSpacing.md,
+            left: AppSpacing.xs,
+          ),
           child: Text(
             l10n.tickerNotSelectedHint,
-            style: TextStyle(fontSize: AppTypography.bodySmall, color: Theme.of(context).colorScheme.outline),
+            style: TextStyle(
+              fontSize: AppTypography.bodySmall,
+              color: Theme.of(context).colorScheme.outline,
+            ),
           ),
         ),
         // 검색 결과 리스트
@@ -438,8 +461,11 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
             decoration: BoxDecoration(
               color: context.mlColors.cardBackground,
               borderRadius: BorderRadius.circular(AppRadius.lg),
-              border: Border.all(color: context.mlColors.subtleBorder),
-              boxShadow: AppShadow.lg(context.mlColors.overlayDim),
+              border: Border.all(
+                color: context.mlColors.subtleBorder.withValues(alpha: 0.68),
+                width: 0.8,
+              ),
+              boxShadow: AppShadow.sm(context.mlColors.overlayDim),
             ),
             child: ListView.separated(
               shrinkWrap: true,
@@ -447,7 +473,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
               itemCount: _searchResults.length,
               separatorBuilder: (_, __) => Divider(
                 height: 1,
-                color: context.mlColors.chartGridLine,
+                color: context.mlColors.chartGridLine.withValues(alpha: 0.72),
               ),
               itemBuilder: (context, index) {
                 final item = _searchResults[index];
@@ -466,12 +492,18 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
             decoration: BoxDecoration(
               color: context.mlColors.cardBackground,
               borderRadius: BorderRadius.circular(AppRadius.lg),
-              border: Border.all(color: context.mlColors.subtleBorder),
+              border: Border.all(
+                color: context.mlColors.subtleBorder.withValues(alpha: 0.68),
+                width: 0.8,
+              ),
             ),
             child: Center(
               child: Text(
                 l10n.noTickerSearchResults,
-                style: TextStyle(fontSize: AppTypography.bodyMedium, color: Theme.of(context).colorScheme.outline),
+                style: TextStyle(
+                  fontSize: AppTypography.bodyMedium,
+                  color: Theme.of(context).colorScheme.outline,
+                ),
               ),
             ),
           ),
@@ -484,12 +516,18 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     return InkWell(
       onTap: () => _selectTicker(item),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.lg),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.xl,
+          vertical: AppSpacing.lg,
+        ),
         child: Row(
           children: [
             // 티커 심볼
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xs),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.md,
+                vertical: AppSpacing.xs,
+              ),
               decoration: BoxDecoration(
                 color: context.mlColors.accentBlue.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(AppRadius.xs),
@@ -530,7 +568,10 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                 ),
                 child: Text(
                   item.category!,
-                  style: TextStyle(fontSize: AppTypography.caption, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                  style: TextStyle(
+                    fontSize: AppTypography.caption,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ),
           ],
@@ -624,7 +665,9 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
               width: 20,
               child: CircularProgressIndicator(
                 strokeWidth: AppStroke.medium,
-                valueColor: AlwaysStoppedAnimation<Color>(context.mlColors.onPrimary),
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  context.mlColors.onPrimary,
+                ),
               ),
             )
           : Text(

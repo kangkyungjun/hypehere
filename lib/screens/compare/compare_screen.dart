@@ -61,16 +61,16 @@ class _CompareScreenState extends State<CompareScreen> {
   Future<void> _addTicker(String ticker) async {
     final l10n = AppLocalizations.of(context);
     if (_selectedTickers.length >= 3) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.errMaxCompare)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.errMaxCompare)));
       return;
     }
 
     if (_selectedTickers.contains(ticker.toUpperCase())) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.errMaxCompare)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.errMaxCompare)));
       return;
     }
 
@@ -236,8 +236,8 @@ class _CompareScreenState extends State<CompareScreen> {
             child: _selectedTickers.isEmpty
                 ? _buildEmptyState()
                 : _isLoading
-                    ? const Center(child: CircularProgressIndicator())
-                    : _buildComparisonContent(),
+                ? const Center(child: CircularProgressIndicator())
+                : _buildComparisonContent(),
           ),
         ],
       ),
@@ -254,59 +254,64 @@ class _CompareScreenState extends State<CompareScreen> {
           padding: const EdgeInsets.all(AppSpacing.xl),
           color: context.mlColors.sectionBackground,
           child: Row(
-        children: [
-          Expanded(
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: l10n.tickerSearchHint,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppRadius.md),
-                ),
-                filled: true,
-                fillColor: Theme.of(context).colorScheme.surface,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.xl,
-                  vertical: AppSpacing.lg,
-                ),
-                suffixIcon: _isSearching
-                    ? const Padding(
-                        padding: EdgeInsets.all(AppSpacing.lg),
-                        child: SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(strokeWidth: AppStroke.medium),
-                        ),
-                      )
-                    : null,
-              ),
-              textCapitalization: TextCapitalization.characters,
-              onChanged: (value) => _performSearch(value),
-              onSubmitted: (value) {
-                // 검색 결과가 있으면 첫 번째 결과 선택
-                if (_searchResults.isNotEmpty) {
-                  _addTickerFromSearch(_searchResults.first);
-                }
-              },
-            ),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          ElevatedButton(
-            onPressed: _isLoading
-                ? null  // 로딩 중에는 버튼 비활성화
-                : () {
-                    if (_searchController.text.isNotEmpty) {
-                      _addTicker(_searchController.text);
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    hintText: l10n.tickerSearchHint,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppRadius.md),
+                    ),
+                    filled: true,
+                    fillColor: Theme.of(context).colorScheme.surface,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.xl,
+                      vertical: AppSpacing.lg,
+                    ),
+                    suffixIcon: _isSearching
+                        ? const Padding(
+                            padding: EdgeInsets.all(AppSpacing.lg),
+                            child: SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                strokeWidth: AppStroke.medium,
+                              ),
+                            ),
+                          )
+                        : null,
+                  ),
+                  textCapitalization: TextCapitalization.characters,
+                  onChanged: (value) => _performSearch(value),
+                  onSubmitted: (value) {
+                    // 검색 결과가 있으면 첫 번째 결과 선택
+                    if (_searchResults.isNotEmpty) {
+                      _addTickerFromSearch(_searchResults.first);
                     }
                   },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: context.mlColors.accentBlue,
-              foregroundColor: context.mlColors.onPrimary,
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl, vertical: AppSpacing.lg),
-            ),
-            child: Text(l10n.add),
-          ),
-        ],
+                ),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              ElevatedButton(
+                onPressed: _isLoading
+                    ? null // 로딩 중에는 버튼 비활성화
+                    : () {
+                        if (_searchController.text.isNotEmpty) {
+                          _addTicker(_searchController.text);
+                        }
+                      },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: context.mlColors.accentBlue,
+                  foregroundColor: context.mlColors.onPrimary,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.xxl,
+                    vertical: AppSpacing.lg,
+                  ),
+                ),
+                child: Text(l10n.add),
+              ),
+            ],
           ),
         ),
 
@@ -315,13 +320,19 @@ class _CompareScreenState extends State<CompareScreen> {
           Container(
             constraints: const BoxConstraints(maxHeight: 200),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
+              color: context.mlColors.cardBackground,
               border: Border(
-                left: BorderSide(color: context.mlColors.subtleBorder),
-                right: BorderSide(color: context.mlColors.subtleBorder),
-                bottom: BorderSide(color: context.mlColors.subtleBorder),
+                left: BorderSide(
+                  color: context.mlColors.subtleBorder.withValues(alpha: 0.7),
+                ),
+                right: BorderSide(
+                  color: context.mlColors.subtleBorder.withValues(alpha: 0.7),
+                ),
+                bottom: BorderSide(
+                  color: context.mlColors.subtleBorder.withValues(alpha: 0.7),
+                ),
               ),
-              boxShadow: AppShadow.md(context.mlColors.overlayDim),
+              boxShadow: AppShadow.sm(context.mlColors.overlayDim),
             ),
             child: ListView.builder(
               shrinkWrap: true,
@@ -346,7 +357,10 @@ class _CompareScreenState extends State<CompareScreen> {
   /// 선택된 종목 칩
   Widget _buildSelectedTickersChips() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.md),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.xl,
+        vertical: AppSpacing.md,
+      ),
       child: Wrap(
         spacing: 8,
         children: _selectedTickers.map((ticker) {
@@ -408,9 +422,12 @@ class _CompareScreenState extends State<CompareScreen> {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
+        color: context.mlColors.cardBackground,
         borderRadius: BorderRadius.circular(AppRadius.lg),
-        boxShadow: AppShadow.md(context.mlColors.overlayDim),
+        border: Border.all(
+          color: context.mlColors.subtleBorder.withValues(alpha: 0.62),
+          width: 0.8,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -420,13 +437,19 @@ class _CompareScreenState extends State<CompareScreen> {
             padding: const EdgeInsets.all(AppSpacing.xl),
             child: Text(
               AppLocalizations.of(context).keyMetricsComparison,
-              style: TextStyle(fontSize: AppTypography.headlineMedium, fontWeight: AppTypography.bold),
+              style: TextStyle(
+                fontSize: AppTypography.headlineMedium,
+                fontWeight: AppTypography.bold,
+              ),
             ),
           ),
 
           // 테이블
           Table(
-            border: TableBorder.all(color: context.mlColors.subtleBorder),
+            border: TableBorder.all(
+              color: context.mlColors.subtleBorder.withValues(alpha: 0.58),
+              width: 0.6,
+            ),
             columnWidths: const {
               0: FlexColumnWidth(1.5),
               1: FlexColumnWidth(1),
@@ -436,9 +459,14 @@ class _CompareScreenState extends State<CompareScreen> {
             children: [
               // 헤더
               TableRow(
-                decoration: BoxDecoration(color: context.mlColors.sectionBackground),
+                decoration: BoxDecoration(
+                  color: context.mlColors.infoBg.withValues(alpha: 0.42),
+                ),
                 children: [
-                  _buildTableCell(AppLocalizations.of(context).metric, isHeader: true),
+                  _buildTableCell(
+                    AppLocalizations.of(context).metric,
+                    isHeader: true,
+                  ),
                   ..._selectedTickers.map(
                     (ticker) => _buildTableCell(ticker, isHeader: true),
                   ),
@@ -456,14 +484,14 @@ class _CompareScreenState extends State<CompareScreen> {
               // Signal (score-based localized label)
               _buildMetricRow(
                 'Signal',
-                _selectedTickers
-                    .map((t) {
-                      final d = _tickerDataMap[t]?.lastOrNull;
-                      if (d?.signal == null || d?.score == null) return null;
-                      return ScoreMapper.getScoreLabelLocalized(
-                          d!.score!, AppLocalizations.of(context));
-                    })
-                    .toList(),
+                _selectedTickers.map((t) {
+                  final d = _tickerDataMap[t]?.lastOrNull;
+                  if (d?.signal == null || d?.score == null) return null;
+                  return ScoreMapper.getScoreLabelLocalized(
+                    d!.score!,
+                    AppLocalizations.of(context),
+                  );
+                }).toList(),
                 isString: true,
               ),
 
@@ -506,7 +534,10 @@ class _CompareScreenState extends State<CompareScreen> {
             padding: const EdgeInsets.all(AppSpacing.lg),
             child: Text(
               AppLocalizations.of(context).serverCalculatedNote,
-              style: TextStyle(fontSize: AppTypography.caption, color: context.mlColors.textSecondary),
+              style: TextStyle(
+                fontSize: AppTypography.caption,
+                color: context.mlColors.textSecondary,
+              ),
             ),
           ),
         ],
@@ -515,8 +546,11 @@ class _CompareScreenState extends State<CompareScreen> {
   }
 
   /// 테이블 행 생성 (지표별)
-  TableRow _buildMetricRow(String label, List<Object?> values,
-      {bool isString = false}) {
+  TableRow _buildMetricRow(
+    String label,
+    List<Object?> values, {
+    bool isString = false,
+  }) {
     return TableRow(
       children: [
         _buildTableCell(label),
@@ -540,9 +574,13 @@ class _CompareScreenState extends State<CompareScreen> {
       child: Text(
         text,
         style: TextStyle(
-          fontSize: isHeader ? AppTypography.bodySmall : AppTypography.bodyMedium,
+          fontSize: isHeader
+              ? AppTypography.bodySmall
+              : AppTypography.bodyMedium,
           fontWeight: isHeader ? AppTypography.bold : AppTypography.regular,
-          color: isHeader ? context.mlColors.textSecondary : context.mlColors.textPrimary,
+          color: isHeader
+              ? context.mlColors.textSecondary
+              : context.mlColors.textPrimary,
           fontFeatures: isHeader ? null : AppTypography.tabularFigures,
         ),
         textAlign: isHeader ? TextAlign.center : TextAlign.left,
@@ -556,16 +594,22 @@ class _CompareScreenState extends State<CompareScreen> {
       margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
       padding: const EdgeInsets.all(AppSpacing.xl),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
+        color: context.mlColors.cardBackground,
         borderRadius: BorderRadius.circular(AppRadius.lg),
-        boxShadow: AppShadow.md(context.mlColors.overlayDim),
+        border: Border.all(
+          color: context.mlColors.subtleBorder.withValues(alpha: 0.62),
+          width: 0.8,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             AppLocalizations.of(context).priceTrendComparison,
-            style: TextStyle(fontSize: AppTypography.headlineMedium, fontWeight: AppTypography.bold),
+            style: TextStyle(
+              fontSize: AppTypography.headlineMedium,
+              fontWeight: AppTypography.bold,
+            ),
           ),
           const SizedBox(height: AppSpacing.xl),
 
@@ -612,7 +656,10 @@ class _CompareScreenState extends State<CompareScreen> {
       children: [
         Text(
           ticker,
-          style: const TextStyle(fontSize: AppTypography.bodyLarge, fontWeight: AppTypography.bold),
+          style: const TextStyle(
+            fontSize: AppTypography.bodyLarge,
+            fontWeight: AppTypography.bold,
+          ),
         ),
         const SizedBox(height: AppSpacing.md),
         SizedBox(
@@ -636,7 +683,8 @@ class _CompareScreenState extends State<CompareScreen> {
                         sideTitles: SideTitles(
                           showTitles: true,
                           reservedSize: 30,
-                          interval: ((data.data.length / 0.6) / 4).ceilToDouble(),
+                          interval: ((data.data.length / 0.6) / 4)
+                              .ceilToDouble(),
                           getTitlesWidget: (value, meta) {
                             final index = value.toInt();
 
@@ -644,22 +692,32 @@ class _CompareScreenState extends State<CompareScreen> {
                             if (index >= 0 && index < data.data.length) {
                               final date = data.data[index].date;
                               return Padding(
-                                padding: const EdgeInsets.only(top: AppSpacing.md),
+                                padding: const EdgeInsets.only(
+                                  top: AppSpacing.md,
+                                ),
                                 child: Text(
                                   '${date.month}/${date.day}',
-                                  style: TextStyle(fontSize: AppTypography.micro),
+                                  style: TextStyle(
+                                    fontSize: AppTypography.micro,
+                                  ),
                                 ),
                               );
                             }
 
                             // 미래 영역 (60:40 비율)
-                            if (index >= data.data.length && data.data.isNotEmpty) {
+                            if (index >= data.data.length &&
+                                data.data.isNotEmpty) {
                               final lastDate = data.data.last.date;
-                              final daysSinceLastDate = index - (data.data.length - 1);
-                              final futureDate = lastDate.add(Duration(days: daysSinceLastDate));
+                              final daysSinceLastDate =
+                                  index - (data.data.length - 1);
+                              final futureDate = lastDate.add(
+                                Duration(days: daysSinceLastDate),
+                              );
 
                               return Padding(
-                                padding: const EdgeInsets.only(top: AppSpacing.md),
+                                padding: const EdgeInsets.only(
+                                  top: AppSpacing.md,
+                                ),
                                 child: Text(
                                   '${futureDate.month}/${futureDate.day}',
                                   style: TextStyle(
@@ -687,7 +745,7 @@ class _CompareScreenState extends State<CompareScreen> {
                       .toList(),
                   isCurved: true,
                   color: context.mlColors.accentBlue,
-                  barWidth: 2,
+                  barWidth: 1.5,
                   dotData: const FlDotData(show: false),
                 ),
               ],
@@ -704,16 +762,22 @@ class _CompareScreenState extends State<CompareScreen> {
       margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
       padding: const EdgeInsets.all(AppSpacing.xl),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
+        color: context.mlColors.cardBackground,
         borderRadius: BorderRadius.circular(AppRadius.lg),
-        boxShadow: AppShadow.md(context.mlColors.overlayDim),
+        border: Border.all(
+          color: context.mlColors.subtleBorder.withValues(alpha: 0.62),
+          width: 0.8,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             AppLocalizations.of(context).rsiComparison,
-            style: TextStyle(fontSize: AppTypography.headlineMedium, fontWeight: AppTypography.bold),
+            style: TextStyle(
+              fontSize: AppTypography.headlineMedium,
+              fontWeight: AppTypography.bold,
+            ),
           ),
           const SizedBox(height: AppSpacing.xl),
 
@@ -733,9 +797,7 @@ class _CompareScreenState extends State<CompareScreen> {
                       ),
                     ),
                   ),
-                  Expanded(
-                    child: _buildRsiBar(latestRsi),
-                  ),
+                  Expanded(child: _buildRsiBar(latestRsi)),
                   const SizedBox(width: AppSpacing.md),
                   SizedBox(
                     width: 50,
@@ -753,7 +815,10 @@ class _CompareScreenState extends State<CompareScreen> {
           const SizedBox(height: AppSpacing.md),
           Text(
             AppLocalizations.of(context).rsiInterpretation,
-            style: TextStyle(fontSize: AppTypography.caption, color: context.mlColors.textSecondary),
+            style: TextStyle(
+              fontSize: AppTypography.caption,
+              color: context.mlColors.textSecondary,
+            ),
           ),
         ],
       ),

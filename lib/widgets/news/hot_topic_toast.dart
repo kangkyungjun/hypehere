@@ -43,12 +43,22 @@ class HotTopicToast extends StatelessWidget {
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
           child: Container(
-            margin: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.md, AppSpacing.lg, 0),
-            padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.md, AppSpacing.lg),
+            margin: const EdgeInsets.fromLTRB(
+              AppSpacing.lg,
+              AppSpacing.md,
+              AppSpacing.lg,
+              0,
+            ),
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.lg,
+              AppSpacing.lg,
+              AppSpacing.md,
+              AppSpacing.lg,
+            ),
             decoration: BoxDecoration(
               color: theme.colorScheme.errorContainer.withValues(alpha: 0.92),
               borderRadius: BorderRadius.circular(AppRadius.lg),
-              boxShadow: AppShadow.lg(context.mlColors.overlayDim),
+              boxShadow: AppShadow.sm(context.mlColors.overlayDim),
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -56,7 +66,10 @@ class HotTopicToast extends StatelessWidget {
                 // Fire icon
                 const Padding(
                   padding: EdgeInsets.only(top: AppSpacing.xxs),
-                  child: Text('🔥', style: TextStyle(fontSize: AppTypography.headlineLarge)),
+                  child: Text(
+                    '🔥',
+                    style: TextStyle(fontSize: AppTypography.headlineLarge),
+                  ),
                 ),
                 const SizedBox(width: AppSpacing.md),
 
@@ -71,19 +84,25 @@ class HotTopicToast extends StatelessWidget {
                           Divider(
                             height: 8,
                             thickness: 0.5,
-                            color: theme.colorScheme.onErrorContainer.withValues(alpha: 0.15),
+                            color: theme.colorScheme.onErrorContainer
+                                .withValues(alpha: 0.15),
                           ),
                         Row(
                           children: [
                             Expanded(
                               child: GestureDetector(
                                 behavior: HitTestBehavior.opaque,
-                                onTap: () => MarketNewsModal.show(context, previewItems[i]),
+                                onTap: () => MarketNewsModal.show(
+                                  context,
+                                  previewItems[i],
+                                ),
                                 child: Text(
                                   previewItems[i].aiSummary.localize(langCode),
                                   style: TextStyle(
                                     fontSize: AppTypography.bodySmall,
-                                    fontWeight: i == 0 ? AppTypography.semiBold : AppTypography.regular,
+                                    fontWeight: i == 0
+                                        ? AppTypography.semiBold
+                                        : AppTypography.regular,
                                     color: theme.colorScheme.onErrorContainer,
                                     height: 1.3,
                                   ),
@@ -100,7 +119,8 @@ class HotTopicToast extends StatelessWidget {
                                 child: Icon(
                                   Icons.close,
                                   size: 14,
-                                  color: theme.colorScheme.onErrorContainer.withValues(alpha: 0.5),
+                                  color: theme.colorScheme.onErrorContainer
+                                      .withValues(alpha: 0.5),
                                 ),
                               ),
                             ),
@@ -111,16 +131,20 @@ class HotTopicToast extends StatelessWidget {
                         Divider(
                           height: 8,
                           thickness: 0.5,
-                          color: theme.colorScheme.onErrorContainer.withValues(alpha: 0.15),
+                          color: theme.colorScheme.onErrorContainer.withValues(
+                            alpha: 0.15,
+                          ),
                         ),
                         GestureDetector(
-                          onTap: () => MarketNewsModal.show(context, hotTopics.first),
+                          onTap: () =>
+                              MarketNewsModal.show(context, hotTopics.first),
                           child: Text(
                             l10n.hotTopicMore(moreCount),
                             style: TextStyle(
                               fontSize: AppTypography.caption,
                               fontWeight: AppTypography.medium,
-                              color: theme.colorScheme.onErrorContainer.withValues(alpha: 0.7),
+                              color: theme.colorScheme.onErrorContainer
+                                  .withValues(alpha: 0.7),
                             ),
                           ),
                         ),
@@ -128,7 +152,6 @@ class HotTopicToast extends StatelessWidget {
                     ],
                   ),
                 ),
-
               ],
             ),
           ),

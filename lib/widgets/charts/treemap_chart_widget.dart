@@ -50,7 +50,11 @@ class _TreemapChartWidgetState extends State<TreemapChartWidget> {
               padding: const EdgeInsets.only(bottom: AppSpacing.md),
               child: Row(
                 children: [
-                  Icon(Icons.arrow_back_ios, size: 16, color: context.mlColors.accentBlue),
+                  Icon(
+                    Icons.arrow_back_ios,
+                    size: 16,
+                    color: context.mlColors.accentBlue,
+                  ),
                   const SizedBox(width: AppSpacing.xs),
                   Flexible(
                     child: Text(
@@ -102,48 +106,47 @@ class _TreemapChartWidgetState extends State<TreemapChartWidget> {
   List<_TreemapNode> _computeLayout(Size size) {
     if (_currentSector == null) {
       // Level 1: Sector view
-      final items = widget.data.sectors
-          .where((s) => s.totalTradingValue != null && s.totalTradingValue! > 0)
-          .toList()
-        ..sort((a, b) =>
-            (b.totalTradingValue ?? 0).compareTo(a.totalTradingValue ?? 0));
+      final items =
+          widget.data.sectors
+              .where(
+                (s) => s.totalTradingValue != null && s.totalTradingValue! > 0,
+              )
+              .toList()
+            ..sort(
+              (a, b) => (b.totalTradingValue ?? 0).compareTo(
+                a.totalTradingValue ?? 0,
+              ),
+            );
 
       if (items.isEmpty) return [];
 
       final entries = items
-          .map((s) => _SquarifyEntry(
-                value: s.totalTradingValue ?? 1.0,
-                data: s,
-              ))
+          .map(
+            (s) => _SquarifyEntry(value: s.totalTradingValue ?? 1.0, data: s),
+          )
           .toList();
 
       return _squarify(entries, Rect.fromLTWH(0, 0, size.width, size.height));
     } else {
       // Level 2: Ticker view
-      final items = _currentSector!.items
-          .where((t) => t.tradingValue != null && t.tradingValue! > 0)
-          .toList()
-        ..sort(
-            (a, b) => (b.tradingValue ?? 0).compareTo(a.tradingValue ?? 0));
+      final items =
+          _currentSector!.items
+              .where((t) => t.tradingValue != null && t.tradingValue! > 0)
+              .toList()
+            ..sort(
+              (a, b) => (b.tradingValue ?? 0).compareTo(a.tradingValue ?? 0),
+            );
 
       // Include items with null trading value at minimum size
       final nullItems = _currentSector!.items
           .where((t) => t.tradingValue == null || t.tradingValue == 0)
           .toList();
 
-      final minValue = items.isNotEmpty
-          ? items.last.tradingValue! * 0.1
-          : 1.0;
+      final minValue = items.isNotEmpty ? items.last.tradingValue! * 0.1 : 1.0;
 
       final entries = [
-        ...items.map((t) => _SquarifyEntry(
-              value: t.tradingValue!,
-              data: t,
-            )),
-        ...nullItems.map((t) => _SquarifyEntry(
-              value: minValue,
-              data: t,
-            )),
+        ...items.map((t) => _SquarifyEntry(value: t.tradingValue!, data: t)),
+        ...nullItems.map((t) => _SquarifyEntry(value: minValue, data: t)),
       ];
 
       if (entries.isEmpty) return [];
@@ -182,12 +185,15 @@ class _TreemapChartWidgetState extends State<TreemapChartWidget> {
   }
 
   void _showSmallSectorsModal(List<_TreemapNode> nodes) {
-    final smallSectors = nodes
-        .where((n) => n.rect.width < 40 || n.rect.height < 25)
-        .map((n) => n.data as TreemapSector)
-        .toList()
-      ..sort((a, b) =>
-          (b.totalTradingValue ?? 0).compareTo(a.totalTradingValue ?? 0));
+    final smallSectors =
+        nodes
+            .where((n) => n.rect.width < 40 || n.rect.height < 25)
+            .map((n) => n.data as TreemapSector)
+            .toList()
+          ..sort(
+            (a, b) =>
+                (b.totalTradingValue ?? 0).compareTo(a.totalTradingValue ?? 0),
+          );
 
     if (smallSectors.isEmpty) return;
 
@@ -206,7 +212,9 @@ class _TreemapChartWidgetState extends State<TreemapChartWidget> {
             ),
             decoration: BoxDecoration(
               color: mlc.cardBackground,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
+              borderRadius: BorderRadius.vertical(
+                top: Radius.circular(AppRadius.xl),
+              ),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -221,7 +229,12 @@ class _TreemapChartWidgetState extends State<TreemapChartWidget> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.xl, AppSpacing.xl, AppSpacing.md),
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.xl,
+                    AppSpacing.xl,
+                    AppSpacing.xl,
+                    AppSpacing.md,
+                  ),
                   child: Row(
                     children: [
                       Expanded(
@@ -248,7 +261,9 @@ class _TreemapChartWidgetState extends State<TreemapChartWidget> {
                 Flexible(
                   child: ListView.builder(
                     shrinkWrap: true,
-                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppSpacing.xs,
+                    ),
                     itemCount: smallSectors.length,
                     itemBuilder: (ctx, i) {
                       final sector = smallSectors[i];
@@ -260,8 +275,8 @@ class _TreemapChartWidgetState extends State<TreemapChartWidget> {
                       final changeColor = changePct == null
                           ? itemMlc.neutralColor
                           : changePct >= 0
-                              ? itemMlc.gainColor
-                              : itemMlc.lossColor;
+                          ? itemMlc.gainColor
+                          : itemMlc.lossColor;
 
                       return InkWell(
                         onTap: () {
@@ -270,7 +285,9 @@ class _TreemapChartWidgetState extends State<TreemapChartWidget> {
                         },
                         child: Padding(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: AppSpacing.xl, vertical: AppSpacing.lg),
+                            horizontal: AppSpacing.xl,
+                            vertical: AppSpacing.lg,
+                          ),
                           child: Row(
                             children: [
                               Expanded(
@@ -328,12 +345,14 @@ class _TreemapChartWidgetState extends State<TreemapChartWidget> {
   }
 
   void _showSmallTickersModal(List<_TreemapNode> nodes) {
-    final smallTickers = nodes
-        .where((n) => n.rect.width < 50 || n.rect.height < 30)
-        .map((n) => n.data as TreemapItem)
-        .toList()
-      ..sort((a, b) =>
-          (b.tradingValue ?? 0).compareTo(a.tradingValue ?? 0));
+    final smallTickers =
+        nodes
+            .where((n) => n.rect.width < 50 || n.rect.height < 30)
+            .map((n) => n.data as TreemapItem)
+            .toList()
+          ..sort(
+            (a, b) => (b.tradingValue ?? 0).compareTo(a.tradingValue ?? 0),
+          );
 
     if (smallTickers.isEmpty) return;
 
@@ -352,7 +371,9 @@ class _TreemapChartWidgetState extends State<TreemapChartWidget> {
             ),
             decoration: BoxDecoration(
               color: mlc.cardBackground,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
+              borderRadius: BorderRadius.vertical(
+                top: Radius.circular(AppRadius.xl),
+              ),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -367,7 +388,12 @@ class _TreemapChartWidgetState extends State<TreemapChartWidget> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.xl, AppSpacing.xl, AppSpacing.md),
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.xl,
+                    AppSpacing.xl,
+                    AppSpacing.xl,
+                    AppSpacing.md,
+                  ),
                   child: Row(
                     children: [
                       Expanded(
@@ -394,7 +420,9 @@ class _TreemapChartWidgetState extends State<TreemapChartWidget> {
                 Flexible(
                   child: ListView.builder(
                     shrinkWrap: true,
-                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppSpacing.xs,
+                    ),
                     itemCount: smallTickers.length,
                     itemBuilder: (ctx, i) =>
                         _buildTickerRow(ctx, smallTickers[i]),
@@ -417,8 +445,8 @@ class _TreemapChartWidgetState extends State<TreemapChartWidget> {
     final changeColor = changePct == null
         ? mlc.neutralColor
         : changePct >= 0
-            ? mlc.gainColor
-            : mlc.lossColor;
+        ? mlc.gainColor
+        : mlc.lossColor;
 
     return InkWell(
       onTap: () {
@@ -426,7 +454,10 @@ class _TreemapChartWidgetState extends State<TreemapChartWidget> {
         widget.onTickerTap(item.ticker);
       },
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.lg),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.xl,
+          vertical: AppSpacing.lg,
+        ),
         child: Row(
           children: [
             Expanded(
@@ -499,13 +530,21 @@ class _TreemapChartWidgetState extends State<TreemapChartWidget> {
       if (currentRow.isEmpty ||
           _worstRatio(testRow, testRowValue, remaining, remainingValue) <=
               _worstRatio(
-                  currentRow, currentRowValue, remaining, remainingValue)) {
+                currentRow,
+                currentRowValue,
+                remaining,
+                remainingValue,
+              )) {
         currentRow = testRow;
         currentRowValue = testRowValue;
       } else {
         // Layout current row
-        final rowResult =
-            _layoutRow(currentRow, currentRowValue, remaining, remainingValue);
+        final rowResult = _layoutRow(
+          currentRow,
+          currentRowValue,
+          remaining,
+          remainingValue,
+        );
         result.addAll(rowResult.nodes);
         remaining = rowResult.remaining;
         remainingValue -= currentRowValue;
@@ -517,23 +556,32 @@ class _TreemapChartWidgetState extends State<TreemapChartWidget> {
 
     // Layout last row
     if (currentRow.isNotEmpty) {
-      final rowResult =
-          _layoutRow(currentRow, currentRowValue, remaining, remainingValue);
+      final rowResult = _layoutRow(
+        currentRow,
+        currentRowValue,
+        remaining,
+        remainingValue,
+      );
       result.addAll(rowResult.nodes);
     }
 
     return result;
   }
 
-  double _worstRatio(List<_SquarifyEntry> row, double rowValue, Rect bounds,
-      double totalValue) {
+  double _worstRatio(
+    List<_SquarifyEntry> row,
+    double rowValue,
+    Rect bounds,
+    double totalValue,
+  ) {
     if (row.isEmpty || totalValue <= 0 || rowValue <= 0) return double.infinity;
 
     final fraction = rowValue / totalValue;
     final isHorizontal = bounds.width >= bounds.height;
-    final shortSide =
-        isHorizontal ? bounds.height : bounds.width;
-    final longSide = isHorizontal ? bounds.width * fraction : bounds.height * fraction;
+    final shortSide = isHorizontal ? bounds.height : bounds.width;
+    final longSide = isHorizontal
+        ? bounds.width * fraction
+        : bounds.height * fraction;
 
     if (shortSide <= 0 || longSide <= 0) return double.infinity;
 
@@ -552,8 +600,12 @@ class _TreemapChartWidgetState extends State<TreemapChartWidget> {
     return worst;
   }
 
-  _LayoutResult _layoutRow(List<_SquarifyEntry> row, double rowValue,
-      Rect bounds, double totalValue) {
+  _LayoutResult _layoutRow(
+    List<_SquarifyEntry> row,
+    double rowValue,
+    Rect bounds,
+    double totalValue,
+  ) {
     if (totalValue <= 0 || rowValue <= 0) {
       return _LayoutResult(nodes: [], remaining: bounds);
     }
@@ -567,34 +619,44 @@ class _TreemapChartWidgetState extends State<TreemapChartWidget> {
       var y = bounds.top;
       for (final entry in row) {
         final entryHeight = bounds.height * (entry.value / rowValue);
-        nodes.add(_TreemapNode(
-          rect: Rect.fromLTWH(bounds.left, y, rowWidth, entryHeight),
-          data: entry.data,
-        ));
+        nodes.add(
+          _TreemapNode(
+            rect: Rect.fromLTWH(bounds.left, y, rowWidth, entryHeight),
+            data: entry.data,
+          ),
+        );
         y += entryHeight;
       }
       return _LayoutResult(
         nodes: nodes,
         remaining: Rect.fromLTWH(
-            bounds.left + rowWidth, bounds.top,
-            bounds.width - rowWidth, bounds.height),
+          bounds.left + rowWidth,
+          bounds.top,
+          bounds.width - rowWidth,
+          bounds.height,
+        ),
       );
     } else {
       final rowHeight = bounds.height * fraction;
       var x = bounds.left;
       for (final entry in row) {
         final entryWidth = bounds.width * (entry.value / rowValue);
-        nodes.add(_TreemapNode(
-          rect: Rect.fromLTWH(x, bounds.top, entryWidth, rowHeight),
-          data: entry.data,
-        ));
+        nodes.add(
+          _TreemapNode(
+            rect: Rect.fromLTWH(x, bounds.top, entryWidth, rowHeight),
+            data: entry.data,
+          ),
+        );
         x += entryWidth;
       }
       return _LayoutResult(
         nodes: nodes,
         remaining: Rect.fromLTWH(
-            bounds.left, bounds.top + rowHeight,
-            bounds.width, bounds.height - rowHeight),
+          bounds.left,
+          bounds.top + rowHeight,
+          bounds.width,
+          bounds.height - rowHeight,
+        ),
       );
     }
   }
@@ -607,14 +669,19 @@ class _TreemapPainter extends CustomPainter {
   final Color borderColor;
   final MarketLensColors mlColors;
 
-  _TreemapPainter({required this.nodes, required this.isSectorView, required this.borderColor, required this.mlColors});
+  _TreemapPainter({
+    required this.nodes,
+    required this.isSectorView,
+    required this.borderColor,
+    required this.mlColors,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
     final borderPaint = Paint()
       ..color = borderColor
       ..style = PaintingStyle.stroke
-      ..strokeWidth = isSectorView ? 2.0 : 1.0;
+      ..strokeWidth = isSectorView ? 1.0 : 0.6;
 
     for (final node in nodes) {
       final rect = node.rect;
@@ -650,63 +717,126 @@ class _TreemapPainter extends CustomPainter {
   }
 
   void _drawSectorText(
-      Canvas canvas, Rect rect, TreemapSector sector, double w, double h) {
+    Canvas canvas,
+    Rect rect,
+    TreemapSector sector,
+    double w,
+    double h,
+  ) {
     if (w < 40 || h < 25) return; // too small for text
 
     final lines = <_TextLine>[];
 
     if (w >= 100 && h >= 60) {
       // Large: sector name + change% + trading value
-      lines.add(_TextLine(_shortenSector(sector.sector, w), AppTypography.bodyMedium, AppTypography.bold));
+      lines.add(
+        _TextLine(
+          _shortenSector(sector.sector, w),
+          AppTypography.bodyMedium,
+          AppTypography.bold,
+        ),
+      );
       if (sector.avgChangePct != null) {
         final sign = sector.avgChangePct! >= 0 ? '+' : '';
-        lines.add(_TextLine(
-            '$sign${sector.avgChangePct!.toStringAsFixed(2)}%', AppTypography.bodySmall, AppTypography.medium));
+        lines.add(
+          _TextLine(
+            '$sign${sector.avgChangePct!.toStringAsFixed(2)}%',
+            AppTypography.bodySmall,
+            AppTypography.medium,
+          ),
+        );
       }
-      lines.add(_TextLine(sector.formattedTradingValue, AppTypography.caption, AppTypography.regular));
+      lines.add(
+        _TextLine(
+          sector.formattedTradingValue,
+          AppTypography.caption,
+          AppTypography.regular,
+        ),
+      );
     } else if (w >= 60 && h >= 40) {
       // Medium: sector name + change%
-      lines.add(_TextLine(_shortenSector(sector.sector, w), AppTypography.caption, AppTypography.bold));
+      lines.add(
+        _TextLine(
+          _shortenSector(sector.sector, w),
+          AppTypography.caption,
+          AppTypography.bold,
+        ),
+      );
       if (sector.avgChangePct != null) {
         final sign = sector.avgChangePct! >= 0 ? '+' : '';
-        lines.add(_TextLine(
-            '$sign${sector.avgChangePct!.toStringAsFixed(1)}%', AppTypography.micro, AppTypography.medium));
+        lines.add(
+          _TextLine(
+            '$sign${sector.avgChangePct!.toStringAsFixed(1)}%',
+            AppTypography.micro,
+            AppTypography.medium,
+          ),
+        );
       }
     } else {
       // Small: abbreviated sector name only
-      lines.add(_TextLine(_abbreviateSector(sector.sector), 9, AppTypography.bold));
+      lines.add(
+        _TextLine(_abbreviateSector(sector.sector), 9, AppTypography.bold),
+      );
     }
 
     _paintLines(canvas, rect, lines);
   }
 
   void _drawTickerText(
-      Canvas canvas, Rect rect, TreemapItem item, double w, double h) {
+    Canvas canvas,
+    Rect rect,
+    TreemapItem item,
+    double w,
+    double h,
+  ) {
     if (w < 25 || h < 18) return; // too small for text
 
     final lines = <_TextLine>[];
 
     if (w >= 80 && h >= 55) {
       // Large: ticker + name + change% + trading value
-      lines.add(_TextLine(item.ticker, AppTypography.bodyMedium, AppTypography.bold));
+      lines.add(
+        _TextLine(item.ticker, AppTypography.bodyMedium, AppTypography.bold),
+      );
       if (item.name != null) {
-        final displayName =
-            item.name!.length > 12 ? '${item.name!.substring(0, 10)}..' : item.name!;
-        lines.add(_TextLine(displayName, AppTypography.micro, AppTypography.regular));
+        final displayName = item.name!.length > 12
+            ? '${item.name!.substring(0, 10)}..'
+            : item.name!;
+        lines.add(
+          _TextLine(displayName, AppTypography.micro, AppTypography.regular),
+        );
       }
       if (item.changePct != null) {
         final sign = item.changePct! >= 0 ? '+' : '';
-        lines.add(_TextLine(
-            '$sign${item.changePct!.toStringAsFixed(2)}%', AppTypography.caption, AppTypography.medium));
+        lines.add(
+          _TextLine(
+            '$sign${item.changePct!.toStringAsFixed(2)}%',
+            AppTypography.caption,
+            AppTypography.medium,
+          ),
+        );
       }
-      lines.add(_TextLine(item.formattedTradingValue, AppTypography.micro, AppTypography.regular));
+      lines.add(
+        _TextLine(
+          item.formattedTradingValue,
+          AppTypography.micro,
+          AppTypography.regular,
+        ),
+      );
     } else if (w >= 50 && h >= 30) {
       // Medium: ticker + change%
-      lines.add(_TextLine(item.ticker, AppTypography.caption, AppTypography.bold));
+      lines.add(
+        _TextLine(item.ticker, AppTypography.caption, AppTypography.bold),
+      );
       if (item.changePct != null) {
         final sign = item.changePct! >= 0 ? '+' : '';
-        lines.add(_TextLine(
-            '$sign${item.changePct!.toStringAsFixed(1)}%', AppTypography.micro, AppTypography.medium));
+        lines.add(
+          _TextLine(
+            '$sign${item.changePct!.toStringAsFixed(1)}%',
+            AppTypography.micro,
+            AppTypography.medium,
+          ),
+        );
       }
     } else if (w >= 30) {
       // Small: ticker only
@@ -719,8 +849,7 @@ class _TreemapPainter extends CustomPainter {
   void _paintLines(Canvas canvas, Rect rect, List<_TextLine> lines) {
     if (lines.isEmpty) return;
 
-    final totalHeight =
-        lines.fold(0.0, (sum, line) => sum + line.fontSize + 3);
+    final totalHeight = lines.fold(0.0, (sum, line) => sum + line.fontSize + 3);
     var y = rect.center.dy - totalHeight / 2;
 
     for (final line in lines) {
@@ -740,8 +869,7 @@ class _TreemapPainter extends CustomPainter {
         ellipsis: '..',
       );
       tp.layout(maxWidth: rect.width - 6);
-      tp.paint(canvas,
-          Offset(rect.center.dx - tp.width / 2, y));
+      tp.paint(canvas, Offset(rect.center.dx - tp.width / 2, y));
       y += line.fontSize + 3;
     }
   }
@@ -776,12 +904,15 @@ class _TreemapPainter extends CustomPainter {
       'Utilities': 'Util',
       'Energy': 'Enrg',
     };
-    return abbr[sector] ?? (sector.length > 4 ? sector.substring(0, 4) : sector);
+    return abbr[sector] ??
+        (sector.length > 4 ? sector.substring(0, 4) : sector);
   }
 
   @override
   bool shouldRepaint(_TreemapPainter oldDelegate) {
-    return oldDelegate.nodes != nodes || oldDelegate.isSectorView != isSectorView || oldDelegate.borderColor != borderColor;
+    return oldDelegate.nodes != nodes ||
+        oldDelegate.isSectorView != isSectorView ||
+        oldDelegate.borderColor != borderColor;
   }
 }
 

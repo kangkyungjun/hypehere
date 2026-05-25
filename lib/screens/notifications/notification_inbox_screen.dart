@@ -121,6 +121,36 @@ class _NotificationInboxScreenState extends State<NotificationInboxScreen> {
     }
   }
 
+  Future<void> _markSingleRead(NotificationItem item) async {
+    if (item.isRead) return;
+    try {
+      final token = await _getAuthToken();
+      if (token == null) return;
+
+      await http
+          .post(
+            Uri.parse('$_baseUrl/notifications/${item.id}/read/'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Token $token',
+            },
+          )
+          .timeout(const Duration(seconds: 5));
+
+      // 로컬 상태 즉시 갱신
+      if (mounted) {
+        setState(() {
+          final idx = _notifications.indexWhere((n) => n.id == item.id);
+          if (idx != -1) {
+            _notifications[idx] = _notifications[idx].copyWith(isRead: true);
+          }
+        });
+      }
+    } catch (e) {
+      debugPrint('markSingleRead error: $e');
+    }
+  }
+
   String _iconForType(String type) {
     switch (type) {
       case 'STRONG_BUY':
@@ -146,6 +176,9 @@ class _NotificationInboxScreenState extends State<NotificationInboxScreen> {
   }
 
   void _onTapNotification(NotificationItem item) {
+    // 개별 읽음 처리
+    _markSingleRead(item);
+
     if (item.isCommunityNotification && item.postId != null) {
       Navigator.push(
         context,
@@ -240,13 +273,15 @@ class _NotificationInboxScreenState extends State<NotificationInboxScreen> {
     AppLocalizations l10n,
     ThemeData theme,
   ) {
+    final hasTapTarget = item.ticker.isNotEmpty ||
+        (item.isCommunityNotification && item.postId != null);
+
     return InkWell(
-      onTap:
-          (item.ticker.isNotEmpty ||
-              (item.isCommunityNotification && item.postId != null))
-          ? () => _onTapNotification(item)
-          : null,
-      child: Padding(
+      onTap: hasTapTarget ? () => _onTapNotification(item) : null,
+      child: Container(
+        color: item.isRead
+            ? Colors.transparent
+            : context.mlColors.infoBg.withValues(alpha: 0.3),
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.xl,
           vertical: AppSpacing.md,
@@ -254,6 +289,22 @@ class _NotificationInboxScreenState extends State<NotificationInboxScreen> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // 미읽음 표시 (파란 점)
+            if (!item.isRead)
+              Container(
+                width: 8,
+                height: 8,
+                margin: const EdgeInsets.only(
+                  top: AppSpacing.xs,
+                  right: AppSpacing.sm,
+                ),
+                decoration: BoxDecoration(
+                  color: context.mlColors.accentBlue,
+                  shape: BoxShape.circle,
+                ),
+              )
+            else
+              const SizedBox(width: 8 + AppSpacing.sm),
             Text(
               _iconForType(item.notificationType),
               style: const TextStyle(fontSize: AppTypography.displayMedium),

@@ -186,8 +186,7 @@ class _AddHoldingSheetState extends State<AddHoldingSheet> {
                   vertical: AppSpacing.lg,
                 ),
                 decoration: BoxDecoration(
-                  color: mlc.sectionBackground,
-                  border: Border.all(color: mlc.subtleBorder),
+                  color: mlc.infoBg.withValues(alpha: 0.45),
                   borderRadius: BorderRadius.circular(AppRadius.lg),
                 ),
                 child: Row(

@@ -32,19 +32,21 @@ class MarketSegmentedTabs extends StatelessWidget {
           ),
       padding: const EdgeInsets.all(AppSpacing.xs),
       decoration: BoxDecoration(
-        color: colors.cardBackground,
+        color: colors.infoBg.withValues(alpha: 0.72),
         borderRadius: BorderRadius.circular(AppRadius.full),
-        border: Border.all(color: colors.subtleBorder),
       ),
       child: TabBar(
         controller: controller,
         dividerColor: Colors.transparent,
         indicatorSize: TabBarIndicatorSize.tab,
         indicator: BoxDecoration(
-          color: colors.accentBlue,
+          color: colors.cardBackground,
           borderRadius: BorderRadius.circular(AppRadius.full),
+          border: Border.all(
+            color: colors.subtleBorder.withValues(alpha: 0.55),
+          ),
         ),
-        labelColor: colors.onPrimary,
+        labelColor: colors.accentBlue,
         unselectedLabelColor: colors.textSecondary,
         labelStyle: const TextStyle(
           fontSize: AppTypography.bodySmall,

@@ -20,10 +20,7 @@ import '../../theme/app_typography.dart';
 class BollingerBandsChartWidget extends StatelessWidget {
   final List<ChartDataPoint> dataPoints;
 
-  const BollingerBandsChartWidget({
-    super.key,
-    required this.dataPoints,
-  });
+  const BollingerBandsChartWidget({super.key, required this.dataPoints});
 
   @override
   Widget build(BuildContext context) {
@@ -31,10 +28,12 @@ class BollingerBandsChartWidget extends StatelessWidget {
     final bbData = dataPoints
         .asMap()
         .entries
-        .where((e) =>
-            e.value.bbUpper != null &&
-            e.value.bbMiddle != null &&
-            e.value.bbLower != null)
+        .where(
+          (e) =>
+              e.value.bbUpper != null &&
+              e.value.bbMiddle != null &&
+              e.value.bbLower != null,
+        )
         .toList();
 
     if (bbData.isEmpty) {
@@ -42,16 +41,22 @@ class BollingerBandsChartWidget extends StatelessWidget {
     }
 
     // Y축 범위 계산 (가격 데이터 포함)
-    final allValues = bbData.expand((e) => [
-          e.value.bbUpper!,
-          e.value.bbMiddle!,
-          e.value.bbLower!,
-          if (e.value.close != null) e.value.close!,
-        ]);
+    final allValues = bbData.expand(
+      (e) => [
+        e.value.bbUpper!,
+        e.value.bbMiddle!,
+        e.value.bbLower!,
+        if (e.value.close != null) e.value.close!,
+      ],
+    );
     final minValue = allValues.fold<double>(
-        allValues.first, (prev, curr) => prev < curr ? prev : curr);
+      allValues.first,
+      (prev, curr) => prev < curr ? prev : curr,
+    );
     final maxValue = allValues.fold<double>(
-        allValues.first, (prev, curr) => prev > curr ? prev : curr);
+      allValues.first,
+      (prev, curr) => prev > curr ? prev : curr,
+    );
     final margin = (maxValue - minValue) * 0.1;
 
     return Container(
@@ -83,11 +88,15 @@ class BollingerBandsChartWidget extends StatelessWidget {
                 gridData: FlGridData(
                   show: true,
                   drawVerticalLine: false,
-                  horizontalInterval: maxValue > minValue ? (maxValue - minValue) / 4 : 1,
+                  horizontalInterval: maxValue > minValue
+                      ? (maxValue - minValue) / 4
+                      : 1,
                   getDrawingHorizontalLine: (value) {
                     return FlLine(
-                      color: context.mlColors.chartGridLine,
-                      strokeWidth: AppStroke.thin,
+                      color: context.mlColors.chartGridLine.withValues(
+                        alpha: 0.72,
+                      ),
+                      strokeWidth: AppStroke.hairline,
                     );
                   },
                 ),
@@ -111,7 +120,8 @@ class BollingerBandsChartWidget extends StatelessWidget {
                     sideTitles: SideTitles(
                       showTitles: true,
                       reservedSize: 30,
-                      interval: ((dataPoints.length / 0.6) / 4).ceilToDouble(),  // 60:40 비율에 맞춰 간격 조정
+                      interval: ((dataPoints.length / 0.6) / 4)
+                          .ceilToDouble(), // 60:40 비율에 맞춰 간격 조정
                       getTitlesWidget: (value, meta) {
                         final index = value.toInt();
 
@@ -122,7 +132,9 @@ class BollingerBandsChartWidget extends StatelessWidget {
                             padding: const EdgeInsets.only(top: AppSpacing.md),
                             child: Text(
                               '${date.month}/${date.day}',
-                              style: const TextStyle(fontSize: AppTypography.micro),
+                              style: const TextStyle(
+                                fontSize: AppTypography.micro,
+                              ),
                             ),
                           );
                         }
@@ -130,8 +142,11 @@ class BollingerBandsChartWidget extends StatelessWidget {
                         // 미래 영역 (오른쪽 40%)
                         if (index >= dataPoints.length) {
                           final lastDate = dataPoints.last.date;
-                          final daysSinceLastDate = index - (dataPoints.length - 1);
-                          final futureDate = lastDate.add(Duration(days: daysSinceLastDate));
+                          final daysSinceLastDate =
+                              index - (dataPoints.length - 1);
+                          final futureDate = lastDate.add(
+                            Duration(days: daysSinceLastDate),
+                          );
 
                           return Padding(
                             padding: const EdgeInsets.only(top: AppSpacing.md),
@@ -139,7 +154,9 @@ class BollingerBandsChartWidget extends StatelessWidget {
                               '${futureDate.month}/${futureDate.day}',
                               style: TextStyle(
                                 fontSize: AppTypography.micro,
-                                color: Theme.of(context).colorScheme.outline,  // 미래 날짜는 회색으로 구분
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.outline, // 미래 날짜는 회색으로 구분
                               ),
                             ),
                           );
@@ -156,29 +173,28 @@ class BollingerBandsChartWidget extends StatelessWidget {
                     sideTitles: SideTitles(showTitles: false),
                   ),
                 ),
-                borderData: FlBorderData(
-                  show: true,
-                  border: Border.all(color: context.mlColors.subtleBorder),
-                ),
+                borderData: FlBorderData(show: false),
                 minY: minValue - margin,
                 maxY: maxValue + margin,
                 minX: 0,
-                maxX: ((dataPoints.length - 1) / 0.6),  // 40% 미래 영역 확보 (60:40 비율)
+                maxX:
+                    ((dataPoints.length - 1) / 0.6), // 40% 미래 영역 확보 (60:40 비율)
                 lineBarsData: [
                   // Upper Band (상단 밴드) - 서버 계산 값
                   LineChartBarData(
                     spots: bbData
-                        .map((e) =>
-                            FlSpot(e.key.toDouble(), e.value.bbUpper!))
+                        .map((e) => FlSpot(e.key.toDouble(), e.value.bbUpper!))
                         .toList(),
                     isCurved: true,
-                    color: context.mlColors.accentBlue.withValues(alpha: 0.6),
-                    barWidth: 1.5,
+                    color: context.mlColors.accentBlue.withValues(alpha: 0.48),
+                    barWidth: 1.2,
                     isStrokeCapRound: true,
                     dotData: const FlDotData(show: false),
                     belowBarData: BarAreaData(
                       show: true,
-                      color: context.mlColors.accentBlue.withValues(alpha: 0.1),
+                      color: context.mlColors.accentBlue.withValues(
+                        alpha: 0.05,
+                      ),
                       cutOffY: bbData.first.value.bbLower!,
                       applyCutOffY: true,
                     ),
@@ -186,12 +202,11 @@ class BollingerBandsChartWidget extends StatelessWidget {
                   // Middle Band (중간선 = 이동평균선) - 서버 계산 값
                   LineChartBarData(
                     spots: bbData
-                        .map((e) =>
-                            FlSpot(e.key.toDouble(), e.value.bbMiddle!))
+                        .map((e) => FlSpot(e.key.toDouble(), e.value.bbMiddle!))
                         .toList(),
                     isCurved: true,
                     color: context.mlColors.accentBlue,
-                    barWidth: 2,
+                    barWidth: 1.5,
                     isStrokeCapRound: true,
                     dotData: const FlDotData(show: false),
                     belowBarData: BarAreaData(show: false),
@@ -199,12 +214,11 @@ class BollingerBandsChartWidget extends StatelessWidget {
                   // Lower Band (하단 밴드) - 서버 계산 값
                   LineChartBarData(
                     spots: bbData
-                        .map((e) =>
-                            FlSpot(e.key.toDouble(), e.value.bbLower!))
+                        .map((e) => FlSpot(e.key.toDouble(), e.value.bbLower!))
                         .toList(),
                     isCurved: true,
-                    color: context.mlColors.accentBlue.withValues(alpha: 0.6),
-                    barWidth: 1.5,
+                    color: context.mlColors.accentBlue.withValues(alpha: 0.48),
+                    barWidth: 1.2,
                     isStrokeCapRound: true,
                     dotData: const FlDotData(show: false),
                     belowBarData: BarAreaData(show: false),
@@ -213,12 +227,13 @@ class BollingerBandsChartWidget extends StatelessWidget {
                   if (bbData.every((e) => e.value.close != null))
                     LineChartBarData(
                       spots: bbData
-                          .map((e) =>
-                              FlSpot(e.key.toDouble(), e.value.close!))
+                          .map((e) => FlSpot(e.key.toDouble(), e.value.close!))
                           .toList(),
                       isCurved: true,
-                      color: Theme.of(context).colorScheme.onSurface,
-                      barWidth: 2,
+                      color: context.mlColors.textPrimary.withValues(
+                        alpha: 0.88,
+                      ),
+                      barWidth: 1.7,
                       isStrokeCapRound: true,
                       dotData: const FlDotData(show: false),
                       belowBarData: BarAreaData(show: false),
@@ -234,13 +249,22 @@ class BollingerBandsChartWidget extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _buildLegendItem('Upper', context.mlColors.accentBlue.withValues(alpha: 0.6)),
+              _buildLegendItem(
+                'Upper',
+                context.mlColors.accentBlue.withValues(alpha: 0.6),
+              ),
               const SizedBox(width: AppSpacing.lg),
               _buildLegendItem('Middle', context.mlColors.accentBlue),
               const SizedBox(width: AppSpacing.lg),
-              _buildLegendItem('Lower', context.mlColors.accentBlue.withValues(alpha: 0.6)),
+              _buildLegendItem(
+                'Lower',
+                context.mlColors.accentBlue.withValues(alpha: 0.6),
+              ),
               const SizedBox(width: AppSpacing.lg),
-              _buildLegendItem('Price', Theme.of(context).colorScheme.onSurface),
+              _buildLegendItem(
+                'Price',
+                Theme.of(context).colorScheme.onSurface,
+              ),
             ],
           ),
 
@@ -267,19 +291,31 @@ class BollingerBandsChartWidget extends StatelessWidget {
                 const SizedBox(height: AppSpacing.xs),
                 Text(
                   AppLocalizations.of(context).bbBandWidth,
-                  style: TextStyle(fontSize: AppTypography.caption, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                  style: TextStyle(
+                    fontSize: AppTypography.caption,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
                 Text(
                   AppLocalizations.of(context).bbUpperApproach,
-                  style: TextStyle(fontSize: AppTypography.caption, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                  style: TextStyle(
+                    fontSize: AppTypography.caption,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
                 Text(
                   AppLocalizations.of(context).bbLowerApproach,
-                  style: TextStyle(fontSize: AppTypography.caption, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                  style: TextStyle(
+                    fontSize: AppTypography.caption,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
                 Text(
                   AppLocalizations.of(context).bbMiddleLine,
-                  style: TextStyle(fontSize: AppTypography.caption, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                  style: TextStyle(
+                    fontSize: AppTypography.caption,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ],
             ),
@@ -293,11 +329,7 @@ class BollingerBandsChartWidget extends StatelessWidget {
   Widget _buildLegendItem(String label, Color color) {
     return Row(
       children: [
-        Container(
-          width: 16,
-          height: 2,
-          color: color,
-        ),
+        Container(width: 16, height: 2, color: color),
         const SizedBox(width: AppSpacing.xs),
         Text(
           label,

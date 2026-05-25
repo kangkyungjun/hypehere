@@ -31,6 +31,6 @@ abstract final class AppShadow {
 
   /// 텍스트 드롭 섀도 — 트리맵, 뉴스 오버레이 등
   static const List<Shadow> textDrop = [
-    Shadow(offset: Offset(0, 1), blurRadius: 2, color: Color(0x99000000)),
+    Shadow(offset: Offset(0, 1), blurRadius: 1.2, color: Color(0x66000000)),
   ];
 }

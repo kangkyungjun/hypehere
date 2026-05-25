@@ -274,7 +274,7 @@ class WatchlistTab extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: mlc.sectionBackground,
+                  color: mlc.infoBg.withValues(alpha: 0.48),
                   borderRadius: BorderRadius.circular(AppRadius.card),
                 ),
                 child: Icon(Icons.bookmark, color: mlc.textTertiary, size: 22),
@@ -407,7 +407,7 @@ class WatchlistTab extends StatelessWidget {
                           width: 40,
                           height: 40,
                           decoration: BoxDecoration(
-                            color: mlc.infoBg,
+                            color: mlc.infoBg.withValues(alpha: 0.58),
                             borderRadius: BorderRadius.circular(AppRadius.lg),
                           ),
                           child: Icon(
@@ -457,7 +457,9 @@ class WatchlistTab extends StatelessWidget {
                         width: 72,
                         height: 72,
                         decoration: BoxDecoration(
-                          color: context.mlColors.sectionBackground,
+                          color: context.mlColors.infoBg.withValues(
+                            alpha: 0.48,
+                          ),
                           borderRadius: BorderRadius.circular(AppRadius.xl),
                         ),
                         child: Icon(

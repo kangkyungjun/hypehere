@@ -76,23 +76,19 @@ class _NewsCombinedScreenState extends State<NewsCombinedScreen>
                 tabs: [l10n.tabCalendar, l10n.tabNews],
                 padding: EdgeInsets.fromLTRB(
                   AppSpacing.xl,
-                  AppSpacing.sm,
+                  AppSpacing.xs,
                   _isNewsTab ? AppSpacing.sm : AppSpacing.xl,
-                  AppSpacing.md,
+                  AppSpacing.xs,
                 ),
               ),
             ),
             if (_isNewsTab)
               Padding(
-                padding: const EdgeInsets.only(
-                  right: AppSpacing.xl,
-                  bottom: AppSpacing.xs,
-                ),
+                padding: const EdgeInsets.only(right: AppSpacing.xl),
                 child: DecoratedBox(
                   decoration: BoxDecoration(
-                    color: context.mlColors.cardBackground,
+                    color: context.mlColors.infoBg.withValues(alpha: 0.45),
                     borderRadius: BorderRadius.circular(AppRadius.full),
-                    border: Border.all(color: context.mlColors.subtleBorder),
                   ),
                   child: IconButton(
                     visualDensity: VisualDensity.compact,
@@ -116,43 +112,6 @@ class _NewsCombinedScreenState extends State<NewsCombinedScreen>
         ),
         // Category chip bar (only visible on News tab)
         if (_isNewsTab) _buildCategoryChips(context, l10n),
-        // Filter active indicator
-        if (_isNewsTab && _filterState.isActive)
-          GestureDetector(
-            onTap: () {
-              setState(() => _filterState = const NewsFilterState());
-            },
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.xl,
-                vertical: AppSpacing.sm,
-              ),
-              child: Row(
-                children: [
-                  Chip(
-                    label: Text(
-                      l10n.filterActiveLabel,
-                      style: TextStyle(
-                        fontSize: AppTypography.caption,
-                        color: context.mlColors.accentBlue,
-                      ),
-                    ),
-                    deleteIcon: Icon(
-                      Icons.close,
-                      size: 16,
-                      color: context.mlColors.accentBlue,
-                    ),
-                    onDeleted: () {
-                      setState(() => _filterState = const NewsFilterState());
-                    },
-                    backgroundColor: context.mlColors.infoBg,
-                    side: BorderSide.none,
-                    visualDensity: VisualDensity.compact,
-                  ),
-                ],
-              ),
-            ),
-          ),
         Expanded(
           child: TabBarView(
             controller: _tabController,
@@ -175,11 +134,14 @@ class _NewsCombinedScreenState extends State<NewsCombinedScreen>
       (NewsCategory.watchlist, l10n.filterMyWatchlist),
     ];
 
-    return Container(
-      color: Theme.of(context).colorScheme.surface,
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.xl,
-        vertical: AppSpacing.sm,
+    final colors = context.mlColors;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.xl,
+        0,
+        AppSpacing.xl,
+        AppSpacing.xs,
       ),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
@@ -197,17 +159,15 @@ class _NewsCombinedScreenState extends State<NewsCombinedScreen>
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: AppSpacing.md,
-                      vertical: AppSpacing.sm,
+                      vertical: AppSpacing.xs,
                     ),
                     decoration: BoxDecoration(
-                      color: isSelected
-                          ? context.mlColors.accentBlue
-                          : context.mlColors.sectionBackground,
+                      color: isSelected ? colors.infoBg : Colors.transparent,
                       borderRadius: BorderRadius.circular(AppRadius.badge),
                       border: Border.all(
                         color: isSelected
-                            ? context.mlColors.accentBlue
-                            : context.mlColors.subtleBorder,
+                            ? colors.accentBlue.withValues(alpha: 0.28)
+                            : Colors.transparent,
                       ),
                     ),
                     child: Text(
@@ -216,8 +176,8 @@ class _NewsCombinedScreenState extends State<NewsCombinedScreen>
                         fontSize: AppTypography.bodySmall,
                         fontWeight: AppTypography.semiBold,
                         color: isSelected
-                            ? context.mlColors.onPrimary
-                            : context.mlColors.textSecondary,
+                            ? colors.accentBlue
+                            : colors.textSecondary,
                       ),
                     ),
                   ),

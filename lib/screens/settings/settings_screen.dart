@@ -812,7 +812,9 @@ class SettingsScreen extends StatelessWidget {
                     children: [
                       ListTile(
                         leading: CircleAvatar(
-                          backgroundColor: context.mlColors.infoBg,
+                          backgroundColor: context.mlColors.infoBg.withValues(
+                            alpha: 0.58,
+                          ),
                           child: Icon(
                             Icons.login_rounded,
                             color: context.mlColors.accentBlue,
@@ -826,7 +828,9 @@ class SettingsScreen extends StatelessWidget {
                       const Divider(height: 1),
                       ListTile(
                         leading: CircleAvatar(
-                          backgroundColor: context.mlColors.infoBg,
+                          backgroundColor: context.mlColors.infoBg.withValues(
+                            alpha: 0.58,
+                          ),
                           child: Icon(
                             Icons.person_add_alt_1_rounded,
                             color: context.mlColors.accentBlue,

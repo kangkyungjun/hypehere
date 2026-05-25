@@ -181,10 +181,10 @@ class MarketLensColors extends ThemeExtension<MarketLensColors> {
   static const light = MarketLensColors(
     cardBackground: Colors.white,
     chartBackground: Color(0xFFFFFFFF),
-    chartGridLine: Color(0xFFE8EDF5),
+    chartGridLine: Color(0xFFE9ECEF),
     chartTooltipBg: Color(0xEE111827),
-    subtleBorder: Color(0xFFE5EAF2),
-    sectionBackground: Color(0xFFF6F8FB),
+    subtleBorder: Color(0xFFE5E7EB),
+    sectionBackground: Color(0xFFFFFFFF),
     gainColor: Color(0xFF059669),
     lossColor: Color(0xFFDC2626),
     neutralColor: Color(0xFF8A94A6),
@@ -199,7 +199,7 @@ class MarketLensColors extends ThemeExtension<MarketLensColors> {
     dangerColor: Color(0xFFDC2626),
     dangerBg: Color(0xFFFFF0F0),
     onPrimary: Colors.white,
-    infoBg: Color(0xFFEFF6FF),
+    infoBg: Color(0xFFF3F6FA),
     reportColor: Color(0xFFD97706),
     overlayDim: Color(0x14000000), // 8% black
     scoreBuyColor: Color(0xFF5BBF8A),
@@ -221,19 +221,19 @@ class MarketLensColors extends ThemeExtension<MarketLensColors> {
     roleManagerColor: Color(0xFFD97706),
     roleGoldColor: Color(0xFFB7791F),
     roleRegularColor: Color(0xFF667085),
-    treemapGainBase: Color(0xFF2D4A2D), // Dark green
-    treemapGainFull: Color(0xFF00C853), // Bright green
-    treemapLossBase: Color(0xFF4A2D2D), // Dark red
-    treemapLossFull: Color(0xFFD50000), // Deep red
+    treemapGainBase: Color(0xFF2E4A3C),
+    treemapGainFull: Color(0xFF22A06B),
+    treemapLossBase: Color(0xFF4A3333),
+    treemapLossFull: Color(0xFFC2413B),
   );
 
   static const dark = MarketLensColors(
-    cardBackground: Color(0xFF151B24),
-    chartBackground: Color(0xFF151B24),
-    chartGridLine: Color(0xFF273244),
-    chartTooltipBg: Color(0xFF0B111A),
-    subtleBorder: Color(0xFF273244),
-    sectionBackground: Color(0xFF0B111A),
+    cardBackground: Color(0xFF111111),
+    chartBackground: Color(0xFF111111),
+    chartGridLine: Color(0xFF2A2A2A),
+    chartTooltipBg: Color(0xFF080808),
+    subtleBorder: Color(0xFF2A2A2A),
+    sectionBackground: Color(0xFF000000),
     gainColor: Color(0xFF34D399), // Emerald 400 — 다크 배경에 가독성 확보
     lossColor: Color(0xFFF87171), // Red 400 — 다크 배경에 가독성 확보
     neutralColor: Color(0xFFBDBDBD), // grey 400
@@ -248,7 +248,7 @@ class MarketLensColors extends ThemeExtension<MarketLensColors> {
     dangerColor: Color(0xFFEF5350), // red 400
     dangerBg: Color(0xFF3E1E1E), // 다크 red tint
     onPrimary: Colors.white,
-    infoBg: Color(0xFF1A2940), // 다크 blue tint
+    infoBg: Color(0xFF171A1F),
     reportColor: Color(0xFFFFB74D), // orange 300
     overlayDim: Color(0x14FFFFFF), // 8% white
     scoreBuyColor: Color(0xFFA5D6A7), // Green 200
@@ -270,10 +270,10 @@ class MarketLensColors extends ThemeExtension<MarketLensColors> {
     roleManagerColor: Color(0xFFFFB74D), // Orange 300
     roleGoldColor: Color(0xFFFFCA28), // Amber 400
     roleRegularColor: Color(0xFF9E9E9E), // Grey 500
-    treemapGainBase: Color(0xFF1B3A1B), // Darker green (dark mode)
-    treemapGainFull: Color(0xFF2E7D32), // Green 800 (less bright)
-    treemapLossBase: Color(0xFF3A1B1B), // Darker red (dark mode)
-    treemapLossFull: Color(0xFFC62828), // Red 800 (less bright)
+    treemapGainBase: Color(0xFF173326),
+    treemapGainFull: Color(0xFF23885E),
+    treemapLossBase: Color(0xFF331C1C),
+    treemapLossFull: Color(0xFFA63A36),
   );
 
   @override

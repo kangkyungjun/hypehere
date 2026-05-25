@@ -18,10 +18,7 @@ import '../../theme/app_typography.dart';
 class MacdChartWidget extends StatelessWidget {
   final List<ChartDataPoint> dataPoints;
 
-  const MacdChartWidget({
-    super.key,
-    required this.dataPoints,
-  });
+  const MacdChartWidget({super.key, required this.dataPoints});
 
   @override
   Widget build(BuildContext context) {
@@ -33,10 +30,12 @@ class MacdChartWidget extends StatelessWidget {
     final macdDataStrict = dataPoints
         .asMap()
         .entries
-        .where((e) =>
-            e.value.macd != null &&
-            e.value.macdSignal != null &&
-            e.value.macdHist != null)
+        .where(
+          (e) =>
+              e.value.macd != null &&
+              e.value.macdSignal != null &&
+              e.value.macdHist != null,
+        )
         .toList();
 
     // 📊 완화 필터 (macd만 필요)
@@ -47,27 +46,33 @@ class MacdChartWidget extends StatelessWidget {
         .toList();
 
     // 📊 signal/hist 둘 다 있는 포인트 개수 (정책 결정용)
-    final bothExist = dataPoints.where((d) =>
-        d.macdSignal != null && d.macdHist != null).length;
+    final bothExist = dataPoints
+        .where((d) => d.macdSignal != null && d.macdHist != null)
+        .length;
 
     debugPrint('[MACD Debug] 기존 필터(strict) 결과: ${macdDataStrict.length}개');
     debugPrint('[MACD Debug] 완화 필터(relaxed) 결과: ${macdDataRelaxed.length}개');
     debugPrint('[MACD Debug] signal/hist 둘 다 있는 포인트: $bothExist개');
-    debugPrint('[MACD Debug] 필터 차이: ${macdDataRelaxed.length - macdDataStrict.length}개 손실');
+    debugPrint(
+      '[MACD Debug] 필터 차이: ${macdDataRelaxed.length - macdDataStrict.length}개 손실',
+    );
 
     // 📊 날짜별 상세 (최근 15개만)
     final startIdx = dataPoints.length > 15 ? dataPoints.length - 15 : 0;
     debugPrint('\n[MACD Debug] === 최근 15개 데이터 필터 결과 ===');
     for (int i = startIdx; i < dataPoints.length; i++) {
       final dp = dataPoints[i];
-      final strictPass = dp.macd != null && dp.macdSignal != null && dp.macdHist != null;
+      final strictPass =
+          dp.macd != null && dp.macdSignal != null && dp.macdHist != null;
       final relaxedPass = dp.macd != null;
 
-      debugPrint('[MACD Debug] ${dp.date}: '
-            'macd=${dp.macd != null ? "O" : "X"} '
-            'signal=${dp.macdSignal != null ? "O" : "X"} '
-            'hist=${dp.macdHist != null ? "O" : "X"} → '
-            'strict=${strictPass ? "✅" : "❌"} relaxed=${relaxedPass ? "✅" : "❌"}');
+      debugPrint(
+        '[MACD Debug] ${dp.date}: '
+        'macd=${dp.macd != null ? "O" : "X"} '
+        'signal=${dp.macdSignal != null ? "O" : "X"} '
+        'hist=${dp.macdHist != null ? "O" : "X"} → '
+        'strict=${strictPass ? "✅" : "❌"} relaxed=${relaxedPass ? "✅" : "❌"}',
+      );
     }
 
     // MACD 값이 있는 데이터만 필터링
@@ -80,11 +85,9 @@ class MacdChartWidget extends StatelessWidget {
 
     // Y축 범위 계산 (통합 - MACD, Signal, Histogram 모두 포함)
     // Step 1: 모든 값 수집
-    final allValues = macdData.expand((e) => [
-          e.value.macd!,
-          e.value.macdSignal!,
-          e.value.macdHist!,
-        ]);
+    final allValues = macdData.expand(
+      (e) => [e.value.macd!, e.value.macdSignal!, e.value.macdHist!],
+    );
 
     // Step 2: min/max 계산
     double minY = allValues.first;
@@ -107,7 +110,7 @@ class MacdChartWidget extends StatelessWidget {
 
     // X축 범위 (BarChart와 LineChart 공통)
     final minX = 0.0;
-    final maxX = ((macdData.length - 1) / 0.6);  // 40% 미래 영역 확보 (60:40 비율)
+    final maxX = ((macdData.length - 1) / 0.6); // 40% 미래 영역 확보 (60:40 비율)
 
     // 디버그 로그
     debugPrint('[MACD Debug] points=${macdData.length}');
@@ -121,7 +124,7 @@ class MacdChartWidget extends StatelessWidget {
       decoration: BoxDecoration(
         color: context.mlColors.cardBackground,
         borderRadius: BorderRadius.circular(AppRadius.lg),
-        boxShadow: AppShadow.md(context.mlColors.overlayDim),
+        boxShadow: AppShadow.sm(context.mlColors.overlayDim),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -154,9 +157,13 @@ class MacdChartWidget extends StatelessWidget {
                             fromY: 0,
                             toY: hist,
                             color: hist >= 0
-                                ? context.mlColors.gainColor.withValues(alpha: 0.3)
-                                : context.mlColors.lossColor.withValues(alpha: 0.3),
-                            width: 3,
+                                ? context.mlColors.gainColor.withValues(
+                                    alpha: 0.22,
+                                  )
+                                : context.mlColors.lossColor.withValues(
+                                    alpha: 0.22,
+                                  ),
+                            width: 2,
                           ),
                         ],
                       );
@@ -168,8 +175,10 @@ class MacdChartWidget extends StatelessWidget {
                           (chartMaxY - chartMinY) / 4, // 4 grid lines
                       getDrawingHorizontalLine: (value) {
                         return FlLine(
-                          color: context.mlColors.chartGridLine,
-                          strokeWidth: AppStroke.thin,
+                          color: context.mlColors.chartGridLine.withValues(
+                            alpha: 0.72,
+                          ),
+                          strokeWidth: AppStroke.hairline,
                         );
                       },
                     ),
@@ -193,7 +202,8 @@ class MacdChartWidget extends StatelessWidget {
                         sideTitles: SideTitles(
                           showTitles: true,
                           reservedSize: 30,
-                          interval: ((macdData.length / 0.6) / 4).ceilToDouble(),  // 60:40 비율에 맞춰 간격 조정
+                          interval: ((macdData.length / 0.6) / 4)
+                              .ceilToDouble(), // 60:40 비율에 맞춰 간격 조정
                           getTitlesWidget: (value, meta) {
                             final index = value.toInt();
 
@@ -201,10 +211,14 @@ class MacdChartWidget extends StatelessWidget {
                             if (index >= 0 && index < macdData.length) {
                               final date = macdData[index].value.date;
                               return Padding(
-                                padding: const EdgeInsets.only(top: AppSpacing.md),
+                                padding: const EdgeInsets.only(
+                                  top: AppSpacing.md,
+                                ),
                                 child: Text(
                                   '${date.month}/${date.day}',
-                                  style: const TextStyle(fontSize: AppTypography.micro),
+                                  style: const TextStyle(
+                                    fontSize: AppTypography.micro,
+                                  ),
                                 ),
                               );
                             }
@@ -212,16 +226,23 @@ class MacdChartWidget extends StatelessWidget {
                             // 미래 영역 (오른쪽 40%)
                             if (index >= macdData.length) {
                               final lastDate = macdData.last.value.date;
-                              final daysSinceLastDate = index - (macdData.length - 1);
-                              final futureDate = lastDate.add(Duration(days: daysSinceLastDate));
+                              final daysSinceLastDate =
+                                  index - (macdData.length - 1);
+                              final futureDate = lastDate.add(
+                                Duration(days: daysSinceLastDate),
+                              );
 
                               return Padding(
-                                padding: const EdgeInsets.only(top: AppSpacing.md),
+                                padding: const EdgeInsets.only(
+                                  top: AppSpacing.md,
+                                ),
                                 child: Text(
                                   '${futureDate.month}/${futureDate.day}',
                                   style: TextStyle(
                                     fontSize: AppTypography.micro,
-                                    color: Theme.of(context).colorScheme.outline,  // 미래 날짜는 회색으로 구분
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.outline, // 미래 날짜는 회색으로 구분
                                   ),
                                 ),
                               );
@@ -238,10 +259,7 @@ class MacdChartWidget extends StatelessWidget {
                         sideTitles: SideTitles(showTitles: false),
                       ),
                     ),
-                    borderData: FlBorderData(
-                      show: true,
-                      border: Border.all(color: context.mlColors.subtleBorder),
-                    ),
+                    borderData: FlBorderData(show: false),
                     minY: chartMinY,
                     maxY: chartMaxY,
                   ),
@@ -275,11 +293,14 @@ class MacdChartWidget extends StatelessWidget {
                       LineChartBarData(
                         spots: List.generate(
                           macdData.length,
-                          (index) => FlSpot(index.toDouble(), macdData[index].value.macd!),
+                          (index) => FlSpot(
+                            index.toDouble(),
+                            macdData[index].value.macd!,
+                          ),
                         ),
                         isCurved: true,
                         color: context.mlColors.accentBlue,
-                        barWidth: 2,
+                        barWidth: 1.5,
                         isStrokeCapRound: true,
                         dotData: const FlDotData(show: false),
                         belowBarData: BarAreaData(show: false),
@@ -288,11 +309,14 @@ class MacdChartWidget extends StatelessWidget {
                       LineChartBarData(
                         spots: List.generate(
                           macdData.length,
-                          (index) => FlSpot(index.toDouble(), macdData[index].value.macdSignal!),
+                          (index) => FlSpot(
+                            index.toDouble(),
+                            macdData[index].value.macdSignal!,
+                          ),
                         ),
                         isCurved: true,
                         color: context.mlColors.warningColor,
-                        barWidth: 2,
+                        barWidth: 1.5,
                         isStrokeCapRound: true,
                         dotData: const FlDotData(show: false),
                         belowBarData: BarAreaData(show: false),
@@ -303,8 +327,10 @@ class MacdChartWidget extends StatelessWidget {
                         // Zero line
                         HorizontalLine(
                           y: 0,
-                          color: Theme.of(context).colorScheme.outline,
-                          strokeWidth: AppStroke.thin,
+                          color: context.mlColors.textTertiary.withValues(
+                            alpha: 0.58,
+                          ),
+                          strokeWidth: AppStroke.hairline,
                           dashArray: [3, 3],
                         ),
                       ],
@@ -332,7 +358,10 @@ class MacdChartWidget extends StatelessWidget {
                     height: 12,
                     color: context.mlColors.gainColor.withValues(alpha: 0.3),
                   ),
-                  const Text('/', style: TextStyle(fontSize: AppTypography.bodySmall)),
+                  const Text(
+                    '/',
+                    style: TextStyle(fontSize: AppTypography.bodySmall),
+                  ),
                   Container(
                     width: 12,
                     height: 12,
@@ -360,11 +389,7 @@ class MacdChartWidget extends StatelessWidget {
   Widget _buildLegendItem(String label, Color color) {
     return Row(
       children: [
-        Container(
-          width: 16,
-          height: 2,
-          color: color,
-        ),
+        Container(width: 16, height: 2, color: color),
         const SizedBox(width: AppSpacing.xs),
         Text(
           label,

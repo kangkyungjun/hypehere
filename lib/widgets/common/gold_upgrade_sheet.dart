@@ -295,9 +295,8 @@ class _GoldUpgradeSheetState extends State<GoldUpgradeSheet> {
                 vertical: AppSpacing.md,
               ),
               decoration: BoxDecoration(
-                color: mlc.sectionBackground,
+                color: mlc.infoBg.withValues(alpha: 0.45),
                 borderRadius: BorderRadius.circular(AppRadius.lg),
-                border: Border.all(color: mlc.subtleBorder),
               ),
               child: Text(
                 priceText,
@@ -349,8 +348,11 @@ class _GoldUpgradeSheetState extends State<GoldUpgradeSheet> {
                 vertical: AppSpacing.sm,
               ),
               decoration: BoxDecoration(
-                color: mlc.sectionBackground,
-                border: Border.all(color: mlc.subtleBorder),
+                color: mlc.cardBackground,
+                border: Border.all(
+                  color: mlc.subtleBorder.withValues(alpha: 0.62),
+                  width: 0.8,
+                ),
                 borderRadius: BorderRadius.circular(AppRadius.lg),
               ),
               child: Text(
