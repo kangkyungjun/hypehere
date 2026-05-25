@@ -51,6 +51,7 @@ app.*.map.json
 
 # Environment variables (DO NOT COMMIT)
 .env
+.env.*
 
 # Firebase service account key (DO NOT COMMIT)
 secrets/
