@@ -39,15 +39,16 @@ for pattern in "${SENSITIVE_PATTERNS[@]}"; do
 done
 
 # 2. Scan staged content for secret patterns
+# Using simple substring patterns for macOS grep compatibility
 SECRET_PATTERNS=(
     'PRIVATE KEY'
-    'AIzaSy[A-Za-z0-9_-]{33}'
-    'sk_live_[A-Za-z0-9]{20,}'
-    'sk_test_[A-Za-z0-9]{20,}'
-    'AKIA[0-9A-Z]{16}'
-    'ghp_[A-Za-z0-9]{36}'
-    'gho_[A-Za-z0-9]{36}'
-    'glpat-[A-Za-z0-9_-]{20}'
+    'AIzaSy'
+    'sk_live_'
+    'sk_test_'
+    'AKIA[0-9A-Z]'
+    'ghp_[A-Za-z0-9]'
+    'gho_[A-Za-z0-9]'
+    'glpat-'
 )
 
 for pattern in "${SECRET_PATTERNS[@]}"; do
