@@ -60,6 +60,13 @@ ios/Pods/
 # Firebase service account key (DO NOT COMMIT)
 secrets/
 
+# Google Cloud service account keys (DO NOT COMMIT)
+gen-lang-client-*.json
+
+# Firebase config files containing API keys (DO NOT COMMIT)
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+
 # API keys and local databases (DO NOT COMMIT)
 fastlane/api_key.json
 *.db
