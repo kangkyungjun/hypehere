@@ -46,28 +46,43 @@ app.*.map.json
 android/.gradle/
 ios/Pods/
 
-# Release signing keys (DO NOT COMMIT)
+# ============================================
+# SECRETS & CREDENTIALS (DO NOT COMMIT)
+# ============================================
+
+# Centralized secrets directory
+secrets/
+
+# Signing keys
 *.jks
 *.keystore
 *.p8
+*.p12
+*.pem
 /android/key.properties
 
-# Environment variables (DO NOT COMMIT)
+# Environment variables
 .env
 .env.*
 !.env.example
 
-# Firebase service account key (DO NOT COMMIT)
-secrets/
-
-# Google Cloud service account keys (DO NOT COMMIT)
+# Google Cloud / Firebase service account keys
 gen-lang-client-*.json
+*-service-account*.json
+firebase-*.json
+!firebase.json
 
-# Firebase config files containing API keys (DO NOT COMMIT)
+# Firebase config files containing API keys
 android/app/google-services.json
 ios/Runner/GoogleService-Info.plist
 
-# API keys and local databases (DO NOT COMMIT)
+# Fastlane credentials
 fastlane/api_key.json
+
+# Subscription / Auth keys
+AuthKey_*.p8
+SubscriptionKey_*.p8
+
+# Databases
 *.db
 *.sqlite3
