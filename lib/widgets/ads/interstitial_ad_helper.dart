@@ -5,6 +5,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/widgets.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/subscription_provider.dart';
 
 /// 전면 광고 매니저 (Interstitial Ad)
 ///
@@ -52,7 +53,8 @@ class InterstitialAdHelper {
 
     // Gold: 항상 미표시 / Manager·Master: 토글로 제어 / Regular: 항상 표���
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    if (authProvider.shouldHideAds) return false;
+    final sub = Provider.of<SubscriptionProvider>(context, listen: false);
+    if (authProvider.shouldHideAds || sub.isGoldActive) return false;
 
     // 조건 검사
     if (!_shouldShowAd()) return false;

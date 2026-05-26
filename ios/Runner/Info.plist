@@ -56,5 +56,7 @@
 	<false/>
 	<key>GULSceneDelegateProxyEnabled</key>
 	<false/>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>MarketLens needs access to your photo library to set your profile picture.</string>
 </dict>
 </plist>

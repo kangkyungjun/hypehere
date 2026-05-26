@@ -261,11 +261,12 @@ marketlens/
 ## 7. 진행 중인 작업 및 로드맵
 
 ### 진행 중
-- **UI/UX 디자인 시스템 개선** — `docs/UIUX_IMPROVEMENT_PLAN.md` 참고
-  - Phase 1: 디자인 토큰 시스템 구축
-  - Phase 2: 카드리스 디자인 전환
-  - Phase 3: 타이포그래피 계층 개선
-  - Phase 4: 접근성 및 마이크로 인터랙션
+- **UI/UX 전면 재개발** — `docs/UIUX_IMPROVEMENT_PLAN.md` 참고
+  - Phase 1: 디자인 시스템 재정비
+  - Phase 2: 핵심 화면 재설계
+  - Phase 3: 차트/그래프 전면 개선
+  - Phase 4: 모달/필터/상태 화면 통일
+  - Phase 5: 전체 QA와 디테일 보정
 - **구독 수익화 구현** — `docs/monetization_strategy.md` 참고
   - Gold 멤버십 ₩4,900/월
   - 7일 무료 체험
@@ -413,7 +414,7 @@ python manage.py test
 
 | 문서 | 경로 | 설명 |
 |------|------|------|
-| UI/UX 개선 계획 | `docs/UIUX_IMPROVEMENT_PLAN.md` | 4단계 디자인 시스템 개선 로드맵 |
+| UI/UX 디자인 재개발 문서 | `docs/UIUX_IMPROVEMENT_PLAN.md` | 전면 디자인 재정비 원칙, 우선순위, 화면별 체크리스트 |
 | 수익화 전략 | `docs/monetization_strategy.md` | Gold 구독 모델, RevenueCat 연동 가이드 |
 | 매크로 뉴스 수집 계획 | `docs/macro_news_collection_plan.md` | 가상 티커 기반 매크로 뉴스 확장 계획 |
 | 본 문서 | `docs/DEVELOPMENT.md` | 프로젝트 현황 및 개발 이력 |

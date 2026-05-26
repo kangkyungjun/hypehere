@@ -565,7 +565,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
       // Show App Open Ad on first launch (Gold users excluded)
       final auth = context.read<AuthProvider>();
-      if (!auth.shouldHideAds) {
+      final sub = context.read<SubscriptionProvider>();
+      if (!auth.shouldHideAds && !sub.isGoldActive) {
         AppOpenAdHelper.instance.showAdIfAvailable();
       }
     });

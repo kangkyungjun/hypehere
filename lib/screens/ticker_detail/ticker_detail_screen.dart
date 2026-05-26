@@ -8,6 +8,7 @@ import '../../models/chart_data.dart';
 import '../../models/ticker_info.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/portfolio_provider.dart';
+import '../../providers/subscription_provider.dart';
 import '../../providers/watchlist_provider.dart';
 import '../../widgets/charts/rsi_chart_widget.dart';
 import '../../widgets/charts/company_profile_card.dart';
@@ -215,11 +216,13 @@ class _TickerDetailScreenState extends State<TickerDetailScreen> {
     }
 
     final portfolio = context.read<PortfolioProvider>();
+    final sub = context.read<SubscriptionProvider>();
     final ticker = widget.ticker;
 
     // Free user limit check (new ticker only)
+    // Hybrid check: server role OR client-side RevenueCat status (webhook 지연 대비)
     final isNewTicker = !portfolio.isInHoldings(ticker);
-    if (isNewTicker && !auth.isGoldOrAbove && portfolio.holdings.length >= 3) {
+    if (isNewTicker && !auth.isGoldOrAbove && !sub.isGoldActive && portfolio.holdings.length >= 3) {
       if (!context.mounted) return;
       final upgradeResult = await showDialog<String>(
         context: context,

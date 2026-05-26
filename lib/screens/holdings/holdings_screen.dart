@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/portfolio_provider.dart';
+import '../../providers/subscription_provider.dart';
 import '../../utils/error_localizer.dart';
 import '../../widgets/community/signup_prompt_dialog.dart';
 import '../../widgets/common/gold_upgrade_sheet.dart';
@@ -68,6 +69,7 @@ class HoldingsScreen extends StatelessWidget {
     }
 
     final portfolio = context.read<PortfolioProvider>();
+    final sub = context.read<SubscriptionProvider>();
 
     // Search for ticker
     if (!context.mounted) return;
@@ -77,8 +79,9 @@ class HoldingsScreen extends StatelessWidget {
     final ticker = tickerInfo.ticker;
 
     // Free user limit check — new ticker only (allow additional buy on existing)
+    // Hybrid check: server role OR client-side RevenueCat status (webhook 지연 대비)
     final isNewTicker = !portfolio.isInHoldings(ticker);
-    if (isNewTicker && !auth.isGoldOrAbove && portfolio.holdings.length >= 3) {
+    if (isNewTicker && !auth.isGoldOrAbove && !sub.isGoldActive && portfolio.holdings.length >= 3) {
       if (!context.mounted) return;
       _showHoldingsLimitDialog(context);
       return;

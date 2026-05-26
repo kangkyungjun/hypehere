@@ -4,6 +4,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'dart:io';
 import '../../providers/auth_provider.dart';
+import '../../providers/subscription_provider.dart';
 
 /// 재사용 가능한 배너 광고 위젯
 ///
@@ -73,7 +74,8 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
   Widget build(BuildContext context) {
     // Gold: 항상 숨김 / Manager·Master: 토글로 제어 / Regular: 항상 표시
     final authProvider = context.watch<AuthProvider>();
-    if (authProvider.shouldHideAds) {
+    final sub = context.watch<SubscriptionProvider>();
+    if (authProvider.shouldHideAds || sub.isGoldActive) {
       return const SizedBox.shrink();
     }
 

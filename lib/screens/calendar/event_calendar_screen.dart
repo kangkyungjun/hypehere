@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/market_event.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/subscription_provider.dart';
 import '../../services/analytics_api_client.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_radius.dart';
@@ -334,14 +335,17 @@ class _EventCalendarScreenState extends State<EventCalendarScreen> {
       }
     }
     // Preload ad for non-Gold users
-    if (!auth.shouldHideAds) {
+    final sub = context.read<SubscriptionProvider>();
+    if (!auth.shouldHideAds && !sub.isGoldActive) {
       RewardedAdHelper.instance.preloadAd();
     }
   }
 
   bool _isCalendarUnlocked() {
     final auth = context.read<AuthProvider>();
-    if (auth.shouldHideAds) return true;
+    final sub = context.read<SubscriptionProvider>();
+    // Hybrid check: server role OR client-side RevenueCat status (webhook 지연 대비)
+    if (auth.shouldHideAds || sub.isGoldActive) return true;
     return _adUnlockExpiry != null && _adUnlockExpiry!.isAfter(DateTime.now());
   }
 

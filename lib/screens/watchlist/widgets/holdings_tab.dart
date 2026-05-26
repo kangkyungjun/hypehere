@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../theme/app_colors.dart';
 import '../../../providers/auth_provider.dart';
+import '../../../providers/subscription_provider.dart';
 import '../../../models/portfolio_data.dart';
 import '../../../providers/portfolio_provider.dart';
 import '../../../theme/app_spacing.dart';
@@ -288,6 +289,7 @@ class _HoldingsTabState extends State<HoldingsTab> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final auth = context.watch<AuthProvider>();
+    final sub = context.watch<SubscriptionProvider>();
     final portfolio = context.watch<PortfolioProvider>();
     final isLoggedIn = auth.isLoggedIn;
 
@@ -495,7 +497,7 @@ class _HoldingsTabState extends State<HoldingsTab> {
           SliverToBoxAdapter(
             child: PortfolioAICard(
               summary: portfolio.summary,
-              isAdFree: auth.shouldHideAds,
+              isAdFree: auth.shouldHideAds || sub.isGoldActive,
             ),
           ),
 

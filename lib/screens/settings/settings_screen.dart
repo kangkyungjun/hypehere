@@ -603,7 +603,8 @@ class SettingsScreen extends StatelessWidget {
           return const SizedBox.shrink();
         }
 
-        if (auth.isGoldOrAbove) {
+        // Hybrid check: server role OR client-side RevenueCat status (webhook 지연 대비)
+        if (auth.isGoldOrAbove || sub.isGoldActive) {
           // Gold 유저: 구독 상태 + 구독 관리 + 구매 복원
           final formattedDate = sub.expirationDate != null
               ? '${sub.expirationDate!.year}-${sub.expirationDate!.month.toString().padLeft(2, '0')}-${sub.expirationDate!.day.toString().padLeft(2, '0')}'

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../providers/watchlist_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/portfolio_provider.dart';
+import '../../providers/subscription_provider.dart';
 import '../../services/analytics_api_client.dart';
 import '../../utils/error_localizer.dart';
 import '../../models/ticker_score.dart';
@@ -133,9 +134,11 @@ class _WatchlistScreenState extends State<WatchlistScreen> {
     }
 
     // 무료 유저 보유종목 3개 제한 (새 종목만 체크)
+    // Hybrid check: server role OR client-side RevenueCat status (webhook 지연 대비)
     final portfolio = context.read<PortfolioProvider>();
+    final sub = context.read<SubscriptionProvider>();
     final isNewTicker = !portfolio.isInHoldings(ticker);
-    if (isNewTicker && !auth.isGoldOrAbove && portfolio.holdings.length >= 3) {
+    if (isNewTicker && !auth.isGoldOrAbove && !sub.isGoldActive && portfolio.holdings.length >= 3) {
       if (!mounted) return;
       _showHoldingsLimitDialog();
       return;
