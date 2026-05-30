@@ -599,8 +599,15 @@ def device_register_view(request):
         defaults={'user': user, 'platform': platform, 'language': language, 'is_active': True},
     )
 
-    # 같은 사용자의 모든 활성 토큰 언어를 최신 언어로 동기화 (중복 언어 발송 방지)
     if user:
+        # 같은 사용자 + 같은 플랫폼의 이전 토큰 비활성화 (중복 알림 방지)
+        stale = DeviceToken.objects.filter(
+            user=user, platform=platform, is_active=True
+        ).exclude(pk=obj.pk).update(is_active=False)
+        if stale:
+            logger.info(f"Deactivated {stale} stale token(s) for user {user.id} ({platform})")
+
+        # 다른 플랫폼 토큰 언어도 동기화 (일관된 언어로 알림 발송)
         DeviceToken.objects.filter(
             user=user, is_active=True
         ).exclude(pk=obj.pk).update(language=language)

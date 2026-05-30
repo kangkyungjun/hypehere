@@ -15,43 +15,47 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
   debugPrint('[FCM] Background message: ${message.messageId}');
 
-  // 백그라운드에서도 로컬 알림 표시 (data-only 메시지 대응)
-  final notification = message.notification;
-  if (notification != null) {
-    final plugin = FlutterLocalNotificationsPlugin();
-    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
-    const iosSettings = DarwinInitializationSettings();
-    await plugin.initialize(
-      const InitializationSettings(android: androidSettings, iOS: iosSettings),
-    );
+  // notification 페이로드가 있는 메시지는 OS가 자동 표시하므로 로컬 알림 생략
+  // data-only 메시지만 로컬 알림으로 직접 표시
+  if (message.notification != null) return;
 
-    final isSubscription =
-        message.data['type']?.toString().startsWith('SUBSCRIPTION_') ?? false;
-    final channelId =
-        isSubscription ? 'marketlens_subscription' : 'marketlens_default';
-    final channelName =
-        isSubscription ? 'Subscription Alerts' : 'MarketLens 알림';
+  final title = message.data['title'] ?? '';
+  final body = message.data['body'] ?? '';
+  if (title.isEmpty && body.isEmpty) return;
 
-    await plugin.show(
-      message.hashCode,
-      notification.title,
-      notification.body,
-      NotificationDetails(
-        android: AndroidNotificationDetails(
-          channelId,
-          channelName,
-          importance: Importance.high,
-          priority: Priority.high,
-        ),
-        iOS: const DarwinNotificationDetails(
-          presentAlert: true,
-          presentBadge: true,
-          presentSound: true,
-        ),
+  final plugin = FlutterLocalNotificationsPlugin();
+  const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+  const iosSettings = DarwinInitializationSettings();
+  await plugin.initialize(
+    const InitializationSettings(android: androidSettings, iOS: iosSettings),
+  );
+
+  final isSubscription =
+      message.data['type']?.toString().startsWith('SUBSCRIPTION_') ?? false;
+  final channelId =
+      isSubscription ? 'marketlens_subscription' : 'marketlens_default';
+  final channelName =
+      isSubscription ? 'Subscription Alerts' : 'MarketLens 알림';
+
+  await plugin.show(
+    message.hashCode,
+    title,
+    body,
+    NotificationDetails(
+      android: AndroidNotificationDetails(
+        channelId,
+        channelName,
+        importance: Importance.high,
+        priority: Priority.high,
       ),
-      payload: jsonEncode(message.data),
-    );
-  }
+      iOS: const DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+      ),
+    ),
+    payload: jsonEncode(message.data),
+  );
 }
 
 class NotificationService {
@@ -167,11 +171,12 @@ class NotificationService {
       _handleNotificationOpen(initialMessage);
     }
 
-    // iOS foreground 알림 표시 설정
+    // iOS foreground: 시스템 자동 표시 비활성화 (onMessage → _localNotifications.show()로 통일)
+    // alert/sound를 true로 두면 시스템 표시 + _localNotifications.show() 이중 표시됨
     await _messaging!.setForegroundNotificationPresentationOptions(
-      alert: true,
+      alert: false,
       badge: true,
-      sound: true,
+      sound: false,
     );
   }
 
@@ -254,9 +259,28 @@ class NotificationService {
         _onTokenRefreshSub = _messaging?.onTokenRefresh.listen((
           newToken,
         ) async {
+          final oldToken = _currentToken;
           _currentToken = newToken;
           final at = await _storage.read(key: 'auth_token');
           if (at != null) {
+            // 이전 토큰 비활성화 (같은 기기에 중복 발송 방지)
+            if (oldToken != null && oldToken != newToken) {
+              try {
+                await http.post(
+                  Uri.parse('$_baseUrl/device/deactivate/'),
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Token $at',
+                  },
+                  body: jsonEncode({'token': oldToken}),
+                );
+                debugPrint('[FCM] Old token deactivated on refresh');
+              } catch (e) {
+                debugPrint('[FCM] Old token deactivation failed: $e');
+              }
+            }
+
+            // 새 토큰 등록
             final p = Platform.isIOS ? 'ios' : 'android';
             final lang = PlatformDispatcher.instance.locale.languageCode;
             final response = await http.post(
