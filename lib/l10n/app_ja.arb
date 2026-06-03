@@ -940,6 +940,8 @@
   "investmentProfileLoadFailed": "プロフィールを読み込めませんでした。もう一度お試しください。",
   "yourInvestmentStyle": "あなたの投資スタイル",
   "setInvestmentStyle": "投資スタイルを設定",
+  "myRecommendations": "あなたへのおすすめ",
+  "recommendationFit": "適合度",
   "skip": "スキップ",
   "next": "次へ",
 

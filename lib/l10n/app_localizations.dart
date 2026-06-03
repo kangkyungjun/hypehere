@@ -4682,6 +4682,18 @@ abstract class AppLocalizations {
   /// **'Set your investment style'**
   String get setInvestmentStyle;
 
+  /// No description provided for @myRecommendations.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended for You'**
+  String get myRecommendations;
+
+  /// No description provided for @recommendationFit.
+  ///
+  /// In en, this message translates to:
+  /// **'Fit'**
+  String get recommendationFit;
+
   /// No description provided for @skip.
   ///
   /// In en, this message translates to:

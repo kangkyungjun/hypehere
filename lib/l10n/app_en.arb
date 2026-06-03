@@ -1146,6 +1146,8 @@
   "investmentProfileLoadFailed": "Failed to load your profile. Please try again.",
   "yourInvestmentStyle": "Your Investment Style",
   "setInvestmentStyle": "Set your investment style",
+  "myRecommendations": "Recommended for You",
+  "recommendationFit": "Fit",
   "skip": "Skip",
   "next": "Next",
 

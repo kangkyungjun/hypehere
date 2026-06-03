@@ -25,6 +25,7 @@ import 'providers/portfolio_provider.dart';
 import 'providers/subscription_provider.dart';
 import 'providers/coach_mark_provider.dart';
 import 'providers/investment_profile_provider.dart';
+import 'providers/recommendation_provider.dart';
 import 'screens/onboarding/investment_profile_onboarding_screen.dart';
 import 'screens/dashboard/dashboard_screen.dart';
 import 'screens/explore/explore_screen.dart';
@@ -94,6 +95,7 @@ void main() async {
         ChangeNotifierProvider.value(value: subscriptionProvider),
         ChangeNotifierProvider.value(value: coachMarkProvider),
         ChangeNotifierProvider(create: (_) => InvestmentProfileProvider()),
+        ChangeNotifierProvider(create: (_) => RecommendationProvider()),
       ],
       child: const MarketLensApp(),
     ),
@@ -607,6 +609,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       final sub = context.read<SubscriptionProvider>();
 
       final investmentProfile = context.read<InvestmentProfileProvider>();
+      final recommendations = context.read<RecommendationProvider>();
 
       // 초기 동기화 (앱 시작 시 auth 상태 확인 완료 후)
       watchlist.switchUser(_authProvider!.currentUser?.id);
@@ -615,6 +618,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         // logIn 내부에서 미초기화 시 자동 initialize() 호출
         sub.logIn(_authProvider!.currentUser!.id.toString());
         investmentProfile.fetchProfile();
+        recommendations.fetch();
 
         // 앱 시작 시 온보딩 트리거
         if (_authProvider!.needsInvestmentOnboarding) {
@@ -644,6 +648,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           portfolio.initialize();
           sub.logIn(_authProvider!.currentUser!.id.toString());
           investmentProfile.fetchProfile();
+          recommendations.fetch();
           _fetchUnreadCount(); // 로그인 직후 뱃지 갱신
 
           // 투자 프로필 온보딩 트리거
@@ -664,6 +669,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           portfolio.clear();
           sub.logOut();
           investmentProfile.clear();
+          recommendations.clear();
           setState(() => _unreadNotificationCount = 0); // 로그아웃 시 뱃지 초기화
         }
       };

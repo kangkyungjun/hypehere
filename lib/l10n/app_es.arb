@@ -940,6 +940,8 @@
   "investmentProfileLoadFailed": "No se pudo cargar tu perfil. Inténtalo de nuevo.",
   "yourInvestmentStyle": "Tu perfil de inversión",
   "setInvestmentStyle": "Configura tu perfil de inversión",
+  "myRecommendations": "Recomendado para ti",
+  "recommendationFit": "Ajuste",
   "skip": "Omitir",
   "next": "Siguiente",
 

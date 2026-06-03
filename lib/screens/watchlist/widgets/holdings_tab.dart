@@ -13,6 +13,7 @@ import '../../../widgets/common/section_header.dart';
 import '../../../utils/error_localizer.dart';
 import 'portfolio_summary_card.dart';
 import 'investment_style_chip.dart';
+import 'my_recommendations_section.dart';
 import 'tax_estimate_card.dart';
 import 'portfolio_ai_card.dart';
 import 'holding_list_item.dart';
@@ -368,6 +369,9 @@ class _HoldingsTabState extends State<HoldingsTab> {
                       // Investment style chip ("당신의 투자성향 · 균형형").
                       // Parent already applies horizontal padding, so use 0.
                       const InvestmentStyleChip(horizontalPadding: 0),
+                      // My recommendations ("내 추천 종목") — Phase C.
+                      // Shown here too: no holdings yet → "what to buy" guidance.
+                      const MyRecommendationsSection(horizontalPadding: 0),
                       const SizedBox(height: AppSpacing.xl),
                       CoachMark(
                         coachKey: CoachMarkProvider.keyHoldings,
@@ -495,6 +499,9 @@ class _HoldingsTabState extends State<HoldingsTab> {
 
           // Investment style chip ("당신의 투자성향 · 균형형")
           const SliverToBoxAdapter(child: InvestmentStyleChip()),
+
+          // My recommendations ("내 추천 종목") — Phase C
+          const SliverToBoxAdapter(child: MyRecommendationsSection()),
 
           // Tax estimate card (Korean only)
           const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.md)),

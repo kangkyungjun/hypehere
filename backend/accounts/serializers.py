@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model, authenticate
 from django.contrib.auth.password_validation import validate_password
-from .models import DeviceToken, InvestmentProfile
+from .models import DeviceToken, InvestmentProfile, Recommendation
 
 User = get_user_model()
 
@@ -56,6 +56,18 @@ class InvestmentProfileSerializer(serializers.ModelSerializer):
         if not (1 <= value <= 5):
             raise serializers.ValidationError('risk_tolerance must be between 1 and 5.')
         return value
+
+
+class RecommendationSerializer(serializers.ModelSerializer):
+    """추천종목 Serializer (앱 조회용). rationale_json → rationale 로 노출."""
+    rationale = serializers.JSONField(source='rationale_json')
+
+    class Meta:
+        model = Recommendation
+        fields = [
+            'rank', 'ticker', 'name', 'name_ko', 'fit_score',
+            'current_price', 'change_pct', 'signal', 'rationale', 'date',
+        ]
 
 
 class RegisterSerializer(serializers.ModelSerializer):

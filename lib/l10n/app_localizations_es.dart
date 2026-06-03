@@ -2507,6 +2507,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get setInvestmentStyle => 'Configura tu perfil de inversión';
 
   @override
+  String get myRecommendations => 'Recomendado para ti';
+
+  @override
+  String get recommendationFit => 'Ajuste';
+
+  @override
   String get skip => 'Omitir';
 
   @override

@@ -2435,6 +2435,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get setInvestmentStyle => '投資スタイルを設定';
 
   @override
+  String get myRecommendations => 'あなたへのおすすめ';
+
+  @override
+  String get recommendationFit => '適合度';
+
+  @override
   String get skip => 'スキップ';
 
   @override

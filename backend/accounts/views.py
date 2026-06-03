@@ -10,17 +10,19 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import get_user_model
-from django.db.models import Q
+from django.db import transaction
+from django.db.models import Q, Max
 from django.utils import timezone
+from django.utils.dateparse import parse_date
 
 logger = logging.getLogger(__name__)
 from .serializers import (
     RegisterSerializer, LoginSerializer, UserSerializer, ChangePasswordSerializer,
     DeviceTokenSerializer, SubscriptionSyncSerializer,
     SendVerificationCodeSerializer, VerifyCodeSerializer, PasswordResetConfirmSerializer,
-    InvestmentProfileSerializer,
+    InvestmentProfileSerializer, RecommendationSerializer,
 )
-from .models import DeviceToken, NotificationSubscription, NotificationHistory, SubscriptionInfo, InvestmentProfile
+from .models import DeviceToken, NotificationSubscription, NotificationHistory, SubscriptionInfo, InvestmentProfile, Recommendation
 from .email_utils import create_and_send_code, verify_code, send_subscription_email
 from .fcm_utils import send_general_to_all, _send_fcm, send_subscription_notification
 
@@ -882,6 +884,113 @@ def internal_user_profiles_view(request):
         })
 
     return Response({'profiles': data, 'count': len(data)})
+
+
+@api_view(['POST'])
+@authentication_classes([])
+@permission_classes([AllowAny])
+def ingest_recommendations_view(request):
+    """
+    Mac mini 내부 API — 유저별 추천종목 배치 업로드 (Phase C)
+    X-API-Key 헤더 검증. 같은 date 재업로드 시 해당 날짜 전체 삭제 후 재삽입(멱등).
+    POST /api/v1/internal/ingest/recommendations
+    Body: {"date": "YYYY-MM-DD", "recommendations": [{user_id, rank, ticker, fit_score,
+           rationale_json, name, name_ko, current_price, change_pct, signal}, ...]}
+    """
+    api_key = request.headers.get('X-API-Key', '')
+    expected_key = django_settings.INTERNAL_API_KEY
+    if not expected_key or api_key != expected_key:
+        return Response({'error': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
+
+    date_str = request.data.get('date')
+    items = request.data.get('recommendations', [])
+    if not date_str or not isinstance(items, list):
+        return Response({'error': 'date and recommendations[] required.'},
+                        status=status.HTTP_400_BAD_REQUEST)
+    rec_date = parse_date(date_str)
+    if rec_date is None:
+        return Response({'error': 'Invalid date (expected YYYY-MM-DD).'},
+                        status=status.HTTP_400_BAD_REQUEST)
+
+    # user_id 정수 변환 (비숫자/None 은 건너뜀 — 배치 전체 실패 방지)
+    def _to_int(v):
+        try:
+            return int(v)
+        except (TypeError, ValueError):
+            return None
+
+    requested_ids = {iid for iid in (_to_int(it.get('user_id')) for it in items) if iid is not None}
+    valid_ids = set(User.objects.filter(id__in=requested_ids).values_list('id', flat=True))
+
+    objs = []
+    skipped = 0
+    for it in items:
+        uid = _to_int(it.get('user_id'))
+        ticker = it.get('ticker')
+        if uid is None or uid not in valid_ids or not ticker:
+            skipped += 1
+            continue
+        objs.append(Recommendation(
+            user_id=uid,
+            date=rec_date,
+            rank=it.get('rank') or 0,
+            ticker=ticker,
+            fit_score=it.get('fit_score') or 0.0,
+            rationale_json=it.get('rationale_json') or {},
+            name=it.get('name') or '',
+            name_ko=it.get('name_ko') or '',
+            current_price=it.get('current_price'),
+            change_pct=it.get('change_pct'),
+            signal=it.get('signal') or '',
+        ))
+
+    with transaction.atomic():
+        Recommendation.objects.filter(date=rec_date).delete()
+        Recommendation.objects.bulk_create(objs, ignore_conflicts=True)
+
+    return Response({
+        'ingested': len(objs),
+        'skipped': skipped,
+        'users': len({o.user_id for o in objs}),
+        'date': date_str,
+    })
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def user_recommendations_view(request):
+    """
+    앱 — 본인 추천종목 조회 (Phase C)
+    GET /api/v1/users/me/recommendations?date=YYYY-MM-DD
+    date 미지정 시 본인 최신 날짜. 추천 없으면 빈 배열(graceful).
+    """
+    date_str = request.query_params.get('date')
+    qs = Recommendation.objects.filter(user=request.user)
+
+    if date_str:
+        rec_date = parse_date(date_str)
+        if rec_date is None:
+            return Response({'error': 'Invalid date (expected YYYY-MM-DD).'},
+                            status=status.HTTP_400_BAD_REQUEST)
+    else:
+        rec_date = qs.aggregate(latest=Max('date'))['latest']
+
+    if rec_date is None:
+        return Response({'date': None, 'style': None, 'recommendations': []})
+
+    recs = qs.filter(date=rec_date).order_by('rank')
+
+    style = None
+    try:
+        style = request.user.investment_profile.investment_style
+    except InvestmentProfile.DoesNotExist:
+        pass
+
+    return Response({
+        'date': rec_date.isoformat(),
+        'style': style,
+        'recommendations': RecommendationSerializer(recs, many=True).data,
+    })
 
 
 # ========================================

@@ -2430,6 +2430,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get setInvestmentStyle => '设置投资偏好';
 
   @override
+  String get myRecommendations => '为你推荐';
+
+  @override
+  String get recommendationFit => '匹配度';
+
+  @override
   String get skip => '跳过';
 
   @override

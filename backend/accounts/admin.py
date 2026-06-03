@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .models import CustomUser, EmailVerificationCode, InvestmentProfile
+from .models import CustomUser, EmailVerificationCode, InvestmentProfile, Recommendation
 
 
 @admin.register(CustomUser)
@@ -46,6 +46,15 @@ class InvestmentProfileAdmin(admin.ModelAdmin):
     search_fields = ['user__email', 'user__nickname']
     ordering = ['-updated_at']
     readonly_fields = ['created_at', 'updated_at']
+
+
+@admin.register(Recommendation)
+class RecommendationAdmin(admin.ModelAdmin):
+    list_display = ['user', 'date', 'rank', 'ticker', 'fit_score', 'signal', 'created_at']
+    list_filter = ['date', 'signal']
+    search_fields = ['user__email', 'user__nickname', 'ticker']
+    ordering = ['-date', 'user', 'rank']
+    readonly_fields = ['created_at']
 
 
 @admin.register(EmailVerificationCode)

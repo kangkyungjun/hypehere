@@ -31,6 +31,7 @@ from .views import (
     revenuecat_webhook_view,
     subscription_status_view,
     investment_profile_view,
+    user_recommendations_view,
 )
 
 app_name = 'accounts'
@@ -77,6 +78,9 @@ urlpatterns = [
 
     # 투자 프로필
     path('investment-profile/', investment_profile_view, name='investment-profile'),
+
+    # 추천종목 (Phase C) — 앱 조회. GET /api/marketlens/accounts/recommendations/?date=...
+    path('recommendations/', user_recommendations_view, name='user-recommendations'),
 
     # RevenueCat IAP Webhook + 구독 상태
     path('webhook/revenuecat/', revenuecat_webhook_view, name='revenuecat-webhook'),

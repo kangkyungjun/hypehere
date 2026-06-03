@@ -18,7 +18,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.views.generic import TemplateView
-from accounts.views import internal_user_profiles_view
+from accounts.views import (
+    internal_user_profiles_view,
+    ingest_recommendations_view,
+)
 from drf_spectacular.views import (
     SpectacularAPIView,
     SpectacularSwaggerView,
@@ -32,6 +35,7 @@ urlpatterns = [
     path("api/community/", include("community.urls")),
     # Internal API (Mac mini)
     path("api/v1/internal/users/profiles/", internal_user_profiles_view, name="internal-user-profiles"),
+    path("api/v1/internal/ingest/recommendations", ingest_recommendations_view, name="ingest-recommendations"),
     # API Documentation
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),

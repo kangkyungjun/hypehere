@@ -257,6 +257,40 @@ class InvestmentProfile(models.Model):
         return f"{self.user_id} [{self.investment_style}] risk={self.risk_tolerance}"
 
 
+class Recommendation(models.Model):
+    """맥미니(deep_bot)가 생성한 유저별 스타일 추천종목 (Phase C)
+
+    같은 date 배치 재업로드 시 해당 날짜 전체 삭제 후 재삽입(멱등).
+    name/current_price 등은 업로드 시점의 표시 스냅샷.
+    """
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='recommendations',
+    )
+    date = models.DateField(db_index=True)
+    rank = models.IntegerField()
+    ticker = models.CharField(max_length=20)
+    fit_score = models.FloatField()
+    rationale_json = models.JSONField(default=dict, blank=True)
+    # 표시 스냅샷 (업로드 시점 값)
+    name = models.CharField(max_length=128, blank=True, default='')
+    name_ko = models.CharField(max_length=128, blank=True, default='')
+    current_price = models.FloatField(null=True, blank=True)
+    change_pct = models.FloatField(null=True, blank=True)
+    signal = models.CharField(max_length=16, blank=True, default='')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'accounts_recommendation'
+        unique_together = ('user', 'date', 'ticker')
+        indexes = [models.Index(fields=['user', 'date', 'rank'])]
+        ordering = ['rank']
+
+    def __str__(self):
+        return f"{self.user_id} {self.date} #{self.rank} {self.ticker} ({self.fit_score})"
+
+
 class EmailVerificationCode(models.Model):
     """이메일 인증 코드 (회원가입 / 비밀번호 재설정)"""
     PURPOSE_CHOICES = [

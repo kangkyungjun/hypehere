@@ -940,6 +940,8 @@
   "investmentProfileLoadFailed": "无法加载您的投资偏好，请重试。",
   "yourInvestmentStyle": "您的投资偏好",
   "setInvestmentStyle": "设置投资偏好",
+  "myRecommendations": "为你推荐",
+  "recommendationFit": "匹配度",
   "skip": "跳过",
   "next": "下一步",
 

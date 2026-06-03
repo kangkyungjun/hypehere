@@ -2434,6 +2434,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get setInvestmentStyle => '투자성향 설정하기';
 
   @override
+  String get myRecommendations => '내 추천 종목';
+
+  @override
+  String get recommendationFit => '적합도';
+
+  @override
   String get skip => '건너뛰기';
 
   @override
