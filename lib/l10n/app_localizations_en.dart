@@ -2266,6 +2266,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get goldMembershipTitle => 'Gold Membership';
 
   @override
+  String get goldComingSoon => 'Gold membership is coming soon!';
+
+  @override
   String get subscription => 'Subscription';
 
   @override
@@ -2466,6 +2469,16 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get investmentProfileSaveFailed =>
       'Failed to save profile. Please try again.';
+
+  @override
+  String get investmentProfileLoadFailed =>
+      'Failed to load your profile. Please try again.';
+
+  @override
+  String get yourInvestmentStyle => 'Your Investment Style';
+
+  @override
+  String get setInvestmentStyle => 'Set your investment style';
 
   @override
   String get skip => 'Skip';

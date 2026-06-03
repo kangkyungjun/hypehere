@@ -2237,6 +2237,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get goldMembershipTitle => 'Gold 멤버십';
 
   @override
+  String get goldComingSoon => 'Gold 멤버십 준비 중입니다!';
+
+  @override
   String get subscription => '구독';
 
   @override
@@ -2420,6 +2423,15 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get investmentProfileSaveFailed => '프로필 저장에 실패했습니다. 다시 시도해주세요.';
+
+  @override
+  String get investmentProfileLoadFailed => '프로필을 불러오지 못했습니다. 다시 시도해주세요.';
+
+  @override
+  String get yourInvestmentStyle => '당신의 투자성향';
+
+  @override
+  String get setInvestmentStyle => '투자성향 설정하기';
 
   @override
   String get skip => '건너뛰기';

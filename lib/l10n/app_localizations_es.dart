@@ -2289,6 +2289,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get goldMembershipTitle => 'Membresía Gold';
 
   @override
+  String get goldComingSoon => '¡La membresía Gold estará disponible pronto!';
+
+  @override
   String get subscription => 'Suscripción';
 
   @override
@@ -2492,6 +2495,16 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get investmentProfileSaveFailed =>
       'No se pudo guardar el perfil. Inténtalo de nuevo.';
+
+  @override
+  String get investmentProfileLoadFailed =>
+      'No se pudo cargar tu perfil. Inténtalo de nuevo.';
+
+  @override
+  String get yourInvestmentStyle => 'Tu perfil de inversión';
+
+  @override
+  String get setInvestmentStyle => 'Configura tu perfil de inversión';
 
   @override
   String get skip => 'Omitir';

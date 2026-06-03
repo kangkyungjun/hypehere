@@ -846,6 +846,7 @@
   "subscriptionTermsIos": "付款将从您的App Store账户中扣除。如果在当前周期结束前24小时内未取消，订阅将自动续订。",
   "subscriptionTermsAndroid": "付款将从您的Google Play账户中扣除。如果在当前周期结束前24小时内未取消，订阅将自动续订。",
   "goldMembershipTitle": "Gold会员",
+  "goldComingSoon": "Gold会员即将推出！",
   "subscription": "订阅",
 
   "freeTrialStart": "开始7天免费试用",
@@ -936,6 +937,9 @@
   "investmentProfileEditSubtitle": "查看或编辑您的投资偏好",
   "investmentProfileComplete": "完成",
   "investmentProfileSaveFailed": "保存失败，请重试。",
+  "investmentProfileLoadFailed": "无法加载您的投资偏好，请重试。",
+  "yourInvestmentStyle": "您的投资偏好",
+  "setInvestmentStyle": "设置投资偏好",
   "skip": "跳过",
   "next": "下一步",
 

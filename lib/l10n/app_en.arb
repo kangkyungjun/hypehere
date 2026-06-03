@@ -1052,6 +1052,7 @@
   "subscriptionTermsIos": "Payment will be charged to your App Store account. Subscription renews automatically unless cancelled 24 hours before the end of the current period.",
   "subscriptionTermsAndroid": "Payment will be charged to your Google Play account. Subscription renews automatically unless cancelled 24 hours before the end of the current period.",
   "goldMembershipTitle": "Gold Membership",
+  "goldComingSoon": "Gold membership is coming soon!",
   "subscription": "Subscription",
 
   "freeTrialStart": "Start 7-Day Free Trial",
@@ -1142,6 +1143,9 @@
   "investmentProfileEditSubtitle": "View or edit your investment preferences",
   "investmentProfileComplete": "Complete",
   "investmentProfileSaveFailed": "Failed to save profile. Please try again.",
+  "investmentProfileLoadFailed": "Failed to load your profile. Please try again.",
+  "yourInvestmentStyle": "Your Investment Style",
+  "setInvestmentStyle": "Set your investment style",
   "skip": "Skip",
   "next": "Next",
 

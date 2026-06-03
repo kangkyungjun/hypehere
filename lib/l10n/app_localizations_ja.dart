@@ -2237,6 +2237,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get goldMembershipTitle => 'Goldメンバーシップ';
 
   @override
+  String get goldComingSoon => 'Goldメンバーシップは近日公開予定です！';
+
+  @override
   String get subscription => 'サブスクリプション';
 
   @override
@@ -2421,6 +2424,15 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get investmentProfileSaveFailed => 'プロフィールの保存に失敗しました。もう一度お試しください。';
+
+  @override
+  String get investmentProfileLoadFailed => 'プロフィールを読み込めませんでした。もう一度お試しください。';
+
+  @override
+  String get yourInvestmentStyle => 'あなたの投資スタイル';
+
+  @override
+  String get setInvestmentStyle => '投資スタイルを設定';
 
   @override
   String get skip => 'スキップ';

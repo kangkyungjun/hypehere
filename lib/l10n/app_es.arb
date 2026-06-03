@@ -846,6 +846,7 @@
   "subscriptionTermsIos": "El pago se cargará a tu cuenta de App Store. La suscripción se renueva automáticamente a menos que se cancele 24 horas antes del final del período actual.",
   "subscriptionTermsAndroid": "El pago se cargará a tu cuenta de Google Play. La suscripción se renueva automáticamente a menos que se cancele 24 horas antes del final del período actual.",
   "goldMembershipTitle": "Membresía Gold",
+  "goldComingSoon": "¡La membresía Gold estará disponible pronto!",
   "subscription": "Suscripción",
 
   "freeTrialStart": "Iniciar prueba gratuita de 7 días",
@@ -936,6 +937,9 @@
   "investmentProfileEditSubtitle": "Ver o editar tus preferencias de inversión",
   "investmentProfileComplete": "Completar",
   "investmentProfileSaveFailed": "No se pudo guardar el perfil. Inténtalo de nuevo.",
+  "investmentProfileLoadFailed": "No se pudo cargar tu perfil. Inténtalo de nuevo.",
+  "yourInvestmentStyle": "Tu perfil de inversión",
+  "setInvestmentStyle": "Configura tu perfil de inversión",
   "skip": "Omitir",
   "next": "Siguiente",
 

@@ -34,6 +34,15 @@ class _InvestmentProfileOnboardingScreenState
   int _currentPage = 0;
   bool _isSaving = false;
 
+  /// Edit-mode initial load state. While true, the form is hidden behind a
+  /// loading indicator so we never prefill with defaults before the real
+  /// profile is fetched.
+  bool _isLoadingProfile = false;
+
+  /// Edit-mode load failure. When true we block saving and show a retry view,
+  /// preventing the real server profile from being overwritten with defaults.
+  bool _loadFailed = false;
+
   // Selections
   String _investmentStyle = 'balanced';
   String _timeHorizon = 'medium';
@@ -48,13 +57,49 @@ class _InvestmentProfileOnboardingScreenState
       final provider = context.read<InvestmentProfileProvider>();
       final profile = provider.profile;
       if (profile != null) {
-        _investmentStyle = profile.investmentStyle;
-        _timeHorizon = profile.timeHorizon;
-        _riskTolerance = profile.riskTolerance.toDouble();
-        _targetReturn = profile.targetReturn;
-        _maxLossTolerance = profile.maxLossTolerance;
+        _applyProfile(profile);
+      } else {
+        // Cache is empty (e.g. app-start fetch failed). Re-fetch before
+        // prefilling so we don't show defaults that could overwrite the
+        // user's real profile on save.
+        _isLoadingProfile = true;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _loadProfileForEdit();
+        });
       }
     }
+  }
+
+  void _applyProfile(InvestmentProfile profile) {
+    _investmentStyle = profile.investmentStyle;
+    _timeHorizon = profile.timeHorizon;
+    _riskTolerance = profile.riskTolerance.toDouble();
+    _targetReturn = profile.targetReturn;
+    _maxLossTolerance = profile.maxLossTolerance;
+  }
+
+  Future<void> _loadProfileForEdit() async {
+    setState(() {
+      _isLoadingProfile = true;
+      _loadFailed = false;
+    });
+
+    final provider = context.read<InvestmentProfileProvider>();
+    await provider.fetchProfile();
+    if (!mounted) return;
+
+    final profile = provider.profile;
+    setState(() {
+      if (profile != null) {
+        _applyProfile(profile);
+        _loadFailed = false;
+      } else {
+        // Either the server has no profile yet (unexpected in edit mode) or
+        // the fetch failed. Block saving to avoid clobbering real data.
+        _loadFailed = true;
+      }
+      _isLoadingProfile = false;
+    });
   }
 
   @override
@@ -140,35 +185,83 @@ class _InvestmentProfileOnboardingScreenState
                 onPressed: () => Navigator.pop(context, false),
               ),
         actions: [
-          if (!widget.isEditing)
+          if (!widget.isEditing && !_isLoadingProfile && !_loadFailed)
             TextButton(
               onPressed: _isSaving ? null : _skipAndClose,
               child: Text(l10n.skip),
             ),
         ],
       ),
-      body: Column(
-        children: [
-          // Progress indicator
-          _buildProgressIndicator(colors),
-          // Pages
-          Expanded(
-            child: PageView(
-              controller: _pageController,
-              physics: const NeverScrollableScrollPhysics(),
-              onPageChanged: (index) => setState(() => _currentPage = index),
-              children: [
-                _buildStylePage(l10n, colors),
-                _buildTimeHorizonPage(l10n, colors),
-                _buildRiskTolerancePage(l10n, colors),
-                _buildTargetReturnPage(l10n, colors),
-                _buildMaxLossPage(l10n, colors),
-              ],
-            ),
+      body: _buildBody(l10n, colors),
+    );
+  }
+
+  Widget _buildBody(AppLocalizations l10n, MarketLensColors colors) {
+    if (_isLoadingProfile) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (_loadFailed) {
+      return _buildLoadErrorView(l10n, colors);
+    }
+    return Column(
+      children: [
+        // Progress indicator
+        _buildProgressIndicator(colors),
+        // Pages
+        Expanded(
+          child: PageView(
+            controller: _pageController,
+            physics: const NeverScrollableScrollPhysics(),
+            onPageChanged: (index) => setState(() => _currentPage = index),
+            children: [
+              _buildStylePage(l10n, colors),
+              _buildTimeHorizonPage(l10n, colors),
+              _buildRiskTolerancePage(l10n, colors),
+              _buildTargetReturnPage(l10n, colors),
+              _buildMaxLossPage(l10n, colors),
+            ],
           ),
-          // Bottom button
-          _buildBottomButton(l10n, colors),
-        ],
+        ),
+        // Bottom button
+        _buildBottomButton(l10n, colors),
+      ],
+    );
+  }
+
+  Widget _buildLoadErrorView(AppLocalizations l10n, MarketLensColors colors) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.xl),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.cloud_off_rounded,
+              size: 48,
+              color: colors.textSecondary,
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            Text(
+              l10n.investmentProfileLoadFailed,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: AppTypography.bodyLarge,
+                color: colors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.xl),
+            FilledButton(
+              onPressed: _loadProfileForEdit,
+              style: FilledButton.styleFrom(
+                backgroundColor: colors.accentBlue,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppRadius.lg),
+                ),
+              ),
+              child: Text(l10n.retry),
+            ),
+          ],
+        ),
       ),
     );
   }

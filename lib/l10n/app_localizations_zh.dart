@@ -2235,6 +2235,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get goldMembershipTitle => 'Gold会员';
 
   @override
+  String get goldComingSoon => 'Gold会员即将推出！';
+
+  @override
   String get subscription => '订阅';
 
   @override
@@ -2416,6 +2419,15 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get investmentProfileSaveFailed => '保存失败，请重试。';
+
+  @override
+  String get investmentProfileLoadFailed => '无法加载您的投资偏好，请重试。';
+
+  @override
+  String get yourInvestmentStyle => '您的投资偏好';
+
+  @override
+  String get setInvestmentStyle => '设置投资偏好';
 
   @override
   String get skip => '跳过';

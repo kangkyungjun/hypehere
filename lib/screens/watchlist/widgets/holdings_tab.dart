@@ -12,6 +12,7 @@ import '../../../widgets/common/bento_card.dart';
 import '../../../widgets/common/section_header.dart';
 import '../../../utils/error_localizer.dart';
 import 'portfolio_summary_card.dart';
+import 'investment_style_chip.dart';
 import 'tax_estimate_card.dart';
 import 'portfolio_ai_card.dart';
 import 'holding_list_item.dart';
@@ -364,6 +365,10 @@ class _HoldingsTabState extends State<HoldingsTab> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      // Investment style chip ("당신의 투자성향 · 균형형").
+                      // Parent already applies horizontal padding, so use 0.
+                      const InvestmentStyleChip(horizontalPadding: 0),
+                      const SizedBox(height: AppSpacing.xl),
                       CoachMark(
                         coachKey: CoachMarkProvider.keyHoldings,
                         message: l10n.coachMarkHoldings,
@@ -487,6 +492,9 @@ class _HoldingsTabState extends State<HoldingsTab> {
           ),
           // Portfolio summary card
           SliverToBoxAdapter(child: PortfolioSummaryCard(portfolio: portfolio)),
+
+          // Investment style chip ("당신의 투자성향 · 균형형")
+          const SliverToBoxAdapter(child: InvestmentStyleChip()),
 
           // Tax estimate card (Korean only)
           const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.md)),

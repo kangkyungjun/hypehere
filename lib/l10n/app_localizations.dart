@@ -4316,6 +4316,12 @@ abstract class AppLocalizations {
   /// **'Gold Membership'**
   String get goldMembershipTitle;
 
+  /// No description provided for @goldComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Gold membership is coming soon!'**
+  String get goldComingSoon;
+
   /// No description provided for @subscription.
   ///
   /// In en, this message translates to:
@@ -4657,6 +4663,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to save profile. Please try again.'**
   String get investmentProfileSaveFailed;
+
+  /// No description provided for @investmentProfileLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load your profile. Please try again.'**
+  String get investmentProfileLoadFailed;
+
+  /// No description provided for @yourInvestmentStyle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Investment Style'**
+  String get yourInvestmentStyle;
+
+  /// No description provided for @setInvestmentStyle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set your investment style'**
+  String get setInvestmentStyle;
 
   /// No description provided for @skip.
   ///

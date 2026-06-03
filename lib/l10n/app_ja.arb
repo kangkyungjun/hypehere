@@ -846,6 +846,7 @@
   "subscriptionTermsIos": "お支払いはApp Storeアカウントに請求されます。現在の期間終了の24時間前までにキャンセルしない限り、自動的に更新されます。",
   "subscriptionTermsAndroid": "お支払いはGoogle Playアカウントに請求されます。現在の期間終了の24時間前までにキャンセルしない限り、自動的に更新されます。",
   "goldMembershipTitle": "Goldメンバーシップ",
+  "goldComingSoon": "Goldメンバーシップは近日公開予定です！",
   "subscription": "サブスクリプション",
 
   "freeTrialStart": "7日間無料体験を始める",
@@ -936,6 +937,9 @@
   "investmentProfileEditSubtitle": "投資の傾向を確認・編集します",
   "investmentProfileComplete": "完了",
   "investmentProfileSaveFailed": "プロフィールの保存に失敗しました。もう一度お試しください。",
+  "investmentProfileLoadFailed": "プロフィールを読み込めませんでした。もう一度お試しください。",
+  "yourInvestmentStyle": "あなたの投資スタイル",
+  "setInvestmentStyle": "投資スタイルを設定",
   "skip": "スキップ",
   "next": "次へ",
 
