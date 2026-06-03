@@ -868,6 +868,13 @@ def internal_user_profiles_view(request):
         return Response({'error': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
 
     profiles = InvestmentProfile.objects.select_related('user').all()
+
+    # 유저별 언어 (active DeviceToken 기준; 등록 시 기기 간 동기화되어 단일 값이 일반적)
+    # email_utils.send_subscription_email()와 동일한 해석 패턴. 미설정 시 'en'.
+    device_langs = dict(
+        DeviceToken.objects.filter(is_active=True).values_list('user_id', 'language')
+    )
+
     data = []
     for p in profiles:
         data.append({
@@ -880,6 +887,7 @@ def internal_user_profiles_view(request):
             'risk_tolerance': p.risk_tolerance,
             'target_return': p.target_return,
             'max_loss_tolerance': p.max_loss_tolerance,
+            'language': device_langs.get(p.user_id, 'en'),
             'updated_at': p.updated_at.isoformat(),
         })
 
