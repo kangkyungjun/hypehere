@@ -41,21 +41,6 @@ class Migration(migrations.Migration):
                 "ordering": ["rank"],
             },
         ),
-        migrations.RenameIndex(
-            model_name="customuser",
-            new_name="accounts_us_email_74c8d6_idx",
-            old_name="users_email_4b85f2_idx",
-        ),
-        migrations.RenameIndex(
-            model_name="customuser",
-            new_name="accounts_us_created_4734df_idx",
-            old_name="users_created_6541e9_idx",
-        ),
-        migrations.RenameIndex(
-            model_name="emailverificationcode",
-            new_name="accounts_em_email_7bc994_idx",
-            old_name="accounts_em_email_purpose_idx",
-        ),
         migrations.AddField(
             model_name="recommendation",
             name="user",
