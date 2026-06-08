@@ -7,6 +7,10 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticate
 from django.db import transaction
 from .models import Post, Comment, PostLike, CommentLike
 from moderation.models import PostReport, CommentReport
+from moderation.views import blocked_user_ids
+
+# 동일 콘텐츠가 이 수 이상으로 신고되면 자동으로 숨김 처리 (관리자 검토 전 선제 차단)
+REPORT_AUTOHIDE_THRESHOLD = 3
 from accounts.fcm_utils import (
     send_general_to_ticker_subscribers,
     send_comment_notification,
@@ -45,7 +49,14 @@ class PostViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """is_deleted=False인 게시글만 조회, 필터링 및 정렬 지원"""
-        queryset = Post.objects.filter(is_deleted=False).select_related('author')
+        queryset = Post.objects.filter(
+            is_deleted=False, is_hidden=False
+        ).select_related('author')
+
+        # 차단한 사용자의 게시글 제외 (Apple Guideline 1.2 (d))
+        blocked = blocked_user_ids(self.request.user)
+        if blocked:
+            queryset = queryset.exclude(author_id__in=blocked)
 
         # ticker 필터링
         ticker = self.request.query_params.get('ticker')
@@ -176,10 +187,15 @@ class PostViewSet(viewsets.ModelViewSet):
             return Response([])
 
         queryset = Post.objects.filter(
-            is_deleted=False,
+            is_deleted=False, is_hidden=False,
         ).filter(
             Q(title__icontains=query) | Q(content__icontains=query)
         ).select_related('author')
+
+        # 차단한 사용자의 게시글 제외
+        blocked = blocked_user_ids(request.user)
+        if blocked:
+            queryset = queryset.exclude(author_id__in=blocked)
 
         # ticker 필터 (선택)
         ticker = request.query_params.get('ticker')
@@ -254,6 +270,16 @@ class PostViewSet(viewsets.ModelViewSet):
             description=description[:500],
         )
 
+        # 신고 누적 임계치 도달 시 자동 숨김 (관리자 최종 검토 전 선제 차단)
+        report_total = PostReport.objects.filter(post=post).count()
+        if report_total >= REPORT_AUTOHIDE_THRESHOLD and not post.is_hidden:
+            post.is_hidden = True
+            post.save(update_fields=['is_hidden'])
+            logger.warning(
+                "[MODERATION] Post %s auto-hidden after %s reports",
+                post.id, report_total,
+            )
+
         return Response(
             {'detail': '신고가 접수되었습니다.'},
             status=status.HTTP_201_CREATED
@@ -282,6 +308,11 @@ class CommentViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """is_deleted=False인 댓글만 조회, post 필터링 지원"""
         queryset = Comment.objects.filter(is_deleted=False).select_related('author', 'post')
+
+        # 차단한 사용자의 댓글 제외 (Apple Guideline 1.2 (d))
+        blocked = blocked_user_ids(self.request.user)
+        if blocked:
+            queryset = queryset.exclude(author_id__in=blocked)
 
         # Nested route: URL에서 post_pk 가져오기
         post_pk = self.kwargs.get('post_pk')
@@ -453,6 +484,19 @@ class CommentViewSet(viewsets.ModelViewSet):
             reason=report_type,
             description=description[:500],
         )
+
+        # 신고 누적 임계치 도달 시 자동 숨김 (소프트 삭제로 피드에서 제거)
+        report_total = CommentReport.objects.filter(comment=comment).count()
+        if report_total >= REPORT_AUTOHIDE_THRESHOLD and not comment.is_deleted:
+            with transaction.atomic():
+                comment.is_deleted = True
+                comment.save(update_fields=['is_deleted'])
+                if comment.parent is None:
+                    comment.post.decrement_comment_count()
+            logger.warning(
+                "[MODERATION] Comment %s auto-hidden after %s reports",
+                comment.id, report_total,
+            )
 
         return Response(
             {'detail': '신고가 접수되었습니다.'},

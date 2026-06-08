@@ -1,5 +1,22 @@
 {
   "@@locale": "zh",
+  "blockUser": "屏蔽用户",
+  "blockUserConfirm": "要屏蔽 {nickname} 吗？您将不再看到该用户的帖子和评论。",
+  "@blockUserConfirm": {
+    "placeholders": {
+      "nickname": { "type": "String" }
+    }
+  },
+  "userBlocked": "已屏蔽该用户。",
+  "userUnblocked": "已解除屏蔽。",
+  "blockedUsers": "已屏蔽的用户",
+  "noBlockedUsers": "您还没有屏蔽任何用户。",
+  "unblock": "解除屏蔽",
+  "termsAgreementRequired": "注册前必须同意服务条款。",
+  "eulaZeroTolerance": "MarketLens 对不当内容和滥用行为采取零容忍政策。",
+  "eulaAgreePrefix": "我同意",
+  "eulaAgreeAnd": "和",
+  "eulaAgreeSuffix": "。",
 
   "appTitle": "MarketLens",
 

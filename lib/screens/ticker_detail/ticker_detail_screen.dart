@@ -17,6 +17,7 @@ import '../../widgets/charts/ticker_news_card.dart';
 import '../../widgets/ads/banner_ad_widget.dart';
 import '../../widgets/ads/interstitial_ad_helper.dart';
 import '../../widgets/common/ml_divider.dart';
+import '../../config/feature_flags.dart';
 import '../../widgets/common/gold_upgrade_sheet.dart';
 import '../../widgets/community/signup_prompt_dialog.dart';
 import '../../theme/app_colors.dart';
@@ -221,8 +222,10 @@ class _TickerDetailScreenState extends State<TickerDetailScreen> {
 
     // Free user limit check (new ticker only)
     // Hybrid check: server role OR client-side RevenueCat status (webhook 지연 대비)
+    // [GOLD_PURCHASE_FLAG] 골드 구매 비활성화 시 Holdings 제한 전체 스킵.
+    // 복원: kGoldPurchaseEnabled = true → 3개 제한 + 업그레이드 다이얼로그 자동 복원.
     final isNewTicker = !portfolio.isInHoldings(ticker);
-    if (isNewTicker && !auth.isGoldOrAbove && !sub.isGoldActive && portfolio.holdings.length >= 3) {
+    if (FeatureFlags.kGoldPurchaseEnabled && isNewTicker && !auth.isGoldOrAbove && !sub.isGoldActive && portfolio.holdings.length >= 3) {
       if (!context.mounted) return;
       final upgradeResult = await showDialog<String>(
         context: context,
@@ -572,7 +575,13 @@ class _TickerDetailScreenState extends State<TickerDetailScreen> {
             const SizedBox(height: AppSpacing.xl),
 
             // 19. 실시간 토크 섹션 (커뮤니티 통합)
-            TickerCommunitySection(key: _communityKey, ticker: widget.ticker),
+            // [COMMUNITY_FLAG] 커뮤니티 비활성화 시 숨김.
+            // 복원: FeatureFlags.kCommunityEnabled = true 로 변경.
+            if (FeatureFlags.kCommunityEnabled)
+              TickerCommunitySection(
+                key: _communityKey,
+                ticker: widget.ticker,
+              ),
 
             const SizedBox(height: AppSpacing.xl),
           ],

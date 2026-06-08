@@ -8,12 +8,14 @@ import '../../providers/auth_provider.dart';
 import '../../providers/locale_provider.dart';
 import '../../providers/subscription_provider.dart';
 import '../../services/auth_service.dart';
+import '../../config/feature_flags.dart';
 import '../../widgets/common/gold_upgrade_sheet.dart';
 import '../auth/login_screen.dart';
 import '../auth/signup_screen.dart';
 import '../profile/profile_screen.dart';
 import '../admin/admin_panel_screen.dart';
 import '../community/community_feed_screen.dart';
+import 'blocked_users_screen.dart';
 import '../onboarding/investment_profile_onboarding_screen.dart';
 import '../../l10n/app_localizations.dart';
 import '../../theme/app_colors.dart';
@@ -367,8 +369,13 @@ class SettingsScreen extends StatelessWidget {
           ),
 
           // Community Section
+          // [COMMUNITY_FLAG] 커뮤니티 비활성화 시 섹션 전체 숨김.
+          // 복원: FeatureFlags.kCommunityEnabled = true 로 변경.
           Builder(
             builder: (context) {
+              if (!FeatureFlags.kCommunityEnabled) {
+                return const SizedBox.shrink();
+              }
               final l10n = AppLocalizations.of(context);
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -386,6 +393,19 @@ class SettingsScreen extends StatelessWidget {
                             context,
                             appPageRoute(
                               builder: (_) => const CommunityFeedScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                      _buildSettingsTile(
+                        context,
+                        icon: Icons.block,
+                        title: l10n.blockedUsers,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            appPageRoute(
+                              builder: (_) => const BlockedUsersScreen(),
                             ),
                           );
                         },
@@ -697,6 +717,29 @@ class SettingsScreen extends StatelessWidget {
                         );
                       }
                     },
+                  ),
+                ],
+              ),
+            ],
+          );
+        }
+
+        // [GOLD_PURCHASE_FLAG] Regular 유저 구독 섹션
+        // 복원: kGoldPurchaseEnabled = true → 기존 업그레이드 유도 UI 자동 복원.
+        if (!FeatureFlags.kGoldPurchaseEnabled) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildSectionHeader(context, l10n.subscription),
+              _buildSettingsCard(
+                context,
+                children: [
+                  _buildSettingsTile(
+                    context,
+                    icon: Icons.workspace_premium_rounded,
+                    iconColor: Colors.amber.shade700,
+                    title: l10n.goldMembershipTitle,
+                    subtitle: l10n.goldComingSoon,
                   ),
                 ],
               ),

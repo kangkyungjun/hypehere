@@ -6,6 +6,7 @@ import '../../providers/portfolio_provider.dart';
 import '../../providers/subscription_provider.dart';
 import '../../utils/error_localizer.dart';
 import '../../widgets/community/signup_prompt_dialog.dart';
+import '../../config/feature_flags.dart';
 import '../../widgets/common/gold_upgrade_sheet.dart';
 import '../../theme/app_spacing.dart';
 import '../auth/login_screen.dart';
@@ -80,8 +81,10 @@ class HoldingsScreen extends StatelessWidget {
 
     // Free user limit check — new ticker only (allow additional buy on existing)
     // Hybrid check: server role OR client-side RevenueCat status (webhook 지연 대비)
+    // [GOLD_PURCHASE_FLAG] 골드 구매 비활성화 시 Holdings 제한 전체 스킵.
+    // 복원: kGoldPurchaseEnabled = true → 3개 제한 자동 복원.
     final isNewTicker = !portfolio.isInHoldings(ticker);
-    if (isNewTicker && !auth.isGoldOrAbove && !sub.isGoldActive && portfolio.holdings.length >= 3) {
+    if (FeatureFlags.kGoldPurchaseEnabled && isNewTicker && !auth.isGoldOrAbove && !sub.isGoldActive && portfolio.holdings.length >= 3) {
       if (!context.mounted) return;
       _showHoldingsLimitDialog(context);
       return;

@@ -9,6 +9,45 @@ class AppLocalizationsJa extends AppLocalizations {
   AppLocalizationsJa([String locale = 'ja']) : super(locale);
 
   @override
+  String get blockUser => 'ユーザーをブロック';
+
+  @override
+  String blockUserConfirm(String nickname) {
+    return '$nickname さんをブロックしますか？今後このユーザーの投稿やコメントは表示されません。';
+  }
+
+  @override
+  String get userBlocked => 'ユーザーをブロックしました。';
+
+  @override
+  String get userUnblocked => 'ブロックを解除しました。';
+
+  @override
+  String get blockedUsers => 'ブロックしたユーザー';
+
+  @override
+  String get noBlockedUsers => 'ブロックしたユーザーはいません。';
+
+  @override
+  String get unblock => 'ブロック解除';
+
+  @override
+  String get termsAgreementRequired => '登録するには利用規約に同意する必要があります。';
+
+  @override
+  String get eulaZeroTolerance =>
+      'MarketLens は不適切なコンテンツや迷惑行為に対してゼロトレランス（一切容認しない）方針です。';
+
+  @override
+  String get eulaAgreePrefix => '';
+
+  @override
+  String get eulaAgreeAnd => 'および';
+
+  @override
+  String get eulaAgreeSuffix => 'に同意します。';
+
+  @override
   String get appTitle => 'MarketLens';
 
   @override

@@ -389,6 +389,50 @@ class _CommunityFeedScreenState extends State<CommunityFeedScreen> {
     }
   }
 
+  /// 게시글 작성자 차단 — 차단 즉시 해당 사용자의 게시글을 목록에서 제거
+  Future<void> _blockPostAuthor(Post post) async {
+    final l10n = AppLocalizations.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.blockUser),
+        content: Text(l10n.blockUserConfirm(post.author.nickname)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(
+              foregroundColor: context.mlColors.dangerColor,
+            ),
+            child: Text(l10n.blockUser),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    try {
+      await _apiClient.blockUser(post.author.id, postId: post.id);
+      if (!mounted) return;
+      final blockedId = post.author.id;
+      setState(() {
+        _posts.removeWhere((p) => p.author.id == blockedId);
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.userBlocked)),
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(ErrorLocalizer.getMessage(context, e))),
+        );
+      }
+    }
+  }
+
   /// 게시글 상세로 이동
   void _navigateToPostDetail(int postId) {
     Navigator.push(
@@ -753,12 +797,14 @@ class _CommunityFeedScreenState extends State<CommunityFeedScreen> {
           );
           final isOwnPost = authProvider.currentUser?.id == post.author.id;
           final canReport = authProvider.isLoggedIn && !isOwnPost;
+          final canBlock = authProvider.isLoggedIn && !isOwnPost;
           return PostCard(
             post: post,
             onTap: () => _navigateToPostDetail(post.id),
             onEdit: post.canEdit ? () => _editPost(post) : null,
             onDelete: post.canDelete ? () => _deletePost(post) : null,
             onReport: canReport ? () => _reportPost(post) : null,
+            onBlock: canBlock ? () => _blockPostAuthor(post) : null,
           );
         },
       ),

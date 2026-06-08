@@ -11,6 +11,7 @@ import '../../../theme/app_spacing.dart';
 import '../../../theme/app_typography.dart';
 import '../../../utils/multilingual.dart';
 import '../../../widgets/ads/rewarded_ad_helper.dart';
+import '../../../config/feature_flags.dart';
 import '../../../widgets/common/gold_upgrade_sheet.dart';
 
 String _formatSummaryTime(DateTime dt, AppLocalizations l10n) {
@@ -440,20 +441,22 @@ class _PortfolioAICardState extends State<PortfolioAICard> {
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
                     ),
-                    OutlinedButton.icon(
-                      onPressed: () => GoldUpgradeSheet.show(context, source: 'ai_card'),
-                      icon: Icon(Icons.workspace_premium, size: 16, color: Colors.amber.shade700),
-                      label: Text(l10n.upgradeToGold, style: const TextStyle(fontSize: AppTypography.bodySmall)),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.amber.shade700,
-                        side: BorderSide(color: Colors.amber.shade700),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: AppSpacing.md, vertical: AppSpacing.xs,
+                    // [GOLD_PURCHASE_FLAG] 구매 비활성화 시 업그레이드 버튼 숨김
+                    if (FeatureFlags.kGoldPurchaseEnabled)
+                      OutlinedButton.icon(
+                        onPressed: () => GoldUpgradeSheet.show(context, source: 'ai_card'),
+                        icon: Icon(Icons.workspace_premium, size: 16, color: Colors.amber.shade700),
+                        label: Text(l10n.upgradeToGold, style: const TextStyle(fontSize: AppTypography.bodySmall)),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.amber.shade700,
+                          side: BorderSide(color: Colors.amber.shade700),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.md, vertical: AppSpacing.xs,
+                          ),
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         ),
-                        minimumSize: Size.zero,
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
-                    ),
                   ],
                 ),
                 // X button: show previous analysis (if available)

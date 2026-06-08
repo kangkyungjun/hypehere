@@ -33,6 +33,7 @@ urlpatterns = [
     # API endpoints
     path("api/accounts/", include("accounts.urls")),
     path("api/community/", include("community.urls")),
+    path("api/moderation/", include("moderation.urls")),
     # Internal API (Mac mini)
     path("api/v1/internal/users/profiles/", internal_user_profiles_view, name="internal-user-profiles"),
     path("api/v1/internal/ingest/recommendations", ingest_recommendations_view, name="ingest-recommendations"),

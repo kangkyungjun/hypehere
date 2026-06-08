@@ -9,6 +9,45 @@ class AppLocalizationsKo extends AppLocalizations {
   AppLocalizationsKo([String locale = 'ko']) : super(locale);
 
   @override
+  String get blockUser => '사용자 차단';
+
+  @override
+  String blockUserConfirm(String nickname) {
+    return '$nickname님을 차단할까요? 이 사용자의 게시글과 댓글이 더 이상 표시되지 않습니다.';
+  }
+
+  @override
+  String get userBlocked => '사용자를 차단했습니다.';
+
+  @override
+  String get userUnblocked => '차단을 해제했습니다.';
+
+  @override
+  String get blockedUsers => '차단한 사용자';
+
+  @override
+  String get noBlockedUsers => '차단한 사용자가 없습니다.';
+
+  @override
+  String get unblock => '차단 해제';
+
+  @override
+  String get termsAgreementRequired => '가입하려면 이용약관에 동의해야 합니다.';
+
+  @override
+  String get eulaZeroTolerance =>
+      'MarketLens는 부적절한 콘텐츠와 악의적 행위에 대해 무관용 원칙을 적용합니다.';
+
+  @override
+  String get eulaAgreePrefix => '본인은 ';
+
+  @override
+  String get eulaAgreeAnd => ' 및 ';
+
+  @override
+  String get eulaAgreeSuffix => '에 동의합니다.';
+
+  @override
   String get appTitle => '마켓렌즈';
 
   @override

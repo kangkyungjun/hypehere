@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/auth_service.dart';
@@ -63,6 +65,17 @@ class _SignupScreenState extends State<SignupScreen> {
   final _passwordConfirmController = TextEditingController();
   bool _isLoading = false;
 
+  /// EULA(이용약관) 동의 여부 — Apple Guideline 1.2 (a): 가입 전 필수 동의
+  bool _agreedToTerms = false;
+
+  Future<void> _openUrl(String path) async {
+    final lang = Localizations.localeOf(context).languageCode;
+    final uri = Uri.parse('https://www.hypehere.net/marketlens/$path/?lang=$lang');
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+
   @override
   void dispose() {
     _emailController.dispose();
@@ -103,6 +116,15 @@ class _SignupScreenState extends State<SignupScreen> {
 
   Future<void> _handleSignup() async {
     if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    // EULA 미동의 시 가입 차단 (Apple Guideline 1.2 (a))
+    if (!_agreedToTerms) {
+      final l10n = AppLocalizations.of(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.termsAgreementRequired)),
+      );
       return;
     }
 
@@ -176,6 +198,77 @@ class _SignupScreenState extends State<SignupScreen> {
         setState(() => _isLoading = false);
       }
     }
+  }
+
+  /// EULA 동의 영역 — 무관용 정책 명시 + 약관/개인정보 링크 + 필수 체크박스
+  Widget _buildTermsAgreement(AppLocalizations l10n) {
+    final mlc = context.mlColors;
+    final linkStyle = TextStyle(
+      color: mlc.accentBlue,
+      decoration: TextDecoration.underline,
+      decorationColor: mlc.accentBlue,
+      fontWeight: AppTypography.semiBold,
+    );
+    final baseStyle = TextStyle(
+      color: mlc.textSecondary,
+      fontSize: AppTypography.bodySmall,
+      height: 1.45,
+    );
+
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: mlc.cardBackground,
+        border: Border.all(
+          color: _agreedToTerms
+              ? mlc.accentBlue.withValues(alpha: 0.5)
+              : mlc.subtleBorder,
+        ),
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 24,
+            height: 24,
+            child: Checkbox(
+              value: _agreedToTerms,
+              onChanged: (v) => setState(() => _agreedToTerms = v ?? false),
+            ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: GestureDetector(
+              onTap: () => setState(() => _agreedToTerms = !_agreedToTerms),
+              child: Text.rich(
+                TextSpan(
+                  style: baseStyle,
+                  children: [
+                    TextSpan(text: '${l10n.eulaZeroTolerance}\n'),
+                    TextSpan(text: l10n.eulaAgreePrefix),
+                    TextSpan(
+                      text: l10n.termsOfService,
+                      style: linkStyle,
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () => _openUrl('terms'),
+                    ),
+                    TextSpan(text: l10n.eulaAgreeAnd),
+                    TextSpan(
+                      text: l10n.privacyPolicy,
+                      style: linkStyle,
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () => _openUrl('privacy'),
+                    ),
+                    TextSpan(text: l10n.eulaAgreeSuffix),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -300,9 +393,14 @@ class _SignupScreenState extends State<SignupScreen> {
                         ],
                       ),
                     ),
+                    const SizedBox(height: AppSpacing.lg),
+                    // EULA 동의 — Apple Guideline 1.2 (a): 무관용 정책 명시 + 필수 동의
+                    _buildTermsAgreement(l10n),
                     const SizedBox(height: AppSpacing.xl),
                     FilledButton(
-                      onPressed: _isLoading ? null : _handleSignup,
+                      onPressed: (_isLoading || !_agreedToTerms)
+                          ? null
+                          : _handleSignup,
                       style: FilledButton.styleFrom(
                         padding: const EdgeInsets.symmetric(
                           vertical: AppSpacing.lg,

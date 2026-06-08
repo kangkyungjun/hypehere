@@ -1,5 +1,22 @@
 {
   "@@locale": "en",
+  "blockUser": "Block user",
+  "blockUserConfirm": "Block {nickname}? You will no longer see their posts or comments.",
+  "@blockUserConfirm": {
+    "placeholders": {
+      "nickname": { "type": "String" }
+    }
+  },
+  "userBlocked": "User blocked.",
+  "userUnblocked": "User unblocked.",
+  "blockedUsers": "Blocked users",
+  "noBlockedUsers": "You haven't blocked anyone.",
+  "unblock": "Unblock",
+  "termsAgreementRequired": "You must agree to the Terms of Service to sign up.",
+  "eulaZeroTolerance": "MarketLens has zero tolerance for objectionable content or abusive behavior.",
+  "eulaAgreePrefix": "I agree to the ",
+  "eulaAgreeAnd": " and ",
+  "eulaAgreeSuffix": ".",
 
   "appTitle": "MarketLens",
   "@appTitle": { "description": "App title" },

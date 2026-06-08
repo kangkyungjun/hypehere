@@ -9,6 +9,7 @@ import '../../utils/error_localizer.dart';
 import '../../models/ticker_score.dart';
 import '../../models/treemap_data.dart';
 import '../../widgets/community/signup_prompt_dialog.dart';
+import '../../config/feature_flags.dart';
 import '../../widgets/common/gold_upgrade_sheet.dart';
 import '../ticker_detail/ticker_detail_screen.dart';
 import '../auth/login_screen.dart';
@@ -135,10 +136,12 @@ class _WatchlistScreenState extends State<WatchlistScreen> {
 
     // 무료 유저 보유종목 3개 제한 (새 종목만 체크)
     // Hybrid check: server role OR client-side RevenueCat status (webhook 지연 대비)
+    // [GOLD_PURCHASE_FLAG] 골드 구매 비활성화 시 Holdings 제한 전체 스킵.
+    // 복원: kGoldPurchaseEnabled = true → 3개 제한 + 업그레이드 다이얼로그 자동 복원.
     final portfolio = context.read<PortfolioProvider>();
     final sub = context.read<SubscriptionProvider>();
     final isNewTicker = !portfolio.isInHoldings(ticker);
-    if (isNewTicker && !auth.isGoldOrAbove && !sub.isGoldActive && portfolio.holdings.length >= 3) {
+    if (FeatureFlags.kGoldPurchaseEnabled && isNewTicker && !auth.isGoldOrAbove && !sub.isGoldActive && portfolio.holdings.length >= 3) {
       if (!mounted) return;
       _showHoldingsLimitDialog();
       return;

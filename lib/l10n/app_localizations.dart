@@ -104,6 +104,78 @@ abstract class AppLocalizations {
     Locale('es'),
   ];
 
+  /// No description provided for @blockUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Block user'**
+  String get blockUser;
+
+  /// No description provided for @blockUserConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Block {nickname}? You will no longer see their posts or comments.'**
+  String blockUserConfirm(String nickname);
+
+  /// No description provided for @userBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'User blocked.'**
+  String get userBlocked;
+
+  /// No description provided for @userUnblocked.
+  ///
+  /// In en, this message translates to:
+  /// **'User unblocked.'**
+  String get userUnblocked;
+
+  /// No description provided for @blockedUsers.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked users'**
+  String get blockedUsers;
+
+  /// No description provided for @noBlockedUsers.
+  ///
+  /// In en, this message translates to:
+  /// **'You haven\'t blocked anyone.'**
+  String get noBlockedUsers;
+
+  /// No description provided for @unblock.
+  ///
+  /// In en, this message translates to:
+  /// **'Unblock'**
+  String get unblock;
+
+  /// No description provided for @termsAgreementRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'You must agree to the Terms of Service to sign up.'**
+  String get termsAgreementRequired;
+
+  /// No description provided for @eulaZeroTolerance.
+  ///
+  /// In en, this message translates to:
+  /// **'MarketLens has zero tolerance for objectionable content or abusive behavior.'**
+  String get eulaZeroTolerance;
+
+  /// No description provided for @eulaAgreePrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'I agree to the '**
+  String get eulaAgreePrefix;
+
+  /// No description provided for @eulaAgreeAnd.
+  ///
+  /// In en, this message translates to:
+  /// **' and '**
+  String get eulaAgreeAnd;
+
+  /// No description provided for @eulaAgreeSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'.'**
+  String get eulaAgreeSuffix;
+
   /// App title
   ///
   /// In en, this message translates to:

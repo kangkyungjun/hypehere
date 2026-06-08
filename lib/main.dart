@@ -36,6 +36,7 @@ import 'screens/ai_lens/ai_lens_screen.dart';
 import 'screens/holdings/holdings_screen.dart';
 import 'services/notification_service.dart';
 import 'screens/notifications/notification_inbox_screen.dart';
+import 'config/feature_flags.dart';
 import 'screens/ticker_detail/ticker_detail_screen.dart';
 import 'screens/community/post_detail_screen.dart';
 import 'models/news_data.dart';
@@ -745,7 +746,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         normalizedType.contains('NEWS') || target == 'news';
 
     // ── 1. 커뮤니티 (post_id) → PostDetailScreen ──
-    if (postId != null && postId.isNotEmpty) {
+    // [COMMUNITY_FLAG] 커뮤니티 비활성화 시 게시글 딥링크 무시.
+    // 복원: FeatureFlags.kCommunityEnabled = true 로 변경.
+    if (FeatureFlags.kCommunityEnabled && postId != null && postId.isNotEmpty) {
       final id = int.tryParse(postId);
       if (id != null) {
         Navigator.push(

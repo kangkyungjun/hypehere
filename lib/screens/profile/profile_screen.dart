@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import '../../config/feature_flags.dart';
 import '../../providers/auth_provider.dart';
 import '../../models/community/post.dart';
 import '../../models/community/comment.dart';
@@ -61,6 +62,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   /// 내 활동 내역 로드
   Future<void> _loadMyActivity() async {
+    // [COMMUNITY_FLAG] 커뮤니티 비활성화 시 내 게시글/댓글 로드 자체를 건너뜀.
+    if (!FeatureFlags.kCommunityEnabled) {
+      if (mounted) {
+        setState(() {
+          _isLoadingPosts = false;
+          _isLoadingComments = false;
+        });
+      }
+      return;
+    }
+
     setState(() {
       _isLoadingPosts = true;
       _isLoadingComments = true;
@@ -269,15 +281,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                 const SizedBox(height: AppSpacing.xxl),
 
-                // 내 게시글 섹션
-                _buildMyPostsSection(),
+                // 내 게시글 / 내 댓글 섹션
+                // [COMMUNITY_FLAG] 커뮤니티 비활성화 시 숨김.
+                // 복원: FeatureFlags.kCommunityEnabled = true 로 변경.
+                if (FeatureFlags.kCommunityEnabled) ...[
+                  // 내 게시글 섹션
+                  _buildMyPostsSection(),
 
-                const SizedBox(height: AppSpacing.xxl),
+                  const SizedBox(height: AppSpacing.xxl),
 
-                // 내 댓글 섹션
-                _buildMyCommentsSection(),
+                  // 내 댓글 섹션
+                  _buildMyCommentsSection(),
 
-                const SizedBox(height: AppSpacing.xxl),
+                  const SizedBox(height: AppSpacing.xxl),
+                ],
 
                 // 비밀번호 변경
                 _buildChangePasswordTile(),

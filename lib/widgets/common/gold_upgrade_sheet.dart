@@ -3,6 +3,7 @@ import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../config/feature_flags.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/auth_provider.dart';
 import '../../screens/auth/login_screen.dart';
@@ -20,7 +21,16 @@ class GoldUpgradeSheet extends StatefulWidget {
 
   const GoldUpgradeSheet({super.key, required this.source});
 
+  // [GOLD_PURCHASE_FLAG] 골드 구매 비활성화 시 Coming Soon 스낵바 표시.
+  // 복원: FeatureFlags.kGoldPurchaseEnabled = true 로 변경하면 이 분기 자동 비활성화.
   static Future<void> show(BuildContext context, {required String source}) {
+    if (!FeatureFlags.kGoldPurchaseEnabled) {
+      final l10n = AppLocalizations.of(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.goldComingSoon)),
+      );
+      return Future.value();
+    }
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,

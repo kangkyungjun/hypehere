@@ -15,6 +15,7 @@ class PostCard extends StatelessWidget {
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
   final VoidCallback? onReport;
+  final VoidCallback? onBlock;
 
   /// When true, removes horizontal padding and divider (for embedded use)
   final bool compact;
@@ -26,6 +27,7 @@ class PostCard extends StatelessWidget {
     this.onEdit,
     this.onDelete,
     this.onReport,
+    this.onBlock,
     this.compact = false,
   });
 
@@ -103,8 +105,11 @@ class PostCard extends StatelessWidget {
                     color: context.mlColors.textTertiary,
                   ),
                 ),
-                // 수정/삭제/신고 메뉴
-                if (onEdit != null || onDelete != null || onReport != null)
+                // 수정/삭제/신고/차단 메뉴
+                if (onEdit != null ||
+                    onDelete != null ||
+                    onReport != null ||
+                    onBlock != null)
                   SizedBox(
                     width: 32,
                     height: 32,
@@ -123,6 +128,8 @@ class PostCard extends StatelessWidget {
                           onDelete?.call();
                         } else if (value == 'report') {
                           onReport?.call();
+                        } else if (value == 'block') {
+                          onBlock?.call();
                         }
                       },
                       itemBuilder: (context) => [
@@ -187,6 +194,31 @@ class PostCard extends StatelessWidget {
                                   l10n.report,
                                   style: TextStyle(
                                     color: context.mlColors.reportColor,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        if (onBlock != null)
+                          PopupMenuItem(
+                            value: 'block',
+                            height: 24,
+                            padding: const EdgeInsets.only(
+                              left: AppSpacing.md,
+                              right: AppSpacing.xl,
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.block,
+                                  size: 18,
+                                  color: context.mlColors.dangerColor,
+                                ),
+                                const SizedBox(width: AppSpacing.md),
+                                Text(
+                                  l10n.blockUser,
+                                  style: TextStyle(
+                                    color: context.mlColors.dangerColor,
                                   ),
                                 ),
                               ],

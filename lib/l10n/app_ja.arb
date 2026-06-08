@@ -1,5 +1,22 @@
 {
   "@@locale": "ja",
+  "blockUser": "ユーザーをブロック",
+  "blockUserConfirm": "{nickname} さんをブロックしますか？今後このユーザーの投稿やコメントは表示されません。",
+  "@blockUserConfirm": {
+    "placeholders": {
+      "nickname": { "type": "String" }
+    }
+  },
+  "userBlocked": "ユーザーをブロックしました。",
+  "userUnblocked": "ブロックを解除しました。",
+  "blockedUsers": "ブロックしたユーザー",
+  "noBlockedUsers": "ブロックしたユーザーはいません。",
+  "unblock": "ブロック解除",
+  "termsAgreementRequired": "登録するには利用規約に同意する必要があります。",
+  "eulaZeroTolerance": "MarketLens は不適切なコンテンツや迷惑行為に対してゼロトレランス（一切容認しない）方針です。",
+  "eulaAgreePrefix": "",
+  "eulaAgreeAnd": "および",
+  "eulaAgreeSuffix": "に同意します。",
 
   "appTitle": "MarketLens",
 

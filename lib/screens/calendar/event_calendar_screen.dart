@@ -15,6 +15,7 @@ import '../../theme/app_typography.dart';
 import '../../widgets/ads/banner_ad_widget.dart';
 import '../../widgets/ads/rewarded_ad_helper.dart';
 import '../../widgets/common/empty_state_view.dart';
+import '../../config/feature_flags.dart';
 import '../../widgets/common/gold_upgrade_sheet.dart';
 import '../ticker_detail/ticker_detail_screen.dart';
 
@@ -466,16 +467,19 @@ class _EventCalendarScreenState extends State<EventCalendarScreen> {
                         textStyle: const TextStyle(fontSize: AppTypography.bodySmall),
                       ),
                     ),
-                    const SizedBox(width: AppSpacing.sm),
-                    OutlinedButton.icon(
-                      onPressed: () => GoldUpgradeSheet.show(context, source: 'calendar'),
-                      icon: const Icon(Icons.workspace_premium, size: 18),
-                      label: Text(l10n.upgradeToGold),
-                      style: OutlinedButton.styleFrom(
-                        visualDensity: VisualDensity.compact,
-                        textStyle: const TextStyle(fontSize: AppTypography.bodySmall),
+                    // [GOLD_PURCHASE_FLAG] 구매 비활성화 시 업그레이드 버튼 숨김
+                    if (FeatureFlags.kGoldPurchaseEnabled) ...[
+                      const SizedBox(width: AppSpacing.sm),
+                      OutlinedButton.icon(
+                        onPressed: () => GoldUpgradeSheet.show(context, source: 'calendar'),
+                        icon: const Icon(Icons.workspace_premium, size: 18),
+                        label: Text(l10n.upgradeToGold),
+                        style: OutlinedButton.styleFrom(
+                          visualDensity: VisualDensity.compact,
+                          textStyle: const TextStyle(fontSize: AppTypography.bodySmall),
+                        ),
                       ),
-                    ),
+                    ],
                   ],
                 ),
               ],

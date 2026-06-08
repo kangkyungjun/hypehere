@@ -1,8 +1,22 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from .models import Post, Comment, PostLike, CommentLike
+from moderation.filters import contains_objectionable
 
 User = get_user_model()
+
+# 부적절 콘텐츠 거부 메시지 (클라이언트에서 'objectionable' 키워드로 분기)
+OBJECTIONABLE_MESSAGE = (
+    '부적절한 표현이 포함되어 등록할 수 없습니다. '
+    '(Objectionable content is not allowed.)'
+)
+
+
+def _reject_if_objectionable(*texts):
+    """주어진 텍스트 중 하나라도 금칙어 포함 시 ValidationError 발생."""
+    for text in texts:
+        if text and contains_objectionable(text):
+            raise serializers.ValidationError(OBJECTIONABLE_MESSAGE)
 
 
 class CustomUserSerializer(serializers.ModelSerializer):
@@ -107,6 +121,11 @@ class PostSerializer(serializers.ModelSerializer):
                 or request.user.is_staff
                 or getattr(request.user, 'role', None) in ('master', 'manager'))
 
+    def validate(self, attrs):
+        """게시글 제목/내용 부적절 표현 차단 (무관용)"""
+        _reject_if_objectionable(attrs.get('title'), attrs.get('content'))
+        return attrs
+
     def create(self, validated_data):
         """게시글 생성 시 author 자동 설정"""
         request = self.context.get('request')
@@ -180,6 +199,11 @@ class CommentSerializer(serializers.ModelSerializer):
         replies = obj.replies.filter(is_deleted=False).order_by('created_at')
         return CommentSerializer(replies, many=True, context=self.context).data
 
+    def validate(self, attrs):
+        """댓글 내용 부적절 표현 차단 (무관용). content는 initial_data에서 확인."""
+        _reject_if_objectionable(self.initial_data.get('content'))
+        return attrs
+
     def create(self, validated_data):
         """댓글 생성 시 author 자동 설정"""
         request = self.context.get('request')
@@ -192,6 +216,7 @@ class CommentSerializer(serializers.ModelSerializer):
         """댓글 수정 - content는 SerializerMethodField이므로 직접 처리"""
         content = self.initial_data.get('content')
         if content is not None:
+            _reject_if_objectionable(content)
             instance.content = content
         instance.save()
         return instance

@@ -1,5 +1,17 @@
 from django.contrib import admin
-from .models import PostReport, CommentReport
+from .models import PostReport, CommentReport, BlockedUser
+
+
+@admin.register(BlockedUser)
+class BlockedUserAdmin(admin.ModelAdmin):
+    """사용자 차단 관리자 (차단 발생 모니터링 — 개발자 통보)"""
+
+    list_display = ['id', 'blocker', 'blocked', 'reason', 'created_at']
+    list_filter = ['created_at']
+    search_fields = ['blocker__nickname', 'blocked__nickname', 'reason']
+    ordering = ['-created_at']
+    readonly_fields = ['created_at']
+    raw_id_fields = ['blocker', 'blocked', 'context_post', 'context_comment']
 
 
 @admin.register(PostReport)

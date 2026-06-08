@@ -12,6 +12,7 @@ class CommentCard extends StatelessWidget {
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
   final VoidCallback? onReport;
+  final VoidCallback? onBlock;
   final VoidCallback? onLike;
 
   const CommentCard({
@@ -20,6 +21,7 @@ class CommentCard extends StatelessWidget {
     this.onEdit,
     this.onDelete,
     this.onReport,
+    this.onBlock,
     this.onLike,
   });
 
@@ -46,7 +48,10 @@ class CommentCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final isLocked = comment.isLocked;
-    final showMenu = onEdit != null || onDelete != null || onReport != null;
+    final showMenu = onEdit != null ||
+        onDelete != null ||
+        onReport != null ||
+        onBlock != null;
 
     return Padding(
       padding: const EdgeInsets.symmetric(
@@ -98,6 +103,8 @@ class CommentCard extends StatelessWidget {
                           onDelete?.call();
                         } else if (value == 'report') {
                           onReport?.call();
+                        } else if (value == 'block') {
+                          onBlock?.call();
                         }
                       },
                       itemBuilder: (context) => [
@@ -162,6 +169,31 @@ class CommentCard extends StatelessWidget {
                                   l10n.report,
                                   style: TextStyle(
                                     color: context.mlColors.reportColor,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        if (onBlock != null)
+                          PopupMenuItem(
+                            value: 'block',
+                            height: 24,
+                            padding: const EdgeInsets.only(
+                              left: AppSpacing.md,
+                              right: AppSpacing.xl,
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.block,
+                                  size: 18,
+                                  color: context.mlColors.dangerColor,
+                                ),
+                                const SizedBox(width: AppSpacing.md),
+                                Text(
+                                  l10n.blockUser,
+                                  style: TextStyle(
+                                    color: context.mlColors.dangerColor,
                                   ),
                                 ),
                               ],

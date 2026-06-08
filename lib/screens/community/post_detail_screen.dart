@@ -635,6 +635,83 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     }
   }
 
+  /// 사용자 차단 확인 다이얼로그
+  Future<bool> _confirmBlock(String nickname) async {
+    final l10n = AppLocalizations.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.blockUser),
+        content: Text(l10n.blockUserConfirm(nickname)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(
+              foregroundColor: context.mlColors.dangerColor,
+            ),
+            child: Text(l10n.blockUser),
+          ),
+        ],
+      ),
+    );
+    return confirmed == true;
+  }
+
+  /// 게시글 작성자 차단 — 차단 후 피드로 복귀
+  Future<void> _blockPostAuthor() async {
+    if (_post == null) return;
+    final author = _post!.author;
+    if (!await _confirmBlock(author.nickname)) return;
+
+    try {
+      await _apiClient.blockUser(author.id, postId: _post!.id);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppLocalizations.of(context).userBlocked)),
+        );
+        // 차단된 사용자의 콘텐츠를 피드에서 즉시 제거하기 위해 새로고침 신호와 함께 복귀
+        Navigator.pop(context, true);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(ErrorLocalizer.getMessage(context, e))),
+        );
+      }
+    }
+  }
+
+  /// 댓글 작성자 차단 — 해당 사용자의 댓글을 목록에서 즉시 제거
+  Future<void> _blockCommentAuthor(Comment comment) async {
+    if (!await _confirmBlock(comment.author.nickname)) return;
+
+    try {
+      await _apiClient.blockUser(
+        comment.author.id,
+        postId: widget.postId,
+        commentId: comment.id,
+      );
+      if (!mounted) return;
+      final blockedId = comment.author.id;
+      setState(() {
+        _comments.removeWhere((c) => c.author.id == blockedId);
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(context).userBlocked)),
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(ErrorLocalizer.getMessage(context, e))),
+        );
+      }
+    }
+  }
+
   /// Ticker 배지 색상 (PostCard와 동일)
   Color _getTickerColor(String ticker) => BadgeColors.tickerBadge(ticker);
 
@@ -673,8 +750,9 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                 final isOwnPost =
                     authProvider.currentUser?.id == _post!.author.id;
                 final canReport = authProvider.isLoggedIn && !isOwnPost;
+                final canBlock = authProvider.isLoggedIn && !isOwnPost;
                 final showMenu =
-                    _post!.canEdit || _post!.canDelete || canReport;
+                    _post!.canEdit || _post!.canDelete || canReport || canBlock;
                 if (!showMenu) return const SizedBox.shrink();
                 return PopupMenuButton<String>(
                   onSelected: (value) {
@@ -684,6 +762,8 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                       _deletePost();
                     } else if (value == 'report') {
                       _reportPost();
+                    } else if (value == 'block') {
+                      _blockPostAuthor();
                     }
                   },
                   itemBuilder: (context) => [
@@ -748,6 +828,31 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                               AppLocalizations.of(context).report,
                               style: TextStyle(
                                 color: context.mlColors.reportColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    if (canBlock)
+                      PopupMenuItem(
+                        value: 'block',
+                        height: 24,
+                        padding: const EdgeInsets.only(
+                          left: AppSpacing.md,
+                          right: AppSpacing.xl,
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.block,
+                              size: 20,
+                              color: context.mlColors.dangerColor,
+                            ),
+                            const SizedBox(width: AppSpacing.md),
+                            Text(
+                              AppLocalizations.of(context).blockUser,
+                              style: TextStyle(
+                                color: context.mlColors.dangerColor,
                               ),
                             ),
                           ],
@@ -1104,12 +1209,14 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final isOwnComment = authProvider.currentUser?.id == comment.author.id;
       final canReportComment = authProvider.isLoggedIn && !isOwnComment;
+      final canBlockComment = authProvider.isLoggedIn && !isOwnComment;
       widgets.add(
         CommentCard(
           comment: comment,
           onEdit: comment.canEdit ? () => _editComment(comment) : null,
           onDelete: comment.canDelete ? () => _deleteComment(comment) : null,
           onReport: canReportComment ? () => _reportComment(comment) : null,
+          onBlock: canBlockComment ? () => _blockCommentAuthor(comment) : null,
           onLike: () => _toggleCommentLike(comment),
         ),
       );

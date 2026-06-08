@@ -9,6 +9,44 @@ class AppLocalizationsZh extends AppLocalizations {
   AppLocalizationsZh([String locale = 'zh']) : super(locale);
 
   @override
+  String get blockUser => '屏蔽用户';
+
+  @override
+  String blockUserConfirm(String nickname) {
+    return '要屏蔽 $nickname 吗？您将不再看到该用户的帖子和评论。';
+  }
+
+  @override
+  String get userBlocked => '已屏蔽该用户。';
+
+  @override
+  String get userUnblocked => '已解除屏蔽。';
+
+  @override
+  String get blockedUsers => '已屏蔽的用户';
+
+  @override
+  String get noBlockedUsers => '您还没有屏蔽任何用户。';
+
+  @override
+  String get unblock => '解除屏蔽';
+
+  @override
+  String get termsAgreementRequired => '注册前必须同意服务条款。';
+
+  @override
+  String get eulaZeroTolerance => 'MarketLens 对不当内容和滥用行为采取零容忍政策。';
+
+  @override
+  String get eulaAgreePrefix => '我同意';
+
+  @override
+  String get eulaAgreeAnd => '和';
+
+  @override
+  String get eulaAgreeSuffix => '。';
+
+  @override
   String get appTitle => 'MarketLens';
 
   @override

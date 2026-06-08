@@ -11,6 +11,13 @@ import 'auth_service.dart';
 class CommunityApiClient {
   static final String _baseUrl =
       dotenv.env['COMMUNITY_API_BASE_URL'] ?? 'http://43.201.45.60:8000/api/community';
+
+  /// 모더레이션(차단) API base — community와 동일 Django 프로젝트의 /api/moderation/
+  static final String _moderationBaseUrl = _baseUrl.replaceFirst(
+    RegExp(r'/community/?$'),
+    '/moderation',
+  );
+
   final AuthService _authService = AuthService();
 
   // Helper method to get headers with auth token
@@ -576,6 +583,80 @@ class CommunityApiClient {
           debugMessage: detail, statusCode: 400);
     } else {
       throw ApiException(ApiErrorCode.reportFailed, statusCode: response.statusCode);
+    }
+  }
+
+  // ========================================
+  // 사용자 차단 (Moderation) — Apple Guideline 1.2 (d)
+  // ========================================
+
+  /// 사용자 차단. 차단 즉시 해당 사용자의 콘텐츠가 피드에서 제거됨.
+  /// [postId]/[commentId]는 차단 컨텍스트(개발자 통보/검토용, 선택).
+  Future<void> blockUser(
+    int userId, {
+    int? postId,
+    int? commentId,
+    String reason = '',
+  }) async {
+    final response = await _makeAuthenticatedRequest((headers) {
+      return http.post(
+        Uri.parse('$_moderationBaseUrl/users/$userId/block/'),
+        headers: headers,
+        body: jsonEncode({
+          if (postId != null) 'post_id': postId,
+          if (commentId != null) 'comment_id': commentId,
+          'reason': reason,
+        }),
+      );
+    });
+
+    if (response.statusCode == 201 || response.statusCode == 200) {
+      return;
+    } else if (response.statusCode == 401) {
+      throw ApiException(ApiErrorCode.loginRequired, statusCode: 401);
+    } else {
+      throw ApiException(ApiErrorCode.genericError,
+          debugMessage: 'Failed to block user', statusCode: response.statusCode);
+    }
+  }
+
+  /// 차단 해제.
+  Future<void> unblockUser(int userId) async {
+    final response = await _makeAuthenticatedRequest((headers) {
+      return http.delete(
+        Uri.parse('$_moderationBaseUrl/users/$userId/unblock/'),
+        headers: headers,
+      );
+    });
+
+    if (response.statusCode == 204 || response.statusCode == 404) {
+      return;
+    } else if (response.statusCode == 401) {
+      throw ApiException(ApiErrorCode.loginRequired, statusCode: 401);
+    } else {
+      throw ApiException(ApiErrorCode.genericError,
+          debugMessage: 'Failed to unblock user', statusCode: response.statusCode);
+    }
+  }
+
+  /// 내가 차단한 사용자 목록.
+  Future<List<Map<String, dynamic>>> getBlockedUsers() async {
+    final response = await _makeAuthenticatedRequest((headers) {
+      return http.get(
+        Uri.parse('$_moderationBaseUrl/users/blocked/'),
+        headers: headers,
+      );
+    });
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      final List results = data is List ? data : (data['results'] as List? ?? []);
+      return results.cast<Map<String, dynamic>>();
+    } else if (response.statusCode == 401) {
+      throw ApiException(ApiErrorCode.loginRequired, statusCode: 401);
+    } else {
+      throw ApiException(ApiErrorCode.genericError,
+          debugMessage: 'Failed to load blocked users', statusCode: response.statusCode);
     }
   }
 

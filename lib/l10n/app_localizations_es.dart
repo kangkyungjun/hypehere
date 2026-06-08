@@ -9,6 +9,46 @@ class AppLocalizationsEs extends AppLocalizations {
   AppLocalizationsEs([String locale = 'es']) : super(locale);
 
   @override
+  String get blockUser => 'Bloquear usuario';
+
+  @override
+  String blockUserConfirm(String nickname) {
+    return '¿Bloquear a $nickname? Ya no verás sus publicaciones ni comentarios.';
+  }
+
+  @override
+  String get userBlocked => 'Usuario bloqueado.';
+
+  @override
+  String get userUnblocked => 'Usuario desbloqueado.';
+
+  @override
+  String get blockedUsers => 'Usuarios bloqueados';
+
+  @override
+  String get noBlockedUsers => 'No has bloqueado a nadie.';
+
+  @override
+  String get unblock => 'Desbloquear';
+
+  @override
+  String get termsAgreementRequired =>
+      'Debes aceptar los Términos de servicio para registrarte.';
+
+  @override
+  String get eulaZeroTolerance =>
+      'MarketLens tiene tolerancia cero con el contenido objetable o el comportamiento abusivo.';
+
+  @override
+  String get eulaAgreePrefix => 'Acepto los ';
+
+  @override
+  String get eulaAgreeAnd => ' y la ';
+
+  @override
+  String get eulaAgreeSuffix => '.';
+
+  @override
   String get appTitle => 'MarketLens';
 
   @override

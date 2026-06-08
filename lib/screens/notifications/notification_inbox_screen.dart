@@ -7,6 +7,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+import '../../config/feature_flags.dart';
 import '../../l10n/app_localizations.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_spacing.dart';
@@ -179,7 +180,11 @@ class _NotificationInboxScreenState extends State<NotificationInboxScreen> {
     // 개별 읽음 처리
     _markSingleRead(item);
 
-    if (item.isCommunityNotification && item.postId != null) {
+    // [COMMUNITY_FLAG] 커뮤니티 비활성화 시 게시글 알림 탭은 무시(딥링크 차단).
+    // 복원: FeatureFlags.kCommunityEnabled = true 로 변경.
+    if (FeatureFlags.kCommunityEnabled &&
+        item.isCommunityNotification &&
+        item.postId != null) {
       Navigator.push(
         context,
         MaterialPageRoute(
