@@ -216,6 +216,13 @@ EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', 'marketlens.service@gmail.com')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'marketlens.service@gmail.com')
 
+# Ops alerts — 광고 로드 실패 등 운영 이상 통지 (owner 이메일 + master/manager FCM)
+ALERT_OWNER_EMAIL = os.getenv('ALERT_OWNER_EMAIL', 'kangkyungjun88@gmail.com')
+# 스팸 방지: 광고 실패 알림은 이 초(기본 30분) 윈도 내 1회만 발송
+AD_FAILURE_ALERT_THROTTLE_SECONDS = int(
+    os.getenv('AD_FAILURE_ALERT_THROTTLE_SECONDS', '1800')
+)
+
 # Email verification settings
 VERIFICATION_CODE_EXPIRY_MINUTES = 10
 VERIFICATION_CODE_MAX_ATTEMPTS = 5

@@ -102,9 +102,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settingsTooltip => '설정';
 
   @override
-  String get compareTickers => '종목 비교';
-
-  @override
   String get account => '계정';
 
   @override
@@ -297,6 +294,25 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get marketLensAIScore => 'AI 점수';
+
+  @override
+  String get aiTabAnalysis => 'AI분석';
+
+  @override
+  String get aiTabStocks => 'AI종목';
+
+  @override
+  String get aiAnalysisComingSoonTitle => '대화형 AI 분석';
+
+  @override
+  String get aiAnalysisComingSoonBody =>
+      '메신저처럼 질문하면 AI가 시장과 종목을 분석해 드립니다. 기능 구현 예정입니다.';
+
+  @override
+  String get comingSoonBadge => '출시 예정';
+
+  @override
+  String get aiNoStocksInSegment => '해당 구간 종목이 없습니다';
 
   @override
   String get distributionShownOnFullLoad => '전체 시그널 로딩 시 분포 표시';
@@ -1409,9 +1425,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get errDemotionFailed => '강등 실패';
 
   @override
-  String get errMaxCompare => '최대 3개까지 비교 가능합니다';
-
-  @override
   String get today => '오늘';
 
   @override
@@ -1813,6 +1826,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get aiRecommendations => '추천사항';
 
   @override
+  String get todayPicks => '오늘의 추천 종목';
+
+  @override
   String get recPortfolioOverview => '포트폴리오 개요';
 
   @override
@@ -1937,6 +1953,24 @@ class AppLocalizationsKo extends AppLocalizations {
   String get aiRefreshOnChange => '종목 변경 시 자동 갱신';
 
   @override
+  String get aiUpdateButton => 'AI 분석 업데이트';
+
+  @override
+  String get aiUpdating => '분석 업데이트 중…';
+
+  @override
+  String get aiNoChangeToAnalyze => '변경 사항이 없어 새 분석이 필요하지 않습니다';
+
+  @override
+  String get aiAnalysisOnDemandHint => '포트폴리오 변경 또는 날짜가 바뀌면 업데이트할 수 있어요';
+
+  @override
+  String get aiUpdateInProgressHint => '분석 생성 중… 최대 1분 정도 걸려요.';
+
+  @override
+  String get aiUpdateDelayed => '분석 생성이 조금 지연되고 있어요. 잠시 후 자동으로 반영됩니다.';
+
+  @override
   String lastUpdateTime(String time) {
     return '마지막 업데이트: $time';
   }
@@ -2037,6 +2071,29 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String newsBubbleMentions(int count) {
+    return '$count건';
+  }
+
+  @override
+  String get newsSentiment24hTitle => '최근 24시간';
+
+  @override
+  String get newsBullish => '강세뉴스';
+
+  @override
+  String get newsNeutral => '중립뉴스';
+
+  @override
+  String get newsBearish => '약세뉴스';
+
+  @override
+  String get keyNewsTitle => '금일 핵심 뉴스';
+
+  @override
+  String get viewTickerDetail => '종목으로 이동';
+
+  @override
+  String newsCountUnit(int count) {
     return '$count건';
   }
 
@@ -2145,6 +2202,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get losersTop => '하락률';
 
   @override
+  String get volumeTop => '거래량';
+
+  @override
   String get topByMarketCap => '시가총액 상위';
 
   @override
@@ -2177,6 +2237,9 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get holdingsSummary => '보유현황';
+
+  @override
+  String get investmentReturn => '투자 수익률';
 
   @override
   String get returnRate => '수익률';
@@ -2348,7 +2411,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get watchlistSubtitle => '관심 종목을 모아보세요';
 
   @override
-  String get holdingsSubtitle => '보유 중인 종목을 관리하세요';
+  String get wlTargetPrice => '목표가';
+
+  @override
+  String get wlPrice1mAgo => '1개월';
+
+  @override
+  String get wlPrice3mAgo => '3개월';
 
   @override
   String get filterActiveLabel => '필터 적용 중';

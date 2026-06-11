@@ -166,7 +166,8 @@ class MarketLensApp extends StatelessWidget {
           brightness: Brightness.light,
           surface: MarketLensColors.light.cardBackground,
         ),
-        scaffoldBackgroundColor: MarketLensColors.light.sectionBackground,
+        // 에디토리얼 청킹: 페이지 배경을 연회색으로 → 흰 카드가 떠 보임
+        scaffoldBackgroundColor: MarketLensColors.light.groupedBackground,
         useMaterial3: true,
         extensions: const [MarketLensColors.light],
         dividerTheme: DividerThemeData(
@@ -210,7 +211,7 @@ class MarketLensApp extends StatelessWidget {
         ),
         chipTheme: ChipThemeData(
           backgroundColor: Colors.transparent,
-          selectedColor: MarketLensColors.light.infoBg,
+          selectedColor: MarketLensColors.light.accentBlue,
           disabledColor: Colors.transparent,
           side: BorderSide(
             color: MarketLensColors.light.subtleBorder.withValues(alpha: 0.55),
@@ -220,6 +221,12 @@ class MarketLensApp extends StatelessWidget {
           ),
           labelStyle: TextStyle(
             color: MarketLensColors.light.textSecondary,
+            fontSize: AppTypography.bodySmall,
+            fontWeight: AppTypography.semiBold,
+          ),
+          // 솔리드 활성 칩: 선택 시 라벨 흰색 (오늘의집 톤)
+          secondaryLabelStyle: TextStyle(
+            color: MarketLensColors.light.onPrimary,
             fontSize: AppTypography.bodySmall,
             fontWeight: AppTypography.semiBold,
           ),
@@ -294,7 +301,8 @@ class MarketLensApp extends StatelessWidget {
           brightness: Brightness.dark,
           surface: MarketLensColors.dark.cardBackground,
         ),
-        scaffoldBackgroundColor: MarketLensColors.dark.sectionBackground,
+        // 에디토리얼 청킹: 페이지 배경을 카드보다 어둡게 → 카드 분리감
+        scaffoldBackgroundColor: MarketLensColors.dark.groupedBackground,
         useMaterial3: true,
         extensions: const [MarketLensColors.dark],
         dividerTheme: DividerThemeData(
@@ -335,7 +343,7 @@ class MarketLensApp extends StatelessWidget {
         ),
         chipTheme: ChipThemeData(
           backgroundColor: Colors.transparent,
-          selectedColor: MarketLensColors.dark.infoBg,
+          selectedColor: MarketLensColors.dark.accentBlue,
           disabledColor: Colors.transparent,
           side: BorderSide(
             color: MarketLensColors.dark.subtleBorder.withValues(alpha: 0.55),
@@ -345,6 +353,12 @@ class MarketLensApp extends StatelessWidget {
           ),
           labelStyle: TextStyle(
             color: MarketLensColors.dark.textSecondary,
+            fontSize: AppTypography.bodySmall,
+            fontWeight: AppTypography.semiBold,
+          ),
+          // 솔리드 활성 칩: 선택 시 라벨 흰색 (오늘의집 톤)
+          secondaryLabelStyle: TextStyle(
+            color: MarketLensColors.dark.onPrimary,
             fontSize: AppTypography.bodySmall,
             fontWeight: AppTypography.semiBold,
           ),
@@ -1005,6 +1019,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     final l10n = AppLocalizations.of(context);
 
     return Scaffold(
+      // 하단 플로팅 탭바 뒤로 body를 확장 → pill 주변이 투명해져 페이지가 비쳐 보임
+      extendBody: true,
       appBar: AppBar(
         toolbarHeight: 34,
         title: const Text(
@@ -1089,7 +1105,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       (
         icon: Icons.auto_awesome_outlined,
         activeIcon: Icons.auto_awesome_rounded,
-        label: l10n.tabAIAnalysis,
+        label: l10n.tabAILens,
         tooltip: l10n.tabAILensTooltip,
       ),
       (

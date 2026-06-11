@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'ad_failure_reporter.dart';
 
 /// 보상형 광고 매니저 (Rewarded Ad)
 ///
@@ -48,6 +49,8 @@ class RewardedAdHelper {
         onAdFailedToLoad: (error) {
           debugPrint('[AdMob] 보상형 광고 로드 실패: $error');
           _isAdLoaded = false;
+          // 운영 알림: 광고 로드 실패를 백엔드에 보고(세션당 1회) → owner/매니저 통지 + owner 이메일
+          AdFailureReporter.report(error.toString(), adUnit: 'rewarded');
         },
       ),
     );

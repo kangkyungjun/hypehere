@@ -7,19 +7,16 @@ import '../../models/indices_data.dart';
 import '../../models/ticker_score.dart';
 import '../ticker_detail/ticker_detail_screen.dart';
 import '../../widgets/ads/banner_ad_widget.dart';
-import '../../widgets/charts/treemap_chart_widget.dart';
 import '../../widgets/charts/macro_banner_widget.dart';
 import '../../widgets/dashboard/indices_bar_widget.dart';
-import '../../theme/app_colors.dart';
-import '../../theme/app_radius.dart';
+import '../../widgets/dashboard/recommendation_carousel.dart';
+import '../../widgets/dashboard/sector_bar_chart_widget.dart';
+import 'sector_overview_screen.dart';
 import '../../widgets/common/bento_card.dart';
 import '../../theme/app_spacing.dart';
-import '../../theme/app_typography.dart';
 import '../../l10n/app_localizations.dart';
 import '../../widgets/common/error_state_view.dart';
-import '../../widgets/common/coach_mark_overlay.dart';
 import '../../widgets/common/market_segmented_tabs.dart';
-import '../../providers/coach_mark_provider.dart';
 import 'widgets/top_stocks_section.dart';
 import 'widgets/up_down_tab.dart';
 import 'widgets/indexes_tab.dart';
@@ -65,6 +62,16 @@ class _DashboardScreenState extends State<DashboardScreen>
   bool _isLoading = true;
   String? _error;
 
+  /// 매크로 지표에서 VIX(VIXCLS) 추출 — 섹터 막대 차트 하단 표시용
+  MacroIndicator? get _vixIndicator {
+    final list = _macroData?.indicators;
+    if (list == null) return null;
+    for (final i in list) {
+      if (i.indicatorCode == 'VIXCLS') return i;
+    }
+    return null;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -93,7 +100,7 @@ class _DashboardScreenState extends State<DashboardScreen>
         _apiClient.getMacroIndicators().catchError((e) => e),
         _apiClient.getMacroSignals().catchError((e) => e),
         _apiClient.getMarketIndices().catchError((e) => e),
-        _apiClient.getTopTickers(limit: 5).catchError((e) => e),
+        _apiClient.getTopByMarketCap(limit: 5).catchError((e) => e),
       ]);
 
       TreemapData? treemap;
@@ -242,11 +249,12 @@ class _DashboardScreenState extends State<DashboardScreen>
       onRefresh: _loadData,
       child: ListView(
         key: const PageStorageKey('dashboard_today'),
-        padding: const EdgeInsets.fromLTRB(
+        padding: EdgeInsets.fromLTRB(
           AppSpacing.xl,
           AppSpacing.md,
           AppSpacing.xl,
-          AppSpacing.lg,
+          // 플로팅 탭바(extendBody) 뒤로 마지막 콘텐츠가 가리지 않도록 하단 여백 확보
+          MediaQuery.of(context).viewPadding.bottom + 64,
         ),
         children: [
           // ===== Macro Banner Card =====
@@ -269,7 +277,7 @@ class _DashboardScreenState extends State<DashboardScreen>
             ),
           ),
           if (_macroData != null || _signalsData != null)
-            const SizedBox(height: AppSpacing.xl),
+            const SizedBox(height: AppSpacing.sm),
 
           // ===== Indices Bar (S&P, NASDAQ, DOW) — individual cards =====
           IndicesBarWidget(
@@ -282,44 +290,63 @@ class _DashboardScreenState extends State<DashboardScreen>
             },
           ),
           if (_indicesData != null && _indicesData!.indices.isNotEmpty)
-            const SizedBox(height: AppSpacing.xl),
+            const SizedBox(height: AppSpacing.sm),
 
-          // ===== Treemap Card (header + chart combined) =====
-          CoachMark(
-            coachKey: CoachMarkProvider.keyDashboardTreemap,
-            message: AppLocalizations.of(context).coachMarkDashboardTreemap,
-            child: BentoCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildTreemapHeader(),
-                  const SizedBox(height: AppSpacing.md),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.xs,
-                    ),
-                    child: Text(
-                      AppLocalizations.of(context).treemapLegend,
-                      style: TextStyle(
-                        fontSize: AppTypography.caption,
-                        color: Theme.of(context).colorScheme.outline,
+          // ===== 오늘의 추천 종목 캐러셀 (AI점수 × 오늘 모멘텀 블렌드) =====
+          Builder(
+            builder: (_) {
+              final recos = RecommendationCarousel.compute(_treemapData);
+              if (recos.isEmpty) return const SizedBox.shrink();
+              return Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.lg),
+                child: RecommendationCarousel(
+                  items: recos,
+                  onTickerTap: _onTickerTap,
+                ),
+              );
+            },
+          ),
+
+          // ===== Sector Bar Chart Card (탭 → 섹터별 시장현황 트리맵) =====
+          BentoCard(
+            child: (_treemapError != null && _treemapData == null)
+                ? SizedBox(
+                    height: 120,
+                    child: Center(
+                      child: TextButton(
+                        onPressed: _reloadFilteredData,
+                        child: Text(AppLocalizations.of(context).tryAgain),
                       ),
                     ),
+                  )
+                : (_isTreemapLoading && _treemapData == null)
+                ? const SizedBox(
+                    height: 120,
+                    child: Center(child: CircularProgressIndicator()),
+                  )
+                : SectorBarChartWidget(
+                    sectors: _treemapData?.sectors ?? const [],
+                    vix: _vixIndicator,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => SectorOverviewScreen(
+                            initialIndex: _selectedIndex,
+                          ),
+                        ),
+                      );
+                    },
                   ),
-                  const SizedBox(height: AppSpacing.md),
-                  _buildTreemapSection(),
-                ],
-              ),
-            ),
           ),
 
           // ===== Banner Ad =====
-          const SizedBox(height: AppSpacing.xl),
+          const SizedBox(height: AppSpacing.sm),
           const Center(child: BannerAdWidget()),
 
           // ===== Top Stocks Card =====
           if (_topStocks.isNotEmpty) ...[
-            const SizedBox(height: AppSpacing.xl),
+            const SizedBox(height: AppSpacing.sm),
             BentoCard(
               child: TopStocksSection(
                 topStocks: _topStocks,
@@ -337,9 +364,9 @@ class _DashboardScreenState extends State<DashboardScreen>
           ],
 
           // ===== Bottom Ad =====
-          const SizedBox(height: AppSpacing.xl),
+          const SizedBox(height: AppSpacing.sm),
           const Center(child: BannerAdWidget()),
-          const SizedBox(height: AppSpacing.xl),
+          const SizedBox(height: AppSpacing.sm),
         ],
       ),
     );
@@ -385,175 +412,4 @@ class _DashboardScreenState extends State<DashboardScreen>
     );
   }
 
-  /// 트리맵 섹션
-  Widget _buildTreemapSection() {
-    if (_isTreemapLoading) {
-      return const SizedBox(
-        height: 350,
-        child: Center(child: CircularProgressIndicator()),
-      );
-    }
-    if (_treemapError != null) {
-      return Container(
-        height: 200,
-        decoration: BoxDecoration(
-          color: context.mlColors.sectionBackground,
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-        ),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.error_outline,
-                size: 32,
-                color: context.mlColors.dangerColor,
-              ),
-              const SizedBox(height: AppSpacing.md),
-              Text(
-                _treemapError!,
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  fontSize: AppTypography.bodyMedium,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: AppSpacing.md),
-              TextButton(
-                onPressed: _loadData,
-                child: Text(AppLocalizations.of(context).tryAgain),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-    if (_treemapData == null) return const SizedBox.shrink();
-
-    return TreemapChartWidget(data: _treemapData!, onTickerTap: _onTickerTap);
-  }
-
-  /// 트리맵 섹션 헤더 (전체 거래대금 + 변동률 포함)
-  Widget _buildTreemapHeader() {
-    double totalTrading = 0;
-    double weightedChangePct = 0;
-    double totalWeight = 0;
-
-    if (_treemapData != null) {
-      for (final sector in _treemapData!.sectors) {
-        totalTrading += sector.totalTradingValue ?? 0;
-        if (sector.avgChangePct != null && sector.totalTradingValue != null) {
-          weightedChangePct += sector.avgChangePct! * sector.totalTradingValue!;
-          totalWeight += sector.totalTradingValue!;
-        }
-      }
-    }
-    final avgPct = totalWeight > 0 ? weightedChangePct / totalWeight : 0.0;
-    final tradingStr = formatDollar(totalTrading);
-
-    final mlc = context.mlColors;
-    final color = avgPct > 0
-        ? mlc.gainColor
-        : avgPct < 0
-        ? mlc.lossColor
-        : mlc.neutralColor;
-    final arrow = avgPct > 0
-        ? '▲'
-        : avgPct < 0
-        ? '▼'
-        : '─';
-    final sign = avgPct >= 0 ? '+' : '';
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: mlc.infoBg.withValues(alpha: 0.58),
-                borderRadius: BorderRadius.circular(AppRadius.lg),
-              ),
-              child: Icon(
-                Icons.grid_view_rounded,
-                color: mlc.accentBlue,
-                size: 20,
-              ),
-            ),
-            const SizedBox(width: AppSpacing.md),
-            Expanded(
-              child: Text(
-                AppLocalizations.of(context).sectorMarketOverview,
-                style: AppTypography.cardTitle.copyWith(color: mlc.textPrimary),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            const SizedBox(width: AppSpacing.md),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  tradingStr,
-                  style: AppTypography.priceCard.copyWith(
-                    color: mlc.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  '$arrow $sign${avgPct.toStringAsFixed(2)}%',
-                  style: AppTypography.numericSecondary.copyWith(
-                    color: color,
-                    fontWeight: AppTypography.semiBold,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.md),
-        _buildIndexFilterChips(),
-      ],
-    );
-  }
-
-  /// 지수 필터 "전체" 칩 (지수 카드 클릭으로 필터 선택, 여기서는 리셋만)
-  Widget _buildIndexFilterChips() {
-    final l10n = AppLocalizations.of(context);
-    final isAllSelected = _selectedIndex == null;
-
-    return GestureDetector(
-      onTap: () => _onIndexFilterChanged(null),
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md,
-          vertical: AppSpacing.sm,
-        ),
-        decoration: BoxDecoration(
-          color: isAllSelected
-              ? context.mlColors.infoBg.withValues(alpha: 0.72)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(AppRadius.badge),
-          border: Border.all(
-            color: isAllSelected
-                ? context.mlColors.accentBlue.withValues(alpha: 0.28)
-                : Colors.transparent,
-          ),
-        ),
-        child: Center(
-          child: Text(
-            l10n.filterAll,
-            style: TextStyle(
-              fontSize: AppTypography.bodySmall,
-              fontWeight: AppTypography.semiBold,
-              color: isAllSelected
-                  ? context.mlColors.accentBlue
-                  : context.mlColors.textSecondary,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 }

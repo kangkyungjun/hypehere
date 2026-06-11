@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../../config/feature_flags.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/portfolio_provider.dart';
+import '../watchlist/widgets/portfolio_summary_card.dart';
 import '../../models/community/post.dart';
 import '../../models/community/comment.dart';
 import '../../services/community_api_client.dart';
@@ -281,6 +283,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                 const SizedBox(height: AppSpacing.xxl),
 
+                // 투자 수익률 (보유종목 요약과 동일 디자인)
+                _buildInvestmentReturnSection(),
+
+                const SizedBox(height: AppSpacing.xxl),
+
                 // 내 게시글 / 내 댓글 섹션
                 // [COMMUNITY_FLAG] 커뮤니티 비활성화 시 숨김.
                 // 복원: FeatureFlags.kCommunityEnabled = true 로 변경.
@@ -310,6 +317,66 @@ class _ProfileScreenState extends State<ProfileScreen> {
           );
         },
       ),
+    );
+  }
+
+  /// 투자 수익률 섹션 — 보유종목 요약(PortfolioSummaryCard)을 동일 디자인으로 재사용.
+  /// 보유 종목이 없으면 안내 문구 카드를 표시.
+  Widget _buildInvestmentReturnSection() {
+    final l10n = AppLocalizations.of(context);
+    final mlc = context.mlColors;
+
+    return Consumer<PortfolioProvider>(
+      builder: (context, portfolio, _) {
+        if (portfolio.holdings.isEmpty) {
+          return BentoCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.investmentReturn,
+                  style: AppTypography.cardTitle.copyWith(
+                    color: mlc.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                Center(
+                  child: Column(
+                    children: [
+                      Icon(
+                        Icons.account_balance_wallet_outlined,
+                        size: 32,
+                        color: mlc.textTertiary,
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      Text(
+                        l10n.noHoldingsYet,
+                        style: AppTypography.body.copyWith(
+                          color: mlc.textSecondary,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.xxs),
+                      Text(
+                        l10n.addFirstHolding,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: AppTypography.bodySmall,
+                          color: mlc.textTertiary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+        return PortfolioSummaryCard(
+          portfolio: portfolio,
+          title: l10n.investmentReturn,
+          outerPadding: EdgeInsets.zero,
+        );
+      },
     );
   }
 

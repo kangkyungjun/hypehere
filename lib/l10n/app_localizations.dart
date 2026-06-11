@@ -284,12 +284,6 @@ abstract class AppLocalizations {
   /// **'Settings'**
   String get settingsTooltip;
 
-  /// No description provided for @compareTickers.
-  ///
-  /// In en, this message translates to:
-  /// **'Compare Tickers'**
-  String get compareTickers;
-
   /// No description provided for @account.
   ///
   /// In en, this message translates to:
@@ -673,6 +667,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'AI Score'**
   String get marketLensAIScore;
+
+  /// No description provided for @aiTabAnalysis.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Analysis'**
+  String get aiTabAnalysis;
+
+  /// No description provided for @aiTabStocks.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Stocks'**
+  String get aiTabStocks;
+
+  /// No description provided for @aiAnalysisComingSoonTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Conversational AI'**
+  String get aiAnalysisComingSoonTitle;
+
+  /// No description provided for @aiAnalysisComingSoonBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask like a messenger and AI analyzes the market and stocks for you. Coming soon.'**
+  String get aiAnalysisComingSoonBody;
+
+  /// No description provided for @comingSoonBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming soon'**
+  String get comingSoonBadge;
+
+  /// No description provided for @aiNoStocksInSegment.
+  ///
+  /// In en, this message translates to:
+  /// **'No stocks in this range'**
+  String get aiNoStocksInSegment;
 
   /// No description provided for @distributionShownOnFullLoad.
   ///
@@ -2786,12 +2816,6 @@ abstract class AppLocalizations {
   /// **'Demotion failed'**
   String get errDemotionFailed;
 
-  /// No description provided for @errMaxCompare.
-  ///
-  /// In en, this message translates to:
-  /// **'Maximum 3 tickers can be compared'**
-  String get errMaxCompare;
-
   /// No description provided for @today.
   ///
   /// In en, this message translates to:
@@ -3524,6 +3548,12 @@ abstract class AppLocalizations {
   /// **'Recommendations'**
   String get aiRecommendations;
 
+  /// No description provided for @todayPicks.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s Picks'**
+  String get todayPicks;
+
   /// No description provided for @recPortfolioOverview.
   ///
   /// In en, this message translates to:
@@ -3752,6 +3782,42 @@ abstract class AppLocalizations {
   /// **'Auto-refreshes on changes'**
   String get aiRefreshOnChange;
 
+  /// No description provided for @aiUpdateButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Update AI Analysis'**
+  String get aiUpdateButton;
+
+  /// No description provided for @aiUpdating.
+  ///
+  /// In en, this message translates to:
+  /// **'Updating analysis…'**
+  String get aiUpdating;
+
+  /// No description provided for @aiNoChangeToAnalyze.
+  ///
+  /// In en, this message translates to:
+  /// **'No changes — a new analysis isn\'t needed'**
+  String get aiNoChangeToAnalyze;
+
+  /// No description provided for @aiAnalysisOnDemandHint.
+  ///
+  /// In en, this message translates to:
+  /// **'You can update when your portfolio or the date changes'**
+  String get aiAnalysisOnDemandHint;
+
+  /// No description provided for @aiUpdateInProgressHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Generating analysis… this can take up to a minute.'**
+  String get aiUpdateInProgressHint;
+
+  /// No description provided for @aiUpdateDelayed.
+  ///
+  /// In en, this message translates to:
+  /// **'Analysis is taking a little longer — it\'ll appear automatically soon.'**
+  String get aiUpdateDelayed;
+
   /// No description provided for @lastUpdateTime.
   ///
   /// In en, this message translates to:
@@ -3943,6 +4009,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} mentions'**
   String newsBubbleMentions(int count);
+
+  /// No description provided for @newsSentiment24hTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 24 Hours'**
+  String get newsSentiment24hTitle;
+
+  /// No description provided for @newsBullish.
+  ///
+  /// In en, this message translates to:
+  /// **'Bullish'**
+  String get newsBullish;
+
+  /// No description provided for @newsNeutral.
+  ///
+  /// In en, this message translates to:
+  /// **'Neutral'**
+  String get newsNeutral;
+
+  /// No description provided for @newsBearish.
+  ///
+  /// In en, this message translates to:
+  /// **'Bearish'**
+  String get newsBearish;
+
+  /// No description provided for @keyNewsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s Key News'**
+  String get keyNewsTitle;
+
+  /// No description provided for @viewTickerDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to Stock'**
+  String get viewTickerDetail;
+
+  /// No description provided for @newsCountUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}'**
+  String newsCountUnit(int count);
 
   /// No description provided for @taxEstimateTitle.
   ///
@@ -4148,6 +4256,12 @@ abstract class AppLocalizations {
   /// **'Losers'**
   String get losersTop;
 
+  /// No description provided for @volumeTop.
+  ///
+  /// In en, this message translates to:
+  /// **'Volume'**
+  String get volumeTop;
+
   /// No description provided for @topByMarketCap.
   ///
   /// In en, this message translates to:
@@ -4207,6 +4321,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Holdings Summary'**
   String get holdingsSummary;
+
+  /// No description provided for @investmentReturn.
+  ///
+  /// In en, this message translates to:
+  /// **'Investment Return'**
+  String get investmentReturn;
 
   /// No description provided for @returnRate.
   ///
@@ -4514,11 +4634,23 @@ abstract class AppLocalizations {
   /// **'Collect and track your favorite stocks'**
   String get watchlistSubtitle;
 
-  /// No description provided for @holdingsSubtitle.
+  /// No description provided for @wlTargetPrice.
   ///
   /// In en, this message translates to:
-  /// **'Manage your portfolio and track returns'**
-  String get holdingsSubtitle;
+  /// **'Target'**
+  String get wlTargetPrice;
+
+  /// No description provided for @wlPrice1mAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'1M ago'**
+  String get wlPrice1mAgo;
+
+  /// No description provided for @wlPrice3mAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'3M ago'**
+  String get wlPrice3mAgo;
 
   /// No description provided for @filterActiveLabel.
   ///

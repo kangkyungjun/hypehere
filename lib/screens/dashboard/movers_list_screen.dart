@@ -53,6 +53,9 @@ class _MoversListScreenState extends State<MoversListScreen> {
       case 'losers':
         items.sort((a, b) => (a.changePct ?? 0).compareTo(b.changePct ?? 0));
         break;
+      case 'volume':
+        items.sort((a, b) => (b.volume ?? 0).compareTo(a.volume ?? 0));
+        break;
     }
     return items;
   }
@@ -65,6 +68,8 @@ class _MoversListScreenState extends State<MoversListScreen> {
         return l10n.gainersTop;
       case 'losers':
         return l10n.losersTop;
+      case 'volume':
+        return l10n.volumeTop;
       default:
         return '';
     }
@@ -95,9 +100,10 @@ class _MoversListScreenState extends State<MoversListScreen> {
         title: Text(_title(l10n)),
       ),
       body: ListView.builder(
+        // 외곽 패딩 축소 (좌우 xl→sm, 상하 lg→xs) — 등락 탭과 동일 취지
         padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.xl,
-          vertical: AppSpacing.lg,
+          horizontal: AppSpacing.sm,
+          vertical: AppSpacing.xs,
         ),
         itemCount: totalCount,
         itemBuilder: (context, index) {
@@ -215,8 +221,9 @@ class _MoversListScreenState extends State<MoversListScreen> {
                     children: [
                       Text(
                         item.ticker,
+                        // 회사 티커를 더 크게(가독성↑): bodyLarge → headlineLarge
                         style: TextStyle(
-                          fontSize: AppTypography.bodyLarge,
+                          fontSize: AppTypography.headlineLarge,
                           fontWeight: AppTypography.bold,
                           color: mlc.textPrimary,
                         ),

@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/news_data.dart';
+import '../../screens/ticker_detail/ticker_detail_screen.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 import '../../theme/app_typography.dart';
+import '../../utils/app_page_route.dart';
 import '../../utils/multilingual.dart';
 
 /// Shared modal for MARKET ticker news items.
@@ -68,7 +70,7 @@ class MarketNewsModal {
                     child: Text(
                       isMarketNews(item) ? l10n.marketNews : item.ticker,
                       style: TextStyle(
-                        fontSize: AppTypography.caption,
+                        fontSize: AppTypography.bodySmall,
                         fontWeight: AppTypography.bold,
                         color: ctx.mlColors.textSecondary,
                       ),
@@ -84,7 +86,7 @@ class MarketNewsModal {
                     child: Text(
                       item.sentimentLabelLocalized(l10n),
                       style: TextStyle(
-                        fontSize: AppTypography.caption,
+                        fontSize: AppTypography.bodySmall,
                         fontWeight: AppTypography.bold,
                         color: dotColor,
                       ),
@@ -106,7 +108,7 @@ class MarketNewsModal {
                 Text(
                   item.source!,
                   style: TextStyle(
-                    fontSize: AppTypography.bodySmall,
+                    fontSize: AppTypography.bodyMedium,
                     color: Theme.of(ctx).colorScheme.outline,
                   ),
                 ),
@@ -114,56 +116,54 @@ class MarketNewsModal {
 
               const SizedBox(height: AppSpacing.xxl),
 
-              // AI summary section
+              // Article title section (replaces the old "AI Summary" label)
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
                     width: 3,
-                    height: 16,
+                    height: 20,
+                    margin: const EdgeInsets.only(top: AppSpacing.xxs),
                     decoration: BoxDecoration(
                       color: Theme.of(ctx).colorScheme.primary,
                       borderRadius: BorderRadius.circular(AppRadius.xxs),
                     ),
                   ),
                   const SizedBox(width: AppSpacing.md),
-                  Text(
-                    l10n.aiSummary,
-                    style: Theme.of(ctx).textTheme.titleSmall?.copyWith(
-                          fontWeight: AppTypography.semiBold,
-                        ),
+                  Expanded(
+                    child: Text(
+                      item.title,
+                      style: TextStyle(
+                        fontSize: AppTypography.headlineLarge,
+                        fontWeight: AppTypography.bold,
+                        color: Theme.of(ctx).colorScheme.onSurface,
+                        height: 1.3,
+                      ),
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                 ],
               ),
               const SizedBox(height: AppSpacing.lg),
 
-              Text(
-                item.aiSummary.localize(langCode),
-                style: TextStyle(
-                  fontSize: AppTypography.bodyLarge,
-                  fontWeight: AppTypography.semiBold,
-                  color: Theme.of(ctx).colorScheme.onSurface,
-                  height: 1.5,
-                ),
-              ),
-
-              // Source URL button
-              if (item.sourceUrl != null) ...[
-                const SizedBox(height: AppSpacing.xxl),
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
-                    onPressed: () => _launchUrl(item.sourceUrl!),
-                    icon: const Icon(Icons.open_in_new, size: 16),
-                    label: Text(l10n.viewOriginalArticle),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(AppRadius.lg),
-                      ),
+              // AI summary body (enlarged for readability)
+              Flexible(
+                child: SingleChildScrollView(
+                  child: Text(
+                    item.aiSummary.localize(langCode),
+                    style: TextStyle(
+                      fontSize: AppTypography.headlineMedium,
+                      fontWeight: AppTypography.medium,
+                      color: Theme.of(ctx).colorScheme.onSurface,
+                      height: 1.6,
                     ),
                   ),
                 ),
-              ],
+              ),
+
+              // Action buttons (horizontal, evenly split)
+              ..._buildActions(ctx, context, item, l10n),
 
               SizedBox(height: MediaQuery.of(ctx).padding.bottom + 16),
             ],
@@ -171,6 +171,63 @@ class MarketNewsModal {
         ),
       ),
     );
+  }
+
+  /// Bottom action buttons: 원문 기사 보기 + 종목으로 이동, laid out
+  /// horizontally and split evenly. Falls back to a single full-width
+  /// button when only one applies. [sheetCtx] pops the sheet; [navCtx]
+  /// is used to push the ticker screen after popping.
+  static List<Widget> _buildActions(
+    BuildContext sheetCtx,
+    BuildContext navCtx,
+    NewsItem item,
+    AppLocalizations l10n,
+  ) {
+    final hasUrl = item.sourceUrl != null;
+    final hasTicker = !isMarketNews(item) && item.ticker.isNotEmpty;
+    if (!hasUrl && !hasTicker) return const [];
+
+    final shape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(AppRadius.lg),
+    );
+    const pad = EdgeInsets.symmetric(vertical: AppSpacing.lg);
+
+    final originalBtn = OutlinedButton.icon(
+      onPressed: () => _launchUrl(item.sourceUrl!),
+      icon: const Icon(Icons.open_in_new, size: 16),
+      label: Text(l10n.viewOriginalArticle, overflow: TextOverflow.ellipsis),
+      style: OutlinedButton.styleFrom(padding: pad, shape: shape),
+    );
+
+    final tickerBtn = FilledButton.icon(
+      onPressed: () {
+        Navigator.pop(sheetCtx);
+        Navigator.push(
+          navCtx,
+          appPageRoute(builder: (_) => TickerDetailScreen(ticker: item.ticker)),
+        );
+      },
+      icon: const Icon(Icons.show_chart, size: 16),
+      label: Text(l10n.viewTickerDetail, overflow: TextOverflow.ellipsis),
+      style: FilledButton.styleFrom(padding: pad, shape: shape),
+    );
+
+    return [
+      const SizedBox(height: AppSpacing.xxl),
+      if (hasUrl && hasTicker)
+        Row(
+          children: [
+            Expanded(child: originalBtn),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(child: tickerBtn),
+          ],
+        )
+      else
+        SizedBox(
+          width: double.infinity,
+          child: hasUrl ? originalBtn : tickerBtn,
+        ),
+    ];
   }
 
   static Future<void> _launchUrl(String url) async {

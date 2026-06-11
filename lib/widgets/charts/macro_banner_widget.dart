@@ -84,11 +84,12 @@ class MacroBannerWidget extends StatelessWidget {
       onTap: onNavigateToIndexes,
       behavior: HitTestBehavior.opaque,
       child: Padding(
+        // 상하 여백을 기존 대비 ~30%로 축소 (md → xs) — above-fold 2박스 확보
         padding: const EdgeInsets.fromLTRB(
           AppSpacing.lg,
+          AppSpacing.xs,
           AppSpacing.md,
-          AppSpacing.md,
-          AppSpacing.md,
+          AppSpacing.xs,
         ),
         child: Row(
           children: [

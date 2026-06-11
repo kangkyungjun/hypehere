@@ -113,15 +113,21 @@ class _StockRow extends StatelessWidget {
         ),
         child: Row(
           children: [
-            // Rank number
-            SizedBox(
-              width: 24,
+            // Rank — 오늘의집 스타일 스퀴르클 (상위권 강조)
+            Container(
+              width: 30,
+              height: 30,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: rank <= 3 ? mlc.infoBg : mlc.overlayDim,
+                borderRadius: BorderRadius.circular(AppRadius.md),
+              ),
               child: Text(
                 '$rank',
                 style: TextStyle(
-                  fontSize: AppTypography.bodyLarge,
-                  fontWeight: AppTypography.semiBold,
-                  color: mlc.textTertiary,
+                  fontSize: AppTypography.bodyMedium,
+                  fontWeight: AppTypography.bold,
+                  color: rank <= 3 ? mlc.accentBlue : mlc.textTertiary,
                 ),
               ),
             ),

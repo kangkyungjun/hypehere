@@ -28,7 +28,18 @@ String _formatRelativeTime(DateTime dt, AppLocalizations l10n) {
 class PortfolioSummaryCard extends StatelessWidget {
   final PortfolioProvider portfolio;
 
-  const PortfolioSummaryCard({super.key, required this.portfolio});
+  /// 카드 타이틀 (기본: 보유 요약). 프로필 등에서 다른 제목으로 재사용 가능.
+  final String? title;
+
+  /// 외부 패딩 (기본: 좌우 16·상하 12). 부모가 이미 패딩을 줄 땐 zero 전달.
+  final EdgeInsetsGeometry? outerPadding;
+
+  const PortfolioSummaryCard({
+    super.key,
+    required this.portfolio,
+    this.title,
+    this.outerPadding,
+  });
 
   static final _moneyFormat = NumberFormat('#,##0.00', 'en_US');
 
@@ -64,12 +75,18 @@ class PortfolioSummaryCard extends StatelessWidget {
         : context.mlColors.lossColor;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.xl,
-        vertical: AppSpacing.md,
-      ),
+      padding: outerPadding ??
+          const EdgeInsets.symmetric(
+            horizontal: AppSpacing.xl,
+            vertical: AppSpacing.md,
+          ),
       child: BentoCard(
-        padding: const EdgeInsets.all(AppSpacing.lg),
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.sm,
+          AppSpacing.md,
+          AppSpacing.sm,
+          AppSpacing.sm,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -78,7 +95,7 @@ class PortfolioSummaryCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  l10n.holdingsSummary,
+                  title ?? l10n.holdingsSummary,
                   style: AppTypography.cardTitle.copyWith(
                     color: context.mlColors.textSecondary,
                   ),
@@ -94,7 +111,7 @@ class PortfolioSummaryCard extends StatelessWidget {
                   ),
               ],
             ),
-            const SizedBox(height: AppSpacing.lg),
+            const SizedBox(height: AppSpacing.md),
 
             // Row 1: 수익률 | 매수금
             Row(

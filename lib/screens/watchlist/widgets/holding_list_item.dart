@@ -97,7 +97,7 @@ class HoldingListItem extends StatelessWidget {
       ),
       child: BentoCard(
         margin: const EdgeInsets.only(bottom: AppSpacing.md),
-        padding: const EdgeInsets.all(AppSpacing.lg),
+        padding: const EdgeInsets.all(AppSpacing.sm),
         onTap: onTap,
         child: Row(
           children: [

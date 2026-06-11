@@ -80,6 +80,13 @@ class UpDownTab extends StatelessWidget {
     return items.take(5).toList();
   }
 
+  /// Top 5 by volume (descending).
+  List<TreemapItem> _volumeTop() {
+    final items = _allItems()
+      ..sort((a, b) => (b.volume ?? 0).compareTo(a.volume ?? 0));
+    return items.take(5).toList();
+  }
+
   // ---------------------------------------------------------------------------
   // Build
   // ---------------------------------------------------------------------------
@@ -89,13 +96,20 @@ class UpDownTab extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppSpacing.md),
+      // 박스 밖 외곽 패딩을 ~30%로 축소 (md → xs)
+      // 하단은 플로팅 탭바(extendBody)에 가리지 않도록 여백 확보
+      padding: EdgeInsets.fromLTRB(
+        AppSpacing.xs,
+        AppSpacing.xs,
+        AppSpacing.xs,
+        MediaQuery.of(context).viewPadding.bottom + 64,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Index filter chips
           _buildFilterChips(context, l10n),
-          const SizedBox(height: AppSpacing.xl),
+          const SizedBox(height: AppSpacing.xs),
 
           // Content
           if (isLoading)
@@ -114,9 +128,10 @@ class UpDownTab extends StatelessWidget {
               sortBy: 'trading_volume',
               l10n: l10n,
             ),
-            const SizedBox(height: AppSpacing.lg),
+            // 박스 사이 간격 ~30%로 축소 (lg → xs)
+            const SizedBox(height: AppSpacing.xs),
             const BannerAdWidget(),
-            const SizedBox(height: AppSpacing.lg),
+            const SizedBox(height: AppSpacing.xs),
 
             // Gainers Top
             _buildSection(
@@ -126,7 +141,7 @@ class UpDownTab extends StatelessWidget {
               sortBy: 'gainers',
               l10n: l10n,
             ),
-            const SizedBox(height: AppSpacing.lg),
+            const SizedBox(height: AppSpacing.xs),
 
             // Losers Top
             _buildSection(
@@ -136,7 +151,17 @@ class UpDownTab extends StatelessWidget {
               sortBy: 'losers',
               l10n: l10n,
             ),
-            const SizedBox(height: AppSpacing.lg),
+            const SizedBox(height: AppSpacing.xs),
+
+            // Volume Top (거래량)
+            _buildSection(
+              context: context,
+              title: l10n.volumeTop,
+              items: _volumeTop(),
+              sortBy: 'volume',
+              l10n: l10n,
+            ),
+            const SizedBox(height: AppSpacing.xs),
             const BannerAdWidget(),
           ],
         ],
@@ -245,7 +270,7 @@ class UpDownTab extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: AppSpacing.lg),
+          const SizedBox(height: AppSpacing.md),
 
           // Items
           if (items.isEmpty)
@@ -335,8 +360,9 @@ class UpDownTab extends StatelessWidget {
                     children: [
                       Text(
                         item.ticker,
+                        // 회사 티커를 더 크게(가독성↑): bodyLarge → headlineLarge
                         style: TextStyle(
-                          fontSize: AppTypography.bodyLarge,
+                          fontSize: AppTypography.headlineLarge,
                           fontWeight: AppTypography.bold,
                           color: mlc.textPrimary,
                         ),

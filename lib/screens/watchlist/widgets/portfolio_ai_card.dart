@@ -2,9 +2,11 @@ import 'dart:convert';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../models/portfolio_data.dart';
+import '../../../providers/portfolio_provider.dart';
 import '../../../theme/app_colors.dart';
 import '../../../theme/app_radius.dart';
 import '../../../theme/app_spacing.dart';
@@ -63,6 +65,11 @@ class PortfolioAICard extends StatefulWidget {
 class _PortfolioAICardState extends State<PortfolioAICard> {
   static const _prefKeySummary = 'portfolio_ai_last_summary';
   static const _prefKeyRecs = 'portfolio_ai_last_recommendations';
+  // Anti-abuse: signature + date of the last *generated* analysis, used to
+  // decide whether a new update would differ (and thus whether to allow a
+  // rewarded-ad-gated regeneration).
+  static const _prefKeySignature = 'portfolio_ai_last_signature';
+  static const _prefKeyAnalysisDate = 'portfolio_ai_last_analysis_date';
 
   /// In-session unlock: set after watching ad in current session.
   String? _sessionUnlockedSummary;
@@ -71,8 +78,18 @@ class _PortfolioAICardState extends State<PortfolioAICard> {
   String? _savedAiSummary;
   List<Map<String, dynamic>>? _savedRecommendations;
 
+  /// Portfolio signature + calendar day of the last generated analysis.
+  String? _savedSignature;
+  String? _savedAnalysisDate;
+
   /// When true, shows the previous (saved) content instead of blur.
   bool _showingPrevious = false;
+
+  /// Set when a button-triggered refresh was paid for (ad watched) but the
+  /// regeneration didn't land within the polling window. The analysis is
+  /// auto-unlocked + persisted once it arrives on a later fetch (didUpdateWidget).
+  bool _pendingUnlock = false;
+  String? _pendingBaselineSummary;
 
   bool get _isUnlocked {
     if (widget.isAdFree) return true;
@@ -120,6 +137,17 @@ class _PortfolioAICardState extends State<PortfolioAICard> {
     if (oldWidget.summary?.aiSummary != widget.summary?.aiSummary) {
       _showingPrevious = false;
     }
+    // A paid-but-delayed refresh has now landed → auto-unlock + persist so the
+    // user sees the analysis they already watched an ad for (no re-blur).
+    final current = widget.summary?.aiSummary;
+    if (_pendingUnlock &&
+        current != null &&
+        current.isNotEmpty &&
+        current != _pendingBaselineSummary) {
+      _pendingUnlock = false;
+      _sessionUnlockedSummary = current;
+      _persistGenerated(widget.summary);
+    }
     if (!widget.isAdFree && !_isUnlocked) {
       RewardedAdHelper.instance.preloadAd();
     }
@@ -129,9 +157,13 @@ class _PortfolioAICardState extends State<PortfolioAICard> {
     final prefs = await SharedPreferences.getInstance();
     final summary = prefs.getString(_prefKeySummary);
     final recsJson = prefs.getString(_prefKeyRecs);
+    final signature = prefs.getString(_prefKeySignature);
+    final analysisDate = prefs.getString(_prefKeyAnalysisDate);
     if (!mounted) return;
     setState(() {
       _savedAiSummary = summary;
+      _savedSignature = signature;
+      _savedAnalysisDate = analysisDate;
       if (recsJson != null) {
         try {
           _savedRecommendations =
@@ -164,23 +196,201 @@ class _PortfolioAICardState extends State<PortfolioAICard> {
     });
   }
 
-  void _onWatchAd() {
+  // ─── Button-triggered AI update (replaces the old auto-regeneration) ──────
+  //
+  // CHANGE (2026-06): The portfolio analysis no longer regenerates automatically
+  // (see PortfolioProvider._refreshAIData). The user now presses "AI 분석
+  // 업데이트" to request a fresh analysis (rewarded-ad gated). To avoid users
+  // burning rewarded ads on an identical result, the button is only meaningful
+  // when the portfolio changed OR a new calendar day started since the last
+  // generated analysis.
+
+  String _todayYmd() {
+    final n = DateTime.now();
+    return '${n.year}-${n.month.toString().padLeft(2, '0')}-${n.day.toString().padLeft(2, '0')}';
+  }
+
+  /// Order-independent signature of the current holdings (ticker/shares/avgPrice).
+  String _currentSignature() {
+    final holdings = context.read<PortfolioProvider>().holdings;
+    final parts = holdings
+        .map((h) => '${h.ticker}:${h.shares ?? 0}:${h.avgPrice ?? 0}')
+        .toList()
+      ..sort();
+    return parts.join('|');
+  }
+
+  /// A new analysis would differ only if holdings changed or the day rolled over.
+  bool get _canUpdate {
+    if (_savedSignature == null || _savedAnalysisDate == null) return true;
+    if (_currentSignature() != _savedSignature) return true;
+    if (_todayYmd() != _savedAnalysisDate) return true;
+    return false;
+  }
+
+  void _onUpdatePressed() {
+    final l10n = AppLocalizations.of(context);
+    // Anti-abuse: nothing changed → don't show an ad, just inform the user.
+    if (!_canUpdate) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.aiNoChangeToAnalyze)),
+      );
+      return;
+    }
+    if (widget.isAdFree) {
+      _runUpdate();
+      return;
+    }
     RewardedAdHelper.instance.showAd(
-      onRewarded: () {
-        if (mounted) {
-          setState(() {
-            _sessionUnlockedSummary = widget.summary?.aiSummary;
-          });
-          _persistCurrentContent();
-        }
-      },
-      onFailed: () {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(AppLocalizations.of(context).adNotReady)),
-          );
-        }
-      },
+      onRewarded: _runUpdate,
+      // 광고를 불러오지 못하면(노필 등) 막지 않고 무료로 업데이트 진행
+      onFailed: _runUpdate,
+    );
+  }
+
+  Future<void> _runUpdate() async {
+    final provider = context.read<PortfolioProvider>();
+    final l10n = AppLocalizations.of(context);
+    // Capture baseline so we can auto-unlock if the (paid) analysis lands later.
+    _pendingBaselineSummary = widget.summary?.aiSummary;
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.aiUpdateInProgressHint)),
+      );
+    }
+    try {
+      final applied = await provider.requestAnalysisUpdate();
+      if (!mounted) return;
+      if (applied) {
+        setState(() {
+          _sessionUnlockedSummary = provider.summary?.aiSummary;
+          _pendingUnlock = false;
+        });
+        await _persistGenerated(provider.summary);
+      } else {
+        // Timed out: the regeneration is still in flight. Auto-unlock when the
+        // new analysis arrives on a later fetch (see didUpdateWidget).
+        setState(() => _pendingUnlock = true);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.aiUpdateDelayed)),
+        );
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.signalLoadFailed)),
+        );
+      }
+    }
+  }
+
+  /// Persist a freshly generated analysis + its signature/date.
+  Future<void> _persistGenerated(PortfolioSummary? s) async {
+    final summary = s?.aiSummary;
+    if (summary == null) return;
+    final recs = s?.aiRecommendations;
+    final sig = _currentSignature();
+    final today = _todayYmd();
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_prefKeySummary, summary);
+    if (recs != null) {
+      await prefs.setString(_prefKeyRecs, jsonEncode(recs));
+    } else {
+      await prefs.remove(_prefKeyRecs);
+    }
+    await prefs.setString(_prefKeySignature, sig);
+    await prefs.setString(_prefKeyAnalysisDate, today);
+
+    if (!mounted) return;
+    setState(() {
+      _savedAiSummary = summary;
+      _savedRecommendations = recs;
+      _savedSignature = sig;
+      _savedAnalysisDate = today;
+      _showingPrevious = false;
+    });
+  }
+
+  /// Primary "AI 분석 업데이트" button + no-change reason line.
+  Widget _buildUpdateButton(ThemeData theme, AppLocalizations l10n) {
+    final updating = context.watch<PortfolioProvider>().isUpdatingAnalysis;
+    final canUpdate = _canUpdate;
+
+    final Widget label = updating
+        ? Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Text(l10n.aiUpdating),
+            ],
+          )
+        : Text(l10n.aiUpdateButton);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SizedBox(height: AppSpacing.md),
+        FilledButton.icon(
+          onPressed: updating ? null : _onUpdatePressed,
+          icon: updating
+              ? const SizedBox.shrink()
+              : Icon(
+                  canUpdate
+                      ? Icons.auto_awesome_rounded
+                      : Icons.check_circle_outline,
+                  size: 18,
+                ),
+          label: label,
+          style: FilledButton.styleFrom(
+            // Visually de-emphasize when there is nothing new to analyze.
+            backgroundColor: canUpdate
+                ? theme.colorScheme.primary
+                : theme.colorScheme.surfaceContainerHighest,
+            foregroundColor: canUpdate
+                ? theme.colorScheme.onPrimary
+                : theme.colorScheme.outline,
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppRadius.md),
+            ),
+          ),
+        ),
+        if (!canUpdate) ...[
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            l10n.aiNoChangeToAnalyze,
+            style: TextStyle(
+              fontSize: AppTypography.micro,
+              color: theme.colorScheme.outline,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ],
+    );
+  }
+
+  void _onWatchAd() {
+    // 광고 시청 완료(onRewarded) 또는 광고를 못 불러온 경우(onFailed) 모두
+    // 동일하게 무료로 블러를 해제한다. (광고 노필 환경에서도 막히지 않도록)
+    void unlock() {
+      if (mounted) {
+        setState(() {
+          _sessionUnlockedSummary = widget.summary?.aiSummary;
+        });
+        _persistCurrentContent();
+      }
+    }
+
+    RewardedAdHelper.instance.showAd(
+      onRewarded: unlock,
+      onFailed: unlock,
     );
   }
 
@@ -275,6 +485,8 @@ class _PortfolioAICardState extends State<PortfolioAICard> {
                   ],
                 ),
               ],
+              // Button-triggered AI analysis update (rewarded-ad gated)
+              _buildUpdateButton(theme, l10n),
             ],
           ),
         ),
@@ -356,7 +568,7 @@ class _PortfolioAICardState extends State<PortfolioAICard> {
             const SizedBox(width: AppSpacing.xs),
             Flexible(
               child: Text(
-                '${l10n.dailyUpdate} · ${l10n.aiRefreshOnChange}',
+                l10n.aiAnalysisOnDemandHint,
                 style: TextStyle(fontSize: AppTypography.micro, color: theme.colorScheme.outline),
               ),
             ),

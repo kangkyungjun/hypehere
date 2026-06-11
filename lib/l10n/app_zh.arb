@@ -38,7 +38,6 @@
 
   "settings": "设置",
   "settingsTooltip": "设置",
-  "compareTickers": "股票对比",
 
   "account": "账户",
   "login": "登录",
@@ -109,6 +108,12 @@
   "filterNasdaq": "纳斯达克",
   "filterDow": "道琼斯",
   "marketLensAIScore": "AI评分",
+  "aiTabAnalysis": "AI分析",
+  "aiTabStocks": "AI个股",
+  "aiAnalysisComingSoonTitle": "对话式AI分析",
+  "aiAnalysisComingSoonBody": "像聊天一样提问，AI即可为你分析市场与个股。功能即将推出。",
+  "comingSoonBadge": "即将推出",
+  "aiNoStocksInSegment": "该区间暂无个股",
   "distributionShownOnFullLoad": "加载全部信号后显示分布",
   "topN": "▲ 前 {n}",
   "bottomN": "▼ 后 {n}",
@@ -488,7 +493,6 @@
   "errMasterRequired": "权限不足，仅限Master访问。",
   "errSearchRequired": "请输入搜索词",
   "errDemotionFailed": "降级失败",
-  "errMaxCompare": "最多可对比3只股票",
   "today": "今天",
   "yesterday": "昨天",
   "dayBeforeYesterday": "前天",
@@ -669,6 +673,7 @@
   "holdingUpdated": "{ticker} 持仓信息已更新",
   "portfolioAIAnalysis": "投资组合AI分析",
   "aiRecommendations": "推荐建议",
+  "todayPicks": "今日推荐",
   "recPortfolioOverview": "投资组合概览",
   "recTechnicalInsight": "技术分析",
   "recMarketIntelligence": "市场情报",
@@ -707,6 +712,12 @@
   "currentValueLabel": "市值",
   "dailyUpdate": "每日早间更新",
   "aiRefreshOnChange": "持仓变更时自动刷新",
+  "aiUpdateButton": "更新AI分析",
+  "aiUpdating": "正在更新分析…",
+  "aiNoChangeToAnalyze": "无变更，无需重新分析",
+  "aiAnalysisOnDemandHint": "当持仓或日期变化时可更新",
+  "aiUpdateInProgressHint": "正在生成分析… 最多约需1分钟。",
+  "aiUpdateDelayed": "分析生成稍有延迟，稍后将自动显示。",
   "lastUpdateTime": "最后更新: {time}",
   "@lastUpdateTime": {
     "placeholders": {
@@ -763,6 +774,19 @@
     }
   },
 
+  "newsSentiment24hTitle": "最近24小时",
+  "newsBullish": "利好新闻",
+  "newsNeutral": "中性新闻",
+  "newsBearish": "利空新闻",
+  "keyNewsTitle": "今日核心新闻",
+  "viewTickerDetail": "前往个股",
+  "newsCountUnit": "{count}条",
+  "@newsCountUnit": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
   "taxEstimateTitle": "税费估算",
   "totalGains": "总收益",
   "annualExemption": "年度免税额",
@@ -798,6 +822,7 @@
   "tradingVolumeTop": "成交额",
   "gainersTop": "涨幅",
   "losersTop": "跌幅",
+  "volumeTop": "成交量",
   "topByMarketCap": "市值排名",
   "viewMore": "查看更多",
 
@@ -820,6 +845,7 @@
   "seeMore": "查看更多",
 
   "holdingsSummary": "持仓概况",
+  "investmentReturn": "投资收益率",
   "returnRate": "收益率",
   "purchaseAmount": "买入金额",
   "profitAmount": "盈亏金额",
@@ -908,7 +934,9 @@
   "aiSignalSellDesc": "卖出 (20-39): 整体消极信号",
   "aiSignalStrongSellDesc": "强力卖出 (0-19): 技术和财务指标均显示强烈卖出信号",
   "watchlistSubtitle": "收藏您关注的股票",
-  "holdingsSubtitle": "管理您的持仓",
+  "wlTargetPrice": "目标价",
+  "wlPrice1mAgo": "1个月前",
+  "wlPrice3mAgo": "3个月前",
   "filterActiveLabel": "筛选已启用",
   "tapToRemoveFilter": "点击取消",
   "searchTickersCta": "搜索股票",

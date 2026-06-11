@@ -9,6 +9,7 @@ class MarketLensColors extends ThemeExtension<MarketLensColors> {
     required this.chartTooltipBg,
     required this.subtleBorder,
     required this.sectionBackground,
+    required this.groupedBackground,
     required this.gainColor,
     required this.lossColor,
     required this.neutralColor,
@@ -57,6 +58,10 @@ class MarketLensColors extends ThemeExtension<MarketLensColors> {
   final Color chartTooltipBg;
   final Color subtleBorder;
   final Color sectionBackground;
+
+  /// 그룹 배경 — 에디토리얼 섹션 청킹용 따뜻한 뉴트럴 (카드를 흰색으로 띄움)
+  /// light: 연회색 #F4F5F7, dark: #0A0A0A
+  final Color groupedBackground;
 
   /// 상승, 매수, 긍정 (light: Material Green 500, dark: Green 400)
   final Color gainColor;
@@ -185,6 +190,7 @@ class MarketLensColors extends ThemeExtension<MarketLensColors> {
     chartTooltipBg: Color(0xEE111827),
     subtleBorder: Color(0xFFE5E7EB),
     sectionBackground: Color(0xFFFFFFFF),
+    groupedBackground: Color(0xFFF4F5F7),
     gainColor: Color(0xFF059669),
     lossColor: Color(0xFFDC2626),
     neutralColor: Color(0xFF8A94A6),
@@ -234,6 +240,7 @@ class MarketLensColors extends ThemeExtension<MarketLensColors> {
     chartTooltipBg: Color(0xFF080808),
     subtleBorder: Color(0xFF2A2A2A),
     sectionBackground: Color(0xFF000000),
+    groupedBackground: Color(0xFF0A0A0A),
     gainColor: Color(0xFF34D399), // Emerald 400 — 다크 배경에 가독성 확보
     lossColor: Color(0xFFF87171), // Red 400 — 다크 배경에 가독성 확보
     neutralColor: Color(0xFFBDBDBD), // grey 400
@@ -284,6 +291,7 @@ class MarketLensColors extends ThemeExtension<MarketLensColors> {
     Color? chartTooltipBg,
     Color? subtleBorder,
     Color? sectionBackground,
+    Color? groupedBackground,
     Color? gainColor,
     Color? lossColor,
     Color? neutralColor,
@@ -332,6 +340,7 @@ class MarketLensColors extends ThemeExtension<MarketLensColors> {
       chartTooltipBg: chartTooltipBg ?? this.chartTooltipBg,
       subtleBorder: subtleBorder ?? this.subtleBorder,
       sectionBackground: sectionBackground ?? this.sectionBackground,
+      groupedBackground: groupedBackground ?? this.groupedBackground,
       gainColor: gainColor ?? this.gainColor,
       lossColor: lossColor ?? this.lossColor,
       neutralColor: neutralColor ?? this.neutralColor,
@@ -388,6 +397,11 @@ class MarketLensColors extends ThemeExtension<MarketLensColors> {
       sectionBackground: Color.lerp(
         sectionBackground,
         other.sectionBackground,
+        t,
+      )!,
+      groupedBackground: Color.lerp(
+        groupedBackground,
+        other.groupedBackground,
         t,
       )!,
       gainColor: Color.lerp(gainColor, other.gainColor, t)!,

@@ -101,9 +101,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsTooltip => '设置';
 
   @override
-  String get compareTickers => '股票对比';
-
-  @override
   String get account => '账户';
 
   @override
@@ -296,6 +293,24 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get marketLensAIScore => 'AI评分';
+
+  @override
+  String get aiTabAnalysis => 'AI分析';
+
+  @override
+  String get aiTabStocks => 'AI个股';
+
+  @override
+  String get aiAnalysisComingSoonTitle => '对话式AI分析';
+
+  @override
+  String get aiAnalysisComingSoonBody => '像聊天一样提问，AI即可为你分析市场与个股。功能即将推出。';
+
+  @override
+  String get comingSoonBadge => '即将推出';
+
+  @override
+  String get aiNoStocksInSegment => '该区间暂无个股';
 
   @override
   String get distributionShownOnFullLoad => '加载全部信号后显示分布';
@@ -1406,9 +1421,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get errDemotionFailed => '降级失败';
 
   @override
-  String get errMaxCompare => '最多可对比3只股票';
-
-  @override
   String get today => '今天';
 
   @override
@@ -1810,6 +1822,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get aiRecommendations => '推荐建议';
 
   @override
+  String get todayPicks => '今日推荐';
+
+  @override
   String get recPortfolioOverview => '投资组合概览';
 
   @override
@@ -1934,6 +1949,24 @@ class AppLocalizationsZh extends AppLocalizations {
   String get aiRefreshOnChange => '持仓变更时自动刷新';
 
   @override
+  String get aiUpdateButton => '更新AI分析';
+
+  @override
+  String get aiUpdating => '正在更新分析…';
+
+  @override
+  String get aiNoChangeToAnalyze => '无变更，无需重新分析';
+
+  @override
+  String get aiAnalysisOnDemandHint => '当持仓或日期变化时可更新';
+
+  @override
+  String get aiUpdateInProgressHint => '正在生成分析… 最多约需1分钟。';
+
+  @override
+  String get aiUpdateDelayed => '分析生成稍有延迟，稍后将自动显示。';
+
+  @override
   String lastUpdateTime(String time) {
     return '最后更新: $time';
   }
@@ -2034,6 +2067,29 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String newsBubbleMentions(int count) {
+    return '$count条';
+  }
+
+  @override
+  String get newsSentiment24hTitle => '最近24小时';
+
+  @override
+  String get newsBullish => '利好新闻';
+
+  @override
+  String get newsNeutral => '中性新闻';
+
+  @override
+  String get newsBearish => '利空新闻';
+
+  @override
+  String get keyNewsTitle => '今日核心新闻';
+
+  @override
+  String get viewTickerDetail => '前往个股';
+
+  @override
+  String newsCountUnit(int count) {
     return '$count条';
   }
 
@@ -2142,6 +2198,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get losersTop => '跌幅';
 
   @override
+  String get volumeTop => '成交量';
+
+  @override
   String get topByMarketCap => '市值排名';
 
   @override
@@ -2174,6 +2233,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get holdingsSummary => '持仓概况';
+
+  @override
+  String get investmentReturn => '投资收益率';
 
   @override
   String get returnRate => '收益率';
@@ -2344,7 +2406,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get watchlistSubtitle => '收藏您关注的股票';
 
   @override
-  String get holdingsSubtitle => '管理您的持仓';
+  String get wlTargetPrice => '目标价';
+
+  @override
+  String get wlPrice1mAgo => '1个月前';
+
+  @override
+  String get wlPrice3mAgo => '3个月前';
 
   @override
   String get filterActiveLabel => '筛选已启用';

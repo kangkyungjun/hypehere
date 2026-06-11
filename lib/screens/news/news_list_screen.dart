@@ -3,19 +3,19 @@ import 'package:provider/provider.dart';
 import '../../models/news_data.dart';
 import '../../models/news_filter.dart';
 import '../../utils/multilingual.dart';
-import '../../utils/app_page_route.dart';
 import '../../services/analytics_api_client.dart';
 import '../../utils/error_localizer.dart';
 import '../../widgets/ads/banner_ad_widget.dart';
 import '../../widgets/news/market_news_modal.dart';
 import '../../widgets/news/mention_bubble_card.dart';
+import '../../widgets/news/bull_bear_bar_card.dart';
+import '../../widgets/news/key_news_card.dart';
 import '../../models/mention_bubble_data.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 import '../../theme/app_typography.dart';
 import '../../providers/watchlist_provider.dart';
-import '../ticker_detail/ticker_detail_screen.dart';
 import '../../l10n/app_localizations.dart';
 import '../../widgets/common/error_state_view.dart';
 import '../../widgets/common/empty_state_view.dart';
@@ -25,7 +25,7 @@ import '../../widgets/common/empty_state_view.dart';
 /// - Date separators ("오늘 2/21 금", "어제 2/20 목")
 /// - Timeline layout (dot + vertical line)
 /// - Banner ad every 15 news items
-/// - Tap item → TickerDetailScreen
+/// - Tap item → MarketNewsModal (with original-article / go-to-stock actions)
 /// - Filter support via [filterState]
 /// - Hot topic toast overlay
 class NewsListScreen extends StatefulWidget {
@@ -59,6 +59,10 @@ class _NewsListScreenState extends State<NewsListScreen> {
   // Mention bubble
   MentionBubbleData? _mentionBubble;
 
+  // 24h bull/bear sentiment counts + AI key news
+  SentimentCounts _sentimentCounts = SentimentCounts();
+  List<NewsItem> _keyNews = [];
+
   // Track current filter to detect changes
   late NewsFilterState _currentFilter;
 
@@ -72,6 +76,8 @@ class _NewsListScreenState extends State<NewsListScreen> {
     _loadInitial();
     _loadHotTopics();
     _loadMentionBubble();
+    _loadSentimentCounts();
+    _loadKeyNews();
   }
 
   @override
@@ -83,6 +89,7 @@ class _NewsListScreenState extends State<NewsListScreen> {
       _items.clear();
       _loadInitial();
       _loadMentionBubble();
+      _loadSentimentCounts();
     }
   }
 
@@ -253,11 +260,21 @@ class _NewsListScreenState extends State<NewsListScreen> {
     }
   }
 
-  void _onTickerTap(String ticker) {
-    Navigator.push(
-      context,
-      appPageRoute(builder: (_) => TickerDetailScreen(ticker: ticker)),
+  Future<void> _loadSentimentCounts() async {
+    final params = _buildFilterParams();
+    final counts = await _apiClient.getRecentSentimentCounts(
+      hours: 24,
+      tickers: params.tickers,
+      sectors: params.sectors,
+      excludeMarket: params.excludeMarket,
+      // NOT params.sentiment — bar shows the full mix for the category
     );
+    if (mounted) setState(() => _sentimentCounts = counts);
+  }
+
+  Future<void> _loadKeyNews() async {
+    final items = await _apiClient.getKeyNews(hours: 10, limit: 5);
+    if (mounted) setState(() => _keyNews = items);
   }
 
   @override
@@ -299,6 +316,8 @@ class _NewsListScreenState extends State<NewsListScreen> {
           _loadInitial(),
           _loadHotTopics(),
           _loadMentionBubble(),
+          _loadSentimentCounts(),
+          _loadKeyNews(),
         ]);
       },
       child: ListView.builder(
@@ -318,9 +337,31 @@ class _NewsListScreenState extends State<NewsListScreen> {
   bool get _hasBubble =>
       _mentionBubble != null && _mentionBubble!.items.isNotEmpty;
 
-  /// Calculate total item count including bubble card, date headers, and ads
+  bool get _hasBullBear =>
+      (_sentimentCounts.bullish +
+          _sentimentCounts.neutral +
+          _sentimentCounts.bearish) >
+      0;
+
+  bool get _hasKeyNews => _keyNews.isNotEmpty;
+
+  /// Header widgets shown above the news timeline. The banner ad is always
+  /// present so it appears even when all cards are hidden.
+  List<Widget> _headerWidgets() {
+    return [
+      if (_hasBubble) MentionBubbleCard(data: _mentionBubble!),
+      if (_hasBullBear) BullBearBarCard(counts: _sentimentCounts),
+      if (_hasKeyNews) KeyNewsCard(items: _keyNews),
+      const Padding(
+        padding: EdgeInsets.only(bottom: AppSpacing.lg),
+        child: Center(child: BannerAdWidget()),
+      ),
+    ];
+  }
+
+  /// Calculate total item count including header widgets, date headers, and ads
   int _buildListItemCount() {
-    int count = _hasBubble ? 2 : 0; // bubble card + banner ad slot
+    int count = _headerWidgets().length;
     String? lastDateGroup;
     int newsIndex = 0;
 
@@ -347,23 +388,15 @@ class _NewsListScreenState extends State<NewsListScreen> {
     return count;
   }
 
-  /// Build item at virtual index (handles bubble, headers, news, ads)
+  /// Build item at virtual index (handles header widgets, date headers, news, ads)
   Widget _buildListItem(int virtualIndex) {
-    // Bubble card at index 0
-    if (_hasBubble && virtualIndex == 0) {
-      return MentionBubbleCard(data: _mentionBubble!);
+    final headers = _headerWidgets();
+    if (virtualIndex < headers.length) {
+      return headers[virtualIndex];
     }
 
-    // Banner ad after bubble card
-    if (_hasBubble && virtualIndex == 1) {
-      return const Padding(
-        padding: EdgeInsets.only(bottom: AppSpacing.lg),
-        child: Center(child: BannerAdWidget()),
-      );
-    }
-
-    // Offset for the bubble card + banner ad
-    final adjusted = _hasBubble ? virtualIndex - 2 : virtualIndex;
+    // Offset past the header widgets
+    final adjusted = virtualIndex - headers.length;
 
     int currentVirtual = 0;
     String? lastDateGroup;
@@ -471,9 +504,7 @@ class _NewsListScreenState extends State<NewsListScreen> {
     final isMarket = MarketNewsModal.isMarketNews(item);
 
     return InkWell(
-      onTap: () => isMarket
-          ? MarketNewsModal.show(context, item)
-          : _onTickerTap(item.ticker),
+      onTap: () => MarketNewsModal.show(context, item),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 0),
         child: IntrinsicHeight(

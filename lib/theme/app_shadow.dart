@@ -2,6 +2,16 @@ import 'package:flutter/material.dart';
 
 /// Semantic box shadow tokens for consistent elevation.
 abstract final class AppShadow {
+  /// 카드 부드러운 그림자 — 그룹(회색) 배경 위 흰 카드를 띄울 때 (에디토리얼 톤)
+  /// 낮은 alpha + 넓은 blur로 테두리 없이 부드럽게 분리
+  static List<BoxShadow> card(Color color) => [
+    BoxShadow(
+      color: color.withValues(alpha: 0.05),
+      blurRadius: 14,
+      offset: const Offset(0, 3),
+    ),
+  ];
+
   /// 미세 그림자 — 목록 항목, 작은 요소
   static List<BoxShadow> sm(Color color) => [
     BoxShadow(

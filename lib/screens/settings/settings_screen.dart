@@ -325,7 +325,10 @@ class SettingsScreen extends StatelessWidget {
           ),
 
           // Subscription Section
-          _buildSubscriptionSection(context),
+          // [SUBSCRIPTION_VISIBILITY_FLAG] 구독(Gold) 섹션 숨김 처리.
+          // 복원: FeatureFlags.kShowSubscriptionInSettings = true (config/feature_flags.dart)
+          if (FeatureFlags.kShowSubscriptionInSettings)
+            _buildSubscriptionSection(context),
 
           // Language Section
           Consumer<LocaleProvider>(

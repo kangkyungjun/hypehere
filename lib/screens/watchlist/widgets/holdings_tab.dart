@@ -326,7 +326,7 @@ class _HoldingsTabState extends State<HoldingsTab> {
                           color: mlc.textTertiary,
                         ),
                       ),
-                      const SizedBox(height: AppSpacing.xl),
+                      const SizedBox(height: AppSpacing.sm),
                       Text(
                         l10n.noHoldingsHint,
                         style: TextStyle(
@@ -372,7 +372,7 @@ class _HoldingsTabState extends State<HoldingsTab> {
                       // My recommendations ("내 추천 종목") — Phase C.
                       // Shown here too: no holdings yet → "what to buy" guidance.
                       const MyRecommendationsSection(horizontalPadding: 0),
-                      const SizedBox(height: AppSpacing.xl),
+                      const SizedBox(height: AppSpacing.sm),
                       CoachMark(
                         coachKey: CoachMarkProvider.keyHoldings,
                         message: l10n.coachMarkHoldings,
@@ -413,7 +413,7 @@ class _HoldingsTabState extends State<HoldingsTab> {
                               ),
                               textAlign: TextAlign.center,
                             ),
-                            const SizedBox(height: AppSpacing.xl),
+                            const SizedBox(height: AppSpacing.sm),
                             _benefitItem(theme, l10n.aiPortfolioBenefit1),
                             const SizedBox(height: AppSpacing.sm),
                             _benefitItem(theme, l10n.aiPortfolioBenefit2),
@@ -422,7 +422,7 @@ class _HoldingsTabState extends State<HoldingsTab> {
                           ],
                         ),
                       ),
-                      const SizedBox(height: AppSpacing.xxxl),
+                      const SizedBox(height: AppSpacing.lg),
 
                       // Primary CTA — direct add holding
                       SizedBox(
@@ -478,22 +478,6 @@ class _HoldingsTabState extends State<HoldingsTab> {
       onRefresh: widget.onRefresh,
       child: CustomScrollView(
         slivers: [
-          // Holdings subtitle
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.xl,
-                vertical: AppSpacing.md,
-              ),
-              child: Text(
-                l10n.holdingsSubtitle,
-                style: TextStyle(
-                  fontSize: AppTypography.caption,
-                  color: context.mlColors.textSecondary,
-                ),
-              ),
-            ),
-          ),
           // Portfolio summary card
           SliverToBoxAdapter(child: PortfolioSummaryCard(portfolio: portfolio)),
 
@@ -638,8 +622,12 @@ class _HoldingsTabState extends State<HoldingsTab> {
               ),
           ],
 
-          // Bottom padding
-          const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xl)),
+          // Bottom padding — 플로팅 탭바(extendBody)에 마지막 콘텐츠가 가리지 않도록
+          SliverToBoxAdapter(
+            child: SizedBox(
+              height: MediaQuery.of(context).viewPadding.bottom + 64,
+            ),
+          ),
         ],
       ),
     );

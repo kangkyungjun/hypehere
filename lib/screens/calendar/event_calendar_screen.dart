@@ -12,9 +12,9 @@ import '../../theme/app_colors.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 import '../../theme/app_typography.dart';
-import '../../widgets/ads/banner_ad_widget.dart';
 import '../../widgets/ads/rewarded_ad_helper.dart';
 import '../../widgets/common/empty_state_view.dart';
+import '../../widgets/common/market_segmented_tabs.dart';
 import '../../config/feature_flags.dart';
 import '../../widgets/common/gold_upgrade_sheet.dart';
 import '../ticker_detail/ticker_detail_screen.dart';
@@ -26,10 +26,14 @@ class EventCalendarScreen extends StatefulWidget {
   State<EventCalendarScreen> createState() => _EventCalendarScreenState();
 }
 
-class _EventCalendarScreenState extends State<EventCalendarScreen> {
+class _EventCalendarScreenState extends State<EventCalendarScreen>
+    with SingleTickerProviderStateMixin {
   static const _prefKeyAdUnlock = 'calendar_ad_unlock_until';
 
   final AnalyticsApiClient _apiClient = AnalyticsApiClient();
+
+  /// Sub-tabs below the calendar: News·Announcements | Economic Indicators
+  late final TabController _eventTabController;
 
   late int _year;
   late int _month;
@@ -46,6 +50,7 @@ class _EventCalendarScreenState extends State<EventCalendarScreen> {
     _year = now.year;
     _month = now.month;
     _selectedDate = DateTime(now.year, now.month, now.day);
+    _eventTabController = TabController(length: 2, vsync: this);
     _loadAdUnlock();
   }
 
@@ -59,6 +64,7 @@ class _EventCalendarScreenState extends State<EventCalendarScreen> {
 
   @override
   void dispose() {
+    _eventTabController.dispose();
     _apiClient.dispose();
     super.dispose();
   }
@@ -382,13 +388,11 @@ class _EventCalendarScreenState extends State<EventCalendarScreen> {
     );
   }
 
-  Widget _buildLockedSection(
+  /// Blurred locked events for a single tab column + unlock CTA overlay.
+  Widget _buildLockedSectionTab(
     List<MarketCalendarEvent> lockedEvents,
     AppLocalizations l10n,
   ) {
-    final newsEvents = lockedEvents.where((e) => !_economicTypes.contains(e.eventType)).toList();
-    final econEvents = lockedEvents.where((e) => _economicTypes.contains(e.eventType)).toList();
-
     return Stack(
       children: [
         // Blurred content
@@ -397,96 +401,78 @@ class _EventCalendarScreenState extends State<EventCalendarScreen> {
           child: ImageFiltered(
             imageFilter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
             child: IgnorePointer(
-              child: IntrinsicHeight(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: _buildEventColumn(
-                        l10n.calendarNewsAnnouncements,
-                        Icons.campaign,
-                        context.mlColors.eventEarningsColor,
-                        newsEvents,
-                        l10n,
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.sm),
-                    Expanded(
-                      child: _buildEventColumn(
-                        l10n.calendarEconomicIndicators,
-                        Icons.show_chart,
-                        context.mlColors.accentBlue,
-                        econEvents,
-                        l10n,
-                      ),
-                    ),
-                  ],
-                ),
+              child: Column(
+                children: lockedEvents
+                    .map((e) => _buildFullEventItem(e, l10n))
+                    .toList(),
               ),
             ),
           ),
         ),
         // CTA overlay
-        Positioned.fill(
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(AppRadius.md),
-              color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.3),
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.lock, size: 28, color: context.mlColors.textSecondary),
-                const SizedBox(height: AppSpacing.sm),
-                Text(
-                  l10n.calendarPremiumEvents(lockedEvents.length),
-                  style: TextStyle(
-                    fontSize: AppTypography.bodyMedium,
-                    fontWeight: AppTypography.bold,
-                    color: context.mlColors.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.xxs),
-                Text(
-                  l10n.calendarUnlockWithAd,
-                  style: TextStyle(
-                    fontSize: AppTypography.caption,
-                    color: context.mlColors.textSecondary,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.md),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    FilledButton.icon(
-                      onPressed: _onWatchCalendarAd,
-                      icon: const Icon(Icons.play_circle_outline, size: 18),
-                      label: Text(l10n.watchAd),
-                      style: FilledButton.styleFrom(
-                        visualDensity: VisualDensity.compact,
-                        textStyle: const TextStyle(fontSize: AppTypography.bodySmall),
-                      ),
-                    ),
-                    // [GOLD_PURCHASE_FLAG] 구매 비활성화 시 업그레이드 버튼 숨김
-                    if (FeatureFlags.kGoldPurchaseEnabled) ...[
-                      const SizedBox(width: AppSpacing.sm),
-                      OutlinedButton.icon(
-                        onPressed: () => GoldUpgradeSheet.show(context, source: 'calendar'),
-                        icon: const Icon(Icons.workspace_premium, size: 18),
-                        label: Text(l10n.upgradeToGold),
-                        style: OutlinedButton.styleFrom(
-                          visualDensity: VisualDensity.compact,
-                          textStyle: const TextStyle(fontSize: AppTypography.bodySmall),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ],
+        Positioned.fill(child: _buildLockedCta(lockedEvents.length, l10n)),
+      ],
+    );
+  }
+
+  /// Shared "premium locked" CTA (watch ad / upgrade).
+  Widget _buildLockedCta(int lockedCount, AppLocalizations l10n) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(AppRadius.md),
+        color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.3),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.lock, size: 28, color: context.mlColors.textSecondary),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            l10n.calendarPremiumEvents(lockedCount),
+            style: TextStyle(
+              fontSize: AppTypography.bodyMedium,
+              fontWeight: AppTypography.bold,
+              color: context.mlColors.textPrimary,
             ),
           ),
-        ),
-      ],
+          const SizedBox(height: AppSpacing.xxs),
+          Text(
+            l10n.calendarUnlockWithAd,
+            style: TextStyle(
+              fontSize: AppTypography.caption,
+              color: context.mlColors.textSecondary,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              FilledButton.icon(
+                onPressed: _onWatchCalendarAd,
+                icon: const Icon(Icons.play_circle_outline, size: 18),
+                label: Text(l10n.watchAd),
+                style: FilledButton.styleFrom(
+                  visualDensity: VisualDensity.compact,
+                  textStyle: const TextStyle(fontSize: AppTypography.bodySmall),
+                ),
+              ),
+              // [GOLD_PURCHASE_FLAG] 구매 비활성화 시 업그레이드 버튼 숨김
+              if (FeatureFlags.kGoldPurchaseEnabled) ...[
+                const SizedBox(width: AppSpacing.sm),
+                OutlinedButton.icon(
+                  onPressed: () => GoldUpgradeSheet.show(context, source: 'calendar'),
+                  icon: const Icon(Icons.workspace_premium, size: 18),
+                  label: Text(l10n.upgradeToGold),
+                  style: OutlinedButton.styleFrom(
+                    visualDensity: VisualDensity.compact,
+                    textStyle: const TextStyle(fontSize: AppTypography.bodySmall),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -497,27 +483,28 @@ class _EventCalendarScreenState extends State<EventCalendarScreen> {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
 
-    return RefreshIndicator(
-      onRefresh: _loadCalendar,
-      child: ListView(
-        padding: EdgeInsets.fromLTRB(
-          AppSpacing.lg, AppSpacing.md, AppSpacing.lg,
-          AppSpacing.md + MediaQuery.of(context).padding.bottom + 70,
+    return Column(
+      children: [
+        // ── Fixed header: month navigation + calendar grid + banner ad ──
+        Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.lg,
+            AppSpacing.md,
+            AppSpacing.lg,
+            0,
+          ),
+          child: Column(
+            children: [
+              _buildMonthNavigation(lang, l10n, today),
+              const SizedBox(height: AppSpacing.md),
+              _buildCalendarGrid(lang, today),
+            ],
+          ),
         ),
-        children: [
-          // Month navigation
-          _buildMonthNavigation(lang, l10n, today),
-          const SizedBox(height: AppSpacing.md),
-          // Calendar grid
-          _buildCalendarGrid(lang, today),
-          const SizedBox(height: AppSpacing.lg),
-          // Banner ad between calendar and event list
-          const Center(child: BannerAdWidget()),
-          const SizedBox(height: AppSpacing.lg),
-          // Event list for selected date
-          _buildEventList(l10n),
-        ],
-      ),
+        const SizedBox(height: AppSpacing.sm),
+        // ── Event tab section fills remaining space below ──
+        Expanded(child: _buildEventTabSection(l10n)),
+      ],
     );
   }
 
@@ -869,7 +856,7 @@ class _EventCalendarScreenState extends State<EventCalendarScreen> {
 
   static const _economicTypes = {'economic', 'fomc', 'fed_speech'};
 
-  Widget _buildEventList(AppLocalizations l10n) {
+  Widget _buildEventTabSection(AppLocalizations l10n) {
     if (_isLoading) {
       return const Padding(
         padding: EdgeInsets.all(AppSpacing.xxxl),
@@ -882,6 +869,7 @@ class _EventCalendarScreenState extends State<EventCalendarScreen> {
         padding: const EdgeInsets.all(AppSpacing.xxxl),
         child: Center(
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               Icon(Icons.error_outline, size: 40, color: context.mlColors.textTertiary),
               const SizedBox(height: AppSpacing.md),
@@ -918,6 +906,7 @@ class _EventCalendarScreenState extends State<EventCalendarScreen> {
         padding: const EdgeInsets.all(AppSpacing.xxxl),
         child: Center(
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               Icon(Icons.event_available, size: 40, color: context.mlColors.textTertiary),
               const SizedBox(height: AppSpacing.md),
@@ -936,209 +925,242 @@ class _EventCalendarScreenState extends State<EventCalendarScreen> {
     final freeEvents = isUnlocked ? allEvents : allEvents.where((e) => !_isEventLocked(e)).toList();
     final lockedEvents = isUnlocked ? <MarketCalendarEvent>[] : allEvents.where((e) => _isEventLocked(e)).toList();
 
-    // Split free events into two categories
+    // Split each bucket into the two categories
     final newsEvents = freeEvents.where((e) => !_economicTypes.contains(e.eventType)).toList();
     final econEvents = freeEvents.where((e) => _economicTypes.contains(e.eventType)).toList();
+    final newsLocked = lockedEvents.where((e) => !_economicTypes.contains(e.eventType)).toList();
+    final econLocked = lockedEvents.where((e) => _economicTypes.contains(e.eventType)).toList();
+
+    final mlc = context.mlColors;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (headerDate != null)
-          Padding(
-            padding: const EdgeInsets.only(left: AppSpacing.xxs, bottom: AppSpacing.xs),
-            child: Row(
-              children: [
-                Text(headerDate, style: TextStyle(fontSize: AppTypography.bodyLarge, fontWeight: AppTypography.bold, color: context.mlColors.textSecondary)),
-                const SizedBox(width: AppSpacing.sm),
-                Text(l10n.nEvents(allEvents.length),
-                    style: TextStyle(fontSize: AppTypography.bodySmall, color: context.mlColors.textSecondary)),
-              ],
-            ),
-          )
-        else
-          Padding(
-            padding: const EdgeInsets.only(left: AppSpacing.xxs, bottom: AppSpacing.xs),
-            child: Row(
-              children: [
-                Text(l10n.nEvents(allEvents.length),
-                    style: TextStyle(fontSize: AppTypography.bodySmall, color: context.mlColors.textSecondary, fontWeight: AppTypography.medium)),
-                if (isUnlocked && _adUnlockExpiry != null) ...[
-                  const SizedBox(width: AppSpacing.sm),
-                  Text(
-                    l10n.calendarUnlockedUntil(
-                      '${_adUnlockExpiry!.hour.toString().padLeft(2, '0')}:${_adUnlockExpiry!.minute.toString().padLeft(2, '0')}',
-                    ),
-                    style: TextStyle(fontSize: AppTypography.micro, color: Theme.of(context).colorScheme.primary),
-                  ),
-                ],
-              ],
-            ),
+        // Compact header: (selected date) + total count + unlock window
+        Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.xs,
           ),
-        // Free events two-column layout
-        if (freeEvents.isNotEmpty)
-          IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Left column - News/Announcements
-                Expanded(
-                  child: _buildEventColumn(
-                    l10n.calendarNewsAnnouncements,
-                    Icons.campaign,
-                    context.mlColors.eventEarningsColor,
-                    newsEvents,
-                    l10n,
+          child: Row(
+            children: [
+              if (headerDate != null) ...[
+                Text(
+                  headerDate,
+                  style: TextStyle(
+                    fontSize: AppTypography.bodyMedium,
+                    fontWeight: AppTypography.bold,
+                    color: mlc.textSecondary,
                   ),
                 ),
                 const SizedBox(width: AppSpacing.sm),
-                // Right column - US Economic Indicators
-                Expanded(
-                  child: _buildEventColumn(
-                    l10n.calendarEconomicIndicators,
-                    Icons.show_chart,
-                    context.mlColors.accentBlue,
-                    econEvents,
-                    l10n,
+              ],
+              Text(
+                l10n.nEvents(allEvents.length),
+                style: TextStyle(
+                  fontSize: AppTypography.bodySmall,
+                  color: mlc.textSecondary,
+                  fontWeight: AppTypography.medium,
+                ),
+              ),
+              if (isUnlocked && _adUnlockExpiry != null) ...[
+                const SizedBox(width: AppSpacing.sm),
+                Text(
+                  l10n.calendarUnlockedUntil(
+                    '${_adUnlockExpiry!.hour.toString().padLeft(2, '0')}:${_adUnlockExpiry!.minute.toString().padLeft(2, '0')}',
+                  ),
+                  style: TextStyle(
+                    fontSize: AppTypography.micro,
+                    color: Theme.of(context).colorScheme.primary,
                   ),
                 ),
               ],
-            ),
+            ],
           ),
-        // Locked events with blur + CTA
-        if (lockedEvents.isNotEmpty) ...[
-          const SizedBox(height: AppSpacing.md),
-          _buildLockedSection(lockedEvents, l10n),
-        ],
+        ),
+        // Sub-tab bar: News·Announcements | Economic Indicators
+        _buildEventTabBar(
+          newsEvents.length + newsLocked.length,
+          econEvents.length + econLocked.length,
+          l10n,
+        ),
+        // Tab content fills remaining space, swipeable left/right
+        Expanded(
+          child: TabBarView(
+            controller: _eventTabController,
+            children: [
+              _buildEventTabList(newsEvents, newsLocked, l10n),
+              _buildEventTabList(econEvents, econLocked, l10n),
+            ],
+          ),
+        ),
       ],
     );
   }
 
-  Widget _buildEventColumn(
-    String title,
-    IconData icon,
-    Color headerColor,
-    List<MarketCalendarEvent> events,
-    AppLocalizations l10n,
-  ) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(AppRadius.md),
-        border: Border.all(color: context.mlColors.subtleBorder),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.sm),
-            decoration: BoxDecoration(
-              color: headerColor.withValues(alpha: 0.08),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(AppRadius.md)),
-            ),
-            child: Row(
-              children: [
-                Icon(icon, size: 13, color: headerColor),
-                const SizedBox(width: AppSpacing.xs),
-                Expanded(
-                  child: Text(
-                    title,
-                    style: TextStyle(fontSize: AppTypography.caption, fontWeight: AppTypography.bold, color: headerColor),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                Text(
-                  '${events.length}',
-                  style: TextStyle(fontSize: AppTypography.micro, color: headerColor, fontWeight: AppTypography.semiBold),
-                ),
-              ],
-            ),
-          ),
-          // Event items
-          if (events.isEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
-              child: Center(
-                child: Text('—', style: TextStyle(fontSize: AppTypography.bodySmall, color: context.mlColors.textTertiary)),
-              ),
-            )
-          else
-            ...events.map((event) => _buildCompactEventItem(event, l10n)),
-        ],
+  Widget _buildEventTabBar(int newsCount, int econCount, AppLocalizations l10n) {
+    return MarketSegmentedTabs(
+      controller: _eventTabController,
+      tabs: [
+        '${l10n.calendarNewsAnnouncements} ($newsCount)',
+        '${l10n.calendarEconomicIndicators} ($econCount)',
+      ],
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.sm,
       ),
     );
   }
 
-  Widget _buildCompactEventItem(MarketCalendarEvent event, AppLocalizations l10n) {
-    return InkWell(
-      onTap: () => _onEventTap(event),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+  /// Full-width scrollable list for one category (fills the space below).
+  Widget _buildEventTabList(
+    List<MarketCalendarEvent> events,
+    List<MarketCalendarEvent> lockedEvents,
+    AppLocalizations l10n,
+  ) {
+    final bottomPad = MediaQuery.of(context).padding.bottom + 70.0;
+
+    if (events.isEmpty && lockedEvents.isEmpty) {
+      return RefreshIndicator(
+        onRefresh: _loadCalendar,
+        child: ListView(
+          padding: EdgeInsets.only(bottom: bottomPad),
           children: [
-            // Color dot
-            Container(
-              margin: const EdgeInsets.only(top: AppSpacing.xs),
-              width: 6,
-              height: 6,
-              decoration: BoxDecoration(color: event.colorOf(context.mlColors), shape: BoxShape.circle),
-            ),
-            const SizedBox(width: AppSpacing.xs),
-            Expanded(
+            const SizedBox(height: AppSpacing.xxxl),
+            Center(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Icon(Icons.event_available, size: 36, color: context.mlColors.textTertiary),
+                  const SizedBox(height: AppSpacing.sm),
                   Text(
-                    event.title,
-                    style: const TextStyle(fontSize: AppTypography.caption, fontWeight: AppTypography.medium, height: 1.2),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: AppSpacing.xxs),
-                  Row(
-                    children: [
-                      Text(
-                        event.date.substring(5),
-                        style: TextStyle(fontSize: AppTypography.chartLabel, color: context.mlColors.textTertiary),
-                      ),
-                      if (event.ticker != null) ...[
-                        const SizedBox(width: AppSpacing.xxs),
-                        Flexible(
-                          child: Text(
-                            event.ticker!,
-                            style: TextStyle(
-                              fontSize: AppTypography.chartLabel,
-                              color: Theme.of(context).colorScheme.primary,
-                              fontWeight: AppTypography.medium,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                      if (event.importance == 'high') ...[
-                        const SizedBox(width: AppSpacing.xxs),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxs, vertical: 0.5),
-                          decoration: BoxDecoration(
-                            color: context.mlColors.lossColor.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(AppRadius.xxs),
-                          ),
-                          child: Text(
-                            '!',
-                            style: TextStyle(fontSize: AppTypography.chartMicro, color: context.mlColors.lossColor, fontWeight: AppTypography.bold),
-                          ),
-                        ),
-                      ],
-                    ],
+                    l10n.noEventsSelectedDay,
+                    style: TextStyle(
+                      fontSize: AppTypography.bodyMedium,
+                      color: context.mlColors.textTertiary,
+                    ),
                   ),
                 ],
               ),
             ),
           ],
         ),
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh: _loadCalendar,
+      child: ListView(
+        padding: EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, bottomPad),
+        children: [
+          ...events.map((e) => _buildFullEventItem(e, l10n)),
+          if (lockedEvents.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.md),
+            _buildLockedSectionTab(lockedEvents, l10n),
+          ],
+        ],
       ),
+    );
+  }
+
+  /// Full-width event row with larger, more legible typography.
+  Widget _buildFullEventItem(MarketCalendarEvent event, AppLocalizations l10n) {
+    final mlc = context.mlColors;
+    return Column(
+      children: [
+        InkWell(
+          onTap: () => _onEventTap(event),
+          borderRadius: BorderRadius.circular(AppRadius.sm),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.xs, vertical: AppSpacing.md,
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  margin: const EdgeInsets.only(top: 5),
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: event.colorOf(mlc),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        event.title,
+                        style: const TextStyle(
+                          fontSize: AppTypography.bodyLarge,
+                          fontWeight: AppTypography.semiBold,
+                          height: 1.3,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: AppSpacing.xs),
+                      Row(
+                        children: [
+                          Text(
+                            event.date.substring(5),
+                            style: TextStyle(
+                              fontSize: AppTypography.bodySmall,
+                              color: mlc.textTertiary,
+                            ),
+                          ),
+                          if (event.ticker != null) ...[
+                            Text(
+                              '  ·  ',
+                              style: TextStyle(
+                                fontSize: AppTypography.bodySmall,
+                                color: mlc.textTertiary,
+                              ),
+                            ),
+                            Flexible(
+                              child: Text(
+                                event.ticker!,
+                                style: TextStyle(
+                                  fontSize: AppTypography.bodySmall,
+                                  color: Theme.of(context).colorScheme.primary,
+                                  fontWeight: AppTypography.semiBold,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                          if (event.importance == 'high') ...[
+                            const SizedBox(width: AppSpacing.sm),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: AppSpacing.xs, vertical: 1,
+                              ),
+                              decoration: BoxDecoration(
+                                color: mlc.lossColor.withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(AppRadius.xs),
+                              ),
+                              child: Text(
+                                'HIGH',
+                                style: TextStyle(
+                                  fontSize: AppTypography.micro,
+                                  color: mlc.lossColor,
+                                  fontWeight: AppTypography.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(Icons.chevron_right, size: 18, color: mlc.textTertiary),
+              ],
+            ),
+          ),
+        ),
+        Divider(height: 1, thickness: 0.5, color: mlc.subtleBorder),
+      ],
     );
   }
 

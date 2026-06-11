@@ -32,6 +32,7 @@ from .views import (
     subscription_status_view,
     investment_profile_view,
     user_recommendations_view,
+    report_ad_failure_view,
 )
 
 app_name = 'accounts'
@@ -85,6 +86,9 @@ urlpatterns = [
     # RevenueCat IAP Webhook + 구독 상태
     path('webhook/revenuecat/', revenuecat_webhook_view, name='revenuecat-webhook'),
     path('subscription/status/', subscription_status_view, name='subscription-status'),
+
+    # 운영 알림 — 광고 로드 실패 보고 (클라이언트 → owner/매니저 통지)
+    path('ops/ad-failure/', report_ad_failure_view, name='ops-ad-failure'),
 
     # JWT 엔드포인트 (하위 호환)
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),

@@ -19,9 +19,20 @@ import '../../../providers/coach_mark_provider.dart';
 import '../../explore/explore_screen.dart';
 import 'login_required_banner.dart';
 
-/// Watchlist tab: shows watchlist items with [+💼] button or "보유중" badge.
+/// Per-ticker analyst target + historical prices for the watchlist card,
+/// derived client-side from getChartData (see WatchlistScreen._loadEnrichment).
+class WatchlistEnrichment {
+  final double? target;
+  final double? price1m;
+  final double? price3m;
+  const WatchlistEnrichment({this.target, this.price1m, this.price3m});
+}
+
+/// Watchlist tab: 2-up grid of compact stock cards (ticker, price/change,
+/// analyst target, 1M/3M-ago prices) with full-width banner ads between rows.
 class WatchlistTab extends StatelessWidget {
   final Map<String, TickerScore> tickerScores;
+  final Map<String, WatchlistEnrichment> enrichment;
   final bool isLoading;
   final String? error;
   final TreemapData? treemapData;
@@ -33,6 +44,7 @@ class WatchlistTab extends StatelessWidget {
   const WatchlistTab({
     super.key,
     required this.tickerScores,
+    this.enrichment = const {},
     required this.isLoading,
     this.error,
     this.treemapData,
@@ -53,18 +65,6 @@ class WatchlistTab extends StatelessWidget {
             (a, b) => (b.tradingValue ?? 0).compareTo(a.tradingValue ?? 0),
           );
     return items.take(10).toList();
-  }
-
-  Color _getSignalColor(BuildContext context, SignalType signalType) {
-    switch (signalType) {
-      case SignalType.buy:
-        return context.mlColors.gainColor;
-      case SignalType.sell:
-        return context.mlColors.lossColor;
-      case SignalType.hold:
-      case SignalType.neutral:
-        return context.mlColors.neutralColor;
-    }
   }
 
   void _onRemoveTicker(
@@ -120,311 +120,288 @@ class WatchlistTab extends StatelessWidget {
         final showDiscovery =
             allWatchlist.length < 5 && discoveryItems.isNotEmpty;
 
-        final loginBannerCount = isLoggedIn ? 0 : 1;
-        const subtitleCount = 1; // watchlist subtitle
-        final discoveryCount = showDiscovery ? 1 : 0;
-        const adBannerCount = 1; // bottom banner ad
-        final totalCount =
-            loginBannerCount +
-            subtitleCount +
-            allWatchlist.length +
-            discoveryCount +
-            adBannerCount;
+        // Build a flat list of rows: subtitle, 2-up card rows, interleaved
+        // full-width banner ads (every 2 rows), discovery card, bottom ad.
+        final children = <Widget>[];
+
+        if (!isLoggedIn) children.add(const LoginRequiredBanner());
+
+        children.add(
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.xxs,
+              AppSpacing.sm,
+              AppSpacing.xxs,
+              AppSpacing.md,
+            ),
+            child: Text(
+              l10n.watchlistSubtitle,
+              style: TextStyle(
+                fontSize: AppTypography.caption,
+                color: context.mlColors.textSecondary,
+              ),
+            ),
+          ),
+        );
+
+        final pairCount = (allWatchlist.length / 2).ceil();
+        int rowsSinceAd = 0;
+        for (int p = 0; p < pairCount; p++) {
+          final i = p * 2;
+          final t1 = allWatchlist[i];
+          final t2 = (i + 1 < allWatchlist.length) ? allWatchlist[i + 1] : null;
+
+          children.add(
+            IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(
+                    child: _buildTickerCard(
+                      context,
+                      t1,
+                      tickerScores[t1],
+                      watchlistProvider,
+                      isLoggedIn,
+                      isLoggedIn && portfolio.isInHoldings(t1),
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: t2 == null
+                        ? const SizedBox.shrink()
+                        : _buildTickerCard(
+                            context,
+                            t2,
+                            tickerScores[t2],
+                            watchlistProvider,
+                            isLoggedIn,
+                            isLoggedIn && portfolio.isInHoldings(t2),
+                          ),
+                  ),
+                ],
+              ),
+            ),
+          );
+          children.add(const SizedBox(height: AppSpacing.md));
+
+          rowsSinceAd++;
+          if (rowsSinceAd >= 2 && p != pairCount - 1) {
+            rowsSinceAd = 0;
+            children.add(
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
+                child: BannerAdWidget(),
+              ),
+            );
+          }
+        }
+
+        if (showDiscovery) {
+          children.add(_buildDiscoverySection(context, discoveryItems));
+        }
+
+        // Bottom banner ad
+        children.add(
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: AppSpacing.xl),
+            child: BannerAdWidget(),
+          ),
+        );
 
         return RefreshIndicator(
           onRefresh: onRefresh,
-          child: ListView.builder(
-            padding: const EdgeInsets.fromLTRB(
+          child: ListView(
+            padding: EdgeInsets.fromLTRB(
               AppSpacing.xl,
               AppSpacing.md,
               AppSpacing.xl,
-              AppSpacing.xl,
+              MediaQuery.of(context).viewPadding.bottom + 64,
             ),
-            itemCount: totalCount,
-            itemBuilder: (context, index) {
-              // Login banner as first item when not logged in
-              if (!isLoggedIn && index == 0) {
-                return const LoginRequiredBanner();
-              }
-              final adjusted = isLoggedIn ? index : index - 1;
-
-              // Subtitle row
-              if (adjusted == 0) {
-                return Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    AppSpacing.xxs,
-                    AppSpacing.sm,
-                    AppSpacing.xxs,
-                    AppSpacing.md,
-                  ),
-                  child: Text(
-                    l10n.watchlistSubtitle,
-                    style: TextStyle(
-                      fontSize: AppTypography.caption,
-                      color: context.mlColors.textSecondary,
-                    ),
-                  ),
-                );
-              }
-              final listAdjusted = adjusted - 1;
-
-              // Discovery card
-              if (showDiscovery && listAdjusted == allWatchlist.length) {
-                return _buildDiscoverySection(context, discoveryItems);
-              }
-
-              // Banner ad as last item
-              final adIndex = allWatchlist.length + discoveryCount;
-              if (listAdjusted == adIndex) {
-                return const Padding(
-                  padding: EdgeInsets.symmetric(vertical: AppSpacing.xl),
-                  child: BannerAdWidget(),
-                );
-              }
-
-              if (listAdjusted >= allWatchlist.length) {
-                return const SizedBox.shrink();
-              }
-              final ticker = allWatchlist[listAdjusted];
-              final tickerScore = tickerScores[ticker];
-              final isHeld = isLoggedIn && portfolio.isInHoldings(ticker);
-              return _buildTickerItem(
-                context,
-                ticker,
-                tickerScore,
-                watchlistProvider,
-                isLoggedIn,
-                isHeld,
-              );
-            },
+            children: children,
           ),
         );
       },
     );
   }
 
-  Widget _buildTickerItem(
+  /// Compact watchlist card (two fit per row).
+  ///
+  /// NOTE: swipe-to-delete (Dismissible) doesn't fit a 2-up grid cell, so
+  /// removal moved to **long-press** (with undo snackbar). Tap → detail.
+  /// The big score box + signal pill were dropped for the compact mockup
+  /// layout; add-to-holdings is kept as a small trailing icon.
+  Widget _buildTickerCard(
     BuildContext context,
     String ticker,
-    TickerScore? tickerScore,
+    TickerScore? score,
     WatchlistProvider provider,
     bool isLoggedIn,
     bool isHeld,
   ) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
     final mlc = context.mlColors;
-    final hasScore = tickerScore != null;
+    final isKo = Localizations.localeOf(context).languageCode == 'ko';
+    final enrich = enrichment[ticker];
 
-    return Dismissible(
-      key: Key(ticker),
-      direction: DismissDirection.endToStart,
-      background: Container(
-        margin: const EdgeInsets.only(bottom: AppSpacing.md),
-        decoration: BoxDecoration(
-          color: mlc.dangerColor,
-          borderRadius: BorderRadius.circular(AppRadius.card),
-        ),
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: AppSpacing.xxl),
-        child: Icon(Icons.delete, color: mlc.onPrimary),
-      ),
-      onDismissed: (_) => _onRemoveTicker(context, ticker, provider),
+    final name = score?.name == null
+        ? null
+        : (isKo && score!.nameKo != null ? score.nameKo! : score!.name!);
+    final priceStr = score?.close != null
+        ? '\$${score!.close!.toStringAsFixed(2)}'
+        : '—';
+
+    return GestureDetector(
+      onLongPress: () => _onRemoveTicker(context, ticker, provider),
       child: BentoCard(
-        margin: const EdgeInsets.only(bottom: AppSpacing.md),
-        padding: const EdgeInsets.all(AppSpacing.lg),
+        margin: EdgeInsets.zero,
+        padding: const EdgeInsets.all(AppSpacing.md),
         onTap: () => onTickerTap(ticker),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            // Score box
-            if (hasScore)
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: _getSignalColor(
-                    context,
-                    tickerScore.signalType,
-                  ).withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(AppRadius.card),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      tickerScore.score.toStringAsFixed(0),
-                      style: TextStyle(
-                        fontSize: AppTypography.headlineMedium,
-                        fontWeight: AppTypography.bold,
-                        color: _getSignalColor(context, tickerScore.signalType),
-                      ),
-                    ),
-                    Text(
-                      l10n.score,
-                      style: TextStyle(
-                        fontSize: AppTypography.chartMicro,
-                        color: mlc.textTertiary,
-                      ),
-                    ),
-                  ],
-                ),
-              )
-            else
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: mlc.infoBg.withValues(alpha: 0.48),
-                  borderRadius: BorderRadius.circular(AppRadius.card),
-                ),
-                child: Icon(Icons.bookmark, color: mlc.textTertiary, size: 22),
-              ),
-
-            const SizedBox(width: AppSpacing.lg),
-
-            // Ticker + Name
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
+            // Ticker + current price
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
                     ticker,
                     style: TextStyle(
-                      fontSize: AppTypography.headlineSmall,
+                      fontSize: AppTypography.bodyLarge,
                       fontWeight: AppTypography.bold,
                       color: mlc.textPrimary,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: AppSpacing.xxs),
-                  hasScore && tickerScore.name != null
-                      ? Text(
-                          Localizations.localeOf(context).languageCode ==
-                                      'ko' &&
-                                  tickerScore.nameKo != null
-                              ? tickerScore.nameKo!
-                              : tickerScore.name!,
+                ),
+                const SizedBox(width: AppSpacing.xs),
+                Text(
+                  priceStr,
+                  style: AppTypography.numericSecondary.copyWith(
+                    fontSize: AppTypography.bodyMedium,
+                    fontWeight: AppTypography.bold,
+                    color: mlc.textPrimary,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.xxs),
+            // Company name + change%
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    name ?? l10n.tapToViewDetails,
+                    style: TextStyle(
+                      fontSize: AppTypography.caption,
+                      color: name == null ? mlc.textTertiary : mlc.textSecondary,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                if (score?.changePct != null) ...[
+                  const SizedBox(width: AppSpacing.xs),
+                  Text(
+                    '${score!.changePct! >= 0 ? '▲' : '▼'} ${score.changePct!.abs().toStringAsFixed(2)}%',
+                    style: TextStyle(
+                      fontSize: AppTypography.caption,
+                      fontWeight: AppTypography.semiBold,
+                      color: score.changePct! >= 0
+                          ? mlc.gainColor
+                          : mlc.lossColor,
+                      fontFeatures: AppTypography.tabularFigures,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            _statRow(context, l10n.wlTargetPrice, _fmtPrice(enrich?.target)),
+            _statRow(context, l10n.wlPrice1mAgo, _fmtPrice(enrich?.price1m)),
+            _statRow(context, l10n.wlPrice3mAgo, _fmtPrice(enrich?.price3m)),
+            if (isLoggedIn) ...[
+              const SizedBox(height: AppSpacing.xs),
+              Align(
+                alignment: Alignment.centerRight,
+                child: isHeld
+                    ? Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.sm,
+                          vertical: AppSpacing.xxs,
+                        ),
+                        decoration: BoxDecoration(
+                          color: mlc.textTertiary.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(AppRadius.badge),
+                        ),
+                        child: Text(
+                          l10n.alreadyHeld,
                           style: TextStyle(
-                            fontSize: AppTypography.bodySmall,
+                            fontSize: AppTypography.micro,
                             color: mlc.textSecondary,
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        )
-                      : Text(
-                          l10n.tapToViewDetails,
-                          style: TextStyle(
-                            fontSize: AppTypography.bodySmall,
-                            color: mlc.textTertiary,
-                            fontStyle: FontStyle.italic,
-                          ),
                         ),
-                ],
-              ),
-            ),
-
-            // Price + Change%
-            if (hasScore && tickerScore.close != null)
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    '\$${tickerScore.close!.toStringAsFixed(2)}',
-                    style: AppTypography.numericSecondary.copyWith(
-                      fontSize: AppTypography.bodyLarge,
-                      color: mlc.textPrimary,
-                    ),
-                  ),
-                  if (tickerScore.changePct != null) ...[
-                    const SizedBox(height: AppSpacing.xxs),
-                    Text(
-                      '${tickerScore.changePct! >= 0 ? '+' : ''}${tickerScore.changePct!.toStringAsFixed(2)}%',
-                      style: TextStyle(
-                        fontSize: AppTypography.caption,
-                        fontWeight: AppTypography.semiBold,
-                        color: tickerScore.changePct! >= 0
-                            ? context.mlColors.gainColor
-                            : context.mlColors.lossColor,
-                        fontFeatures: AppTypography.tabularFigures,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-
-            const SizedBox(width: AppSpacing.sm),
-
-            // Signal pill
-            if (hasScore && tickerScore.signal != null)
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.md,
-                  vertical: AppSpacing.xs,
-                ),
-                decoration: BoxDecoration(
-                  color: _getSignalColor(context, tickerScore.signalType),
-                  borderRadius: BorderRadius.circular(AppRadius.badge),
-                ),
-                child: Text(
-                  tickerScore.signalLabelLocalized(l10n),
-                  style: TextStyle(
-                    color: context.mlColors.onPrimary,
-                    fontSize: AppTypography.micro,
-                    fontWeight: AppTypography.bold,
-                  ),
-                ),
-              ),
-
-            const SizedBox(width: AppSpacing.xs),
-
-            // [+💼] or "보유중" badge
-            if (isLoggedIn)
-              isHeld
-                  ? Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.md,
-                        vertical: AppSpacing.xs,
-                      ),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.outline.withValues(
-                          alpha: 0.15,
-                        ),
-                        borderRadius: BorderRadius.circular(AppRadius.badge),
-                      ),
-                      child: Text(
-                        l10n.alreadyHeld,
-                        style: TextStyle(
-                          fontSize: AppTypography.micro,
-                          color: mlc.textSecondary,
-                        ),
-                      ),
-                    )
-                  : Tooltip(
-                      message: l10n.addToHoldings,
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(AppRadius.lg),
-                        onTap: () => onAddHolding(ticker, tickerScore),
-                        child: Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: mlc.infoBg.withValues(alpha: 0.58),
-                            borderRadius: BorderRadius.circular(AppRadius.lg),
-                          ),
-                          child: Icon(
-                            Icons.add_business,
-                            size: 20,
-                            color: mlc.accentBlue,
+                      )
+                    : Tooltip(
+                        message: l10n.addToHoldings,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(AppRadius.lg),
+                          onTap: () => onAddHolding(ticker, score),
+                          child: Container(
+                            width: 28,
+                            height: 28,
+                            decoration: BoxDecoration(
+                              color: mlc.infoBg.withValues(alpha: 0.58),
+                              borderRadius: BorderRadius.circular(AppRadius.lg),
+                            ),
+                            child: Icon(
+                              Icons.add_business,
+                              size: 16,
+                              color: mlc.accentBlue,
+                            ),
                           ),
                         ),
                       ),
-                    )
-            else
-              Icon(Icons.chevron_right, color: mlc.textTertiary),
+              ),
+            ],
           ],
         ),
       ),
     );
   }
+
+  Widget _statRow(BuildContext context, String label, String value) {
+    final mlc = context.mlColors;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxs),
+      child: Row(
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: AppTypography.caption,
+              color: mlc.textSecondary,
+            ),
+          ),
+          const Spacer(),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: AppTypography.bodySmall,
+              fontWeight: AppTypography.medium,
+              color: mlc.textPrimary,
+              fontFeatures: AppTypography.tabularFigures,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _fmtPrice(double? v) =>
+      v == null ? '—' : '\$${v.toStringAsFixed(2)}';
 
   Widget _buildEmptyState(
     BuildContext context,
@@ -438,14 +415,20 @@ class WatchlistTab extends StatelessWidget {
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.xl),
+          // 하단은 플로팅 탭바(extendBody)에 가리지 않도록 여백 확보
+          padding: EdgeInsets.fromLTRB(
+            AppSpacing.xl,
+            AppSpacing.xl,
+            AppSpacing.xl,
+            MediaQuery.of(context).viewPadding.bottom + 64,
+          ),
           child: Column(
             children: [
               if (!auth.isLoggedIn) ...[
                 const LoginRequiredBanner(),
-                const SizedBox(height: AppSpacing.xl),
+                const SizedBox(height: AppSpacing.sm),
               ],
-              const SizedBox(height: AppSpacing.xl),
+              const SizedBox(height: AppSpacing.sm),
               BentoCard(
                 padding: const EdgeInsets.all(AppSpacing.xxl),
                 child: Column(
@@ -469,7 +452,7 @@ class WatchlistTab extends StatelessWidget {
                         ),
                       ),
                     ),
-                    const SizedBox(height: AppSpacing.xl),
+                    const SizedBox(height: AppSpacing.sm),
                     Text(
                       l10n.watchlistEmpty,
                       style: TextStyle(
@@ -488,13 +471,13 @@ class WatchlistTab extends StatelessWidget {
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: AppSpacing.xl),
+                    const SizedBox(height: AppSpacing.sm),
                     _buildAddWatchlistButton(context, l10n),
                   ],
                 ),
               ),
               if (topVolumeItems.isNotEmpty) ...[
-                const SizedBox(height: AppSpacing.xxxl),
+                const SizedBox(height: AppSpacing.lg),
                 WatchlistDiscoveryCard(
                   topItems: topVolumeItems,
                   onTickerTap: onTickerTap,

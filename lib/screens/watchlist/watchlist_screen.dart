@@ -8,6 +8,7 @@ import '../../services/analytics_api_client.dart';
 import '../../utils/error_localizer.dart';
 import '../../models/ticker_score.dart';
 import '../../models/treemap_data.dart';
+import '../../models/chart_data.dart';
 import '../../widgets/community/signup_prompt_dialog.dart';
 import '../../config/feature_flags.dart';
 import '../../widgets/common/gold_upgrade_sheet.dart';
@@ -36,6 +37,10 @@ class _WatchlistScreenState extends State<WatchlistScreen> {
   TreemapData? _treemapData;
   bool _isLoading = true;
   String? _error;
+
+  /// Per-ticker analyst target + 1M/3M-ago prices, derived from getChartData.
+  /// Populated progressively after the watchlist loads (see [_loadEnrichment]).
+  final Map<String, WatchlistEnrichment> _enrichment = {};
 
   @override
   void initState() {
@@ -67,6 +72,9 @@ class _WatchlistScreenState extends State<WatchlistScreen> {
       _error = null;
     });
 
+    // Fresh load → drop cached enrichment so it re-derives (e.g. pull-to-refresh).
+    _enrichment.clear();
+
     try {
       final watchlist = context.read<WatchlistProvider>().watchlist;
       if (watchlist.isEmpty) {
@@ -87,12 +95,71 @@ class _WatchlistScreenState extends State<WatchlistScreen> {
         _tickerScores = scoreMap;
         _isLoading = false;
       });
+
+      // Progressive per-ticker enrichment (target + 1M/3M prices). Fire and
+      // forget — cards render immediately and fill in as data arrives.
+      _loadEnrichment(watchlist);
     } catch (e) {
       setState(() {
         _error = ErrorLocalizer.getMessage(context, e);
         _isLoading = false;
       });
     }
+  }
+
+  /// Fetch analyst target + 1M/3M-ago prices per ticker via getChartData,
+  /// in bounded-concurrency chunks, updating the UI progressively.
+  Future<void> _loadEnrichment(List<String> tickers) async {
+    final now = DateTime.now();
+    final from = now.subtract(const Duration(days: 95));
+    final pending =
+        tickers.where((t) => !_enrichment.containsKey(t)).toList();
+    const chunkSize = 4;
+
+    for (var i = 0; i < pending.length; i += chunkSize) {
+      final end = (i + chunkSize).clamp(0, pending.length);
+      final slice = pending.sublist(i, end);
+
+      final results = await Future.wait(slice.map((t) async {
+        try {
+          final chart =
+              await _apiClient.getChartData(t, fromDate: from, toDate: now);
+          final points = [...chart.data]
+            ..sort((a, b) => a.date.compareTo(b.date));
+          return MapEntry(
+            t,
+            WatchlistEnrichment(
+              target: chart.analystConsensus?.mean,
+              price1m: _priceAsOf(points, now.subtract(const Duration(days: 30))),
+              price3m: _priceAsOf(points, now.subtract(const Duration(days: 90))),
+            ),
+          );
+        } catch (_) {
+          return MapEntry(t, const WatchlistEnrichment());
+        }
+      }));
+
+      if (!mounted) return;
+      setState(() {
+        for (final e in results) {
+          _enrichment[e.key] = e.value;
+        }
+      });
+    }
+  }
+
+  /// Close price of the latest data point on or before [target] (ascending list).
+  double? _priceAsOf(List<ChartDataPoint> points, DateTime target) {
+    double? result;
+    for (final p in points) {
+      if (p.close == null) continue;
+      if (!p.date.isAfter(target)) {
+        result = p.close;
+      } else {
+        break;
+      }
+    }
+    return result;
   }
 
   Future<void> _loadTreemapData() async {
@@ -276,6 +343,7 @@ class _WatchlistScreenState extends State<WatchlistScreen> {
   Widget build(BuildContext context) {
     return WatchlistTab(
       tickerScores: _tickerScores,
+      enrichment: _enrichment,
       isLoading: _isLoading,
       error: _error,
       treemapData: _treemapData,

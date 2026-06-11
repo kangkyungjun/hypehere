@@ -39,7 +39,6 @@
 
   "settings": "Settings",
   "settingsTooltip": "Settings",
-  "compareTickers": "Compare Tickers",
 
   "account": "Account",
   "login": "Login",
@@ -115,6 +114,12 @@
   "filterNasdaq": "NASDAQ",
   "filterDow": "Dow",
   "marketLensAIScore": "AI Score",
+  "aiTabAnalysis": "AI Analysis",
+  "aiTabStocks": "AI Stocks",
+  "aiAnalysisComingSoonTitle": "Conversational AI",
+  "aiAnalysisComingSoonBody": "Ask like a messenger and AI analyzes the market and stocks for you. Coming soon.",
+  "comingSoonBadge": "Coming soon",
+  "aiNoStocksInSegment": "No stocks in this range",
   "distributionShownOnFullLoad": "Score distribution loads with all signals",
   "topN": "▲ Top {n}",
   "@topN": {
@@ -624,7 +629,6 @@
   "errMasterRequired": "Master access required",
   "errSearchRequired": "Please enter a search term",
   "errDemotionFailed": "Demotion failed",
-  "errMaxCompare": "Maximum 3 tickers can be compared",
   "today": "Today",
   "yesterday": "Yesterday",
   "dayBeforeYesterday": "2 days ago",
@@ -845,6 +849,7 @@
   },
   "portfolioAIAnalysis": "Portfolio AI Analysis",
   "aiRecommendations": "Recommendations",
+  "todayPicks": "Today's Picks",
   "recPortfolioOverview": "Portfolio Overview",
   "recTechnicalInsight": "Technical Analysis",
   "recMarketIntelligence": "Market Intelligence",
@@ -908,6 +913,12 @@
   "currentValueLabel": "Current Value",
   "dailyUpdate": "Updated daily in the morning",
   "aiRefreshOnChange": "Auto-refreshes on changes",
+  "aiUpdateButton": "Update AI Analysis",
+  "aiUpdating": "Updating analysis…",
+  "aiNoChangeToAnalyze": "No changes — a new analysis isn't needed",
+  "aiAnalysisOnDemandHint": "You can update when your portfolio or the date changes",
+  "aiUpdateInProgressHint": "Generating analysis… this can take up to a minute.",
+  "aiUpdateDelayed": "Analysis is taking a little longer — it'll appear automatically soon.",
   "lastUpdateTime": "Last updated: {time}",
   "@lastUpdateTime": {
     "placeholders": {
@@ -964,6 +975,19 @@
     }
   },
 
+  "newsSentiment24hTitle": "Last 24 Hours",
+  "newsBullish": "Bullish",
+  "newsNeutral": "Neutral",
+  "newsBearish": "Bearish",
+  "keyNewsTitle": "Today's Key News",
+  "viewTickerDetail": "Go to Stock",
+  "newsCountUnit": "{count}",
+  "@newsCountUnit": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
   "taxEstimateTitle": "Tax Estimate",
   "totalGains": "Total Gains",
   "annualExemption": "Annual Exemption",
@@ -1004,6 +1028,7 @@
   "tradingVolumeTop": "Trading Volume",
   "gainersTop": "Gainers",
   "losersTop": "Losers",
+  "volumeTop": "Volume",
   "topByMarketCap": "Top by Market Cap",
   "viewMore": "View More",
 
@@ -1026,6 +1051,7 @@
   "seeMore": "See More",
 
   "holdingsSummary": "Holdings Summary",
+  "investmentReturn": "Investment Return",
   "returnRate": "Return",
   "purchaseAmount": "Cost Basis",
   "profitAmount": "Profit/Loss",
@@ -1114,7 +1140,9 @@
   "aiSignalSellDesc": "Sell (20-39): Overall negative indicators suggest selling",
   "aiSignalStrongSellDesc": "Strong Sell (0-19): Technical and financial indicators show strong sell signals",
   "watchlistSubtitle": "Collect and track your favorite stocks",
-  "holdingsSubtitle": "Manage your portfolio and track returns",
+  "wlTargetPrice": "Target",
+  "wlPrice1mAgo": "1M ago",
+  "wlPrice3mAgo": "3M ago",
   "filterActiveLabel": "Filter Active",
   "tapToRemoveFilter": "Tap to remove",
   "searchTickersCta": "Search Tickers",

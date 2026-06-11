@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/news_filter.dart';
 import '../../providers/watchlist_provider.dart';
+import '../../widgets/ads/banner_ad_widget.dart';
 import '../../widgets/news/news_filter_sheet.dart';
 import '../calendar/event_calendar_screen.dart';
 import 'news_list_screen.dart';
@@ -119,6 +120,18 @@ class _NewsCombinedScreenState extends State<NewsCombinedScreen>
               const EventCalendarScreen(),
               NewsListScreen(embedded: true, filterState: _filterState),
             ],
+          ),
+        ),
+        // Shared banner ad at the bottom of both Calendar/News tabs
+        // 하단 여백을 더 줘서 플로팅 탭바(extendBody)에 가리지 않도록
+        const SafeArea(
+          top: false,
+          child: Padding(
+            padding: EdgeInsets.only(
+              top: AppSpacing.xs,
+              bottom: AppSpacing.xs + 64,
+            ),
+            child: Center(child: BannerAdWidget()),
           ),
         ),
       ],

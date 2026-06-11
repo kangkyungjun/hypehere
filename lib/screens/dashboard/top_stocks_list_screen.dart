@@ -35,7 +35,7 @@ class _TopStocksListScreenState extends State<TopStocksListScreen> {
 
   Future<void> _loadData() async {
     try {
-      final stocks = await _apiClient.getTopTickers(limit: 50);
+      final stocks = await _apiClient.getTopByMarketCap(limit: 50);
       if (mounted) {
         setState(() {
           _stocks = stocks;

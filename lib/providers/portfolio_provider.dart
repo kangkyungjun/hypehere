@@ -219,12 +219,113 @@ class PortfolioProvider with ChangeNotifier {
   }
 
   /// Refresh advice + summary + exchange rate in parallel.
+  ///
+  /// CHANGE (2026-06) — AI generation moved from auto to button-triggered:
+  /// Previously, calling this on app init / pull-refresh / every holding
+  /// add·update·delete·sell caused the server (Mac mini brain) to regenerate
+  /// the costly GPT portfolio analysis automatically. That unit cost no longer
+  /// matches revenue, so AI *generation* is now user-triggered via
+  /// [requestAnalysisUpdate] (rewarded-ad gated in PortfolioAICard).
+  ///
+  /// These calls are intentionally KEPT so numeric data (value/PnL/advice/FX)
+  /// still refreshes — they now rely on the server returning the *cached*
+  /// analysis from `GET /summary` (no regeneration). To restore the old
+  /// auto-regeneration behavior, either call [requestAnalysisUpdate] from the
+  /// CRUD handlers below, or re-enable regen-on-GET server-side.
   Future<void> _refreshAIData() async {
     await Future.wait([
       loadAdvice(),
       loadSummary(),
       loadExchangeRate(),
     ]);
+  }
+
+  /// Whether a user-triggered AI analysis update is in flight.
+  bool _isUpdatingAnalysis = false;
+  bool get isUpdatingAnalysis => _isUpdatingAnalysis;
+
+  /// Representative purchase date for a holding (yyyy-MM-dd), sent in
+  /// trigger_data so the Mac mini doesn't reset buy_date to today.
+  /// Prefers the earliest BUY transaction for the ticker, else the holding's
+  /// createdAt. Returns null only when nothing is known (backend defaults).
+  String? _buyDateFor(PortfolioHolding h) {
+    DateTime? d;
+    final buys = _transactions
+        .where((t) => t.ticker == h.ticker.toUpperCase() && t.type == 'BUY')
+        .toList();
+    if (buys.isNotEmpty) {
+      d = buys.map((t) => t.date).reduce((a, b) => a.isBefore(b) ? a : b);
+    }
+    d ??= h.createdAt;
+    if (d == null) return null;
+    return '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+  }
+
+  /// User-triggered ("AI 분석 업데이트" button) portfolio AI regeneration.
+  ///
+  /// See [_refreshAIData] for why this replaced the previous auto-regeneration.
+  /// The refresh is ASYNCHRONOUS: we POST a PENDING queue record (with the
+  /// current holdings so the Mac mini analyzes the up-to-date portfolio), then
+  /// poll [getSummary] with backoff until the analysis actually changes (the
+  /// poller's round-trip is ~15–40s+). Returns `true` if the new analysis was
+  /// observed, `false` on timeout (delayed — it will appear on a later fetch).
+  Future<bool> requestAnalysisUpdate() async {
+    _isUpdatingAnalysis = true;
+    _error = null;
+    notifyListeners();
+
+    // Baseline to detect when the regenerated analysis has landed.
+    final baselineSummary = _summary?.aiSummary;
+    final baselineDate = _summary?.date;
+
+    try {
+      final holdings = _holdings.map((h) {
+        final buyDate = _buyDateFor(h);
+        return <String, dynamic>{
+          'ticker': h.ticker,
+          'shares': h.shares,
+          'avg_price': h.avgPrice,
+          // buy_date prevents the Mac mini upsert from resetting the purchase
+          // date to today (which would corrupt holding-period narration).
+          if (buyDate != null) 'buy_date': buyDate,
+        };
+      }).toList();
+      final signature = (_holdings
+              .map((h) => '${h.ticker}:${h.shares ?? 0}:${h.avgPrice ?? 0}')
+              .toList()
+            ..sort())
+          .join('|');
+
+      await _apiClient.requestAnalysisRefresh(
+        holdings: holdings,
+        signature: signature,
+      );
+
+      // Backoff poll (~50s total) until the cached summary changes.
+      const delays = [2, 3, 4, 5, 5, 5, 6, 6, 7, 7];
+      for (final d in delays) {
+        await Future.delayed(Duration(seconds: d));
+        await loadSummary(); // GET cached summary; updates _summary + notifies
+        final cur = _summary;
+        final changed = cur != null &&
+            ((baselineSummary == null &&
+                    (cur.aiSummary?.isNotEmpty ?? false)) ||
+                (cur.aiSummary != baselineSummary) ||
+                (baselineDate != null && cur.date.isAfter(baselineDate)));
+        if (changed) {
+          _lastRefreshedAt = DateTime.now();
+          return true;
+        }
+      }
+      return false; // delayed — result not yet visible
+    } catch (e) {
+      _error = e.toString();
+      debugPrint('requestAnalysisUpdate error: $e');
+      rethrow;
+    } finally {
+      _isUpdatingAnalysis = false;
+      notifyListeners();
+    }
   }
 
   // ============================================================

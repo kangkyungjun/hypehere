@@ -38,7 +38,6 @@
 
   "settings": "Ajustes",
   "settingsTooltip": "Ajustes",
-  "compareTickers": "Comparar acciones",
 
   "account": "Cuenta",
   "login": "Iniciar sesión",
@@ -109,6 +108,12 @@
   "filterNasdaq": "NASDAQ",
   "filterDow": "Dow",
   "marketLensAIScore": "Puntuación IA",
+  "aiTabAnalysis": "Análisis IA",
+  "aiTabStocks": "Valores IA",
+  "aiAnalysisComingSoonTitle": "IA conversacional",
+  "aiAnalysisComingSoonBody": "Pregunta como en un chat y la IA analiza el mercado y los valores. Próximamente.",
+  "comingSoonBadge": "Próximamente",
+  "aiNoStocksInSegment": "No hay valores en este rango",
   "distributionShownOnFullLoad": "La distribución se muestra al cargar todas las señales",
   "topN": "▲ Top {n}",
   "bottomN": "▼ Últimos {n}",
@@ -488,7 +493,6 @@
   "errMasterRequired": "Se requiere acceso de Master",
   "errSearchRequired": "Introduce un término de búsqueda",
   "errDemotionFailed": "Error en la degradación",
-  "errMaxCompare": "Se pueden comparar un máximo de 3 acciones",
   "today": "Hoy",
   "yesterday": "Ayer",
   "dayBeforeYesterday": "Hace 2 días",
@@ -669,6 +673,7 @@
   "holdingUpdated": "{ticker} posición actualizada",
   "portfolioAIAnalysis": "Análisis IA del portafolio",
   "aiRecommendations": "Recomendaciones",
+  "todayPicks": "Selección de hoy",
   "recPortfolioOverview": "Resumen del Portafolio",
   "recTechnicalInsight": "Análisis Técnico",
   "recMarketIntelligence": "Inteligencia de Mercado",
@@ -707,6 +712,12 @@
   "currentValueLabel": "Valor actual",
   "dailyUpdate": "Actualización diaria por la mañana",
   "aiRefreshOnChange": "Se actualiza automáticamente al modificar",
+  "aiUpdateButton": "Actualizar análisis IA",
+  "aiUpdating": "Actualizando análisis…",
+  "aiNoChangeToAnalyze": "Sin cambios: no se necesita un nuevo análisis",
+  "aiAnalysisOnDemandHint": "Puedes actualizar cuando cambie tu cartera o la fecha",
+  "aiUpdateInProgressHint": "Generando análisis… puede tardar hasta un minuto.",
+  "aiUpdateDelayed": "El análisis está tardando un poco; aparecerá automáticamente pronto.",
   "lastUpdateTime": "Última actualización: {time}",
   "@lastUpdateTime": {
     "placeholders": {
@@ -763,6 +774,19 @@
     }
   },
 
+  "newsSentiment24hTitle": "Últimas 24 horas",
+  "newsBullish": "Alcistas",
+  "newsNeutral": "Neutrales",
+  "newsBearish": "Bajistas",
+  "keyNewsTitle": "Noticias clave de hoy",
+  "viewTickerDetail": "Ir al valor",
+  "newsCountUnit": "{count}",
+  "@newsCountUnit": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
   "taxEstimateTitle": "Estimación de impuestos",
   "totalGains": "Ganancias totales",
   "annualExemption": "Exención anual",
@@ -798,6 +822,7 @@
   "tradingVolumeTop": "Volumen",
   "gainersTop": "Ganadores",
   "losersTop": "Perdedores",
+  "volumeTop": "Volumen",
   "topByMarketCap": "Top por capitalización",
   "viewMore": "Ver más",
 
@@ -820,6 +845,7 @@
   "seeMore": "Ver más",
 
   "holdingsSummary": "Resumen de Posiciones",
+  "investmentReturn": "Rentabilidad",
   "returnRate": "Rendimiento",
   "purchaseAmount": "Costo de Compra",
   "profitAmount": "Ganancia/Pérdida",
@@ -908,7 +934,9 @@
   "aiSignalSellDesc": "Venta (20-39): Indicadores generalmente negativos",
   "aiSignalStrongSellDesc": "Venta Fuerte (0-19): Indicadores técnicos y financieros muestran fuertes señales de venta",
   "watchlistSubtitle": "Recopila y sigue tus acciones favoritas",
-  "holdingsSubtitle": "Gestiona tu cartera y sigue tus rendimientos",
+  "wlTargetPrice": "Objetivo",
+  "wlPrice1mAgo": "Hace 1M",
+  "wlPrice3mAgo": "Hace 3M",
   "filterActiveLabel": "Filtro activo",
   "tapToRemoveFilter": "Toca para quitar",
   "searchTickersCta": "Buscar acciones",

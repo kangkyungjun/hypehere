@@ -103,9 +103,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsTooltip => 'Settings';
 
   @override
-  String get compareTickers => 'Compare Tickers';
-
-  @override
   String get account => 'Account';
 
   @override
@@ -302,6 +299,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get marketLensAIScore => 'AI Score';
+
+  @override
+  String get aiTabAnalysis => 'AI Analysis';
+
+  @override
+  String get aiTabStocks => 'AI Stocks';
+
+  @override
+  String get aiAnalysisComingSoonTitle => 'Conversational AI';
+
+  @override
+  String get aiAnalysisComingSoonBody =>
+      'Ask like a messenger and AI analyzes the market and stocks for you. Coming soon.';
+
+  @override
+  String get comingSoonBadge => 'Coming soon';
+
+  @override
+  String get aiNoStocksInSegment => 'No stocks in this range';
 
   @override
   String get distributionShownOnFullLoad =>
@@ -1426,9 +1442,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get errDemotionFailed => 'Demotion failed';
 
   @override
-  String get errMaxCompare => 'Maximum 3 tickers can be compared';
-
-  @override
   String get today => 'Today';
 
   @override
@@ -1839,6 +1852,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get aiRecommendations => 'Recommendations';
 
   @override
+  String get todayPicks => 'Today\'s Picks';
+
+  @override
   String get recPortfolioOverview => 'Portfolio Overview';
 
   @override
@@ -1964,6 +1980,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get aiRefreshOnChange => 'Auto-refreshes on changes';
 
   @override
+  String get aiUpdateButton => 'Update AI Analysis';
+
+  @override
+  String get aiUpdating => 'Updating analysis…';
+
+  @override
+  String get aiNoChangeToAnalyze => 'No changes — a new analysis isn\'t needed';
+
+  @override
+  String get aiAnalysisOnDemandHint =>
+      'You can update when your portfolio or the date changes';
+
+  @override
+  String get aiUpdateInProgressHint =>
+      'Generating analysis… this can take up to a minute.';
+
+  @override
+  String get aiUpdateDelayed =>
+      'Analysis is taking a little longer — it\'ll appear automatically soon.';
+
+  @override
   String lastUpdateTime(String time) {
     return 'Last updated: $time';
   }
@@ -2065,6 +2102,29 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String newsBubbleMentions(int count) {
     return '$count mentions';
+  }
+
+  @override
+  String get newsSentiment24hTitle => 'Last 24 Hours';
+
+  @override
+  String get newsBullish => 'Bullish';
+
+  @override
+  String get newsNeutral => 'Neutral';
+
+  @override
+  String get newsBearish => 'Bearish';
+
+  @override
+  String get keyNewsTitle => 'Today\'s Key News';
+
+  @override
+  String get viewTickerDetail => 'Go to Stock';
+
+  @override
+  String newsCountUnit(int count) {
+    return '$count';
   }
 
   @override
@@ -2172,6 +2232,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get losersTop => 'Losers';
 
   @override
+  String get volumeTop => 'Volume';
+
+  @override
   String get topByMarketCap => 'Top by Market Cap';
 
   @override
@@ -2206,6 +2269,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get holdingsSummary => 'Holdings Summary';
+
+  @override
+  String get investmentReturn => 'Investment Return';
 
   @override
   String get returnRate => 'Return';
@@ -2383,7 +2449,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get watchlistSubtitle => 'Collect and track your favorite stocks';
 
   @override
-  String get holdingsSubtitle => 'Manage your portfolio and track returns';
+  String get wlTargetPrice => 'Target';
+
+  @override
+  String get wlPrice1mAgo => '1M ago';
+
+  @override
+  String get wlPrice3mAgo => '3M ago';
 
   @override
   String get filterActiveLabel => 'Filter Active';

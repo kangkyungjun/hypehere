@@ -26,4 +26,7 @@ abstract final class AppSpacing {
 
   /// 24px — 대형 섹션 간 간격
   static const double xxxl = 24.0;
+
+  /// 28px — 에디토리얼 섹션 리듬 (콘텐츠 블록 사이 큰 여백)
+  static const double section = 28.0;
 }

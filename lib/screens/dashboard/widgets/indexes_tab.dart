@@ -163,7 +163,12 @@ class _IndexesTabState extends State<IndexesTab> {
     }
 
     return ListView(
-      padding: const EdgeInsets.all(AppSpacing.xl),
+      padding: EdgeInsets.fromLTRB(
+        AppSpacing.xl,
+        AppSpacing.xl,
+        AppSpacing.xl,
+        MediaQuery.of(context).viewPadding.bottom + 64,
+      ),
       children: [
         _buildGaugeHeader(context, mlc, l10n),
         ...children,
@@ -339,7 +344,7 @@ class _IndexesTabState extends State<IndexesTab> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Row 1: dot + label + risk badge
+              // Row 1: dot + label + value% + change% (left) + risk badge (right)
               Row(
                 children: [
                   Container(
@@ -351,7 +356,7 @@ class _IndexesTabState extends State<IndexesTab> {
                     ),
                   ),
                   const SizedBox(width: AppSpacing.md),
-                  Expanded(
+                  Flexible(
                     child: Text(
                       item.label(l10n),
                       style: TextStyle(
@@ -359,8 +364,32 @@ class _IndexesTabState extends State<IndexesTab> {
                         fontWeight: AppTypography.semiBold,
                         color: mlc.textPrimary,
                       ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
+                  const SizedBox(width: AppSpacing.sm),
+                  Text(
+                    '${item.formattedValue}${item.percentSuffix}',
+                    style: TextStyle(
+                      fontSize: AppTypography.headlineMedium,
+                      fontWeight: AppTypography.bold,
+                      color: mlc.textPrimary,
+                    ),
+                  ),
+                  if (item.isIndicator && item.indicator!.changePct != null) ...[
+                    const SizedBox(width: AppSpacing.xs),
+                    Text(
+                      '${item.indicator!.changeArrow}${item.indicator!.changePct!.abs().toStringAsFixed(2)}%',
+                      style: TextStyle(
+                        fontSize: AppTypography.bodyMedium,
+                        fontWeight: AppTypography.medium,
+                        color: item.indicator!.changeColor(mlc),
+                        fontFeatures: AppTypography.tabularFigures,
+                      ),
+                    ),
+                  ],
+                  const Spacer(),
+                  const SizedBox(width: AppSpacing.sm),
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: AppSpacing.md,
@@ -379,34 +408,6 @@ class _IndexesTabState extends State<IndexesTab> {
                       ),
                     ),
                   ),
-                ],
-              ),
-
-              const SizedBox(height: AppSpacing.md),
-
-              // Row 2: current value + change% (indicators only)
-              Row(
-                children: [
-                  Text(
-                    '${item.formattedValue}${item.percentSuffix}',
-                    style: TextStyle(
-                      fontSize: AppTypography.headlineMedium,
-                      fontWeight: AppTypography.bold,
-                      color: mlc.textPrimary,
-                    ),
-                  ),
-                  if (item.isIndicator && item.indicator!.changePct != null) ...[
-                    const SizedBox(width: AppSpacing.md),
-                    Text(
-                      '${item.indicator!.changeArrow}${item.indicator!.changePct!.abs().toStringAsFixed(2)}%',
-                      style: TextStyle(
-                        fontSize: AppTypography.bodyMedium,
-                        fontWeight: AppTypography.medium,
-                        color: item.indicator!.changeColor(mlc),
-                        fontFeatures: AppTypography.tabularFigures,
-                      ),
-                    ),
-                  ],
                 ],
               ),
 

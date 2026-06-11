@@ -175,6 +175,61 @@ class AnalyticsApiClient {
     }
   }
 
+  /// Get top tickers by **market cap** (individual stocks only).
+  ///
+  /// GET /api/v1/market/top-marketcap — SP500/DOW30/NASDAQ100 구성종목을
+  /// 시가총액 내림차순으로 반환 (ETF·종합지수 제외). 응답은 scores/top과 동일
+  /// (TopTickerResponse) 이므로 [TickerScore]로 그대로 파싱.
+  Future<List<TickerScore>> getTopByMarketCap({
+    DateTime? date,
+    int limit = 20,
+    String? index,
+  }) async {
+    try {
+      final params = <String, String>{
+        'limit': limit.toString(),
+      };
+      if (date != null) {
+        params['date'] = _formatDate(date);
+      }
+      if (index != null) {
+        params['index'] = index;
+      }
+
+      final uri = Uri.parse('$_baseUrl/api/v1/market/top-marketcap')
+          .replace(queryParameters: params);
+
+      debugPrint('[API] 💰 GET $_baseUrl/api/v1/market/top-marketcap?limit=$limit');
+
+      final response = await _httpClient.get(uri).timeout(
+        const Duration(seconds: 15),
+        onTimeout: () {
+          throw TimeoutException('Top market cap timeout');
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body) as List;
+        return json.map((item) => TickerScore.fromJson(item)).toList();
+      } else {
+        throw ApiException(
+          ApiErrorCode.genericError,
+          debugMessage: 'Failed to load top market cap: ${response.statusCode}',
+          statusCode: response.statusCode,
+        );
+      }
+    } on TimeoutException {
+      throw ApiException(ApiErrorCode.timeout15s, debugMessage: 'Top market cap');
+    } on SocketException {
+      throw ApiException(ApiErrorCode.networkFailed, debugMessage: 'Top market cap');
+    } on FormatException {
+      throw ApiException(ApiErrorCode.responseFormat, debugMessage: 'Top market cap');
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(ApiErrorCode.genericError, debugMessage: '$e');
+    }
+  }
+
   /// Get scores for specific tickers by batch
   ///
   /// Used by watchlist screen to fetch exact tickers instead of top N.
@@ -706,6 +761,108 @@ class AnalyticsApiClient {
       }
     } catch (e) {
       return MentionBubbleData(items: [], periodHours: hours);
+    }
+  }
+
+  /// Bull/bear/neutral counts over the last [hours] window, computed
+  /// client-side (no dedicated backend endpoint). Honors the category
+  /// filters (tickers/sectors/excludeMarket) but NOT sentiment, so the
+  /// result reflects the full sentiment mix of the current category.
+  ///
+  /// Uses bounded pagination over [getNewsList] (assumed newest-first),
+  /// stopping once an item older than the cutoff is seen or [maxFetch]
+  /// is reached. Returns empty [SentimentCounts] on any error.
+  Future<SentimentCounts> getRecentSentimentCounts({
+    int hours = 24,
+    int maxFetch = 1000,
+    int pageSize = 100,
+    String? tickers,
+    String? sectors,
+    bool? excludeMarket,
+  }) async {
+    try {
+      final cutoff = DateTime.now().toUtc().subtract(Duration(hours: hours));
+      int bullish = 0, neutral = 0, bearish = 0;
+      int offset = 0;
+      bool reachedOlder = false;
+
+      while (offset < maxFetch && !reachedOlder) {
+        final limit = (maxFetch - offset).clamp(0, pageSize);
+        if (limit == 0) break;
+
+        final data = await getNewsList(
+          limit: limit,
+          offset: offset,
+          tickers: tickers,
+          sectors: sectors,
+          excludeMarket: excludeMarket,
+          // deliberately NOT passing sentiment — need the full mix
+        );
+        if (data.items.isEmpty) break;
+
+        for (final item in data.items) {
+          if (item.publishedAt.isBefore(cutoff)) {
+            reachedOlder = true;
+            continue;
+          }
+          switch (item.sentimentGrade) {
+            case 'bullish':
+              bullish++;
+              break;
+            case 'bearish':
+              bearish++;
+              break;
+            default:
+              neutral++;
+          }
+        }
+
+        if (data.items.length < limit) break; // no more pages
+        offset += data.items.length;
+      }
+
+      if (!reachedOlder && offset >= maxFetch) {
+        debugPrint('[getRecentSentimentCounts] hit maxFetch=$maxFetch before '
+            'reaching ${hours}h cutoff; counts are an approximation.');
+      }
+
+      return SentimentCounts(
+        bullish: bullish,
+        neutral: neutral,
+        bearish: bearish,
+      );
+    } catch (e) {
+      debugPrint('[getRecentSentimentCounts] error: $e');
+      return SentimentCounts();
+    }
+  }
+
+  /// Top key news within the last [hours] hours (max [limit]).
+  /// Reuses [getHotTopics] (48h, priority-sorted), then filters to the
+  /// recent window and re-sorts by hot_topic_priority (higher = more
+  /// important, nulls last) then recency. Returns [] on any error.
+  Future<List<NewsItem>> getKeyNews({int hours = 10, int limit = 5}) async {
+    try {
+      final data = await getHotTopics(limit: 20);
+      final cutoff = DateTime.now().toUtc().subtract(Duration(hours: hours));
+      final recent =
+          data.items.where((n) => !n.publishedAt.isBefore(cutoff)).toList();
+
+      recent.sort((a, b) {
+        final pa = a.hotTopicPriority;
+        final pb = b.hotTopicPriority;
+        if (pa != pb) {
+          if (pa == null) return 1; // nulls last
+          if (pb == null) return -1;
+          return pb.compareTo(pa); // higher priority first
+        }
+        return b.publishedAt.compareTo(a.publishedAt); // newer first
+      });
+
+      return recent.take(limit).toList();
+    } catch (e) {
+      debugPrint('[getKeyNews] error: $e');
+      return [];
     }
   }
 

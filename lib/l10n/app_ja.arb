@@ -38,7 +38,6 @@
 
   "settings": "設定",
   "settingsTooltip": "設定",
-  "compareTickers": "銘柄比較",
 
   "account": "アカウント",
   "login": "ログイン",
@@ -109,6 +108,12 @@
   "filterNasdaq": "NASDAQ",
   "filterDow": "ダウ",
   "marketLensAIScore": "AIスコア",
+  "aiTabAnalysis": "AI分析",
+  "aiTabStocks": "AI銘柄",
+  "aiAnalysisComingSoonTitle": "対話型AI分析",
+  "aiAnalysisComingSoonBody": "メッセンジャーのように質問すると、AIが市場と銘柄を分析します。実装予定です。",
+  "comingSoonBadge": "近日公開",
+  "aiNoStocksInSegment": "この区間に該当する銘柄はありません",
   "distributionShownOnFullLoad": "全シグナル読込時にスコア分布を表示",
   "topN": "▲ 上位 {n}",
   "bottomN": "▼ 下位 {n}",
@@ -488,7 +493,6 @@
   "errMasterRequired": "権限が不足しています。Masterのみアクセスできます。",
   "errSearchRequired": "検索キーワードを入力してください",
   "errDemotionFailed": "降格に失敗しました",
-  "errMaxCompare": "最大3銘柄まで比較できます",
   "today": "今日",
   "yesterday": "昨日",
   "dayBeforeYesterday": "一昨日",
@@ -669,6 +673,7 @@
   "holdingUpdated": "{ticker} の保有情報が更新されました",
   "portfolioAIAnalysis": "ポートフォリオAI分析",
   "aiRecommendations": "推奨事項",
+  "todayPicks": "本日のおすすめ銘柄",
   "recPortfolioOverview": "ポートフォリオ概要",
   "recTechnicalInsight": "テクニカル分析",
   "recMarketIntelligence": "マーケット情報",
@@ -707,6 +712,12 @@
   "currentValueLabel": "評価額",
   "dailyUpdate": "毎朝更新",
   "aiRefreshOnChange": "銘柄変更時に自動更新",
+  "aiUpdateButton": "AI分析を更新",
+  "aiUpdating": "分析を更新中…",
+  "aiNoChangeToAnalyze": "変更がないため新しい分析は不要です",
+  "aiAnalysisOnDemandHint": "ポートフォリオの変更や日付が変わると更新できます",
+  "aiUpdateInProgressHint": "分析を生成中… 最大1分ほどかかります。",
+  "aiUpdateDelayed": "分析の生成に少し時間がかかっています。まもなく自動で反映されます。",
   "lastUpdateTime": "最終更新: {time}",
   "@lastUpdateTime": {
     "placeholders": {
@@ -763,6 +774,19 @@
     }
   },
 
+  "newsSentiment24hTitle": "過去24時間",
+  "newsBullish": "強気ニュース",
+  "newsNeutral": "中立ニュース",
+  "newsBearish": "弱気ニュース",
+  "keyNewsTitle": "本日の主要ニュース",
+  "viewTickerDetail": "銘柄へ移動",
+  "newsCountUnit": "{count}件",
+  "@newsCountUnit": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
   "taxEstimateTitle": "税金見積もり",
   "totalGains": "総利益",
   "annualExemption": "年間控除額",
@@ -798,6 +822,7 @@
   "tradingVolumeTop": "売買代金",
   "gainersTop": "上昇率",
   "losersTop": "下落率",
+  "volumeTop": "出来高",
   "topByMarketCap": "時価総額上位",
   "viewMore": "もっと見る",
 
@@ -820,6 +845,7 @@
   "seeMore": "もっと見る",
 
   "holdingsSummary": "保有状況",
+  "investmentReturn": "投資収益率",
   "returnRate": "収益率",
   "purchaseAmount": "取得金額",
   "profitAmount": "損益額",
@@ -908,7 +934,9 @@
   "aiSignalSellDesc": "売り (20-39): 全体的にネガティブなシグナル",
   "aiSignalStrongSellDesc": "強い売り (0-19): テクニカル・ファンダメンタル指標が強い売りシグナル",
   "watchlistSubtitle": "お気に入りの銘柄を集めましょう",
-  "holdingsSubtitle": "保有銘柄を管理しましょう",
+  "wlTargetPrice": "目標株価",
+  "wlPrice1mAgo": "1カ月前",
+  "wlPrice3mAgo": "3カ月前",
   "filterActiveLabel": "フィルター適用中",
   "tapToRemoveFilter": "タップで解除",
   "searchTickersCta": "銘柄を検索",

@@ -1183,3 +1183,27 @@ def subscription_status_view(request):
             'is_trial': False,
             'has_used_trial': False,
         })
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def report_ad_failure_view(request):
+    """클라이언트의 광고 로드 실패 보고 → owner/매니저에게 알림 + owner 이메일.
+
+    POST body: { error, platform, app_version, ad_unit }
+    인증 불필요(AllowAny). 스팸 방지(throttle)는 ops_alerts.notify_ad_failure가 담당.
+    항상 200을 반환한다 (클라이언트는 fire-and-forget).
+    """
+    from .ops_alerts import notify_ad_failure
+
+    data = request.data if isinstance(request.data, dict) else {}
+    try:
+        notify_ad_failure(
+            error_message=str(data.get('error', ''))[:500],
+            platform=str(data.get('platform', ''))[:20],
+            app_version=str(data.get('app_version', ''))[:30],
+            ad_unit=str(data.get('ad_unit', ''))[:100],
+        )
+    except Exception as exc:  # noqa: BLE001
+        logging.getLogger(__name__).error(f'[report_ad_failure] {exc}')
+    return Response({'ok': True})

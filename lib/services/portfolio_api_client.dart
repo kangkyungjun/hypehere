@@ -312,6 +312,58 @@ class PortfolioApiClient {
     }
   }
 
+  /// Enqueue a button-driven portfolio AI refresh (rewarded-ad gated in the UI).
+  ///
+  /// CHANGE (2026-06): The portfolio AI analysis used to be regenerated
+  /// automatically (on app init / pull-refresh / every holding change), which
+  /// ran a costly GPT analysis without matching revenue. Generation is now
+  /// user-triggered. Normal [getSummary] returns the cached analysis only.
+  ///
+  /// Despite the "summary/refresh" name, this triggers a FULL AI regeneration
+  /// on the Mac mini brain (advice + summary + review + alerts). The backend
+  /// inserts a PENDING `analysis-queue` record (user_id from the auth token);
+  /// the Mac mini poller picks it up, regenerates, and uploads results to the
+  /// ingest endpoints. The result is therefore ASYNCHRONOUS — this method only
+  /// confirms the request was accepted (200/201/202); the caller must then poll
+  /// [getSummary] with backoff (see PortfolioProvider.requestAnalysisUpdate).
+  ///
+  /// [trigger_data.holdings] (snake_case: ticker/shares/avg_price) + [signature]
+  /// are sent so the poller analyzes the user's up-to-date portfolio
+  /// (_apply_portfolio_change), even if the server→Mac-mini holding sync lags.
+  Future<void> requestAnalysisRefresh({
+    required List<Map<String, dynamic>> holdings,
+    String? signature,
+  }) async {
+    try {
+      final response = await _authPost(
+        '/api/v1/portfolio/summary/refresh',
+        body: {
+          'request_type': 'PORTFOLIO_REFRESH',
+          'trigger_data': {
+            'holdings': holdings,
+            if (signature != null) 'signature': signature,
+          },
+        },
+      );
+      if (response.statusCode == 401) {
+        throw ApiException(ApiErrorCode.sessionExpired,
+            debugMessage: 'Analysis refresh', statusCode: 401);
+      }
+      // 200/201 (sync ack) or 202 (queued) are all "accepted".
+      if (response.statusCode != 200 &&
+          response.statusCode != 201 &&
+          response.statusCode != 202) {
+        throw ApiException(ApiErrorCode.genericError,
+            debugMessage: 'Analysis refresh: ${response.statusCode}',
+            statusCode: response.statusCode);
+      }
+    } on ApiException {
+      rethrow;
+    } catch (e) {
+      throw ApiException(ApiErrorCode.genericError, debugMessage: '$e');
+    }
+  }
+
   // ============================================================
   // Alerts
   // ============================================================

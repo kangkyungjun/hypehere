@@ -102,9 +102,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settingsTooltip => '設定';
 
   @override
-  String get compareTickers => '銘柄比較';
-
-  @override
   String get account => 'アカウント';
 
   @override
@@ -297,6 +294,25 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get marketLensAIScore => 'AIスコア';
+
+  @override
+  String get aiTabAnalysis => 'AI分析';
+
+  @override
+  String get aiTabStocks => 'AI銘柄';
+
+  @override
+  String get aiAnalysisComingSoonTitle => '対話型AI分析';
+
+  @override
+  String get aiAnalysisComingSoonBody =>
+      'メッセンジャーのように質問すると、AIが市場と銘柄を分析します。実装予定です。';
+
+  @override
+  String get comingSoonBadge => '近日公開';
+
+  @override
+  String get aiNoStocksInSegment => 'この区間に該当する銘柄はありません';
 
   @override
   String get distributionShownOnFullLoad => '全シグナル読込時にスコア分布を表示';
@@ -1409,9 +1425,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get errDemotionFailed => '降格に失敗しました';
 
   @override
-  String get errMaxCompare => '最大3銘柄まで比較できます';
-
-  @override
   String get today => '今日';
 
   @override
@@ -1813,6 +1826,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get aiRecommendations => '推奨事項';
 
   @override
+  String get todayPicks => '本日のおすすめ銘柄';
+
+  @override
   String get recPortfolioOverview => 'ポートフォリオ概要';
 
   @override
@@ -1937,6 +1953,24 @@ class AppLocalizationsJa extends AppLocalizations {
   String get aiRefreshOnChange => '銘柄変更時に自動更新';
 
   @override
+  String get aiUpdateButton => 'AI分析を更新';
+
+  @override
+  String get aiUpdating => '分析を更新中…';
+
+  @override
+  String get aiNoChangeToAnalyze => '変更がないため新しい分析は不要です';
+
+  @override
+  String get aiAnalysisOnDemandHint => 'ポートフォリオの変更や日付が変わると更新できます';
+
+  @override
+  String get aiUpdateInProgressHint => '分析を生成中… 最大1分ほどかかります。';
+
+  @override
+  String get aiUpdateDelayed => '分析の生成に少し時間がかかっています。まもなく自動で反映されます。';
+
+  @override
   String lastUpdateTime(String time) {
     return '最終更新: $time';
   }
@@ -2037,6 +2071,29 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String newsBubbleMentions(int count) {
+    return '$count件';
+  }
+
+  @override
+  String get newsSentiment24hTitle => '過去24時間';
+
+  @override
+  String get newsBullish => '強気ニュース';
+
+  @override
+  String get newsNeutral => '中立ニュース';
+
+  @override
+  String get newsBearish => '弱気ニュース';
+
+  @override
+  String get keyNewsTitle => '本日の主要ニュース';
+
+  @override
+  String get viewTickerDetail => '銘柄へ移動';
+
+  @override
+  String newsCountUnit(int count) {
     return '$count件';
   }
 
@@ -2145,6 +2202,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get losersTop => '下落率';
 
   @override
+  String get volumeTop => '出来高';
+
+  @override
   String get topByMarketCap => '時価総額上位';
 
   @override
@@ -2177,6 +2237,9 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get holdingsSummary => '保有状況';
+
+  @override
+  String get investmentReturn => '投資収益率';
 
   @override
   String get returnRate => '収益率';
@@ -2349,7 +2412,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get watchlistSubtitle => 'お気に入りの銘柄を集めましょう';
 
   @override
-  String get holdingsSubtitle => '保有銘柄を管理しましょう';
+  String get wlTargetPrice => '目標株価';
+
+  @override
+  String get wlPrice1mAgo => '1カ月前';
+
+  @override
+  String get wlPrice3mAgo => '3カ月前';
 
   @override
   String get filterActiveLabel => 'フィルター適用中';
