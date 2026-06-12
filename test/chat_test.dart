@@ -6,6 +6,8 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:marketlens/exceptions/api_error_codes.dart';
+import 'package:marketlens/exceptions/api_exception.dart';
 import 'package:marketlens/services/auth_service.dart';
 import 'package:marketlens/services/chat_api_client.dart';
 import 'package:marketlens/providers/chat_provider.dart';
@@ -72,6 +74,57 @@ void main() {
       expect(msgs[1].isAssistant, true);
       expect(msgs[1].content, '72점, 매수권고');
       expect(msgs[1].turnIndex, 2);
+    });
+
+    test('getMessages — bare 배열(top-level array) 응답도 파싱', () async {
+      // 서버가 {messages:[...]} 대신 최상위 배열을 줘도 계약상 허용.
+      final api = ChatApiClient(
+        authService: _FakeAuth(),
+        httpClient: MockClient((req) async => _json([
+              {'role': 'user', 'content': 'hi'},
+              {'role': 'assistant', 'content': 'hello'},
+            ])),
+      );
+      final msgs = await api.getMessages('c1');
+      expect(msgs.length, 2);
+      expect(msgs.first.isUser, true);
+      expect(msgs.last.isAssistant, true);
+    });
+
+    test('sendMessage — 404(브리지 미배포 현재 상태) → ApiException', () async {
+      // 서버 배포 전 실제 라이브 상태: /api/v1/chat/* 가 404.
+      final api = ChatApiClient(
+        authService: _FakeAuth(),
+        httpClient: MockClient((req) async => http.Response('', 404)),
+      );
+      expect(
+        () => api.sendMessage(conversationId: 'c1', message: 'hi', lang: 'en'),
+        throwsA(isA<ApiException>()),
+      );
+    });
+
+    test('sendMessage — 401 → sessionExpired 코드', () async {
+      final api = ChatApiClient(
+        authService: _FakeAuth(),
+        httpClient: MockClient((req) async => http.Response('', 401)),
+      );
+      await expectLater(
+        () => api.sendMessage(conversationId: 'c1', message: 'hi', lang: 'en'),
+        throwsA(isA<ApiException>()
+            .having((e) => e.code, 'code', ApiErrorCode.sessionExpired)),
+      );
+    });
+
+    test('getMessages — 401 → sessionExpired 코드', () async {
+      final api = ChatApiClient(
+        authService: _FakeAuth(),
+        httpClient: MockClient((req) async => http.Response('', 401)),
+      );
+      await expectLater(
+        () => api.getMessages('c1'),
+        throwsA(isA<ApiException>()
+            .having((e) => e.code, 'code', ApiErrorCode.sessionExpired)),
+      );
     });
   });
 
