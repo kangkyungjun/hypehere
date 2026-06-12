@@ -1829,6 +1829,39 @@ class AppLocalizationsJa extends AppLocalizations {
   String get todayPicks => '本日のおすすめ銘柄';
 
   @override
+  String get aiChatTitle => 'AIチャット';
+
+  @override
+  String get aiChatHint => 'メッセージを入力';
+
+  @override
+  String get aiChatEmptyTitle => '何でも聞いてください';
+
+  @override
+  String get aiChatEmptySubtitle => '銘柄やポートフォリオについてAIと話そう';
+
+  @override
+  String get aiChatThinking => 'AIが考えています…';
+
+  @override
+  String get aiChatErrorRetry => '応答を取得できませんでした。もう一度お試しください。';
+
+  @override
+  String get aiChatLoginRequired => 'AIと話すにはログインしてください';
+
+  @override
+  String get aiChatNew => '新しい会話';
+
+  @override
+  String get aiChatHistory => '過去の会話';
+
+  @override
+  String get aiChatNoHistory => '過去の会話はありません';
+
+  @override
+  String get aiChatFreeToday => '今日無料';
+
+  @override
   String get recPortfolioOverview => 'ポートフォリオ概要';
 
   @override

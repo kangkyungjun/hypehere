@@ -1825,6 +1825,39 @@ class AppLocalizationsZh extends AppLocalizations {
   String get todayPicks => '今日推荐';
 
   @override
+  String get aiChatTitle => 'AI对话';
+
+  @override
+  String get aiChatHint => '输入消息';
+
+  @override
+  String get aiChatEmptyTitle => '尽管问我';
+
+  @override
+  String get aiChatEmptySubtitle => '与AI讨论股票和投资组合';
+
+  @override
+  String get aiChatThinking => 'AI思考中…';
+
+  @override
+  String get aiChatErrorRetry => '未能获取回复，请重试。';
+
+  @override
+  String get aiChatLoginRequired => '登录后与AI对话';
+
+  @override
+  String get aiChatNew => '新对话';
+
+  @override
+  String get aiChatHistory => '历史对话';
+
+  @override
+  String get aiChatNoHistory => '暂无历史对话';
+
+  @override
+  String get aiChatFreeToday => '今日免费';
+
+  @override
   String get recPortfolioOverview => '投资组合概览';
 
   @override

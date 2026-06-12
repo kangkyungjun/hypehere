@@ -3554,6 +3554,72 @@ abstract class AppLocalizations {
   /// **'Today\'s Picks'**
   String get todayPicks;
 
+  /// No description provided for @aiChatTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Chat'**
+  String get aiChatTitle;
+
+  /// No description provided for @aiChatHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Type a message'**
+  String get aiChatHint;
+
+  /// No description provided for @aiChatEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask me anything'**
+  String get aiChatEmptyTitle;
+
+  /// No description provided for @aiChatEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat with AI about stocks and your portfolio'**
+  String get aiChatEmptySubtitle;
+
+  /// No description provided for @aiChatThinking.
+  ///
+  /// In en, this message translates to:
+  /// **'AI is thinking…'**
+  String get aiChatThinking;
+
+  /// No description provided for @aiChatErrorRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t get a response. Please try again.'**
+  String get aiChatErrorRetry;
+
+  /// No description provided for @aiChatLoginRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Log in to chat with AI'**
+  String get aiChatLoginRequired;
+
+  /// No description provided for @aiChatNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New chat'**
+  String get aiChatNew;
+
+  /// No description provided for @aiChatHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Past chats'**
+  String get aiChatHistory;
+
+  /// No description provided for @aiChatNoHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'No past conversations'**
+  String get aiChatNoHistory;
+
+  /// No description provided for @aiChatFreeToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Free today'**
+  String get aiChatFreeToday;
+
   /// No description provided for @recPortfolioOverview.
   ///
   /// In en, this message translates to:

@@ -1855,6 +1855,40 @@ class AppLocalizationsEn extends AppLocalizations {
   String get todayPicks => 'Today\'s Picks';
 
   @override
+  String get aiChatTitle => 'AI Chat';
+
+  @override
+  String get aiChatHint => 'Type a message';
+
+  @override
+  String get aiChatEmptyTitle => 'Ask me anything';
+
+  @override
+  String get aiChatEmptySubtitle =>
+      'Chat with AI about stocks and your portfolio';
+
+  @override
+  String get aiChatThinking => 'AI is thinking…';
+
+  @override
+  String get aiChatErrorRetry => 'Couldn\'t get a response. Please try again.';
+
+  @override
+  String get aiChatLoginRequired => 'Log in to chat with AI';
+
+  @override
+  String get aiChatNew => 'New chat';
+
+  @override
+  String get aiChatHistory => 'Past chats';
+
+  @override
+  String get aiChatNoHistory => 'No past conversations';
+
+  @override
+  String get aiChatFreeToday => 'Free today';
+
+  @override
   String get recPortfolioOverview => 'Portfolio Overview';
 
   @override

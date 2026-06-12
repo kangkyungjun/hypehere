@@ -1829,6 +1829,39 @@ class AppLocalizationsKo extends AppLocalizations {
   String get todayPicks => '오늘의 추천 종목';
 
   @override
+  String get aiChatTitle => 'AI 대화';
+
+  @override
+  String get aiChatHint => '메시지를 입력하세요';
+
+  @override
+  String get aiChatEmptyTitle => '무엇이든 물어보세요';
+
+  @override
+  String get aiChatEmptySubtitle => '종목·포트폴리오에 대해 AI와 대화하세요';
+
+  @override
+  String get aiChatThinking => 'AI가 생각 중…';
+
+  @override
+  String get aiChatErrorRetry => '응답을 가져오지 못했어요. 다시 시도해 주세요.';
+
+  @override
+  String get aiChatLoginRequired => 'AI와 대화하려면 로그인하세요';
+
+  @override
+  String get aiChatNew => '새 대화';
+
+  @override
+  String get aiChatHistory => '이전 대화';
+
+  @override
+  String get aiChatNoHistory => '이전 대화가 없습니다';
+
+  @override
+  String get aiChatFreeToday => '오늘 무료';
+
+  @override
   String get recPortfolioOverview => '포트폴리오 개요';
 
   @override

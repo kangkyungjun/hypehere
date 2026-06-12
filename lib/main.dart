@@ -26,6 +26,7 @@ import 'providers/subscription_provider.dart';
 import 'providers/coach_mark_provider.dart';
 import 'providers/investment_profile_provider.dart';
 import 'providers/recommendation_provider.dart';
+import 'providers/chat_provider.dart';
 import 'screens/onboarding/investment_profile_onboarding_screen.dart';
 import 'screens/dashboard/dashboard_screen.dart';
 import 'screens/explore/explore_screen.dart';
@@ -97,6 +98,7 @@ void main() async {
         ChangeNotifierProvider.value(value: coachMarkProvider),
         ChangeNotifierProvider(create: (_) => InvestmentProfileProvider()),
         ChangeNotifierProvider(create: (_) => RecommendationProvider()),
+        ChangeNotifierProvider(create: (_) => ChatProvider()),
       ],
       child: const MarketLensApp(),
     ),

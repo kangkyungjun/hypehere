@@ -7,7 +7,7 @@ import '../../utils/score_mapper.dart';
 import '../../utils/app_page_route.dart';
 import '../ticker_detail/ticker_detail_screen.dart';
 import 'ai_lens_list_screen.dart';
-import 'widgets/ai_analysis_coming_soon.dart';
+import 'chat/ai_chat_screen.dart';
 import '../../widgets/ads/banner_ad_widget.dart';
 import '../../widgets/common/market_segmented_tabs.dart';
 import '../../theme/app_colors.dart';
@@ -202,7 +202,7 @@ class _AILensScreenState extends State<AILensScreen>
             child: TabBarView(
               controller: _tabController,
               children: [
-                const AiAnalysisComingSoon(),
+                const AiChatScreen(),
                 RefreshIndicator(onRefresh: _loadData, child: _buildBody()),
               ],
             ),
