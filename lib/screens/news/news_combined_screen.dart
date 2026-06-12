@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/news_filter.dart';
 import '../../providers/watchlist_provider.dart';
-import '../../widgets/ads/banner_ad_widget.dart';
 import '../../widgets/news/news_filter_sheet.dart';
 import '../calendar/event_calendar_screen.dart';
 import 'news_list_screen.dart';
@@ -122,18 +121,8 @@ class _NewsCombinedScreenState extends State<NewsCombinedScreen>
             ],
           ),
         ),
-        // Shared banner ad at the bottom of both Calendar/News tabs
-        // 하단 여백을 더 줘서 플로팅 탭바(extendBody)에 가리지 않도록
-        const SafeArea(
-          top: false,
-          child: Padding(
-            padding: EdgeInsets.only(
-              top: AppSpacing.xs,
-              bottom: AppSpacing.xs + 64,
-            ),
-            child: Center(child: BannerAdWidget()),
-          ),
-        ),
+        // 고정 배너 제거 — 배너는 각 서브탭(캘린더/뉴스) 스크롤 끝으로 이동(B).
+        // 플로팅 탭바가 차지하던 고정 빈 띠가 사라져 콘텐츠 높이를 회수.
       ],
     );
   }

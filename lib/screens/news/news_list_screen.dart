@@ -322,11 +322,14 @@ class _NewsListScreenState extends State<NewsListScreen> {
       },
       child: ListView.builder(
         controller: _scrollController,
-        padding: const EdgeInsets.fromLTRB(
+        padding: EdgeInsets.fromLTRB(
           AppSpacing.xl,
           AppSpacing.md,
           AppSpacing.xl,
-          AppSpacing.xl,
+          // embedded(뉴스 탭)일 때만 플로팅 탭바 클리어런스, 단독은 자체 Scaffold
+          widget.embedded
+              ? MediaQuery.of(context).viewPadding.bottom + 64
+              : AppSpacing.xl,
         ),
         itemCount: _buildListItemCount(),
         itemBuilder: (context, index) => _buildListItem(index),

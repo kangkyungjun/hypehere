@@ -13,6 +13,7 @@ import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 import '../../theme/app_typography.dart';
 import '../../widgets/ads/rewarded_ad_helper.dart';
+import '../../widgets/ads/banner_ad_widget.dart';
 import '../../widgets/common/empty_state_view.dart';
 import '../../widgets/common/market_segmented_tabs.dart';
 import '../../config/feature_flags.dart';
@@ -1055,6 +1056,11 @@ class _EventCalendarScreenState extends State<EventCalendarScreen>
             const SizedBox(height: AppSpacing.md),
             _buildLockedSectionTab(lockedEvents, l10n),
           ],
+          // 배너를 스크롤 맨 끝으로 이동(B). bottomPad가 탭바 클리어런스 제공.
+          const Padding(
+            padding: EdgeInsets.only(top: AppSpacing.lg),
+            child: Center(child: BannerAdWidget()),
+          ),
         ],
       ),
     );
