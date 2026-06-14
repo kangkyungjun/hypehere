@@ -458,6 +458,30 @@ abstract class AppLocalizations {
   /// **'At least 8 characters. Cannot be all numbers or a common password.'**
   String get passwordRequirements;
 
+  /// No description provided for @passwordRuleLength.
+  ///
+  /// In en, this message translates to:
+  /// **'At least 8 characters'**
+  String get passwordRuleLength;
+
+  /// No description provided for @passwordRuleNotNumeric.
+  ///
+  /// In en, this message translates to:
+  /// **'Not only numbers'**
+  String get passwordRuleNotNumeric;
+
+  /// No description provided for @passwordRuleNotCommon.
+  ///
+  /// In en, this message translates to:
+  /// **'Not a common password'**
+  String get passwordRuleNotCommon;
+
+  /// No description provided for @passwordRuleNotSimilar.
+  ///
+  /// In en, this message translates to:
+  /// **'Different from email & nickname'**
+  String get passwordRuleNotSimilar;
+
   /// No description provided for @passwordConfirm.
   ///
   /// In en, this message translates to:
@@ -481,6 +505,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Passwords do not match'**
   String get passwordMismatch;
+
+  /// No description provided for @passwordPolicyFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'This password doesn\'t meet security requirements. Please choose another.'**
+  String get passwordPolicyFailed;
 
   /// No description provided for @changePassword.
   ///

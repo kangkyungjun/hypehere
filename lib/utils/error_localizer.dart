@@ -36,6 +36,8 @@ class ErrorLocalizer {
         return l10n.errEmailNotVerified;
       case ApiErrorCode.rateLimited:
         return l10n.errRateLimited;
+      case ApiErrorCode.weakPassword:
+        return l10n.passwordPolicyFailed;
       case ApiErrorCode.badRequest:
         if (e.debugMessage != null && e.debugMessage!.isNotEmpty) {
           return e.debugMessage!;

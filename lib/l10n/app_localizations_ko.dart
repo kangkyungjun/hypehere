@@ -189,6 +189,18 @@ class AppLocalizationsKo extends AppLocalizations {
   String get passwordRequirements => '8자 이상, 숫자만 불가, 흔한 비밀번호 불가';
 
   @override
+  String get passwordRuleLength => '8자 이상';
+
+  @override
+  String get passwordRuleNotNumeric => '숫자로만 구성 불가';
+
+  @override
+  String get passwordRuleNotCommon => '흔한 비밀번호 아님';
+
+  @override
+  String get passwordRuleNotSimilar => '이메일·닉네임과 다름';
+
+  @override
   String get passwordConfirm => '비밀번호 확인';
 
   @override
@@ -199,6 +211,9 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get passwordMismatch => '비밀번호가 일치하지 않습니다';
+
+  @override
+  String get passwordPolicyFailed => '비밀번호가 보안 규칙에 맞지 않습니다. 다른 비밀번호를 사용해 주세요.';
 
   @override
   String get changePassword => '비밀번호 변경';

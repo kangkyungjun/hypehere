@@ -188,6 +188,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String get passwordRequirements => '至少8个字符，不能全为数字，不能是常见密码';
 
   @override
+  String get passwordRuleLength => '至少8个字符';
+
+  @override
+  String get passwordRuleNotNumeric => '不能全为数字';
+
+  @override
+  String get passwordRuleNotCommon => '非常见密码';
+
+  @override
+  String get passwordRuleNotSimilar => '与邮箱·昵称不同';
+
+  @override
   String get passwordConfirm => '确认密码';
 
   @override
@@ -198,6 +210,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get passwordMismatch => '两次密码不一致';
+
+  @override
+  String get passwordPolicyFailed => '密码不符合安全要求，请更换其他密码。';
 
   @override
   String get changePassword => '修改密码';

@@ -5,6 +5,8 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/auth_service.dart';
+import '../../exceptions/api_exception.dart';
+import '../../exceptions/api_error_codes.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
@@ -63,6 +65,8 @@ class _SignupScreenState extends State<SignupScreen> {
   final _nicknameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _passwordConfirmController = TextEditingController();
+  // 서버가 비밀번호를 거부했을 때 폼으로 돌아와 이 필드에 포커스를 준다.
+  final _passwordFocusNode = FocusNode();
   bool _isLoading = false;
 
   /// EULA(이용약관) 동의 여부 — Apple Guideline 1.2 (a): 가입 전 필수 동의
@@ -82,7 +86,29 @@ class _SignupScreenState extends State<SignupScreen> {
     _nicknameController.dispose();
     _passwordController.dispose();
     _passwordConfirmController.dispose();
+    _passwordFocusNode.dispose();
     super.dispose();
+  }
+
+  /// 빨간 플로팅 에러 SnackBar (가입 화면 공용).
+  void _showErrorSnack(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(Icons.error_outline, color: context.mlColors.onPrimary, size: 20),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(child: Text(message)),
+          ],
+        ),
+        backgroundColor: context.mlColors.dangerColor,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.md),
+        ),
+        margin: const EdgeInsets.all(AppSpacing.xl),
+      ),
+    );
   }
 
   String? _validatePassword(String? value, AppLocalizations l10n) {
@@ -112,6 +138,59 @@ class _SignupScreenState extends State<SignupScreen> {
       return l10n.passwordTooSimilar;
     }
     return null;
+  }
+
+  /// 실시간 비밀번호 규칙 상태 — 입력 즉시 각 항목 충족 여부를 보여준다.
+  /// _validatePassword와 동일 기준/상수를 공유해 안내와 실제 검증이 어긋나지 않게 한다.
+  List<({String label, bool ok})> _passwordRules(AppLocalizations l10n) {
+    final v = _passwordController.text;
+    final lower = v.toLowerCase();
+    final emailLocal =
+        _emailController.text.trim().split('@').first.toLowerCase();
+    final nickname = _nicknameController.text.trim().toLowerCase();
+    final notSimilar = v.isNotEmpty &&
+        !(emailLocal.length >= 3 && lower.contains(emailLocal)) &&
+        !(nickname.length >= 3 && lower.contains(nickname));
+    return [
+      (label: l10n.passwordRuleLength, ok: v.length >= 8),
+      (
+        label: l10n.passwordRuleNotNumeric,
+        ok: v.isNotEmpty && !RegExp(r'^\d+$').hasMatch(v),
+      ),
+      (
+        label: l10n.passwordRuleNotCommon,
+        ok: v.isNotEmpty && !_commonPasswords.contains(lower),
+      ),
+      (label: l10n.passwordRuleNotSimilar, ok: notSimilar),
+    ];
+  }
+
+  /// 비밀번호 필드 아래 실시간 규칙 체크리스트(✓ 녹색 / ○ 회색).
+  Widget _buildPasswordChecklist(AppLocalizations l10n, MarketLensColors mlc) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: _passwordRules(l10n).map((r) {
+        final color = r.ok ? mlc.gainColor : mlc.textTertiary;
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxs),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                r.ok ? Icons.check_circle_rounded : Icons.radio_button_unchecked,
+                size: 15,
+                color: color,
+              ),
+              const SizedBox(width: AppSpacing.xs),
+              Flexible(
+                child: Text(r.label,
+                    style: AppTypography.label.copyWith(color: color)),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
+    );
   }
 
   Future<void> _handleSignup() async {
@@ -152,13 +231,28 @@ class _SignupScreenState extends State<SignupScreen> {
                 final auth = context.read<AuthProvider>();
                 final navigator = Navigator.of(context);
                 // 3. 인증코드 + 가입을 한 번에 처리
-                await auth.registerWithVerification(
-                  email: email,
-                  nickname: nickname,
-                  password: password,
-                  passwordConfirm: passwordConfirm,
-                  code: code,
-                );
+                try {
+                  await auth.registerWithVerification(
+                    email: email,
+                    nickname: nickname,
+                    password: password,
+                    passwordConfirm: passwordConfirm,
+                    code: code,
+                  );
+                } on ApiException catch (e) {
+                  // 서버가 비밀번호 정책으로 거부 → 인증 화면을 닫고 가입 폼으로 돌아가
+                  // 비밀번호를 고치게 한다(인증 화면에 갇혀 못 고치는 상황 방지).
+                  if (e.code == ApiErrorCode.weakPassword) {
+                    navigator.pop();
+                    if (mounted) {
+                      _showErrorSnack(
+                          AppLocalizations.of(context).passwordPolicyFailed);
+                      _passwordFocusNode.requestFocus();
+                    }
+                    return;
+                  }
+                  rethrow; // 그 외(인증코드 오류 등)는 인증 화면이 안내
+                }
 
                 if (navigator.mounted) {
                   navigator.popUntil((route) => route.isFirst);
@@ -170,28 +264,7 @@ class _SignupScreenState extends State<SignupScreen> {
       }
     } catch (e) {
       if (mounted) {
-        final message = ErrorLocalizer.getMessage(context, e);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                Icon(
-                  Icons.error_outline,
-                  color: context.mlColors.onPrimary,
-                  size: 20,
-                ),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(child: Text(message)),
-              ],
-            ),
-            backgroundColor: context.mlColors.dangerColor,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppRadius.md),
-            ),
-            margin: const EdgeInsets.all(AppSpacing.xl),
-          ),
-        );
+        _showErrorSnack(ErrorLocalizer.getMessage(context, e));
       }
     } finally {
       if (mounted) {
@@ -359,17 +432,21 @@ class _SignupScreenState extends State<SignupScreen> {
                           const SizedBox(height: AppSpacing.lg),
                           TextFormField(
                             controller: _passwordController,
+                            focusNode: _passwordFocusNode,
                             obscureText: true,
+                            // 입력 즉시 규칙 체크리스트를 갱신 + 닉네임/이메일 유사도 반영
+                            onChanged: (_) => setState(() {}),
                             decoration: InputDecoration(
                               labelText: l10n.password,
                               hintText: l10n.passwordHint,
                               prefixIcon: const Icon(Icons.lock_outlined),
-                              helperText: l10n.passwordRequirements,
-                              helperMaxLines: 2,
                             ),
                             validator: (value) =>
                                 _validatePassword(value, l10n),
                           ),
+                          const SizedBox(height: AppSpacing.sm),
+                          // 규칙을 항상 보이게 + 타이핑 중 충족 여부 실시간 안내
+                          _buildPasswordChecklist(l10n, context.mlColors),
                           const SizedBox(height: AppSpacing.lg),
                           TextFormField(
                             controller: _passwordConfirmController,

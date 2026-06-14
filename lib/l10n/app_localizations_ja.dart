@@ -189,6 +189,18 @@ class AppLocalizationsJa extends AppLocalizations {
   String get passwordRequirements => '8文字以上、数字のみ不可、一般的なパスワード不可';
 
   @override
+  String get passwordRuleLength => '8文字以上';
+
+  @override
+  String get passwordRuleNotNumeric => '数字のみは不可';
+
+  @override
+  String get passwordRuleNotCommon => 'ありふれたパスワードでない';
+
+  @override
+  String get passwordRuleNotSimilar => 'メール・ニックネームと異なる';
+
+  @override
   String get passwordConfirm => 'パスワード確認';
 
   @override
@@ -199,6 +211,9 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get passwordMismatch => 'パスワードが一致しません';
+
+  @override
+  String get passwordPolicyFailed => 'パスワードがセキュリティ要件を満たしていません。別のパスワードをご利用ください。';
 
   @override
   String get changePassword => 'パスワード変更';

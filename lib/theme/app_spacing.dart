@@ -30,3 +30,19 @@ abstract final class AppSpacing {
   /// 28px — 에디토리얼 섹션 리듬 (콘텐츠 블록 사이 큰 여백)
   static const double section = 28.0;
 }
+
+/// 화면 레이아웃 치수 토큰.
+///
+/// 여러 화면이 공유해야 하는 구조적 높이/너비를 한곳에서 관리한다.
+abstract final class AppLayout {
+  /// 플로팅 하단 탭바의 개별 아이템 높이.
+  static const double bottomNavItemHeight = 48.0;
+
+  /// 플로팅 하단 탭바의 콘텐츠 높이(안전영역 제외).
+  ///
+  /// SafeArea min top(xs=4) + 내부 padding(xs=4)*2 + 아이템(48) = 60.
+  /// main.dart의 `_buildModernBottomNav`와 AI 채팅 입력창 클리어런스가 공유하여,
+  /// 탭바 디자인이 바뀌어도 입력창이 탭바 밑으로 겹치지 않도록 보장한다.
+  static const double bottomNavContentHeight =
+      AppSpacing.xs + (AppSpacing.xs * 2) + bottomNavItemHeight;
+}

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../providers/chat_provider.dart';
+import '../../../providers/chat_nav_signals.dart';
 import '../../../providers/subscription_provider.dart';
 import '../../../widgets/ads/banner_ad_widget.dart';
 import '../../../widgets/ads/rewarded_ad_helper.dart';
@@ -28,6 +29,28 @@ class _AiChatScreenState extends State<AiChatScreen> {
   final _controller = TextEditingController();
   final _scrollController = ScrollController();
 
+  // ───────────────────────────────────────────────────────────────────────
+  // 대화 관리 UI(헤더의 "이전 대화"·"새 대화") 노출 플래그. 현재 OFF로 가려둠.
+  //
+  // [가린 이유 — 2026-06-14] 서버 대화 이력(analytics.chat_messages)에 AI 답변이
+  //   저장되지 않아, "이전 대화"를 열어도 사용자 질문만 보이고 답변은 비어 있음.
+  //   원인은 맥미니 분석엔진이 답변을 신규 경로 /internal/ingest/chat-message가
+  //   아니라 옛 ai-messages 경로로 보내 chat_messages에 assistant 턴이 안 쌓이는 것.
+  //   답변 없는 이력/새 대화 분리는 사용자에게 혼란만 주므로 기능을 잠시 숨긴다.
+  //
+  // [되살리는 법] 맥미니가 chat-message로 답변을 저장하도록 수정되면 이 값만 true로.
+  //   헤더·이력 시트·관련 Provider 메서드는 그대로 보존되어 있어 즉시 복구된다.
+  //
+  // [완전 제거 시] 끝내 안 쓰기로 확정되면 다음을 함께 삭제:
+  //   - 이 화면: _header(), _openHistory(), 본 플래그, build()의 헤더 분기,
+  //     initState()의 loadConversations() 호출
+  //   - ChatProvider: startNew(), loadConversation(), loadConversations(),
+  //     _conversations 필드 / conversations getter
+  //   - ChatApiClient.getConversations() (다른 참조가 없을 때)
+  // 비-const 인스턴스 필드로 두어 dead_code 경고 없이 분기를 유지한다.
+  // ───────────────────────────────────────────────────────────────────────
+  final bool _showConversationControls = false;
+
   @override
   void initState() {
     super.initState();
@@ -35,7 +58,9 @@ class _AiChatScreenState extends State<AiChatScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       final chat = context.read<ChatProvider>();
-      chat.loadConversations(); // 이전 대화 목록 (실패는 조용히)
+      // 이전 대화 목록 (실패는 조용히). 대화 관리 UI를 숨긴 동안엔 불필요한
+      // 네트워크 호출이라 함께 가린다. _showConversationControls 참고.
+      if (_showConversationControls) chat.loadConversations();
       chat.loadQuota(); // 일일 무료 쿼터
     });
   }
@@ -106,7 +131,8 @@ class _AiChatScreenState extends State<AiChatScreen> {
 
     return Column(
       children: [
-        _header(l10n, mlc, chat),
+        // 대화 관리 UI(이전 대화·새 대화)는 현재 가려둠 — _showConversationControls 참고.
+        if (_showConversationControls) _header(l10n, mlc, chat),
         Expanded(
           child: (chat.isEmpty && !showThinking)
               ? _emptyState(l10n, mlc)
@@ -324,13 +350,41 @@ class _AiChatScreenState extends State<AiChatScreen> {
     );
   }
 
+  /// 입력창 왼쪽 인라인 원형 버튼 — 하단 풀 탭바를 펼쳤다 접는다.
+  /// 탭바에서 다시 채팅으로 돌아올 때도 같은 버튼(펼침 상태=X 아이콘)으로 접는다.
+  Widget _navToggleButton(MarketLensColors mlc) {
+    return ValueListenableBuilder<bool>(
+      valueListenable: chatNavExpanded,
+      builder: (context, expanded, _) {
+        return Material(
+          color: mlc.infoBg.withValues(alpha: 0.7),
+          shape: const CircleBorder(),
+          child: InkWell(
+            customBorder: const CircleBorder(),
+            onTap: () => chatNavExpanded.value = !expanded,
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.sm),
+              child: Icon(
+                expanded ? Icons.close_rounded : Icons.apps_rounded,
+                color: mlc.accentBlue,
+                size: 22,
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   Widget _inputBar(BuildContext context, AppLocalizations l10n,
       MarketLensColors mlc, ChatProvider chat, bool isAdFree) {
     final keyboard = MediaQuery.of(context).viewInsets.bottom;
-    // 키보드가 없을 때만 플로팅 탭바 클리어런스를 더한다.
-    final bottomClear = keyboard > 0
-        ? AppSpacing.sm
-        : MediaQuery.of(context).viewPadding.bottom + 64;
+    final safeBottom = MediaQuery.of(context).viewPadding.bottom;
+    // 채팅 페이지에선 main.dart가 하단 풀 탭바를 띄우지 않으므로(왼쪽 원형 버튼으로
+    // 펼침), 입력창을 탭바 위로 올릴 필요 없이 자연 높이로 둔다 = 홈 인디케이터(safe
+    // area)만 피하는 정도. 키보드가 뜨면 키보드 위 8px.
+    final bottomClear =
+        keyboard > 0 ? AppSpacing.sm : safeBottom + AppSpacing.sm;
     return Container(
       padding: EdgeInsets.fromLTRB(
           AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, bottomClear),
@@ -342,6 +396,9 @@ class _AiChatScreenState extends State<AiChatScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
+          // 접이식 내비 토글(탭바 ⇄ 채팅 입력). 펼침이면 X, 접힘이면 메뉴 아이콘.
+          _navToggleButton(mlc),
+          const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: TextField(
               controller: _controller,

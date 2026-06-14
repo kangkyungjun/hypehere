@@ -577,6 +577,15 @@ class AuthService {
           );
         }
       }
+      // 비밀번호 정책 위반(서버 Django validators) — 가입 폼으로 돌려보내 수정하도록
+      // 전용 코드로 분리(인증 화면에서 막혀 못 고치는 상황 방지).
+      if (body['password'] is List && (body['password'] as List).isNotEmpty) {
+        return ApiException(
+          ApiErrorCode.weakPassword,
+          debugMessage: (body['password'] as List).first.toString(),
+          statusCode: statusCode,
+        );
+      }
       // Collect field-level errors
       final messages = <String>[];
       body.forEach((key, value) {

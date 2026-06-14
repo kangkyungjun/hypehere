@@ -16,6 +16,7 @@ enum ApiErrorCode {
   cannotLoadUser,
   emailNotVerified,
   rateLimited,
+  weakPassword,
 
   // HTTP Status
   badRequest,

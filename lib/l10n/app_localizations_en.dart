@@ -193,6 +193,18 @@ class AppLocalizationsEn extends AppLocalizations {
       'At least 8 characters. Cannot be all numbers or a common password.';
 
   @override
+  String get passwordRuleLength => 'At least 8 characters';
+
+  @override
+  String get passwordRuleNotNumeric => 'Not only numbers';
+
+  @override
+  String get passwordRuleNotCommon => 'Not a common password';
+
+  @override
+  String get passwordRuleNotSimilar => 'Different from email & nickname';
+
+  @override
   String get passwordConfirm => 'Confirm Password';
 
   @override
@@ -203,6 +215,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get passwordMismatch => 'Passwords do not match';
+
+  @override
+  String get passwordPolicyFailed =>
+      'This password doesn\'t meet security requirements. Please choose another.';
 
   @override
   String get changePassword => 'Change Password';

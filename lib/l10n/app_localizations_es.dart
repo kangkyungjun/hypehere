@@ -195,6 +195,18 @@ class AppLocalizationsEs extends AppLocalizations {
       'Mínimo 8 caracteres. No puede ser solo números ni una contraseña común.';
 
   @override
+  String get passwordRuleLength => 'Mínimo 8 caracteres';
+
+  @override
+  String get passwordRuleNotNumeric => 'No solo números';
+
+  @override
+  String get passwordRuleNotCommon => 'No es una contraseña común';
+
+  @override
+  String get passwordRuleNotSimilar => 'Distinta del correo y apodo';
+
+  @override
   String get passwordConfirm => 'Confirmar contraseña';
 
   @override
@@ -205,6 +217,10 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get passwordMismatch => 'Las contraseñas no coinciden';
+
+  @override
+  String get passwordPolicyFailed =>
+      'La contraseña no cumple los requisitos de seguridad. Elige otra.';
 
   @override
   String get changePassword => 'Cambiar contraseña';

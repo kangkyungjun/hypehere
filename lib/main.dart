@@ -16,6 +16,7 @@ import 'theme/app_duration.dart';
 import 'theme/app_radius.dart';
 import 'theme/app_shadow.dart';
 import 'theme/app_spacing.dart';
+import 'providers/chat_nav_signals.dart';
 import 'theme/app_typography.dart';
 import 'providers/watchlist_provider.dart';
 import 'providers/recent_search_provider.dart';
@@ -1019,7 +1020,23 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    // 키보드가 올라오면 플로팅 탭바를 숨긴다(채팅·검색 등 입력 시 탭바가 키보드 위에
+    // 끼어드는 어색함 제거). 키보드 애니메이션과 함께 자연스럽게 사라진다.
+    final keyboardUp = MediaQuery.of(context).viewInsets.bottom > 0;
 
+    // AI 채팅(분석 서브탭) 페이지에서는 풀 탭바를 띄우지 않고, 입력창 왼쪽의
+    // 원형 버튼으로 접이식 내비를 쓴다. aiChatSubTabActive 변화에 따라 갱신.
+    return ValueListenableBuilder<bool>(
+      valueListenable: aiChatSubTabActive,
+      builder: (context, chatActive, _) {
+        final onChatPage = _currentIndex == 2 && chatActive;
+        return _buildScaffold(l10n, keyboardUp, onChatPage);
+      },
+    );
+  }
+
+  Widget _buildScaffold(
+      AppLocalizations l10n, bool keyboardUp, bool onChatPage) {
     return Scaffold(
       // 하단 플로팅 탭바 뒤로 body를 확장 → pill 주변이 투명해져 페이지가 비쳐 보임
       extendBody: true,
@@ -1083,9 +1100,54 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           // 속보 토스트
           if (_breakingTitle != null)
             Positioned(top: 0, left: 0, right: 0, child: _buildBreakingToast()),
+          // 채팅 페이지 접이식 내비: 펼침 오버레이(스크림 + 풀 탭바)
+          if (onChatPage && !keyboardUp) _buildChatNavOverlay(l10n),
         ],
       ),
-      bottomNavigationBar: _buildModernBottomNav(l10n),
+      // 채팅 페이지에서는 바닥을 비워 입력창이 자연 높이로 내려오게 한다(탭바는
+      // 입력창 왼쪽 원형 버튼으로 펼침). 키보드 시에도 숨김(기존 동작).
+      bottomNavigationBar:
+          (keyboardUp || onChatPage) ? null : _buildModernBottomNav(l10n),
+    );
+  }
+
+  /// 채팅 페이지에서 입력창 왼쪽 원형 버튼을 누르면 펼쳐지는 풀 탭바 오버레이.
+  /// 스크림 또는 탭 선택 시 접힌다. 접힘 시엔 IgnorePointer로 입력 방해 안 함.
+  Widget _buildChatNavOverlay(AppLocalizations l10n) {
+    return ValueListenableBuilder<bool>(
+      valueListenable: chatNavExpanded,
+      builder: (context, expanded, _) {
+        return Positioned.fill(
+          child: IgnorePointer(
+            ignoring: !expanded,
+            child: AnimatedOpacity(
+              opacity: expanded ? 1 : 0,
+              duration: AppDuration.fast,
+              curve: Curves.easeOut,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => chatNavExpanded.value = false, // 스크림 탭 = 접힘
+                child: ColoredBox(
+                  color: Colors.black.withValues(alpha: 0.18),
+                  child: Align(
+                    alignment: Alignment.bottomCenter,
+                    child: AnimatedSlide(
+                      offset: expanded ? Offset.zero : const Offset(0, 1),
+                      duration: AppDuration.fast,
+                      curve: Curves.easeOutCubic,
+                      // 풀 탭바 영역 탭은 스크림으로 전파되지 않게 흡수.
+                      child: GestureDetector(
+                        onTap: () {},
+                        child: _buildModernBottomNav(l10n),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -1155,11 +1217,15 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                     message: item.tooltip,
                     child: InkWell(
                       borderRadius: BorderRadius.circular(AppRadius.xxl),
-                      onTap: () => setState(() => _currentIndex = index),
+                      onTap: () {
+                        setState(() => _currentIndex = index);
+                        // 펼침 오버레이에서 선택했으면 접는다(일반 탭바에선 무해).
+                        chatNavExpanded.value = false;
+                      },
                       child: AnimatedContainer(
                         duration: AppDuration.fast,
                         curve: Curves.easeOutCubic,
-                        height: 48,
+                        height: AppLayout.bottomNavItemHeight,
                         decoration: BoxDecoration(
                           color: selected
                               ? colors.infoBg.withValues(alpha: 0.58)

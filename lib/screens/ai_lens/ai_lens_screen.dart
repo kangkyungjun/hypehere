@@ -8,6 +8,7 @@ import '../../utils/app_page_route.dart';
 import '../ticker_detail/ticker_detail_screen.dart';
 import 'ai_lens_list_screen.dart';
 import 'chat/ai_chat_screen.dart';
+import '../../providers/chat_nav_signals.dart';
 import '../../widgets/ads/banner_ad_widget.dart';
 import '../../widgets/common/market_segmented_tabs.dart';
 import '../../theme/app_colors.dart';
@@ -60,12 +61,20 @@ class _AILensScreenState extends State<AILensScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this, initialIndex: 1);
-    _tabController.addListener(() => setState(() {}));
+    _tabController.addListener(() {
+      setState(() {});
+      // 서브탭0=분석(채팅). main.dart가 채팅 페이지에서만 접이식 탭바를 쓰도록 신호.
+      aiChatSubTabActive.value = _tabController.index == 0;
+    });
+    // 초기값 반영(기본 initialIndex=1=종목 → false).
+    aiChatSubTabActive.value = _tabController.index == 0;
     _loadData();
   }
 
   @override
   void dispose() {
+    aiChatSubTabActive.value = false;
+    chatNavExpanded.value = false;
     _tabController.dispose();
     _apiClient.dispose();
     super.dispose();
