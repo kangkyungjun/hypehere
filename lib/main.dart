@@ -42,6 +42,7 @@ import 'config/feature_flags.dart';
 import 'screens/ticker_detail/ticker_detail_screen.dart';
 import 'screens/community/post_detail_screen.dart';
 import 'models/news_data.dart';
+import 'utils/multilingual.dart';
 import 'widgets/news/market_news_modal.dart';
 import 'widgets/ads/app_open_ad_helper.dart';
 import 'package:upgrader/upgrader.dart';
@@ -924,6 +925,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
   Widget _buildBreakingToast() {
     final theme = Theme.of(context);
+    // 속보는 전 유저 브로드캐스트라 맥미니가 ||| 패킹으로 보낼 수 있음 →
+    // 표시 시점에 localize (단일 언어면 원문 그대로 반환되는 no-op)
+    final langCode = Localizations.localeOf(context).languageCode;
     return Material(
       color: Colors.transparent,
       child: GestureDetector(
@@ -969,7 +973,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      _breakingTitle ?? '',
+                      (_breakingTitle ?? '').localize(langCode),
                       style: TextStyle(
                         fontSize: AppTypography.bodyMedium,
                         fontWeight: AppTypography.bold,
@@ -981,7 +985,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                     if (_breakingBody != null && _breakingBody!.isNotEmpty) ...[
                       const SizedBox(height: AppSpacing.xxs),
                       Text(
-                        _breakingBody!,
+                        _breakingBody!.localize(langCode),
                         style: TextStyle(
                           fontSize: AppTypography.bodySmall,
                           color: theme.colorScheme.onErrorContainer.withValues(

@@ -132,7 +132,7 @@ class MarketNewsModal {
                   const SizedBox(width: AppSpacing.md),
                   Expanded(
                     child: Text(
-                      item.title,
+                      item.title.localize(langCode),
                       style: TextStyle(
                         fontSize: AppTypography.headlineLarge,
                         fontWeight: AppTypography.bold,
