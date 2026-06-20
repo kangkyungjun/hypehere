@@ -14,6 +14,7 @@ import '../auth/login_screen.dart';
 import '../auth/signup_screen.dart';
 import '../profile/profile_screen.dart';
 import '../admin/admin_panel_screen.dart';
+import '../admin/active_users_dashboard_screen.dart';
 import '../community/community_feed_screen.dart';
 import 'blocked_users_screen.dart';
 import '../onboarding/investment_profile_onboarding_screen.dart';
@@ -289,6 +290,22 @@ class SettingsScreen extends StatelessWidget {
                           subtitle: l10n.adminPanelSubtitle,
                           onTap: () => _navigateToAdminPanel(context),
                         ),
+                        // Master 전용 — 활성 사용자(DAU/WAU). 매니저에겐 렌더 안 됨.
+                        if (authProvider.isMaster)
+                          _buildSettingsTile(
+                            context,
+                            icon: Icons.insights_rounded,
+                            iconColor: context.mlColors.accentBlue,
+                            title: '활성 사용자 (DAU/WAU)',
+                            subtitle: 'Master 전용 · 일·주 활성 사용자',
+                            onTap: () => Navigator.push(
+                              context,
+                              appPageRoute(
+                                builder: (_) =>
+                                    const ActiveUsersDashboardScreen(),
+                              ),
+                            ),
+                          ),
                         _buildSettingsTile(
                           context,
                           icon: Icons.campaign_rounded,

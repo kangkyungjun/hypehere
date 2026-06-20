@@ -9,7 +9,7 @@ import '../ticker_detail/ticker_detail_screen.dart';
 import '../../widgets/ads/banner_ad_widget.dart';
 import '../../widgets/charts/macro_banner_widget.dart';
 import '../../widgets/dashboard/indices_bar_widget.dart';
-import '../../widgets/dashboard/recommendation_carousel.dart';
+import '../../widgets/dashboard/recommendation_grid.dart';
 import '../../widgets/dashboard/sector_bar_chart_widget.dart';
 import 'sector_overview_screen.dart';
 import '../../widgets/common/bento_card.dart';
@@ -17,12 +17,12 @@ import '../../theme/app_spacing.dart';
 import '../../l10n/app_localizations.dart';
 import '../../widgets/common/error_state_view.dart';
 import '../../widgets/common/market_segmented_tabs.dart';
-import 'widgets/top_stocks_section.dart';
 import 'widgets/up_down_tab.dart';
 import 'widgets/indexes_tab.dart';
 import 'movers_list_screen.dart';
 import 'top_stocks_list_screen.dart';
 import '../indexes/indexes_detail_screen.dart';
+import '../indexes/macro_history_screen.dart';
 
 /// Dashboard Screen - Home 탭 (시장 스냅샷)
 ///
@@ -292,21 +292,6 @@ class _DashboardScreenState extends State<DashboardScreen>
           if (_indicesData != null && _indicesData!.indices.isNotEmpty)
             const SizedBox(height: AppSpacing.sm),
 
-          // ===== 오늘의 추천 종목 캐러셀 (AI점수 × 오늘 모멘텀 블렌드) =====
-          Builder(
-            builder: (_) {
-              final recos = RecommendationCarousel.compute(_treemapData);
-              if (recos.isEmpty) return const SizedBox.shrink();
-              return Padding(
-                padding: const EdgeInsets.only(bottom: AppSpacing.lg),
-                child: RecommendationCarousel(
-                  items: recos,
-                  onTickerTap: _onTickerTap,
-                ),
-              );
-            },
-          ),
-
           // ===== Sector Bar Chart Card (탭 → 섹터별 시장현황 트리맵) =====
           BentoCard(
             child: (_treemapError != null && _treemapData == null)
@@ -337,31 +322,40 @@ class _DashboardScreenState extends State<DashboardScreen>
                         ),
                       );
                     },
+                    onVixTap: _vixIndicator == null
+                        ? null
+                        : () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const MacroHistoryScreen(
+                                  indicatorCode: 'VIXCLS',
+                                  title: 'VIX',
+                                ),
+                              ),
+                            );
+                          },
                   ),
+          ),
+
+          // ===== 오늘의 추천 종목 그리드 (AI점수 × 오늘 모멘텀 블렌드, 상위 8개) =====
+          Builder(
+            builder: (_) {
+              final recos = RecommendationGrid.compute(_treemapData);
+              if (recos.isEmpty) return const SizedBox.shrink();
+              return Padding(
+                padding: const EdgeInsets.only(top: AppSpacing.lg),
+                child: RecommendationGrid(
+                  items: recos,
+                  onTickerTap: _onTickerTap,
+                ),
+              );
+            },
           ),
 
           // ===== Banner Ad =====
           const SizedBox(height: AppSpacing.sm),
           const Center(child: BannerAdWidget()),
-
-          // ===== Top Stocks Card =====
-          if (_topStocks.isNotEmpty) ...[
-            const SizedBox(height: AppSpacing.sm),
-            BentoCard(
-              child: TopStocksSection(
-                topStocks: _topStocks,
-                onTickerTap: _onTickerTap,
-                onViewMore: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const TopStocksListScreen(),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ],
 
           // ===== Bottom Ad =====
           const SizedBox(height: AppSpacing.sm),
@@ -384,6 +378,13 @@ class _DashboardScreenState extends State<DashboardScreen>
         treemapData: _treemapData,
         selectedIndex: _selectedIndex,
         isLoading: _isTreemapLoading,
+        topStocks: _topStocks,
+        onTopStocksViewMore: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const TopStocksListScreen()),
+          );
+        },
         onIndexFilterChanged: _onIndexFilterChanged,
         onTickerTap: _onTickerTap,
         onViewMore: (sortBy) {
@@ -411,5 +412,4 @@ class _DashboardScreenState extends State<DashboardScreen>
       child: IndexesTab(data: _macroData, signals: _signalsData),
     );
   }
-
 }

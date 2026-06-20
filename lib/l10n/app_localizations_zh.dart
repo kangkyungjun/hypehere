@@ -316,6 +316,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get aiTabStocks => 'AI个股';
 
   @override
+  String get aiTabSector => 'AI板块';
+
+  @override
   String get aiAnalysisComingSoonTitle => '对话式AI分析';
 
   @override
@@ -1624,6 +1627,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get calendarEconomicIndicators => '美国经济指标';
 
   @override
+  String get calendarViewResult => '查看结果';
+
+  @override
   String get forgotPassword => '找回密码';
 
   @override
@@ -1850,6 +1856,30 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get aiChatEmptySubtitle => '与AI讨论股票和投资组合';
+
+  @override
+  String get aiChatSuggestionsTitle => '试试这样问';
+
+  @override
+  String get aiChatShuffle => '换一批';
+
+  @override
+  String get aiChatCopy => '复制';
+
+  @override
+  String get aiChatShare => '分享';
+
+  @override
+  String get aiChatCopied => '已复制';
+
+  @override
+  String get aiChatShareQ => '问题';
+
+  @override
+  String get aiChatShareA => '回答';
+
+  @override
+  String get aiChatShareFooter => '— MarketLens AI';
 
   @override
   String get aiChatThinking => 'AI思考中…';

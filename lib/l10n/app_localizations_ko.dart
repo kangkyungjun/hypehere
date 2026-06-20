@@ -317,6 +317,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get aiTabStocks => 'AI종목';
 
   @override
+  String get aiTabSector => 'AI섹터';
+
+  @override
   String get aiAnalysisComingSoonTitle => '대화형 AI 분석';
 
   @override
@@ -1628,6 +1631,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get calendarEconomicIndicators => '미국 경제지표';
 
   @override
+  String get calendarViewResult => '결과 보기';
+
+  @override
   String get forgotPassword => '비밀번호 찾기';
 
   @override
@@ -1854,6 +1860,30 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get aiChatEmptySubtitle => '종목·포트폴리오에 대해 AI와 대화하세요';
+
+  @override
+  String get aiChatSuggestionsTitle => '이런 질문은 어때요?';
+
+  @override
+  String get aiChatShuffle => '다른 질문';
+
+  @override
+  String get aiChatCopy => '복사';
+
+  @override
+  String get aiChatShare => '공유';
+
+  @override
+  String get aiChatCopied => '복사됨';
+
+  @override
+  String get aiChatShareQ => '질문';
+
+  @override
+  String get aiChatShareA => '답변';
+
+  @override
+  String get aiChatShareFooter => '— MarketLens AI';
 
   @override
   String get aiChatThinking => 'AI가 생각 중…';
@@ -2462,10 +2492,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get wlTargetPrice => '목표가';
 
   @override
-  String get wlPrice1mAgo => '1개월';
+  String get wlPrice1mAgo => '1개월 전';
 
   @override
-  String get wlPrice3mAgo => '3개월';
+  String get wlPrice3mAgo => '3개월 전';
 
   @override
   String get filterActiveLabel => '필터 적용 중';

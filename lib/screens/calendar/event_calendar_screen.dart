@@ -19,6 +19,7 @@ import '../../widgets/common/market_segmented_tabs.dart';
 import '../../config/feature_flags.dart';
 import '../../widgets/common/gold_upgrade_sheet.dart';
 import '../ticker_detail/ticker_detail_screen.dart';
+import '../common/webview_screen.dart';
 
 class EventCalendarScreen extends StatefulWidget {
   const EventCalendarScreen({super.key});
@@ -44,6 +45,12 @@ class _EventCalendarScreenState extends State<EventCalendarScreen>
   String? _error;
   DateTime? _adUnlockExpiry;
 
+  /// 단일 스크롤 컨트롤러: 캘린더가 함께 스크롤되며 '맨 위로' 위치 판정에 사용
+  final ScrollController _scrollController = ScrollController();
+
+  /// 일정 이상 내려갔을 때만 '맨 위로' 버튼 노출
+  bool _showScrollTop = false;
+
   @override
   void initState() {
     super.initState();
@@ -52,7 +59,32 @@ class _EventCalendarScreenState extends State<EventCalendarScreen>
     _month = now.month;
     _selectedDate = DateTime(now.year, now.month, now.day);
     _eventTabController = TabController(length: 2, vsync: this);
+    // 세그먼트 탭 전환 시 활성 카테고리 목록을 다시 그린다(TabBarView 제거 대응)
+    _eventTabController.addListener(_onTabChanged);
+    _scrollController.addListener(_onScroll);
     _loadAdUnlock();
+  }
+
+  void _onTabChanged() {
+    if (!mounted || _eventTabController.indexIsChanging) return;
+    setState(() {});
+  }
+
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+    final show = _scrollController.offset > 320;
+    if (show != _showScrollTop) {
+      setState(() => _showScrollTop = show);
+    }
+  }
+
+  void _scrollToTop() {
+    if (!_scrollController.hasClients) return;
+    _scrollController.animateTo(
+      0,
+      duration: const Duration(milliseconds: 320),
+      curve: Curves.easeOutCubic,
+    );
   }
 
   @override
@@ -65,7 +97,9 @@ class _EventCalendarScreenState extends State<EventCalendarScreen>
 
   @override
   void dispose() {
+    _eventTabController.removeListener(_onTabChanged);
     _eventTabController.dispose();
+    _scrollController.dispose();
     _apiClient.dispose();
     super.dispose();
   }
@@ -163,24 +197,79 @@ class _EventCalendarScreenState extends State<EventCalendarScreen>
 
   String _monthName(int month, String lang) {
     const monthNamesEn = [
-      '', 'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
+      '',
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
     ];
     const monthNamesKo = [
-      '', '1월', '2월', '3월', '4월', '5월', '6월',
-      '7월', '8월', '9월', '10월', '11월', '12월'
+      '',
+      '1월',
+      '2월',
+      '3월',
+      '4월',
+      '5월',
+      '6월',
+      '7월',
+      '8월',
+      '9월',
+      '10월',
+      '11월',
+      '12월',
     ];
     const monthNamesZh = [
-      '', '1月', '2月', '3月', '4月', '5月', '6月',
-      '7月', '8月', '9月', '10月', '11月', '12月'
+      '',
+      '1月',
+      '2月',
+      '3月',
+      '4月',
+      '5月',
+      '6月',
+      '7月',
+      '8月',
+      '9月',
+      '10月',
+      '11月',
+      '12月',
     ];
     const monthNamesJa = [
-      '', '1月', '2月', '3月', '4月', '5月', '6月',
-      '7月', '8月', '9月', '10月', '11月', '12月'
+      '',
+      '1月',
+      '2月',
+      '3月',
+      '4月',
+      '5月',
+      '6月',
+      '7月',
+      '8月',
+      '9月',
+      '10月',
+      '11月',
+      '12月',
     ];
     const monthNamesEs = [
-      '', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+      '',
+      'Enero',
+      'Febrero',
+      'Marzo',
+      'Abril',
+      'Mayo',
+      'Junio',
+      'Julio',
+      'Agosto',
+      'Septiembre',
+      'Octubre',
+      'Noviembre',
+      'Diciembre',
     ];
 
     return switch (lang) {
@@ -218,16 +307,47 @@ class _EventCalendarScreenState extends State<EventCalendarScreen>
   }
 
   void _onEventTap(MarketCalendarEvent event) {
-    if (event.eventType == 'earnings' && event.ticker != null && event.ticker!.isNotEmpty) {
+    if (event.eventType == 'earnings' &&
+        event.ticker != null &&
+        event.ticker!.isNotEmpty) {
       Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) => TickerDetailScreen(ticker: event.ticker!),
         ),
       );
-    } else if (event.description != null && event.description!.isNotEmpty) {
+    } else if ((event.description != null && event.description!.isNotEmpty) ||
+        _hasResultLink(event)) {
       _showEventDetail(event);
     }
+  }
+
+  /// 오늘(자정) 이전이면 '지난 일정'으로 본다.
+  bool _isPastEvent(MarketCalendarEvent event) {
+    final d = DateTime.tryParse(event.date);
+    if (d == null) return false;
+    final now = DateTime.now();
+    return DateTime(
+      d.year,
+      d.month,
+      d.day,
+    ).isBefore(DateTime(now.year, now.month, now.day));
+  }
+
+  /// 지난 일정이면서 서버가 결과 URL을 내려준 경우에만 '결과 보기' 노출.
+  bool _hasResultLink(MarketCalendarEvent event) =>
+      _isPastEvent(event) && event.resultUrl != null;
+
+  /// 결과 URL을 앱 내부 웹뷰로 연다(외부 브라우저 X).
+  void _openResultWebView(MarketCalendarEvent event) {
+    final url = event.resultUrl;
+    if (url == null) return;
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => WebViewScreen(title: event.title, url: url),
+      ),
+    );
   }
 
   void _showEventDetail(MarketCalendarEvent event) {
@@ -244,8 +364,10 @@ class _EventCalendarScreenState extends State<EventCalendarScreen>
             left: AppSpacing.xxl,
             right: AppSpacing.xxl,
             top: AppSpacing.xxl,
-            bottom: MediaQuery.of(context).viewInsets.bottom +
-                MediaQuery.of(context).viewPadding.bottom + AppSpacing.md,
+            bottom:
+                MediaQuery.of(context).viewInsets.bottom +
+                MediaQuery.of(context).viewPadding.bottom +
+                AppSpacing.md,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -253,12 +375,19 @@ class _EventCalendarScreenState extends State<EventCalendarScreen>
             children: [
               Row(
                 children: [
-                  Icon(event.icon, color: event.colorOf(context.mlColors), size: 24),
+                  Icon(
+                    event.icon,
+                    color: event.colorOf(context.mlColors),
+                    size: 24,
+                  ),
                   const SizedBox(width: AppSpacing.lg),
                   Expanded(
                     child: Text(
                       event.title,
-                      style: TextStyle(fontSize: AppTypography.headlineMedium, fontWeight: AppTypography.bold),
+                      style: TextStyle(
+                        fontSize: AppTypography.headlineMedium,
+                        fontWeight: AppTypography.bold,
+                      ),
                     ),
                   ),
                 ],
@@ -267,42 +396,68 @@ class _EventCalendarScreenState extends State<EventCalendarScreen>
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xxs),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.md,
+                      vertical: AppSpacing.xxs,
+                    ),
                     decoration: BoxDecoration(
-                      color: event.colorOf(context.mlColors).withValues(alpha: 0.15),
+                      color: event
+                          .colorOf(context.mlColors)
+                          .withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(AppRadius.xs),
                     ),
                     child: Text(
                       _eventTypeLabel(event.eventType, l10n),
-                      style: TextStyle(fontSize: AppTypography.caption, color: event.colorOf(context.mlColors), fontWeight: AppTypography.semiBold),
+                      style: TextStyle(
+                        fontSize: AppTypography.caption,
+                        color: event.colorOf(context.mlColors),
+                        fontWeight: AppTypography.semiBold,
+                      ),
                     ),
                   ),
                   const SizedBox(width: AppSpacing.md),
                   Text(
                     event.date,
-                    style: TextStyle(fontSize: AppTypography.bodySmall, color: context.mlColors.textSecondary),
+                    style: TextStyle(
+                      fontSize: AppTypography.bodySmall,
+                      color: context.mlColors.textSecondary,
+                    ),
                   ),
                   if (event.importance == 'high') ...[
                     const SizedBox(width: AppSpacing.md),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 1),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.sm,
+                        vertical: 1,
+                      ),
                       decoration: BoxDecoration(
-                        color: context.mlColors.lossColor.withValues(alpha: 0.15),
+                        color: context.mlColors.lossColor.withValues(
+                          alpha: 0.15,
+                        ),
                         borderRadius: BorderRadius.circular(AppRadius.xs),
                       ),
                       child: Text(
                         'HIGH',
-                        style: TextStyle(fontSize: AppTypography.micro, color: context.mlColors.lossColor, fontWeight: AppTypography.bold),
+                        style: TextStyle(
+                          fontSize: AppTypography.micro,
+                          color: context.mlColors.lossColor,
+                          fontWeight: AppTypography.bold,
+                        ),
                       ),
                     ),
                   ],
                 ],
               ),
-              if (event.description != null && event.description!.isNotEmpty) ...[
+              if (event.description != null &&
+                  event.description!.isNotEmpty) ...[
                 const SizedBox(height: AppSpacing.xl),
                 Text(
                   event.description!,
-                  style: TextStyle(fontSize: AppTypography.bodyLarge, color: context.mlColors.textPrimary, height: 1.5),
+                  style: TextStyle(
+                    fontSize: AppTypography.bodyLarge,
+                    color: context.mlColors.textPrimary,
+                    height: 1.5,
+                  ),
                 ),
               ],
               if (event.ticker != null && event.ticker!.isNotEmpty) ...[
@@ -313,12 +468,28 @@ class _EventCalendarScreenState extends State<EventCalendarScreen>
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => TickerDetailScreen(ticker: event.ticker!),
+                        builder: (context) =>
+                            TickerDetailScreen(ticker: event.ticker!),
                       ),
                     );
                   },
                   icon: const Icon(Icons.open_in_new, size: 16),
                   label: Text(event.ticker!),
+                ),
+              ],
+              // 지난 일정 결과 팔로업 — 앱 내부 웹뷰로 오픈
+              if (_hasResultLink(event)) ...[
+                const SizedBox(height: AppSpacing.xl),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      _openResultWebView(event);
+                    },
+                    icon: const Icon(Icons.insights, size: 18),
+                    label: Text(l10n.calendarViewResult),
+                  ),
                 ),
               ],
               const SizedBox(height: AppSpacing.md),
@@ -381,9 +552,9 @@ class _EventCalendarScreenState extends State<EventCalendarScreen>
       },
       onFailed: () {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10n.adNotReady)),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(l10n.adNotReady)));
         }
       },
     );
@@ -461,12 +632,15 @@ class _EventCalendarScreenState extends State<EventCalendarScreen>
               if (FeatureFlags.kGoldPurchaseEnabled) ...[
                 const SizedBox(width: AppSpacing.sm),
                 OutlinedButton.icon(
-                  onPressed: () => GoldUpgradeSheet.show(context, source: 'calendar'),
+                  onPressed: () =>
+                      GoldUpgradeSheet.show(context, source: 'calendar'),
                   icon: const Icon(Icons.workspace_premium, size: 18),
                   label: Text(l10n.upgradeToGold),
                   style: OutlinedButton.styleFrom(
                     visualDensity: VisualDensity.compact,
-                    textStyle: const TextStyle(fontSize: AppTypography.bodySmall),
+                    textStyle: const TextStyle(
+                      fontSize: AppTypography.bodySmall,
+                    ),
                   ),
                 ),
               ],
@@ -484,32 +658,91 @@ class _EventCalendarScreenState extends State<EventCalendarScreen>
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
 
-    return Column(
+    final bg = Theme.of(context).scaffoldBackgroundColor;
+    final mlc = context.mlColors;
+
+    return Stack(
       children: [
-        // ── Fixed header: month navigation + calendar grid + banner ad ──
-        Padding(
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.lg,
-            AppSpacing.md,
-            AppSpacing.lg,
-            0,
-          ),
-          child: Column(
-            children: [
-              _buildMonthNavigation(lang, l10n, today),
-              const SizedBox(height: AppSpacing.md),
-              _buildCalendarGrid(lang, today),
+        RefreshIndicator(
+          onRefresh: _loadCalendar,
+          child: CustomScrollView(
+            controller: _scrollController,
+            // 목록이 짧아도 당겨서 새로고침이 되도록 항상 스크롤 가능
+            physics: const AlwaysScrollableScrollPhysics(),
+            slivers: [
+              // ── 상단 고정: 월 네비게이션(2026년 6월 · N개 이벤트) ──
+              SliverPersistentHeader(
+                pinned: true,
+                delegate: _PinnedHeaderDelegate(
+                  height: 56,
+                  background: bg,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      AppSpacing.lg,
+                      0,
+                      AppSpacing.lg,
+                      0,
+                    ),
+                    child: _buildMonthNavigation(lang, l10n, today),
+                  ),
+                ),
+              ),
+              // ── 함께 스크롤되어 올라가는 캘린더 그리드 ──
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.lg,
+                    AppSpacing.sm,
+                    AppSpacing.lg,
+                    AppSpacing.sm,
+                  ),
+                  child: _buildCalendarGrid(lang, today),
+                ),
+              ),
+              // ── 이벤트 영역(컴팩트 헤더 + 고정 탭바 + 목록) ──
+              ..._buildEventSlivers(l10n, bg),
             ],
           ),
         ),
-        const SizedBox(height: AppSpacing.sm),
-        // ── Event tab section fills remaining space below ──
-        Expanded(child: _buildEventTabSection(l10n)),
+
+        // ── '맨 위로' 버튼: 한참 내려가면 노출 ──
+        Positioned(
+          right: AppSpacing.lg,
+          bottom: MediaQuery.of(context).padding.bottom + 78,
+          child: IgnorePointer(
+            ignoring: !_showScrollTop,
+            child: AnimatedOpacity(
+              opacity: _showScrollTop ? 1 : 0,
+              duration: const Duration(milliseconds: 180),
+              child: Material(
+                color: mlc.accentBlue,
+                shape: const CircleBorder(),
+                elevation: 3,
+                child: InkWell(
+                  customBorder: const CircleBorder(),
+                  onTap: _scrollToTop,
+                  child: const Padding(
+                    padding: EdgeInsets.all(AppSpacing.md),
+                    child: Icon(
+                      Icons.keyboard_arrow_up,
+                      color: Colors.white,
+                      size: 26,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
       ],
     );
   }
 
-  Widget _buildMonthNavigation(String lang, AppLocalizations l10n, DateTime today) {
+  Widget _buildMonthNavigation(
+    String lang,
+    AppLocalizations l10n,
+    DateTime today,
+  ) {
     final isCurrentMonth = _year == today.year && _month == today.month;
 
     return Row(
@@ -523,12 +756,19 @@ class _EventCalendarScreenState extends State<EventCalendarScreen>
               children: [
                 Text(
                   _monthName(_month, lang),
-                  style: TextStyle(fontSize: AppTypography.bodyLarge, fontWeight: AppTypography.bold, color: context.mlColors.textSecondary),
+                  style: TextStyle(
+                    fontSize: AppTypography.bodyLarge,
+                    fontWeight: AppTypography.bold,
+                    color: context.mlColors.textSecondary,
+                  ),
                 ),
                 if (_calendarData != null && _calendarData!.totalCount > 0) ...[
                   const SizedBox(width: AppSpacing.sm),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 1),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.sm,
+                      vertical: 1,
+                    ),
                     decoration: BoxDecoration(
                       color: context.mlColors.subtleBorder,
                       borderRadius: BorderRadius.circular(AppRadius.lg),
@@ -546,7 +786,10 @@ class _EventCalendarScreenState extends State<EventCalendarScreen>
                 if (!isCurrentMonth) ...[
                   const SizedBox(width: AppSpacing.sm),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 1),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.sm,
+                      vertical: 1,
+                    ),
                     decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.primaryContainer,
                       borderRadius: BorderRadius.circular(AppRadius.xs),
@@ -609,7 +852,9 @@ class _EventCalendarScreenState extends State<EventCalendarScreen>
                 left: AppSpacing.xxl,
                 right: AppSpacing.xxl,
                 top: AppSpacing.lg,
-                bottom: MediaQuery.of(modalContext).viewInsets.bottom + AppSpacing.xxl,
+                bottom:
+                    MediaQuery.of(modalContext).viewInsets.bottom +
+                    AppSpacing.xxl,
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -655,7 +900,8 @@ class _EventCalendarScreenState extends State<EventCalendarScreen>
                     children: List.generate(12, (index) {
                       final m = index + 1;
                       final isSelected = pickerYear == _year && m == _month;
-                      final isTodayMonth = pickerYear == now.year && m == now.month;
+                      final isTodayMonth =
+                          pickerYear == now.year && m == now.month;
                       final primary = Theme.of(context).colorScheme.primary;
 
                       return GestureDetector(
@@ -720,11 +966,81 @@ class _EventCalendarScreenState extends State<EventCalendarScreen>
 
   List<String> _shortMonthNames(String lang) {
     return switch (lang) {
-      'ko' => ['', '1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],
-      'zh' => ['', '1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
-      'ja' => ['', '1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
-      'es' => ['', 'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
-      _ => ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+      'ko' => [
+        '',
+        '1월',
+        '2월',
+        '3월',
+        '4월',
+        '5월',
+        '6월',
+        '7월',
+        '8월',
+        '9월',
+        '10월',
+        '11월',
+        '12월',
+      ],
+      'zh' => [
+        '',
+        '1月',
+        '2月',
+        '3月',
+        '4月',
+        '5月',
+        '6月',
+        '7月',
+        '8月',
+        '9月',
+        '10月',
+        '11月',
+        '12月',
+      ],
+      'ja' => [
+        '',
+        '1月',
+        '2月',
+        '3月',
+        '4月',
+        '5月',
+        '6月',
+        '7月',
+        '8月',
+        '9月',
+        '10月',
+        '11月',
+        '12月',
+      ],
+      'es' => [
+        '',
+        'Ene',
+        'Feb',
+        'Mar',
+        'Abr',
+        'May',
+        'Jun',
+        'Jul',
+        'Ago',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dic',
+      ],
+      _ => [
+        '',
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec',
+      ],
     };
   }
 
@@ -752,8 +1068,8 @@ class _EventCalendarScreenState extends State<EventCalendarScreen>
                     color: isSunday
                         ? context.mlColors.sundayColor
                         : isSaturday
-                            ? context.mlColors.accentBlue
-                            : context.mlColors.textSecondary,
+                        ? context.mlColors.accentBlue
+                        : context.mlColors.textSecondary,
                   ),
                 ),
               ),
@@ -767,7 +1083,11 @@ class _EventCalendarScreenState extends State<EventCalendarScreen>
     );
   }
 
-  List<Widget> _buildWeekRows(int startWeekday, int daysInMonth, DateTime today) {
+  List<Widget> _buildWeekRows(
+    int startWeekday,
+    int daysInMonth,
+    DateTime today,
+  ) {
     final rows = <Widget>[];
     int dayCounter = 1;
 
@@ -798,7 +1118,9 @@ class _EventCalendarScreenState extends State<EventCalendarScreen>
                   height: 44,
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.5)
+                        ? Theme.of(
+                            context,
+                          ).colorScheme.primaryContainer.withValues(alpha: 0.5)
                         : null,
                     borderRadius: BorderRadius.circular(AppRadius.md),
                   ),
@@ -819,14 +1141,16 @@ class _EventCalendarScreenState extends State<EventCalendarScreen>
                           '$day',
                           style: TextStyle(
                             fontSize: AppTypography.bodyMedium,
-                            fontWeight: isToday || isSelected ? AppTypography.bold : AppTypography.regular,
+                            fontWeight: isToday || isSelected
+                                ? AppTypography.bold
+                                : AppTypography.regular,
                             color: isToday
                                 ? Theme.of(context).colorScheme.onPrimary
                                 : col == 0
-                                    ? context.mlColors.sundayColor
-                                    : col == 6
-                                        ? context.mlColors.accentBlue
-                                        : null,
+                                ? context.mlColors.sundayColor
+                                : col == 6
+                                ? context.mlColors.accentBlue
+                                : null,
                           ),
                         ),
                       ),
@@ -857,30 +1181,56 @@ class _EventCalendarScreenState extends State<EventCalendarScreen>
 
   static const _economicTypes = {'economic', 'fomc', 'fed_speech'};
 
-  Widget _buildEventTabSection(AppLocalizations l10n) {
+  /// 이벤트 영역을 슬리버 목록으로 구성한다.
+  /// - 컴팩트 헤더(선택일 + 개수)는 캘린더와 함께 스크롤되어 사라지고
+  /// - 세그먼트 탭바는 [SliverPersistentHeader]로 상단 고정되어 항상 전환 가능
+  List<Widget> _buildEventSlivers(AppLocalizations l10n, Color bg) {
     if (_isLoading) {
-      return const Padding(
-        padding: EdgeInsets.all(AppSpacing.xxxl),
-        child: Center(child: CircularProgressIndicator()),
-      );
+      return const [
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: Padding(
+            padding: EdgeInsets.all(AppSpacing.xxxl),
+            child: Center(child: CircularProgressIndicator()),
+          ),
+        ),
+      ];
     }
 
     if (_error != null) {
-      return Padding(
-        padding: const EdgeInsets.all(AppSpacing.xxxl),
-        child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.error_outline, size: 40, color: context.mlColors.textTertiary),
-              const SizedBox(height: AppSpacing.md),
-              Text(_error!, style: TextStyle(color: context.mlColors.textSecondary, fontSize: AppTypography.bodyMedium)),
-              const SizedBox(height: AppSpacing.md),
-              TextButton(onPressed: _loadCalendar, child: const Text('Retry')),
-            ],
+      return [
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.xxxl),
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.error_outline,
+                    size: 40,
+                    color: context.mlColors.textTertiary,
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  Text(
+                    _error!,
+                    style: TextStyle(
+                      color: context.mlColors.textSecondary,
+                      fontSize: AppTypography.bodyMedium,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  TextButton(
+                    onPressed: _loadCalendar,
+                    child: const Text('Retry'),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
-      );
+      ];
     }
 
     // Collect events to display
@@ -890,10 +1240,15 @@ class _EventCalendarScreenState extends State<EventCalendarScreen>
     if (_selectedDate == null) {
       final totalCount = _calendarData?.totalCount ?? 0;
       if (totalCount == 0) {
-        return EmptyStateView(
-          icon: Icons.event_busy,
-          message: l10n.noEventsThisMonth,
-        );
+        return [
+          SliverFillRemaining(
+            hasScrollBody: false,
+            child: EmptyStateView(
+              icon: Icons.event_busy,
+              message: l10n.noEventsThisMonth,
+            ),
+          ),
+        ];
       }
       final sortedDates = _calendarData!.byDate.keys.toList()..sort();
       allEvents = sortedDates.expand((d) => _calendarData!.byDate[d]!).toList();
@@ -903,44 +1258,74 @@ class _EventCalendarScreenState extends State<EventCalendarScreen>
     }
 
     if (allEvents.isEmpty) {
-      return Padding(
-        padding: const EdgeInsets.all(AppSpacing.xxxl),
-        child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.event_available, size: 40, color: context.mlColors.textTertiary),
-              const SizedBox(height: AppSpacing.md),
-              Text(
-                l10n.noEventsSelectedDay,
-                style: TextStyle(color: context.mlColors.textSecondary, fontSize: AppTypography.bodyLarge),
+      return [
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.xxxl),
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.event_available,
+                    size: 40,
+                    color: context.mlColors.textTertiary,
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  Text(
+                    l10n.noEventsSelectedDay,
+                    style: TextStyle(
+                      color: context.mlColors.textSecondary,
+                      fontSize: AppTypography.bodyLarge,
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
-      );
+      ];
     }
 
     // Premium gating: split into free / locked events
     final isUnlocked = _isCalendarUnlocked();
-    final freeEvents = isUnlocked ? allEvents : allEvents.where((e) => !_isEventLocked(e)).toList();
-    final lockedEvents = isUnlocked ? <MarketCalendarEvent>[] : allEvents.where((e) => _isEventLocked(e)).toList();
+    final freeEvents = isUnlocked
+        ? allEvents
+        : allEvents.where((e) => !_isEventLocked(e)).toList();
+    final lockedEvents = isUnlocked
+        ? <MarketCalendarEvent>[]
+        : allEvents.where((e) => _isEventLocked(e)).toList();
 
     // Split each bucket into the two categories
-    final newsEvents = freeEvents.where((e) => !_economicTypes.contains(e.eventType)).toList();
-    final econEvents = freeEvents.where((e) => _economicTypes.contains(e.eventType)).toList();
-    final newsLocked = lockedEvents.where((e) => !_economicTypes.contains(e.eventType)).toList();
-    final econLocked = lockedEvents.where((e) => _economicTypes.contains(e.eventType)).toList();
+    final newsEvents = freeEvents
+        .where((e) => !_economicTypes.contains(e.eventType))
+        .toList();
+    final econEvents = freeEvents
+        .where((e) => _economicTypes.contains(e.eventType))
+        .toList();
+    final newsLocked = lockedEvents
+        .where((e) => !_economicTypes.contains(e.eventType))
+        .toList();
+    final econLocked = lockedEvents
+        .where((e) => _economicTypes.contains(e.eventType))
+        .toList();
 
     final mlc = context.mlColors;
+    final isNews = _eventTabController.index == 0;
+    final events = isNews ? newsEvents : econEvents;
+    final locked = isNews ? newsLocked : econLocked;
+    final bottomPad = MediaQuery.of(context).padding.bottom + 70.0;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Compact header: (selected date) + total count + unlock window
-        Padding(
+    final slivers = <Widget>[
+      // Compact header: (selected date) + total count + unlock window — 함께 스크롤
+      SliverToBoxAdapter(
+        child: Padding(
           padding: const EdgeInsets.fromLTRB(
-            AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.xs,
+            AppSpacing.lg,
+            0,
+            AppSpacing.lg,
+            AppSpacing.xs,
           ),
           child: Row(
             children: [
@@ -978,58 +1363,36 @@ class _EventCalendarScreenState extends State<EventCalendarScreen>
             ],
           ),
         ),
-        // Sub-tab bar: News·Announcements | Economic Indicators
-        _buildEventTabBar(
-          newsEvents.length + newsLocked.length,
-          econEvents.length + econLocked.length,
-          l10n,
-        ),
-        // Tab content fills remaining space, swipeable left/right
-        Expanded(
-          child: TabBarView(
-            controller: _eventTabController,
-            children: [
-              _buildEventTabList(newsEvents, newsLocked, l10n),
-              _buildEventTabList(econEvents, econLocked, l10n),
-            ],
+      ),
+      // Sub-tab bar: News·Announcements | Economic Indicators — 상단 고정
+      SliverPersistentHeader(
+        pinned: true,
+        delegate: _PinnedHeaderDelegate(
+          height: 46,
+          background: bg,
+          child: _buildEventTabBar(
+            newsEvents.length + newsLocked.length,
+            econEvents.length + econLocked.length,
+            l10n,
           ),
         ),
-      ],
-    );
-  }
-
-  Widget _buildEventTabBar(int newsCount, int econCount, AppLocalizations l10n) {
-    return MarketSegmentedTabs(
-      controller: _eventTabController,
-      tabs: [
-        '${l10n.calendarNewsAnnouncements} ($newsCount)',
-        '${l10n.calendarEconomicIndicators} ($econCount)',
-      ],
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.sm,
       ),
-    );
-  }
+    ];
 
-  /// Full-width scrollable list for one category (fills the space below).
-  Widget _buildEventTabList(
-    List<MarketCalendarEvent> events,
-    List<MarketCalendarEvent> lockedEvents,
-    AppLocalizations l10n,
-  ) {
-    final bottomPad = MediaQuery.of(context).padding.bottom + 70.0;
-
-    if (events.isEmpty && lockedEvents.isEmpty) {
-      return RefreshIndicator(
-        onRefresh: _loadCalendar,
-        child: ListView(
-          padding: EdgeInsets.only(bottom: bottomPad),
-          children: [
-            const SizedBox(height: AppSpacing.xxxl),
-            Center(
+    // 활성 카테고리 목록 (비었으면 안내, 있으면 목록 + 잠금섹션 + 배너)
+    if (events.isEmpty && locked.isEmpty) {
+      slivers.add(
+        SliverPadding(
+          padding: EdgeInsets.only(top: AppSpacing.xxxl, bottom: bottomPad),
+          sliver: SliverToBoxAdapter(
+            child: Center(
               child: Column(
                 children: [
-                  Icon(Icons.event_available, size: 36, color: context.mlColors.textTertiary),
+                  Icon(
+                    Icons.event_available,
+                    size: 36,
+                    color: context.mlColors.textTertiary,
+                  ),
                   const SizedBox(height: AppSpacing.sm),
                   Text(
                     l10n.noEventsSelectedDay,
@@ -1041,27 +1404,55 @@ class _EventCalendarScreenState extends State<EventCalendarScreen>
                 ],
               ),
             ),
-          ],
+          ),
+        ),
+      );
+    } else {
+      slivers.add(
+        SliverPadding(
+          padding: EdgeInsets.fromLTRB(
+            AppSpacing.lg,
+            0,
+            AppSpacing.lg,
+            bottomPad,
+          ),
+          sliver: SliverList(
+            delegate: SliverChildListDelegate([
+              ...events.map((e) => _buildFullEventItem(e, l10n)),
+              if (locked.isNotEmpty) ...[
+                const SizedBox(height: AppSpacing.md),
+                _buildLockedSectionTab(locked, l10n),
+              ],
+              // 배너를 스크롤 맨 끝으로
+              const Padding(
+                padding: EdgeInsets.only(top: AppSpacing.lg),
+                child: Center(child: BannerAdWidget()),
+              ),
+            ]),
+          ),
         ),
       );
     }
 
-    return RefreshIndicator(
-      onRefresh: _loadCalendar,
-      child: ListView(
-        padding: EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, bottomPad),
-        children: [
-          ...events.map((e) => _buildFullEventItem(e, l10n)),
-          if (lockedEvents.isNotEmpty) ...[
-            const SizedBox(height: AppSpacing.md),
-            _buildLockedSectionTab(lockedEvents, l10n),
-          ],
-          // 배너를 스크롤 맨 끝으로 이동(B). bottomPad가 탭바 클리어런스 제공.
-          const Padding(
-            padding: EdgeInsets.only(top: AppSpacing.lg),
-            child: Center(child: BannerAdWidget()),
-          ),
-        ],
+    return slivers;
+  }
+
+  Widget _buildEventTabBar(
+    int newsCount,
+    int econCount,
+    AppLocalizations l10n,
+  ) {
+    return MarketSegmentedTabs(
+      controller: _eventTabController,
+      tabs: [
+        '${l10n.calendarNewsAnnouncements} ($newsCount)',
+        '${l10n.calendarEconomicIndicators} ($econCount)',
+      ],
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        0,
+        AppSpacing.lg,
+        AppSpacing.sm,
       ),
     );
   }
@@ -1076,7 +1467,8 @@ class _EventCalendarScreenState extends State<EventCalendarScreen>
           borderRadius: BorderRadius.circular(AppRadius.sm),
           child: Padding(
             padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.xs, vertical: AppSpacing.md,
+              horizontal: AppSpacing.xs,
+              vertical: AppSpacing.md,
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1139,11 +1531,14 @@ class _EventCalendarScreenState extends State<EventCalendarScreen>
                             const SizedBox(width: AppSpacing.sm),
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                horizontal: AppSpacing.xs, vertical: 1,
+                                horizontal: AppSpacing.xs,
+                                vertical: 1,
                               ),
                               decoration: BoxDecoration(
                                 color: mlc.lossColor.withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(AppRadius.xs),
+                                borderRadius: BorderRadius.circular(
+                                  AppRadius.xs,
+                                ),
                               ),
                               child: Text(
                                 'HIGH',
@@ -1151,6 +1546,51 @@ class _EventCalendarScreenState extends State<EventCalendarScreen>
                                   fontSize: AppTypography.micro,
                                   color: mlc.lossColor,
                                   fontWeight: AppTypography.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                          // 지난 일정 결과 팔로업 — 한 번에 인앱 웹뷰로
+                          if (_hasResultLink(event)) ...[
+                            const SizedBox(width: AppSpacing.sm),
+                            GestureDetector(
+                              onTap: () => _openResultWebView(event),
+                              behavior: HitTestBehavior.opaque,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: AppSpacing.xs,
+                                  vertical: 1,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.primary.withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(
+                                    AppRadius.xs,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.insights,
+                                      size: 11,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.primary,
+                                    ),
+                                    const SizedBox(width: 2),
+                                    Text(
+                                      l10n.calendarViewResult,
+                                      style: TextStyle(
+                                        fontSize: AppTypography.micro,
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.primary,
+                                        fontWeight: AppTypography.semiBold,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),
@@ -1169,5 +1609,44 @@ class _EventCalendarScreenState extends State<EventCalendarScreen>
       ],
     );
   }
+}
 
+/// 고정 높이 핀(pinned) 헤더 델리게이트 — 스크롤해도 상단에 남는 영역.
+/// 뒤 콘텐츠가 비치지 않도록 [background]로 채운다.
+class _PinnedHeaderDelegate extends SliverPersistentHeaderDelegate {
+  _PinnedHeaderDelegate({
+    required this.height,
+    required this.child,
+    required this.background,
+  });
+
+  final double height;
+  final Widget child;
+  final Color background;
+
+  @override
+  double get minExtent => height;
+
+  @override
+  double get maxExtent => height;
+
+  @override
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
+    return Container(
+      height: height,
+      color: background,
+      alignment: Alignment.centerLeft,
+      child: child,
+    );
+  }
+
+  @override
+  bool shouldRebuild(covariant _PinnedHeaderDelegate old) =>
+      old.height != height ||
+      old.background != background ||
+      old.child != child;
 }

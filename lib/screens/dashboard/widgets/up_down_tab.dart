@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../models/treemap_data.dart';
+import '../../../models/ticker_score.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../theme/app_colors.dart';
 import '../../../theme/app_radius.dart';
@@ -8,6 +9,7 @@ import '../../../theme/app_typography.dart';
 import '../../../widgets/ads/banner_ad_widget.dart';
 import '../../../widgets/common/bento_card.dart';
 import '../../../widgets/common/ml_divider.dart';
+import 'top_stocks_section.dart';
 
 /// Up & Down tab widget for the Dashboard.
 ///
@@ -27,11 +29,19 @@ class UpDownTab extends StatelessWidget {
     required this.onIndexFilterChanged,
     required this.onTickerTap,
     required this.onViewMore,
+    this.topStocks = const [],
+    this.onTopStocksViewMore,
     this.isLoading = false,
   });
 
   /// Treemap data from which items are extracted and sorted.
   final TreemapData? treemapData;
+
+  /// Top stocks by market cap, rendered as the first section.
+  final List<TickerScore> topStocks;
+
+  /// Called when the user taps "View More" on the market-cap section.
+  final VoidCallback? onTopStocksViewMore;
 
   /// Currently selected index filter (null = All).
   final String? selectedIndex;
@@ -107,6 +117,18 @@ class UpDownTab extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Top by Market Cap (시가총액 상위) — 등락 페이지 맨 위
+          if (topStocks.isNotEmpty) ...[
+            BentoCard(
+              child: TopStocksSection(
+                topStocks: topStocks,
+                onTickerTap: onTickerTap,
+                onViewMore: onTopStocksViewMore ?? () {},
+              ),
+            ),
+            const SizedBox(height: AppSpacing.xs),
+          ],
+
           // Index filter chips
           _buildFilterChips(context, l10n),
           const SizedBox(height: AppSpacing.xs),

@@ -10,6 +10,10 @@ class MarketCalendarEvent {
   final String? ticker;
   final String importance;
 
+  /// 지난 일정의 결과/팔로업을 볼 수 있는 URL (서버 제공). 인앱 웹뷰로 오픈.
+  /// 서버가 아직 안 내려주면 null → '결과 보기' 미노출.
+  final String? resultUrl;
+
   const MarketCalendarEvent({
     required this.id,
     required this.date,
@@ -18,9 +22,11 @@ class MarketCalendarEvent {
     this.description,
     this.ticker,
     required this.importance,
+    this.resultUrl,
   });
 
   factory MarketCalendarEvent.fromJson(Map<String, dynamic> json) {
+    final rawResultUrl = (json['result_url'] ?? json['resultUrl']) as String?;
     return MarketCalendarEvent(
       id: json['id'] as String,
       date: json['date'] as String,
@@ -29,6 +35,9 @@ class MarketCalendarEvent {
       description: json['description'] as String?,
       ticker: json['ticker'] as String?,
       importance: json['importance'] as String? ?? 'medium',
+      resultUrl: (rawResultUrl != null && rawResultUrl.trim().isNotEmpty)
+          ? rawResultUrl.trim()
+          : null,
     );
   }
 

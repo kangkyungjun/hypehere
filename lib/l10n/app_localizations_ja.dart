@@ -317,6 +317,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get aiTabStocks => 'AI銘柄';
 
   @override
+  String get aiTabSector => 'AIセクター';
+
+  @override
   String get aiAnalysisComingSoonTitle => '対話型AI分析';
 
   @override
@@ -1628,6 +1631,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get calendarEconomicIndicators => '米国経済指標';
 
   @override
+  String get calendarViewResult => '結果を見る';
+
+  @override
   String get forgotPassword => 'パスワードを忘れた';
 
   @override
@@ -1854,6 +1860,30 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get aiChatEmptySubtitle => '銘柄やポートフォリオについてAIと話そう';
+
+  @override
+  String get aiChatSuggestionsTitle => 'こんな質問はどう？';
+
+  @override
+  String get aiChatShuffle => '他の質問';
+
+  @override
+  String get aiChatCopy => 'コピー';
+
+  @override
+  String get aiChatShare => '共有';
+
+  @override
+  String get aiChatCopied => 'コピーしました';
+
+  @override
+  String get aiChatShareQ => '質問';
+
+  @override
+  String get aiChatShareA => '回答';
+
+  @override
+  String get aiChatShareFooter => '— MarketLens AI';
 
   @override
   String get aiChatThinking => 'AIが考えています…';

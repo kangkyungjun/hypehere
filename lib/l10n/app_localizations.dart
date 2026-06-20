@@ -710,6 +710,12 @@ abstract class AppLocalizations {
   /// **'AI Stocks'**
   String get aiTabStocks;
 
+  /// No description provided for @aiTabSector.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Sector'**
+  String get aiTabSector;
+
   /// No description provided for @aiAnalysisComingSoonTitle.
   ///
   /// In en, this message translates to:
@@ -3188,6 +3194,12 @@ abstract class AppLocalizations {
   /// **'US Economic'**
   String get calendarEconomicIndicators;
 
+  /// No description provided for @calendarViewResult.
+  ///
+  /// In en, this message translates to:
+  /// **'View result'**
+  String get calendarViewResult;
+
   /// No description provided for @forgotPassword.
   ///
   /// In en, this message translates to:
@@ -3607,6 +3619,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Chat with AI about stocks and your portfolio'**
   String get aiChatEmptySubtitle;
+
+  /// No description provided for @aiChatSuggestionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Try asking'**
+  String get aiChatSuggestionsTitle;
+
+  /// No description provided for @aiChatShuffle.
+  ///
+  /// In en, this message translates to:
+  /// **'Shuffle'**
+  String get aiChatShuffle;
+
+  /// No description provided for @aiChatCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get aiChatCopy;
+
+  /// No description provided for @aiChatShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get aiChatShare;
+
+  /// No description provided for @aiChatCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied'**
+  String get aiChatCopied;
+
+  /// No description provided for @aiChatShareQ.
+  ///
+  /// In en, this message translates to:
+  /// **'Question'**
+  String get aiChatShareQ;
+
+  /// No description provided for @aiChatShareA.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer'**
+  String get aiChatShareA;
+
+  /// No description provided for @aiChatShareFooter.
+  ///
+  /// In en, this message translates to:
+  /// **'— MarketLens AI'**
+  String get aiChatShareFooter;
 
   /// No description provided for @aiChatThinking.
   ///

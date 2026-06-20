@@ -327,6 +327,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get aiTabStocks => 'Valores IA';
 
   @override
+  String get aiTabSector => 'Sector IA';
+
+  @override
   String get aiAnalysisComingSoonTitle => 'IA conversacional';
 
   @override
@@ -1670,6 +1673,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get calendarEconomicIndicators => 'Economía EE.UU.';
 
   @override
+  String get calendarViewResult => 'Ver resultado';
+
+  @override
   String get forgotPassword => 'Olvidé mi contraseña';
 
   @override
@@ -1904,6 +1910,30 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get aiChatEmptySubtitle =>
       'Habla con la IA sobre acciones y tu cartera';
+
+  @override
+  String get aiChatSuggestionsTitle => 'Prueba a preguntar';
+
+  @override
+  String get aiChatShuffle => 'Otras';
+
+  @override
+  String get aiChatCopy => 'Copiar';
+
+  @override
+  String get aiChatShare => 'Compartir';
+
+  @override
+  String get aiChatCopied => 'Copiado';
+
+  @override
+  String get aiChatShareQ => 'Pregunta';
+
+  @override
+  String get aiChatShareA => 'Respuesta';
+
+  @override
+  String get aiChatShareFooter => '— MarketLens AI';
 
   @override
   String get aiChatThinking => 'La IA está pensando…';

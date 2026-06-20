@@ -22,15 +22,16 @@ class MarketSegmentedTabs extends StatelessWidget {
     final colors = context.mlColors;
 
     return Container(
+      // 기본 외곽 여백을 타이트하게(기존 T8/B12 → T4/B4, 좌우 16→12)
       margin:
           padding ??
           const EdgeInsets.fromLTRB(
-            AppSpacing.xl,
-            AppSpacing.sm,
-            AppSpacing.xl,
             AppSpacing.md,
+            AppSpacing.xs,
+            AppSpacing.md,
+            AppSpacing.xs,
           ),
-      padding: const EdgeInsets.all(AppSpacing.xs),
+      padding: const EdgeInsets.all(AppSpacing.xxs),
       decoration: BoxDecoration(
         color: colors.infoBg.withValues(alpha: 0.72),
         borderRadius: BorderRadius.circular(AppRadius.full),
@@ -60,7 +61,7 @@ class MarketSegmentedTabs extends StatelessWidget {
         ),
         overlayColor: WidgetStateProperty.all(Colors.transparent),
         splashFactory: NoSplash.splashFactory,
-        tabs: tabs.map((tab) => Tab(height: 36, text: tab)).toList(),
+        tabs: tabs.map((tab) => Tab(height: 32, text: tab)).toList(),
       ),
     );
   }

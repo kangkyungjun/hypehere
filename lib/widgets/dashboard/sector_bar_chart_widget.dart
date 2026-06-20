@@ -18,6 +18,7 @@ class SectorBarChartWidget extends StatelessWidget {
     required this.sectors,
     required this.onTap,
     this.vix,
+    this.onVixTap,
     this.maxBars = 7,
   });
 
@@ -30,11 +31,16 @@ class SectorBarChartWidget extends StatelessWidget {
   /// 막대 탭 → 섹터별 시장현황 화면 이동
   final VoidCallback onTap;
 
+  /// VIX 줄 탭 → VIX 상세 화면 이동 (null이면 카드 탭으로 전파)
+  final VoidCallback? onVixTap;
+
   /// 표시할 최대 막대 개수
   final int maxBars;
 
   static const double _maxBarHeight = 40;
   static const double _labelHeight = 16;
+  // 섹터명 영역: 긴 이름이 잘리지 않도록 2줄(micro 10pt) 높이 확보
+  static const double _nameHeight = 28;
 
   @override
   Widget build(BuildContext context) {
@@ -73,7 +79,7 @@ class SectorBarChartWidget extends StatelessWidget {
         children: [
           // 막대 영역 (상단 라벨+막대 / 기준선 / 하단 막대+라벨 / 섹터명)
           SizedBox(
-            height: (_labelHeight + _maxBarHeight) * 2 + 18,
+            height: (_labelHeight + _maxBarHeight) * 2 + _nameHeight,
             child: Stack(
               children: [
                 // 0 기준선
@@ -93,6 +99,7 @@ class SectorBarChartWidget extends StatelessWidget {
                           maxAbs: maxAbs,
                           maxBarHeight: _maxBarHeight,
                           labelHeight: _labelHeight,
+                          nameHeight: _nameHeight,
                         ),
                       ),
                   ],
@@ -104,7 +111,19 @@ class SectorBarChartWidget extends StatelessWidget {
             const SizedBox(height: AppSpacing.sm),
             Divider(height: 1, color: mlc.subtleBorder),
             const SizedBox(height: AppSpacing.sm),
-            _buildVixLine(context, vix!),
+            // VIX 줄은 자체 탭(→ VIX 상세). 카드 onTap(섹터별 시장현황)으로 전파되지 않음.
+            onVixTap == null
+                ? _buildVixLine(context, vix!)
+                : InkWell(
+                    onTap: onVixTap,
+                    borderRadius: BorderRadius.circular(AppRadius.md),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: AppSpacing.xs,
+                      ),
+                      child: _buildVixLine(context, vix!),
+                    ),
+                  ),
           ],
         ],
       ),
@@ -185,12 +204,14 @@ class _SectorBar extends StatelessWidget {
     required this.maxAbs,
     required this.maxBarHeight,
     required this.labelHeight,
+    required this.nameHeight,
   });
 
   final TreemapSector sector;
   final double maxAbs;
   final double maxBarHeight;
   final double labelHeight;
+  final double nameHeight;
 
   @override
   Widget build(BuildContext context) {
@@ -244,16 +265,18 @@ class _SectorBar extends StatelessWidget {
                 )
               : const SizedBox.shrink(),
         ),
-        // 섹터명
+        // 섹터명 — 긴 이름은 잘리지 않고 2줄까지 표시
         SizedBox(
-          height: 18,
+          height: nameHeight,
           child: Text(
             sector.sector,
-            maxLines: 1,
+            maxLines: 2,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
+            softWrap: true,
             style: TextStyle(
               fontSize: AppTypography.micro,
+              height: 1.15,
               color: mlc.textSecondary,
             ),
           ),

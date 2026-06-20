@@ -37,6 +37,7 @@ import 'screens/news/news_combined_screen.dart';
 import 'screens/ai_lens/ai_lens_screen.dart';
 import 'screens/holdings/holdings_screen.dart';
 import 'services/notification_service.dart';
+import 'services/activity_service.dart';
 import 'screens/notifications/notification_inbox_screen.dart';
 import 'config/feature_flags.dart';
 import 'screens/ticker_detail/ticker_detail_screen.dart';
@@ -563,11 +564,15 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   void initState() {
     super.initState();
     _fetchUnreadCount();
+    // DAU/WAU: 앱 시작(포그라운드) 활동 핑 (로그인 상태에서만 전송)
+    ActivityService.instance.maybePing();
 
     // 앱 resume 시 뱃지 카운트 + 구독/권한 자동 동기화
     _lifecycleListener = AppLifecycleListener(
       onResume: () {
         _fetchUnreadCount();
+        // DAU/WAU: 포그라운드 복귀 활동 핑(~30분 throttle, 미로그인 스킵)
+        ActivityService.instance.maybePing();
         // 자동 구독/권한 동기화 (매니저 승급 등 즉시 반영)
         if (_authProvider?.isLoggedIn ?? false) {
           final sub = context.read<SubscriptionProvider>();

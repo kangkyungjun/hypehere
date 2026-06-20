@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import '../../services/analytics_api_client.dart';
 import '../../utils/error_localizer.dart';
 import '../../models/ticker_score.dart';
-import '../../models/stock_classification.dart';
 import '../../utils/score_mapper.dart';
 import '../../utils/app_page_route.dart';
 import '../ticker_detail/ticker_detail_screen.dart';
 import 'ai_lens_list_screen.dart';
+import 'ai_sector_screen.dart';
 import 'chat/ai_chat_screen.dart';
 import '../../providers/chat_nav_signals.dart';
 import '../../widgets/ads/banner_ad_widget.dart';
@@ -39,7 +39,7 @@ class _AILensScreenState extends State<AILensScreen>
     with SingleTickerProviderStateMixin {
   final AnalyticsApiClient _apiClient = AnalyticsApiClient();
 
-  // Internal top tabs: AI분석 | AI종목 (default = AI종목)
+  // Internal top tabs: AI분석 | AI종목 (default = AI분석/채팅)
   late final TabController _tabController;
 
   // AI Score distribution + per-segment signal buckets
@@ -49,24 +49,19 @@ class _AILensScreenState extends State<AILensScreen>
   // Index filter state
   String? _selectedIndex;
 
-  // Classification filter state
-  String? _selectedClassification;
-  List<Map<String, dynamic>> _classificationResults = [];
-  bool _isLoadingClassification = false;
-
   bool _isLoading = true;
   String? _error;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this, initialIndex: 1);
+    _tabController = TabController(length: 3, vsync: this, initialIndex: 0);
     _tabController.addListener(() {
       setState(() {});
       // 서브탭0=분석(채팅). main.dart가 채팅 페이지에서만 접이식 탭바를 쓰도록 신호.
       aiChatSubTabActive.value = _tabController.index == 0;
     });
-    // 초기값 반영(기본 initialIndex=1=종목 → false).
+    // 초기값 반영(기본 initialIndex=0=분석/채팅 → true).
     aiChatSubTabActive.value = _tabController.index == 0;
     _loadData();
   }
@@ -146,34 +141,6 @@ class _AILensScreenState extends State<AILensScreen>
     _loadData();
   }
 
-  Future<void> _onClassificationTap(String category) async {
-    if (_selectedClassification == category) {
-      setState(() {
-        _selectedClassification = null;
-        _classificationResults = [];
-      });
-      return;
-    }
-    setState(() {
-      _selectedClassification = category;
-      _isLoadingClassification = true;
-      _classificationResults = [];
-    });
-    try {
-      final results = await _apiClient.getStocksByClassification(category);
-      if (!mounted) return;
-      setState(() {
-        _classificationResults = results;
-        _isLoadingClassification = false;
-      });
-    } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _isLoadingClassification = false;
-      });
-    }
-  }
-
   void _onTickerTap(String ticker) {
     Navigator.push(
       context,
@@ -181,19 +148,9 @@ class _AILensScreenState extends State<AILensScreen>
     );
   }
 
-  /// Classification-filtered ticker set (null = no filter)
-  Set<String>? get _classificationTickers {
-    if (_selectedClassification == null) return null;
-    if (_classificationResults.isEmpty) return {};
-    return _classificationResults.map((r) => r['ticker'] as String).toSet();
-  }
-
-  /// Signals for one score segment, respecting the classification filter.
+  /// Signals for one score segment.
   List<TickerScore> _segmentItems(ScoreLevel level) {
-    final items = _segmentSignals[level] ?? const [];
-    final tickers = _classificationTickers;
-    if (tickers == null) return items;
-    return items.where((s) => tickers.contains(s.ticker)).toList();
+    return _segmentSignals[level] ?? const [];
   }
 
   @override
@@ -205,7 +162,14 @@ class _AILensScreenState extends State<AILensScreen>
         children: [
           MarketSegmentedTabs(
             controller: _tabController,
-            tabs: [l10n.aiTabAnalysis, l10n.aiTabStocks],
+            tabs: [l10n.aiTabAnalysis, l10n.aiTabStocks, l10n.aiTabSector],
+            // 탭 영역 위아래 여백을 절반 이하로(기본 T8/B12 → T4/B4) 공간 낭비 제거
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.md,
+              AppSpacing.xs,
+              AppSpacing.md,
+              AppSpacing.xs,
+            ),
           ),
           Expanded(
             child: TabBarView(
@@ -213,6 +177,7 @@ class _AILensScreenState extends State<AILensScreen>
               children: [
                 const AiChatScreen(),
                 RefreshIndicator(onRefresh: _loadData, child: _buildBody()),
+                const AiSectorScreen(),
               ],
             ),
           ),
@@ -241,20 +206,11 @@ class _AILensScreenState extends State<AILensScreen>
       key: const PageStorageKey('ai_lens_list'),
       padding: EdgeInsets.fromLTRB(
         AppSpacing.xl,
-        AppSpacing.md,
+        AppSpacing.xs,
         AppSpacing.xl,
         MediaQuery.of(context).viewPadding.bottom + 64,
       ),
       children: [
-        // Classification filter chips (최상단)
-        _buildClassificationFilterChips(),
-        if (_selectedClassification != null) ...[
-          const SizedBox(height: AppSpacing.md),
-          _buildClassificationResultsSection(),
-          const SizedBox(height: AppSpacing.md),
-        ] else
-          const SizedBox(height: AppSpacing.md),
-
         // AI Score Section (header + filter + distribution bar)
         BentoCard(child: _buildAIScoreSection()),
 
@@ -372,177 +328,6 @@ class _AILensScreenState extends State<AILensScreen>
           _buildEmptyState(l10n.aiNoStocksInSegment)
         else
           ...displayItems.map((ticker) => _buildCompactTickerItem(ticker)),
-      ],
-    );
-  }
-
-  // ─── Classification Filter (최상단) ────────────────────────────
-
-  Widget _buildClassificationFilterChips() {
-    final langCode = Localizations.localeOf(context).languageCode;
-    return SizedBox(
-      height: 36,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: StockClassification.allCategories.length,
-        separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.sm),
-        itemBuilder: (context, index) {
-          final cat = StockClassification.allCategories[index];
-          final code = cat['code']!;
-          final label = langCode == 'ko' ? cat['ko']! : cat['en']!;
-          final isSelected = _selectedClassification == code;
-          return FilterChip(
-            label: Text(label),
-            selected: isSelected,
-            onSelected: (_) => _onClassificationTap(code),
-            selectedColor: context.mlColors.infoBg.withValues(alpha: 0.72),
-            backgroundColor: Colors.transparent,
-            side: BorderSide(
-              color: isSelected
-                  ? context.mlColors.accentBlue.withValues(alpha: 0.28)
-                  : Colors.transparent,
-            ),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppRadius.badge),
-            ),
-            labelStyle: TextStyle(
-              fontSize: AppTypography.bodySmall,
-              fontWeight: AppTypography.semiBold,
-              color: isSelected
-                  ? context.mlColors.accentBlue
-                  : context.mlColors.textSecondary,
-            ),
-            materialTapTargetSize: MaterialTapTargetSize.padded,
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildClassificationResultsSection() {
-    if (_isLoadingClassification) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.all(AppSpacing.xl),
-          child: CircularProgressIndicator(),
-        ),
-      );
-    }
-    if (_classificationResults.isEmpty) {
-      return Padding(
-        padding: const EdgeInsets.all(AppSpacing.xl),
-        child: Center(
-          child: Text(
-            Localizations.localeOf(context).languageCode == 'ko'
-                ? '해당 분류 종목이 없습니다'
-                : 'No stocks in this category',
-            style: Theme.of(context).textTheme.bodyLarge,
-          ),
-        ),
-      );
-    }
-
-    final langCode = Localizations.localeOf(context).languageCode;
-    final displayItems = _classificationResults.take(20).toList();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          '${_selectedClassification ?? ''} (${_classificationResults.length})',
-          style: TextStyle(
-            fontSize: AppTypography.bodyLarge,
-            fontWeight: AppTypography.bold,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        ...displayItems.map((item) {
-          final ticker = item['ticker'] as String;
-          final name = item['name'] as String?;
-          final nameKo = item['name_ko'] as String?;
-          final score = item['score'] as num?;
-          final changePct = item['change_pct'] as num?;
-          final displayName = (langCode == 'ko' && nameKo != null)
-              ? nameKo
-              : (name ?? ticker);
-
-          return ListTile(
-            dense: true,
-            contentPadding: EdgeInsets.zero,
-            leading: CircleAvatar(
-              radius: 16,
-              backgroundColor: context.mlColors.infoBg,
-              child: Text(
-                ticker[0],
-                style: TextStyle(
-                  fontSize: 12,
-                  color: context.mlColors.accentBlue,
-                  fontWeight: AppTypography.bold,
-                ),
-              ),
-            ),
-            title: Text(
-              ticker,
-              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-            ),
-            subtitle: Text(
-              displayName,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 12),
-            ),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (score != null)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.tertiaryContainer,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      score.toStringAsFixed(0),
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.onTertiaryContainer,
-                      ),
-                    ),
-                  ),
-                if (changePct != null) ...[
-                  const SizedBox(width: 6),
-                  Text(
-                    '${changePct >= 0 ? '+' : ''}${changePct.toStringAsFixed(1)}%',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: changePct >= 0
-                          ? context.mlColors.gainColor
-                          : context.mlColors.lossColor,
-                    ),
-                  ),
-                ],
-              ],
-            ),
-            onTap: () => _onTickerTap(ticker),
-          );
-        }),
-        if (_classificationResults.length > 20)
-          Padding(
-            padding: const EdgeInsets.only(top: AppSpacing.sm),
-            child: Text(
-              '+${_classificationResults.length - 20} more',
-              style: TextStyle(
-                fontSize: AppTypography.bodySmall,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ),
       ],
     );
   }
@@ -859,7 +644,6 @@ class _AILensScreenState extends State<AILensScreen>
       ),
     );
   }
-
 
   Widget _buildCompactTickerItem(TickerScore ticker) {
     final l10n = AppLocalizations.of(context);

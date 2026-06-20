@@ -76,15 +76,23 @@ class MacroBannerWidget extends StatelessWidget {
     }
 
     final l10n = AppLocalizations.of(context);
+    final mlc = context.mlColors;
     final riskLabel = overall?.riskLabelLocalized(l10n) ?? '–';
-    final dotColor =
-        overall?.riskColor(context.mlColors) ?? context.mlColors.textTertiary;
+
+    // 탭 전체 배경을 거시경제 위험도 색으로 채우고,
+    // 배경 명도에 따라 대비되는 글씨색(흰/검정)을 자동 선택해 가독성 확보.
+    final bgColor = overall?.riskColor(mlc) ?? mlc.neutralColor;
+    final onColor =
+        ThemeData.estimateBrightnessForColor(bgColor) == Brightness.dark
+        ? Colors.white
+        : Colors.black87;
 
     return GestureDetector(
       onTap: onNavigateToIndexes,
       behavior: HitTestBehavior.opaque,
-      child: Padding(
-        // 상하 여백을 기존 대비 ~30%로 축소 (md → xs) — above-fold 2박스 확보
+      child: Container(
+        color: bgColor,
+        // 상하 여백은 타이트하게 유지 — above-fold 2박스 확보
         padding: const EdgeInsets.fromLTRB(
           AppSpacing.lg,
           AppSpacing.xs,
@@ -93,20 +101,12 @@ class MacroBannerWidget extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Container(
-              width: 12,
-              height: 12,
-              decoration: BoxDecoration(
-                color: dotColor,
-                shape: BoxShape.circle,
-              ),
-            ),
-            const SizedBox(width: AppSpacing.xxs),
+            // 방향 글리프(▲▲/▼ 등) — 색맹 사용자도 색에 의존하지 않게 상태 표시
             Text(
               _riskAccessibilityIcon(overall?.riskLevel),
               style: TextStyle(
                 fontSize: AppTypography.micro,
-                color: dotColor,
+                color: onColor,
                 fontWeight: AppTypography.bold,
               ),
             ),
@@ -117,16 +117,14 @@ class MacroBannerWidget extends StatelessWidget {
                   children: [
                     TextSpan(
                       text: '${l10n.macroOverall}: $riskLabel',
-                      style: AppTypography.bodyStrong.copyWith(
-                        color: context.mlColors.textSecondary,
-                      ),
+                      style: AppTypography.bodyStrong.copyWith(color: onColor),
                     ),
                     if (summary.isNotEmpty)
                       TextSpan(
                         text: ' ($summary)',
                         style: TextStyle(
                           fontSize: AppTypography.bodyMedium,
-                          color: context.mlColors.textTertiary,
+                          color: onColor.withValues(alpha: 0.82),
                         ),
                       ),
                   ],
@@ -138,7 +136,7 @@ class MacroBannerWidget extends StatelessWidget {
             Icon(
               Icons.chevron_right,
               size: 18,
-              color: Theme.of(context).colorScheme.outline,
+              color: onColor.withValues(alpha: 0.8),
             ),
           ],
         ),
