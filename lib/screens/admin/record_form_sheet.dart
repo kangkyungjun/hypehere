@@ -50,11 +50,31 @@ class _RecordFormSheetState extends State<RecordFormSheet> {
   DateTime _date = DateTime.now();
   bool _saving = false;
 
-  static const _catByKind = {
-    'finance': ['지출', '수익', '배당'],
-    'asset': ['비품', '소모품', '장비', 'SW', '기타'],
-    'plan': ['경영', '운영', '개발', '기타'],
-    'note': ['경영', '운영', '개발', '기타'],
+  // 재무 카테고리 — 수익 4 / 배당 1 / 지출 20.
+  //   '수익'/'지출'은 구버전 호환용(과거 데이터는 그대로 살아있고 편집도 가능).
+  //   분류는 그룹 헤더 없이 의미 순서로 나열. P&L 집계는 direction + category 기반.
+  static const _financeIncomeCats = ['광고', 'IAP', '기타수익', '수익'];
+  static const _financeDividendCats = ['배당'];
+  static const _financeExpenseCats = [
+    '서버비', 'SaaS구독', '급여', '외주', '광고비', '콘텐츠',
+    '교통비', '숙박', '식비(출장)', '일당',
+    '식비(일상)', '비품', '통신비',
+    '수수료', '이자',
+    '부가세', '법인세', '원천세',
+    '기타지출', '지출',
+  ];
+  static final _financeCats = [
+    ..._financeIncomeCats,
+    ..._financeDividendCats,
+    ..._financeExpenseCats,
+  ];
+  static final _financeIncomeSet = _financeIncomeCats.toSet();
+
+  static final _catByKind = <String, List<String>>{
+    'finance': _financeCats,
+    'asset': const ['비품', '소모품', '장비', 'SW', '기타'],
+    'plan': const ['경영', '운영', '개발', '기타'],
+    'note': const ['경영', '운영', '개발', '기타'],
   };
 
   static const _statusByKind = {
@@ -91,7 +111,9 @@ class _RecordFormSheetState extends State<RecordFormSheet> {
   }
 
   String? _direction() {
-    if (_kind == 'finance') return _category == '수익' ? 'in' : 'out';
+    if (_kind == 'finance') {
+      return _financeIncomeSet.contains(_category) ? 'in' : 'out';
+    }
     if (_kind == 'asset') return 'out';
     return null;
   }

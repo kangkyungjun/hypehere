@@ -190,6 +190,49 @@ class OpsMonthlyPoint {
   );
 }
 
+/// 카테고리별 합산 1건 (월별 P&L 세부).
+class CategoryAmount {
+  final String category;
+  final double amount;
+  final double share; // 0.0 ~ 1.0
+  const CategoryAmount({
+    required this.category,
+    required this.amount,
+    required this.share,
+  });
+  factory CategoryAmount.fromJson(Map<String, dynamic> j) => CategoryAmount(
+    category: j['category'] as String? ?? '기타',
+    amount: (j['amount'] as num?)?.toDouble() ?? 0,
+    share: (j['share'] as num?)?.toDouble() ?? 0,
+  );
+}
+
+/// 카테고리 집계 응답 (수익/지출 그룹).
+class CategoryBreakdown {
+  final String month; // YYYY-MM
+  final List<CategoryAmount> income;
+  final List<CategoryAmount> expense;
+  final double dividend;
+  const CategoryBreakdown({
+    required this.month,
+    required this.income,
+    required this.expense,
+    required this.dividend,
+  });
+  factory CategoryBreakdown.fromJson(Map<String, dynamic> j) => CategoryBreakdown(
+    month: j['month'] as String? ?? '',
+    income: ((j['income'] as List?) ?? const [])
+        .whereType<Map<String, dynamic>>()
+        .map(CategoryAmount.fromJson)
+        .toList(),
+    expense: ((j['expense'] as List?) ?? const [])
+        .whereType<Map<String, dynamic>>()
+        .map(CategoryAmount.fromJson)
+        .toList(),
+    dividend: (j['dividend'] as num?)?.toDouble() ?? 0,
+  );
+}
+
 /// 사용자 권한 분포 통계 (관리자 패널 상단 카드).
 class UserStats {
   final int total;

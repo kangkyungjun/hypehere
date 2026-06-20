@@ -154,6 +154,19 @@ class AdminApiClient {
     throw _err(res.statusCode);
   }
 
+  Future<CategoryBreakdown> getOpsCategoryBreakdown({String? month}) async {
+    final res = await _get(
+      '/api/v1/admin/ops/category-breakdown',
+      params: month != null ? {'month': month} : null,
+    );
+    if (res.statusCode == 200) {
+      return CategoryBreakdown.fromJson(
+        jsonDecode(res.body) as Map<String, dynamic>,
+      );
+    }
+    throw _err(res.statusCode);
+  }
+
   Future<List<OpsMonthlyPoint>> getOpsMonthly({int months = 12}) async {
     final res = await _get(
       '/api/v1/admin/ops/monthly',

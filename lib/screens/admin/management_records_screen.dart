@@ -33,6 +33,7 @@ class _ManagementRecordsScreenState extends State<ManagementRecordsScreen> {
   OpsSummary? _summary;
   List<OpsMonthlyPoint> _monthly = const [];
   List<ManagementRecord> _records = const [];
+  CategoryBreakdown? _breakdown;
 
   static const _kinds = <(String?, String)>[
     (null, '전체'),
@@ -62,11 +63,13 @@ class _ManagementRecordsScreenState extends State<ManagementRecordsScreen> {
     try {
       final summary = await _api.getOpsSummary();
       final monthly = await _api.getOpsMonthly(months: 6);
+      final breakdown = await _api.getOpsCategoryBreakdown();
       final records = await _api.getOpsRecords(kind: _kindFilter);
       if (!mounted) return;
       setState(() {
         _summary = summary;
         _monthly = monthly;
+        _breakdown = breakdown;
         _records = records;
         _loading = false;
       });
@@ -84,11 +87,13 @@ class _ManagementRecordsScreenState extends State<ManagementRecordsScreen> {
       final records = await _api.getOpsRecords(kind: _kindFilter);
       final summary = await _api.getOpsSummary();
       final monthly = await _api.getOpsMonthly(months: 6);
+      final breakdown = await _api.getOpsCategoryBreakdown();
       if (!mounted) return;
       setState(() {
         _records = records;
         _summary = summary;
         _monthly = monthly;
+        _breakdown = breakdown;
       });
     } catch (_) {}
   }
@@ -175,6 +180,12 @@ class _ManagementRecordsScreenState extends State<ManagementRecordsScreen> {
       children: [
         _summaryCard(context),
         const SizedBox(height: AppSpacing.md),
+        if (_breakdown != null &&
+            (_breakdown!.expense.isNotEmpty ||
+                _breakdown!.income.isNotEmpty)) ...[
+          _breakdownCard(context, _breakdown!),
+          const SizedBox(height: AppSpacing.md),
+        ],
         _monthlyCard(context),
         const SizedBox(height: AppSpacing.md),
         SingleChildScrollView(
@@ -260,6 +271,128 @@ class _ManagementRecordsScreenState extends State<ManagementRecordsScreen> {
             '배당 ${won(s?.dividend ?? 0)}',
             style: AppTypography.label.copyWith(color: mlc.textSecondary),
           ),
+        ],
+      ),
+    );
+  }
+
+  /// 월별 카테고리 분포 카드 — 지출 위주, 상위 N개 표시. 수익은 한 줄 요약.
+  Widget _breakdownCard(BuildContext context, CategoryBreakdown b) {
+    final mlc = context.mlColors;
+    final expenseTotal = b.expense.fold<double>(0, (a, e) => a + e.amount);
+    final incomeTotal = b.income.fold<double>(0, (a, e) => a + e.amount);
+    final maxAbs = b.expense
+        .map((e) => e.amount)
+        .fold<double>(1, (a, x) => x > a ? x : a);
+
+    Widget row(CategoryAmount e) {
+      final frac = (e.amount / maxAbs).clamp(0.0, 1.0);
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 2),
+        child: Row(
+          children: [
+            SizedBox(
+              width: 76,
+              child: Text(
+                e.category,
+                style: AppTypography.label.copyWith(color: mlc.textSecondary),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            Expanded(
+              child: Stack(
+                children: [
+                  Container(
+                    height: 12,
+                    decoration: BoxDecoration(
+                      color: mlc.overlayDim,
+                      borderRadius: BorderRadius.circular(AppRadius.xs),
+                    ),
+                  ),
+                  FractionallySizedBox(
+                    widthFactor: frac,
+                    child: Container(
+                      height: 12,
+                      decoration: BoxDecoration(
+                        color: mlc.lossColor,
+                        borderRadius: BorderRadius.circular(AppRadius.xs),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            SizedBox(
+              width: 80,
+              child: Text(
+                won(e.amount),
+                textAlign: TextAlign.right,
+                style: AppTypography.label.copyWith(color: mlc.lossColor),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            SizedBox(
+              width: 38,
+              child: Text(
+                '${(e.share * 100).round()}%',
+                textAlign: TextAlign.right,
+                style: AppTypography.label.copyWith(color: mlc.textTertiary),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return BentoCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                '카테고리별 ${b.month}',
+                style:
+                    AppTypography.cardTitle.copyWith(color: mlc.textPrimary),
+              ),
+              const Spacer(),
+              if (incomeTotal > 0)
+                Text(
+                  '수익 ${won(incomeTotal)}',
+                  style: AppTypography.label.copyWith(color: mlc.gainColor),
+                ),
+            ],
+          ),
+          if (b.expense.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+              child: Text(
+                '이번 달 지출 기록 없음',
+                style: TextStyle(
+                  fontSize: AppTypography.bodySmall,
+                  color: mlc.textTertiary,
+                ),
+              ),
+            )
+          else ...[
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              '지출 ${won(expenseTotal)}',
+              style: AppTypography.label.copyWith(color: mlc.lossColor),
+            ),
+            const SizedBox(height: AppSpacing.xs),
+            ...b.expense.take(8).map(row),
+            if (b.expense.length > 8) ...[
+              const SizedBox(height: 2),
+              Text(
+                '외 ${b.expense.length - 8}건',
+                style: AppTypography.label.copyWith(color: mlc.textTertiary),
+              ),
+            ],
+          ],
         ],
       ),
     );
