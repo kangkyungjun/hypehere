@@ -15,6 +15,7 @@ import '../auth/signup_screen.dart';
 import '../profile/profile_screen.dart';
 import '../admin/admin_panel_screen.dart';
 import '../admin/active_users_dashboard_screen.dart';
+import '../admin/management_records_screen.dart';
 import '../community/community_feed_screen.dart';
 import 'blocked_users_screen.dart';
 import '../onboarding/investment_profile_onboarding_screen.dart';
@@ -303,6 +304,22 @@ class SettingsScreen extends StatelessWidget {
                               appPageRoute(
                                 builder: (_) =>
                                     const ActiveUsersDashboardScreen(),
+                              ),
+                            ),
+                          ),
+                        // Master 전용 — 경영·운영 관리(지출·수익·자산·계획)
+                        if (authProvider.isMaster)
+                          _buildSettingsTile(
+                            context,
+                            icon: Icons.account_balance_wallet_rounded,
+                            iconColor: context.mlColors.gainColor,
+                            title: '경영·운영 관리',
+                            subtitle: 'Master 전용 · 수익·지출·자산·계획 기록',
+                            onTap: () => Navigator.push(
+                              context,
+                              appPageRoute(
+                                builder: (_) =>
+                                    const ManagementRecordsScreen(),
                               ),
                             ),
                           ),
