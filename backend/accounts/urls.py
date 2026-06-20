@@ -18,6 +18,7 @@ from .views import (
     request_deletion_view,
     cancel_deletion_view,
     search_users_view,
+    users_stats_view,
     promote_to_gold_view,
     promote_to_manager_view,
     demote_to_regular_view,
@@ -60,6 +61,7 @@ urlpatterns = [
 
     # 권한 관리 (Manager/Master 전용)
     path('users/search/', search_users_view, name='user-search'),
+    path('users/stats/', users_stats_view, name='user-stats'),
     path('users/<int:pk>/promote-to-gold/', promote_to_gold_view, name='promote-to-gold'),
     path('users/<int:pk>/promote-to-manager/', promote_to_manager_view, name='promote-to-manager'),
     path('users/<int:pk>/demote-to-regular/', demote_to_regular_view, name='demote-to-regular'),

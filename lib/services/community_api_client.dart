@@ -421,15 +421,30 @@ class CommunityApiClient {
 
   /// 사용자 검색/목록 조회 (Manager/Master 전용, 페이지네이션)
   ///
-  // GET /api/accounts/users/search/?q=<query>&page=<page>
-  // q가 비어있으면 전체 사용자 목록 반환 (최신 가입순)
-  Future<({List<Map<String, dynamic>> items, int count, bool hasNext})> getUsers({String? query, int page = 1}) async {
+  // GET /api/accounts/users/search/?q=<query>&role=<role>&page=<page>&size=<size>
+  // q가 비어있으면 전체 사용자 목록 반환 (최신 가입순). role 미지정 시 전체.
+  Future<({List<Map<String, dynamic>> items, int count, bool hasNext})> getUsers({
+    String? query,
+    String? role,
+    int page = 1,
+    int size = 20,
+  }) async {
     final accountsBaseUrl =
         dotenv.env['AUTH_API_BASE_URL'] ?? 'http://43.201.45.60:8002/api/accounts';
-    var url = '$accountsBaseUrl/users/search/?page=$page';
+    final params = <String, String>{
+      'page': '$page',
+      'size': '$size',
+    };
     if (query != null && query.trim().isNotEmpty) {
-      url += '&q=${Uri.encodeComponent(query)}';
+      params['q'] = query.trim();
     }
+    if (role != null && role.isNotEmpty) {
+      params['role'] = role;
+    }
+    final qs = params.entries
+        .map((e) => '${e.key}=${Uri.encodeComponent(e.value)}')
+        .join('&');
+    final url = '$accountsBaseUrl/users/search/?$qs';
 
     final response = await _makeAuthenticatedRequest((headers) {
       return http.get(Uri.parse(url), headers: headers);
@@ -455,6 +470,29 @@ class CommunityApiClient {
       throw ApiException(ApiErrorCode.genericError,
           debugMessage: 'User search failed', statusCode: response.statusCode);
     }
+  }
+
+  /// 권한 분포 통계 (Manager+ 전용).
+  /// GET /api/accounts/users/stats/
+  /// 응답: { total, master, manager, gold, regular }
+  Future<Map<String, int>> getUserStats() async {
+    final accountsBaseUrl =
+        dotenv.env['AUTH_API_BASE_URL'] ?? 'http://43.201.45.60:8002/api/accounts';
+    final response = await _makeAuthenticatedRequest((headers) {
+      return http.get(Uri.parse('$accountsBaseUrl/users/stats/'), headers: headers);
+    });
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      return data.map((k, v) => MapEntry(k, (v as num).toInt()));
+    }
+    if (response.statusCode == 401) {
+      throw ApiException(ApiErrorCode.loginRequired, statusCode: 401);
+    }
+    if (response.statusCode == 403) {
+      throw ApiException(ApiErrorCode.managerRequired, statusCode: 403);
+    }
+    throw ApiException(ApiErrorCode.genericError,
+        debugMessage: 'User stats failed', statusCode: response.statusCode);
   }
 
   /// 사용자 검색 (하위 호환용 - 기존 searchUsers 래퍼)

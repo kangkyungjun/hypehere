@@ -9,9 +9,13 @@ import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 import '../../theme/app_typography.dart';
 import '../../widgets/common/bento_card.dart';
+import 'record_detail_screen.dart';
+import 'record_form_sheet.dart';
 
 /// 경영·운영 관리 — **Master 전용**.
-/// 월별 P&L(수익/지출/순익) + 카테고리·종류 필터 + 기록 CRUD + 자산 등록번호.
+/// 월별 P&L(수익/지출/순익) + 카테고리·종류 필터 + 기록 목록.
+/// 목록 항목 탭 → 상세 페이지(`RecordDetailScreen`)로 이동.
+/// `+` FAB → 추가 폼(`showRecordFormSheet`).
 class ManagementRecordsScreen extends StatefulWidget {
   const ManagementRecordsScreen({super.key});
 
@@ -89,6 +93,30 @@ class _ManagementRecordsScreenState extends State<ManagementRecordsScreen> {
     } catch (_) {}
   }
 
+  Future<void> _openAddForm() async {
+    final result = await showRecordFormSheet(context, api: _api);
+    if (!mounted) return;
+    if (result is ManagementRecord || result == false) {
+      _reloadRecords();
+    }
+  }
+
+  Future<void> _openDetail(ManagementRecord r) async {
+    final result = await Navigator.of(context).push<Object?>(
+      MaterialPageRoute(
+        builder: (_) => RecordDetailScreen(record: r),
+      ),
+    );
+    if (!mounted) return;
+    if (result == true || result == false) {
+      _reloadRecords();
+      if (result == false) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text('삭제되었습니다')));
+      }
+    }
+  }
+
   static String won(double v) {
     final neg = v < 0;
     final s = v.abs().round().toString();
@@ -111,7 +139,7 @@ class _ManagementRecordsScreenState extends State<ManagementRecordsScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('경영·운영 관리')),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _openForm(),
+        onPressed: _openAddForm,
         child: const Icon(Icons.add),
       ),
       body: RefreshIndicator(
@@ -119,18 +147,18 @@ class _ManagementRecordsScreenState extends State<ManagementRecordsScreen> {
         child: _loading
             ? const Center(child: CircularProgressIndicator())
             : _error != null
-            ? ListView(
-                children: [
-                  const SizedBox(height: 120),
-                  Center(
-                    child: Text(
-                      '불러오지 못했습니다\n$_error',
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ],
-              )
-            : _buildBody(context),
+                ? ListView(
+                    children: [
+                      const SizedBox(height: 120),
+                      Center(
+                        child: Text(
+                          '불러오지 못했습니다\n$_error',
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ],
+                  )
+                : _buildBody(context),
       ),
     );
   }
@@ -149,7 +177,6 @@ class _ManagementRecordsScreenState extends State<ManagementRecordsScreen> {
         const SizedBox(height: AppSpacing.md),
         _monthlyCard(context),
         const SizedBox(height: AppSpacing.md),
-        // 종류 필터
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Row(
@@ -191,23 +218,23 @@ class _ManagementRecordsScreenState extends State<ManagementRecordsScreen> {
     final mlc = context.mlColors;
     final s = _summary;
     Widget cell(String label, double v, Color c) => Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: AppTypography.label.copyWith(color: mlc.textTertiary),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: AppTypography.label.copyWith(color: mlc.textTertiary),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                won(v),
+                style: AppTypography.bodyStrong.copyWith(color: c),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
           ),
-          const SizedBox(height: 2),
-          Text(
-            won(v),
-            style: AppTypography.bodyStrong.copyWith(color: c),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
-      ),
-    );
+        );
     return BentoCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -326,7 +353,7 @@ class _ManagementRecordsScreenState extends State<ManagementRecordsScreen> {
       if (r.status != null) r.status!,
     ].join('  ·  ');
     return InkWell(
-      onTap: () => _openForm(record: r),
+      onTap: () => _openDetail(r),
       child: Container(
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.xs,
@@ -374,6 +401,8 @@ class _ManagementRecordsScreenState extends State<ManagementRecordsScreen> {
                   fontWeight: AppTypography.bold,
                 ),
               ),
+            const SizedBox(width: AppSpacing.xs),
+            Icon(Icons.chevron_right, size: 18, color: mlc.textTertiary),
           ],
         ),
       ),
@@ -400,336 +429,6 @@ class _ManagementRecordsScreenState extends State<ManagementRecordsScreen> {
           fontSize: AppTypography.micro,
           fontWeight: AppTypography.bold,
           color: color,
-        ),
-      ),
-    );
-  }
-
-  // ── 추가/수정 폼 (바텀시트) ──
-  void _openForm({ManagementRecord? record}) {
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
-      ),
-      builder: (_) => _RecordForm(
-        api: _api,
-        record: record,
-        onSaved: () {
-          Navigator.pop(context);
-          _reloadRecords();
-        },
-        onDeleted: () {
-          Navigator.pop(context);
-          _reloadRecords();
-        },
-      ),
-    );
-  }
-}
-
-/// 기록 추가/수정 폼. kind에 따라 필드가 바뀐다.
-class _RecordForm extends StatefulWidget {
-  const _RecordForm({
-    required this.api,
-    required this.onSaved,
-    required this.onDeleted,
-    this.record,
-  });
-  final AdminApiClient api;
-  final ManagementRecord? record;
-  final VoidCallback onSaved;
-  final VoidCallback onDeleted;
-
-  @override
-  State<_RecordForm> createState() => _RecordFormState();
-}
-
-class _RecordFormState extends State<_RecordForm> {
-  late String _kind;
-  late String _category;
-  late String _status; // '' = 미지정
-  String? _assetType;
-  final _title = TextEditingController();
-  final _amount = TextEditingController();
-  final _quantity = TextEditingController();
-  final _vendor = TextEditingController();
-  final _content = TextEditingController();
-  DateTime _date = DateTime.now();
-  bool _saving = false;
-
-  static const _catByKind = {
-    'finance': ['지출', '수익', '배당'],
-    'asset': ['비품', '소모품', '장비', 'SW', '기타'],
-    'plan': ['경영', '운영', '개발', '기타'],
-    'note': ['경영', '운영', '개발', '기타'],
-  };
-
-  // 종류별 상태(자산은 폐기·불용 처분 가능 — 등록 후 나중에 수정).
-  static const _statusByKind = {
-    'finance': {'': '미지정', '결제완료': '결제완료', '대기': '대기', '예정': '예정'},
-    'asset': {'': '미지정', '사용중': '사용중', '폐기': '폐기', '불용': '불용 처분'},
-    'plan': {'': '미지정', '계획': '계획', '진행중': '진행중', '완료': '완료'},
-    'note': {'': '미지정'},
-  };
-
-  @override
-  void initState() {
-    super.initState();
-    final r = widget.record;
-    _kind = r?.kind ?? 'finance';
-    _category = r?.category ?? _catByKind[_kind]!.first;
-    _status = r?.status ?? '';
-    _assetType = r?.assetType ?? (_kind == 'asset' ? 'fixed' : null);
-    _title.text = r?.title ?? '';
-    _amount.text = r?.amount != null ? r!.amount!.round().toString() : '';
-    _quantity.text = r?.quantity?.toString() ?? '';
-    _vendor.text = r?.vendor ?? '';
-    _content.text = r?.content ?? '';
-    if (r?.occurredOn != null) {
-      _date = DateTime.tryParse(r!.occurredOn!) ?? DateTime.now();
-    }
-  }
-
-  @override
-  void dispose() {
-    for (final c in [_title, _amount, _quantity, _vendor, _content]) {
-      c.dispose();
-    }
-    super.dispose();
-  }
-
-  String? _direction() {
-    if (_kind == 'finance') return _category == '수익' ? 'in' : 'out';
-    if (_kind == 'asset') return 'out';
-    return null;
-  }
-
-  Future<void> _save() async {
-    if (_title.text.trim().isEmpty) return;
-    setState(() => _saving = true);
-    final body = <String, dynamic>{
-      'kind': _kind,
-      'category': _category,
-      'title': _title.text.trim(),
-      'content': _content.text.trim().isEmpty ? null : _content.text.trim(),
-      'occurred_on':
-          '${_date.year}-${_date.month.toString().padLeft(2, '0')}-${_date.day.toString().padLeft(2, '0')}',
-      'direction': _direction(),
-      'currency': 'KRW',
-      'status': _status.isEmpty ? null : _status,
-    };
-    if (_kind == 'finance' || _kind == 'asset') {
-      final a = double.tryParse(_amount.text.replaceAll(',', ''));
-      if (a != null) body['amount'] = a;
-    }
-    if (_kind == 'asset') {
-      body['asset_type'] = _assetType;
-      final q = int.tryParse(_quantity.text);
-      if (q != null) body['quantity'] = q;
-      if (_vendor.text.trim().isNotEmpty) body['vendor'] = _vendor.text.trim();
-    }
-    try {
-      if (widget.record == null) {
-        await widget.api.createOpsRecord(body);
-      } else {
-        await widget.api.updateOpsRecord(widget.record!.id, body);
-      }
-      widget.onSaved();
-    } catch (_) {
-      if (mounted) setState(() => _saving = false);
-    }
-  }
-
-  Future<void> _delete() async {
-    setState(() => _saving = true);
-    try {
-      await widget.api.deleteOpsRecord(widget.record!.id);
-      widget.onDeleted();
-    } catch (_) {
-      if (mounted) setState(() => _saving = false);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final mlc = context.mlColors;
-    final isAsset = _kind == 'asset';
-    final isFinance = _kind == 'finance';
-    return Padding(
-      padding: EdgeInsets.only(
-        left: AppSpacing.xl,
-        right: AppSpacing.xl,
-        top: AppSpacing.xl,
-        bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.xl,
-      ),
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              widget.record == null ? '기록 추가' : '기록 수정',
-              style: AppTypography.sectionTitle.copyWith(
-                color: mlc.textPrimary,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            // 종류
-            _dropdown(
-              '종류',
-              _kind,
-              const {
-                'finance': '재무',
-                'asset': '자산',
-                'plan': '계획',
-                'note': '메모',
-              },
-              (v) => setState(() {
-                _kind = v;
-                _category = _catByKind[_kind]!.first;
-                _assetType = v == 'asset' ? 'fixed' : null;
-                _status = '';
-              }),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            // 카테고리
-            _dropdown('카테고리', _category, {
-              for (final c in _catByKind[_kind]!) c: c,
-            }, (v) => setState(() => _category = v)),
-            const SizedBox(height: AppSpacing.md),
-            _field(isAsset ? '품명' : '제목', _title),
-            if (isAsset) ...[
-              const SizedBox(height: AppSpacing.md),
-              _dropdown('유형', _assetType ?? 'fixed', const {
-                'fixed': '고정자산',
-                'consumable': '소모품',
-              }, (v) => setState(() => _assetType = v)),
-              const SizedBox(height: AppSpacing.md),
-              Row(
-                children: [
-                  Expanded(
-                    child: _field(
-                      '수량',
-                      _quantity,
-                      keyboard: TextInputType.number,
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.md),
-                  Expanded(child: _field('구매처', _vendor)),
-                ],
-              ),
-            ],
-            if (isFinance || isAsset) ...[
-              const SizedBox(height: AppSpacing.md),
-              _field(
-                isAsset ? '구매가(원)' : '금액(원)',
-                _amount,
-                keyboard: TextInputType.number,
-              ),
-            ],
-            if (_statusByKind[_kind]!.length > 1) ...[
-              const SizedBox(height: AppSpacing.md),
-              // 자산: 사용중/폐기/불용 처분 (등록번호 유지한 채 나중에 수정)
-              _dropdown(
-                '상태',
-                _status,
-                _statusByKind[_kind]!,
-                (v) => setState(() => _status = v),
-              ),
-            ],
-            const SizedBox(height: AppSpacing.md),
-            // 날짜
-            InkWell(
-              onTap: () async {
-                final d = await showDatePicker(
-                  context: context,
-                  initialDate: _date,
-                  firstDate: DateTime(2020),
-                  lastDate: DateTime(2100),
-                );
-                if (d != null) setState(() => _date = d);
-              },
-              child: InputDecorator(
-                decoration: const InputDecoration(
-                  labelText: '날짜',
-                  border: OutlineInputBorder(),
-                ),
-                child: Text(
-                  '${_date.year}-${_date.month.toString().padLeft(2, '0')}-${_date.day.toString().padLeft(2, '0')}',
-                ),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            _field('내용(선택)', _content, maxLines: 3),
-            if (isAsset && widget.record?.assetNo != null) ...[
-              const SizedBox(height: AppSpacing.sm),
-              Text(
-                '등록번호: ${widget.record!.assetNo}',
-                style: AppTypography.label.copyWith(color: mlc.accentBlue),
-              ),
-            ],
-            const SizedBox(height: AppSpacing.lg),
-            Row(
-              children: [
-                if (widget.record != null)
-                  TextButton.icon(
-                    onPressed: _saving ? null : _delete,
-                    icon: Icon(Icons.delete_outline, color: mlc.lossColor),
-                    label: Text('삭제', style: TextStyle(color: mlc.lossColor)),
-                  ),
-                const Spacer(),
-                FilledButton(
-                  onPressed: _saving ? null : _save,
-                  child: Text(_saving ? '저장 중…' : '저장'),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _field(
-    String label,
-    TextEditingController c, {
-    int maxLines = 1,
-    TextInputType? keyboard,
-  }) {
-    return TextField(
-      controller: c,
-      maxLines: maxLines,
-      keyboardType: keyboard,
-      decoration: InputDecoration(
-        labelText: label,
-        border: const OutlineInputBorder(),
-        isDense: true,
-      ),
-    );
-  }
-
-  Widget _dropdown(
-    String label,
-    String value,
-    Map<String, String> items,
-    ValueChanged<String> onChanged,
-  ) {
-    return InputDecorator(
-      decoration: InputDecoration(
-        labelText: label,
-        border: const OutlineInputBorder(),
-        isDense: true,
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: items.containsKey(value) ? value : items.keys.first,
-          isExpanded: true,
-          items: items.entries
-              .map((e) => DropdownMenuItem(value: e.key, child: Text(e.value)))
-              .toList(),
-          onChanged: (v) => v != null ? onChanged(v) : null,
         ),
       ),
     );

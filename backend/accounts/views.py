@@ -11,7 +11,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import get_user_model
 from django.db import transaction
-from django.db.models import Q, Max
+from django.db.models import Q, Max, Count
 from django.utils import timezone
 from django.utils.dateparse import parse_date
 
@@ -426,12 +426,26 @@ def cancel_deletion_view(request):
 # 권한 관리 API (Manager/Master 전용)
 # ========================================
 
+_USER_ROLES = ('master', 'manager', 'gold', 'regular')
+_USER_PAGE_SIZE_DEFAULT = 20
+_USER_PAGE_SIZE_MAX = 100
+
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def search_users_view(request):
     """
-    사용자 검색 (Manager+ 전용)
-    Flutter: GET /api/accounts/users/search/?q=<query>
+    사용자 목록/검색 (Manager+ 전용, 페이지네이션).
+
+    Query:
+        q      : 이메일/닉네임 부분일치 (선택)
+        role   : master|manager|gold|regular 단일 필터 (선택)
+        page   : 1-based (기본 1)
+        size   : 페이지 크기 (기본 20, 최대 100)
+
+    응답 (DRF 호환):
+        { count, next, previous, results: [...] }
+        next/previous 는 URL 또는 null (Flutter는 next != null 만 사용)
     """
     if request.user.role not in ('master', 'manager'):
         return Response(
@@ -440,14 +454,79 @@ def search_users_view(request):
         )
 
     query = request.query_params.get('q', '').strip()
-    if not query:
-        return Response([])
+    role_filter = (request.query_params.get('role') or '').strip().lower()
 
-    users = User.objects.filter(
-        Q(email__icontains=query) | Q(nickname__icontains=query)
-    )[:20]
+    try:
+        page = max(1, int(request.query_params.get('page', '1')))
+    except ValueError:
+        page = 1
+    try:
+        size = int(request.query_params.get('size', str(_USER_PAGE_SIZE_DEFAULT)))
+    except ValueError:
+        size = _USER_PAGE_SIZE_DEFAULT
+    size = max(1, min(size, _USER_PAGE_SIZE_MAX))
 
-    return Response(UserSerializer(users, many=True).data)
+    qs = User.objects.all()
+    if query:
+        qs = qs.filter(Q(email__icontains=query) | Q(nickname__icontains=query))
+    if role_filter in _USER_ROLES:
+        qs = qs.filter(role=role_filter)
+    qs = qs.order_by('-date_joined', '-id')
+
+    total = qs.count()
+    start = (page - 1) * size
+    end = start + size
+    items = list(qs[start:end])
+    has_next = end < total
+
+    def _page_url(p):
+        base = request.build_absolute_uri(request.path)
+        parts = [f'page={p}', f'size={size}']
+        if query:
+            parts.append(f'q={query}')
+        if role_filter in _USER_ROLES:
+            parts.append(f'role={role_filter}')
+        return f'{base}?{"&".join(parts)}'
+
+    return Response({
+        'count': total,
+        'page': page,
+        'size': size,
+        'next': _page_url(page + 1) if has_next else None,
+        'previous': _page_url(page - 1) if page > 1 else None,
+        'results': UserSerializer(items, many=True).data,
+    })
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def users_stats_view(request):
+    """
+    사용자 권한 분포 통계 (Manager+ 전용).
+    Flutter: GET /api/accounts/users/stats/
+
+    응답: { total, master, manager, gold, regular }
+    """
+    if request.user.role not in ('master', 'manager'):
+        return Response(
+            {'detail': '권한이 없습니다.'},
+            status=status.HTTP_403_FORBIDDEN,
+        )
+
+    counts = dict.fromkeys(_USER_ROLES, 0)
+    rows = (
+        User.objects.values('role')
+        .annotate(n=Count('id'))
+        .values_list('role', 'n')
+    )
+    for r, n in rows:
+        if r in counts:
+            counts[r] = n
+
+    return Response({
+        'total': sum(counts.values()),
+        **counts,
+    })
 
 
 @api_view(['PATCH'])

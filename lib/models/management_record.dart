@@ -15,6 +15,10 @@ class ManagementRecord {
   final String? assetType; // fixed | consumable
   final int? quantity;
   final String? vendor;
+  final List<DisposalEntry> disposalHistory; // 자산 처분/상태변경 누적
+  final List<SubTask> subTasks; // 계획 체크리스트
+  final String? createdAt;
+  final String? updatedAt;
 
   const ManagementRecord({
     required this.id,
@@ -31,6 +35,10 @@ class ManagementRecord {
     this.assetType,
     this.quantity,
     this.vendor,
+    this.disposalHistory = const [],
+    this.subTasks = const [],
+    this.createdAt,
+    this.updatedAt,
   });
 
   factory ManagementRecord.fromJson(Map<String, dynamic> j) => ManagementRecord(
@@ -48,6 +56,99 @@ class ManagementRecord {
     assetType: j['asset_type'] as String?,
     quantity: (j['quantity'] as num?)?.toInt(),
     vendor: j['vendor'] as String?,
+    disposalHistory: ((j['disposal_history'] as List?) ?? const [])
+        .whereType<Map<String, dynamic>>()
+        .map(DisposalEntry.fromJson)
+        .toList(),
+    subTasks: ((j['sub_tasks'] as List?) ?? const [])
+        .whereType<Map<String, dynamic>>()
+        .map(SubTask.fromJson)
+        .toList(),
+    createdAt: j['created_at'] as String?,
+    updatedAt: j['updated_at'] as String?,
+  );
+}
+
+/// 자산 처분/상태변경 이력 1건 (서버가 누적).
+class DisposalEntry {
+  final String kind; // disposed | unused | status_change
+  final String? date; // YYYY-MM-DD
+  final String? reason;
+  final String? fromStatus;
+  final String? toStatus;
+  final int? byUserId;
+  final String? byNickname;
+  final String? byRole;
+  final String? at; // ISO8601
+
+  const DisposalEntry({
+    required this.kind,
+    this.date,
+    this.reason,
+    this.fromStatus,
+    this.toStatus,
+    this.byUserId,
+    this.byNickname,
+    this.byRole,
+    this.at,
+  });
+
+  factory DisposalEntry.fromJson(Map<String, dynamic> j) => DisposalEntry(
+    kind: j['kind'] as String? ?? 'disposed',
+    date: j['date'] as String?,
+    reason: j['reason'] as String?,
+    fromStatus: j['from_status'] as String?,
+    toStatus: j['to_status'] as String?,
+    byUserId: (j['by_user_id'] as num?)?.toInt(),
+    byNickname: j['by_nickname'] as String?,
+    byRole: j['by_role'] as String?,
+    at: j['at'] as String?,
+  );
+}
+
+/// 계획 체크리스트 항목 (작성자·처리자 스냅샷 포함).
+class SubTask {
+  final int id;
+  final String title;
+  final bool done;
+  final String? assignee;
+  final int? createdById;
+  final String? createdByNickname;
+  final String? createdByRole;
+  final String? createdAt;
+  final int? doneById;
+  final String? doneByNickname;
+  final String? doneByRole;
+  final String? doneAt;
+
+  const SubTask({
+    required this.id,
+    required this.title,
+    required this.done,
+    this.assignee,
+    this.createdById,
+    this.createdByNickname,
+    this.createdByRole,
+    this.createdAt,
+    this.doneById,
+    this.doneByNickname,
+    this.doneByRole,
+    this.doneAt,
+  });
+
+  factory SubTask.fromJson(Map<String, dynamic> j) => SubTask(
+    id: (j['id'] as num?)?.toInt() ?? 0,
+    title: j['title'] as String? ?? '',
+    done: j['done'] == true,
+    assignee: j['assignee'] as String?,
+    createdById: (j['created_by_id'] as num?)?.toInt(),
+    createdByNickname: j['created_by_nickname'] as String?,
+    createdByRole: j['created_by_role'] as String?,
+    createdAt: j['created_at'] as String?,
+    doneById: (j['done_by_id'] as num?)?.toInt(),
+    doneByNickname: j['done_by_nickname'] as String?,
+    doneByRole: j['done_by_role'] as String?,
+    doneAt: j['done_at'] as String?,
   );
 }
 
@@ -86,5 +187,28 @@ class OpsMonthlyPoint {
     expense: (j['expense'] as num?)?.toDouble() ?? 0,
     dividend: (j['dividend'] as num?)?.toDouble() ?? 0,
     net: (j['net'] as num?)?.toDouble() ?? 0,
+  );
+}
+
+/// 사용자 권한 분포 통계 (관리자 패널 상단 카드).
+class UserStats {
+  final int total;
+  final int master;
+  final int manager;
+  final int gold;
+  final int regular;
+  const UserStats({
+    required this.total,
+    required this.master,
+    required this.manager,
+    required this.gold,
+    required this.regular,
+  });
+  factory UserStats.fromJson(Map<String, dynamic> j) => UserStats(
+    total: (j['total'] as num?)?.toInt() ?? 0,
+    master: (j['master'] as num?)?.toInt() ?? 0,
+    manager: (j['manager'] as num?)?.toInt() ?? 0,
+    gold: (j['gold'] as num?)?.toInt() ?? 0,
+    regular: (j['regular'] as num?)?.toInt() ?? 0,
   );
 }

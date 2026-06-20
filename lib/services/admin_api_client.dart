@@ -168,6 +168,99 @@ class AdminApiClient {
     throw _err(res.statusCode);
   }
 
+  // ── 자산 처분/상태변경 이력 추가 ──
+  Future<ManagementRecord> addAssetDisposal(
+    int recordId, {
+    String kind = 'disposed',
+    String? date, // YYYY-MM-DD, null이면 서버가 오늘로 채움
+    String? reason,
+    String? toStatus, // 폐기/불용/사용중 등 — 동시에 status 갱신
+  }) async {
+    final uri = Uri.parse(
+      '$_baseUrl/api/v1/admin/ops/records/$recordId/disposal',
+    );
+    final body = <String, dynamic>{
+      'kind': kind,
+      if (date != null) 'date': date,
+      if (reason != null) 'reason': reason,
+      if (toStatus != null) 'to_status': toStatus,
+    };
+    final res = await _httpClient
+        .post(uri, headers: await _jsonHeaders(), body: jsonEncode(body))
+        .timeout(const Duration(seconds: 10));
+    if (res.statusCode == 200) {
+      return ManagementRecord.fromJson(
+        jsonDecode(res.body) as Map<String, dynamic>,
+      );
+    }
+    throw _err(res.statusCode);
+  }
+
+  // ── 계획 체크리스트 ──
+  Future<ManagementRecord> addSubTask(
+    int recordId, {
+    required String title,
+    String? assignee,
+  }) async {
+    final uri = Uri.parse(
+      '$_baseUrl/api/v1/admin/ops/records/$recordId/subtasks',
+    );
+    final body = <String, dynamic>{
+      'title': title,
+      if (assignee != null && assignee.isNotEmpty) 'assignee': assignee,
+    };
+    final res = await _httpClient
+        .post(uri, headers: await _jsonHeaders(), body: jsonEncode(body))
+        .timeout(const Duration(seconds: 10));
+    if (res.statusCode == 200) {
+      return ManagementRecord.fromJson(
+        jsonDecode(res.body) as Map<String, dynamic>,
+      );
+    }
+    throw _err(res.statusCode);
+  }
+
+  Future<ManagementRecord> patchSubTask(
+    int recordId,
+    int subTaskId, {
+    String? title,
+    String? assignee,
+    bool? done,
+  }) async {
+    final uri = Uri.parse(
+      '$_baseUrl/api/v1/admin/ops/records/$recordId/subtasks/$subTaskId',
+    );
+    final body = <String, dynamic>{
+      if (title != null) 'title': title,
+      if (assignee != null) 'assignee': assignee,
+      if (done != null) 'done': done,
+    };
+    final res = await _httpClient
+        .patch(uri, headers: await _jsonHeaders(), body: jsonEncode(body))
+        .timeout(const Duration(seconds: 10));
+    if (res.statusCode == 200) {
+      return ManagementRecord.fromJson(
+        jsonDecode(res.body) as Map<String, dynamic>,
+      );
+    }
+    throw _err(res.statusCode);
+  }
+
+  Future<ManagementRecord> deleteSubTask(int recordId, int subTaskId) async {
+    final uri = Uri.parse(
+      '$_baseUrl/api/v1/admin/ops/records/$recordId/subtasks/$subTaskId',
+    );
+    final res = await _httpClient
+        .delete(uri, headers: await _headers())
+        .timeout(const Duration(seconds: 10));
+    if (res.statusCode == 200) {
+      return ManagementRecord.fromJson(
+        jsonDecode(res.body) as Map<String, dynamic>,
+      );
+    }
+    throw _err(res.statusCode);
+  }
+
   ApiException _err(int code) => (code == 401 || code == 403)
       ? ApiException(ApiErrorCode.loginRequired, statusCode: code)
       : ApiException(ApiErrorCode.serverError, statusCode: code);
