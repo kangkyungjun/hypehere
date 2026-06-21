@@ -10,11 +10,15 @@ class ChatMessage {
   final int? turnIndex;
   final DateTime? createdAt;
 
+  /// 맥미니가 LLM 실패/timeout 시 보내는 폴백 메시지 플래그. 앱은 폴링 종료 + 에러 스타일.
+  final bool isError;
+
   const ChatMessage({
     required this.role,
     required this.content,
     this.turnIndex,
     this.createdAt,
+    this.isError = false,
   });
 
   bool get isUser => role == 'user';
@@ -27,6 +31,7 @@ class ChatMessage {
         createdAt: json['created_at'] != null
             ? DateTime.tryParse(json['created_at'].toString())
             : null,
+        isError: json['is_error'] == true,
       );
 }
 

@@ -138,12 +138,13 @@ class _AiChatScreenState extends State<AiChatScreen> {
     await _submitText(text, chat, isAdFree);
   }
 
-  /// 입력창/추천칩 공통 전송 코어.
+  /// 입력창/추천칩 공통 전송 코어. [category]는 칩 탭에서만 전달.
   Future<void> _submitText(
     String text,
     ChatProvider chat,
-    bool isAdFree,
-  ) async {
+    bool isAdFree, {
+    String? category,
+  }) async {
     final trimmed = text.trim();
     if (trimmed.isEmpty || chat.isSending) return;
     if (!isAdFree && chat.quotaExhausted) {
@@ -155,11 +156,12 @@ class _AiChatScreenState extends State<AiChatScreen> {
     final lang = Localizations.localeOf(context).languageCode;
     if (!isAdFree) await chat.consumeQuota();
     _scrollToBottom();
-    await chat.sendMessage(trimmed, lang: lang);
+    await chat.sendMessage(trimmed, lang: lang, category: category);
     _scrollToBottom();
   }
 
   /// 추천 질문 탭 → 관심도 기록(맞춤 신호) 후 해당 질문 전송.
+  /// 칩의 카테고리를 함께 보내 맥미니가 컨텍스트 주입을 분기할 수 있게 한다.
   Future<void> _onSuggestionTap(
     ChatSuggestion s,
     ChatProvider chat,
@@ -169,7 +171,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
     final interest = await ChatPersonalization.recordTap(s);
     if (!mounted) return;
     setState(() => _interest = interest);
-    await _submitText(s.text(isKo), chat, isAdFree);
+    await _submitText(s.text(isKo), chat, isAdFree, category: s.category);
   }
 
   /// 보상형 광고 시청 → 무료 횟수 +5. 광고 못 불러와도 막지 않음(정책).

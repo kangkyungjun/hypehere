@@ -52,51 +52,56 @@ class ChatBubble extends StatelessWidget {
       );
     }
 
-    // AI 답변: 말풍선 없이 전체 폭 사용 + 복사/공유 액션
+    // AI 답변: 말풍선 없이 전체 폭 사용 + 복사/공유 액션.
+    // 단, isError(맥미니 폴백) 인 경우 에러 톤으로 표시하고 액션 숨김.
     final l10n = AppLocalizations.of(context);
+    final isErr = message.isError;
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(top: AppSpacing.xs, bottom: AppSpacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // AI 마커(아이콘만 — 다국어 부담 없음)
+          // AI 마커(아이콘만 — 다국어 부담 없음). 에러 시 경고 아이콘으로 교체.
           Padding(
             padding: const EdgeInsets.only(bottom: AppSpacing.xs),
             child: Icon(
-              Icons.auto_awesome_rounded,
+              isErr
+                  ? Icons.error_outline_rounded
+                  : Icons.auto_awesome_rounded,
               size: 16,
-              color: mlc.accentBlue,
+              color: isErr ? mlc.dangerColor : mlc.accentBlue,
             ),
           ),
           SelectableText(
             message.content,
             style: AppTypography.body.copyWith(
-              color: mlc.textPrimary,
+              color: isErr ? mlc.dangerColor : mlc.textPrimary,
               height: 1.55,
             ),
           ),
-          // 복사 / 공유 (질문+답변 묶음)
-          Padding(
-            padding: const EdgeInsets.only(top: AppSpacing.xs),
-            child: Row(
-              children: [
-                _actionButton(
-                  mlc,
-                  Icons.copy_rounded,
-                  l10n.aiChatCopy,
-                  () => _copy(context, l10n),
-                ),
-                const SizedBox(width: AppSpacing.md),
-                _actionButton(
-                  mlc,
-                  Icons.ios_share,
-                  l10n.aiChatShare,
-                  () => _share(context, l10n),
-                ),
-              ],
+          // 정상 답변일 때만 복사 / 공유 노출.
+          if (!isErr)
+            Padding(
+              padding: const EdgeInsets.only(top: AppSpacing.xs),
+              child: Row(
+                children: [
+                  _actionButton(
+                    mlc,
+                    Icons.copy_rounded,
+                    l10n.aiChatCopy,
+                    () => _copy(context, l10n),
+                  ),
+                  const SizedBox(width: AppSpacing.md),
+                  _actionButton(
+                    mlc,
+                    Icons.ios_share,
+                    l10n.aiChatShare,
+                    () => _share(context, l10n),
+                  ),
+                ],
+              ),
             ),
-          ),
         ],
       ),
     );

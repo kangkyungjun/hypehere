@@ -38,21 +38,25 @@ class ChatApiClient {
   }
 
   /// 사용자 메시지 전송 — 서버가 user턴 저장(정본) + CHAT 큐 적재.
+  /// [category] : 추천 칩에서 보낼 때만 지정(맥미니가 카테고리별 컨텍스트 주입에 사용).
   Future<void> sendMessage({
     required String conversationId,
     required String message,
     required String lang,
+    String? category,
   }) async {
     final headers = await _authHeaders();
     final uri = Uri.parse('$_baseUrl/api/v1/chat/messages');
+    final body = <String, dynamic>{
+      'conversation_id': conversationId,
+      'message': message,
+      'lang': lang,
+    };
+    if (category != null && category.isNotEmpty) {
+      body['category'] = category;
+    }
     final response = await _httpClient
-        .post(uri,
-            headers: headers,
-            body: jsonEncode({
-              'conversation_id': conversationId,
-              'message': message,
-              'lang': lang,
-            }))
+        .post(uri, headers: headers, body: jsonEncode(body))
         .timeout(const Duration(seconds: 10),
             onTimeout: () => throw TimeoutException('Chat send timeout'));
     // 200/201(동기 ack) 또는 202(큐 적재) 모두 수락

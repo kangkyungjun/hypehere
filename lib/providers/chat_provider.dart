@@ -80,7 +80,12 @@ class ChatProvider extends ChangeNotifier {
   }
 
   /// 메시지 전송 + 응답 폴링.
-  Future<void> sendMessage(String text, {String lang = 'en'}) async {
+  /// [category] : 추천 칩 탭에서 호출할 때 전달(맥미니 컨텍스트 주입용). 자유입력은 null.
+  Future<void> sendMessage(
+    String text, {
+    String lang = 'en',
+    String? category,
+  }) async {
     final trimmed = text.trim();
     if (trimmed.isEmpty || _isSending) return;
     _conversationId ??= _generateId();
@@ -95,7 +100,11 @@ class ChatProvider extends ChangeNotifier {
 
     try {
       await _api.sendMessage(
-          conversationId: convId, message: trimmed, lang: lang);
+        conversationId: convId,
+        message: trimmed,
+        lang: lang,
+        category: category,
+      );
 
       // 백오프 폴링 (~50s) — assistant 턴이 늘면 서버 이력으로 동기화
       const delays = [2, 3, 4, 5, 5, 5, 6, 6, 7, 7];
@@ -106,6 +115,15 @@ class ChatProvider extends ChangeNotifier {
         if (assistantCount > baselineAssistant) {
           _messages = server; // 서버가 정본
           _isSending = false;
+          // 마지막 assistant 턴이 에러 플래그면 사용자에게 안내(UI는 isError 메시지 자체로 표시).
+          final last = server.lastWhere(
+            (m) => m.isAssistant,
+            orElse: () =>
+                const ChatMessage(role: 'assistant', content: ''),
+          );
+          if (last.isError) {
+            _error = 'assistant_failed';
+          }
           notifyListeners();
           return;
         }
