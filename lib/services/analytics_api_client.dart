@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import '../exceptions/api_error_codes.dart';
 import '../exceptions/api_exception.dart';
 import '../models/chart_data.dart';
+import '../models/intraday_chart.dart';
 import '../models/ticker_score.dart';
 import '../models/ticker_info.dart';
 import '../models/market_insights.dart';
@@ -33,6 +34,51 @@ class AnalyticsApiClient {
     // Debug logging for APK troubleshooting
     debugPrint('[AnalyticsApiClient] 🌐 Base URL: $_baseUrl');
     debugPrint('[AnalyticsApiClient] 📁 dotenv loaded: ${dotenv.env['API_BASE_URL']}');
+  }
+
+  /// 시간봉(1h) intraday 차트 데이터.
+  /// [dateEt]가 지정되면 그 ET 일자의 봉만 반환(드릴다운). 미지정 시 최신 거래일.
+  /// 응답이 비어있어도 정상(아직 ingest 전이거나 신규 종목).
+  Future<IntradayChartData> getIntradayChartData(
+    String ticker, {
+    String interval = '1h',
+    String? dateEt, // 'YYYY-MM-DD'
+  }) async {
+    final base = '$_baseUrl/api/v1/charts/${ticker.toUpperCase()}/intraday';
+    final url = dateEt != null && dateEt.isNotEmpty ? '$base/$dateEt' : base;
+    final uri = Uri.parse(url).replace(queryParameters: {'interval': interval});
+    try {
+      final response = await _httpClient.get(uri).timeout(
+            const Duration(seconds: 10),
+            onTimeout: () =>
+                throw TimeoutException('Intraday chart timeout'),
+          );
+      if (response.statusCode == 200) {
+        return IntradayChartData.fromJson(
+          jsonDecode(response.body) as Map<String, dynamic>,
+        );
+      }
+      if (response.statusCode == 404) {
+        // 데이터 없음을 정상 빈 응답으로 처리
+        return IntradayChartData(
+          ticker: ticker.toUpperCase(),
+          interval: interval,
+          data: const [],
+        );
+      }
+      throw ApiException(
+        ApiErrorCode.genericError,
+        statusCode: response.statusCode,
+        debugMessage: 'Intraday chart failed',
+      );
+    } on TimeoutException {
+      throw ApiException(ApiErrorCode.timeout15s, debugMessage: 'Intraday');
+    } on SocketException {
+      throw ApiException(ApiErrorCode.networkFailed, debugMessage: 'Intraday');
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(ApiErrorCode.genericError, debugMessage: '$e');
+    }
   }
 
   /// Get complete chart data for a ticker

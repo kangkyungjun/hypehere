@@ -160,7 +160,8 @@ class TickerHeaderWidget extends StatelessWidget {
             ],
           ),
 
-          const SizedBox(height: AppSpacing.xxl),
+          // 섹터 칩과 가격 사이 간격 — xxl(과대) → md 로 타이트하게.
+          const SizedBox(height: AppSpacing.md),
 
           // 2행: 가격 + 바차트
           if (hasBarChart)
