@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +10,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:app_tracking_transparency/app_tracking_transparency.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'l10n/app_localizations.dart';
 import 'theme/app_colors.dart';
@@ -129,6 +131,22 @@ Future<void> _initializeRemoteServices(
   unawaited(subscriptionProvider.initialize());
 
   try {
+    // iOS 14.5+: ATT 동의 요청을 광고 SDK 초기화 전에 처리하면 IDFA를 받을 수 있어
+    // 보상형/전면 광고 fill rate가 크게 개선된다(미동의 시 NO_FILL 다발).
+    if (!kIsWeb && Platform.isIOS) {
+      try {
+        var status =
+            await AppTrackingTransparency.trackingAuthorizationStatus;
+        if (status == TrackingStatus.notDetermined) {
+          status =
+              await AppTrackingTransparency.requestTrackingAuthorization();
+        }
+        debugPrint('[ATT] tracking status: $status');
+      } catch (e) {
+        debugPrint('[ATT] request failed: $e');
+      }
+    }
+
     await MobileAds.instance.initialize().timeout(const Duration(seconds: 10));
     if (kDebugMode) {
       MobileAds.instance.updateRequestConfiguration(

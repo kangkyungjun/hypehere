@@ -11,6 +11,7 @@ import '../../theme/app_typography.dart';
 import '../../widgets/common/bento_card.dart';
 import 'record_detail_screen.dart';
 import 'record_form_sheet.dart';
+import 'trend_modal.dart';
 
 /// 경영·운영 관리 — **Master 전용**.
 /// 월별 P&L(수익/지출/순익) + 카테고리·종류 필터 + 기록 목록.
@@ -30,8 +31,10 @@ class _ManagementRecordsScreenState extends State<ManagementRecordsScreen> {
   bool _loading = true;
   String? _error;
   String? _kindFilter; // null=전체
+  late String _selectedMonth; // YYYY-MM
   OpsSummary? _summary;
-  List<OpsMonthlyPoint> _monthly = const [];
+  OpsSummary? _prevSummary; // 전월 대비용
+  List<OpsMonthlyPoint> _monthly = const []; // 선택 연도 12개월
   List<ManagementRecord> _records = const [];
   CategoryBreakdown? _breakdown;
 
@@ -43,9 +46,32 @@ class _ManagementRecordsScreenState extends State<ManagementRecordsScreen> {
     ('note', '메모'),
   ];
 
+  static String _ymOf(DateTime d) =>
+      '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}';
+
+  static String _prevMonth(String ym) {
+    final p = ym.split('-');
+    int y = int.parse(p[0]);
+    int m = int.parse(p[1]) - 1;
+    if (m == 0) {
+      y -= 1;
+      m = 12;
+    }
+    return '${y.toString().padLeft(4, '0')}-${m.toString().padLeft(2, '0')}';
+  }
+
+  static int _yearOf(String ym) => int.parse(ym.split('-')[0]);
+
+  static List<String> _monthsOfYear(int year) => List.generate(
+        12,
+        (i) =>
+            '${year.toString().padLeft(4, '0')}-${(i + 1).toString().padLeft(2, '0')}',
+      );
+
   @override
   void initState() {
     super.initState();
+    _selectedMonth = _ymOf(DateTime.now());
     _load();
   }
 
@@ -55,19 +81,49 @@ class _ManagementRecordsScreenState extends State<ManagementRecordsScreen> {
     super.dispose();
   }
 
+  /// 선택 연도 전체 12개월 시계열을 채워서 반환(서버는 과거→현재까지만 반환하므로 미래 월은 0으로 채움).
+  Future<List<OpsMonthlyPoint>> _fetchMonthsOfYear(int year) async {
+    final now = DateTime.now();
+    final monthsBack = (now.year - year) * 12 + now.month;
+    if (monthsBack <= 0) {
+      // 미래 연도 — 빈 12개월
+      return _monthsOfYear(year)
+          .map(
+            (ym) => OpsMonthlyPoint(
+              month: ym, income: 0, expense: 0, dividend: 0, net: 0,
+            ),
+          )
+          .toList();
+    }
+    final all = await _api.getOpsMonthly(months: monthsBack);
+    final byMonth = {for (final m in all) m.month: m};
+    return _monthsOfYear(year)
+        .map(
+          (ym) =>
+              byMonth[ym] ??
+              OpsMonthlyPoint(
+                month: ym, income: 0, expense: 0, dividend: 0, net: 0,
+              ),
+        )
+        .toList();
+  }
+
   Future<void> _load() async {
     setState(() {
       _loading = true;
       _error = null;
     });
     try {
-      final summary = await _api.getOpsSummary();
-      final monthly = await _api.getOpsMonthly(months: 6);
-      final breakdown = await _api.getOpsCategoryBreakdown();
+      final ym = _selectedMonth;
+      final summary = await _api.getOpsSummary(month: ym);
+      final prevSummary = await _api.getOpsSummary(month: _prevMonth(ym));
+      final monthly = await _fetchMonthsOfYear(_yearOf(ym));
+      final breakdown = await _api.getOpsCategoryBreakdown(month: ym);
       final records = await _api.getOpsRecords(kind: _kindFilter);
       if (!mounted) return;
       setState(() {
         _summary = summary;
+        _prevSummary = prevSummary;
         _monthly = monthly;
         _breakdown = breakdown;
         _records = records;
@@ -84,18 +140,37 @@ class _ManagementRecordsScreenState extends State<ManagementRecordsScreen> {
 
   Future<void> _reloadRecords() async {
     try {
+      final ym = _selectedMonth;
       final records = await _api.getOpsRecords(kind: _kindFilter);
-      final summary = await _api.getOpsSummary();
-      final monthly = await _api.getOpsMonthly(months: 6);
-      final breakdown = await _api.getOpsCategoryBreakdown();
+      final summary = await _api.getOpsSummary(month: ym);
+      final prevSummary = await _api.getOpsSummary(month: _prevMonth(ym));
+      final monthly = await _fetchMonthsOfYear(_yearOf(ym));
+      final breakdown = await _api.getOpsCategoryBreakdown(month: ym);
       if (!mounted) return;
       setState(() {
         _records = records;
         _summary = summary;
+        _prevSummary = prevSummary;
         _monthly = monthly;
         _breakdown = breakdown;
       });
     } catch (_) {}
+  }
+
+  Future<void> _onMonthSelected(String ym) async {
+    if (ym == _selectedMonth) return;
+    setState(() => _selectedMonth = ym);
+    await _reloadRecords();
+  }
+
+  Future<void> _openTrend() async {
+    final picked = await showTrendModal(
+      context,
+      api: _api,
+      selectedMonth: _selectedMonth,
+    );
+    if (!mounted || picked == null) return;
+    await _onMonthSelected(picked);
   }
 
   Future<void> _openAddForm() async {
@@ -142,7 +217,20 @@ class _ManagementRecordsScreenState extends State<ManagementRecordsScreen> {
       );
     }
     return Scaffold(
-      appBar: AppBar(title: const Text('경영·운영 관리')),
+      appBar: AppBar(
+        title: const Text('경영·운영 관리'),
+        actions: [
+          TextButton.icon(
+            onPressed: _openTrend,
+            icon: const Icon(Icons.show_chart, size: 18),
+            label: const Text('추이'),
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.onSurface,
+            ),
+          ),
+          const SizedBox(width: 4),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: _openAddForm,
         child: const Icon(Icons.add),
@@ -170,6 +258,11 @@ class _ManagementRecordsScreenState extends State<ManagementRecordsScreen> {
 
   Widget _buildBody(BuildContext context) {
     final mlc = context.mlColors;
+    // 선택 월 기록만 노출 (occurredOn 없는 메모/계획은 항상 노출)
+    final filteredRecords = _records.where((r) {
+      if (r.occurredOn == null || r.occurredOn!.isEmpty) return true;
+      return r.occurredOn!.startsWith(_selectedMonth);
+    }).toList();
     return ListView(
       padding: EdgeInsets.fromLTRB(
         AppSpacing.lg,
@@ -178,6 +271,8 @@ class _ManagementRecordsScreenState extends State<ManagementRecordsScreen> {
         MediaQuery.of(context).viewPadding.bottom + 88,
       ),
       children: [
+        _monthChipsRow(context),
+        const SizedBox(height: AppSpacing.sm),
         _summaryCard(context),
         const SizedBox(height: AppSpacing.md),
         if (_breakdown != null &&
@@ -209,19 +304,50 @@ class _ManagementRecordsScreenState extends State<ManagementRecordsScreen> {
           ),
         ),
         const SizedBox(height: AppSpacing.sm),
-        if (_records.isEmpty)
+        if (filteredRecords.isEmpty)
           Padding(
             padding: const EdgeInsets.all(AppSpacing.xxl),
             child: Center(
               child: Text(
-                '기록이 없습니다. + 로 추가하세요.',
+                '$_selectedMonth 기록 없음',
                 style: TextStyle(color: mlc.textTertiary),
               ),
             ),
           )
         else
-          ..._records.map(_recordTile),
+          ...filteredRecords.map(_recordTile),
       ],
+    );
+  }
+
+  Widget _monthChipsRow(BuildContext context) {
+    final mlc = context.mlColors;
+    final year = _yearOf(_selectedMonth);
+    final months = _monthsOfYear(year);
+    return SizedBox(
+      height: 36,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: months.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 6),
+        itemBuilder: (_, i) {
+          final ym = months[i];
+          final selected = ym == _selectedMonth;
+          final label = '${i + 1}월';
+          return ChoiceChip(
+            label: Text(label),
+            selected: selected,
+            showCheckmark: false,
+            labelStyle: AppTypography.label.copyWith(
+              color: selected ? mlc.textPrimary : mlc.textSecondary,
+              fontWeight: selected
+                  ? AppTypography.bold
+                  : AppTypography.regular,
+            ),
+            onSelected: (_) => _onMonthSelected(ym),
+          );
+        },
+      ),
     );
   }
 
@@ -246,6 +372,23 @@ class _ManagementRecordsScreenState extends State<ManagementRecordsScreen> {
             ],
           ),
         );
+    // 전월 대비 인디케이터 — 순익 차이 + 퍼센트
+    final curNet = s?.net ?? 0;
+    final prevNet = _prevSummary?.net ?? 0;
+    final delta = curNet - prevNet;
+    String? deltaLine;
+    Color deltaColor = mlc.textSecondary;
+    if (s != null && _prevSummary != null) {
+      final up = delta >= 0;
+      deltaColor = up ? mlc.gainColor : mlc.lossColor;
+      final pct = prevNet.abs() > 0
+          ? '${(delta / prevNet.abs() * 100).toStringAsFixed(1)}%'
+          : null;
+      final arrow = up ? '↑' : '↓';
+      final pctStr = pct != null ? ' (${up ? '+' : ''}$pct)' : '';
+      deltaLine =
+          '$arrow 전월 대비 ${up ? '+' : ''}${won(delta)}$pctStr';
+    }
     return BentoCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -271,6 +414,13 @@ class _ManagementRecordsScreenState extends State<ManagementRecordsScreen> {
             '배당 ${won(s?.dividend ?? 0)}',
             style: AppTypography.label.copyWith(color: mlc.textSecondary),
           ),
+          if (deltaLine != null) ...[
+            const SizedBox(height: 2),
+            Text(
+              deltaLine,
+              style: AppTypography.label.copyWith(color: deltaColor),
+            ),
+          ],
         ],
       ),
     );
@@ -404,68 +554,80 @@ class _ManagementRecordsScreenState extends State<ManagementRecordsScreen> {
     final maxAbs = _monthly
         .map((m) => m.net.abs())
         .fold<double>(1, (a, b) => b > a ? b : a);
+    final year = _yearOf(_selectedMonth);
     return BentoCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '월별 순익 (최근 6개월)',
+            '월별 순익 ($year년)',
             style: AppTypography.cardTitle.copyWith(color: mlc.textPrimary),
           ),
           const SizedBox(height: AppSpacing.sm),
           ..._monthly.map((m) {
             final pos = m.net >= 0;
             final frac = (m.net.abs() / maxAbs).clamp(0.0, 1.0);
-            return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 3),
-              child: Row(
-                children: [
-                  SizedBox(
-                    width: 52,
-                    child: Text(
-                      m.month.substring(2),
-                      style: AppTypography.label.copyWith(
-                        color: mlc.textSecondary,
+            final selected = m.month == _selectedMonth;
+            return InkWell(
+              onTap: () => _onMonthSelected(m.month),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 3),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 52,
+                      child: Text(
+                        m.month.substring(2),
+                        style: AppTypography.label.copyWith(
+                          color: selected ? mlc.textPrimary : mlc.textSecondary,
+                          fontWeight: selected
+                              ? AppTypography.bold
+                              : AppTypography.regular,
+                        ),
                       ),
                     ),
-                  ),
-                  Expanded(
-                    child: Stack(
-                      children: [
-                        Container(
-                          height: 14,
-                          decoration: BoxDecoration(
-                            color: mlc.overlayDim,
-                            borderRadius: BorderRadius.circular(AppRadius.xs),
-                          ),
-                        ),
-                        FractionallySizedBox(
-                          widthFactor: frac,
-                          child: Container(
+                    Expanded(
+                      child: Stack(
+                        children: [
+                          Container(
                             height: 14,
                             decoration: BoxDecoration(
-                              color: pos ? mlc.gainColor : mlc.lossColor,
+                              color: mlc.overlayDim,
                               borderRadius: BorderRadius.circular(AppRadius.xs),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  SizedBox(
-                    width: 92,
-                    child: Text(
-                      won(m.net),
-                      textAlign: TextAlign.right,
-                      style: AppTypography.label.copyWith(
-                        color: pos ? mlc.gainColor : mlc.lossColor,
+                          FractionallySizedBox(
+                            widthFactor: frac,
+                            child: Container(
+                              height: 14,
+                              decoration: BoxDecoration(
+                                color: pos ? mlc.gainColor : mlc.lossColor,
+                                borderRadius:
+                                    BorderRadius.circular(AppRadius.xs),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                ],
+                    const SizedBox(width: AppSpacing.sm),
+                    SizedBox(
+                      width: 92,
+                      child: Text(
+                        won(m.net),
+                        textAlign: TextAlign.right,
+                        style: AppTypography.label.copyWith(
+                          color: pos ? mlc.gainColor : mlc.lossColor,
+                          fontWeight: selected
+                              ? AppTypography.bold
+                              : AppTypography.regular,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             );
           }),

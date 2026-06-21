@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter/widgets.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/subscription_provider.dart';
+import 'ad_failure_reporter.dart';
 
 /// 전면 광고 매니저 (Interstitial Ad)
 ///
@@ -129,6 +130,7 @@ class InterstitialAdHelper {
         onAdFailedToLoad: (error) {
           debugPrint('[AdMob] 전면 광고 로드 실패: $error');
           _isAdLoaded = false;
+          AdFailureReporter.reportLoadAdError(error, adUnit: 'interstitial');
         },
       ),
     );

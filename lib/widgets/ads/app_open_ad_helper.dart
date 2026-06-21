@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'ad_failure_reporter.dart';
 
 /// App Open Ad manager shown once on app launch.
 ///
@@ -32,6 +33,14 @@ class AppOpenAdHelper {
       return;
     }
 
+    final interstitialId = Platform.isAndroid
+        ? (dotenv.env['ADMOB_INTERSTITIAL_AD_UNIT_ID_ANDROID'] ?? '')
+        : (dotenv.env['ADMOB_INTERSTITIAL_AD_UNIT_ID_IOS'] ?? '');
+    if (adUnitId == interstitialId) {
+      debugPrint('[AdMob] App Open Ad ID == Interstitial ID — skip load (AdMob 콘솔에서 App Open 형식 단위를 별도 생성하세요)');
+      return;
+    }
+
     _isLoading = true;
     AppOpenAd.load(
       adUnitId: adUnitId,
@@ -46,6 +55,7 @@ class AppOpenAdHelper {
           debugPrint('[AdMob] App Open Ad load failed: $error');
           _isAdLoaded = false;
           _isLoading = false;
+          AdFailureReporter.reportLoadAdError(error, adUnit: 'app_open');
         },
       ),
     );

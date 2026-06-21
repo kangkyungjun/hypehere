@@ -1277,8 +1277,15 @@ def report_ad_failure_view(request):
 
     data = request.data if isinstance(request.data, dict) else {}
     try:
+        raw_code = data.get('error_code', None)
+        try:
+            error_code = int(raw_code) if raw_code is not None else None
+        except (TypeError, ValueError):
+            error_code = None
         notify_ad_failure(
-            error_message=str(data.get('error', ''))[:500],
+            error_message=str(data.get('error_message') or data.get('error') or '')[:500],
+            error_code=error_code,
+            error_domain=str(data.get('error_domain', ''))[:100],
             platform=str(data.get('platform', ''))[:20],
             app_version=str(data.get('app_version', ''))[:30],
             ad_unit=str(data.get('ad_unit', ''))[:100],

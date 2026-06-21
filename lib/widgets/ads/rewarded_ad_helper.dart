@@ -50,7 +50,7 @@ class RewardedAdHelper {
           debugPrint('[AdMob] 보상형 광고 로드 실패: $error');
           _isAdLoaded = false;
           // 운영 알림: 광고 로드 실패를 백엔드에 보고(세션당 1회) → owner/매니저 통지 + owner 이메일
-          AdFailureReporter.report(error.toString(), adUnit: 'rewarded');
+          AdFailureReporter.reportLoadAdError(error, adUnit: 'rewarded');
         },
       ),
     );
