@@ -1904,7 +1904,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get aiChatNoHistory => '이전 대화가 없습니다';
 
   @override
-  String get aiChatFreeToday => '오늘 무료';
+  String get aiChatFreeRemaining => '남은 무료';
 
   @override
   String get recPortfolioOverview => '포트폴리오 개요';

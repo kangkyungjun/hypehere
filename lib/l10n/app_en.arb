@@ -875,7 +875,7 @@
   "aiChatNew": "New chat",
   "aiChatHistory": "Past chats",
   "aiChatNoHistory": "No past conversations",
-  "aiChatFreeToday": "Free today",
+  "aiChatFreeRemaining": "Free left",
   "recPortfolioOverview": "Portfolio Overview",
   "recTechnicalInsight": "Technical Analysis",
   "recMarketIntelligence": "Market Intelligence",

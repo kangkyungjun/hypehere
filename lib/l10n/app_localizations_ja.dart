@@ -1904,7 +1904,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get aiChatNoHistory => '過去の会話はありません';
 
   @override
-  String get aiChatFreeToday => '今日無料';
+  String get aiChatFreeRemaining => '残り無料';
 
   @override
   String get recPortfolioOverview => 'ポートフォリオ概要';

@@ -1932,7 +1932,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get aiChatNoHistory => 'No past conversations';
 
   @override
-  String get aiChatFreeToday => 'Free today';
+  String get aiChatFreeRemaining => 'Free left';
 
   @override
   String get recPortfolioOverview => 'Portfolio Overview';

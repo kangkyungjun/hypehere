@@ -30,19 +30,18 @@ class ChatProvider extends ChangeNotifier {
   List<Conversation> get conversations => List.unmodifiable(_conversations);
   bool get loadingConversations => _loadingConversations;
 
-  // ── 일일 무료 쿼터 (광고 게이트, B) ──
-  /// 하루 무료 메시지 한도. 초과 시 보상형 광고로 리필.
+  // ── 누적 무료 쿼터 (광고 게이트, B) ──
+  /// 무료 메시지 절대 한도(10). 자정 리셋 없음 — 누적 차감.
+  /// 광고 시청 시 사용 카운터를 +5만큼 되돌려 다시 무료처럼 동작(상한 10 유지).
+  /// 표시 형식은 항상 `{남은수}/10`.
   static const int freeLimit = 10;
+
+  /// 누적 사용한 메시지 수(광고 시청 시 감소). 항상 0..freeLimit 범위.
   int _quotaUsed = 0;
-  int _quotaBonus = 0; // 보상형 광고로 적립
-  String _quotaDate = '';
-  static const _kQuotaDate = 'chat_quota_date';
   static const _kQuotaUsed = 'chat_quota_used';
-  static const _kQuotaBonus = 'chat_quota_bonus';
 
   int get quotaUsed => _quotaUsed;
-  int get quotaRemaining =>
-      (freeLimit + _quotaBonus - _quotaUsed).clamp(0, 99999);
+  int get quotaRemaining => (freeLimit - _quotaUsed).clamp(0, freeLimit);
   bool get quotaExhausted => quotaRemaining <= 0;
 
   /// 새 대화 시작 (id 생성, 메시지 초기화).
@@ -143,48 +142,34 @@ class ChatProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// 쿼터 로드 (날짜가 바뀌면 자동 리셋).
+  /// 쿼터 로드. 누적 차감 방식 — 자정 리셋 없음.
+  /// 신규 설치(키 없음) → 0 → 무료 10/10으로 시작.
+  /// 기존 사용자 → 마지막 저장값에서 이어감(상한 10 적용).
   Future<void> loadQuota() async {
     final prefs = await SharedPreferences.getInstance();
-    final today = _today();
-    if ((prefs.getString(_kQuotaDate) ?? '') != today) {
-      _quotaDate = today;
-      _quotaUsed = 0;
-      _quotaBonus = 0;
-      await _persistQuota();
-    } else {
-      _quotaDate = today;
-      _quotaUsed = prefs.getInt(_kQuotaUsed) ?? 0;
-      _quotaBonus = prefs.getInt(_kQuotaBonus) ?? 0;
-    }
+    final used = prefs.getInt(_kQuotaUsed) ?? 0;
+    _quotaUsed = used.clamp(0, freeLimit);
     notifyListeners();
   }
 
   /// 무료 메시지 1개 소비.
   Future<void> consumeQuota() async {
-    _quotaUsed++;
+    _quotaUsed = (_quotaUsed + 1).clamp(0, freeLimit);
     notifyListeners();
     await _persistQuota();
   }
 
-  /// 보상형 광고 시청 보상으로 추가 횟수 적립.
+  /// 보상형 광고 시청 보상으로 사용 카운터 되돌림(절대 한도 10 유지).
+  /// 광고 1회 → 메시지 [n]개 충전(기본 +5). bonus 슬롯 없이 used를 감소시킴.
   Future<void> grantQuotaBonus([int n = 5]) async {
-    _quotaBonus += n;
+    _quotaUsed = (_quotaUsed - n).clamp(0, freeLimit);
     notifyListeners();
     await _persistQuota();
   }
 
   Future<void> _persistQuota() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_kQuotaDate, _quotaDate);
     await prefs.setInt(_kQuotaUsed, _quotaUsed);
-    await prefs.setInt(_kQuotaBonus, _quotaBonus);
-  }
-
-  String _today() {
-    final n = DateTime.now();
-    return '${n.year}-${n.month.toString().padLeft(2, '0')}-'
-        '${n.day.toString().padLeft(2, '0')}';
   }
 
   String _generateId() {

@@ -1955,7 +1955,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get aiChatNoHistory => 'Sin conversaciones previas';
 
   @override
-  String get aiChatFreeToday => 'Gratis hoy';
+  String get aiChatFreeRemaining => 'Restantes';
 
   @override
   String get recPortfolioOverview => 'Resumen del Portafolio';

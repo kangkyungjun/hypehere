@@ -1900,7 +1900,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get aiChatNoHistory => '暂无历史对话';
 
   @override
-  String get aiChatFreeToday => '今日免费';
+  String get aiChatFreeRemaining => '剩余免费';
 
   @override
   String get recPortfolioOverview => '投资组合概览';

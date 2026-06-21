@@ -3704,11 +3704,11 @@ abstract class AppLocalizations {
   /// **'No past conversations'**
   String get aiChatNoHistory;
 
-  /// No description provided for @aiChatFreeToday.
+  /// No description provided for @aiChatFreeRemaining.
   ///
   /// In en, this message translates to:
-  /// **'Free today'**
-  String get aiChatFreeToday;
+  /// **'Free left'**
+  String get aiChatFreeRemaining;
 
   /// No description provided for @recPortfolioOverview.
   ///

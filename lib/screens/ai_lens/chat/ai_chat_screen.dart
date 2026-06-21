@@ -285,7 +285,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
                 )
               else
                 Text(
-                  '${l10n.aiChatFreeToday} '
+                  '${l10n.aiChatFreeRemaining} '
                   '${chat.quotaRemaining}/${ChatProvider.freeLimit}',
                   style: AppTypography.label.copyWith(color: mlc.textTertiary),
                 ),
