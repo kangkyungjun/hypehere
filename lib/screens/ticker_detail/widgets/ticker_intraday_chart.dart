@@ -242,8 +242,9 @@ class _TickerIntradayChartState extends State<TickerIntradayChart> {
     for (final bar in bars) {
       final close = bar.close;
       if (close == null) continue;
-      final dt = bar.dateTime; // ET DateTime
-      final hourSlot = dt.hour + dt.minute / 60.0;
+      // ET 시·분을 직접 사용 — DateTime.parse → 로컬 TZ 환산 시
+      // hourSlot이 slot 범위(9.5~15.5)를 벗어나 plot 밖으로 그려짐.
+      final hourSlot = bar.etHour + bar.etMinute / 60.0;
       spots.add(FlSpot(hourSlot, close));
       if (close < minY) minY = close;
       if (close > maxY) maxY = close;
@@ -256,13 +257,36 @@ class _TickerIntradayChartState extends State<TickerIntradayChart> {
         ),
       );
     }
-    final pad = (maxY - minY).abs() * 0.1;
-    final yMin = (minY - pad).clamp(0.0, double.infinity);
+    // 상단 가격 라벨이 잘리지 않도록 위 패딩 여유.
+    final pad = (maxY - minY).abs() * 0.18;
+    final yMin = (minY - pad * 0.4).clamp(0.0, double.infinity);
     final yMax = maxY + pad;
 
     final firstClose = spots.first.y;
     final lastClose = spots.last.y;
     final lineColor = lastClose >= firstClose ? mlc.gainColor : mlc.lossColor;
+
+    final lineBars = <LineChartBarData>[
+      LineChartBarData(
+        spots: spots,
+        isCurved: false,
+        color: lineColor,
+        barWidth: AppStroke.medium,
+        dotData: FlDotData(
+          show: true,
+          getDotPainter: (spot, _, __, ___) => FlDotCirclePainter(
+            radius: 2.5,
+            color: lineColor,
+            strokeWidth: 0,
+          ),
+        ),
+        belowBarData: BarAreaData(
+          show: true,
+          color: lineColor.withValues(alpha: 0.12),
+        ),
+        showingIndicators: List<int>.generate(spots.length, (i) => i),
+      ),
+    ];
 
     return LineChart(
       LineChartData(
@@ -308,26 +332,45 @@ class _TickerIntradayChartState extends State<TickerIntradayChart> {
           ),
         ),
         borderData: FlBorderData(show: false),
-        lineBarsData: [
-          LineChartBarData(
-            spots: spots,
-            isCurved: false,
-            color: lineColor,
-            barWidth: AppStroke.medium,
-            dotData: FlDotData(
-              show: true,
-              getDotPainter: (spot, _, __, ___) => FlDotCirclePainter(
-                radius: 2.5,
-                color: lineColor,
-                strokeWidth: 0,
-              ),
-            ),
-            belowBarData: BarAreaData(
-              show: true,
-              color: lineColor.withValues(alpha: 0.12),
-            ),
+        lineTouchData: LineTouchData(
+          enabled: true,
+          handleBuiltInTouches: false,
+          touchTooltipData: LineTouchTooltipData(
+            tooltipBgColor: Colors.transparent,
+            tooltipPadding: EdgeInsets.zero,
+            tooltipMargin: 4,
+            fitInsideHorizontally: true,
+            fitInsideVertically: true,
+            getTooltipItems: (touched) => touched.map((s) => LineTooltipItem(
+                  '\$${s.y.toStringAsFixed(2)}',
+                  TextStyle(
+                    color: lineColor,
+                    fontSize: AppTypography.micro,
+                    fontWeight: AppTypography.bold,
+                  ),
+                )).toList(),
           ),
-        ],
+          getTouchedSpotIndicator: (barData, indicators) => indicators
+              .map((_) => TouchedSpotIndicatorData(
+                    const FlLine(color: Colors.transparent),
+                    FlDotData(
+                      show: true,
+                      getDotPainter: (spot, _, __, ___) => FlDotCirclePainter(
+                        radius: 2.5,
+                        color: lineColor,
+                        strokeWidth: 0,
+                      ),
+                    ),
+                  ))
+              .toList(),
+        ),
+        lineBarsData: lineBars,
+        showingTooltipIndicators: List<ShowingTooltipIndicators>.generate(
+          spots.length,
+          (i) => ShowingTooltipIndicators(
+            [LineBarSpot(lineBars[0], 0, spots[i])],
+          ),
+        ),
       ),
     );
   }
@@ -357,13 +400,37 @@ class _TickerIntradayChartState extends State<TickerIntradayChart> {
       if (y < minY) minY = y;
       if (y > maxY) maxY = y;
     }
-    final pad = (maxY - minY).abs() * 0.1;
-    final yMin = (minY - pad).clamp(0.0, double.infinity);
+    // 상단 가격 라벨이 잘리지 않도록 위 패딩 여유.
+    final pad = (maxY - minY).abs() * 0.18;
+    final yMin = (minY - pad * 0.4).clamp(0.0, double.infinity);
     final yMax = maxY + pad;
 
     final firstClose = spots.first.y;
     final lastClose = spots.last.y;
     final lineColor = lastClose >= firstClose ? mlc.gainColor : mlc.lossColor;
+
+    final lineBars = <LineChartBarData>[
+      LineChartBarData(
+        spots: spots,
+        isCurved: false,
+        color: lineColor,
+        barWidth: AppStroke.medium,
+        dotData: FlDotData(
+          show: true,
+          getDotPainter: (spot, _, __, ___) => FlDotCirclePainter(
+            radius: 4,
+            color: lineColor,
+            strokeWidth: 2,
+            strokeColor: mlc.onPrimary,
+          ),
+        ),
+        belowBarData: BarAreaData(
+          show: true,
+          color: lineColor.withValues(alpha: 0.12),
+        ),
+        showingIndicators: List<int>.generate(spots.length, (i) => i),
+      ),
+    ];
 
     return LineChart(
       LineChartData(
@@ -410,23 +477,36 @@ class _TickerIntradayChartState extends State<TickerIntradayChart> {
         borderData: FlBorderData(show: false),
         lineTouchData: LineTouchData(
           enabled: true,
+          handleBuiltInTouches: false,
           touchTooltipData: LineTouchTooltipData(
-            tooltipPadding: const EdgeInsets.symmetric(
-              horizontal: 8,
-              vertical: 4,
-            ),
-            getTooltipItems: (touched) => touched.map((s) {
-              final idx = s.x.round();
-              final d = recent[idx].date;
-              return LineTooltipItem(
-                '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}\n\$${s.y.toStringAsFixed(2)}',
-                TextStyle(
-                  color: mlc.onPrimary,
-                  fontSize: AppTypography.micro,
-                ),
-              );
-            }).toList(),
+            tooltipBgColor: Colors.transparent,
+            tooltipPadding: EdgeInsets.zero,
+            tooltipMargin: 4,
+            fitInsideHorizontally: true,
+            fitInsideVertically: true,
+            getTooltipItems: (touched) => touched.map((s) => LineTooltipItem(
+                  '\$${s.y.toStringAsFixed(2)}',
+                  TextStyle(
+                    color: lineColor,
+                    fontSize: AppTypography.micro,
+                    fontWeight: AppTypography.bold,
+                  ),
+                )).toList(),
           ),
+          getTouchedSpotIndicator: (barData, indicators) => indicators
+              .map((_) => TouchedSpotIndicatorData(
+                    const FlLine(color: Colors.transparent),
+                    FlDotData(
+                      show: true,
+                      getDotPainter: (spot, _, __, ___) => FlDotCirclePainter(
+                        radius: 4,
+                        color: lineColor,
+                        strokeWidth: 2,
+                        strokeColor: mlc.onPrimary,
+                      ),
+                    ),
+                  ))
+              .toList(),
           touchCallback: (event, response) {
             if (event is FlTapUpEvent &&
                 response != null &&
@@ -442,27 +522,13 @@ class _TickerIntradayChartState extends State<TickerIntradayChart> {
             }
           },
         ),
-        lineBarsData: [
-          LineChartBarData(
-            spots: spots,
-            isCurved: false,
-            color: lineColor,
-            barWidth: AppStroke.medium,
-            dotData: FlDotData(
-              show: true,
-              getDotPainter: (spot, _, __, ___) => FlDotCirclePainter(
-                radius: 4,
-                color: lineColor,
-                strokeWidth: 2,
-                strokeColor: mlc.onPrimary,
-              ),
-            ),
-            belowBarData: BarAreaData(
-              show: true,
-              color: lineColor.withValues(alpha: 0.12),
-            ),
+        lineBarsData: lineBars,
+        showingTooltipIndicators: List<ShowingTooltipIndicators>.generate(
+          spots.length,
+          (i) => ShowingTooltipIndicators(
+            [LineBarSpot(lineBars[0], 0, spots[i])],
           ),
-        ],
+        ),
       ),
     );
   }

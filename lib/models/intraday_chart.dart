@@ -21,7 +21,17 @@ class IntradayBar {
   });
 
   /// DateTime.parse는 ISO-8601 datetime/date 둘 다 처리.
+  /// 주의: TZ 오프셋이 박힌 ISO 문자열도 UTC 인스턴트로 정규화되어,
+  /// .hour/.minute는 단말 로컬 TZ 기준 환산값을 반환. ET 시·분을
+  /// 그대로 쓰려면 etHour/etMinute를 사용하라.
   DateTime get dateTime => DateTime.parse(date);
+
+  /// ET 시각의 hour (0..23). 서버가 ET 오프셋을 박아 보내므로
+  /// ISO 문자열 슬라이스가 TZ-안전. DST(-4/-5)와 무관.
+  int get etHour => int.parse(date.substring(11, 13));
+
+  /// ET 시각의 minute (0..59).
+  int get etMinute => int.parse(date.substring(14, 16));
 
   factory IntradayBar.fromJson(Map<String, dynamic> j) => IntradayBar(
         date: (j['date'] as String?) ?? '',
