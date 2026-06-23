@@ -215,6 +215,8 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
           if (!authProvider.isManagerOrAbove) {
             return _buildLocked(l10n);
           }
+          // 시스템 네비바(제스처바/홈인디케이터)에 페이저가 가리지 않도록.
+          final bottomInset = MediaQuery.of(context).padding.bottom;
           return Column(
             children: [
               Expanded(
@@ -224,11 +226,11 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                     await _loadUsers(page: 1);
                   },
                   child: ListView(
-                    padding: const EdgeInsets.fromLTRB(
+                    padding: EdgeInsets.fromLTRB(
                       AppSpacing.xl,
                       AppSpacing.xl,
                       AppSpacing.xl,
-                      AppSpacing.xl,
+                      AppSpacing.xl + bottomInset,
                     ),
                     children: [
                       _buildPermissionCard(authProvider, l10n),
@@ -554,49 +556,62 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
         ),
       );
 
-  /// 번호형 페이저: [‹]  1 [2] 3 4 5 … N  [›]   1–20 / 8,420
+  /// 번호형 페이저: 1–20 / 8,420   [‹]  1 [2] 3 4 5 … N  [›]
+  /// 한 줄 가로 배치 — 좁은 폭에선 페이저만 가로 스크롤.
   Widget _buildPager() {
     final mlc = context.mlColors;
     final start = (_currentPage - 1) * _pageSize + 1;
     final end = (_currentPage * _pageSize).clamp(0, _totalCount);
     final pages = _pageNumbers();
 
-    return Column(
+    final pagerChildren = <Widget>[
+      _pageButton(
+        icon: Icons.chevron_left,
+        enabled: _currentPage > 1,
+        onTap: () => _loadUsers(page: _currentPage - 1),
+      ),
+      for (final p in pages) ...[
+        const SizedBox(width: AppSpacing.xs),
+        if (p == null)
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+            child: Text('…'),
+          )
+        else
+          _pageButton(
+            label: '$p',
+            selected: p == _currentPage,
+            onTap: () => _loadUsers(page: p),
+          ),
+      ],
+      const SizedBox(width: AppSpacing.xs),
+      _pageButton(
+        icon: Icons.chevron_right,
+        enabled: _hasNext,
+        onTap: () => _loadUsers(page: _currentPage + 1),
+      ),
+    ];
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(
-          '$start – $end / ${_formatNumber(_totalCount)}',
+          '$start–$end / ${_formatNumber(_totalCount)}',
           style: TextStyle(
             fontSize: AppTypography.bodySmall,
             color: mlc.textSecondary,
           ),
         ),
-        const SizedBox(height: AppSpacing.xs),
-        Wrap(
-          spacing: AppSpacing.xs,
-          runSpacing: AppSpacing.xs,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: [
-            _pageButton(
-              icon: Icons.chevron_left,
-              enabled: _currentPage > 1,
-              onTap: () => _loadUsers(page: _currentPage - 1),
+        const SizedBox(width: AppSpacing.sm),
+        Expanded(
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            reverse: true,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: pagerChildren,
             ),
-            ...pages.map((p) => p == null
-                ? const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-                    child: Text('…'),
-                  )
-                : _pageButton(
-                    label: '$p',
-                    selected: p == _currentPage,
-                    onTap: () => _loadUsers(page: p),
-                  )),
-            _pageButton(
-              icon: Icons.chevron_right,
-              enabled: _hasNext,
-              onTap: () => _loadUsers(page: _currentPage + 1),
-            ),
-          ],
+          ),
         ),
       ],
     );
