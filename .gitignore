@@ -71,6 +71,8 @@ gen-lang-client-*.json
 *-service-account*.json
 firebase-*.json
 !firebase.json
+# GCP service account key pattern: <project-id>-<12hex>.json
+marketlens-*.json
 
 # Firebase config files containing API keys
 android/app/google-services.json
