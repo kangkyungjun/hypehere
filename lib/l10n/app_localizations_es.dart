@@ -1958,6 +1958,63 @@ class AppLocalizationsEs extends AppLocalizations {
   String get aiChatFreeRemaining => 'Restantes';
 
   @override
+  String get aiChatSelect => 'Seleccionar';
+
+  @override
+  String aiChatSelectedCount(int count) {
+    return '$count seleccionadas';
+  }
+
+  @override
+  String get aiChatHide => 'Ocultar';
+
+  @override
+  String get aiChatHideConfirm =>
+      '¿Ocultar las conversaciones seleccionadas en este teléfono? Se mantienen en el servidor.';
+
+  @override
+  String get aiChatStorageSettings => 'Almacenamiento del chat IA';
+
+  @override
+  String get aiChatStorageSettingsSubtitle =>
+      'Límite de conversaciones y uso del teléfono';
+
+  @override
+  String get aiChatStorageUsage => 'Uso actual';
+
+  @override
+  String get aiChatStorageLimit => 'Límite de historial';
+
+  @override
+  String get aiChatStorageBytes => 'Espacio usado';
+
+  @override
+  String get aiChatStorageNote =>
+      'Al alcanzar el límite, las conversaciones más antiguas se eliminan primero. El servidor las conserva todas, así que no se pierden datos de aprendizaje.';
+
+  @override
+  String get aiChatUnlimited => 'Sin límite';
+
+  @override
+  String aiChatNConversations(int count) {
+    return '$count chats';
+  }
+
+  @override
+  String get aiChatClearLocal => 'Borrar todos los chats del teléfono';
+
+  @override
+  String get aiChatClearLocalDesc =>
+      'Las conversaciones del servidor no se ven afectadas';
+
+  @override
+  String get aiChatClearLocalConfirm =>
+      '¿Borrar todo el caché de chats guardados en este teléfono?';
+
+  @override
+  String get aiChatLocalCleared => 'Caché de chats del teléfono borrado';
+
+  @override
   String get recPortfolioOverview => 'Resumen del Portafolio';
 
   @override

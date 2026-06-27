@@ -3710,6 +3710,102 @@ abstract class AppLocalizations {
   /// **'Free left'**
   String get aiChatFreeRemaining;
 
+  /// No description provided for @aiChatSelect.
+  ///
+  /// In en, this message translates to:
+  /// **'Select'**
+  String get aiChatSelect;
+
+  /// No description provided for @aiChatSelectedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected'**
+  String aiChatSelectedCount(int count);
+
+  /// No description provided for @aiChatHide.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide'**
+  String get aiChatHide;
+
+  /// No description provided for @aiChatHideConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide the selected conversations from this phone? They remain stored on the server.'**
+  String get aiChatHideConfirm;
+
+  /// No description provided for @aiChatStorageSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Chat Storage'**
+  String get aiChatStorageSettings;
+
+  /// No description provided for @aiChatStorageSettingsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'On-device history limit and usage'**
+  String get aiChatStorageSettingsSubtitle;
+
+  /// No description provided for @aiChatStorageUsage.
+  ///
+  /// In en, this message translates to:
+  /// **'Current usage'**
+  String get aiChatStorageUsage;
+
+  /// No description provided for @aiChatStorageLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'History limit'**
+  String get aiChatStorageLimit;
+
+  /// No description provided for @aiChatStorageBytes.
+  ///
+  /// In en, this message translates to:
+  /// **'Storage size'**
+  String get aiChatStorageBytes;
+
+  /// No description provided for @aiChatStorageNote.
+  ///
+  /// In en, this message translates to:
+  /// **'When the limit is reached, the oldest conversations are removed first. The server keeps all of them, so no learning data is lost.'**
+  String get aiChatStorageNote;
+
+  /// No description provided for @aiChatUnlimited.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited'**
+  String get aiChatUnlimited;
+
+  /// No description provided for @aiChatNConversations.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} chats'**
+  String aiChatNConversations(int count);
+
+  /// No description provided for @aiChatClearLocal.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all chats on this phone'**
+  String get aiChatClearLocal;
+
+  /// No description provided for @aiChatClearLocalDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Conversations on the server are not affected'**
+  String get aiChatClearLocalDesc;
+
+  /// No description provided for @aiChatClearLocalConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Erase all cached chats stored on this phone?'**
+  String get aiChatClearLocalConfirm;
+
+  /// No description provided for @aiChatLocalCleared.
+  ///
+  /// In en, this message translates to:
+  /// **'On-device chat cache cleared'**
+  String get aiChatLocalCleared;
+
   /// No description provided for @recPortfolioOverview.
   ///
   /// In en, this message translates to:

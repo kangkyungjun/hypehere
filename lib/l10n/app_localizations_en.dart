@@ -1935,6 +1935,63 @@ class AppLocalizationsEn extends AppLocalizations {
   String get aiChatFreeRemaining => 'Free left';
 
   @override
+  String get aiChatSelect => 'Select';
+
+  @override
+  String aiChatSelectedCount(int count) {
+    return '$count selected';
+  }
+
+  @override
+  String get aiChatHide => 'Hide';
+
+  @override
+  String get aiChatHideConfirm =>
+      'Hide the selected conversations from this phone? They remain stored on the server.';
+
+  @override
+  String get aiChatStorageSettings => 'AI Chat Storage';
+
+  @override
+  String get aiChatStorageSettingsSubtitle =>
+      'On-device history limit and usage';
+
+  @override
+  String get aiChatStorageUsage => 'Current usage';
+
+  @override
+  String get aiChatStorageLimit => 'History limit';
+
+  @override
+  String get aiChatStorageBytes => 'Storage size';
+
+  @override
+  String get aiChatStorageNote =>
+      'When the limit is reached, the oldest conversations are removed first. The server keeps all of them, so no learning data is lost.';
+
+  @override
+  String get aiChatUnlimited => 'Unlimited';
+
+  @override
+  String aiChatNConversations(int count) {
+    return '$count chats';
+  }
+
+  @override
+  String get aiChatClearLocal => 'Clear all chats on this phone';
+
+  @override
+  String get aiChatClearLocalDesc =>
+      'Conversations on the server are not affected';
+
+  @override
+  String get aiChatClearLocalConfirm =>
+      'Erase all cached chats stored on this phone?';
+
+  @override
+  String get aiChatLocalCleared => 'On-device chat cache cleared';
+
+  @override
   String get recPortfolioOverview => 'Portfolio Overview';
 
   @override

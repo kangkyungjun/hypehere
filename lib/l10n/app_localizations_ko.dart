@@ -1907,6 +1907,59 @@ class AppLocalizationsKo extends AppLocalizations {
   String get aiChatFreeRemaining => '남은 무료';
 
   @override
+  String get aiChatSelect => '선택';
+
+  @override
+  String aiChatSelectedCount(int count) {
+    return '$count개 선택됨';
+  }
+
+  @override
+  String get aiChatHide => '숨기기';
+
+  @override
+  String get aiChatHideConfirm => '선택한 대화를 이 폰에서 숨기시겠어요? 서버에는 그대로 보관됩니다.';
+
+  @override
+  String get aiChatStorageSettings => 'AI 채팅 저장 설정';
+
+  @override
+  String get aiChatStorageSettingsSubtitle => '대화 보관 한도 · 폰 저장량 관리';
+
+  @override
+  String get aiChatStorageUsage => '현재 사용량';
+
+  @override
+  String get aiChatStorageLimit => '보관 한도';
+
+  @override
+  String get aiChatStorageBytes => '저장 용량';
+
+  @override
+  String get aiChatStorageNote =>
+      '한도를 넘으면 가장 오래된 대화부터 자동 삭제됩니다. 서버에는 모두 보존되므로 학습 자료는 손실되지 않습니다.';
+
+  @override
+  String get aiChatUnlimited => '무제한';
+
+  @override
+  String aiChatNConversations(int count) {
+    return '$count건';
+  }
+
+  @override
+  String get aiChatClearLocal => '이 폰의 모든 대화 캐시 삭제';
+
+  @override
+  String get aiChatClearLocalDesc => '서버에 저장된 대화는 그대로 유지됩니다';
+
+  @override
+  String get aiChatClearLocalConfirm => '이 폰에 저장된 모든 대화 캐시를 지우시겠어요?';
+
+  @override
+  String get aiChatLocalCleared => '폰의 대화 캐시가 삭제되었습니다';
+
+  @override
   String get recPortfolioOverview => '포트폴리오 개요';
 
   @override

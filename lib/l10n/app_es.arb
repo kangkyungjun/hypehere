@@ -700,6 +700,32 @@
   "aiChatHistory": "Conversaciones",
   "aiChatNoHistory": "Sin conversaciones previas",
   "aiChatFreeRemaining": "Restantes",
+  "aiChatSelect": "Seleccionar",
+  "aiChatSelectedCount": "{count} seleccionadas",
+  "@aiChatSelectedCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "aiChatHide": "Ocultar",
+  "aiChatHideConfirm": "¿Ocultar las conversaciones seleccionadas en este teléfono? Se mantienen en el servidor.",
+  "aiChatStorageSettings": "Almacenamiento del chat IA",
+  "aiChatStorageSettingsSubtitle": "Límite de conversaciones y uso del teléfono",
+  "aiChatStorageUsage": "Uso actual",
+  "aiChatStorageLimit": "Límite de historial",
+  "aiChatStorageBytes": "Espacio usado",
+  "aiChatStorageNote": "Al alcanzar el límite, las conversaciones más antiguas se eliminan primero. El servidor las conserva todas, así que no se pierden datos de aprendizaje.",
+  "aiChatUnlimited": "Sin límite",
+  "aiChatNConversations": "{count} chats",
+  "@aiChatNConversations": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "aiChatClearLocal": "Borrar todos los chats del teléfono",
+  "aiChatClearLocalDesc": "Las conversaciones del servidor no se ven afectadas",
+  "aiChatClearLocalConfirm": "¿Borrar todo el caché de chats guardados en este teléfono?",
+  "aiChatLocalCleared": "Caché de chats del teléfono borrado",
   "recPortfolioOverview": "Resumen del Portafolio",
   "recTechnicalInsight": "Análisis Técnico",
   "recMarketIntelligence": "Inteligencia de Mercado",

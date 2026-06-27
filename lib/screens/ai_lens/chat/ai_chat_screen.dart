@@ -16,7 +16,9 @@ import '../../watchlist/widgets/login_required_banner.dart';
 import '../../../data/chat_suggestions.dart';
 import '../../../models/chat_message.dart';
 import '../../../services/chat_personalization.dart';
+import '../../../utils/app_page_route.dart';
 import 'chat_bubble.dart';
+import 'chat_history_screen.dart';
 
 /// AI 멀티턴 채팅 화면 (AI Lens 탭0).
 ///
@@ -32,27 +34,10 @@ class _AiChatScreenState extends State<AiChatScreen> {
   final _controller = TextEditingController();
   final _scrollController = ScrollController();
 
-  // ───────────────────────────────────────────────────────────────────────
-  // 대화 관리 UI(헤더의 "이전 대화"·"새 대화") 노출 플래그. 현재 OFF로 가려둠.
-  //
-  // [가린 이유 — 2026-06-14] 서버 대화 이력(analytics.chat_messages)에 AI 답변이
-  //   저장되지 않아, "이전 대화"를 열어도 사용자 질문만 보이고 답변은 비어 있음.
-  //   원인은 맥미니 분석엔진이 답변을 신규 경로 /internal/ingest/chat-message가
-  //   아니라 옛 ai-messages 경로로 보내 chat_messages에 assistant 턴이 안 쌓이는 것.
-  //   답변 없는 이력/새 대화 분리는 사용자에게 혼란만 주므로 기능을 잠시 숨긴다.
-  //
-  // [되살리는 법] 맥미니가 chat-message로 답변을 저장하도록 수정되면 이 값만 true로.
-  //   헤더·이력 시트·관련 Provider 메서드는 그대로 보존되어 있어 즉시 복구된다.
-  //
-  // [완전 제거 시] 끝내 안 쓰기로 확정되면 다음을 함께 삭제:
-  //   - 이 화면: _header(), _openHistory(), 본 플래그, build()의 헤더 분기,
-  //     initState()의 loadConversations() 호출
-  //   - ChatProvider: startNew(), loadConversation(), loadConversations(),
-  //     _conversations 필드 / conversations getter
-  //   - ChatApiClient.getConversations() (다른 참조가 없을 때)
-  // 비-const 인스턴스 필드로 두어 dead_code 경고 없이 분기를 유지한다.
-  // ───────────────────────────────────────────────────────────────────────
-  final bool _showConversationControls = false;
+  // 대화 관리 UI(헤더 "이전 대화"·"새 대화") 노출 플래그.
+  // 06-21 is_error 폴백 + 06-27 로컬 캐시(sqflite) 도입으로 이력이 안전하게
+  // 누적·표시되므로 ON. 필요 시 false 로 다시 가릴 수 있다.
+  final bool _showConversationControls = true;
 
   // ── 접속 인사 + 추천(예시) 질문 ──
   /// 빈 화면에서 보여줄 랜덤 추천 질문 5개(관심도 가중).
@@ -71,10 +56,8 @@ class _AiChatScreenState extends State<AiChatScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       final chat = context.read<ChatProvider>();
-      // 이전 대화 목록 (실패는 조용히). 대화 관리 UI를 숨긴 동안엔 불필요한
-      // 네트워크 호출이라 함께 가린다. _showConversationControls 참고.
+      chat.loadQuota(); // 무료 쿼터 + 로컬 한도 설정 로드
       if (_showConversationControls) chat.loadConversations();
-      chat.loadQuota(); // 일일 무료 쿼터
       _initSuggestions(); // 인사말 + 추천 질문
     });
   }
@@ -318,7 +301,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
         children: [
           const Spacer(),
           TextButton.icon(
-            onPressed: () => _openHistory(context, l10n, mlc, chat),
+            onPressed: () => _openHistory(context, chat),
             icon: Icon(
               Icons.history_rounded,
               size: 18,
@@ -342,59 +325,16 @@ class _AiChatScreenState extends State<AiChatScreen> {
     );
   }
 
-  void _openHistory(
-    BuildContext context,
-    AppLocalizations l10n,
-    MarketLensColors mlc,
-    ChatProvider chat,
-  ) {
-    showModalBottomSheet<void>(
-      context: context,
-      builder: (ctx) {
-        final convos = chat.conversations;
-        return SafeArea(
-          child: convos.isEmpty
-              ? Padding(
-                  padding: const EdgeInsets.all(AppSpacing.xxl),
-                  child: Center(
-                    child: Text(
-                      l10n.aiChatNoHistory,
-                      style: AppTypography.body.copyWith(
-                        color: mlc.textSecondary,
-                      ),
-                    ),
-                  ),
-                )
-              : ListView.builder(
-                  shrinkWrap: true,
-                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-                  itemCount: convos.length,
-                  itemBuilder: (c, i) {
-                    final cv = convos[i];
-                    return ListTile(
-                      leading: Icon(
-                        Icons.chat_bubble_outline_rounded,
-                        size: 20,
-                        color: mlc.textTertiary,
-                      ),
-                      title: Text(
-                        cv.title ?? cv.lastMessage ?? cv.id,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppTypography.body.copyWith(
-                          color: mlc.textPrimary,
-                        ),
-                      ),
-                      onTap: () {
-                        Navigator.pop(ctx);
-                        chat.loadConversation(cv.id);
-                      },
-                    );
-                  },
-                ),
-        );
-      },
+  /// 이전 대화 목록 → 선택 모드/공유/숨김 지원하는 전용 화면.
+  Future<void> _openHistory(BuildContext context, ChatProvider chat) async {
+    // 진입 직전에 목록 한 번 더 머지(서버 + 로컬 캐시).
+    chat.loadConversations();
+    final picked = await Navigator.push<String?>(
+      context,
+      appPageRoute(builder: (_) => const ChatHistoryScreen()),
     );
+    if (picked == null || !mounted) return;
+    await chat.loadConversation(picked);
   }
 
   Widget _thinkingBubble(AppLocalizations l10n, MarketLensColors mlc) {

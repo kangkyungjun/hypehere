@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/chat_message.dart';
 import '../services/chat_api_client.dart';
+import '../services/chat_local_store.dart';
 
 /// AI 멀티턴 채팅 상태 관리.
 ///
@@ -11,9 +12,18 @@ import '../services/chat_api_client.dart';
 ///   2) 서버로 전송(POST) — 서버가 user턴 저장 + CHAT 큐 적재(history 동봉)
 ///   3) 대화 이력을 백오프 폴링하여 assistant 응답 도착을 감지 → 서버 이력으로 동기화
 /// conversation_id는 앱에서 생성(즉시 스레드), 서버가 그대로 정본(SoT) 저장.
+///
+/// **로컬 캐시 정책 (2026-06-27 추가):**
+/// - 서버=SoT 유지. 로컬은 빠른 표시/오프라인 캐시 용도(`ChatLocalStore`).
+/// - 폴링 응답이 오면 즉시 sqflite에 영속화 → 앱 재실행 후에도 보임.
+/// - 사용자가 한 대화를 폰에서 숨기면 hidden=1 (서버엔 보존). 머지 시 자동 필터.
+/// - 한도 초과 시 가장 오래된 대화부터 자동 삭제 → `kLocalLimit` 키.
 class ChatProvider extends ChangeNotifier {
-  ChatProvider({ChatApiClient? api}) : _api = api ?? ChatApiClient();
+  ChatProvider({ChatApiClient? api, ChatLocalStore? store})
+      : _api = api ?? ChatApiClient(),
+        _store = store ?? ChatLocalStore.instance;
   final ChatApiClient _api;
+  final ChatLocalStore _store;
 
   String? _conversationId;
   List<ChatMessage> _messages = [];
@@ -44,6 +54,14 @@ class ChatProvider extends ChangeNotifier {
   int get quotaRemaining => (freeLimit - _quotaUsed).clamp(0, freeLimit);
   bool get quotaExhausted => quotaRemaining <= 0;
 
+  // ── 로컬 캐시 한도 (SharedPreferences) ──
+  /// 로컬에 보관할 최대 대화 수. 0 = 무제한.
+  /// 기본 500건 ≈ 3MB(평균). 100/500/1000/0 중 사용자 선택 가능(설정 화면).
+  static const int defaultLocalLimit = 500;
+  static const _kLocalLimit = 'chat_local_limit';
+  int _localLimit = defaultLocalLimit;
+  int get localLimit => _localLimit;
+
   /// 새 대화 시작 (id 생성, 메시지 초기화).
   void startNew() {
     _conversationId = _generateId();
@@ -52,34 +70,89 @@ class ChatProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// 기존 대화 로드 (과거조회).
+  /// 기존 대화 로드 — 로컬 캐시 즉시 표시 후 서버 최신화로 덮어쓴다.
   Future<void> loadConversation(String id) async {
     _conversationId = id;
     _error = null;
-    notifyListeners();
+    // 1) 로컬 즉시(빠른 진입감)
     try {
-      _messages = await _api.getMessages(id);
+      final cached = await _store.messagesOf(id);
+      if (cached.isNotEmpty) {
+        _messages = cached;
+        notifyListeners();
+      }
+    } catch (_) {/* 캐시 실패 무시 */}
+    // 2) 서버 최신화
+    try {
+      final fresh = await _api.getMessages(id);
+      _messages = fresh;
+      // 서버 응답으로 로컬 갱신(SoT)
+      if (fresh.isNotEmpty) {
+        await _store.replaceConversation(id, fresh,
+            maxConversations: _localLimit);
+      }
     } catch (e) {
-      _error = e.toString();
+      // 서버 실패해도 로컬 캐시는 유지
+      if (_messages.isEmpty) _error = e.toString();
     }
     notifyListeners();
   }
 
-  /// 대화 목록 로드 (이전 대화 조회). 실패는 조용히 무시(서버 미배포 등).
+  /// 대화 목록 로드 — 로컬을 우선 보여주고 서버와 머지.
+  ///
+  /// 머지 규칙:
+  ///  - 서버 목록을 기준으로 표시(서버=SoT).
+  ///  - 단, 로컬에 hidden=1로 마킹된 대화 id는 제외("폰에서 안 보기").
+  ///  - 서버에 없고 로컬에만 있는(아직 답변 폴링 전인 신규 대화 등)도 같이 표시.
   Future<void> loadConversations() async {
     _loadingConversations = true;
     notifyListeners();
+
+    // 1) 로컬 캐시 즉시 표시
     try {
-      _conversations = await _api.getConversations();
-    } catch (_) {
-      // 목록 조회 실패는 채팅 흐름을 막지 않도록 무시
+      _conversations = await _store.listConversations();
+      notifyListeners();
+    } catch (_) {/* ignore */}
+
+    // 2) 서버 fetch + hidden id 조회는 각각 독립적으로 보호.
+    //    로컬/네트워크 중 한쪽이 실패해도 다른 쪽 결과를 살린다.
+    List<Conversation> server = const [];
+    try {
+      server = await _api.getConversations();
+    } catch (_) {/* 서버 실패 시 로컬 캐시만 표시 */}
+    Set<String> hidden = <String>{};
+    try {
+      hidden = await _store.hiddenConversationIds();
+    } catch (_) {/* 캐시 미구성 환경(테스트 등)도 진행 */}
+
+    if (server.isNotEmpty || hidden.isNotEmpty) {
+      final localById = {for (final c in _conversations) c.id: c};
+      final merged = <Conversation>[];
+      final seen = <String>{};
+      for (final c in server) {
+        if (hidden.contains(c.id)) continue;
+        merged.add(c);
+        seen.add(c.id);
+      }
+      for (final c in localById.values) {
+        if (seen.contains(c.id)) continue;
+        if (hidden.contains(c.id)) continue;
+        merged.add(c);
+      }
+      merged.sort((a, b) {
+        final ax = a.updatedAt?.millisecondsSinceEpoch ?? 0;
+        final bx = b.updatedAt?.millisecondsSinceEpoch ?? 0;
+        return bx.compareTo(ax);
+      });
+      _conversations = merged;
     }
+
     _loadingConversations = false;
     notifyListeners();
   }
 
   /// 메시지 전송 + 응답 폴링.
-  /// [category] : 추천 칩 탭에서 호출할 때 전달(맥미니 컨텍스트 주입용). 자유입력은 null.
+  /// [category] : 추천 칩에서 호출할 때 전달(맥미니 컨텍스트 주입용). 자유입력은 null.
   Future<void> sendMessage(
     String text, {
     String lang = 'en',
@@ -114,6 +187,9 @@ class ChatProvider extends ChangeNotifier {
         if (assistantCount > baselineAssistant) {
           _messages = server; // 서버가 정본
           _isSending = false;
+          // 로컬 캐시 영속화(앱 재실행 후에도 보임).
+          // 실패는 조용히 무시(채팅 흐름 차단 금지).
+          unawaitedPersist(convId, server);
           // 마지막 assistant 턴이 에러 플래그면 사용자에게 안내(UI는 isError 메시지 자체로 표시).
           final last = server.lastWhere(
             (m) => m.isAssistant,
@@ -142,6 +218,75 @@ class ChatProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// 화면 비차단 영속화. 실패는 디버그 로그만.
+  void unawaitedPersist(String convId, List<ChatMessage> server) {
+    _store
+        .replaceConversation(convId, server, maxConversations: _localLimit)
+        .catchError((e) {
+      if (kDebugMode) {
+        debugPrint('chat cache persist failed: $e');
+      }
+    });
+  }
+
+  // ── 로컬 캐시 제어 (UI에서 호출) ──
+
+  /// 한 대화를 폰에서 숨김(서버 보존). 다음 머지에서도 다시 안 나타남.
+  Future<void> hideConversationLocally(String id) async {
+    await _store.deleteConversationLocal(id);
+    _conversations =
+        _conversations.where((c) => c.id != id).toList(growable: false);
+    if (_conversationId == id) {
+      _conversationId = null;
+      _messages = [];
+    }
+    notifyListeners();
+  }
+
+  /// 여러 대화 일괄 숨김.
+  Future<void> hideConversationsLocally(Iterable<String> ids) async {
+    final set = ids.toSet();
+    for (final id in set) {
+      await _store.deleteConversationLocal(id);
+    }
+    _conversations =
+        _conversations.where((c) => !set.contains(c.id)).toList(growable: false);
+    if (_conversationId != null && set.contains(_conversationId)) {
+      _conversationId = null;
+      _messages = [];
+    }
+    notifyListeners();
+  }
+
+  /// 로컬 캐시 전체 삭제(서버는 손대지 않음).
+  Future<void> clearAllLocal() async {
+    await _store.clearAll();
+    _conversations = const [];
+    notifyListeners();
+  }
+
+  /// 로컬 캐시 사용량 통계(설정 화면 표시용).
+  /// 반환 `(visibleConversations, approxBytes)`.
+  Future<({int conversations, int bytes})> localUsage() async {
+    final c = await _store.visibleConversationCount();
+    final b = await _store.approxStorageBytes();
+    return (conversations: c, bytes: b);
+  }
+
+  /// 한도 변경 → 즉시 영속화 + (작아진 경우) FIFO 적용은 다음 저장 시 일어남.
+  Future<void> setLocalLimit(int limit) async {
+    _localLimit = limit < 0 ? 0 : limit;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_kLocalLimit, _localLimit);
+    notifyListeners();
+  }
+
+  /// 한 대화의 메시지(공유/내보내기용) — 로컬 캐시 직접 조회.
+  Future<List<ChatMessage>> messagesForExport(String id) =>
+      _store.messagesOf(id);
+
+  // ── 무료 쿼터 ──
+
   /// 쿼터 로드. 누적 차감 방식 — 자정 리셋 없음.
   /// 신규 설치(키 없음) → 0 → 무료 10/10으로 시작.
   /// 기존 사용자 → 마지막 저장값에서 이어감(상한 10 적용).
@@ -149,6 +294,8 @@ class ChatProvider extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     final used = prefs.getInt(_kQuotaUsed) ?? 0;
     _quotaUsed = used.clamp(0, freeLimit);
+    // 로컬 캐시 한도도 함께 로드
+    _localLimit = prefs.getInt(_kLocalLimit) ?? defaultLocalLimit;
     notifyListeners();
   }
 

@@ -876,6 +876,32 @@
   "aiChatHistory": "Past chats",
   "aiChatNoHistory": "No past conversations",
   "aiChatFreeRemaining": "Free left",
+  "aiChatSelect": "Select",
+  "aiChatSelectedCount": "{count} selected",
+  "@aiChatSelectedCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "aiChatHide": "Hide",
+  "aiChatHideConfirm": "Hide the selected conversations from this phone? They remain stored on the server.",
+  "aiChatStorageSettings": "AI Chat Storage",
+  "aiChatStorageSettingsSubtitle": "On-device history limit and usage",
+  "aiChatStorageUsage": "Current usage",
+  "aiChatStorageLimit": "History limit",
+  "aiChatStorageBytes": "Storage size",
+  "aiChatStorageNote": "When the limit is reached, the oldest conversations are removed first. The server keeps all of them, so no learning data is lost.",
+  "aiChatUnlimited": "Unlimited",
+  "aiChatNConversations": "{count} chats",
+  "@aiChatNConversations": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "aiChatClearLocal": "Clear all chats on this phone",
+  "aiChatClearLocalDesc": "Conversations on the server are not affected",
+  "aiChatClearLocalConfirm": "Erase all cached chats stored on this phone?",
+  "aiChatLocalCleared": "On-device chat cache cleared",
   "recPortfolioOverview": "Portfolio Overview",
   "recTechnicalInsight": "Technical Analysis",
   "recMarketIntelligence": "Market Intelligence",

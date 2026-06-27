@@ -16,6 +16,7 @@ import '../profile/profile_screen.dart';
 import '../admin/admin_panel_screen.dart';
 import '../admin/active_users_dashboard_screen.dart';
 import '../admin/management_records_screen.dart';
+import '../ai_lens/chat/chat_storage_settings_screen.dart';
 import '../community/community_feed_screen.dart';
 import 'blocked_users_screen.dart';
 import '../onboarding/investment_profile_onboarding_screen.dart';
@@ -512,6 +513,18 @@ class SettingsScreen extends StatelessWidget {
                             },
                           );
                         },
+                      ),
+                      _buildSettingsTile(
+                        context,
+                        icon: Icons.chat_outlined,
+                        title: l10n.aiChatStorageSettings,
+                        subtitle: l10n.aiChatStorageSettingsSubtitle,
+                        onTap: () => Navigator.push(
+                          context,
+                          appPageRoute(
+                            builder: (_) => const ChatStorageSettingsScreen(),
+                          ),
+                        ),
                       ),
                       _buildSettingsTile(
                         context,

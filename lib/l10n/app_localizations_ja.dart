@@ -1907,6 +1907,59 @@ class AppLocalizationsJa extends AppLocalizations {
   String get aiChatFreeRemaining => '残り無料';
 
   @override
+  String get aiChatSelect => '選択';
+
+  @override
+  String aiChatSelectedCount(int count) {
+    return '$count件選択';
+  }
+
+  @override
+  String get aiChatHide => '非表示';
+
+  @override
+  String get aiChatHideConfirm => '選択した会話をこのスマホで非表示にしますか？サーバーには引き続き保存されます。';
+
+  @override
+  String get aiChatStorageSettings => 'AIチャット保存設定';
+
+  @override
+  String get aiChatStorageSettingsSubtitle => '会話保存の上限・容量を管理';
+
+  @override
+  String get aiChatStorageUsage => '現在の使用量';
+
+  @override
+  String get aiChatStorageLimit => '保存上限';
+
+  @override
+  String get aiChatStorageBytes => '容量';
+
+  @override
+  String get aiChatStorageNote =>
+      '上限を超えると古い会話から自動削除されます。サーバーにはすべて保存されるため学習データは失われません。';
+
+  @override
+  String get aiChatUnlimited => '無制限';
+
+  @override
+  String aiChatNConversations(int count) {
+    return '$count件';
+  }
+
+  @override
+  String get aiChatClearLocal => 'このスマホの会話キャッシュを削除';
+
+  @override
+  String get aiChatClearLocalDesc => 'サーバー上の会話は影響を受けません';
+
+  @override
+  String get aiChatClearLocalConfirm => 'このスマホに保存されたすべての会話キャッシュを消去しますか？';
+
+  @override
+  String get aiChatLocalCleared => 'スマホの会話キャッシュを削除しました';
+
+  @override
   String get recPortfolioOverview => 'ポートフォリオ概要';
 
   @override

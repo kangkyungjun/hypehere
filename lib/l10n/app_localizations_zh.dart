@@ -1903,6 +1903,58 @@ class AppLocalizationsZh extends AppLocalizations {
   String get aiChatFreeRemaining => '剩余免费';
 
   @override
+  String get aiChatSelect => '选择';
+
+  @override
+  String aiChatSelectedCount(int count) {
+    return '已选 $count';
+  }
+
+  @override
+  String get aiChatHide => '隐藏';
+
+  @override
+  String get aiChatHideConfirm => '在本机隐藏所选对话？服务器仍会保存这些对话。';
+
+  @override
+  String get aiChatStorageSettings => 'AI 聊天存储设置';
+
+  @override
+  String get aiChatStorageSettingsSubtitle => '对话保存上限·设备占用管理';
+
+  @override
+  String get aiChatStorageUsage => '当前使用量';
+
+  @override
+  String get aiChatStorageLimit => '保存上限';
+
+  @override
+  String get aiChatStorageBytes => '占用空间';
+
+  @override
+  String get aiChatStorageNote => '超过上限将自动删除最早的对话。服务器会保留全部对话，学习数据不会丢失。';
+
+  @override
+  String get aiChatUnlimited => '无限';
+
+  @override
+  String aiChatNConversations(int count) {
+    return '$count 条对话';
+  }
+
+  @override
+  String get aiChatClearLocal => '清除本机所有对话缓存';
+
+  @override
+  String get aiChatClearLocalDesc => '服务器上的对话不会受影响';
+
+  @override
+  String get aiChatClearLocalConfirm => '清除本机保存的所有对话缓存吗？';
+
+  @override
+  String get aiChatLocalCleared => '已清除本机对话缓存';
+
+  @override
   String get recPortfolioOverview => '投资组合概览';
 
   @override

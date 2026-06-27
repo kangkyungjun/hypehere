@@ -700,6 +700,32 @@
   "aiChatHistory": "历史对话",
   "aiChatNoHistory": "暂无历史对话",
   "aiChatFreeRemaining": "剩余免费",
+  "aiChatSelect": "选择",
+  "aiChatSelectedCount": "已选 {count}",
+  "@aiChatSelectedCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "aiChatHide": "隐藏",
+  "aiChatHideConfirm": "在本机隐藏所选对话？服务器仍会保存这些对话。",
+  "aiChatStorageSettings": "AI 聊天存储设置",
+  "aiChatStorageSettingsSubtitle": "对话保存上限·设备占用管理",
+  "aiChatStorageUsage": "当前使用量",
+  "aiChatStorageLimit": "保存上限",
+  "aiChatStorageBytes": "占用空间",
+  "aiChatStorageNote": "超过上限将自动删除最早的对话。服务器会保留全部对话，学习数据不会丢失。",
+  "aiChatUnlimited": "无限",
+  "aiChatNConversations": "{count} 条对话",
+  "@aiChatNConversations": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "aiChatClearLocal": "清除本机所有对话缓存",
+  "aiChatClearLocalDesc": "服务器上的对话不会受影响",
+  "aiChatClearLocalConfirm": "清除本机保存的所有对话缓存吗？",
+  "aiChatLocalCleared": "已清除本机对话缓存",
   "recPortfolioOverview": "投资组合概览",
   "recTechnicalInsight": "技术分析",
   "recMarketIntelligence": "市场情报",
