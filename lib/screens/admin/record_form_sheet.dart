@@ -47,6 +47,9 @@ class _RecordFormSheetState extends State<RecordFormSheet> {
   final _quantity = TextEditingController();
   final _vendor = TextEditingController();
   final _content = TextEditingController();
+  // 계획(plan) 신규 작성 시 체크리스트를 함께 구성 — 줄바꿈으로 항목 N개.
+  final _subtasks = TextEditingController();
+  final _subAssignee = TextEditingController();
   DateTime _date = DateTime.now();
   bool _saving = false;
 
@@ -111,7 +114,15 @@ class _RecordFormSheetState extends State<RecordFormSheet> {
 
   @override
   void dispose() {
-    for (final c in [_title, _amount, _quantity, _vendor, _content]) {
+    for (final c in [
+      _title,
+      _amount,
+      _quantity,
+      _vendor,
+      _content,
+      _subtasks,
+      _subAssignee,
+    ]) {
       c.dispose();
     }
     super.dispose();
@@ -150,9 +161,25 @@ class _RecordFormSheetState extends State<RecordFormSheet> {
       if (_vendor.text.trim().isNotEmpty) body['vendor'] = _vendor.text.trim();
     }
     try {
-      final saved = widget.record == null
+      var saved = widget.record == null
           ? await widget.api.createOpsRecord(body)
           : await widget.api.updateOpsRecord(widget.record!.id, body);
+      // 계획 신규 작성 시 입력한 체크리스트를 함께 생성.
+      if (widget.record == null && _kind == 'plan') {
+        final lines = _subtasks.text
+            .split('\n')
+            .map((s) => s.trim())
+            .where((s) => s.isNotEmpty)
+            .toList();
+        if (lines.isNotEmpty) {
+          final assignee = _subAssignee.text.trim();
+          saved = await widget.api.addSubTasksBulk(
+            saved.id,
+            titles: lines,
+            assignee: assignee.isEmpty ? null : assignee,
+          );
+        }
+      }
       if (!mounted) return;
       Navigator.pop(context, saved);
     } catch (_) {
@@ -300,6 +327,22 @@ class _RecordFormSheetState extends State<RecordFormSheet> {
             ),
             const SizedBox(height: AppSpacing.md),
             _field('내용(선택)', _content, maxLines: 3),
+            // 계획 신규 작성 — 체크리스트를 처음부터 구성.
+            if (_kind == 'plan' && widget.record == null) ...[
+              const SizedBox(height: AppSpacing.md),
+              _field(
+                '체크리스트(선택 · 줄바꿈으로 여러 개)',
+                _subtasks,
+                maxLines: 5,
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                '예) 로고 시안 3종 / App Store 스크린샷 / 약관 검토',
+                style: AppTypography.label.copyWith(color: mlc.textTertiary),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              _field('공통 담당자(선택)', _subAssignee),
+            ],
             if (isAsset && widget.record?.assetNo != null) ...[
               const SizedBox(height: AppSpacing.sm),
               Text(

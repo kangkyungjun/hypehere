@@ -31,6 +31,8 @@ class _ManagementRecordsScreenState extends State<ManagementRecordsScreen> {
   bool _loading = true;
   String? _error;
   String? _kindFilter; // null=전체
+  String? _categoryFilter; // null=전체 (plan/note 한정 노출)
+  SubTaskStatus? _statusFilter; // null=전체 (plan 한정 노출)
   late String _selectedMonth; // YYYY-MM
   OpsSummary? _summary;
   OpsSummary? _prevSummary; // 전월 대비용
@@ -44,6 +46,18 @@ class _ManagementRecordsScreenState extends State<ManagementRecordsScreen> {
     ('asset', '자산'),
     ('plan', '계획'),
     ('note', '메모'),
+  ];
+
+  // plan/note 공통 카테고리 — 추가 필터칩에 노출.
+  static const _planNoteCats = <String?>[null, '경영', '운영', '개발', '기타'];
+  // plan 상태 필터칩 — SubTask 상태 5종.
+  static const _planStatuses = <SubTaskStatus?>[
+    null,
+    SubTaskStatus.todo,
+    SubTaskStatus.inProgress,
+    SubTaskStatus.done,
+    SubTaskStatus.failed,
+    SubTaskStatus.blocked,
   ];
 
   static String _ymOf(DateTime d) =>
@@ -163,6 +177,13 @@ class _ManagementRecordsScreenState extends State<ManagementRecordsScreen> {
     await _reloadRecords();
   }
 
+  /// 연도 이동(월 번호 유지). 재무·자산 월별 뷰를 과거/미래 연도로 전환.
+  Future<void> _changeYear(int delta) async {
+    final p = _selectedMonth.split('-');
+    final y = int.parse(p[0]) + delta;
+    await _onMonthSelected('${y.toString().padLeft(4, '0')}-${p[1]}');
+  }
+
   Future<void> _openTrend() async {
     final picked = await showTrendModal(
       context,
@@ -258,21 +279,41 @@ class _ManagementRecordsScreenState extends State<ManagementRecordsScreen> {
 
   Widget _buildBody(BuildContext context) {
     final mlc = context.mlColors;
-    // 선택 월 기록만 노출 (occurredOn 없는 메모/계획은 항상 노출)
+    final showExtraFilters =
+        _kindFilter == 'plan' || _kindFilter == 'note';
+    final showStatusFilter = _kindFilter == 'plan';
+    // 1) 월 + 카테고리(plan/note) + 상태(plan) 필터 적용 — kind는 서버 응답이 이미 필터.
     final filteredRecords = _records.where((r) {
-      if (r.occurredOn == null || r.occurredOn!.isEmpty) return true;
-      return r.occurredOn!.startsWith(_selectedMonth);
+      // 발생일(월) 필터는 재무·자산(월별 손익 성격)에만 적용.
+      // 계획·메모는 업무목록 성격 — 여러 달/해에 걸쳐 진행되므로 월에 묶지 않고 항상 노출.
+      final monthBound = r.kind == 'finance' || r.kind == 'asset';
+      if (monthBound && r.occurredOn != null && r.occurredOn!.isNotEmpty) {
+        if (!r.occurredOn!.startsWith(_selectedMonth)) return false;
+      }
+      if (showExtraFilters && _categoryFilter != null) {
+        if (r.category != _categoryFilter) return false;
+      }
+      if (showStatusFilter && _statusFilter != null) {
+        // SubTask가 하나라도 해당 상태이면 통과(가장 직관적).
+        // SubTask가 없는 글은 statusFilter가 있으면 제외.
+        if (r.subTasks.isEmpty) return false;
+        if (!r.subTasks.any((t) => t.status == _statusFilter)) return false;
+      }
+      return true;
     }).toList();
-    return ListView(
-      padding: EdgeInsets.fromLTRB(
-        AppSpacing.lg,
-        AppSpacing.md,
-        AppSpacing.lg,
-        MediaQuery.of(context).viewPadding.bottom + 88,
-      ),
-      children: [
+    return SelectionArea(
+      child: ListView(
+        padding: EdgeInsets.fromLTRB(
+          AppSpacing.lg,
+          AppSpacing.md,
+          AppSpacing.lg,
+          MediaQuery.of(context).viewPadding.bottom + 88,
+        ),
+        children: [
         _monthChipsRow(context),
         const SizedBox(height: AppSpacing.sm),
+        _tasksProgressCard(context),
+        const SizedBox(height: AppSpacing.md),
         _summaryCard(context),
         const SizedBox(height: AppSpacing.md),
         if (_breakdown != null &&
@@ -295,7 +336,11 @@ class _ManagementRecordsScreenState extends State<ManagementRecordsScreen> {
                   selected: selected,
                   showCheckmark: false,
                   onSelected: (_) {
-                    setState(() => _kindFilter = k.$1);
+                    setState(() {
+                      _kindFilter = k.$1;
+                      _categoryFilter = null;
+                      _statusFilter = null;
+                    });
                     _reloadRecords();
                   },
                 ),
@@ -303,13 +348,22 @@ class _ManagementRecordsScreenState extends State<ManagementRecordsScreen> {
             }).toList(),
           ),
         ),
+        if (showExtraFilters) ...[
+          const SizedBox(height: 4),
+          _categoryFilterRow(mlc),
+        ],
+        if (showStatusFilter) ...[
+          const SizedBox(height: 4),
+          _statusFilterRow(mlc),
+        ],
         const SizedBox(height: AppSpacing.sm),
         if (filteredRecords.isEmpty)
           Padding(
             padding: const EdgeInsets.all(AppSpacing.xxl),
             child: Center(
               child: Text(
-                '$_selectedMonth 기록 없음',
+                // 계획·메모는 월에 묶이지 않으므로 월 표기를 뺀다.
+                showExtraFilters ? '기록 없음' : '$_selectedMonth 기록 없음',
                 style: TextStyle(color: mlc.textTertiary),
               ),
             ),
@@ -317,6 +371,78 @@ class _ManagementRecordsScreenState extends State<ManagementRecordsScreen> {
         else
           ...filteredRecords.map(_recordTile),
       ],
+      ),
+    );
+  }
+
+  Widget _categoryFilterRow(MarketLensColors mlc) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: _planNoteCats.map((c) {
+          final selected = _categoryFilter == c;
+          return Padding(
+            padding: const EdgeInsets.only(right: AppSpacing.xs),
+            child: ChoiceChip(
+              label: Text(c ?? '전체'),
+              selected: selected,
+              showCheckmark: false,
+              labelStyle: AppTypography.label.copyWith(
+                color: selected ? mlc.textPrimary : mlc.textSecondary,
+                fontWeight: selected
+                    ? AppTypography.bold
+                    : AppTypography.regular,
+              ),
+              onSelected: (_) => setState(() => _categoryFilter = c),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  Widget _statusFilterRow(MarketLensColors mlc) {
+    Color colorOf(SubTaskStatus? s) {
+      if (s == null) return mlc.textSecondary;
+      switch (s) {
+        case SubTaskStatus.todo:
+          return mlc.neutralColor;
+        case SubTaskStatus.inProgress:
+          return mlc.accentBlue;
+        case SubTaskStatus.done:
+          return mlc.gainColor;
+        case SubTaskStatus.failed:
+          return mlc.dangerColor;
+        case SubTaskStatus.blocked:
+          return mlc.warningColor;
+      }
+    }
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: _planStatuses.map((s) {
+          final selected = _statusFilter == s;
+          final color = colorOf(s);
+          return Padding(
+            padding: const EdgeInsets.only(right: AppSpacing.xs),
+            child: ChoiceChip(
+              label: Text(s == null ? '전체 상태' : s.label),
+              selected: selected,
+              showCheckmark: false,
+              labelStyle: TextStyle(
+                fontSize: AppTypography.bodySmall,
+                fontWeight: selected
+                    ? AppTypography.bold
+                    : AppTypography.regular,
+                color: selected ? color : mlc.textSecondary,
+              ),
+              selectedColor: color.withValues(alpha: 0.14),
+              onSelected: (_) => setState(() => _statusFilter = s),
+            ),
+          );
+        }).toList(),
+      ),
     );
   }
 
@@ -324,29 +450,218 @@ class _ManagementRecordsScreenState extends State<ManagementRecordsScreen> {
     final mlc = context.mlColors;
     final year = _yearOf(_selectedMonth);
     final months = _monthsOfYear(year);
-    return SizedBox(
-      height: 36,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: months.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 6),
-        itemBuilder: (_, i) {
-          final ym = months[i];
-          final selected = ym == _selectedMonth;
-          final label = '${i + 1}월';
-          return ChoiceChip(
-            label: Text(label),
-            selected: selected,
-            showCheckmark: false,
-            labelStyle: AppTypography.label.copyWith(
-              color: selected ? mlc.textPrimary : mlc.textSecondary,
-              fontWeight: selected
-                  ? AppTypography.bold
-                  : AppTypography.regular,
+    final curYear = DateTime.now().year;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // 연도 이동 — 재무·자산 월별 뷰를 과거/미래 연도로 전환.
+        Row(
+          children: [
+            IconButton(
+              tooltip: '이전 해',
+              onPressed: () => _changeYear(-1),
+              icon: const Icon(Icons.chevron_left, size: 20),
+              visualDensity: VisualDensity.compact,
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
             ),
-            onSelected: (_) => _onMonthSelected(ym),
-          );
-        },
+            Text(
+              '$year년',
+              style: AppTypography.body.copyWith(
+                color: mlc.textPrimary,
+                fontWeight: AppTypography.bold,
+              ),
+            ),
+            IconButton(
+              tooltip: '다음 해',
+              onPressed: () => _changeYear(1),
+              icon: const Icon(Icons.chevron_right, size: 20),
+              visualDensity: VisualDensity.compact,
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+            ),
+            if (year != curYear) ...[
+              const SizedBox(width: AppSpacing.xs),
+              TextButton(
+                onPressed: () => _onMonthSelected(_ymOf(DateTime.now())),
+                style: TextButton.styleFrom(
+                  visualDensity: VisualDensity.compact,
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                ),
+                child: const Text('올해'),
+              ),
+            ],
+          ],
+        ),
+        SizedBox(
+          height: 36,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: months.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 6),
+            itemBuilder: (_, i) {
+              final ym = months[i];
+              final selected = ym == _selectedMonth;
+              final label = '${i + 1}월';
+              return ChoiceChip(
+                label: Text(label),
+                selected: selected,
+                showCheckmark: false,
+                labelStyle: AppTypography.label.copyWith(
+                  color: selected ? mlc.textPrimary : mlc.textSecondary,
+                  fontWeight: selected
+                      ? AppTypography.bold
+                      : AppTypography.regular,
+                ),
+                onSelected: (_) => _onMonthSelected(ym),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// 전체 plan 글의 SubTask를 합산해 진척률을 보여주는 카드.
+  /// 완료만 분자(% = done/total). 실패·보류·진행중은 본문 메타에 별도 표시.
+  /// 탭하면 plan 필터로 전환.
+  Widget _tasksProgressCard(BuildContext context) {
+    final mlc = context.mlColors;
+    int total = 0;
+    int done = 0;
+    int inProgress = 0;
+    int failed = 0;
+    int blocked = 0;
+    int projects = 0;
+    for (final r in _records) {
+      if (r.kind != 'plan' || r.subTasks.isEmpty) continue;
+      // 카테고리 필터가 활성화돼 있고(plan/note 한정), 일치하지 않으면 제외.
+      if (_categoryFilter != null && r.category != _categoryFilter) continue;
+      projects++;
+      total += r.subTasks.length;
+      for (final t in r.subTasks) {
+        switch (t.status) {
+          case SubTaskStatus.done:
+            done++;
+            break;
+          case SubTaskStatus.inProgress:
+            inProgress++;
+            break;
+          case SubTaskStatus.failed:
+            failed++;
+            break;
+          case SubTaskStatus.blocked:
+            blocked++;
+            break;
+          case SubTaskStatus.todo:
+            break;
+        }
+      }
+    }
+    if (total == 0) {
+      return BentoCard(
+        child: Row(
+          children: [
+            Icon(Icons.task_alt, size: 16, color: mlc.textTertiary),
+            const SizedBox(width: AppSpacing.sm),
+            Text(
+              '업무 진척률 — 등록된 체크리스트 없음',
+              style: AppTypography.label.copyWith(color: mlc.textTertiary),
+            ),
+          ],
+        ),
+      );
+    }
+    final todo = total - done - inProgress - failed - blocked;
+    final ratio = done / total;
+    final barColor = ratio >= 1.0
+        ? mlc.gainColor
+        : (done > 0 || inProgress > 0 ? mlc.accentBlue : mlc.warningColor);
+
+    // 한 줄에 '대기 · 진행중 · 완료 · 실패 · 보류' 중 0 아닌 것만 표시.
+    final parts = <(int, String, Color)>[
+      (todo, '대기', mlc.neutralColor),
+      (inProgress, '진행중', mlc.accentBlue),
+      (done, '완료', mlc.gainColor),
+      (failed, '실패', mlc.dangerColor),
+      (blocked, '보류', mlc.warningColor),
+    ].where((e) => e.$1 > 0).toList();
+
+    return InkWell(
+      onTap: () {
+        if (_kindFilter == 'plan') return;
+        setState(() {
+          _kindFilter = 'plan';
+          _categoryFilter = null;
+          _statusFilter = null;
+        });
+        _reloadRecords();
+      },
+      borderRadius: BorderRadius.circular(AppRadius.lg),
+      child: BentoCard(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Text(
+                  '업무 진척률',
+                  style: AppTypography.cardTitle
+                      .copyWith(color: mlc.textPrimary),
+                ),
+                const SizedBox(width: AppSpacing.xs),
+                Text(
+                  '· 프로젝트 $projects개',
+                  style: AppTypography.label.copyWith(color: mlc.textTertiary),
+                ),
+                const Spacer(),
+                Text(
+                  '${(ratio * 100).round()}%',
+                  style: AppTypography.bodyStrong.copyWith(color: barColor),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Wrap(
+              spacing: 8,
+              runSpacing: 2,
+              children: [
+                Text(
+                  '총 $total',
+                  style: AppTypography.label
+                      .copyWith(color: mlc.textSecondary),
+                ),
+                for (final p in parts)
+                  RichText(
+                    text: TextSpan(
+                      style: AppTypography.label
+                          .copyWith(color: mlc.textSecondary),
+                      children: [
+                        TextSpan(text: '${p.$2} '),
+                        TextSpan(
+                          text: '${p.$1}',
+                          style: TextStyle(
+                            color: p.$3,
+                            fontWeight: AppTypography.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(AppRadius.xs),
+              child: LinearProgressIndicator(
+                value: ratio,
+                minHeight: 8,
+                backgroundColor: mlc.overlayDim,
+                valueColor: AlwaysStoppedAnimation(barColor),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -667,24 +982,38 @@ class _ManagementRecordsScreenState extends State<ManagementRecordsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    r.title,
-                    style: AppTypography.body.copyWith(
-                      color: mlc.textPrimary,
-                      fontWeight: AppTypography.semiBold,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          r.title,
+                          style: AppTypography.body.copyWith(
+                            color: mlc.textPrimary,
+                            fontWeight: AppTypography.semiBold,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (r.kind == 'plan' && r.subTasks.isNotEmpty) ...[
+                        const SizedBox(width: 6),
+                        _planProgressBadge(r, mlc),
+                      ],
+                    ],
                   ),
                   const SizedBox(height: 2),
-                  Text(
-                    sub,
-                    style: AppTypography.label.copyWith(
-                      color: mlc.textTertiary,
+                  // 계획+체크리스트: 제목 아래에 완료/미완료/실패 분포를 색으로 노출.
+                  if (r.kind == 'plan' && r.subTasks.isNotEmpty)
+                    _planBreakdownLine(r, mlc)
+                  else
+                    Text(
+                      sub,
+                      style: AppTypography.label.copyWith(
+                        color: mlc.textTertiary,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
                 ],
               ),
             ),
@@ -699,6 +1028,90 @@ class _ManagementRecordsScreenState extends State<ManagementRecordsScreen> {
             const SizedBox(width: AppSpacing.xs),
             Icon(Icons.chevron_right, size: 18, color: mlc.textTertiary),
           ],
+        ),
+      ),
+    );
+  }
+
+  /// 계획 타일 제목 아래 줄 — 몇 개 중 완료·진행중·대기·실패·보류 몇 개인지 색으로.
+  /// 0건인 상태는 숨긴다. 예) "총 8 · 완료 3 · 진행중 2 · 대기 2 · 실패 1"
+  Widget _planBreakdownLine(ManagementRecord r, MarketLensColors mlc) {
+    final total = r.subTasks.length;
+    int done = 0, inProgress = 0, failed = 0, blocked = 0;
+    for (final t in r.subTasks) {
+      switch (t.status) {
+        case SubTaskStatus.done:
+          done++;
+          break;
+        case SubTaskStatus.inProgress:
+          inProgress++;
+          break;
+        case SubTaskStatus.failed:
+          failed++;
+          break;
+        case SubTaskStatus.blocked:
+          blocked++;
+          break;
+        case SubTaskStatus.todo:
+          break;
+      }
+    }
+    final todo = total - done - inProgress - failed - blocked;
+    final parts = <(int, String, Color)>[
+      (todo, '대기', mlc.neutralColor),
+      (inProgress, '진행중', mlc.accentBlue),
+      (done, '완료', mlc.gainColor),
+      (failed, '실패', mlc.dangerColor),
+      (blocked, '보류', mlc.warningColor),
+    ].where((e) => e.$1 > 0).toList();
+    return Wrap(
+      spacing: 6,
+      runSpacing: 1,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        Text(
+          '총 $total',
+          style: AppTypography.label.copyWith(color: mlc.textTertiary),
+        ),
+        for (final p in parts)
+          RichText(
+            text: TextSpan(
+              style: AppTypography.label.copyWith(color: mlc.textTertiary),
+              children: [
+                TextSpan(text: '${p.$2} '),
+                TextSpan(
+                  text: '${p.$1}',
+                  style: TextStyle(
+                    color: p.$3,
+                    fontWeight: AppTypography.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _planProgressBadge(ManagementRecord r, MarketLensColors mlc) {
+    final total = r.subTasks.length;
+    final done = r.subTasks.where((t) => t.done).length;
+    final ratio = total == 0 ? 0.0 : done / total;
+    final color = ratio >= 1.0
+        ? mlc.gainColor
+        : (done > 0 ? mlc.accentBlue : mlc.warningColor);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.14),
+        borderRadius: BorderRadius.circular(AppRadius.xs),
+      ),
+      child: Text(
+        '$done/$total · ${(ratio * 100).round()}%',
+        style: TextStyle(
+          fontSize: AppTypography.micro,
+          fontWeight: AppTypography.bold,
+          color: color,
         ),
       ),
     );

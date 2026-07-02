@@ -210,6 +210,31 @@ class AdminApiClient {
   }
 
   // ── 계획 체크리스트 ──
+  /// 체크리스트 N개를 한 번에 추가(plan 글에만 허용). 한 트랜잭션.
+  /// 반환: 업데이트된 record(전체 subTasks 포함).
+  Future<ManagementRecord> addSubTasksBulk(
+    int recordId, {
+    required List<String> titles,
+    String? assignee,
+  }) async {
+    final uri = Uri.parse(
+      '$_baseUrl/api/v1/admin/ops/records/$recordId/subtasks/bulk',
+    );
+    final body = <String, dynamic>{
+      'titles': titles,
+      if (assignee != null && assignee.isNotEmpty) 'assignee': assignee,
+    };
+    final res = await _httpClient
+        .post(uri, headers: await _jsonHeaders(), body: jsonEncode(body))
+        .timeout(const Duration(seconds: 15));
+    if (res.statusCode == 200) {
+      return ManagementRecord.fromJson(
+        jsonDecode(res.body) as Map<String, dynamic>,
+      );
+    }
+    throw _err(res.statusCode);
+  }
+
   Future<ManagementRecord> addSubTask(
     int recordId, {
     required String title,
@@ -239,6 +264,8 @@ class AdminApiClient {
     String? title,
     String? assignee,
     bool? done,
+    SubTaskStatus? status,
+    String? resolutionNote, // status=failed|blocked 일 때 선택
   }) async {
     final uri = Uri.parse(
       '$_baseUrl/api/v1/admin/ops/records/$recordId/subtasks/$subTaskId',
@@ -247,6 +274,8 @@ class AdminApiClient {
       if (title != null) 'title': title,
       if (assignee != null) 'assignee': assignee,
       if (done != null) 'done': done,
+      if (status != null) 'status': status.wire,
+      if (resolutionNote != null) 'resolution_note': resolutionNote,
     };
     final res = await _httpClient
         .patch(uri, headers: await _jsonHeaders(), body: jsonEncode(body))
@@ -265,6 +294,74 @@ class AdminApiClient {
     );
     final res = await _httpClient
         .delete(uri, headers: await _headers())
+        .timeout(const Duration(seconds: 10));
+    if (res.statusCode == 200) {
+      return ManagementRecord.fromJson(
+        jsonDecode(res.body) as Map<String, dynamic>,
+      );
+    }
+    throw _err(res.statusCode);
+  }
+
+  /// SubTask 코멘트 추가 — 진행 현황 한 줄.
+  Future<ManagementRecord> addSubTaskComment(
+    int recordId,
+    int subTaskId, {
+    required String body,
+  }) async {
+    final uri = Uri.parse(
+      '$_baseUrl/api/v1/admin/ops/records/$recordId/subtasks/$subTaskId/comments',
+    );
+    final res = await _httpClient
+        .post(
+          uri,
+          headers: await _jsonHeaders(),
+          body: jsonEncode({'body': body}),
+        )
+        .timeout(const Duration(seconds: 10));
+    if (res.statusCode == 200) {
+      return ManagementRecord.fromJson(
+        jsonDecode(res.body) as Map<String, dynamic>,
+      );
+    }
+    throw _err(res.statusCode);
+  }
+
+  /// SubTask 코멘트 삭제 — 본인 또는 Master만(서버 가드).
+  Future<ManagementRecord> deleteSubTaskComment(
+    int recordId,
+    int subTaskId,
+    int commentId,
+  ) async {
+    final uri = Uri.parse(
+      '$_baseUrl/api/v1/admin/ops/records/$recordId/subtasks/$subTaskId/comments/$commentId',
+    );
+    final res = await _httpClient
+        .delete(uri, headers: await _headers())
+        .timeout(const Duration(seconds: 10));
+    if (res.statusCode == 200) {
+      return ManagementRecord.fromJson(
+        jsonDecode(res.body) as Map<String, dynamic>,
+      );
+    }
+    throw _err(res.statusCode);
+  }
+
+  /// SubTask 순서 재정렬 — 드래그 후 신규 id 순서 배열을 보냄.
+  /// 보내지 않은 id가 있으면 서버가 기존 순서로 뒤에 붙임(안전).
+  Future<ManagementRecord> reorderSubTasks(
+    int recordId, {
+    required List<int> orderedIds,
+  }) async {
+    final uri = Uri.parse(
+      '$_baseUrl/api/v1/admin/ops/records/$recordId/subtasks/reorder',
+    );
+    final res = await _httpClient
+        .post(
+          uri,
+          headers: await _jsonHeaders(),
+          body: jsonEncode({'order': orderedIds}),
+        )
         .timeout(const Duration(seconds: 10));
     if (res.statusCode == 200) {
       return ManagementRecord.fromJson(

@@ -106,12 +106,72 @@ class DisposalEntry {
   );
 }
 
-/// 계획 체크리스트 항목 (작성자·처리자 스냅샷 포함).
+/// SubTask 상태 5종. 'todo'(대기) · 'in_progress'(진행중) · 'done'(완료)
+/// · 'failed'(실패) · 'blocked'(보류/불가능).
+enum SubTaskStatus { todo, inProgress, done, failed, blocked }
+
+extension SubTaskStatusX on SubTaskStatus {
+  String get wire {
+    switch (this) {
+      case SubTaskStatus.todo:
+        return 'todo';
+      case SubTaskStatus.inProgress:
+        return 'in_progress';
+      case SubTaskStatus.done:
+        return 'done';
+      case SubTaskStatus.failed:
+        return 'failed';
+      case SubTaskStatus.blocked:
+        return 'blocked';
+    }
+  }
+
+  String get label {
+    switch (this) {
+      case SubTaskStatus.todo:
+        return '대기';
+      case SubTaskStatus.inProgress:
+        return '진행중';
+      case SubTaskStatus.done:
+        return '완료';
+      case SubTaskStatus.failed:
+        return '실패';
+      case SubTaskStatus.blocked:
+        return '보류';
+    }
+  }
+
+  static SubTaskStatus parse(String? wire, {bool? legacyDone}) {
+    switch (wire) {
+      case 'todo':
+        return SubTaskStatus.todo;
+      case 'in_progress':
+        return SubTaskStatus.inProgress;
+      case 'done':
+        return SubTaskStatus.done;
+      case 'failed':
+        return SubTaskStatus.failed;
+      case 'blocked':
+        return SubTaskStatus.blocked;
+    }
+    // 구버전(서버가 status 없이 done만 줄 때) 호환.
+    return (legacyDone == true) ? SubTaskStatus.done : SubTaskStatus.todo;
+  }
+}
+
+/// 계획 체크리스트 항목 (작성자·처리자 스냅샷 + 코멘트 스레드).
+/// 서버 sub_tasks JSONB 항목 1건과 1:1.
+///  - `done` 필드는 구버전 호환용. `status==done` 과 항상 동기.
+///  - `resolutionNote`는 status=failed|blocked일 때 사유(선택).
+///  - `comments`는 시간순 코멘트 리스트(스레드).
 class SubTask {
   final int id;
   final String title;
-  final bool done;
+  final SubTaskStatus status;
+  final bool done; // legacy: status==done
   final String? assignee;
+  final String? resolutionNote;
+  final List<SubTaskComment> comments;
   final int? createdById;
   final String? createdByNickname;
   final String? createdByRole;
@@ -124,8 +184,11 @@ class SubTask {
   const SubTask({
     required this.id,
     required this.title,
+    required this.status,
     required this.done,
     this.assignee,
+    this.resolutionNote,
+    this.comments = const [],
     this.createdById,
     this.createdByNickname,
     this.createdByRole,
@@ -136,20 +199,61 @@ class SubTask {
     this.doneAt,
   });
 
-  factory SubTask.fromJson(Map<String, dynamic> j) => SubTask(
-    id: (j['id'] as num?)?.toInt() ?? 0,
-    title: j['title'] as String? ?? '',
-    done: j['done'] == true,
-    assignee: j['assignee'] as String?,
-    createdById: (j['created_by_id'] as num?)?.toInt(),
-    createdByNickname: j['created_by_nickname'] as String?,
-    createdByRole: j['created_by_role'] as String?,
-    createdAt: j['created_at'] as String?,
-    doneById: (j['done_by_id'] as num?)?.toInt(),
-    doneByNickname: j['done_by_nickname'] as String?,
-    doneByRole: j['done_by_role'] as String?,
-    doneAt: j['done_at'] as String?,
-  );
+  factory SubTask.fromJson(Map<String, dynamic> j) {
+    final legacyDone = j['done'] == true;
+    final status = SubTaskStatusX.parse(
+      j['status'] as String?,
+      legacyDone: legacyDone,
+    );
+    return SubTask(
+      id: (j['id'] as num?)?.toInt() ?? 0,
+      title: j['title'] as String? ?? '',
+      status: status,
+      done: status == SubTaskStatus.done,
+      assignee: j['assignee'] as String?,
+      resolutionNote: j['resolution_note'] as String?,
+      comments: ((j['comments'] as List?) ?? const [])
+          .whereType<Map<String, dynamic>>()
+          .map(SubTaskComment.fromJson)
+          .toList(),
+      createdById: (j['created_by_id'] as num?)?.toInt(),
+      createdByNickname: j['created_by_nickname'] as String?,
+      createdByRole: j['created_by_role'] as String?,
+      createdAt: j['created_at'] as String?,
+      doneById: (j['done_by_id'] as num?)?.toInt(),
+      doneByNickname: j['done_by_nickname'] as String?,
+      doneByRole: j['done_by_role'] as String?,
+      doneAt: j['done_at'] as String?,
+    );
+  }
+}
+
+/// SubTask 코멘트 1건(진행 현황 스레드). 본인 또는 Master만 삭제 가능(서버 가드).
+class SubTaskComment {
+  final int id;
+  final String body;
+  final int? byUserId;
+  final String? byNickname;
+  final String? byRole;
+  final String? at; // ISO8601
+
+  const SubTaskComment({
+    required this.id,
+    required this.body,
+    this.byUserId,
+    this.byNickname,
+    this.byRole,
+    this.at,
+  });
+
+  factory SubTaskComment.fromJson(Map<String, dynamic> j) => SubTaskComment(
+        id: (j['id'] as num?)?.toInt() ?? 0,
+        body: j['body'] as String? ?? '',
+        byUserId: (j['by_user_id'] as num?)?.toInt(),
+        byNickname: j['by_nickname'] as String?,
+        byRole: j['by_role'] as String?,
+        at: j['at'] as String?,
+      );
 }
 
 class OpsSummary {

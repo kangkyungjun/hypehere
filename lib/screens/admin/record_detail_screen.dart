@@ -8,6 +8,7 @@ import '../../theme/app_spacing.dart';
 import '../../theme/app_typography.dart';
 import '../../widgets/common/bento_card.dart';
 import 'record_form_sheet.dart';
+import 'subtask_detail_sheet.dart';
 
 /// 기록 상세 (Master 전용).
 /// kind별 hero 영역 + 라벨/값 리스트 + 종류별 보조 액션.
@@ -44,6 +45,36 @@ class _RecordDetailScreenState extends State<RecordDetailScreen> {
       _record = r;
       _dirty = true;
     });
+  }
+
+  /// 체크리스트 상태에 따라 plan 글의 status를 자동 동기화.
+  ///  - 모든 항목 done(100%)       → '완료'
+  ///  - done>0 또는 in_progress>0  → '진행중'
+  ///  - 그 외(전부 todo, 또는 실패/보류만) → '계획'
+  /// 실패·보류가 있어도 done이 100%가 아니면 '완료'로 가지 않는다(분자=done만).
+  /// 단, 현재 status가 plan 라이프사이클(계획/진행중/완료) 또는 미지정인 경우에만 갱신.
+  /// 사용자가 다른 커스텀 상태를 둔 경우는 건드리지 않는다.
+  Future<void> _maybeSyncPlanStatus(ManagementRecord r) async {
+    if (r.kind != 'plan' || r.subTasks.isEmpty) return;
+    const lifecycle = {'계획', '진행중', '완료'};
+    final cur = r.status ?? '';
+    if (cur.isNotEmpty && !lifecycle.contains(cur)) return;
+    final total = r.subTasks.length;
+    final done = r.subTasks.where((t) => t.status == SubTaskStatus.done).length;
+    final inProg = r.subTasks
+        .where((t) => t.status == SubTaskStatus.inProgress)
+        .length;
+    final next = done == total
+        ? '완료'
+        : ((done > 0 || inProg > 0) ? '진행중' : '계획');
+    if (cur == next) return;
+    try {
+      final updated = await _api.updateOpsRecord(r.id, {'status': next});
+      if (!mounted) return;
+      _replaceRecord(updated);
+    } catch (_) {
+      // 자동 동기화 실패는 조용히 무시 — 다음 변경에서 재시도.
+    }
   }
 
   Future<void> _onEdit() async {
@@ -120,32 +151,62 @@ class _RecordDetailScreenState extends State<RecordDetailScreen> {
       builder: (_) => const _SubTaskDialog(),
     );
     if (result == null || !mounted) return;
+    setState(() => _busy = true);
     try {
-      final updated = await _api.addSubTask(
+      final updated = await _api.addSubTasksBulk(
         _record.id,
-        title: result.title,
+        titles: result.titles,
         assignee: result.assignee,
       );
+      if (!mounted) return;
       _replaceRecord(updated);
+      await _maybeSyncPlanStatus(updated);
+      if (!mounted) return;
+      setState(() => _busy = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('${result.titles.length}개 항목 추가')),
+      );
     } catch (e) {
       if (!mounted) return;
+      setState(() => _busy = false);
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('항목 추가 실패: $e')));
     }
   }
 
-  Future<void> _onToggleSubTask(SubTask t) async {
+  /// 항목 탭 → 상세 시트(상태 변경·코멘트). 시트가 반환한 record로 갱신.
+  Future<void> _onOpenSubTaskDetail(SubTask t, int index1Based) async {
+    final updated = await showSubTaskDetailSheet(
+      context,
+      api: _api,
+      recordId: _record.id,
+      subTask: t,
+      index1Based: index1Based,
+    );
+    if (!mounted || updated == null) return;
+    _replaceRecord(updated);
+    await _maybeSyncPlanStatus(updated);
+  }
+
+  /// 드래그 후 새 순서로 reorder API 호출. 낙관적 UI는 안 함(작아서 round-trip 충분).
+  Future<void> _onReorderSubTasks(int oldIndex, int newIndex) async {
+    if (newIndex > oldIndex) newIndex -= 1;
+    if (oldIndex == newIndex) return;
+    final items = [..._record.subTasks];
+    final moved = items.removeAt(oldIndex);
+    items.insert(newIndex, moved);
+    final ids = items.map((s) => s.id).toList();
     try {
-      final updated = await _api.patchSubTask(
+      final updated = await _api.reorderSubTasks(
         _record.id,
-        t.id,
-        done: !t.done,
+        orderedIds: ids,
       );
+      if (!mounted) return;
       _replaceRecord(updated);
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('변경 실패: $e')));
+          .showSnackBar(SnackBar(content: Text('순서 변경 실패: $e')));
     }
   }
 
@@ -174,6 +235,7 @@ class _RecordDetailScreenState extends State<RecordDetailScreen> {
     try {
       final updated = await _api.deleteSubTask(_record.id, t.id);
       _replaceRecord(updated);
+      await _maybeSyncPlanStatus(updated);
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context)
@@ -202,14 +264,17 @@ class _RecordDetailScreenState extends State<RecordDetailScreen> {
             ),
           ],
         ),
-        body: ListView(
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.lg,
-            AppSpacing.md,
-            AppSpacing.lg,
-            AppSpacing.xxxl,
-          ),
-          children: [
+        // SelectionArea — long-press 또는 드래그로 모든 텍스트 선택·복사 가능.
+        // 탭/리스트 reorder/IconButton 등 기존 인터랙션은 그대로 동작.
+        body: SelectionArea(
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.lg,
+              AppSpacing.md,
+              AppSpacing.lg,
+              AppSpacing.xxxl,
+            ),
+            children: [
             _buildHero(),
             const SizedBox(height: AppSpacing.md),
             _buildInfoCard(),
@@ -228,6 +293,7 @@ class _RecordDetailScreenState extends State<RecordDetailScreen> {
             const SizedBox(height: AppSpacing.xl),
             _buildActions(),
           ],
+        ),
         ),
       ),
     );
@@ -597,7 +663,7 @@ class _RecordDetailScreenState extends State<RecordDetailScreen> {
     return e.kind;
   }
 
-  // ── 계획: 체크리스트 ──
+  // ── 계획: 체크리스트(번호·상태칩·코멘트 배지·드래그 reorder) ──
   Widget _buildSubTaskCard() {
     final mlc = context.mlColors;
     final tasks = _record.subTasks;
@@ -612,6 +678,8 @@ class _RecordDetailScreenState extends State<RecordDetailScreen> {
                 style:
                     AppTypography.cardTitle.copyWith(color: mlc.textPrimary),
               ),
+              const SizedBox(width: 6),
+              if (tasks.isNotEmpty) _progressMini(tasks, mlc),
               const Spacer(),
               TextButton.icon(
                 onPressed: _busy ? null : _onAddSubTask,
@@ -632,27 +700,53 @@ class _RecordDetailScreenState extends State<RecordDetailScreen> {
               ),
             )
           else
-            ...tasks.map((t) => _subTaskRow(t, mlc)),
+            ReorderableListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              buildDefaultDragHandles: false,
+              itemCount: tasks.length,
+              onReorder: (oldI, newI) => _onReorderSubTasks(oldI, newI),
+              itemBuilder: (_, i) => _subTaskRow(tasks[i], i, mlc),
+            ),
         ],
       ),
     );
   }
 
-  Widget _subTaskRow(SubTask t, MarketLensColors mlc) {
-    final creator = (t.createdByNickname?.isNotEmpty == true)
-        ? t.createdByNickname!
-        : '—';
-    final doer = (t.doneByNickname?.isNotEmpty == true)
-        ? t.doneByNickname!
-        : null;
-    final assignee = (t.assignee?.isNotEmpty == true) ? t.assignee! : '미지정';
-
-    final meta = t.done && doer != null
-        ? '✍ $creator → ✅ $doer${t.doneAt != null ? '  ${_shortDate(t.doneAt!)}' : ''}'
-        : '✍ $creator · 담당 $assignee';
-
+  Widget _progressMini(List<SubTask> tasks, MarketLensColors mlc) {
+    final total = tasks.length;
+    final done = tasks.where((t) => t.status == SubTaskStatus.done).length;
+    final ratio = total == 0 ? 0.0 : done / total;
+    final color = ratio >= 1.0
+        ? mlc.gainColor
+        : (done > 0 ? mlc.accentBlue : mlc.warningColor);
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.14),
+        borderRadius: BorderRadius.circular(AppRadius.xs),
+      ),
+      child: Text(
+        '$done/$total · ${(ratio * 100).round()}%',
+        style: TextStyle(
+          fontSize: AppTypography.micro,
+          fontWeight: AppTypography.bold,
+          color: color,
+        ),
+      ),
+    );
+  }
+
+  Widget _subTaskRow(SubTask t, int idx, MarketLensColors mlc) {
+    final assignee = (t.assignee?.isNotEmpty == true) ? t.assignee! : '미지정';
+    final commentCount = t.comments.length;
+    final stColor = _statusColor(t.status, mlc);
+    final isClosed = t.status == SubTaskStatus.done ||
+        t.status == SubTaskStatus.failed ||
+        t.status == SubTaskStatus.blocked;
+    return Container(
+      key: ValueKey('subtask-${t.id}'),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
         border: Border(
           bottom: BorderSide(
@@ -661,53 +755,105 @@ class _RecordDetailScreenState extends State<RecordDetailScreen> {
           ),
         ),
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 30,
-            child: Checkbox(
-              value: t.done,
-              onChanged: (_) => _onToggleSubTask(t),
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      child: InkWell(
+        onTap: _busy ? null : () => _onOpenSubTaskDetail(t, idx + 1),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // 번호
+            SizedBox(
+              width: 26,
+              child: Text(
+                '${idx + 1}.',
+                textAlign: TextAlign.center,
+                style: AppTypography.label.copyWith(
+                  color: mlc.textTertiary,
+                  fontWeight: AppTypography.bold,
+                ),
+              ),
+            ),
+            // 상태 칩
+            Container(
+              margin: const EdgeInsets.only(right: AppSpacing.sm),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(
+                color: stColor.withValues(alpha: 0.14),
+                borderRadius: BorderRadius.circular(AppRadius.badge),
+              ),
+              child: Text(
+                t.status.label,
+                style: TextStyle(
+                  fontSize: AppTypography.micro,
+                  fontWeight: AppTypography.bold,
+                  color: stColor,
+                ),
+              ),
+            ),
+            // 제목 + 메타
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    t.title,
+                    style: TextStyle(
+                      fontSize: AppTypography.bodyLarge,
+                      color: mlc.textPrimary,
+                      fontWeight: AppTypography.semiBold,
+                      decoration:
+                          isClosed ? TextDecoration.lineThrough : null,
+                      decorationColor: mlc.textTertiary,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    '담당 $assignee${commentCount > 0 ? '  ·  💬 $commentCount' : ''}',
+                    style: TextStyle(
+                      fontSize: AppTypography.micro,
+                      color: mlc.textTertiary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // 메뉴 (삭제만 빠른 진입)
+            IconButton(
+              tooltip: '삭제',
+              iconSize: 18,
               visualDensity: VisualDensity.compact,
+              onPressed: _busy ? null : () => _onDeleteSubTask(t),
+              icon: Icon(Icons.delete_outline, color: mlc.textTertiary),
             ),
-          ),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  t.title,
-                  style: TextStyle(
-                    fontSize: AppTypography.bodyLarge,
-                    color: mlc.textPrimary,
-                    fontWeight: AppTypography.semiBold,
-                    decoration: t.done ? TextDecoration.lineThrough : null,
-                    decorationColor: mlc.textTertiary,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  meta,
-                  style: TextStyle(
-                    fontSize: AppTypography.micro,
-                    color: mlc.textTertiary,
-                  ),
-                ),
-              ],
+            // 드래그 핸들 — ReorderableListView가 이 child를 키로 인식하기 위해
+            ReorderableDragStartListener(
+              index: idx,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 2),
+                child: Icon(Icons.drag_handle,
+                    size: 18, color: mlc.textTertiary),
+              ),
             ),
-          ),
-          IconButton(
-            tooltip: '삭제',
-            iconSize: 18,
-            visualDensity: VisualDensity.compact,
-            onPressed: () => _onDeleteSubTask(t),
-            icon: Icon(Icons.delete_outline, color: mlc.textTertiary),
-          ),
-        ],
+          ],
+        ),
       ),
     );
+  }
+
+  Color _statusColor(SubTaskStatus s, MarketLensColors mlc) {
+    switch (s) {
+      case SubTaskStatus.todo:
+        return mlc.neutralColor;
+      case SubTaskStatus.inProgress:
+        return mlc.accentBlue;
+      case SubTaskStatus.done:
+        return mlc.gainColor;
+      case SubTaskStatus.failed:
+        return mlc.dangerColor;
+      case SubTaskStatus.blocked:
+        return mlc.warningColor;
+    }
   }
 
   // ── 하단 액션 (수정/삭제) ──
@@ -832,10 +978,6 @@ class _RecordDetailScreenState extends State<RecordDetailScreen> {
     return s.length >= 16 ? s.substring(0, 16) : s;
   }
 
-  String _shortDate(String iso) {
-    return iso.length >= 10 ? iso.substring(0, 10) : iso;
-  }
-
   /// 발생일(=목표일) 기준 D-Day. 과거면 D+, 오늘이면 D-Day.
   String _dDay(String? ymd) {
     if (ymd == null) return '';
@@ -958,12 +1100,12 @@ class _DisposalDialogState extends State<_DisposalDialog> {
   }
 }
 
-// ── 체크리스트 항목 추가 다이얼로그 ──
+// ── 체크리스트 항목 추가 다이얼로그 (여러 줄 = 여러 항목) ──
 
 class _SubTaskDialogResult {
-  final String title;
+  final List<String> titles;
   final String? assignee;
-  _SubTaskDialogResult({required this.title, this.assignee});
+  _SubTaskDialogResult({required this.titles, this.assignee});
 }
 
 class _SubTaskDialog extends StatefulWidget {
@@ -973,12 +1115,12 @@ class _SubTaskDialog extends StatefulWidget {
 }
 
 class _SubTaskDialogState extends State<_SubTaskDialog> {
-  final _title = TextEditingController();
+  final _titles = TextEditingController();
   final _assignee = TextEditingController();
 
   @override
   void dispose() {
-    _title.dispose();
+    _titles.dispose();
     _assignee.dispose();
     super.dispose();
   }
@@ -986,30 +1128,35 @@ class _SubTaskDialogState extends State<_SubTaskDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('체크리스트 항목 추가'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TextField(
-            controller: _title,
-            autofocus: true,
-            decoration: const InputDecoration(
-              labelText: '제목',
-              border: OutlineInputBorder(),
-              isDense: true,
+      title: const Text('체크리스트 추가'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: _titles,
+              autofocus: true,
+              maxLines: 6,
+              minLines: 3,
+              decoration: const InputDecoration(
+                labelText: '항목(줄바꿈으로 여러 개)',
+                hintText: '예)\n로고 시안 3종\nApp Store 스크린샷\n약관 검토',
+                border: OutlineInputBorder(),
+                isDense: true,
+              ),
             ),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          TextField(
-            controller: _assignee,
-            decoration: const InputDecoration(
-              labelText: '담당자(선택)',
-              hintText: '닉네임',
-              border: OutlineInputBorder(),
-              isDense: true,
+            const SizedBox(height: AppSpacing.md),
+            TextField(
+              controller: _assignee,
+              decoration: const InputDecoration(
+                labelText: '공통 담당자(선택)',
+                hintText: '닉네임 — 모든 항목에 동일하게 적용',
+                border: OutlineInputBorder(),
+                isDense: true,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
       actions: [
         TextButton(
@@ -1018,12 +1165,16 @@ class _SubTaskDialogState extends State<_SubTaskDialog> {
         ),
         FilledButton(
           onPressed: () {
-            final t = _title.text.trim();
-            if (t.isEmpty) return;
+            final lines = _titles.text
+                .split('\n')
+                .map((s) => s.trim())
+                .where((s) => s.isNotEmpty)
+                .toList();
+            if (lines.isEmpty) return;
             Navigator.pop(
               context,
               _SubTaskDialogResult(
-                title: t,
+                titles: lines,
                 assignee: _assignee.text.trim().isEmpty
                     ? null
                     : _assignee.text.trim(),
