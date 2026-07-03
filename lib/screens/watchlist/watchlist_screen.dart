@@ -9,6 +9,7 @@ import '../../utils/error_localizer.dart';
 import '../../models/ticker_score.dart';
 import '../../models/treemap_data.dart';
 import '../../models/chart_data.dart';
+import '../../models/watchlist_opinion.dart';
 import '../../widgets/community/signup_prompt_dialog.dart';
 import '../../config/feature_flags.dart';
 import '../../widgets/common/gold_upgrade_sheet.dart';
@@ -41,6 +42,11 @@ class _WatchlistScreenState extends State<WatchlistScreen> {
   /// Per-ticker analyst target + 1M/3M-ago prices, derived from getChartData.
   /// Populated progressively after the watchlist loads (see [_loadEnrichment]).
   final Map<String, WatchlistEnrichment> _enrichment = {};
+
+  /// ticker → 개인화 AI 의견. 서버 읽기 API(요청2, GET /watchlist/opinion) 확정 후
+  /// 여기서 로드해 채운다. 그전까지는 비어 있어 카드 하단 AI 블록이 렌더되지 않음.
+  /// TODO(watchlist-ai): 계약 확정 시 _loadOpinions() 추가 → _opinions 채우고 setState.
+  final Map<String, WatchlistOpinion> _opinions = {};
 
   @override
   void initState() {
@@ -344,6 +350,7 @@ class _WatchlistScreenState extends State<WatchlistScreen> {
     return WatchlistTab(
       tickerScores: _tickerScores,
       enrichment: _enrichment,
+      opinions: _opinions,
       isLoading: _isLoading,
       error: _error,
       treemapData: _treemapData,

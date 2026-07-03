@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../models/ticker_score.dart';
 import '../../../models/treemap_data.dart';
+import '../../../models/watchlist_opinion.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../providers/portfolio_provider.dart';
 import '../../../providers/watchlist_provider.dart';
@@ -33,6 +34,9 @@ class WatchlistEnrichment {
 class WatchlistTab extends StatelessWidget {
   final Map<String, TickerScore> tickerScores;
   final Map<String, WatchlistEnrichment> enrichment;
+  /// ticker → 개인화 AI 의견. 서버 읽기 API(요청2) 확정·연결 전까지 비어 있으며,
+  /// 비어 있으면 카드 하단 AI 블록은 렌더되지 않는다.
+  final Map<String, WatchlistOpinion> opinions;
   final bool isLoading;
   final String? error;
   final TreemapData? treemapData;
@@ -45,6 +49,7 @@ class WatchlistTab extends StatelessWidget {
     super.key,
     required this.tickerScores,
     this.enrichment = const {},
+    this.opinions = const {},
     required this.isLoading,
     this.error,
     this.treemapData,
@@ -322,6 +327,7 @@ class WatchlistTab extends StatelessWidget {
             _statRow(context, l10n.wlTargetPrice, _fmtPrice(enrich?.target)),
             _statRow(context, l10n.wlPrice1mAgo, _fmtPrice(enrich?.price1m)),
             _statRow(context, l10n.wlPrice3mAgo, _fmtPrice(enrich?.price3m)),
+            _aiOpinionBlock(context, ticker),
             if (isLoggedIn) ...[
               const SizedBox(height: AppSpacing.xs),
               Align(
@@ -369,6 +375,88 @@ class WatchlistTab extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  /// 카드 하단 개인화 AI 의견 블록.
+  /// 의견이 없으면(미연결·빈값) 아무것도 렌더하지 않아 기존 카드와 동일하게 보인다.
+  /// 2단 그리드라 폭이 좁아 서술은 2줄 말줄임 — 전문은 카드 탭 → 종목 상세에서.
+  Widget _aiOpinionBlock(BuildContext context, String ticker) {
+    final op = opinions[ticker];
+    if (op == null || op.isEmpty) return const SizedBox.shrink();
+    final mlc = context.mlColors;
+    final lang = Localizations.localeOf(context).languageCode;
+    final text = op.localizedOpinion(lang);
+    if (text.isEmpty) return const SizedBox.shrink();
+
+    final stance = op.stance;
+    final stanceColor = stance == 'BUY'
+        ? mlc.gainColor
+        : stance == 'SELL'
+            ? mlc.lossColor
+            : mlc.textSecondary;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: AppSpacing.sm),
+        Divider(height: 1, color: mlc.subtleBorder),
+        const SizedBox(height: AppSpacing.sm),
+        Row(
+          children: [
+            Icon(Icons.auto_awesome, size: 12, color: mlc.accentBlue),
+            const SizedBox(width: 4),
+            Text(
+              'AI',
+              style: TextStyle(
+                fontSize: AppTypography.micro,
+                fontWeight: AppTypography.bold,
+                color: mlc.accentBlue,
+              ),
+            ),
+            if (stance != null && stance.isNotEmpty) ...[
+              const SizedBox(width: AppSpacing.xs),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                decoration: BoxDecoration(
+                  color: stanceColor.withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(AppRadius.badge),
+                ),
+                child: Text(
+                  stance,
+                  style: TextStyle(
+                    fontSize: AppTypography.micro,
+                    fontWeight: AppTypography.bold,
+                    color: stanceColor,
+                  ),
+                ),
+              ),
+            ],
+            if (op.confidence != null) ...[
+              const SizedBox(width: AppSpacing.xs),
+              Text(
+                '${(op.confidence! * 100).round()}%',
+                style: TextStyle(
+                  fontSize: AppTypography.micro,
+                  color: mlc.textTertiary,
+                  fontFeatures: AppTypography.tabularFigures,
+                ),
+              ),
+            ],
+          ],
+        ),
+        const SizedBox(height: AppSpacing.xxs),
+        Text(
+          text,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            fontSize: AppTypography.caption,
+            color: mlc.textSecondary,
+            height: 1.35,
+          ),
+        ),
+      ],
     );
   }
 
