@@ -471,6 +471,8 @@ class KeyMetrics {
   final double? peg;
   final double? pb;
   final double? ps;
+  final double? eps;
+  final double? bps;
   final double? evRevenue;
   final double? evEbitda;
   final double? profitMargin;
@@ -493,6 +495,8 @@ class KeyMetrics {
     this.peg,
     this.pb,
     this.ps,
+    this.eps,
+    this.bps,
     this.evRevenue,
     this.evEbitda,
     this.profitMargin,
@@ -517,6 +521,8 @@ class KeyMetrics {
       peg: (json['peg'] as num?)?.toDouble(),
       pb: (json['pb'] as num?)?.toDouble(),
       ps: (json['ps'] as num?)?.toDouble(),
+      eps: (json['eps'] as num?)?.toDouble(),
+      bps: (json['bps'] as num?)?.toDouble(),
       evRevenue: (json['ev_revenue'] as num?)?.toDouble(),
       evEbitda: (json['ev_ebitda'] as num?)?.toDouble(),
       profitMargin: (json['profit_margin'] as num?)?.toDouble(),
@@ -541,6 +547,8 @@ class KeyMetrics {
     'peg': peg,
     'pb': pb,
     'ps': ps,
+    'eps': eps,
+    'bps': bps,
     'ev_revenue': evRevenue,
     'ev_ebitda': evEbitda,
     'profit_margin': profitMargin,

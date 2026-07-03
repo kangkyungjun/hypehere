@@ -35,6 +35,7 @@ import 'widgets/ticker_intraday_chart.dart';
 import 'widgets/ticker_price_chart.dart';
 import 'widgets/ticker_volume_chart.dart';
 import 'widgets/ticker_score_section.dart';
+import 'widgets/investment_metrics_section.dart';
 import 'widgets/ticker_insight_section.dart';
 import 'widgets/ticker_analyst_section.dart';
 import 'widgets/ticker_community_section.dart';
@@ -545,6 +546,11 @@ class _TickerDetailScreenState extends State<TickerDetailScreen> {
 
             // 10. AI 점수 이력 (접힘/펼침)
             TickerScoreSection(chartData: _chartData!),
+
+            const SizedBox(height: AppSpacing.md),
+
+            // 10.5 투자지표 (PER·PBR·ROE·EPS·BPS·EV/EBITDA)
+            InvestmentMetricsSection(metrics: _chartData!.keyMetrics),
 
             const SizedBox(height: AppSpacing.md),
 

@@ -78,6 +78,7 @@ class _RecommendationCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final MarketLensColors colors = context.mlColors;
     final l10n = AppLocalizations.of(context);
+    final lang = Localizations.localeOf(context).languageCode;
     final name = isKo
         ? (rec.nameKo ?? rec.name ?? rec.ticker)
         : (rec.name ?? rec.ticker);
@@ -100,7 +101,77 @@ class _RecommendationCard extends StatelessWidget {
               horizontal: AppSpacing.md,
               vertical: AppSpacing.md,
             ),
-            child: Row(
+            child: _buildRow(context, colors, l10n, name, changePct, lang),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// PER 줄 — "PER 123.6 · 업종 36.1" + 고/저평가 뱃지.
+  /// 둘 다 null이면 호출 안 됨(호출부 가드). 뱃지는 둘 다 있을 때만(비교 가능).
+  Widget _perLine(MarketLensColors colors, String lang) {
+    final pe = rec.pe;
+    final avg = rec.industryAvgPe;
+    final over = rec.isOvervalued; // null | true(고평가) | false(저평가)
+    final buf = StringBuffer('PER');
+    if (pe != null) buf.write(' ${pe.toStringAsFixed(1)}');
+    if (avg != null) buf.write(' · ${_indLabel(lang)} ${avg.toStringAsFixed(1)}');
+    final pillColor = over == true ? colors.warningColor : colors.gainColor;
+    return Row(
+      children: [
+        Flexible(
+          child: Text(
+            buf.toString(),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: AppTypography.micro,
+              color: colors.textTertiary,
+              fontFeatures: AppTypography.tabularFigures,
+            ),
+          ),
+        ),
+        if (over != null) ...[
+          const SizedBox(width: 4),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+            decoration: BoxDecoration(
+              color: pillColor.withValues(alpha: 0.14),
+              borderRadius: BorderRadius.circular(AppRadius.badge),
+            ),
+            child: Text(
+              _valLabel(lang, over),
+              style: TextStyle(
+                fontSize: AppTypography.micro,
+                fontWeight: AppTypography.bold,
+                color: pillColor,
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  static String _indLabel(String lang) =>
+      const {'ko': '업종', 'zh': '行业', 'ja': '業界', 'es': 'Sect.'}[lang] ?? 'Ind.';
+
+  static String _valLabel(String lang, bool over) => over
+      ? (const {'ko': '고평가', 'zh': '高估', 'ja': '割高', 'es': 'Sobreval.'}[lang] ??
+          'Overvalued')
+      : (const {'ko': '저평가', 'zh': '低估', 'ja': '割安', 'es': 'Infraval.'}[lang] ??
+          'Undervalued');
+
+  Widget _buildRow(
+    BuildContext context,
+    MarketLensColors colors,
+    AppLocalizations l10n,
+    String name,
+    double? changePct,
+    String lang,
+  ) {
+    return Row(
               children: [
                 // 순위 배지
                 Container(
@@ -143,6 +214,10 @@ class _RecommendationCard extends StatelessWidget {
                           color: colors.textSecondary,
                         ),
                       ),
+                      if (rec.pe != null || rec.industryAvgPe != null) ...[
+                        const SizedBox(height: 3),
+                        _perLine(colors, lang),
+                      ],
                     ],
                   ),
                 ),
@@ -174,10 +249,6 @@ class _RecommendationCard extends StatelessWidget {
                 const SizedBox(width: AppSpacing.xs),
                 Icon(Icons.chevron_right, size: 18, color: colors.textTertiary),
               ],
-            ),
-          ),
-        ),
-      ),
     );
   }
 }
