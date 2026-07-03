@@ -7,7 +7,9 @@ import '../../providers/auth_provider.dart';
 import '../../providers/portfolio_provider.dart';
 import '../../providers/subscription_provider.dart';
 import '../../services/analytics_api_client.dart';
+import '../../services/portfolio_api_client.dart';
 import '../../utils/error_localizer.dart';
+import '../../utils/multilingual.dart';
 import '../../models/ticker_score.dart';
 import '../../models/treemap_data.dart';
 import '../../models/chart_data.dart';
@@ -35,6 +37,7 @@ class WatchlistScreen extends StatefulWidget {
 
 class _WatchlistScreenState extends State<WatchlistScreen> {
   final AnalyticsApiClient _apiClient = AnalyticsApiClient();
+  final PortfolioApiClient _portfolioApi = PortfolioApiClient();
 
   Map<String, TickerScore> _tickerScores = {};
   TreemapData? _treemapData;
@@ -45,9 +48,8 @@ class _WatchlistScreenState extends State<WatchlistScreen> {
   /// Populated progressively after the watchlist loads (see [_loadEnrichment]).
   final Map<String, WatchlistEnrichment> _enrichment = {};
 
-  /// ticker → 개인화 AI 의견. 서버 읽기 API(요청2, GET /watchlist/opinion) 확정 후
-  /// 여기서 로드해 채운다. 그전까지는 비어 있어 카드 하단 AI 블록이 렌더되지 않음.
-  /// TODO(watchlist-ai): 계약 확정 시 _loadOpinions() 추가 → _opinions 채우고 setState.
+  /// ticker → 개인화 AI 의견. _loadOpinions()가 GET /api/v1/watchlist/opinion 으로
+  /// 채운다. 맥미니가 의견을 업로드하기 전엔 빈 상태 → 카드 하단 AI 블록 미표시.
   final Map<String, WatchlistOpinion> _opinions = {};
 
   /// 오늘 광고 시청으로 관심종목 AI 의견을 활성화했는지(날짜 기반, prefs 지속).
@@ -93,6 +95,7 @@ class _WatchlistScreenState extends State<WatchlistScreen> {
   @override
   void dispose() {
     _apiClient.dispose();
+    _portfolioApi.dispose();
     super.dispose();
   }
 
@@ -140,12 +143,34 @@ class _WatchlistScreenState extends State<WatchlistScreen> {
       // Progressive per-ticker enrichment (target + 1M/3M prices). Fire and
       // forget — cards render immediately and fill in as data arrives.
       _loadEnrichment(watchlist);
+      // 관심종목 개인화 AI 의견도 함께 로드(비필수 — 없으면 블록 미표시).
+      _loadOpinions(watchlist);
     } catch (e) {
       setState(() {
         _error = ErrorLocalizer.getMessage(context, e);
         _isLoading = false;
       });
     }
+  }
+
+  /// 관심종목 개인화 AI 의견 로드 → _opinions 채움. 로그인 시에만, 실패는 조용히 무시.
+  /// 서버(GET /api/v1/watchlist/opinion)가 종목별 최신·lang 추출본을 내려줌.
+  Future<void> _loadOpinions(List<String> watchlist) async {
+    if (!mounted) return;
+    if (!context.read<AuthProvider>().isLoggedIn) return;
+    final lang = effectiveLanguageCode(context);
+    final list = await _portfolioApi.getWatchlistOpinions(lang: lang);
+    if (!mounted || list.isEmpty) return;
+    final want = watchlist.toSet();
+    setState(() {
+      _opinions
+        ..clear()
+        ..addEntries(
+          list
+              .where((o) => want.contains(o.ticker))
+              .map((o) => MapEntry(o.ticker, o)),
+        );
+    });
   }
 
   /// Fetch analyst target + 1M/3M-ago prices per ticker via getChartData,

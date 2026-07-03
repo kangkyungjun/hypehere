@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import '../exceptions/api_error_codes.dart';
 import '../exceptions/api_exception.dart';
 import '../models/portfolio_data.dart';
+import '../models/watchlist_opinion.dart';
 import 'auth_service.dart';
 
 /// API client for portfolio endpoints (FastAPI:8001).
@@ -166,6 +167,26 @@ class PortfolioApiClient {
       throw ApiException(ApiErrorCode.networkFailed, debugMessage: 'Watchlist');
     } catch (e) {
       throw ApiException(ApiErrorCode.genericError, debugMessage: '$e');
+    }
+  }
+
+  /// 관심종목 개인화 AI 의견 (종목별 최신 1건). 서버가 lang 세그먼트 추출본을 내려줌.
+  /// 데이터 없으면 빈 리스트. 실패 시 빈 리스트(비필수 부가 정보 — 화면 막지 않음).
+  Future<List<WatchlistOpinion>> getWatchlistOpinions({
+    required String lang,
+  }) async {
+    try {
+      final response =
+          await _authGet('/api/v1/watchlist/opinion?lang=$lang');
+      _checkResponse(response, 'Watchlist opinions');
+      final json = jsonDecode(response.body) as Map<String, dynamic>;
+      final items = (json['items'] as List?) ?? const [];
+      return items
+          .whereType<Map<String, dynamic>>()
+          .map(WatchlistOpinion.fromJson)
+          .toList();
+    } catch (_) {
+      return const [];
     }
   }
 
