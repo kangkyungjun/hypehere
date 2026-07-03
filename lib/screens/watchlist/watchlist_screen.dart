@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../widgets/ads/rewarded_ad_helper.dart';
 import '../../providers/watchlist_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/portfolio_provider.dart';
@@ -48,11 +50,44 @@ class _WatchlistScreenState extends State<WatchlistScreen> {
   /// TODO(watchlist-ai): 계약 확정 시 _loadOpinions() 추가 → _opinions 채우고 setState.
   final Map<String, WatchlistOpinion> _opinions = {};
 
+  /// 오늘 광고 시청으로 관심종목 AI 의견을 활성화했는지(날짜 기반, prefs 지속).
+  /// ad-free/Gold 유저는 위젯단에서 항상 활성 처리되므로 여기선 광고 해제만 관리.
+  static const _prefKeyOpinionUnlockDate = 'watchlist_ai_opinion_unlock_date';
+  bool _opinionsAdUnlocked = false;
+
   @override
   void initState() {
     super.initState();
     _loadWatchlistData();
     _loadTreemapData();
+    _loadOpinionUnlock();
+    RewardedAdHelper.instance.preloadAd(); // AI 의견 활성화용 미리 로드
+  }
+
+  static String _todayYmd() {
+    final n = DateTime.now();
+    return '${n.year}-${n.month.toString().padLeft(2, '0')}-${n.day.toString().padLeft(2, '0')}';
+  }
+
+  Future<void> _loadOpinionUnlock() async {
+    final prefs = await SharedPreferences.getInstance();
+    final unlockedDate = prefs.getString(_prefKeyOpinionUnlockDate);
+    if (!mounted) return;
+    if (unlockedDate == _todayYmd()) {
+      setState(() => _opinionsAdUnlocked = true);
+    }
+  }
+
+  /// 보상형 광고 시청(또는 노필로 실패해도) → 오늘 하루 AI 의견 활성화 + 지속.
+  void _onWatchAdForOpinions() {
+    void unlock() async {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_prefKeyOpinionUnlockDate, _todayYmd());
+      if (!mounted) return;
+      setState(() => _opinionsAdUnlocked = true);
+    }
+
+    RewardedAdHelper.instance.showAd(onRewarded: unlock, onFailed: unlock);
   }
 
   @override
@@ -351,6 +386,8 @@ class _WatchlistScreenState extends State<WatchlistScreen> {
       tickerScores: _tickerScores,
       enrichment: _enrichment,
       opinions: _opinions,
+      opinionsAdUnlocked: _opinionsAdUnlocked,
+      onWatchAdForOpinions: _onWatchAdForOpinions,
       isLoading: _isLoading,
       error: _error,
       treemapData: _treemapData,

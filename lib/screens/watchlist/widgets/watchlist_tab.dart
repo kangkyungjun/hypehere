@@ -6,6 +6,7 @@ import '../../../models/treemap_data.dart';
 import '../../../models/watchlist_opinion.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../providers/portfolio_provider.dart';
+import '../../../providers/subscription_provider.dart';
 import '../../../providers/watchlist_provider.dart';
 import '../../../theme/app_colors.dart';
 import '../../../theme/app_radius.dart';
@@ -37,6 +38,10 @@ class WatchlistTab extends StatelessWidget {
   /// ticker → 개인화 AI 의견. 서버 읽기 API(요청2) 확정·연결 전까지 비어 있으며,
   /// 비어 있으면 카드 하단 AI 블록은 렌더되지 않는다.
   final Map<String, WatchlistOpinion> opinions;
+  /// 광고 시청으로 오늘 관심종목 AI 의견이 활성화됐는지(ad-free/Gold면 항상 활성).
+  final bool opinionsAdUnlocked;
+  /// AI 의견 잠금 해제용 보상형 광고 요청 콜백.
+  final VoidCallback? onWatchAdForOpinions;
   final bool isLoading;
   final String? error;
   final TreemapData? treemapData;
@@ -50,6 +55,8 @@ class WatchlistTab extends StatelessWidget {
     required this.tickerScores,
     this.enrichment = const {},
     this.opinions = const {},
+    this.opinionsAdUnlocked = false,
+    this.onWatchAdForOpinions,
     required this.isLoading,
     this.error,
     this.treemapData,
@@ -96,7 +103,11 @@ class WatchlistTab extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final auth = context.watch<AuthProvider>();
     final portfolio = context.watch<PortfolioProvider>();
+    final sub = context.watch<SubscriptionProvider>();
     final isLoggedIn = auth.isLoggedIn;
+    // AI 의견 활성화 여부: ad-free/Gold는 항상, 그 외엔 오늘 광고 시청 시.
+    final opinionsUnlocked =
+        auth.shouldHideAds || sub.isGoldActive || opinionsAdUnlocked;
 
     return Consumer<WatchlistProvider>(
       builder: (context, watchlistProvider, child) {
@@ -169,6 +180,7 @@ class WatchlistTab extends StatelessWidget {
                       watchlistProvider,
                       isLoggedIn,
                       isLoggedIn && portfolio.isInHoldings(t1),
+                      opinionsUnlocked,
                     ),
                   ),
                   const SizedBox(width: AppSpacing.md),
@@ -182,6 +194,7 @@ class WatchlistTab extends StatelessWidget {
                             watchlistProvider,
                             isLoggedIn,
                             isLoggedIn && portfolio.isInHoldings(t2),
+                            opinionsUnlocked,
                           ),
                   ),
                 ],
@@ -243,6 +256,7 @@ class WatchlistTab extends StatelessWidget {
     WatchlistProvider provider,
     bool isLoggedIn,
     bool isHeld,
+    bool opinionsUnlocked,
   ) {
     final l10n = AppLocalizations.of(context);
     final mlc = context.mlColors;
@@ -327,7 +341,7 @@ class WatchlistTab extends StatelessWidget {
             _statRow(context, l10n.wlTargetPrice, _fmtPrice(enrich?.target)),
             _statRow(context, l10n.wlPrice1mAgo, _fmtPrice(enrich?.price1m)),
             _statRow(context, l10n.wlPrice3mAgo, _fmtPrice(enrich?.price3m)),
-            _aiOpinionBlock(context, ticker),
+            _aiOpinionBlock(context, ticker, opinionsUnlocked),
             if (isLoggedIn) ...[
               const SizedBox(height: AppSpacing.xs),
               Align(
@@ -380,14 +394,56 @@ class WatchlistTab extends StatelessWidget {
 
   /// 카드 하단 개인화 AI 의견 블록.
   /// 의견이 없으면(미연결·빈값) 아무것도 렌더하지 않아 기존 카드와 동일하게 보인다.
-  /// 2단 그리드라 폭이 좁아 서술은 2줄 말줄임 — 전문은 카드 탭 → 종목 상세에서.
-  Widget _aiOpinionBlock(BuildContext context, String ticker) {
+  /// AI 채팅·포트폴리오 AI 카드와 동일하게 **광고 시청으로 활성화**(ad-free/Gold는 항상).
+  ///  - 잠김: "AI 의견 보기 (광고)" 컴팩트 CTA → 탭 시 보상형 광고.
+  ///  - 해제: 스탠스칩+신뢰도+서술(2줄 말줄임). 전문은 카드 탭 → 종목 상세.
+  Widget _aiOpinionBlock(
+    BuildContext context,
+    String ticker,
+    bool opinionsUnlocked,
+  ) {
     final op = opinions[ticker];
     if (op == null || op.isEmpty) return const SizedBox.shrink();
     final mlc = context.mlColors;
     final lang = Localizations.localeOf(context).languageCode;
     final text = op.localizedOpinion(lang);
     if (text.isEmpty) return const SizedBox.shrink();
+
+    // 잠김 상태 — 광고로 활성화하는 CTA만 노출(내용은 가림).
+    if (!opinionsUnlocked) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: AppSpacing.sm),
+          Divider(height: 1, color: mlc.subtleBorder),
+          const SizedBox(height: AppSpacing.sm),
+          InkWell(
+            onTap: onWatchAdForOpinions,
+            borderRadius: BorderRadius.circular(AppRadius.badge),
+            child: Row(
+              children: [
+                Icon(Icons.auto_awesome, size: 12, color: mlc.accentBlue),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Text(
+                    _viewOpinionLabel(lang),
+                    style: TextStyle(
+                      fontSize: AppTypography.caption,
+                      fontWeight: AppTypography.semiBold,
+                      color: mlc.accentBlue,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Icon(Icons.play_circle_outline,
+                    size: 14, color: mlc.textTertiary),
+              ],
+            ),
+          ),
+        ],
+      );
+    }
 
     final stance = op.stance;
     final stanceColor = stance == 'BUY'
@@ -458,6 +514,22 @@ class WatchlistTab extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  /// 잠금 CTA 라벨 — l10n 파일 변경(다른 WIP와 충돌) 회피 위해 인라인 다국어.
+  static String _viewOpinionLabel(String lang) {
+    switch (lang) {
+      case 'ko':
+        return 'AI 의견 보기';
+      case 'zh':
+        return '查看 AI 观点';
+      case 'ja':
+        return 'AI 意見を見る';
+      case 'es':
+        return 'Ver opinión de IA';
+      default:
+        return 'View AI opinion';
+    }
   }
 
   Widget _statRow(BuildContext context, String label, String value) {
