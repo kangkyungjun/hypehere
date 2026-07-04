@@ -81,12 +81,54 @@ class RsiChartWidget extends StatelessWidget {
   }
 
   /// RSI-only 차트 (MFI 없을 때 fallback)
+  /// RSI/MFI 터치 툴팁 — 날짜 + 정수 반올림 값. 투명 helper 라인은 제외해
+  /// 글씨 안 보임/색 이상/위치 어긋남 문제를 해결. (테마 배경 + onPrimary 글자)
+  LineTouchData _buildTouchData(BuildContext context) {
+    final mlc = context.mlColors;
+    return LineTouchData(
+      enabled: true,
+      touchTooltipData: LineTouchTooltipData(
+        tooltipBgColor: mlc.chartTooltipBg,
+        tooltipRoundedRadius: AppRadius.sm,
+        fitInsideHorizontally: true,
+        fitInsideVertically: true,
+        getTooltipItems: (touchedSpots) {
+          return touchedSpots
+              .map((spot) {
+                // 실선만: 0=RSI, 1=MFI. 투명 helper(barWidth 0)·기타는 제외.
+                if (spot.bar.barWidth == 0) return null;
+                final style = TextStyle(
+                  fontSize: AppTypography.bodySmall,
+                  fontWeight: AppTypography.bold,
+                  color: mlc.onPrimary,
+                );
+                if (spot.barIndex == 0) {
+                  final idx = spot.x.toInt().clamp(0, dataPoints.length - 1);
+                  final d = dataPoints[idx].date;
+                  return LineTooltipItem(
+                    '${d.month}/${d.day}\nRSI ${spot.y.round()}',
+                    style,
+                  );
+                }
+                if (spot.barIndex == 1) {
+                  return LineTooltipItem('MFI ${spot.y.round()}', style);
+                }
+                return null;
+              })
+              .whereType<LineTooltipItem>()
+              .toList();
+        },
+      ),
+    );
+  }
+
   Widget _buildRsiOnlyChart(
     BuildContext context,
     List<MapEntry<int, ChartDataPoint>> rsiData,
   ) {
     return LineChart(
       LineChartData(
+        lineTouchData: _buildTouchData(context),
         gridData: _buildGridData(context),
         titlesData: _buildTitlesData(context),
         borderData: FlBorderData(show: false),
@@ -210,6 +252,7 @@ class RsiChartWidget extends StatelessWidget {
           // Helper pairs for fill zones
           ...helperBars,
         ],
+        lineTouchData: _buildTouchData(context),
         betweenBarsData: betweenBars,
         extraLinesData: _buildExtraLines(context),
       ),
