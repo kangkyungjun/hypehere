@@ -31,7 +31,6 @@ import '../watchlist/widgets/add_holding_sheet.dart';
 import '../watchlist/widgets/instant_advice_sheet.dart';
 import 'widgets/ticker_header_widget.dart';
 import 'widgets/ticker_summary_cards.dart';
-import 'widgets/ticker_intraday_chart.dart';
 import 'widgets/ticker_price_chart.dart';
 import 'widgets/ticker_volume_chart.dart';
 import 'widgets/ticker_score_section.dart';
@@ -480,13 +479,7 @@ class _TickerDetailScreenState extends State<TickerDetailScreen> {
               onScrollToAIInsight: _scrollToAIInsight,
             ),
 
-            // 2.5 Intraday(시간봉) 차트 — 1h/1d 토글, 1d 점 탭 → 그 일자 1h 드릴다운.
-            //   메인 PriceChart(1M~1Y)는 아래 그대로 유지.
-            TickerIntradayChart(
-              ticker: _chartData!.ticker,
-              dailyData: _chartData!.data,
-            ),
-
+            // Intraday(시간봉) 차트는 헤더 가격 옆 미니 스파크라인 탭 → 모달로 이동.
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
               child: Divider(
