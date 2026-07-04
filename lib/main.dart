@@ -48,6 +48,7 @@ import 'models/news_data.dart';
 import 'utils/multilingual.dart';
 import 'widgets/news/market_news_modal.dart';
 import 'widgets/ads/app_open_ad_helper.dart';
+import 'widgets/update_prompt_cooldown.dart';
 import 'package:upgrader/upgrader.dart';
 
 void main() async {
@@ -448,17 +449,25 @@ class MarketLensApp extends StatelessWidget {
       ),
 
       themeMode: ThemeMode.system,
-      home: UpgradeAlert(
+      // upgrader 13.x는 "나중에"만 쿨다운 timestamp를 기록 — 외부 탭/X로 닫으면
+      // 콜드 스타트마다 다시 떠서 "방금 업데이트했는데 또" 호소의 원인.
+      // UpdatePromptCooldown 으로 어떻게 닫히든 cooldown 보장 + willDisplayUpgrade에서
+      // 다이얼로그 표시되는 순간 timestamp 기록.
+      home: UpdatePromptCooldown(
         upgrader: Upgrader(
           messages: _MarketLensUpgraderMessages(
             code: localeProvider.locale?.languageCode ?? 'en',
           ),
-          durationUntilAlertAgain: const Duration(days: 1),
+          durationUntilAlertAgain: const Duration(days: 3),
+          willDisplayUpgrade: ({
+            required bool display,
+            String? installedVersion,
+            UpgraderVersionInfo? versionInfo,
+          }) {
+            if (display) UpdatePromptCooldown.markPrompted();
+          },
         ),
-        showIgnore: false,
-        showLater: true,
-        showReleaseNotes: false,
-        dialogStyle: UpgradeDialogStyle.material,
+        cooldown: const Duration(days: 3),
         child: const MainNavigationScreen(),
       ),
     );

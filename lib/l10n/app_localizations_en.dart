@@ -509,6 +509,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get confirm => 'Confirm';
 
   @override
+  String get dashboardIndexFilterHint =>
+      'Tap an index to filter the chart to its stocks';
+
+  @override
   String get postDeleted => 'Post deleted';
 
   @override
@@ -1894,6 +1898,48 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get aiChatShuffle => 'Shuffle';
+
+  @override
+  String get aiChatAnalyzeMyHoldings => 'Analyze my holdings';
+
+  @override
+  String get macroAiCardTitle => 'AI volatility brief';
+
+  @override
+  String get macroAiCardLoading => 'Analyzing…';
+
+  @override
+  String get macroAiCardError =>
+      'Couldn\'t fetch analysis right now. Please try again shortly.';
+
+  @override
+  String get macroAiCardRetry => 'Try again';
+
+  @override
+  String get macroAiCardCadence => 'Updates each trading day';
+
+  @override
+  String get macroAiCardWatchAdCta =>
+      'Watch a short ad to unlock today\'s AI brief.';
+
+  @override
+  String get macroAiCardWatchAdAction => 'Watch ad for analysis';
+
+  @override
+  String get macroAiCardAdUnavailable =>
+      'Couldn\'t load an ad. Please try again shortly.';
+
+  @override
+  String get aiChatGreetingCooldownTitle => 'AI greeting frequency';
+
+  @override
+  String get aiChatGreetingCooldownOff => 'Off';
+
+  @override
+  String get aiChatGreetingCooldown2h => 'Every 2 hours';
+
+  @override
+  String get aiChatGreetingCooldownDaily => 'Once a day';
 
   @override
   String get aiChatCopy => 'Copy';

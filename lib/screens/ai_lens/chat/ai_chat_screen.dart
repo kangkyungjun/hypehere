@@ -4,6 +4,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../providers/chat_provider.dart';
 import '../../../providers/chat_nav_signals.dart';
+import '../../../providers/portfolio_provider.dart';
 import '../../../providers/subscription_provider.dart';
 import '../../../widgets/ads/banner_ad_widget.dart';
 import '../../../widgets/ads/rewarded_ad_helper.dart';
@@ -63,15 +64,31 @@ class _AiChatScreenState extends State<AiChatScreen> {
   }
 
   /// 관심도 로드 → 추천 질문 5개 추출 + (쿨다운 통과 시) 인사말 준비.
+  /// 인사는 PortfolioProvider의 보유/관심 티커를 반영해 동적 조립(둘 다 없으면 랜덤 폴백).
   Future<void> _initSuggestions() async {
     final interest = await ChatPersonalization.loadInterest();
     final greet = await ChatPersonalization.shouldGreet();
     if (greet) await ChatPersonalization.markGreeted();
     if (!mounted) return;
+    final port = context.read<PortfolioProvider>();
+    // 보유 평가액 desc로 우선순위 정렬 (큰 종목 먼저 인사에 노출).
+    final sortedHoldings = [...port.holdings]
+      ..sort((a, b) => (b.currentValue).compareTo(a.currentValue));
+    final holdings = sortedHoldings
+        .map((h) => (ticker: h.ticker, changePct: h.changePct))
+        .toList();
+    final watchlist = port.watchlistTickers
+        .map((t) => (ticker: t, changePct: null as double?))
+        .toList();
     setState(() {
       _interest = interest;
       _suggestions = ChatSuggestions.pick(5, interest: interest);
-      _greeting = greet ? ChatSuggestions.pickGreeting() : null;
+      _greeting = greet
+          ? ChatSuggestions.pickGreetingFor(
+              holdings: holdings,
+              watchlist: watchlist,
+            )
+          : null;
     });
   }
 
@@ -477,9 +494,14 @@ class _AiChatScreenState extends State<AiChatScreen> {
     );
   }
 
-  /// 접속 인사 카드(AI가 먼저 말을 거는 느낌의 어시스턴트 톤).
+  /// 접속 인사 카드(AI가 먼저 말을 거는 느낌). 보유 종목이 있으면 하단에
+  /// '내 보유 종목 분석' CTA — 탭 시 보유 티커를 포함한 메시지를
+  /// category=portfolio_holdings 로 즉시 전송.
   Widget _greetingCard(MarketLensColors mlc, bool isKo) {
     final g = _greeting!;
+    final port = context.watch<PortfolioProvider>();
+    final hasHoldings = port.holdings.isNotEmpty;
+    final l = AppLocalizations.of(context);
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.lg),
@@ -488,11 +510,81 @@ class _AiChatScreenState extends State<AiChatScreen> {
         borderRadius: BorderRadius.circular(AppRadius.lg),
         border: Border.all(color: mlc.subtleBorder.withValues(alpha: 0.5)),
       ),
-      child: Text(
-        isKo ? g.ko : g.en,
-        style: AppTypography.body.copyWith(color: mlc.textPrimary, height: 1.5),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            isKo ? g.ko : g.en,
+            style:
+                AppTypography.body.copyWith(color: mlc.textPrimary, height: 1.5),
+          ),
+          if (hasHoldings) ...[
+            const SizedBox(height: AppSpacing.md),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: _analyzeHoldingsCta(mlc, l, isKo),
+            ),
+          ],
+        ],
       ),
     );
+  }
+
+  Widget _analyzeHoldingsCta(
+      MarketLensColors mlc, AppLocalizations l, bool isKo) {
+    final chat = context.watch<ChatProvider>();
+    final auth = context.watch<AuthProvider>();
+    final sub = context.watch<SubscriptionProvider>();
+    final isAdFree = auth.shouldHideAds || sub.isGoldActive;
+    return Material(
+      color: mlc.accentBlue.withValues(alpha: 0.14),
+      borderRadius: BorderRadius.circular(AppRadius.full),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(AppRadius.full),
+        onTap: chat.isSending
+            ? null
+            : () => _onAnalyzeHoldingsTap(chat, isAdFree, isKo),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.sm,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.auto_awesome, size: 16, color: mlc.accentBlue),
+              const SizedBox(width: 6),
+              Text(
+                l.aiChatAnalyzeMyHoldings,
+                style: AppTypography.label.copyWith(
+                  color: mlc.accentBlue,
+                  fontWeight: AppTypography.bold,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _onAnalyzeHoldingsTap(
+      ChatProvider chat, bool isAdFree, bool isKo) async {
+    final port = context.read<PortfolioProvider>();
+    // 보유 평가액 desc 상위 8개 — 너무 많으면 메시지가 늘어져 LLM 답변 품질 ↓.
+    final sorted = [...port.holdings]
+      ..sort((a, b) => b.currentValue.compareTo(a.currentValue));
+    final tickers = sorted
+        .take(8)
+        .map((h) => h.ticker.toUpperCase())
+        .where((t) => t.isNotEmpty)
+        .toList();
+    if (tickers.isEmpty) return;
+    final joined = tickers.join(', ');
+    final msg = isKo
+        ? '내 보유 종목 [$joined] 오늘 흐름과 단기 전망을 한 단락으로 요약해줘.'
+        : 'Summarize today\'s moves and short-term outlook for my holdings [$joined] in one paragraph.';
+    await _submitText(msg, chat, isAdFree, category: 'portfolio_holdings');
   }
 
   /// 추천 질문 칩.

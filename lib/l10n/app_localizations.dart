@@ -1046,6 +1046,12 @@ abstract class AppLocalizations {
   /// **'Confirm'**
   String get confirm;
 
+  /// No description provided for @dashboardIndexFilterHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap an index to filter the chart to its stocks'**
+  String get dashboardIndexFilterHint;
+
   /// No description provided for @postDeleted.
   ///
   /// In en, this message translates to:
@@ -3631,6 +3637,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Shuffle'**
   String get aiChatShuffle;
+
+  /// No description provided for @aiChatAnalyzeMyHoldings.
+  ///
+  /// In en, this message translates to:
+  /// **'Analyze my holdings'**
+  String get aiChatAnalyzeMyHoldings;
+
+  /// No description provided for @macroAiCardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'AI volatility brief'**
+  String get macroAiCardTitle;
+
+  /// No description provided for @macroAiCardLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Analyzing…'**
+  String get macroAiCardLoading;
+
+  /// No description provided for @macroAiCardError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t fetch analysis right now. Please try again shortly.'**
+  String get macroAiCardError;
+
+  /// No description provided for @macroAiCardRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get macroAiCardRetry;
+
+  /// No description provided for @macroAiCardCadence.
+  ///
+  /// In en, this message translates to:
+  /// **'Updates each trading day'**
+  String get macroAiCardCadence;
+
+  /// No description provided for @macroAiCardWatchAdCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch a short ad to unlock today\'s AI brief.'**
+  String get macroAiCardWatchAdCta;
+
+  /// No description provided for @macroAiCardWatchAdAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch ad for analysis'**
+  String get macroAiCardWatchAdAction;
+
+  /// No description provided for @macroAiCardAdUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load an ad. Please try again shortly.'**
+  String get macroAiCardAdUnavailable;
+
+  /// No description provided for @aiChatGreetingCooldownTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'AI greeting frequency'**
+  String get aiChatGreetingCooldownTitle;
+
+  /// No description provided for @aiChatGreetingCooldownOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get aiChatGreetingCooldownOff;
+
+  /// No description provided for @aiChatGreetingCooldown2h.
+  ///
+  /// In en, this message translates to:
+  /// **'Every 2 hours'**
+  String get aiChatGreetingCooldown2h;
+
+  /// No description provided for @aiChatGreetingCooldownDaily.
+  ///
+  /// In en, this message translates to:
+  /// **'Once a day'**
+  String get aiChatGreetingCooldownDaily;
 
   /// No description provided for @aiChatCopy.
   ///

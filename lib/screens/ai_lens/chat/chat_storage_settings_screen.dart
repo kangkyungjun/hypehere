@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/chat_provider.dart';
+import '../../../services/chat_personalization.dart';
 import '../../../theme/app_colors.dart';
 import '../../../theme/app_spacing.dart';
 import '../../../theme/app_typography.dart';
@@ -24,11 +25,26 @@ class _ChatStorageSettingsScreenState extends State<ChatStorageSettingsScreen> {
 
   ({int conversations, int bytes})? _usage;
   bool _busy = false;
+  GreetCooldownMode _greetMode = GreetCooldownMode.twoHours;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _refreshUsage());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _refreshUsage();
+      _loadGreetMode();
+    });
+  }
+
+  Future<void> _loadGreetMode() async {
+    final m = await ChatPersonalization.loadGreetMode();
+    if (!mounted) return;
+    setState(() => _greetMode = m);
+  }
+
+  Future<void> _setGreetMode(GreetCooldownMode m) async {
+    setState(() => _greetMode = m);
+    await ChatPersonalization.saveGreetMode(m);
   }
 
   Future<void> _refreshUsage() async {
@@ -148,6 +164,38 @@ class _ChatStorageSettingsScreenState extends State<ChatStorageSettingsScreen> {
             ),
           ),
 
+          // ── AI 인사 빈도 ──
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.xl,
+              AppSpacing.xxl,
+              AppSpacing.xl,
+              AppSpacing.sm,
+            ),
+            child: Text(
+              l10n.aiChatGreetingCooldownTitle,
+              style: AppTypography.label.copyWith(color: mlc.textTertiary),
+            ),
+          ),
+          ..._greetOptions(l10n).map((opt) {
+            final selected = _greetMode == opt.mode;
+            return ListTile(
+              onTap: () => _setGreetMode(opt.mode),
+              leading: Icon(
+                selected
+                    ? Icons.radio_button_checked_rounded
+                    : Icons.radio_button_unchecked_rounded,
+                color: selected ? mlc.accentBlue : mlc.textTertiary,
+              ),
+              title: Text(
+                opt.label,
+                style: AppTypography.body.copyWith(
+                  color: selected ? mlc.textPrimary : mlc.textSecondary,
+                ),
+              ),
+            );
+          }),
+
           // ── 한도 선택 ──
           Padding(
             padding: const EdgeInsets.fromLTRB(
@@ -232,6 +280,21 @@ class _ChatStorageSettingsScreenState extends State<ChatStorageSettingsScreen> {
         ],
       ),
     );
+  }
+
+  List<({GreetCooldownMode mode, String label})> _greetOptions(
+      AppLocalizations l10n) {
+    return [
+      (mode: GreetCooldownMode.off, label: l10n.aiChatGreetingCooldownOff),
+      (
+        mode: GreetCooldownMode.twoHours,
+        label: l10n.aiChatGreetingCooldown2h,
+      ),
+      (
+        mode: GreetCooldownMode.daily,
+        label: l10n.aiChatGreetingCooldownDaily,
+      ),
+    ];
   }
 
   Widget _statCell(MarketLensColors mlc, String value, String label) {

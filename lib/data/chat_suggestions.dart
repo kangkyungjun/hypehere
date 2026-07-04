@@ -65,6 +65,86 @@ class ChatSuggestions {
     return greetings[r.nextInt(greetings.length)];
   }
 
+  /// 인사용 1종목 시세 큐: (티커, 일간 변동% — null이면 시세 없음).
+  /// 우선순위 정렬은 호출자 책임(보통 보유 평가액 desc).
+  static String _fmtPct(double? p) {
+    if (p == null) return '';
+    final s = p >= 0 ? '+${p.toStringAsFixed(1)}%' : '${p.toStringAsFixed(1)}%';
+    return ' $s';
+  }
+
+  /// 보유/관심 종목을 반영한 **개인화 인사**.
+  ///   - holdings ≥ 1 → 보유 티커 최대 3개 + 시세% 멘트 (시세 없으면 종목명만)
+  ///   - holdings 0, watchlist ≥ 1 → 관심 종목 N개 언급
+  ///   - 둘 다 0       → [pickGreeting] 폴백(랜덤 6종)
+  /// [holdings]/[watchlist] 항목 = `(ticker, changePct?)`. changePct는 일간 % (예: -2.3, 1.1).
+  static ({String ko, String en}) pickGreetingFor({
+    List<({String ticker, double? changePct})> holdings = const [],
+    List<({String ticker, double? changePct})> watchlist = const [],
+    Random? rng,
+  }) {
+    final r = rng ?? Random();
+
+    String join(List<({String ticker, double? changePct})> xs) {
+      return xs
+          .take(3)
+          .map((x) => '${x.ticker.toUpperCase()}${_fmtPct(x.changePct)}')
+          .join(' · ');
+    }
+
+    // 중복 제거(첫 등장 보존). 빈 티커 스킵.
+    List<({String ticker, double? changePct})> norm(
+        List<({String ticker, double? changePct})> xs) {
+      final seen = <String>{};
+      final out = <({String ticker, double? changePct})>[];
+      for (final x in xs) {
+        final t = x.ticker.trim().toUpperCase();
+        if (t.isEmpty || seen.contains(t)) continue;
+        seen.add(t);
+        out.add((ticker: t, changePct: x.changePct));
+      }
+      return out;
+    }
+
+    final hs = norm(holdings);
+    if (hs.isNotEmpty) {
+      final tickers = join(hs);
+      final extra = hs.length > 3 ? ' 외 ${hs.length - 3}종목' : '';
+      final extraEn = hs.length > 3 ? ' +${hs.length - 3} more' : '';
+      final ko = [
+        '안녕하세요 👋 $tickers$extra — 흐름 점검해 드릴까요?',
+        '반가워요! $tickers$extra 보고 계시군요. 오늘 시장 분위기나 보유 종목 변동 — 편하게 물어보세요.',
+        '오늘도 잘 오셨어요 ☀️ $tickers$extra — 한 줄 요약부터 시작해 드릴게요.',
+      ];
+      final en = [
+        'Hi 👋 $tickers$extraEn — want a quick read?',
+        'Welcome back! Tracking $tickers$extraEn — ask about today\'s moves or anything else.',
+        'Good to see you ☀️ $tickers$extraEn — say the word.',
+      ];
+      final i = r.nextInt(ko.length);
+      return (ko: ko[i], en: en[i]);
+    }
+
+    final ws = norm(watchlist);
+    if (ws.isNotEmpty) {
+      final tickers = join(ws);
+      final extra = ws.length > 3 ? ' 외 ${ws.length - 3}종목' : '';
+      final extraEn = ws.length > 3 ? ' +${ws.length - 3} more' : '';
+      final ko = [
+        '안녕하세요 👋 관심 종목 $tickers$extra — 한 종목 골라 분석해 드릴까요, 아니면 오늘 시황 요약?',
+        '반가워요! $tickers$extra 관심 등록해 두셨군요. 지금 분석해 보고 싶은 종목이 있으세요?',
+      ];
+      final en = [
+        'Hi 👋 Watching $tickers$extraEn — deep-dive on one, or today\'s recap?',
+        'Welcome back! Watchlist: $tickers$extraEn — pick one to analyze?',
+      ];
+      final i = r.nextInt(ko.length);
+      return (ko: ko[i], en: en[i]);
+    }
+
+    return pickGreeting(rng: r);
+  }
+
   /// 관심도 가중 + 카테고리 다양성을 반영해 [n]개를 중복 없이 뽑는다.
   static List<ChatSuggestion> pick(
     int n, {

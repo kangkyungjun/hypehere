@@ -500,6 +500,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get confirm => '확인';
 
   @override
+  String get dashboardIndexFilterHint => '지수를 탭하면 해당 지수 종목만 필터링됩니다';
+
+  @override
   String get postDeleted => '게시글이 삭제되었습니다';
 
   @override
@@ -1866,6 +1869,45 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get aiChatShuffle => '다른 질문';
+
+  @override
+  String get aiChatAnalyzeMyHoldings => '내 보유 종목 분석';
+
+  @override
+  String get macroAiCardTitle => 'AI 변동성 분석';
+
+  @override
+  String get macroAiCardLoading => '분석 중…';
+
+  @override
+  String get macroAiCardError => '지금은 분석을 가져올 수 없어요. 잠시 후 다시 시도해 보세요.';
+
+  @override
+  String get macroAiCardRetry => '다시 시도';
+
+  @override
+  String get macroAiCardCadence => '거래일마다 갱신';
+
+  @override
+  String get macroAiCardWatchAdCta => '오늘 AI 분석을 받으려면 짧은 광고를 시청해 주세요.';
+
+  @override
+  String get macroAiCardWatchAdAction => '광고 보고 분석 받기';
+
+  @override
+  String get macroAiCardAdUnavailable => '광고를 불러올 수 없어요. 잠시 후 다시 시도해 주세요.';
+
+  @override
+  String get aiChatGreetingCooldownTitle => 'AI 인사 빈도';
+
+  @override
+  String get aiChatGreetingCooldownOff => '끄기';
+
+  @override
+  String get aiChatGreetingCooldown2h => '2시간';
+
+  @override
+  String get aiChatGreetingCooldownDaily => '하루 1회';
 
   @override
   String get aiChatCopy => '복사';

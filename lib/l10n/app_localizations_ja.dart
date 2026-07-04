@@ -500,6 +500,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get confirm => '確認';
 
   @override
+  String get dashboardIndexFilterHint => '指数をタップするとその構成銘柄に絞り込まれます';
+
+  @override
   String get postDeleted => '投稿が削除されました';
 
   @override
@@ -1866,6 +1869,45 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get aiChatShuffle => '他の質問';
+
+  @override
+  String get aiChatAnalyzeMyHoldings => '保有銘柄を分析';
+
+  @override
+  String get macroAiCardTitle => 'AIボラティリティ解説';
+
+  @override
+  String get macroAiCardLoading => '分析中…';
+
+  @override
+  String get macroAiCardError => '現在分析を取得できません。しばらくしてからお試しください。';
+
+  @override
+  String get macroAiCardRetry => '再試行';
+
+  @override
+  String get macroAiCardCadence => '取引日ごとに更新';
+
+  @override
+  String get macroAiCardWatchAdCta => '本日のAI分析を表示するには短い広告をご覧ください。';
+
+  @override
+  String get macroAiCardWatchAdAction => '広告を見て分析を受け取る';
+
+  @override
+  String get macroAiCardAdUnavailable => '広告を読み込めません。しばらくしてからお試しください。';
+
+  @override
+  String get aiChatGreetingCooldownTitle => 'AI挨拶の頻度';
+
+  @override
+  String get aiChatGreetingCooldownOff => 'オフ';
+
+  @override
+  String get aiChatGreetingCooldown2h => '2時間ごと';
+
+  @override
+  String get aiChatGreetingCooldownDaily => '1日1回';
 
   @override
   String get aiChatCopy => 'コピー';

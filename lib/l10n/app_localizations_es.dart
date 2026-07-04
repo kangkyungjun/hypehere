@@ -515,6 +515,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get confirm => 'Confirmar';
 
   @override
+  String get dashboardIndexFilterHint =>
+      'Toca un índice para filtrar sus acciones';
+
+  @override
   String get postDeleted => 'Publicación eliminada';
 
   @override
@@ -1916,6 +1920,48 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get aiChatShuffle => 'Otras';
+
+  @override
+  String get aiChatAnalyzeMyHoldings => 'Analizar mi cartera';
+
+  @override
+  String get macroAiCardTitle => 'Análisis de volatilidad IA';
+
+  @override
+  String get macroAiCardLoading => 'Analizando…';
+
+  @override
+  String get macroAiCardError =>
+      'No se pudo obtener el análisis. Inténtalo más tarde.';
+
+  @override
+  String get macroAiCardRetry => 'Reintentar';
+
+  @override
+  String get macroAiCardCadence => 'Se actualiza cada día de mercado';
+
+  @override
+  String get macroAiCardWatchAdCta =>
+      'Mira un anuncio corto para desbloquear el análisis IA de hoy.';
+
+  @override
+  String get macroAiCardWatchAdAction => 'Ver anuncio para análisis';
+
+  @override
+  String get macroAiCardAdUnavailable =>
+      'No se pudo cargar el anuncio. Inténtalo más tarde.';
+
+  @override
+  String get aiChatGreetingCooldownTitle => 'Frecuencia del saludo de IA';
+
+  @override
+  String get aiChatGreetingCooldownOff => 'Desactivado';
+
+  @override
+  String get aiChatGreetingCooldown2h => 'Cada 2 horas';
+
+  @override
+  String get aiChatGreetingCooldownDaily => 'Una vez al día';
 
   @override
   String get aiChatCopy => 'Copiar';

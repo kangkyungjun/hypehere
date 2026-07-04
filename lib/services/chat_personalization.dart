@@ -14,20 +14,45 @@ class ChatPersonalization {
   ChatPersonalization._();
 
   static const _kGreetLast = 'chat_greet_last_ms';
+  static const _kGreetMode = 'chat_greet_cooldown_mode'; // off | 2h | daily
   static const _kInterest = 'chat_interest_v1'; // JSON {category: count}
   static const _kTapLog = 'chat_tap_log_v1'; // JSON [{id, cat, t}], 최근 300개
   static const _tapLogCap = 300;
 
-  /// 접속 인사 쿨다운(기본 2시간).
+  /// 접속 인사 쿨다운 — 기본값(2시간). 사용자 설정에서 끄기/2시간/하루1회 선택.
   static const Duration greetCooldown = Duration(hours: 2);
 
-  /// 마지막 인사 후 [greetCooldown]이 지났으면 true.
+  /// 현재 쿨다운 모드 로드. 미설정 시 기본 [GreetCooldownMode.twoHours].
+  static Future<GreetCooldownMode> loadGreetMode() async {
+    final prefs = await SharedPreferences.getInstance();
+    return _modeFromWire(prefs.getString(_kGreetMode));
+  }
+
+  /// 쿨다운 모드 저장.
+  static Future<void> saveGreetMode(GreetCooldownMode mode) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_kGreetMode, mode.wire);
+  }
+
+  /// 모드에 따라 인사 노출 여부 판단.
+  ///   - off    → 항상 false (인사 없음)
+  ///   - 2h     → 마지막 인사 후 2시간 경과
+  ///   - daily  → 마지막 인사가 오늘(로컬 자정 기준)이 아니면 true
   static Future<bool> shouldGreet({DateTime? now}) async {
+    final mode = await loadGreetMode();
+    if (mode == GreetCooldownMode.off) return false;
     final prefs = await SharedPreferences.getInstance();
     final lastMs = prefs.getInt(_kGreetLast);
     if (lastMs == null) return true;
     final last = DateTime.fromMillisecondsSinceEpoch(lastMs);
     final ref = now ?? DateTime.now();
+    if (mode == GreetCooldownMode.daily) {
+      // '오늘'(로컬 자정 기준) 첫 진입이면 통과.
+      final sameDay = last.year == ref.year &&
+          last.month == ref.month &&
+          last.day == ref.day;
+      return !sameDay;
+    }
     return ref.difference(last) >= greetCooldown;
   }
 
@@ -95,6 +120,34 @@ class ChatPersonalization {
       return list.map((e) => Map<String, dynamic>.from(e as Map)).toList();
     } catch (_) {
       return [];
+    }
+  }
+
+  static GreetCooldownMode _modeFromWire(String? w) {
+    switch (w) {
+      case 'off':
+        return GreetCooldownMode.off;
+      case 'daily':
+        return GreetCooldownMode.daily;
+      case '2h':
+      default:
+        return GreetCooldownMode.twoHours;
+    }
+  }
+}
+
+/// AI 인사 쿨다운 모드.
+enum GreetCooldownMode { off, twoHours, daily }
+
+extension GreetCooldownModeX on GreetCooldownMode {
+  String get wire {
+    switch (this) {
+      case GreetCooldownMode.off:
+        return 'off';
+      case GreetCooldownMode.twoHours:
+        return '2h';
+      case GreetCooldownMode.daily:
+        return 'daily';
     }
   }
 }

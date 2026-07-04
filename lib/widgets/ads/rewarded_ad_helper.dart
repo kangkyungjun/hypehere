@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
@@ -96,6 +97,43 @@ class RewardedAdHelper {
         onRewarded();
       },
     );
+  }
+
+  /// 보상형 광고를 await 가능한 형태로 표시.
+  /// 반환값:
+  ///   - true  → 사용자가 광고 끝까지 시청해 reward 획득
+  ///   - false → 광고 미준비 / 표시 실패 / 사용자가 중도 닫음
+  /// 호출자는 이 결과로 그 자리에서 후속 동작(예: 쿼터 충전 + 자동 재시도) 결정.
+  Future<bool> showAdAndWait() {
+    final completer = Completer<bool>();
+    var rewarded = false;
+    // 광고 미준비 시 곧장 false.
+    if (!_isAdLoaded || _rewardedAd == null) {
+      preloadAd();
+      return Future.value(false);
+    }
+    _rewardedAd!.fullScreenContentCallback = FullScreenContentCallback(
+      onAdDismissedFullScreenContent: (ad) {
+        ad.dispose();
+        _rewardedAd = null;
+        _isAdLoaded = false;
+        preloadAd();
+        if (!completer.isCompleted) completer.complete(rewarded);
+      },
+      onAdFailedToShowFullScreenContent: (ad, error) {
+        debugPrint('[AdMob] 보상형 광고 표시 실패(showAdAndWait): $error');
+        ad.dispose();
+        _rewardedAd = null;
+        _isAdLoaded = false;
+        if (!completer.isCompleted) completer.complete(false);
+      },
+    );
+    _rewardedAd!.show(
+      onUserEarnedReward: (ad, reward) {
+        rewarded = true;
+      },
+    );
+    return completer.future;
   }
 
   /// 리소스 정리 (앱 종료 시)

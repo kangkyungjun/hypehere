@@ -1,9 +1,13 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../models/macro_data.dart';
+import '../../providers/auth_provider.dart';
+import '../../providers/chat_provider.dart';
+import '../../providers/subscription_provider.dart';
 import '../../services/analytics_api_client.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_radius.dart';
@@ -11,6 +15,8 @@ import '../../theme/app_spacing.dart';
 import '../../theme/app_stroke.dart';
 import '../../theme/app_typography.dart';
 import '../../widgets/ads/banner_ad_widget.dart';
+import '../../widgets/ads/rewarded_ad_helper.dart';
+import 'widgets/macro_explanation_card.dart';
 
 /// Macro indicator history screen with trend chart + history list + detail dialog.
 class MacroHistoryScreen extends StatefulWidget {
@@ -38,6 +44,11 @@ class _MacroHistoryScreenState extends State<MacroHistoryScreen> {
   void initState() {
     super.initState();
     _loadHistory();
+    // VIX는 AI 카드의 광고 게이트(쿼터 소진 시 보상형 광고)를 사용 — 미리 로드.
+    final code = widget.indicatorCode.toUpperCase();
+    if (code == 'VIXCLS' || code == 'VIX') {
+      RewardedAdHelper.instance.preloadAd();
+    }
   }
 
   Future<void> _loadHistory() async {
@@ -88,6 +99,81 @@ class _MacroHistoryScreenState extends State<MacroHistoryScreen> {
     );
   }
 
+  /// 자동 로드 게이트 — 캐시 miss 시 호출.
+  ///   - Gold/AdFree → allow (무료)
+  ///   - 쿼터 있음 → 차감 후 allow
+  ///   - 쿼터 소진 → needAd (카드 자리에 CTA. 사용자 탭 시 광고 다이얼로그 호출됨)
+  Future<MacroAutoGateResult> _onMacroCardAutoRefresh() async {
+    if (!mounted) return MacroAutoGateResult.block;
+    final auth = context.read<AuthProvider>();
+    final sub = context.read<SubscriptionProvider>();
+    final chat = context.read<ChatProvider>();
+    final isAdFree = auth.shouldHideAds || sub.isGoldActive;
+    if (isAdFree) return MacroAutoGateResult.allow;
+    await chat.loadQuota();
+    if (chat.quotaExhausted) {
+      // 자동 광고 다이얼로그는 띄우지 않음 — CTA로 사용자 의지 확인.
+      // 단, CTA 탭으로 다시 _onMacroCardAutoRefresh 호출됐을 때(즉 광고를 봐서
+      // refill된 후 호출)는 quotaExhausted=false라 위 if를 통과 → allow.
+      // CTA 탭에서 광고 다이얼로그를 띄우는 흐름은 별도(_handleAutoCtaTap).
+      return MacroAutoGateResult.needAd;
+    }
+    await chat.consumeQuota();
+    return MacroAutoGateResult.allow;
+  }
+
+  /// 🔄 강제 재요청 게이트 — 명시적 사용자 의지라 쿼터 소진 시 그 자리 광고 자동 다이얼로그.
+  ///   - Gold/AdFree → true
+  ///   - 쿼터 있음 → 차감 후 true
+  ///   - 쿼터 소진 → 보상형 광고 → 시청 완료 시 refill+차감 후 true / 시청 실패 시 스낵바 + false
+  Future<bool> _onMacroCardForceRefresh() async {
+    if (!mounted) return false;
+    final auth = context.read<AuthProvider>();
+    final sub = context.read<SubscriptionProvider>();
+    final chat = context.read<ChatProvider>();
+    final l10n = AppLocalizations.of(context);
+    final isAdFree = auth.shouldHideAds || sub.isGoldActive;
+    if (isAdFree) return true;
+    await chat.loadQuota();
+    if (!chat.quotaExhausted) {
+      await chat.consumeQuota();
+      return true;
+    }
+    // 쿼터 소진 → 그 자리에서 광고 시청 시도.
+    final rewarded = await RewardedAdHelper.instance.showAdAndWait();
+    if (!mounted) return false;
+    if (!rewarded) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.macroAiCardAdUnavailable)),
+      );
+      // 다음 시도를 위해 한 번 더 preload 트리거
+      RewardedAdHelper.instance.preloadAd();
+      return false;
+    }
+    await chat.grantQuotaBonus(1); // 광고 보상 = +1 (VIX 한 회용 소량)
+    await chat.consumeQuota();
+    return true;
+  }
+
+  /// 자동 로드 CTA 탭 → 보상형 광고 → 보상 +1 → 즉시 차감(자동 재호출이 곧장 일어남).
+  Future<bool> _onWatchAdForMacroAuto() async {
+    if (!mounted) return false;
+    final l10n = AppLocalizations.of(context);
+    final chat = context.read<ChatProvider>();
+    final rewarded = await RewardedAdHelper.instance.showAdAndWait();
+    if (!mounted) return false;
+    if (!rewarded) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.macroAiCardAdUnavailable)),
+      );
+      RewardedAdHelper.instance.preloadAd();
+      return false;
+    }
+    await chat.grantQuotaBonus(1);
+    await chat.consumeQuota();
+    return true;
+  }
+
   Widget _buildContent(BuildContext context, MarketLensColors mlc) {
     final entries = _historyData!.entries;
 
@@ -96,6 +182,41 @@ class _MacroHistoryScreenState extends State<MacroHistoryScreen> {
 
     // Trend chart at top
     children.add(_buildTrendChart(mlc));
+
+    // VIX 한정 — AI 변동성 설명 카드 + 배너 광고 1개. (FRED 시리즈명 'VIXCLS')
+    final upperCode = widget.indicatorCode.toUpperCase();
+    if ((upperCode == 'VIXCLS' || upperCode == 'VIX') && entries.isNotEmpty) {
+      final lang = Localizations.localeOf(context).languageCode == 'ko'
+          ? 'ko'
+          : 'en';
+      // 최신 7개 → 오래된 순으로 정렬해 서버에 전달.
+      final recentValues = entries
+          .take(7)
+          .where((e) => (e.observationDate ?? '').isNotEmpty)
+          .toList()
+          .reversed
+          .map<Map<String, Object>>((e) => {
+                'date': e.observationDate!,
+                'value': e.value,
+              })
+          .toList();
+      if (recentValues.isNotEmpty) {
+        children.add(MacroExplanationCard(
+          indicatorCode: upperCode,
+          lang: lang,
+          recentValues: recentValues,
+          onAutoRefresh: _onMacroCardAutoRefresh,
+          onWatchAdForAuto: _onWatchAdForMacroAuto,
+          onForceRefresh: _onMacroCardForceRefresh,
+        ));
+        children.add(
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
+            child: Center(child: BannerAdWidget()),
+          ),
+        );
+      }
+    }
 
     // History items with ads every 5
     int dataIndex = 0;

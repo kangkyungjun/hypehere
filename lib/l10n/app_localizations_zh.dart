@@ -498,6 +498,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get confirm => '确认';
 
   @override
+  String get dashboardIndexFilterHint => '点击指数可筛选该指数的成分股';
+
+  @override
   String get postDeleted => '帖子已删除';
 
   @override
@@ -1862,6 +1865,45 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get aiChatShuffle => '换一批';
+
+  @override
+  String get aiChatAnalyzeMyHoldings => '分析我的持仓';
+
+  @override
+  String get macroAiCardTitle => 'AI 波动性解读';
+
+  @override
+  String get macroAiCardLoading => '分析中…';
+
+  @override
+  String get macroAiCardError => '暂时无法获取分析，请稍后再试。';
+
+  @override
+  String get macroAiCardRetry => '重试';
+
+  @override
+  String get macroAiCardCadence => '每个交易日更新';
+
+  @override
+  String get macroAiCardWatchAdCta => '观看短广告即可解锁今日 AI 分析。';
+
+  @override
+  String get macroAiCardWatchAdAction => '看广告获取分析';
+
+  @override
+  String get macroAiCardAdUnavailable => '暂时无法加载广告，请稍后再试。';
+
+  @override
+  String get aiChatGreetingCooldownTitle => 'AI 问候频率';
+
+  @override
+  String get aiChatGreetingCooldownOff => '关闭';
+
+  @override
+  String get aiChatGreetingCooldown2h => '每 2 小时';
+
+  @override
+  String get aiChatGreetingCooldownDaily => '每天 1 次';
 
   @override
   String get aiChatCopy => '复制';
