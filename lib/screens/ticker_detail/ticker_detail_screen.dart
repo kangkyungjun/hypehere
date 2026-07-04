@@ -34,7 +34,7 @@ import 'widgets/ticker_summary_cards.dart';
 import 'widgets/ticker_price_chart.dart';
 import 'widgets/ticker_volume_chart.dart';
 import 'widgets/ticker_score_section.dart';
-import 'widgets/investment_metrics_section.dart';
+import 'widgets/valuation_card.dart';
 import 'widgets/ticker_insight_section.dart';
 import 'widgets/ticker_analyst_section.dart';
 import 'widgets/ticker_community_section.dart';
@@ -472,6 +472,11 @@ class _TickerDetailScreenState extends State<TickerDetailScreen> {
 
             const SizedBox(height: AppSpacing.sm),
 
+            // 1.5 밸류에이션 카드 (접이식) — 업데이트 날짜 ↔ 전문가 요약 사이
+            ValuationCard(metrics: _chartData!.keyMetrics),
+
+            const SizedBox(height: AppSpacing.sm),
+
             // 2. 전문가 vs AI 요약 카드
             TickerSummaryCards(
               chartData: _chartData!,
@@ -539,11 +544,6 @@ class _TickerDetailScreenState extends State<TickerDetailScreen> {
 
             // 10. AI 점수 이력 (접힘/펼침)
             TickerScoreSection(chartData: _chartData!),
-
-            const SizedBox(height: AppSpacing.md),
-
-            // 10.5 투자지표 (PER·PBR·ROE·EPS·BPS·EV/EBITDA)
-            InvestmentMetricsSection(metrics: _chartData!.keyMetrics),
 
             const SizedBox(height: AppSpacing.md),
 

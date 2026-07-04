@@ -65,6 +65,7 @@ class ValuationMetricsWidget extends StatelessWidget {
             _MetricItem('PSR', _fmtNum(m.ps)),
             _MetricItem(l10n.forwardPE, _fmtNum(m.forwardPe)),
             _MetricItem(l10n.beta, _fmtNum(m.beta)),
+            _MetricItem('EV/EBITDA', _fmtNum(m.evEbitda)),
           ]),
 
           const SizedBox(height: AppSpacing.md),
