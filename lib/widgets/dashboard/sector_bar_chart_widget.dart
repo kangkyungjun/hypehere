@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../models/macro_data.dart';
 import '../../models/treemap_data.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_radius.dart';
@@ -10,29 +9,21 @@ import '../../theme/app_typography.dart';
 ///
 /// - 섹터별 등락률(avgChangePct)을 0 기준선 위(상승)/아래(하락) 막대로 표시
 /// - 상승=gainColor, 하락=lossColor (앱 테마)
-/// - 하단에 VIX 한 줄
 /// - 전체 탭 시 [onTap] 호출 → 섹터별 시장현황(트리맵) 화면으로 이동
+/// (VIX는 거시 배너 아래 MacroStripWidget으로 이동됨)
 class SectorBarChartWidget extends StatelessWidget {
   const SectorBarChartWidget({
     super.key,
     required this.sectors,
     required this.onTap,
-    this.vix,
-    this.onVixTap,
     this.maxBars = 7,
   });
 
   /// 섹터 목록 (treemap 데이터)
   final List<TreemapSector> sectors;
 
-  /// VIX 지표 (macro indicators의 VIXCLS) — 없으면 VIX 줄 숨김
-  final MacroIndicator? vix;
-
   /// 막대 탭 → 섹터별 시장현황 화면 이동
   final VoidCallback onTap;
-
-  /// VIX 줄 탭 → VIX 상세 화면 이동 (null이면 카드 탭으로 전파)
-  final VoidCallback? onVixTap;
 
   /// 표시할 최대 막대 개수
   final int maxBars;
@@ -107,24 +98,6 @@ class SectorBarChartWidget extends StatelessWidget {
               ],
             ),
           ),
-          if (vix != null) ...[
-            const SizedBox(height: AppSpacing.sm),
-            Divider(height: 1, color: mlc.subtleBorder),
-            const SizedBox(height: AppSpacing.sm),
-            // VIX 줄은 자체 탭(→ VIX 상세). 카드 onTap(섹터별 시장현황)으로 전파되지 않음.
-            onVixTap == null
-                ? _buildVixLine(context, vix!)
-                : InkWell(
-                    onTap: onVixTap,
-                    borderRadius: BorderRadius.circular(AppRadius.md),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: AppSpacing.xs,
-                      ),
-                      child: _buildVixLine(context, vix!),
-                    ),
-                  ),
-          ],
         ],
       ),
     );
@@ -145,56 +118,6 @@ class SectorBarChartWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildVixLine(BuildContext context, MacroIndicator v) {
-    final mlc = context.mlColors;
-    final pct = v.changePct;
-    final String arrow;
-    final Color color;
-    if (pct == null || pct == 0) {
-      arrow = '─';
-      color = mlc.neutralColor;
-    } else if (pct > 0) {
-      arrow = '▲';
-      color = mlc.gainColor;
-    } else {
-      arrow = '▼';
-      color = mlc.lossColor;
-    }
-    final pctStr = pct == null
-        ? ''
-        : ' $arrow ${pct >= 0 ? '+' : ''}${pct.toStringAsFixed(1)}%';
-
-    return Row(
-      children: [
-        Text(
-          'VIX ${v.value.toStringAsFixed(2)}',
-          style: AppTypography.numericSecondary.copyWith(
-            color: mlc.textPrimary,
-            fontWeight: AppTypography.semiBold,
-          ),
-        ),
-        if (pctStr.isNotEmpty)
-          Text(
-            pctStr,
-            style: AppTypography.numericSecondary.copyWith(color: color),
-          ),
-        if (v.avg3m != null) ...[
-          Text(
-            '  ·  ',
-            style: TextStyle(color: mlc.textTertiary),
-          ),
-          Text(
-            '3M ${v.avg3m!.toStringAsFixed(2)}',
-            style: AppTypography.numericSecondary.copyWith(
-              color: mlc.textSecondary,
-            ),
-          ),
-        ],
-        const Spacer(),
-        Icon(Icons.chevron_right, size: 18, color: mlc.textTertiary),
-      ],
-    );
-  }
 }
 
 /// 개별 섹터 막대 (상단=상승, 하단=하락)

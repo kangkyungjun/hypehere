@@ -9,8 +9,10 @@ import '../ticker_detail/ticker_detail_screen.dart';
 import '../../widgets/ads/banner_ad_widget.dart';
 import '../../widgets/charts/macro_banner_widget.dart';
 import '../../widgets/dashboard/indices_bar_widget.dart';
+import '../../widgets/dashboard/index_filter_hint.dart';
 import '../../widgets/dashboard/recommendation_grid.dart';
 import '../../widgets/dashboard/sector_bar_chart_widget.dart';
+import '../../widgets/dashboard/macro_strip_widget.dart';
 import 'sector_overview_screen.dart';
 import '../../widgets/common/bento_card.dart';
 import '../../theme/app_spacing.dart';
@@ -62,12 +64,22 @@ class _DashboardScreenState extends State<DashboardScreen>
   bool _isLoading = true;
   String? _error;
 
-  /// 매크로 지표에서 VIX(VIXCLS) 추출 — 섹터 막대 차트 하단 표시용
+  /// 매크로 지표에서 VIX(VIXCLS) 추출 — 거시 배너 아래 가로 막대 좌측.
   MacroIndicator? get _vixIndicator {
     final list = _macroData?.indicators;
     if (list == null) return null;
     for (final i in list) {
       if (i.indicatorCode == 'VIXCLS') return i;
+    }
+    return null;
+  }
+
+  /// 10년물 국채금리(DGS10) 추출 — 가로 막대 우측.
+  MacroIndicator? get _dgs10Indicator {
+    final list = _macroData?.indicators;
+    if (list == null) return null;
+    for (final i in list) {
+      if (i.indicatorCode == 'DGS10') return i;
     }
     return null;
   }
@@ -276,6 +288,39 @@ class _DashboardScreenState extends State<DashboardScreen>
               },
             ),
           ),
+          // ===== 거시 배너 아래 가로 막대: VIX | 10년물 국채금리 =====
+          if (_vixIndicator != null || _dgs10Indicator != null) ...[
+            const SizedBox(height: AppSpacing.sm),
+            MacroStripWidget(
+              vix: _vixIndicator,
+              treasury10y: _dgs10Indicator,
+              onVixTap: _vixIndicator == null
+                  ? null
+                  : () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const MacroHistoryScreen(
+                            indicatorCode: 'VIXCLS',
+                            title: 'VIX',
+                          ),
+                        ),
+                      ),
+              onTreasuryTap: _dgs10Indicator == null
+                  ? null
+                  : () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => MacroHistoryScreen(
+                            indicatorCode: 'DGS10',
+                            title: MacroStripWidget.treasuryTitle(
+                              Localizations.localeOf(context).languageCode,
+                            ),
+                          ),
+                        ),
+                      ),
+            ),
+          ],
+
           if (_macroData != null || _signalsData != null)
             const SizedBox(height: AppSpacing.sm),
 
@@ -289,8 +334,11 @@ class _DashboardScreenState extends State<DashboardScreen>
               _onIndexFilterChanged(newIndex);
             },
           ),
-          if (_indicesData != null && _indicesData!.indices.isNotEmpty)
+          if (_indicesData != null && _indicesData!.indices.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.xs),
+            const IndexFilterHint(),
             const SizedBox(height: AppSpacing.sm),
+          ],
 
           // ===== Sector Bar Chart Card (탭 → 섹터별 시장현황 트리맵) =====
           BentoCard(
@@ -311,7 +359,6 @@ class _DashboardScreenState extends State<DashboardScreen>
                   )
                 : SectorBarChartWidget(
                     sectors: _treemapData?.sectors ?? const [],
-                    vix: _vixIndicator,
                     onTap: () {
                       Navigator.push(
                         context,
@@ -322,19 +369,6 @@ class _DashboardScreenState extends State<DashboardScreen>
                         ),
                       );
                     },
-                    onVixTap: _vixIndicator == null
-                        ? null
-                        : () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const MacroHistoryScreen(
-                                  indicatorCode: 'VIXCLS',
-                                  title: 'VIX',
-                                ),
-                              ),
-                            );
-                          },
                   ),
           ),
 
