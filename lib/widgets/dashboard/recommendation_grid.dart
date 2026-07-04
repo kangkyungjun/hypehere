@@ -51,12 +51,21 @@ class RecommendationGrid extends StatelessWidget {
     return candidates.take(limit).toList();
   }
 
+  /// 섹션 제목 — "오늘의" 접두 없이 "추천 종목" (인라인 5개국어).
+  static String _picksLabel(String lang) =>
+      const {
+        'ko': '추천 종목',
+        'zh': '推荐',
+        'ja': 'おすすめ銘柄',
+        'es': 'Selección',
+      }[lang] ??
+      'Picks';
+
   @override
   Widget build(BuildContext context) {
     if (items.isEmpty) return const SizedBox.shrink();
 
     final mlc = context.mlColors;
-    final l10n = AppLocalizations.of(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -72,7 +81,8 @@ class RecommendationGrid extends StatelessWidget {
               Icon(Icons.auto_awesome_rounded, color: mlc.accentBlue, size: 18),
               const SizedBox(width: AppSpacing.sm),
               Text(
-                l10n.todayPicks,
+                // "오늘의" 접두 제거 — 단순 "추천 종목"(인라인 5개국어, l10n 무변경).
+                _picksLabel(Localizations.localeOf(context).languageCode),
                 style: AppTypography.sectionTitle.copyWith(
                   color: mlc.textPrimary,
                 ),
