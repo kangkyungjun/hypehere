@@ -57,46 +57,93 @@ class RewardedAdHelper {
     );
   }
 
-  /// 광고 표시 + 콜백
+  /// 광고 표시 + 콜백 (방탄 처리)
   ///
   /// [onRewarded]: 광고 시청 완료 시 호출
   /// [onFailed]: 광고 로드 실패/표시 실패 시 호출
+  ///
+  /// 핵심 보장: 어떤 경로로도 사용자가 잠긴 채 멈추지 않는다.
+  ///   - 광고 불가 환경/미로딩 → 즉시 onFailed(무료 해제)
+  ///   - 광고 표시 성공 → 닫힘(onAdDismissed) 시 onRewarded (보상 이벤트 누락에도 안전)
+  ///   - 광고 표시 실패(onAdFailedToShow) → onFailed
+  ///   - show()가 아무 콜백도 내지 않고 멈춤(만료된 광고 등) → 안전 타이머로 onFailed
+  /// onRewarded/onFailed 는 정확히 한 번만 호출된다.
   void showAd({
     required VoidCallback onRewarded,
     required VoidCallback onFailed,
   }) {
+    // 광고가 불가능한 환경: 막지 말고 즉시 무료 해제.
     if (kIsWeb || (!Platform.isAndroid && !Platform.isIOS)) {
+      debugPrint('[AdMob][rewarded] 광고 불가 환경 → 즉시 해제');
       onFailed();
       return;
     }
 
+    // 광고 미로딩(노필/미설정 등): 막지 말고 즉시 해제 + 다음을 위해 프리로드.
     if (!_isAdLoaded || _rewardedAd == null) {
+      debugPrint('[AdMob][rewarded] 광고 미로딩 → 즉시 해제 + 프리로드');
       onFailed();
-      preloadAd(); // 다음을 위해 미리 로드 시도
+      preloadAd();
       return;
     }
 
-    _rewardedAd!.fullScreenContentCallback = FullScreenContentCallback(
+    // 이 광고 인스턴스는 1회용. 참조를 즉시 비워 중복 표시/재사용을 막는다.
+    final ad = _rewardedAd!;
+    _rewardedAd = null;
+    _isAdLoaded = false;
+
+    var settled = false; // onRewarded/onFailed 중복 호출 방지
+    var didShow = false; // 실제 전체화면 표시 여부
+
+    void settleRewarded() {
+      if (settled) return;
+      settled = true;
+      onRewarded();
+    }
+
+    void settleFailed() {
+      if (settled) return;
+      settled = true;
+      onFailed();
+    }
+
+    ad.fullScreenContentCallback = FullScreenContentCallback(
+      onAdShowedFullScreenContent: (ad) {
+        didShow = true;
+        debugPrint('[AdMob][rewarded] 광고 표시됨');
+      },
       onAdDismissedFullScreenContent: (ad) {
+        debugPrint('[AdMob][rewarded] 광고 닫힘 → 해제');
         ad.dispose();
-        _rewardedAd = null;
-        _isAdLoaded = false;
-        preloadAd(); // 다음 광고 미리 로드
+        preloadAd();
+        // 광고를 봤으므로 콘텐츠를 연다(보상 이벤트가 누락돼도 안전).
+        settleRewarded();
       },
       onAdFailedToShowFullScreenContent: (ad, error) {
-        debugPrint('[AdMob] 보상형 광고 표시 실패: $error');
+        debugPrint('[AdMob][rewarded] 광고 표시 실패: $error → 해제');
         ad.dispose();
-        _rewardedAd = null;
-        _isAdLoaded = false;
-        onFailed();
+        preloadAd();
+        settleFailed();
       },
     );
 
-    _rewardedAd!.show(
+    ad.show(
       onUserEarnedReward: (ad, reward) {
-        onRewarded();
+        // 보상 획득은 로그만; 실제 해제는 onAdDismissed 에서 처리(항상 호출됨).
+        debugPrint('[AdMob][rewarded] 보상 획득: ${reward.amount} ${reward.type}');
       },
     );
+
+    // 안전장치: show() 후에도 광고가 실제로 표시되지 않고(표시/실패 콜백 모두 없음)
+    // 멈춘 경우(만료된 광고 등) 사용자를 막지 않도록 무료 해제.
+    // 표시가 되면 didShow=true 라 이 타이머는 아무 일도 하지 않는다.
+    Future.delayed(const Duration(seconds: 3), () {
+      if (!didShow && !settled) {
+        debugPrint('[AdMob][rewarded] 광고 무응답(표시 안 됨) → 안전 해제');
+        preloadAd();
+        settleFailed();
+      }
+    });
   }
 
   /// 보상형 광고를 await 가능한 형태로 표시.
