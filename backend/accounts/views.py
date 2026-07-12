@@ -430,6 +430,59 @@ _USER_ROLES = ('master', 'manager', 'gold', 'regular')
 _USER_PAGE_SIZE_DEFAULT = 20
 _USER_PAGE_SIZE_MAX = 100
 
+def _user_activity_metrics(user_ids):
+    """유저별 접속 지표를 FastAPI 내부 엔드포인트에서 배치 조회.
+
+    반환: { user_id: {last_access, total_accesses, total_active_days,
+                      month_accesses, month_active_days} }
+
+    analytics(접속 원천)는 FastAPI 소유 Postgres 에 있고, Django 프로덕션은 SQLite 라
+    직접 크로스스키마 쿼리가 불가능하다. 따라서 서버 간 내부 API(X-API-Key)로 위임한다.
+    - 총계/마지막접속: analytics.user_activity_totals (90일 purge 무관 영구 누적).
+    - 이번달: analytics.user_activity_daily (raw, 이번 달은 항상 90일 내).
+    - 미설정/호출 실패 등에는 조용히 빈 dict 반환 → 목록은 막지 않는다.
+    """
+    if not user_ids:
+        return {}
+
+    base = getattr(django_settings, 'FASTAPI_INTERNAL_URL', '') or ''
+    api_key = getattr(django_settings, 'ANALYTICS_API_KEY', '') or ''
+    if not base or not api_key:
+        return {}
+
+    import urllib.request
+    import urllib.error
+
+    url = base.rstrip('/') + '/api/v1/internal/users/activity-metrics'
+    body = json.dumps({'user_ids': list(user_ids)}).encode('utf-8')
+    req = urllib.request.Request(
+        url,
+        data=body,
+        headers={'Content-Type': 'application/json', 'X-API-Key': api_key},
+        method='POST',
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            data = json.loads(resp.read().decode('utf-8'))
+    except Exception:
+        # 내부 API 부재/타임아웃 등 — 지표는 부가정보이므로 목록을 막지 않는다.
+        logger.warning("user activity metrics unavailable", exc_info=True)
+        return {}
+
+    metrics = {}
+    for row in data.get('metrics', []):
+        uid = row.get('user_id')
+        if uid is None:
+            continue
+        metrics[uid] = {
+            'last_access': row.get('last_access'),
+            'total_accesses': int(row.get('total_accesses') or 0),
+            'total_active_days': int(row.get('total_active_days') or 0),
+            'month_accesses': int(row.get('month_accesses') or 0),
+            'month_active_days': int(row.get('month_active_days') or 0),
+        }
+    return metrics
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -488,13 +541,26 @@ def search_users_view(request):
             parts.append(f'role={role_filter}')
         return f'{base}?{"&".join(parts)}'
 
+    results = UserSerializer(items, many=True).data
+    # 접속 지표(마지막 접속·총/이번달 접속·접속일수)를 각 유저에 병합.
+    metrics = _user_activity_metrics([u.id for u in items])
+    _empty = {
+        'last_access': None,
+        'total_accesses': 0,
+        'total_active_days': 0,
+        'month_accesses': 0,
+        'month_active_days': 0,
+    }
+    for row in results:
+        row.update(metrics.get(row['id'], _empty))
+
     return Response({
         'count': total,
         'page': page,
         'size': size,
         'next': _page_url(page + 1) if has_next else None,
         'previous': _page_url(page - 1) if page > 1 else None,
-        'results': UserSerializer(items, many=True).data,
+        'results': results,
     })
 
 

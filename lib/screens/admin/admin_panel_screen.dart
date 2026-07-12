@@ -748,10 +748,65 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                 ),
               ],
             ),
+            const SizedBox(height: AppSpacing.sm),
+            _buildActivityMetrics(user),
             const SizedBox(height: AppSpacing.md),
             _buildActionRow(userId, nickname, role, auth, l10n),
           ],
         ),
+      ),
+    );
+  }
+
+  /// 유저별 접속 지표: 마지막 접속 · 총(횟수/일수) · 이번달(횟수/일수).
+  Widget _buildActivityMetrics(Map<String, dynamic> user) {
+    final mlc = context.mlColors;
+    final muted = Theme.of(context).colorScheme.onSurfaceVariant;
+    final String lastAccess = (user['last_access'] as String?) ?? '-';
+    final int totalAcc = (user['total_accesses'] as int?) ?? 0;
+    final int totalDays = (user['total_active_days'] as int?) ?? 0;
+    final int monthAcc = (user['month_accesses'] as int?) ?? 0;
+    final int monthDays = (user['month_active_days'] as int?) ?? 0;
+
+    Widget stat(IconData icon, String label, String value) => Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 12, color: muted),
+            const SizedBox(width: 3),
+            Text(
+              '$label ',
+              style: TextStyle(fontSize: AppTypography.micro, color: muted),
+            ),
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: AppTypography.micro,
+                fontWeight: AppTypography.bold,
+                color: mlc.accentBlue,
+              ),
+            ),
+          ],
+        );
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.xs,
+      ),
+      decoration: BoxDecoration(
+        color: mlc.accentBlue.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(AppRadius.sm),
+      ),
+      child: Wrap(
+        spacing: AppSpacing.md,
+        runSpacing: AppSpacing.xxs,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          stat(Icons.schedule, '마지막 접속', lastAccess),
+          stat(Icons.login, '총', '$totalAcc회 · $totalDays일'),
+          stat(Icons.calendar_month, '이번달', '$monthAcc회 · $monthDays일'),
+        ],
       ),
     );
   }

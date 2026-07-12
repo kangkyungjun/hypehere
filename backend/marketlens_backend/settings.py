@@ -234,3 +234,9 @@ REVENUECAT_WEBHOOK_SECRET = os.getenv('REVENUECAT_WEBHOOK_SECRET', '')
 
 # Internal API (Mac mini → Django)
 INTERNAL_API_KEY = os.getenv('INTERNAL_API_KEY', '')
+
+# Internal API (Django → FastAPI analytics) — 관리자 패널 접속 지표 프록시.
+# FastAPI(analytics Postgres 소유)와 같은 EC2 이므로 기본은 localhost:8001.
+# ANALYTICS_API_KEY 는 FastAPI 의 X-API-Key 와 동일 값이어야 한다(미설정 시 지표 조회 skip).
+FASTAPI_INTERNAL_URL = os.getenv('FASTAPI_INTERNAL_URL', 'http://127.0.0.1:8001')
+ANALYTICS_API_KEY = os.getenv('ANALYTICS_API_KEY', '')
