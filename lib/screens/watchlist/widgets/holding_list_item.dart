@@ -131,7 +131,7 @@ class HoldingListItem extends StatelessWidget {
                   Text(
                     l10n.score,
                     style: TextStyle(
-                      fontSize: AppTypography.chartMicro,
+                      fontSize: AppTypography.caption,
                       color: mlc.textTertiary,
                     ),
                   ),
@@ -177,7 +177,7 @@ class HoldingListItem extends StatelessWidget {
                             holding.avgPrice!.toStringAsFixed(2),
                           ),
                           style: TextStyle(
-                            fontSize: AppTypography.micro,
+                            fontSize: AppTypography.caption,
                             color: mlc.textTertiary,
                           ),
                         ),
@@ -185,14 +185,14 @@ class HoldingListItem extends StatelessWidget {
                           const SizedBox(width: AppSpacing.xs),
                           Icon(
                             Icons.calendar_today,
-                            size: 10,
+                            size: 12,
                             color: mlc.textTertiary,
                           ),
                           const SizedBox(width: AppSpacing.xxs),
                           Text(
                             _formatDate(holding.createdAt!),
                             style: TextStyle(
-                              fontSize: AppTypography.micro,
+                              fontSize: AppTypography.caption,
                               color: mlc.textTertiary,
                             ),
                           ),
@@ -219,7 +219,7 @@ class HoldingListItem extends StatelessWidget {
                   ),
                 const SizedBox(height: AppSpacing.xxs),
                 Text(
-                  '${holding.pnlPct >= 0 ? '+' : ''}${holding.pnlPct.toStringAsFixed(2)}%',
+                  '${holding.pnlPct >= 0 ? '▲' : '▼'} ${holding.pnlPct.abs().toStringAsFixed(2)}%',
                   style: TextStyle(
                     fontSize: AppTypography.bodySmall,
                     fontWeight: AppTypography.semiBold,
@@ -250,7 +250,7 @@ class HoldingListItem extends StatelessWidget {
                   _signalLabel(context, holding.signal),
                   style: TextStyle(
                     color: context.mlColors.onPrimary,
-                    fontSize: AppTypography.micro,
+                    fontSize: AppTypography.caption,
                     fontWeight: AppTypography.bold,
                   ),
                 ),

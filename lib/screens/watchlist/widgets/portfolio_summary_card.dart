@@ -119,7 +119,8 @@ class PortfolioSummaryCard extends StatelessWidget {
                 Expanded(
                   child: _GridCell(
                     label: l10n.returnRate,
-                    value: _formatPct(totalPnlPct),
+                    value:
+                        '${totalPnlPct >= 0 ? '▲' : '▼'} ${totalPnlPct.abs().toStringAsFixed(2)}%',
                     valueStyle: TextStyle(
                       fontSize: AppTypography.headlineMedium,
                       fontWeight: AppTypography.bold,
@@ -213,11 +214,11 @@ class _GridCell extends StatelessWidget {
           label,
           style: TextStyle(
             fontSize: AppTypography.caption,
-            color: context.mlColors.textTertiary,
-            fontWeight: AppTypography.medium,
+            color: context.mlColors.textSecondary,
+            fontWeight: AppTypography.semiBold,
           ),
         ),
-        const SizedBox(height: AppSpacing.xs),
+        const SizedBox(height: AppSpacing.sm),
         Text(value, style: valueStyle),
         if (subValue != null)
           Text(

@@ -287,7 +287,7 @@ class WatchlistTab extends StatelessWidget {
                   child: Text(
                     ticker,
                     style: TextStyle(
-                      fontSize: AppTypography.bodyLarge,
+                      fontSize: AppTypography.headlineSmall,
                       fontWeight: AppTypography.bold,
                       color: mlc.textPrimary,
                     ),
@@ -314,7 +314,7 @@ class WatchlistTab extends StatelessWidget {
                   child: Text(
                     name ?? l10n.tapToViewDetails,
                     style: TextStyle(
-                      fontSize: AppTypography.caption,
+                      fontSize: AppTypography.bodySmall,
                       color: name == null ? mlc.textTertiary : mlc.textSecondary,
                     ),
                     maxLines: 1,
@@ -366,20 +366,26 @@ class WatchlistTab extends StatelessWidget {
                       )
                     : Tooltip(
                         message: l10n.addToHoldings,
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(AppRadius.lg),
-                          onTap: () => onAddHolding(ticker, score),
-                          child: Container(
-                            width: 28,
-                            height: 28,
-                            decoration: BoxDecoration(
-                              color: mlc.infoBg.withValues(alpha: 0.58),
-                              borderRadius: BorderRadius.circular(AppRadius.lg),
-                            ),
-                            child: Icon(
-                              Icons.add_business,
-                              size: 16,
-                              color: mlc.accentBlue,
+                        child: SizedBox(
+                          width: 44,
+                          height: 44,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(AppRadius.lg),
+                            onTap: () => onAddHolding(ticker, score),
+                            child: Center(
+                              child: Container(
+                                width: 34,
+                                height: 34,
+                                decoration: BoxDecoration(
+                                  color: mlc.infoBg.withValues(alpha: 0.58),
+                                  borderRadius: BorderRadius.circular(AppRadius.lg),
+                                ),
+                                child: Icon(
+                                  Icons.add_business,
+                                  size: 18,
+                                  color: mlc.accentBlue,
+                                ),
+                              ),
                             ),
                           ),
                         ),
@@ -420,25 +426,38 @@ class WatchlistTab extends StatelessWidget {
           InkWell(
             onTap: onWatchAdForOpinions,
             borderRadius: BorderRadius.circular(AppRadius.badge),
-            child: Row(
-              children: [
-                Icon(Icons.auto_awesome, size: 12, color: mlc.accentBlue),
-                const SizedBox(width: 4),
-                Expanded(
-                  child: Text(
-                    _viewOpinionLabel(lang),
-                    style: TextStyle(
-                      fontSize: AppTypography.caption,
-                      fontWeight: AppTypography.semiBold,
-                      color: mlc.accentBlue,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.md,
+                vertical: AppSpacing.xs,
+              ),
+              decoration: BoxDecoration(
+                color: mlc.accentBlue.withValues(alpha: 0.10),
+                borderRadius: BorderRadius.circular(AppRadius.badge),
+                border: Border.all(
+                  color: mlc.accentBlue.withValues(alpha: 0.30),
                 ),
-                Icon(Icons.play_circle_outline,
-                    size: 14, color: mlc.textTertiary),
-              ],
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.auto_awesome, size: 16, color: mlc.accentBlue),
+                  const SizedBox(width: AppSpacing.xs),
+                  Expanded(
+                    child: Text(
+                      _viewOpinionLabel(lang),
+                      style: TextStyle(
+                        fontSize: AppTypography.bodySmall,
+                        fontWeight: AppTypography.semiBold,
+                        color: mlc.accentBlue,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  Icon(Icons.play_circle_outline,
+                      size: 18, color: mlc.textTertiary),
+                ],
+              ),
             ),
           ),
         ],
@@ -465,7 +484,7 @@ class WatchlistTab extends StatelessWidget {
             Text(
               'AI',
               style: TextStyle(
-                fontSize: AppTypography.micro,
+                fontSize: AppTypography.caption,
                 fontWeight: AppTypography.bold,
                 color: mlc.accentBlue,
               ),
@@ -473,7 +492,7 @@ class WatchlistTab extends StatelessWidget {
             if (stance != null && stance.isNotEmpty) ...[
               const SizedBox(width: AppSpacing.xs),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
                   color: stanceColor.withValues(alpha: 0.14),
                   borderRadius: BorderRadius.circular(AppRadius.badge),
@@ -481,7 +500,7 @@ class WatchlistTab extends StatelessWidget {
                 child: Text(
                   stance,
                   style: TextStyle(
-                    fontSize: AppTypography.micro,
+                    fontSize: AppTypography.bodySmall,
                     fontWeight: AppTypography.bold,
                     color: stanceColor,
                   ),
@@ -493,7 +512,7 @@ class WatchlistTab extends StatelessWidget {
               Text(
                 '${(op.confidence! * 100).round()}%',
                 style: TextStyle(
-                  fontSize: AppTypography.micro,
+                  fontSize: AppTypography.bodySmall,
                   color: mlc.textTertiary,
                   fontFeatures: AppTypography.tabularFigures,
                 ),
@@ -549,7 +568,7 @@ class WatchlistTab extends StatelessWidget {
           Text(
             value,
             style: TextStyle(
-              fontSize: AppTypography.bodySmall,
+              fontSize: AppTypography.bodyMedium,
               fontWeight: AppTypography.medium,
               color: mlc.textPrimary,
               fontFeatures: AppTypography.tabularFigures,

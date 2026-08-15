@@ -366,7 +366,7 @@ class _PortfolioAICardState extends State<PortfolioAICard> {
           Text(
             l10n.aiNoChangeToAnalyze,
             style: TextStyle(
-              fontSize: AppTypography.micro,
+              fontSize: AppTypography.caption,
               color: theme.colorScheme.outline,
             ),
             textAlign: TextAlign.center,
@@ -514,7 +514,7 @@ class _PortfolioAICardState extends State<PortfolioAICard> {
                 child: Text(
                   l10n.viewingPreviousAnalysis,
                   style: TextStyle(
-                    fontSize: AppTypography.micro,
+                    fontSize: AppTypography.caption,
                     color: theme.colorScheme.outline,
                   ),
                 ),
@@ -569,7 +569,7 @@ class _PortfolioAICardState extends State<PortfolioAICard> {
             Flexible(
               child: Text(
                 l10n.aiAnalysisOnDemandHint,
-                style: TextStyle(fontSize: AppTypography.micro, color: theme.colorScheme.outline),
+                style: TextStyle(fontSize: AppTypography.caption, color: theme.colorScheme.outline),
               ),
             ),
           ],
@@ -580,7 +580,7 @@ class _PortfolioAICardState extends State<PortfolioAICard> {
             padding: const EdgeInsets.only(left: AppSpacing.xl),
             child: Text(
               l10n.lastUpdateTime(_formatSummaryTime(widget.summary!.date, l10n)),
-              style: TextStyle(fontSize: AppTypography.micro, color: theme.colorScheme.outline),
+              style: TextStyle(fontSize: AppTypography.caption, color: theme.colorScheme.outline),
             ),
           ),
         ],
