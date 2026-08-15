@@ -193,23 +193,27 @@ class _TickerInsightSectionState extends State<TickerInsightSection> {
             const SizedBox(height: AppSpacing.md),
             InkWell(
               onTap: () => setState(() => _showAIReasons = !_showAIReasons),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    _showAIReasons ? l10n.hideBullBearFactors : l10n.showBullBearFactors,
-                    style: TextStyle(
-                      fontSize: AppTypography.bodySmall,
-                      color: context.mlColors.accentBlue,
-                      fontWeight: AppTypography.medium,
+              child: Container(
+                constraints: const BoxConstraints(minHeight: 44),
+                alignment: Alignment.center,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      _showAIReasons ? l10n.hideBullBearFactors : l10n.showBullBearFactors,
+                      style: TextStyle(
+                        fontSize: AppTypography.bodyLarge,
+                        color: context.mlColors.accentBlue,
+                        fontWeight: AppTypography.semiBold,
+                      ),
                     ),
-                  ),
-                  Icon(
-                    _showAIReasons ? Icons.expand_less : Icons.expand_more,
-                    size: 18,
-                    color: context.mlColors.accentBlue,
-                  ),
-                ],
+                    Icon(
+                      _showAIReasons ? Icons.expand_less : Icons.expand_more,
+                      size: 18,
+                      color: context.mlColors.accentBlue,
+                    ),
+                  ],
+                ),
               ),
             ),
 
@@ -234,7 +238,7 @@ class _TickerInsightSectionState extends State<TickerInsightSection> {
                 ),
                 const SizedBox(height: AppSpacing.xs),
                 ...latestData.aiBullishReasons!.map((reason) => Padding(
-                      padding: const EdgeInsets.only(left: 22, bottom: 3),
+                      padding: const EdgeInsets.only(left: 22, bottom: AppSpacing.sm),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -269,7 +273,7 @@ class _TickerInsightSectionState extends State<TickerInsightSection> {
                 ),
                 const SizedBox(height: AppSpacing.xs),
                 ...latestData.aiBearishReasons!.map((reason) => Padding(
-                      padding: const EdgeInsets.only(left: 22, bottom: 3),
+                      padding: const EdgeInsets.only(left: 22, bottom: AppSpacing.sm),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [

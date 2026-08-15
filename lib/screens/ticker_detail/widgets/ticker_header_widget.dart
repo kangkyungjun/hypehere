@@ -287,8 +287,8 @@ class TickerHeaderWidget extends StatelessWidget {
                 top: 0,
                 child: Icon(
                   Icons.open_in_full_rounded,
-                  size: 11,
-                  color: mlc.textTertiary,
+                  size: 16,
+                  color: mlc.textSecondary,
                 ),
               ),
             ],

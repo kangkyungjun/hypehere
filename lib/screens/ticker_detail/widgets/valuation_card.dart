@@ -167,7 +167,10 @@ class _ValuationCardState extends State<ValuationCard> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        for (final c in cells) Expanded(child: _cell(mlc, c.$1, c.$2)),
+        for (int i = 0; i < cells.length; i++) ...[
+          if (i > 0) const SizedBox(width: AppSpacing.md),
+          Expanded(child: _cell(mlc, cells[i].$1, cells[i].$2)),
+        ],
       ],
     );
   }
@@ -179,13 +182,13 @@ class _ValuationCardState extends State<ValuationCard> {
         Text(
           label,
           style: TextStyle(
-            fontSize: AppTypography.micro,
-            color: mlc.textTertiary,
+            fontSize: AppTypography.caption,
+            color: mlc.textSecondary,
           ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
-        const SizedBox(height: 1),
+        const SizedBox(height: AppSpacing.xs),
         Text(
           value,
           style: TextStyle(

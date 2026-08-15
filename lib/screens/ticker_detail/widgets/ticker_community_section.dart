@@ -81,7 +81,7 @@ class TickerCommunitySectionState extends State<TickerCommunitySection> {
                       child: Text(
                         l10n.totalPosts(postCount),
                         style: TextStyle(
-                          fontSize: AppTypography.micro,
+                          fontSize: AppTypography.caption,
                           fontWeight: AppTypography.bold,
                           color: Theme.of(context).colorScheme.primary,
                         ),

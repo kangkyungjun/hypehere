@@ -228,10 +228,10 @@ class _TickerAnalystSectionState extends State<TickerAnalystSection> {
                       width: 48,
                       child: Column(
                         children: [
-                          Text(l10n.targetPrice, style: TextStyle(fontSize: AppTypography.chartLabel, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                          Text(l10n.targetPrice, style: TextStyle(fontSize: AppTypography.caption, color: Theme.of(context).colorScheme.onSurfaceVariant)),
                           Text(
                             '\$${consensus.mean?.toStringAsFixed(0) ?? ''}',
-                            style: TextStyle(fontSize: AppTypography.chartLabel, color: Theme.of(context).colorScheme.onSurfaceVariant, fontWeight: AppTypography.semiBold, fontFeatures: AppTypography.tabularFigures),
+                            style: TextStyle(fontSize: AppTypography.caption, color: Theme.of(context).colorScheme.onSurfaceVariant, fontWeight: AppTypography.semiBold, fontFeatures: AppTypography.tabularFigures),
                           ),
                           const SizedBox(height: AppSpacing.xxs),
                           Container(
@@ -256,10 +256,10 @@ class _TickerAnalystSectionState extends State<TickerAnalystSection> {
                       width: 48,
                       child: Column(
                         children: [
-                          Text(l10n.currentPrice, style: TextStyle(fontSize: AppTypography.chartLabel, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                          Text(l10n.currentPrice, style: TextStyle(fontSize: AppTypography.caption, color: Theme.of(context).colorScheme.onSurfaceVariant)),
                           Text(
                             '\$${latestClose?.toStringAsFixed(0) ?? ''}',
-                            style: TextStyle(fontSize: AppTypography.chartLabel, color: Theme.of(context).colorScheme.onSurfaceVariant, fontWeight: AppTypography.semiBold, fontFeatures: AppTypography.tabularFigures),
+                            style: TextStyle(fontSize: AppTypography.caption, color: Theme.of(context).colorScheme.onSurfaceVariant, fontWeight: AppTypography.semiBold, fontFeatures: AppTypography.tabularFigures),
                           ),
                           const SizedBox(height: AppSpacing.xxs),
                           Container(
@@ -316,6 +316,7 @@ class _TickerAnalystSectionState extends State<TickerAnalystSection> {
       final r = sorted[i];
       widgets.add(
         Container(
+          constraints: const BoxConstraints(minHeight: 44),
           padding: const EdgeInsets.symmetric(vertical: AppSpacing.md, horizontal: AppSpacing.lg),
           decoration: BoxDecoration(
             color: context.mlColors.cardBackground,
@@ -357,7 +358,7 @@ class _TickerAnalystSectionState extends State<TickerAnalystSection> {
                             child: Text(
                               translateStatus(r.status, l10n),
                               style: TextStyle(
-                                fontSize: AppTypography.micro,
+                                fontSize: AppTypography.caption,
                                 fontWeight: AppTypography.semiBold,
                                 color: getStatusColor(context, r.status),
                               ),
