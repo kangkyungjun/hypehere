@@ -315,14 +315,14 @@ class _ExploreScreenState extends State<ExploreScreen> {
                     color: Theme.of(context).colorScheme.tertiaryContainer,
                     borderRadius: BorderRadius.circular(4),
                   ),
-                  child: Text(score.toStringAsFixed(0), style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onTertiaryContainer)),
+                  child: Text(score.toStringAsFixed(0), style: TextStyle(fontSize: AppTypography.bodyMedium, color: Theme.of(context).colorScheme.onTertiaryContainer)),
                 ),
               if (changePct != null) ...[
                 const SizedBox(width: 8),
                 Text(
                   '${changePct >= 0 ? '+' : ''}${changePct.toStringAsFixed(1)}%',
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: AppTypography.bodyMedium,
                     color: changePct >= 0
                         ? context.mlColors.gainColor
                         : context.mlColors.lossColor,

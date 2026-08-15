@@ -429,7 +429,7 @@ class _InvestmentProfileOnboardingScreenState
           Text(
             '${_riskTolerance.round()}',
             style: TextStyle(
-              fontSize: 48,
+              fontSize: AppTypography.heroSmall,
               fontWeight: AppTypography.bold,
               color: colors.accentBlue,
             ),
