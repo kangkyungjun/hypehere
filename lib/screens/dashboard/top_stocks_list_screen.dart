@@ -209,7 +209,7 @@ class _TopStocksListScreenState extends State<TopStocksListScreen> {
                       Text(
                         stock.ticker,
                         style: TextStyle(
-                          fontSize: AppTypography.bodyLarge,
+                          fontSize: AppTypography.headlineLarge,
                           fontWeight: AppTypography.bold,
                           color: mlc.textPrimary,
                         ),
