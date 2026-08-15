@@ -609,7 +609,7 @@ class SettingsScreen extends StatelessWidget {
                           child: Text(
                             l10n.privacyPolicy,
                             style: TextStyle(
-                              fontSize: AppTypography.caption,
+                              fontSize: AppTypography.bodySmall,
                               color: Theme.of(
                                 context,
                               ).colorScheme.onSurfaceVariant,
@@ -624,7 +624,7 @@ class SettingsScreen extends StatelessWidget {
                           child: Text(
                             '|',
                             style: TextStyle(
-                              fontSize: AppTypography.caption,
+                              fontSize: AppTypography.bodySmall,
                               color: Theme.of(context).colorScheme.outline,
                             ),
                           ),
@@ -634,7 +634,7 @@ class SettingsScreen extends StatelessWidget {
                           child: Text(
                             l10n.termsOfService,
                             style: TextStyle(
-                              fontSize: AppTypography.caption,
+                              fontSize: AppTypography.bodySmall,
                               color: Theme.of(
                                 context,
                               ).colorScheme.onSurfaceVariant,
@@ -648,7 +648,7 @@ class SettingsScreen extends StatelessWidget {
                     Text(
                       'marketlens.service@gmail.com',
                       style: TextStyle(
-                        fontSize: AppTypography.micro,
+                        fontSize: AppTypography.caption,
                         color: Theme.of(context).colorScheme.outline,
                       ),
                     ),
@@ -729,7 +729,7 @@ class SettingsScreen extends StatelessWidget {
                             badgeText,
                             style: TextStyle(
                               color: context.mlColors.onPrimary,
-                              fontSize: AppTypography.micro,
+                              fontSize: AppTypography.caption,
                               fontWeight: AppTypography.bold,
                             ),
                           ),
@@ -1351,7 +1351,7 @@ class SettingsScreen extends StatelessWidget {
         badgeText,
         style: TextStyle(
           color: context.mlColors.onPrimary,
-          fontSize: AppTypography.micro,
+          fontSize: AppTypography.caption,
           fontWeight: AppTypography.bold,
         ),
       ),

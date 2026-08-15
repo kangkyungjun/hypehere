@@ -184,7 +184,8 @@ class _SignupScreenState extends State<SignupScreen> {
               const SizedBox(width: AppSpacing.xs),
               Flexible(
                 child: Text(r.label,
-                    style: AppTypography.label.copyWith(color: color)),
+                    style: AppTypography.label
+                        .copyWith(fontSize: AppTypography.bodyMedium, color: color)),
               ),
             ],
           ),

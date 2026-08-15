@@ -438,7 +438,7 @@ class _AILensScreenState extends State<AILensScreen>
                             child: Text(
                               label,
                               style: TextStyle(
-                                fontSize: AppTypography.chartLabel,
+                                fontSize: AppTypography.bodySmall,
                                 fontWeight: AppTypography.bold,
                                 color: colors.onPrimary,
                               ),
@@ -566,7 +566,7 @@ class _AILensScreenState extends State<AILensScreen>
           Text(
             accessibilityLabel,
             style: TextStyle(
-              fontSize: AppTypography.micro,
+              fontSize: AppTypography.bodySmall,
               color: color,
               fontWeight: AppTypography.bold,
             ),
@@ -577,7 +577,7 @@ class _AILensScreenState extends State<AILensScreen>
           child: Text(
             text,
             style: TextStyle(
-              fontSize: AppTypography.caption,
+              fontSize: AppTypography.bodySmall,
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
@@ -699,7 +699,7 @@ class _AILensScreenState extends State<AILensScreen>
                           TextSpan(
                             text: primaryName,
                             style: TextStyle(
-                              fontSize: AppTypography.caption,
+                              fontSize: AppTypography.bodySmall,
                               fontWeight: AppTypography.medium,
                               color: context.mlColors.textSecondary,
                             ),
@@ -709,7 +709,7 @@ class _AILensScreenState extends State<AILensScreen>
                             TextSpan(
                               text: secondaryName,
                               style: TextStyle(
-                                fontSize: AppTypography.micro,
+                                fontSize: AppTypography.caption,
                                 color: context.mlColors.textTertiary,
                               ),
                             ),
@@ -735,7 +735,7 @@ class _AILensScreenState extends State<AILensScreen>
                 ticker.signalLabelLocalized(l10n),
                 style: TextStyle(
                   color: scoreColor,
-                  fontSize: AppTypography.micro,
+                  fontSize: AppTypography.caption,
                   fontWeight: AppTypography.bold,
                 ),
               ),

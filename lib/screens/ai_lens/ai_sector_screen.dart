@@ -166,7 +166,7 @@ class _AiSectorScreenState extends State<AiSectorScreen> {
               borderRadius: BorderRadius.circular(AppRadius.badge),
             ),
             labelStyle: TextStyle(
-              fontSize: AppTypography.bodySmall,
+              fontSize: AppTypography.bodyMedium,
               fontWeight: AppTypography.semiBold,
               color: selected
                   ? context.mlColors.accentBlue
@@ -354,7 +354,7 @@ class _AiSectorScreenState extends State<AiSectorScreen> {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontSize: AppTypography.caption,
+                        fontSize: AppTypography.bodySmall,
                         color: mlc.textSecondary,
                       ),
                     ),

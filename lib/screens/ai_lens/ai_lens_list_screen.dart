@@ -161,7 +161,7 @@ class AILensListScreen extends StatelessWidget {
                 ticker.signalLabelLocalized(l10n),
                 style: TextStyle(
                   color: context.mlColors.onPrimary,
-                  fontSize: AppTypography.micro,
+                  fontSize: AppTypography.caption,
                   fontWeight: AppTypography.bold,
                 ),
               ),

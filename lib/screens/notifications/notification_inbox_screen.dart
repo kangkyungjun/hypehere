@@ -289,7 +289,7 @@ class _NotificationInboxScreenState extends State<NotificationInboxScreen> {
             : context.mlColors.infoBg.withValues(alpha: 0.3),
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.xl,
-          vertical: AppSpacing.md,
+          vertical: AppSpacing.lg,
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,

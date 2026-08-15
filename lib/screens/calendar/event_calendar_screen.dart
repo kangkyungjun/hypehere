@@ -439,7 +439,7 @@ class _EventCalendarScreenState extends State<EventCalendarScreen>
                       child: Text(
                         'HIGH',
                         style: TextStyle(
-                          fontSize: AppTypography.micro,
+                          fontSize: AppTypography.caption,
                           color: context.mlColors.lossColor,
                           fontWeight: AppTypography.bold,
                         ),
@@ -797,7 +797,7 @@ class _EventCalendarScreenState extends State<EventCalendarScreen>
                     child: Text(
                       l10n.today,
                       style: TextStyle(
-                        fontSize: AppTypography.micro,
+                        fontSize: AppTypography.caption,
                         color: Theme.of(context).colorScheme.onPrimaryContainer,
                         fontWeight: AppTypography.semiBold,
                       ),
@@ -1355,7 +1355,7 @@ class _EventCalendarScreenState extends State<EventCalendarScreen>
                     '${_adUnlockExpiry!.hour.toString().padLeft(2, '0')}:${_adUnlockExpiry!.minute.toString().padLeft(2, '0')}',
                   ),
                   style: TextStyle(
-                    fontSize: AppTypography.micro,
+                    fontSize: AppTypography.caption,
                     color: Theme.of(context).colorScheme.primary,
                   ),
                 ),
@@ -1543,7 +1543,7 @@ class _EventCalendarScreenState extends State<EventCalendarScreen>
                               child: Text(
                                 'HIGH',
                                 style: TextStyle(
-                                  fontSize: AppTypography.micro,
+                                  fontSize: AppTypography.caption,
                                   color: mlc.lossColor,
                                   fontWeight: AppTypography.bold,
                                 ),
@@ -1574,7 +1574,7 @@ class _EventCalendarScreenState extends State<EventCalendarScreen>
                                   children: [
                                     Icon(
                                       Icons.insights,
-                                      size: 11,
+                                      size: 12,
                                       color: Theme.of(
                                         context,
                                       ).colorScheme.primary,
@@ -1583,7 +1583,7 @@ class _EventCalendarScreenState extends State<EventCalendarScreen>
                                     Text(
                                       l10n.calendarViewResult,
                                       style: TextStyle(
-                                        fontSize: AppTypography.micro,
+                                        fontSize: AppTypography.bodySmall,
                                         color: Theme.of(
                                           context,
                                         ).colorScheme.primary,

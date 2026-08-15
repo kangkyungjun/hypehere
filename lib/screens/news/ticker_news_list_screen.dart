@@ -260,7 +260,7 @@ class _TickerNewsListScreenState extends State<TickerNewsListScreen> {
         Text(
           title,
           style: TextStyle(
-            fontSize: AppTypography.caption,
+            fontSize: AppTypography.bodySmall,
             fontWeight: AppTypography.semiBold,
             color: Theme.of(context).colorScheme.outline,
           ),
@@ -288,7 +288,7 @@ class _TickerNewsListScreenState extends State<TickerNewsListScreen> {
         const SizedBox(width: AppSpacing.xs),
         Text(
           '$label  $count',
-          style: TextStyle(fontSize: AppTypography.caption, color: color.withValues(alpha: 0.9)),
+          style: TextStyle(fontSize: AppTypography.bodySmall, color: color.withValues(alpha: 0.9)),
         ),
       ],
     );
@@ -387,7 +387,7 @@ class _TickerNewsListScreenState extends State<TickerNewsListScreen> {
                           child: Text(
                             item.sentimentLabelLocalized(AppLocalizations.of(context)),
                             style: TextStyle(
-                              fontSize: AppTypography.micro,
+                              fontSize: AppTypography.caption,
                               fontWeight: AppTypography.bold,
                               color: dotColor,
                             ),
@@ -397,7 +397,7 @@ class _TickerNewsListScreenState extends State<TickerNewsListScreen> {
                         Text(
                           item.timeAgoLocalized(AppLocalizations.of(context)),
                           style: TextStyle(
-                            fontSize: AppTypography.micro,
+                            fontSize: AppTypography.caption,
                             color: Theme.of(context).colorScheme.outline,
                           ),
                         ),
@@ -424,7 +424,7 @@ class _TickerNewsListScreenState extends State<TickerNewsListScreen> {
                       Text(
                         item.source!,
                         style: TextStyle(
-                          fontSize: AppTypography.micro,
+                          fontSize: AppTypography.caption,
                           color: Theme.of(context).colorScheme.outline,
                         ),
                       ),

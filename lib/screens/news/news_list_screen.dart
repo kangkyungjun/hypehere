@@ -602,7 +602,7 @@ class _NewsListScreenState extends State<NewsListScreen> {
                             child: Text(
                               item.sentimentLabelLocalized(l10n),
                               style: TextStyle(
-                                fontSize: AppTypography.micro,
+                                fontSize: AppTypography.caption,
                                 fontWeight: AppTypography.bold,
                                 color: dotColor,
                               ),
@@ -614,7 +614,7 @@ class _NewsListScreenState extends State<NewsListScreen> {
                             Text(
                               item.sectorShort!,
                               style: TextStyle(
-                                fontSize: AppTypography.micro,
+                                fontSize: AppTypography.caption,
                                 color: mlc.textTertiary,
                               ),
                             ),
@@ -623,7 +623,7 @@ class _NewsListScreenState extends State<NewsListScreen> {
                           Text(
                             item.timeAgoLocalized(l10n),
                             style: TextStyle(
-                              fontSize: AppTypography.micro,
+                              fontSize: AppTypography.caption,
                               color: mlc.textTertiary,
                             ),
                           ),
