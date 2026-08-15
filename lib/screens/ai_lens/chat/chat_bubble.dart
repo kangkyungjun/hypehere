@@ -46,7 +46,11 @@ class ChatBubble extends StatelessWidget {
           ),
           child: Text(
             message.content,
-            style: AppTypography.body.copyWith(color: mlc.onPrimary),
+            style: AppTypography.body.copyWith(
+              fontSize: AppTypography.headlineMedium,
+              height: 1.55,
+              color: mlc.onPrimary,
+            ),
           ),
         ),
       );
@@ -76,6 +80,7 @@ class ChatBubble extends StatelessWidget {
           SelectableText(
             message.content,
             style: AppTypography.body.copyWith(
+              fontSize: AppTypography.headlineMedium,
               color: isErr ? mlc.dangerColor : mlc.textPrimary,
               height: 1.55,
             ),
