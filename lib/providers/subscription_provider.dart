@@ -229,7 +229,9 @@ class SubscriptionProvider with ChangeNotifier {
         return PurchaseResult.noPackage;
       }
       debugPrint('[Subscription] Calling Purchases.purchasePackage() — StoreKit sheet should appear now');
-      final info = await Purchases.purchasePackage(package);
+      // 9.x: purchasePackage()가 CustomerInfo 대신 PurchaseResult(customerInfo+storeTransaction) 반환
+      final purchaseResult = await Purchases.purchasePackage(package);
+      final info = purchaseResult.customerInfo;
       debugPrint('[Subscription] Purchase done, entitlements: ${info.entitlements.all.keys.toList()}');
       _updateFromCustomerInfo(info);
       debugPrint('[Subscription] isGoldActive=$_isGoldActive, productId=$_activeProductId');

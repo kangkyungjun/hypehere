@@ -416,18 +416,16 @@ class _IndexesTabState extends State<IndexesTab> {
                   item.avg3m != null ||
                   item.low3m != null) ...[
                 const SizedBox(height: AppSpacing.sm),
-                Row(
+                Wrap(
+                  spacing: AppSpacing.md,
+                  runSpacing: AppSpacing.xxs,
                   children: [
                     if (item.high3m != null)
                       _stat3m(l10n, l10n.macro3mHigh, item.high3m!, mlc),
-                    if (item.avg3m != null) ...[
-                      const SizedBox(width: AppSpacing.lg),
+                    if (item.avg3m != null)
                       _stat3m(l10n, l10n.macro3mAvg, item.avg3m!, mlc),
-                    ],
-                    if (item.low3m != null) ...[
-                      const SizedBox(width: AppSpacing.lg),
+                    if (item.low3m != null)
                       _stat3m(l10n, l10n.macro3mLow, item.low3m!, mlc),
-                    ],
                   ],
                 ),
               ],
@@ -449,7 +447,7 @@ class _IndexesTabState extends State<IndexesTab> {
       TextSpan(
         children: [
           TextSpan(
-            text: '${l10n.macro3mTitle} $abbrev: ',
+            text: '$abbrev: ',
             style: TextStyle(
               fontSize: AppTypography.bodySmall,
               color: mlc.textTertiary,
