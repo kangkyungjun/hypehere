@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.3.12+37
+version: 1.3.14+39
 
 environment:
   sdk: ^3.8.1
@@ -74,8 +74,8 @@ dependencies:
   # 네이티브 공유 시트 (AI 답변 공유)
   share_plus: ^10.1.4
 
-  # In-App Purchase (RevenueCat)
-  purchases_flutter: ^8.0.0
+  # In-App Purchase (RevenueCat) — 9.x uses Google Play Billing Library 8 (required by 2026-08-31)
+  purchases_flutter: ^9.16.1
 
   # App update prompt (checks App Store / Play Store version)
   upgrader: ^13.1.0
