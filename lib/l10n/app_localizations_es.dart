@@ -1916,6 +1916,10 @@ class AppLocalizationsEs extends AppLocalizations {
       'Habla con la IA sobre acciones y tu cartera';
 
   @override
+  String get aiChatDailyDisclaimer =>
+      'El análisis de IA es solo informativo. Las decisiones de inversión y sus resultados son tu responsabilidad.';
+
+  @override
   String get aiChatSuggestionsTitle => 'Prueba a preguntar';
 
   @override

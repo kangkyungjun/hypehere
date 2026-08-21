@@ -15,6 +15,7 @@ class ChatPersonalization {
 
   static const _kGreetLast = 'chat_greet_last_ms';
   static const _kGreetMode = 'chat_greet_cooldown_mode'; // off | 2h | daily
+  static const _kDisclaimerLast = 'chat_disclaimer_last_ms';
   static const _kInterest = 'chat_interest_v1'; // JSON {category: count}
   static const _kTapLog = 'chat_tap_log_v1'; // JSON [{id, cat, t}], 최근 300개
   static const _tapLogCap = 300;
@@ -61,6 +62,32 @@ class ChatPersonalization {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(
       _kGreetLast,
+      (now ?? DateTime.now()).millisecondsSinceEpoch,
+    );
+  }
+
+  /// 면책 안내(시스템 말풍선) — 하루 1회.
+  ///
+  /// 사용자가 **채팅 화면을 실제로 연** 그 날(로컬 자정 기준) 첫 진입에만 true.
+  /// 접속하지 않으면 호출되지 않으므로 백그라운드에서 미리 생성되는 일은 없다.
+  /// greet(종목 인사)와 **독립**된 키를 쓴다(성격이 달라 쿨다운도 별개).
+  static Future<bool> shouldShowDailyDisclaimer({DateTime? now}) async {
+    final prefs = await SharedPreferences.getInstance();
+    final lastMs = prefs.getInt(_kDisclaimerLast);
+    if (lastMs == null) return true;
+    final last = DateTime.fromMillisecondsSinceEpoch(lastMs);
+    final ref = now ?? DateTime.now();
+    final sameDay =
+        last.year == ref.year && last.month == ref.month && last.day == ref.day;
+    return !sameDay;
+  }
+
+  /// 면책 안내를 노출했음을 기록(그 날 재노출 방지). 화면에 실제로 그린
+  /// 시점에만 호출한다.
+  static Future<void> markDisclaimerShown({DateTime? now}) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(
+      _kDisclaimerLast,
       (now ?? DateTime.now()).millisecondsSinceEpoch,
     );
   }

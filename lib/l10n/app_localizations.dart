@@ -3626,6 +3626,12 @@ abstract class AppLocalizations {
   /// **'Chat with AI about stocks and your portfolio'**
   String get aiChatEmptySubtitle;
 
+  /// No description provided for @aiChatDailyDisclaimer.
+  ///
+  /// In en, this message translates to:
+  /// **'AI analysis is for reference only. Investment decisions and their outcomes are your own responsibility.'**
+  String get aiChatDailyDisclaimer;
+
   /// No description provided for @aiChatSuggestionsTitle.
   ///
   /// In en, this message translates to:

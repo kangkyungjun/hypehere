@@ -862,6 +862,7 @@
   "aiChatHint": "Type a message",
   "aiChatEmptyTitle": "Ask me anything",
   "aiChatEmptySubtitle": "Chat with AI about stocks and your portfolio",
+  "aiChatDailyDisclaimer": "AI analysis is for reference only. Investment decisions and their outcomes are your own responsibility.",
   "aiChatSuggestionsTitle": "Try asking",
   "aiChatShuffle": "Shuffle",
   "aiChatAnalyzeMyHoldings": "Analyze my holdings",

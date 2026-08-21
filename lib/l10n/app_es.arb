@@ -686,6 +686,7 @@
   "aiChatHint": "Escribe un mensaje",
   "aiChatEmptyTitle": "Pregúntame lo que sea",
   "aiChatEmptySubtitle": "Habla con la IA sobre acciones y tu cartera",
+  "aiChatDailyDisclaimer": "El análisis de IA es solo informativo. Las decisiones de inversión y sus resultados son tu responsabilidad.",
   "aiChatSuggestionsTitle": "Prueba a preguntar",
   "aiChatShuffle": "Otras",
   "aiChatAnalyzeMyHoldings": "Analizar mi cartera",

@@ -1865,6 +1865,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get aiChatEmptySubtitle => '銘柄やポートフォリオについてAIと話そう';
 
   @override
+  String get aiChatDailyDisclaimer => 'AI分析は参考情報です。投資の判断と責任はご自身にあります。';
+
+  @override
   String get aiChatSuggestionsTitle => 'こんな質問はどう？';
 
   @override

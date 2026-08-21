@@ -1861,6 +1861,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get aiChatEmptySubtitle => '与AI讨论股票和投资组合';
 
   @override
+  String get aiChatDailyDisclaimer => 'AI 分析仅供参考，投资决策及其后果由您本人负责。';
+
+  @override
   String get aiChatSuggestionsTitle => '试试这样问';
 
   @override

@@ -1894,6 +1894,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Chat with AI about stocks and your portfolio';
 
   @override
+  String get aiChatDailyDisclaimer =>
+      'AI analysis is for reference only. Investment decisions and their outcomes are your own responsibility.';
+
+  @override
   String get aiChatSuggestionsTitle => 'Try asking';
 
   @override

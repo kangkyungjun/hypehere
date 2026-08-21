@@ -47,6 +47,10 @@ class _AiChatScreenState extends State<AiChatScreen> {
   /// 이번 접속에서 노출할 인사말(2시간 쿨다운 통과 시에만 non-null).
   ({String ko, String en})? _greeting;
 
+  /// 오늘(로컬 자정 기준) 첫 진입이면 면책 안내 시스템 말풍선을 1회 노출.
+  /// 화면을 실제로 연 경우에만 계산·기록되므로 사전 생성되지 않는다.
+  bool _showDailyDisclaimer = false;
+
   /// 카테고리별 관심도(추천 가중치 + 맞춤 콘텐츠 신호).
   Map<String, int> _interest = const {};
 
@@ -69,6 +73,9 @@ class _AiChatScreenState extends State<AiChatScreen> {
     final interest = await ChatPersonalization.loadInterest();
     final greet = await ChatPersonalization.shouldGreet();
     if (greet) await ChatPersonalization.markGreeted();
+    // 면책 안내: 오늘 첫 진입이면 1회 노출(그린 시점에 기록해 재노출 방지).
+    final showDisclaimer = await ChatPersonalization.shouldShowDailyDisclaimer();
+    if (showDisclaimer) await ChatPersonalization.markDisclaimerShown();
     if (!mounted) return;
     final port = context.read<PortfolioProvider>();
     // 보유 평가액 desc로 우선순위 정렬 (큰 종목 먼저 인사에 노출).
@@ -82,6 +89,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
         .toList();
     setState(() {
       _interest = interest;
+      _showDailyDisclaimer = showDisclaimer;
       _suggestions = ChatSuggestions.pick(5, interest: interest);
       _greeting = greet
           ? ChatSuggestions.pickGreetingFor(
@@ -201,7 +209,9 @@ class _AiChatScreenState extends State<AiChatScreen> {
     final sub = context.watch<SubscriptionProvider>();
     final isAdFree = auth.shouldHideAds || sub.isGoldActive;
     final showThinking = chat.isSending;
-    final count = chat.messages.length + (showThinking ? 1 : 0);
+    // 대화가 있을 때는 면책 안내를 리스트 맨 위(헤더)에 시스템 말풍선으로 1개 얹는다.
+    final headerCount = _showDailyDisclaimer ? 1 : 0;
+    final count = headerCount + chat.messages.length + (showThinking ? 1 : 0);
 
     return Column(
       children: [
@@ -220,15 +230,19 @@ class _AiChatScreenState extends State<AiChatScreen> {
                   ),
                   itemCount: count,
                   itemBuilder: (ctx, i) {
-                    if (showThinking && i == count - 1) {
+                    if (headerCount == 1 && i == 0) {
+                      return _dailyDisclaimerBubble(l10n, mlc);
+                    }
+                    final mi = i - headerCount;
+                    if (showThinking && mi == chat.messages.length) {
                       return _thinkingBubble(l10n, mlc);
                     }
-                    final msg = chat.messages[i];
+                    final msg = chat.messages[mi];
                     return ChatBubble(
                       message: msg,
                       // AI 답변엔 대응 질문을 함께 넘겨 공유/복사에 포함
                       question: msg.isAssistant
-                          ? _questionFor(chat.messages, i)
+                          ? _questionFor(chat.messages, mi)
                           : null,
                     );
                   },
@@ -407,6 +421,8 @@ class _AiChatScreenState extends State<AiChatScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          // 오늘 첫 진입이면 면책 안내를 맨 위에 1회.
+          if (_showDailyDisclaimer) _dailyDisclaimerBubble(l10n, mlc),
           Container(
             width: 64,
             height: 64,
@@ -489,6 +505,38 @@ class _AiChatScreenState extends State<AiChatScreen> {
                   .toList(),
             ),
           ],
+        ],
+      ),
+    );
+  }
+
+  /// 하루 1회 면책 안내 — 시스템 말풍선(전송·저장 안 하는 뷰 전용).
+  /// AI/유저 말풍선과 구분되도록 은은한 회색 톤 + info 아이콘.
+  Widget _dailyDisclaimerBubble(AppLocalizations l10n, MarketLensColors mlc) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: AppSpacing.md),
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: mlc.cardBackground,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        border: Border.all(color: mlc.subtleBorder.withValues(alpha: 0.6)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.info_outline_rounded, size: 16, color: mlc.textTertiary),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Text(
+              l10n.aiChatDailyDisclaimer,
+              style: AppTypography.body.copyWith(
+                fontSize: AppTypography.bodySmall,
+                color: mlc.textSecondary,
+                height: 1.4,
+              ),
+            ),
+          ),
         ],
       ),
     );

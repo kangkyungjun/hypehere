@@ -686,6 +686,7 @@
   "aiChatHint": "メッセージを入力",
   "aiChatEmptyTitle": "何でも聞いてください",
   "aiChatEmptySubtitle": "銘柄やポートフォリオについてAIと話そう",
+  "aiChatDailyDisclaimer": "AI分析は参考情報です。投資の判断と責任はご自身にあります。",
   "aiChatSuggestionsTitle": "こんな質問はどう？",
   "aiChatShuffle": "他の質問",
   "aiChatAnalyzeMyHoldings": "保有銘柄を分析",
