@@ -7,6 +7,7 @@ import '../../theme/app_colors.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 import '../../theme/app_typography.dart';
+import '../../widgets/common/bento_card.dart';
 import 'post_detail_screen.dart';
 import '../../l10n/app_localizations.dart';
 
@@ -120,9 +121,8 @@ class _MyCommentsScreenState extends State<MyCommentsScreen> {
             Text(
               _errorMessage!,
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: AppTypography.bodyLarge,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              style: AppTypography.body.copyWith(
+                color: context.mlColors.textSecondary,
               ),
             ),
             const SizedBox(height: AppSpacing.xxl),
@@ -158,10 +158,9 @@ class _MyCommentsScreenState extends State<MyCommentsScreen> {
               // 제목
               Text(
                 l10n.writeFirstCommentPrompt,
-                style: TextStyle(
-                  fontSize: AppTypography.displayMedium,
-                  fontWeight: AppTypography.bold,
-                  color: Theme.of(context).colorScheme.onSurface,
+                textAlign: TextAlign.center,
+                style: AppTypography.sectionTitle.copyWith(
+                  color: context.mlColors.textPrimary,
                 ),
               ),
               const SizedBox(height: AppSpacing.lg),
@@ -170,9 +169,8 @@ class _MyCommentsScreenState extends State<MyCommentsScreen> {
               Text(
                 l10n.startConversationPrompt,
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: AppTypography.bodyLarge,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                style: AppTypography.body.copyWith(
+                  color: context.mlColors.textSecondary,
                   height: 1.5,
                 ),
               ),
@@ -214,77 +212,81 @@ class _MyCommentsScreenState extends State<MyCommentsScreen> {
 
   /// 댓글 카드 위젯
   Widget _buildCommentCard(Comment comment) {
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.md),
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppRadius.lg),
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.xl,
+        vertical: AppSpacing.md,
       ),
-      child: InkWell(
-        onTap: () => _navigateToPostDetail(comment.postId),
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.xl),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 댓글 내용
-              Text(
-                comment.content,
-                style: const TextStyle(
-                  fontSize: AppTypography.headlineSmall,
-                  height: 1.5,
+      child: BentoCard(
+        padding: EdgeInsets.zero,
+        child: InkWell(
+          onTap: () => _navigateToPostDetail(comment.postId),
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.xl),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 댓글 내용
+                Text(
+                  comment.content,
+                  style: AppTypography.body.copyWith(
+                    color: context.mlColors.textPrimary,
+                    height: 1.5,
+                  ),
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
-              ),
 
-              const SizedBox(height: AppSpacing.lg),
+                const SizedBox(height: AppSpacing.lg),
 
-              // 하단 정보 (날짜, 좋아요 수)
-              Row(
-                children: [
-                  Icon(
-                    Icons.access_time,
-                    size: 14,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                  const SizedBox(width: AppSpacing.xs),
-                  Text(
-                    _formatDate(comment.createdAt),
-                    style: TextStyle(
-                      fontSize: AppTypography.bodySmall,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                // 하단 정보 (날짜, 좋아요 수)
+                Row(
+                  children: [
+                    Icon(
+                      Icons.access_time,
+                      size: 14,
+                      color: context.mlColors.textSecondary,
                     ),
-                  ),
-
-                  const SizedBox(width: AppSpacing.xl),
-
-                  Icon(
-                    Icons.favorite,
-                    size: 14,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                  const SizedBox(width: AppSpacing.xs),
-                  Text(
-                    '${comment.likeCount}',
-                    style: TextStyle(
-                      fontSize: AppTypography.bodySmall,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    const SizedBox(width: AppSpacing.xs),
+                    Flexible(
+                      child: Text(
+                        _formatDate(comment.createdAt),
+                        style: AppTypography.label.copyWith(
+                          color: context.mlColors.textSecondary,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                  ),
 
-                  const Spacer(),
+                    const SizedBox(width: AppSpacing.xl),
 
-                  // 게시글로 이동 아이콘
-                  Icon(
-                    Icons.arrow_forward_ios,
-                    size: 16,
-                    color: Theme.of(context).colorScheme.outline,
-                  ),
-                ],
-              ),
-            ],
+                    Icon(
+                      Icons.favorite,
+                      size: 14,
+                      color: context.mlColors.textSecondary,
+                    ),
+                    const SizedBox(width: AppSpacing.xs),
+                    Text(
+                      '${comment.likeCount}',
+                      style: AppTypography.label.copyWith(
+                        color: context.mlColors.textSecondary,
+                      ),
+                    ),
+
+                    const Spacer(),
+
+                    // 게시글로 이동 아이콘
+                    Icon(
+                      Icons.arrow_forward_ios,
+                      size: 16,
+                      color: context.mlColors.textTertiary,
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

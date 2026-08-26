@@ -95,12 +95,15 @@ class AILensListScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(AppRadius.card),
               ),
               child: Center(
-                child: Text(
-                  ticker.score.toStringAsFixed(0),
-                  style: TextStyle(
-                    fontSize: AppTypography.headlineMedium,
-                    fontWeight: AppTypography.bold,
-                    color: scoreColor,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    ticker.score.toStringAsFixed(0),
+                    style: TextStyle(
+                      fontSize: AppTypography.headlineMedium,
+                      fontWeight: AppTypography.bold,
+                      color: scoreColor,
+                    ),
                   ),
                 ),
               ),
@@ -135,8 +138,8 @@ class AILensListScreen extends StatelessWidget {
                             TextSpan(
                               text: secondaryName,
                               style: TextStyle(
-                                fontSize: AppTypography.caption,
-                                color: context.mlColors.textTertiary,
+                                fontSize: AppTypography.bodySmall,
+                                color: context.mlColors.textSecondary,
                               ),
                             ),
                           ],
@@ -157,12 +160,16 @@ class AILensListScreen extends StatelessWidget {
                 color: scoreColor,
                 borderRadius: BorderRadius.circular(AppRadius.badge),
               ),
-              child: Text(
-                ticker.signalLabelLocalized(l10n),
-                style: TextStyle(
-                  color: context.mlColors.onPrimary,
-                  fontSize: AppTypography.caption,
-                  fontWeight: AppTypography.bold,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  ticker.signalLabelLocalized(l10n),
+                  maxLines: 1,
+                  style: TextStyle(
+                    color: context.mlColors.onPrimary,
+                    fontSize: AppTypography.caption,
+                    fontWeight: AppTypography.bold,
+                  ),
                 ),
               ),
             ),

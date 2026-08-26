@@ -689,9 +689,9 @@ class _CommunityFeedScreenState extends State<CommunityFeedScreen> {
             const SizedBox(height: AppSpacing.xl),
             Text(
               _errorMessage ?? l10n.checkNetwork,
-              style: TextStyle(
-                fontSize: AppTypography.headlineMedium,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              textAlign: TextAlign.center,
+              style: AppTypography.cardTitle.copyWith(
+                color: context.mlColors.textSecondary,
               ),
             ),
             const SizedBox(height: AppSpacing.xxl),
@@ -730,18 +730,17 @@ class _CommunityFeedScreenState extends State<CommunityFeedScreen> {
             const SizedBox(height: AppSpacing.xl),
             Text(
               isFiltering ? l10n.noSearchResultsCommunity : l10n.noPostsYet,
-              style: TextStyle(
-                fontSize: AppTypography.headlineLarge,
-                fontWeight: AppTypography.semiBold,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              textAlign: TextAlign.center,
+              style: AppTypography.sectionTitle.copyWith(
+                color: context.mlColors.textPrimary,
               ),
             ),
             const SizedBox(height: AppSpacing.md),
             Text(
               isFiltering ? l10n.tryDifferentFilter : l10n.writeFirstPost,
-              style: TextStyle(
-                fontSize: AppTypography.bodyLarge,
-                color: Theme.of(context).colorScheme.outline,
+              textAlign: TextAlign.center,
+              style: AppTypography.body.copyWith(
+                color: context.mlColors.textSecondary,
               ),
             ),
             if (!isFiltering) ...[
@@ -958,10 +957,8 @@ class _TickerSearchSheetState extends State<_TickerSearchSheet> {
       children: [
         Text(
           l10n.popularTickers,
-          style: TextStyle(
-            fontSize: AppTypography.bodyLarge,
-            fontWeight: AppTypography.semiBold,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          style: AppTypography.cardTitle.copyWith(
+            color: context.mlColors.textSecondary,
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
@@ -985,9 +982,8 @@ class _TickerSearchSheetState extends State<_TickerSearchSheet> {
       return Center(
         child: Text(
           AppLocalizations.of(context).noSearchResultsCommunity,
-          style: TextStyle(
-            fontSize: AppTypography.headlineMedium,
-            color: Theme.of(context).colorScheme.outline,
+          style: AppTypography.body.copyWith(
+            color: context.mlColors.textSecondary,
           ),
         ),
       );
@@ -1013,9 +1009,8 @@ class _TickerSearchSheetState extends State<_TickerSearchSheet> {
           trailing: ticker.category != null
               ? Text(
                   ticker.category!,
-                  style: TextStyle(
-                    fontSize: AppTypography.bodySmall,
-                    color: Theme.of(context).colorScheme.outline,
+                  style: AppTypography.label.copyWith(
+                    color: context.mlColors.textSecondary,
                   ),
                 )
               : null,

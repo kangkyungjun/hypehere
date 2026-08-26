@@ -259,9 +259,10 @@ class _IndexesTabState extends State<IndexesTab> {
             const SizedBox(height: AppSpacing.xxs),
             Text(
               '($summary)',
+              // 요약문 가독성↑: 힌트색→보조색 승격
               style: TextStyle(
                 fontSize: AppTypography.bodySmall,
-                color: mlc.textTertiary,
+                color: mlc.textSecondary,
               ),
               textAlign: TextAlign.center,
             ),
@@ -368,12 +369,19 @@ class _IndexesTabState extends State<IndexesTab> {
                     ),
                   ),
                   const SizedBox(width: AppSpacing.sm),
-                  Text(
-                    '${item.formattedValue}${item.percentSuffix}',
-                    style: TextStyle(
-                      fontSize: AppTypography.headlineMedium,
-                      fontWeight: AppTypography.bold,
-                      color: mlc.textPrimary,
+                  // 히어로 숫자: 커질 수 있으니 축소 방어(FittedBox)
+                  Flexible(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerRight,
+                      child: Text(
+                        '${item.formattedValue}${item.percentSuffix}',
+                        style: TextStyle(
+                          fontSize: AppTypography.headlineMedium,
+                          fontWeight: AppTypography.bold,
+                          color: mlc.textPrimary,
+                        ),
+                      ),
                     ),
                   ),
                   if (item.isIndicator && item.indicator!.changePct != null) ...[
@@ -447,18 +455,20 @@ class _IndexesTabState extends State<IndexesTab> {
       TextSpan(
         children: [
           TextSpan(
+            // 라벨=보조색 medium (힌트색→승격), 값=진한색으로 위계 대비
             text: '$abbrev: ',
             style: TextStyle(
-              fontSize: AppTypography.bodySmall,
-              color: mlc.textTertiary,
+              fontSize: AppTypography.bodyMedium,
+              fontWeight: AppTypography.medium,
+              color: mlc.textSecondary,
             ),
           ),
           TextSpan(
             text: value.toStringAsFixed(2),
             style: TextStyle(
-              fontSize: AppTypography.bodySmall,
-              fontWeight: AppTypography.medium,
-              color: mlc.textSecondary,
+              fontSize: AppTypography.bodyMedium,
+              fontWeight: AppTypography.semiBold,
+              color: mlc.textPrimary,
             ),
           ),
         ],

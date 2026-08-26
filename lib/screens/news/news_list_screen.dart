@@ -547,33 +547,40 @@ class _NewsListScreenState extends State<NewsListScreen> {
                       // Row 1: ticker + sentiment + time
                       Row(
                         children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: AppSpacing.sm,
-                              vertical: AppSpacing.xs,
-                            ),
-                            decoration: BoxDecoration(
-                              color: isMarket
-                                  ? mlc.sectionBackground
-                                  : mlc.infoBg,
-                              borderRadius: BorderRadius.circular(
-                                AppRadius.badge,
+                          // 티커 배지 — 종목명이 길 때 overflow 방어(Flexible+ellipsis)
+                          Flexible(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: AppSpacing.sm,
+                                vertical: AppSpacing.xs,
                               ),
-                              border: Border.all(color: mlc.subtleBorder),
-                            ),
-                            child: Text(
-                              isMarket
-                                  ? l10n.marketNews
-                                  : (langCode == 'ko' &&
-                                        item.tickerNameKo != null)
-                                  ? '${item.ticker} ${item.tickerNameKo}'
-                                  : item.ticker,
-                              style: TextStyle(
-                                fontSize: AppTypography.caption,
-                                fontWeight: AppTypography.bold,
+                              decoration: BoxDecoration(
                                 color: isMarket
-                                    ? mlc.textSecondary
-                                    : mlc.accentBlue,
+                                    ? mlc.sectionBackground
+                                    : mlc.infoBg,
+                                borderRadius: BorderRadius.circular(
+                                  AppRadius.badge,
+                                ),
+                                border: Border.all(color: mlc.subtleBorder),
+                              ),
+                              child: Text(
+                                isMarket
+                                    ? l10n.marketNews
+                                    : (langCode == 'ko' &&
+                                          item.tickerNameKo != null)
+                                    ? '${item.ticker} ${item.tickerNameKo}'
+                                    : item.ticker,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                // 비방향성 티커 링크 강조 — accentBlue 유지
+                                // caption→bodySmall 한 단계 키움
+                                style: TextStyle(
+                                  fontSize: AppTypography.bodySmall,
+                                  fontWeight: AppTypography.bold,
+                                  color: isMarket
+                                      ? mlc.textSecondary
+                                      : mlc.accentBlue,
+                                ),
                               ),
                             ),
                           ),
@@ -599,23 +606,24 @@ class _NewsListScreenState extends State<NewsListScreen> {
                                 AppRadius.badge,
                               ),
                             ),
+                            // 방향성 감정 배지 — 녹/적 유지, 한 단계 키움
                             child: Text(
                               item.sentimentLabelLocalized(l10n),
                               style: TextStyle(
-                                fontSize: AppTypography.caption,
+                                fontSize: AppTypography.bodySmall,
                                 fontWeight: AppTypography.bold,
                                 color: dotColor,
                               ),
                             ),
                           ),
                           const Spacer(),
-                          // Sector abbreviation (grey)
+                          // Sector abbreviation (뮤트 라벨 → textSecondary 승격)
                           if (item.sectorShort != null) ...[
                             Text(
                               item.sectorShort!,
                               style: TextStyle(
-                                fontSize: AppTypography.caption,
-                                color: mlc.textTertiary,
+                                fontSize: AppTypography.bodySmall,
+                                color: mlc.textSecondary,
                               ),
                             ),
                             const SizedBox(width: AppSpacing.sm),
@@ -623,8 +631,8 @@ class _NewsListScreenState extends State<NewsListScreen> {
                           Text(
                             item.timeAgoLocalized(l10n),
                             style: TextStyle(
-                              fontSize: AppTypography.caption,
-                              color: mlc.textTertiary,
+                              fontSize: AppTypography.bodySmall,
+                              color: mlc.textSecondary,
                             ),
                           ),
                         ],
@@ -645,9 +653,11 @@ class _NewsListScreenState extends State<NewsListScreen> {
                         const SizedBox(height: AppSpacing.xs),
                         Text(
                           item.source!,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontSize: AppTypography.caption,
-                            color: mlc.textTertiary,
+                            fontSize: AppTypography.bodySmall,
+                            color: mlc.textSecondary,
                           ),
                         ),
                       ],

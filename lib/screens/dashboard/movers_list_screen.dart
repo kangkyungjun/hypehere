@@ -231,9 +231,10 @@ class _MoversListScreenState extends State<MoversListScreen> {
                       if (item.displayName(Localizations.localeOf(context).languageCode) != null)
                         Text(
                           item.displayName(Localizations.localeOf(context).languageCode)!,
+                          // 라벨 가독성↑: 힌트색→보조색 승격, bodySmall→bodyMedium
                           style: TextStyle(
-                            fontSize: AppTypography.bodySmall,
-                            color: mlc.textTertiary,
+                            fontSize: AppTypography.bodyMedium,
+                            color: mlc.textSecondary,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,

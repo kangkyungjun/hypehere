@@ -150,7 +150,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                             ? NetworkImage(widget.user.profilePicture!)
                             : null) as ImageProvider?,
                     child: (_selectedImage == null && widget.user.profilePicture == null)
-                        ? Icon(Icons.person, size: 64, color: Theme.of(context).colorScheme.outline)
+                        ? Icon(Icons.person, size: 64, color: context.mlColors.textTertiary)
                         : null,
                   ),
 
@@ -223,13 +223,16 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.info_outline, size: 20, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                      Icon(Icons.info_outline, size: 20, color: context.mlColors.textSecondary),
                       const SizedBox(width: AppSpacing.md),
-                      Text(
-                        l10n.profileEditGuide,
-                        style: TextStyle(
-                          fontWeight: AppTypography.bold,
-                          color: Theme.of(context).colorScheme.onSurface,
+                      Flexible(
+                        child: Text(
+                          l10n.profileEditGuide,
+                          style: TextStyle(
+                            fontWeight: AppTypography.semiBold,
+                            fontSize: AppTypography.bodyLarge,
+                            color: context.mlColors.textPrimary,
+                          ),
                         ),
                       ),
                     ],
@@ -240,8 +243,8 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                     '• 소개글: 최대 200자 (선택사항)\n'
                     '• 프로필 사진: 권장 크기 800x800px',
                     style: TextStyle(
-                      fontSize: AppTypography.bodyMedium,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      fontSize: AppTypography.bodyLarge,
+                      color: context.mlColors.textSecondary,
                       height: 1.5,
                     ),
                   ),

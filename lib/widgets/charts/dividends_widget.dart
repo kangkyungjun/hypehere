@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/chart_data.dart';
 import '../../theme/app_colors.dart';
-import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 import '../../theme/app_typography.dart';
+import '../common/bento_card.dart';
 
 /// Dividend history and yield widget
 ///
@@ -50,37 +50,42 @@ class DividendsWidget extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.sm),
 
-          // Yield + Annual total
+          // Yield + Annual total — 라벨=뮤트, 값=blue(비방향성 집계). 오버플로 방어.
           Row(
             children: [
               if (dividendYield != null) ...[
                 Text(
                   '${l10n.dividendYield} ',
-                  style: TextStyle(fontSize: AppTypography.bodyMedium, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                  style: TextStyle(fontSize: AppTypography.bodyMedium, color: context.mlColors.textSecondary),
                 ),
-                Text(
-                  '${(dividendYield! * 100).toStringAsFixed(2)}%',
-                  style: const TextStyle(
-                    fontSize: AppTypography.bodyLarge,
-                    fontWeight: AppTypography.semiBold,
+                Flexible(
+                  child: Text(
+                    '${(dividendYield! * 100).toStringAsFixed(2)}%',
+                    style: TextStyle(
+                      fontSize: AppTypography.bodyLarge,
+                      fontWeight: AppTypography.semiBold,
+                      color: context.mlColors.accentBlue,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
               if (dividendYield != null && annualTotal > 0)
-                Text(
-                  '     ',
-                  style: TextStyle(color: Theme.of(context).colorScheme.outline),
-                ),
+                const SizedBox(width: AppSpacing.xxl),
               if (annualTotal > 0) ...[
                 Text(
                   '${l10n.annualDividend} ',
-                  style: TextStyle(fontSize: AppTypography.bodyMedium, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                  style: TextStyle(fontSize: AppTypography.bodyMedium, color: context.mlColors.textSecondary),
                 ),
-                Text(
-                  '\$${annualTotal.toStringAsFixed(2)}',
-                  style: const TextStyle(
-                    fontSize: AppTypography.bodyLarge,
-                    fontWeight: AppTypography.semiBold,
+                Flexible(
+                  child: Text(
+                    '\$${annualTotal.toStringAsFixed(2)}',
+                    style: TextStyle(
+                      fontSize: AppTypography.bodyLarge,
+                      fontWeight: AppTypography.semiBold,
+                      color: context.mlColors.accentBlue,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
@@ -98,32 +103,32 @@ class DividendsWidget extends StatelessWidget {
                 final shortDate = parts.length >= 2
                     ? '${parts[0].substring(2)}.${parts[1]}'
                     : d.exDate;
-                return Container(
-                  width: 72,
+                return BentoCard(
                   margin: const EdgeInsets.only(right: AppSpacing.md),
                   padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg, horizontal: AppSpacing.sm),
-                  decoration: BoxDecoration(
-                    color: context.mlColors.cardBackground,
-                    borderRadius: BorderRadius.circular(AppRadius.md),
-                    border: Border.all(color: context.mlColors.subtleBorder),
-                  ),
-                  child: Column(
-                    children: [
-                      Text(
-                        shortDate,
-                        style: TextStyle(fontSize: AppTypography.bodySmall, color: Theme.of(context).colorScheme.onSurfaceVariant),
-                      ),
-                      const SizedBox(height: AppSpacing.xs),
-                      Text(
-                        d.amount != null
-                            ? '\$${d.amount!.toStringAsFixed(2)}'
-                            : '--',
-                        style: const TextStyle(
-                          fontSize: AppTypography.bodyMedium,
-                          fontWeight: AppTypography.semiBold,
+                  child: SizedBox(
+                    width: 72 - AppSpacing.sm * 2,
+                    child: Column(
+                      children: [
+                        Text(
+                          shortDate,
+                          style: TextStyle(fontSize: AppTypography.bodySmall, color: context.mlColors.textSecondary),
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: AppSpacing.xs),
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            d.amount != null
+                                ? '\$${d.amount!.toStringAsFixed(2)}'
+                                : '--',
+                            style: const TextStyle(
+                              fontSize: AppTypography.bodyMedium,
+                              fontWeight: AppTypography.semiBold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 );
               }).toList(),

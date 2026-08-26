@@ -108,11 +108,12 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                       children: [
                         Icon(Icons.info_outline, color: context.mlColors.accentBlue),
                         const SizedBox(width: AppSpacing.md),
-                        Text(
-                          l10n.changePasswordGuide,
-                          style: TextStyle(
-                            fontWeight: AppTypography.bold,
-                            color: context.mlColors.accentBlue,
+                        Flexible(
+                          child: Text(
+                            l10n.changePasswordGuide,
+                            style: AppTypography.bodyStrong.copyWith(
+                              color: context.mlColors.accentBlue,
+                            ),
                           ),
                         ),
                       ],
@@ -120,8 +121,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                     const SizedBox(height: AppSpacing.md),
                     Text(
                       AppLocalizations.of(context).passwordChangeInstructions,
-                      style: TextStyle(
-                        fontSize: AppTypography.bodyMedium,
+                      style: AppTypography.body.copyWith(
                         color: context.mlColors.accentBlue,
                         height: 1.5,
                       ),
@@ -245,11 +245,15 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                           color: context.mlColors.onPrimary,
                         ),
                       )
-                    : Text(
-                        l10n.changePassword,
-                        style: const TextStyle(
-                          fontSize: AppTypography.headlineMedium,
-                          fontWeight: AppTypography.bold,
+                    : FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          l10n.changePassword,
+                          maxLines: 1,
+                          style: const TextStyle(
+                            fontSize: AppTypography.headlineMedium,
+                            fontWeight: AppTypography.bold,
+                          ),
                         ),
                       ),
               ),

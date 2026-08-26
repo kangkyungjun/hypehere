@@ -324,12 +324,15 @@ class _AiSectorScreenState extends State<AiSectorScreen> {
                 borderRadius: BorderRadius.circular(AppRadius.card),
               ),
               child: Center(
-                child: Text(
-                  t.score.toStringAsFixed(0),
-                  style: TextStyle(
-                    fontSize: AppTypography.bodyLarge,
-                    fontWeight: AppTypography.bold,
-                    color: scoreColor,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    t.score.toStringAsFixed(0),
+                    style: TextStyle(
+                      fontSize: AppTypography.bodyLarge,
+                      fontWeight: AppTypography.bold,
+                      color: scoreColor,
+                    ),
                   ),
                 ),
               ),
@@ -363,13 +366,17 @@ class _AiSectorScreenState extends State<AiSectorScreen> {
             ),
             // 변동률
             if (pct != null)
-              Text(
-                '${pct >= 0 ? '+' : ''}${pct.toStringAsFixed(1)}%',
-                style: TextStyle(
-                  fontSize: AppTypography.bodyMedium,
-                  fontWeight: AppTypography.semiBold,
-                  color: pct >= 0 ? mlc.gainColor : mlc.lossColor,
-                  fontFeatures: AppTypography.tabularFigures,
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  '${pct >= 0 ? '+' : ''}${pct.toStringAsFixed(1)}%',
+                  maxLines: 1,
+                  style: TextStyle(
+                    fontSize: AppTypography.bodyMedium,
+                    fontWeight: AppTypography.semiBold,
+                    color: pct >= 0 ? mlc.gainColor : mlc.lossColor,
+                    fontFeatures: AppTypography.tabularFigures,
+                  ),
                 ),
               ),
             const SizedBox(width: AppSpacing.sm),

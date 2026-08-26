@@ -910,7 +910,7 @@ class SettingsScreen extends StatelessWidget {
                             const SizedBox(height: AppSpacing.xs),
                             Text(
                               user.email,
-                              style: AppTypography.label.copyWith(
+                              style: AppTypography.kvLabel.copyWith(
                                 color: context.mlColors.textSecondary,
                               ),
                               overflow: TextOverflow.ellipsis,
@@ -1282,7 +1282,7 @@ class SettingsScreen extends StatelessWidget {
       subtitle: subtitle != null
           ? Text(
               subtitle,
-              style: AppTypography.label.copyWith(color: mlc.textSecondary),
+              style: AppTypography.kvLabel.copyWith(color: mlc.textSecondary),
             )
           : null,
       trailing: Icon(

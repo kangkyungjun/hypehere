@@ -9,6 +9,7 @@ import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 import '../../theme/app_stroke.dart';
 import '../../theme/app_typography.dart';
+import '../../widgets/common/bento_card.dart';
 import 'email_verification_screen.dart';
 import 'reset_password_screen.dart';
 
@@ -104,79 +105,110 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
+    final mlc = context.mlColors;
 
     return Scaffold(
+      backgroundColor: mlc.sectionBackground,
       appBar: AppBar(
         title: Text(l10n.forgotPassword),
       ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.xxl),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const SizedBox(height: AppSpacing.xxxl),
-                Icon(
-                  Icons.lock_reset_outlined,
-                  size: 64,
-                  color: theme.primaryColor,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(AppSpacing.xl),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 480),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const SizedBox(height: AppSpacing.xxl),
+                    Center(
+                      child: Container(
+                        width: 56,
+                        height: 56,
+                        decoration: BoxDecoration(
+                          color: mlc.infoBg,
+                          borderRadius: BorderRadius.circular(AppRadius.lg),
+                        ),
+                        child: Icon(
+                          Icons.lock_reset_outlined,
+                          size: 30,
+                          color: mlc.accentBlue,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+                    Text(
+                      l10n.forgotPassword,
+                      textAlign: TextAlign.center,
+                      style: AppTypography.screenTitle.copyWith(
+                        color: mlc.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      l10n.forgotPasswordSubtitle,
+                      textAlign: TextAlign.center,
+                      style:
+                          AppTypography.body.copyWith(color: mlc.textSecondary),
+                    ),
+                    const SizedBox(height: AppSpacing.xxl),
+                    BentoCard(
+                      child: TextFormField(
+                        controller: _emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: InputDecoration(
+                          labelText: l10n.email,
+                          hintText: l10n.emailHint,
+                          prefixIcon: const Icon(Icons.email_outlined),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return l10n.emailRequired;
+                          }
+                          if (!value.contains('@')) {
+                            return l10n.emailInvalid;
+                          }
+                          return null;
+                        },
+                        onFieldSubmitted: (_) => _handleSubmit(),
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xl),
+                    FilledButton(
+                      onPressed: _isLoading ? null : _handleSubmit,
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: AppSpacing.lg,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(AppRadius.lg),
+                        ),
+                      ),
+                      child: _isLoading
+                          ? SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: AppStroke.medium,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  mlc.onPrimary,
+                                ),
+                              ),
+                            )
+                          : Text(
+                              l10n.sendVerificationCode,
+                              style: const TextStyle(
+                                fontSize: AppTypography.headlineMedium,
+                                fontWeight: AppTypography.semiBold,
+                              ),
+                            ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: AppSpacing.xl),
-                Text(
-                  l10n.forgotPassword,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: AppTypography.displayLarge, fontWeight: AppTypography.bold),
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                Text(
-                  l10n.forgotPasswordSubtitle,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: AppTypography.bodyLarge, color: context.mlColors.textSecondary),
-                ),
-                const SizedBox(height: AppSpacing.xxxl),
-                TextFormField(
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: InputDecoration(
-                    labelText: l10n.email,
-                    hintText: l10n.emailHint,
-                    prefixIcon: const Icon(Icons.email_outlined),
-                    border: const OutlineInputBorder(),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return l10n.emailRequired;
-                    }
-                    if (!value.contains('@')) {
-                      return l10n.emailInvalid;
-                    }
-                    return null;
-                  },
-                  onFieldSubmitted: (_) => _handleSubmit(),
-                ),
-                const SizedBox(height: AppSpacing.xxl),
-                ElevatedButton(
-                  onPressed: _isLoading ? null : _handleSubmit,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
-                    backgroundColor: theme.primaryColor,
-                    foregroundColor: context.mlColors.onPrimary,
-                  ),
-                  child: _isLoading
-                      ? SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: AppStroke.medium,
-                            valueColor: AlwaysStoppedAnimation<Color>(context.mlColors.onPrimary),
-                          ),
-                        )
-                      : Text(l10n.sendVerificationCode, style: const TextStyle(fontSize: AppTypography.headlineMedium)),
-                ),
-              ],
+              ),
             ),
           ),
         ),

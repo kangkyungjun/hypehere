@@ -190,7 +190,10 @@ class HoldingsScreen extends StatelessWidget {
           FilledButton.icon(
             onPressed: () => Navigator.pop(ctx, 'upgrade'),
             icon: const Icon(Icons.workspace_premium, size: 18),
-            label: Text(l10n.upgradeToGold),
+            label: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(l10n.upgradeToGold),
+            ),
             style: FilledButton.styleFrom(
               backgroundColor: Colors.amber.shade700,
               foregroundColor: Colors.white,

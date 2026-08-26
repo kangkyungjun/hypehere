@@ -10,6 +10,7 @@ import '../../theme/app_stroke.dart';
 import '../../theme/app_typography.dart';
 import '../../l10n/app_localizations.dart';
 import '../../utils/badge_colors.dart';
+import '../../widgets/common/bento_card.dart';
 
 /// 관리자 패널 (Manager/Master 전용).
 ///
@@ -257,9 +258,8 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                               _searchController.text.isNotEmpty
                                   ? l10n.noSearchResults
                                   : l10n.noData,
-                              style: TextStyle(
-                                fontSize: AppTypography.headlineMedium,
-                                color: Theme.of(context).colorScheme.outline,
+                              style: AppTypography.cardTitle.copyWith(
+                                color: context.mlColors.textTertiary,
                               ),
                             ),
                           ),
@@ -283,67 +283,58 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
 
   // ── 위젯 빌더 ──
 
-  Widget _buildLocked(AppLocalizations l10n) => Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.lock,
-                size: 64, color: Theme.of(context).colorScheme.outline),
-            const SizedBox(height: AppSpacing.xl),
-            Text(
-              l10n.errManagerRequired,
-              style: TextStyle(
-                fontSize: AppTypography.headlineLarge,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ],
-        ),
-      );
+  Widget _buildLocked(AppLocalizations l10n) {
+    final mlc = context.mlColors;
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.lock, size: 64, color: mlc.textTertiary),
+          const SizedBox(height: AppSpacing.xl),
+          Text(
+            l10n.errManagerRequired,
+            style: AppTypography.sectionTitle.copyWith(color: mlc.textSecondary),
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _buildPermissionCard(AuthProvider auth, AppLocalizations l10n) {
     final mlc = context.mlColors;
-    return Card(
-      color: mlc.warningBg,
-      elevation: 1,
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Row(
-          children: [
-            Icon(
-              auth.isMaster
-                  ? Icons.admin_panel_settings
-                  : Icons.manage_accounts,
-              color: auth.isMaster ? mlc.dangerColor : mlc.warningColor,
-              size: 28,
-            ),
-            const SizedBox(width: AppSpacing.lg),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    auth.roleDisplayName,
-                    style: const TextStyle(
-                      fontSize: AppTypography.headlineMedium,
-                      fontWeight: AppTypography.bold,
-                    ),
+    return BentoCard(
+      child: Row(
+        children: [
+          Icon(
+            auth.isMaster
+                ? Icons.admin_panel_settings
+                : Icons.manage_accounts,
+            color: auth.isMaster ? mlc.dangerColor : mlc.warningColor,
+            size: 28,
+          ),
+          const SizedBox(width: AppSpacing.lg),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  auth.roleDisplayName,
+                  style: AppTypography.cardTitle.copyWith(
+                    color: mlc.textPrimary,
+                    fontWeight: AppTypography.bold,
                   ),
-                  const SizedBox(height: AppSpacing.xxs),
-                  Text(
-                    auth.isMaster
-                        ? '${l10n.promoteToGold} · ${l10n.promoteToManager} · ${l10n.demoteToRegular}'
-                        : '${l10n.promoteToGold} · ${l10n.demoteToRegular}',
-                    style: TextStyle(
-                      fontSize: AppTypography.bodySmall,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
+                ),
+                const SizedBox(height: AppSpacing.xxs),
+                Text(
+                  auth.isMaster
+                      ? '${l10n.promoteToGold} · ${l10n.promoteToManager} · ${l10n.demoteToRegular}'
+                      : '${l10n.promoteToGold} · ${l10n.demoteToRegular}',
+                  style: AppTypography.label.copyWith(color: mlc.textSecondary),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -353,52 +344,46 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
     final l10n = AppLocalizations.of(context);
     final total = _stats['total'] ?? 0;
 
-    return Card(
-      elevation: 1,
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.group_outlined, size: 18, color: mlc.textSecondary),
-                const SizedBox(width: AppSpacing.xs),
-                Text(
-                  '총 가입자',
-                  style: TextStyle(
-                    fontSize: AppTypography.bodySmall,
-                    color: mlc.textSecondary,
-                  ),
+    return BentoCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.group_outlined, size: 18, color: mlc.textSecondary),
+              const SizedBox(width: AppSpacing.xs),
+              Text(
+                '총 가입자',
+                style: AppTypography.kvLabel.copyWith(color: mlc.textSecondary),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Text(
+                '$total${_unitMyeong(l10n)}',
+                style: AppTypography.cardTitle.copyWith(
+                  color: mlc.textPrimary,
+                  fontWeight: AppTypography.bold,
+                  fontFeatures: AppTypography.tabularFigures,
                 ),
-                const SizedBox(width: AppSpacing.sm),
-                Text(
-                  '$total${_unitMyeong(l10n)}',
-                  style: const TextStyle(
-                    fontSize: AppTypography.headlineMedium,
-                    fontWeight: AppTypography.bold,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Row(
-              children: [
-                _statCell(l10n.roleMaster, _stats['master'] ?? 0,
-                    BadgeColors.roleBadge('master', mlc)),
-                _statDivider(),
-                _statCell(l10n.roleManager, _stats['manager'] ?? 0,
-                    BadgeColors.roleBadge('manager', mlc)),
-                _statDivider(),
-                _statCell(l10n.roleGold, _stats['gold'] ?? 0,
-                    BadgeColors.roleBadge('gold', mlc)),
-                _statDivider(),
-                _statCell(l10n.roleRegular, _stats['regular'] ?? 0,
-                    BadgeColors.roleBadge('regular', mlc)),
-              ],
-            ),
-          ],
-        ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Row(
+            children: [
+              _statCell(l10n.roleMaster, _stats['master'] ?? 0,
+                  BadgeColors.roleBadge('master', mlc)),
+              _statDivider(),
+              _statCell(l10n.roleManager, _stats['manager'] ?? 0,
+                  BadgeColors.roleBadge('manager', mlc)),
+              _statDivider(),
+              _statCell(l10n.roleGold, _stats['gold'] ?? 0,
+                  BadgeColors.roleBadge('gold', mlc)),
+              _statDivider(),
+              _statCell(l10n.roleRegular, _stats['regular'] ?? 0,
+                  BadgeColors.roleBadge('regular', mlc)),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -407,22 +392,32 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
     return Expanded(
       child: Column(
         children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: AppTypography.micro,
-              fontWeight: AppTypography.semiBold,
-              color: color,
+          // 역할 라벨(한글)은 caption11로 한 단계 키우되 좁은 4분할 셀에서
+          // 넘치지 않도록 FittedBox(scaleDown)로 방어.
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: AppTypography.caption,
+                fontWeight: AppTypography.semiBold,
+                color: color,
+              ),
+              maxLines: 1,
             ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 2),
-          Text(
-            '$count',
-            style: const TextStyle(
-              fontSize: AppTypography.bodyLarge,
-              fontWeight: AppTypography.bold,
+          // 카운트도 좁은 4분할 셀에서 자릿수 넘침 방지.
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              '$count',
+              style: const TextStyle(
+                fontSize: AppTypography.headlineSmall,
+                fontWeight: AppTypography.bold,
+                fontFeatures: AppTypography.tabularFigures,
+              ),
+              maxLines: 1,
             ),
           ),
         ],
@@ -535,23 +530,20 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
 
   Widget _buildError() => Padding(
         padding: const EdgeInsets.only(bottom: AppSpacing.md),
-        child: Card(
-          color: context.mlColors.dangerBg,
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            child: Row(
-              children: [
-                Icon(Icons.error_outline,
-                    color: context.mlColors.dangerColor),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: Text(
-                    _errorMessage!,
-                    style: TextStyle(color: context.mlColors.dangerColor),
+        child: BentoCard(
+          child: Row(
+            children: [
+              Icon(Icons.error_outline, color: context.mlColors.dangerColor),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Text(
+                  _errorMessage!,
+                  style: AppTypography.body.copyWith(
+                    color: context.mlColors.dangerColor,
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       );
@@ -690,70 +682,66 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
     final String nickname = user['nickname'];
     final String role = user['role'] ?? 'regular';
 
-    return Card(
+    return BentoCard(
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                CircleAvatar(
-                  radius: 18,
-                  backgroundColor: mlc.accentBlue,
-                  child: Text(
-                    nickname.isNotEmpty ? nickname[0].toUpperCase() : 'U',
-                    style: TextStyle(
-                      color: mlc.onPrimary,
-                      fontWeight: AppTypography.bold,
-                    ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 18,
+                backgroundColor: mlc.accentBlue,
+                child: Text(
+                  nickname.isNotEmpty ? nickname[0].toUpperCase() : 'U',
+                  style: TextStyle(
+                    color: mlc.onPrimary,
+                    fontWeight: AppTypography.bold,
                   ),
                 ),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Flexible(
-                            child: Text(
-                              nickname,
-                              style: const TextStyle(
-                                fontSize: AppTypography.headlineMedium,
-                                fontWeight: AppTypography.bold,
-                              ),
-                              overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            nickname,
+                            style: AppTypography.cardTitle.copyWith(
+                              color: mlc.textPrimary,
+                              fontWeight: AppTypography.bold,
                             ),
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          const SizedBox(width: AppSpacing.xs),
-                          _buildRoleBadge(role, l10n),
-                          if (role == 'gold') ...[
-                            const SizedBox(width: AppSpacing.xxs),
-                            _buildGoldTypeBadge(user['is_iap_gold'] == true),
-                          ],
-                        ],
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        email,
-                        style: TextStyle(
-                          fontSize: AppTypography.bodySmall,
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
+                        const SizedBox(width: AppSpacing.xs),
+                        _buildRoleBadge(role, l10n),
+                        if (role == 'gold') ...[
+                          const SizedBox(width: AppSpacing.xxs),
+                          _buildGoldTypeBadge(user['is_iap_gold'] == true),
+                        ],
+                      ],
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      email,
+                      style: AppTypography.label.copyWith(
+                        color: mlc.textSecondary,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            _buildActivityMetrics(user),
-            const SizedBox(height: AppSpacing.md),
-            _buildActionRow(userId, nickname, role, auth, l10n),
-          ],
-        ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          _buildActivityMetrics(user),
+          const SizedBox(height: AppSpacing.md),
+          _buildActionRow(userId, nickname, role, auth, l10n),
+        ],
       ),
     );
   }
@@ -761,27 +749,29 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
   /// 유저별 접속 지표: 마지막 접속 · 총(횟수/일수) · 이번달(횟수/일수).
   Widget _buildActivityMetrics(Map<String, dynamic> user) {
     final mlc = context.mlColors;
-    final muted = Theme.of(context).colorScheme.onSurfaceVariant;
+    final muted = mlc.textSecondary;
     final String lastAccess = (user['last_access'] as String?) ?? '-';
     final int totalAcc = (user['total_accesses'] as int?) ?? 0;
     final int totalDays = (user['total_active_days'] as int?) ?? 0;
     final int monthAcc = (user['month_accesses'] as int?) ?? 0;
     final int monthDays = (user['month_active_days'] as int?) ?? 0;
 
+    // 라벨/값 모두 caption11로 한 단계 키움(micro→caption). Wrap 안이라 넘침 안전.
     Widget stat(IconData icon, String label, String value) => Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 12, color: muted),
+            Icon(icon, size: 13, color: muted),
             const SizedBox(width: 3),
             Text(
               '$label ',
-              style: TextStyle(fontSize: AppTypography.micro, color: muted),
+              style: TextStyle(fontSize: AppTypography.caption, color: muted),
             ),
             Text(
               value,
               style: TextStyle(
-                fontSize: AppTypography.micro,
+                fontSize: AppTypography.caption,
                 fontWeight: AppTypography.bold,
+                fontFeatures: AppTypography.tabularFigures,
                 color: mlc.accentBlue,
               ),
             ),
@@ -880,7 +870,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
           child: Text(
             l10n.roleMaster,
             style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              color: context.mlColors.textSecondary,
               fontWeight: AppTypography.bold,
             ),
           ),

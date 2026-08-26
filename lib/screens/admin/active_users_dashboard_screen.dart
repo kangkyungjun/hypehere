@@ -111,6 +111,7 @@ class _ActiveUsersDashboardScreenState
   }
 
   void _showGlossary(BuildContext context) {
+    final mlc = context.mlColors;
     Widget item(String t, String d) => Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.md),
       child: Column(
@@ -118,10 +119,16 @@ class _ActiveUsersDashboardScreenState
         children: [
           Text(
             t,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+            style: AppTypography.bodyStrong.copyWith(color: mlc.textPrimary),
           ),
           const SizedBox(height: 2),
-          Text(d, style: const TextStyle(fontSize: 13, height: 1.35)),
+          Text(
+            d,
+            style: AppTypography.body.copyWith(
+              color: mlc.textSecondary,
+              height: 1.35,
+            ),
+          ),
         ],
       ),
     );
@@ -213,8 +220,8 @@ class _ActiveUsersDashboardScreenState
           '플랫폼 분리는 당일 첫 기기(first-touch)라 합이 총량과 다를 수 있음. '
           'DAU는 누적가입자(total)와 다른 지표.',
           style: TextStyle(
-            fontSize: AppTypography.micro,
-            color: context.mlColors.textTertiary,
+            fontSize: AppTypography.caption,
+            color: context.mlColors.textSecondary,
             height: 1.4,
           ),
         ),
@@ -241,19 +248,25 @@ class _ActiveUsersDashboardScreenState
               style: AppTypography.label.copyWith(color: mlc.textSecondary),
             ),
             const SizedBox(height: AppSpacing.xs),
-            Text(
-              value,
-              style: AppTypography.sectionTitle.copyWith(
-                color: mlc.textPrimary,
-                fontFeatures: AppTypography.tabularFigures,
+            // 히어로 숫자 — 큰 값이 3분할 카드에서 넘치지 않게 scaleDown 방어.
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                value,
+                maxLines: 1,
+                style: AppTypography.sectionTitle.copyWith(
+                  color: mlc.textPrimary,
+                  fontFeatures: AppTypography.tabularFigures,
+                ),
               ),
             ),
             if (sub != null)
               Text(
                 sub,
                 style: TextStyle(
-                  fontSize: AppTypography.micro,
-                  color: mlc.textTertiary,
+                  fontSize: AppTypography.caption,
+                  color: mlc.textSecondary,
                 ),
               ),
           ],
@@ -423,7 +436,10 @@ class _ActiveUsersDashboardScreenState
         const SizedBox(width: AppSpacing.sm),
         Text(
           'A $android · i $ios',
-          style: AppTypography.label.copyWith(color: mlc.textTertiary),
+          style: AppTypography.label.copyWith(
+            color: mlc.textSecondary,
+            fontFeatures: AppTypography.tabularFigures,
+          ),
         ),
       ],
     );
@@ -446,16 +462,19 @@ class _ActiveUsersDashboardScreenState
             'AdMob 오늘',
             '\$${(ad?.revenueTodayUsd ?? 0).toStringAsFixed(2)}',
             context,
+            accent: true,
           ),
           _kv(
             'AdMob 이번달',
             '\$${(ad?.revenueMtdUsd ?? 0).toStringAsFixed(2)}',
             context,
+            accent: true,
           ),
           _kv(
             'eCPM (1천노출당 수익)',
             '\$${(ad?.ecpm ?? 0).toStringAsFixed(2)}',
             context,
+            accent: true,
           ),
           _kv('설치 오늘', '${dl?.today ?? 0}', context),
           _kv('설치 누적', '${dl?.total ?? 0}', context),
@@ -464,20 +483,33 @@ class _ActiveUsersDashboardScreenState
     );
   }
 
-  Widget _kv(String k, String v, BuildContext context) {
+  /// 라벨=뮤트, 값=진한 semiBold. [accent]=true면 비방향성 집계(수익/eCPM)를
+  /// accentBlue로 강조. 값은 넘치지 않게 Flexible+scaleDown로 방어.
+  Widget _kv(String k, String v, BuildContext context, {bool accent = false}) {
     final mlc = context.mlColors;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 3),
       child: Row(
         children: [
-          Text(k, style: AppTypography.body.copyWith(color: mlc.textSecondary)),
-          const Spacer(),
-          Text(
-            v,
-            style: AppTypography.body.copyWith(
-              color: mlc.textPrimary,
-              fontWeight: AppTypography.semiBold,
-              fontFeatures: AppTypography.tabularFigures,
+          Expanded(
+            child: Text(
+              k,
+              style: AppTypography.kvLabel.copyWith(color: mlc.textSecondary),
+            ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Flexible(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerRight,
+              child: Text(
+                v,
+                maxLines: 1,
+                style: AppTypography.bodyStrong.copyWith(
+                  color: accent ? mlc.accentBlue : mlc.textPrimary,
+                  fontFeatures: AppTypography.tabularFigures,
+                ),
+              ),
             ),
           ),
         ],

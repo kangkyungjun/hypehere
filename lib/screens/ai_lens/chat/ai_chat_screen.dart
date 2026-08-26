@@ -331,24 +331,32 @@ class _AiChatScreenState extends State<AiChatScreen> {
       child: Row(
         children: [
           const Spacer(),
-          TextButton.icon(
-            onPressed: () => _openHistory(context, chat),
-            icon: Icon(
-              Icons.history_rounded,
-              size: 18,
-              color: mlc.textSecondary,
-            ),
-            label: Text(
-              l10n.aiChatHistory,
-              style: AppTypography.label.copyWith(color: mlc.textSecondary),
+          Flexible(
+            child: TextButton.icon(
+              onPressed: () => _openHistory(context, chat),
+              icon: Icon(
+                Icons.history_rounded,
+                size: 18,
+                color: mlc.textSecondary,
+              ),
+              label: Text(
+                l10n.aiChatHistory,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppTypography.label.copyWith(color: mlc.textSecondary),
+              ),
             ),
           ),
-          TextButton.icon(
-            onPressed: chat.isSending ? null : () => chat.startNew(),
-            icon: Icon(Icons.add_rounded, size: 18, color: mlc.accentBlue),
-            label: Text(
-              l10n.aiChatNew,
-              style: AppTypography.label.copyWith(color: mlc.accentBlue),
+          Flexible(
+            child: TextButton.icon(
+              onPressed: chat.isSending ? null : () => chat.startNew(),
+              icon: Icon(Icons.add_rounded, size: 18, color: mlc.accentBlue),
+              label: Text(
+                l10n.aiChatNew,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppTypography.label.copyWith(color: mlc.accentBlue),
+              ),
             ),
           ),
         ],
@@ -464,7 +472,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
               children: [
                 Text(
                   l10n.aiChatSuggestionsTitle,
-                  style: AppTypography.label.copyWith(color: mlc.textTertiary),
+                  style: AppTypography.label.copyWith(color: mlc.textSecondary),
                 ),
                 const Spacer(),
                 InkWell(

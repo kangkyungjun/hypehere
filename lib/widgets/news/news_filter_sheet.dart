@@ -300,13 +300,13 @@ class _NewsFilterSheetState extends State<NewsFilterSheet> {
               child: Text(
                 opt.$2,
                 style: TextStyle(
-                  fontSize: AppTypography.caption,
+                  fontSize: AppTypography.bodySmall,
                   fontWeight: selected
                       ? AppTypography.bold
-                      : AppTypography.regular,
+                      : AppTypography.medium,
                   color: selected
                       ? context.mlColors.accentBlue
-                      : Theme.of(context).colorScheme.onSurfaceVariant,
+                      : context.mlColors.textSecondary,
                 ),
               ),
             ),

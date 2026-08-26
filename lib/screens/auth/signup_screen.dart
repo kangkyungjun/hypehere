@@ -170,7 +170,7 @@ class _SignupScreenState extends State<SignupScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: _passwordRules(l10n).map((r) {
-        final color = r.ok ? mlc.gainColor : mlc.textTertiary;
+        final color = r.ok ? mlc.gainColor : mlc.textSecondary;
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxs),
           child: Row(

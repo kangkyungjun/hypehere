@@ -10,6 +10,7 @@ import '../../theme/app_colors.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 import '../../theme/app_typography.dart';
+import '../../widgets/common/bento_card.dart';
 import '../../widgets/common/error_state_view.dart';
 import '../../widgets/common/empty_state_view.dart';
 
@@ -176,9 +177,17 @@ class _EarningsCalendarScreenState extends State<EarningsCalendarScreen> {
           ),
         ),
 
-        // Event cards
-        for (int i = 0; i < events.length; i++)
-          _buildEventCard(events[i], isLast: i == events.length - 1),
+        // Event cards — 회색 배경 위 흰 카드(레퍼런스 DNA). 카드 하나에 날짜별
+        // 종목을 담고 종목 사이는 얇은 구분선으로 나눈다.
+        BentoCard(
+          padding: EdgeInsets.zero,
+          child: Column(
+            children: [
+              for (int i = 0; i < events.length; i++)
+                _buildEventCard(events[i], isLast: i == events.length - 1),
+            ],
+          ),
+        ),
 
         const SizedBox(height: AppSpacing.lg),
       ],
@@ -208,25 +217,35 @@ class _EarningsCalendarScreenState extends State<EarningsCalendarScreen> {
                     color: event.surpriseColor(context.mlColors).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(AppRadius.md),
                   ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        l10n.previousEarnings,
-                        style: TextStyle(
-                          fontSize: AppTypography.chartMicro,
-                          color: context.mlColors.textSecondary,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxs),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // 작은 라벨/값이 52x40 고정 박스를 넘지 않도록 FittedBox로 축소 보호.
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            l10n.previousEarnings,
+                            style: TextStyle(
+                              fontSize: AppTypography.micro,
+                              color: context.mlColors.textSecondary,
+                            ),
+                          ),
                         ),
-                      ),
-                      Text(
-                        event.surpriseLabel,
-                        style: TextStyle(
-                          fontSize: AppTypography.caption,
-                          fontWeight: AppTypography.bold,
-                          color: event.surpriseColor(context.mlColors),
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            event.surpriseLabel,
+                            style: TextStyle(
+                              fontSize: AppTypography.bodySmall,
+                              fontWeight: AppTypography.bold,
+                              color: event.surpriseColor(context.mlColors),
+                            ),
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
                 const SizedBox(width: AppSpacing.lg),
@@ -280,14 +299,14 @@ class _EarningsCalendarScreenState extends State<EarningsCalendarScreen> {
     final l10n = AppLocalizations.of(context);
     final chips = <Widget>[];
 
-    // Score label
+    // Score label — 방향성 점수 색은 유지(score color).
     if (event.score != null) {
       final label = ScoreMapper.getScoreLabelLocalized(event.score!, l10n);
       final color = ScoreMapper.getScoreColor(event.score!, context.mlColors);
       chips.add(Text(
         '$label(${event.score!.toStringAsFixed(1)})',
         style: TextStyle(
-          fontSize: AppTypography.caption,
+          fontSize: AppTypography.bodySmall,
           color: color,
           fontWeight: AppTypography.medium,
         ),
@@ -299,13 +318,13 @@ class _EarningsCalendarScreenState extends State<EarningsCalendarScreen> {
       if (chips.isNotEmpty) {
         chips.add(Text(
           ' · ',
-          style: TextStyle(fontSize: AppTypography.caption, color: context.mlColors.textTertiary),
+          style: TextStyle(fontSize: AppTypography.bodySmall, color: context.mlColors.textSecondary),
         ));
       }
       chips.add(Text(
         '${l10n.epsEstimateLabel} \$${event.epsEstimateAvg!.toStringAsFixed(2)}',
         style: TextStyle(
-          fontSize: AppTypography.caption,
+          fontSize: AppTypography.bodySmall,
           color: context.mlColors.textSecondary,
         ),
       ));
@@ -315,7 +334,16 @@ class _EarningsCalendarScreenState extends State<EarningsCalendarScreen> {
       return const SizedBox.shrink();
     }
 
-    return Row(children: chips);
+    // 좁은 폭에서 스코어+EPS가 겹칠 수 있으므로 마지막 칩만 잘림 허용(오버플로 방어).
+    return Row(
+      children: [
+        for (int i = 0; i < chips.length; i++)
+          if (i == chips.length - 1)
+            Flexible(child: chips[i])
+          else
+            chips[i],
+      ],
+    );
   }
 
   String _formatDayHeader(String dateStr) {

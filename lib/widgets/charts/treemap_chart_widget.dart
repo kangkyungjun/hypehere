@@ -251,7 +251,7 @@ class _TreemapChartWidgetState extends State<TreemapChartWidget> {
                         l10n.nItems(smallSectors.length),
                         style: TextStyle(
                           fontSize: AppTypography.bodyMedium,
-                          color: mlc.textTertiary,
+                          color: mlc.textSecondary,
                         ),
                       ),
                     ],
@@ -305,7 +305,7 @@ class _TreemapChartWidgetState extends State<TreemapChartWidget> {
                                 l10n.nTickers(sector.tickerCount),
                                 style: TextStyle(
                                   fontSize: AppTypography.bodySmall,
-                                  color: itemMlc.textTertiary,
+                                  color: itemMlc.textSecondary,
                                 ),
                               ),
                               const SizedBox(width: AppSpacing.lg),
@@ -324,7 +324,7 @@ class _TreemapChartWidgetState extends State<TreemapChartWidget> {
                                   sector.formattedTradingValue,
                                   style: TextStyle(
                                     fontSize: AppTypography.bodySmall,
-                                    color: itemMlc.textTertiary,
+                                    color: itemMlc.textSecondary,
                                   ),
                                   textAlign: TextAlign.right,
                                 ),
@@ -410,7 +410,7 @@ class _TreemapChartWidgetState extends State<TreemapChartWidget> {
                         l10n.nItems(smallTickers.length),
                         style: TextStyle(
                           fontSize: AppTypography.bodyMedium,
-                          color: mlc.textTertiary,
+                          color: mlc.textSecondary,
                         ),
                       ),
                     ],
@@ -477,7 +477,7 @@ class _TreemapChartWidgetState extends State<TreemapChartWidget> {
                       item.name!,
                       style: TextStyle(
                         fontSize: AppTypography.bodySmall,
-                        color: ctx.mlColors.textTertiary,
+                        color: ctx.mlColors.textSecondary,
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -499,7 +499,7 @@ class _TreemapChartWidgetState extends State<TreemapChartWidget> {
                 item.formattedTradingValue,
                 style: TextStyle(
                   fontSize: AppTypography.bodySmall,
-                  color: ctx.mlColors.textTertiary,
+                  color: ctx.mlColors.textSecondary,
                 ),
                 textAlign: TextAlign.right,
               ),

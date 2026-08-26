@@ -181,21 +181,29 @@ class _ValuationCardState extends State<ValuationCard> {
       children: [
         Text(
           label,
-          style: TextStyle(
-            fontSize: AppTypography.caption,
-            color: mlc.textSecondary,
-          ),
+          // 라벨 11→13 medium: 작아서 안 읽히던 문제 해소(위계는 값과 색·굵기로).
+          style: AppTypography.kvLabel.copyWith(color: mlc.textSecondary),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
         const SizedBox(height: AppSpacing.xs),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: AppTypography.bodyLarge,
-            fontWeight: AppTypography.bold,
-            color: value == '-' ? mlc.textTertiary : mlc.textPrimary,
-            fontFeatures: AppTypography.tabularFigures,
+        // 값 14→16 semiBold near-black: 카드의 주인공 숫자를 또렷하게.
+        // FittedBox(scaleDown): 좁은 폭에서 '…'로 숫자를 숨기지 않고 살짝 축소
+        // — 데이터 손실 없이 구조도 안 깨진다.
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: Text(
+            value,
+            style: TextStyle(
+              fontSize: AppTypography.headlineMedium,
+              fontWeight: AppTypography.semiBold,
+              height: 1.15,
+              color: value == '-' ? mlc.textTertiary : mlc.textPrimary,
+              fontFeatures: AppTypography.tabularFigures,
+            ),
+            maxLines: 1,
+            softWrap: false,
           ),
         ),
       ],

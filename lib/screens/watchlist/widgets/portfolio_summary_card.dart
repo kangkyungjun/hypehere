@@ -213,13 +213,17 @@ class _GridCell extends StatelessWidget {
         Text(
           label,
           style: TextStyle(
-            fontSize: AppTypography.caption,
+            fontSize: AppTypography.bodySmall,
             color: context.mlColors.textSecondary,
             fontWeight: AppTypography.semiBold,
           ),
         ),
         const SizedBox(height: AppSpacing.sm),
-        Text(value, style: valueStyle),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: Text(value, style: valueStyle),
+        ),
         if (subValue != null)
           Text(
             subValue!,

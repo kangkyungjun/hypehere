@@ -4,9 +4,9 @@ import '../../l10n/app_localizations.dart';
 import '../../models/treemap_data.dart';
 import '../../providers/watchlist_provider.dart';
 import '../../theme/app_colors.dart';
-import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 import '../../theme/app_typography.dart';
+import '../common/bento_card.dart';
 
 /// Dashboard card suggesting top-volume tickers for watchlist discovery.
 ///
@@ -175,21 +175,13 @@ class _TickerTile extends StatelessWidget {
     final arrow = isPositive ? '▲' : '▼';
     final sign = isPositive ? '+' : '';
 
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 110,
+    return SizedBox(
+      width: 110,
+      child: BentoCard(
+        onTap: onTap,
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.md,
           vertical: AppSpacing.md,
-        ),
-        decoration: BoxDecoration(
-          color: context.mlColors.cardBackground,
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-          border: Border.all(
-            color: context.mlColors.subtleBorder.withValues(alpha: 0.62),
-            width: 0.8,
-          ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -229,8 +221,8 @@ class _TickerTile extends StatelessWidget {
             Text(
               item.name ?? item.ticker,
               style: TextStyle(
-                fontSize: AppTypography.micro,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                fontSize: AppTypography.bodySmall,
+                color: context.mlColors.textSecondary,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,

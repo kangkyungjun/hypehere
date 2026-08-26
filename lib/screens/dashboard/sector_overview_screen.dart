@@ -187,11 +187,18 @@ class _SectorOverviewScreenState extends State<SectorOverviewScreen> {
       ),
       child: Row(
         children: [
-          Text(
-            formatDollar(totalTrading),
-            style: AppTypography.numericSecondary.copyWith(
-              color: mlc.textPrimary,
-              fontWeight: AppTypography.semiBold,
+          // 거래대금 값: 커질 수 있으니 축소 방어(FittedBox), 값은 진한색
+          Flexible(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                formatDollar(totalTrading),
+                style: AppTypography.numericSecondary.copyWith(
+                  color: mlc.textPrimary,
+                  fontWeight: AppTypography.semiBold,
+                ),
+              ),
             ),
           ),
           const SizedBox(width: AppSpacing.md),

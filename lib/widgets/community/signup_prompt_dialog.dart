@@ -23,14 +23,16 @@ class SignupPromptDialog extends StatelessWidget {
             Icon(
               Icons.lock_person,
               size: 56,
-              color: Theme.of(context).primaryColor,
+              color: context.mlColors.accentBlue,
             ),
             const SizedBox(height: AppSpacing.xl),
             Text(
               l10n.loginRequired,
-              style: const TextStyle(
+              textAlign: TextAlign.center,
+              style: TextStyle(
                 fontSize: AppTypography.displayMedium,
                 fontWeight: AppTypography.bold,
+                color: context.mlColors.textPrimary,
               ),
             ),
             const SizedBox(height: AppSpacing.md),
@@ -39,7 +41,7 @@ class SignupPromptDialog extends StatelessWidget {
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: AppTypography.bodyLarge,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                color: context.mlColors.textSecondary,
               ),
             ),
             const SizedBox(height: AppSpacing.xxl),
@@ -52,11 +54,15 @@ class SignupPromptDialog extends StatelessWidget {
                     },
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
+                      foregroundColor: context.mlColors.accentBlue,
                       side: BorderSide(
-                        color: Theme.of(context).primaryColor,
+                        color: context.mlColors.accentBlue,
                       ),
                     ),
-                    child: Text(l10n.signup),
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(l10n.signup),
+                    ),
                   ),
                 ),
                 const SizedBox(width: AppSpacing.lg),
@@ -67,10 +73,13 @@ class SignupPromptDialog extends StatelessWidget {
                     },
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
-                      backgroundColor: Theme.of(context).primaryColor,
+                      backgroundColor: context.mlColors.accentBlue,
                       foregroundColor: context.mlColors.onPrimary,
                     ),
-                    child: Text(l10n.login),
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(l10n.login),
+                    ),
                   ),
                 ),
               ],

@@ -246,7 +246,7 @@ class _ManagementRecordsScreenState extends State<ManagementRecordsScreen> {
             icon: const Icon(Icons.show_chart, size: 18),
             label: const Text('추이'),
             style: TextButton.styleFrom(
-              foregroundColor: Theme.of(context).colorScheme.onSurface,
+              foregroundColor: context.mlColors.textPrimary,
             ),
           ),
           const SizedBox(width: 4),
@@ -675,14 +675,22 @@ class _ManagementRecordsScreenState extends State<ManagementRecordsScreen> {
             children: [
               Text(
                 label,
-                style: AppTypography.label.copyWith(color: mlc.textTertiary),
+                style: AppTypography.label.copyWith(color: mlc.textSecondary),
               ),
               const SizedBox(height: 2),
-              Text(
-                won(v),
-                style: AppTypography.bodyStrong.copyWith(color: c),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+              // 금액은 3분할 셀에서 넘칠 수 있어 ellipsis 대신 scaleDown으로 방어
+              // (값을 잘라 숫자를 숨기지 않는다).
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  won(v),
+                  maxLines: 1,
+                  style: AppTypography.bodyStrong.copyWith(
+                    color: c,
+                    fontFeatures: AppTypography.tabularFigures,
+                  ),
+                ),
               ),
             ],
           ),
@@ -1134,7 +1142,7 @@ class _ManagementRecordsScreenState extends State<ManagementRecordsScreen> {
       child: Text(
         label,
         style: TextStyle(
-          fontSize: AppTypography.micro,
+          fontSize: AppTypography.caption,
           fontWeight: AppTypography.bold,
           color: color,
         ),

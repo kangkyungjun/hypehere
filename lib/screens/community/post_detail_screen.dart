@@ -920,9 +920,8 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
           Text(
             _errorMessage ?? AppLocalizations.of(context).cannotLoadPosts,
             textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: AppTypography.bodyLarge,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            style: AppTypography.body.copyWith(
+              color: context.mlColors.textSecondary,
             ),
           ),
           const SizedBox(height: AppSpacing.xxl),
@@ -981,17 +980,21 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
             const SizedBox(height: AppSpacing.sm),
             Row(
               children: [
-                Text(
-                  _post!.author.nickname,
-                  style: AppTypography.bodyStrong.copyWith(
-                    color: context.mlColors.textSecondary,
+                Flexible(
+                  child: Text(
+                    _post!.author.nickname,
+                    style: AppTypography.bodyStrong.copyWith(
+                      color: context.mlColors.textSecondary,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 const SizedBox(width: AppSpacing.md),
                 Text(
                   _formatTimeAgo(_post!.createdAt),
                   style: AppTypography.label.copyWith(
-                    color: context.mlColors.textTertiary,
+                    color: context.mlColors.textSecondary,
                   ),
                 ),
               ],
@@ -1178,9 +1181,8 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                     ),
                     child: Text(
                       AppLocalizations.of(context).writeFirstComment,
-                      style: TextStyle(
-                        fontSize: AppTypography.bodyLarge,
-                        color: Theme.of(context).colorScheme.outline,
+                      style: AppTypography.body.copyWith(
+                        color: context.mlColors.textSecondary,
                       ),
                     ),
                   ),

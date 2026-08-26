@@ -5,6 +5,7 @@ import '../../services/analytics_api_client.dart';
 import '../../utils/error_localizer.dart';
 import '../../widgets/ads/banner_ad_widget.dart';
 import '../../widgets/news/market_news_modal.dart';
+import '../../widgets/common/bento_card.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
@@ -235,18 +236,20 @@ class _TickerNewsListScreenState extends State<TickerNewsListScreen> {
   Widget _buildStatsSection(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final s = widget.stats!;
-    return Container(
+    return BentoCard(
       margin: const EdgeInsets.only(bottom: AppSpacing.lg),
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.lg),
-      decoration: BoxDecoration(
-        color: context.mlColors.sectionBackground,
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: context.mlColors.subtleBorder),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.xl,
+        vertical: AppSpacing.lg,
       ),
       child: Row(
         children: [
           Expanded(child: _buildStatColumn(context, l10n.oneWeek, s.week)),
-          Container(width: 1, height: 40, color: context.mlColors.subtleBorder),
+          Container(
+            width: 1,
+            height: 44,
+            color: context.mlColors.subtleBorder,
+          ),
           Expanded(child: _buildStatColumn(context, l10n.oneMonth, s.month)),
         ],
       ),
@@ -255,22 +258,20 @@ class _TickerNewsListScreenState extends State<TickerNewsListScreen> {
 
   Widget _buildStatColumn(BuildContext context, String title, SentimentCounts counts) {
     final l10n = AppLocalizations.of(context);
+    final mlc = context.mlColors;
     return Column(
       children: [
+        // 라벨=textSecondary medium (위계: 라벨은 뮤트)
         Text(
           title,
-          style: TextStyle(
-            fontSize: AppTypography.bodySmall,
-            fontWeight: AppTypography.semiBold,
-            color: Theme.of(context).colorScheme.outline,
-          ),
+          style: AppTypography.kvLabel.copyWith(color: mlc.textSecondary),
         ),
         const SizedBox(height: AppSpacing.sm),
-        _buildStatRow(context.mlColors.gainColor, l10n.sentimentBullish, counts.bullish),
-        const SizedBox(height: AppSpacing.xxs),
-        _buildStatRow(context.mlColors.neutralColor, l10n.sentimentNeutral, counts.neutral),
-        const SizedBox(height: AppSpacing.xxs),
-        _buildStatRow(context.mlColors.lossColor, l10n.sentimentBearish, counts.bearish),
+        _buildStatRow(mlc.gainColor, l10n.sentimentBullish, counts.bullish),
+        const SizedBox(height: AppSpacing.xs),
+        _buildStatRow(mlc.neutralColor, l10n.sentimentNeutral, counts.neutral),
+        const SizedBox(height: AppSpacing.xs),
+        _buildStatRow(mlc.lossColor, l10n.sentimentBearish, counts.bearish),
       ],
     );
   }
@@ -281,14 +282,23 @@ class _TickerNewsListScreenState extends State<TickerNewsListScreen> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          width: 7,
-          height: 7,
+          width: 8,
+          height: 8,
           decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
-        const SizedBox(width: AppSpacing.xs),
-        Text(
-          '$label  $count',
-          style: TextStyle(fontSize: AppTypography.bodySmall, color: color.withValues(alpha: 0.9)),
+        const SizedBox(width: AppSpacing.sm),
+        // 방향성(강세/약세) 감정 라벨 — 녹/적 유지, 한 단계 키워 가독성 확보
+        Flexible(
+          child: Text(
+            '$label  $count',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: AppTypography.bodyMedium,
+              fontWeight: AppTypography.medium,
+              color: color,
+            ),
+          ),
         ),
       ],
     );
@@ -300,10 +310,8 @@ class _TickerNewsListScreenState extends State<TickerNewsListScreen> {
       padding: const EdgeInsets.only(top: AppSpacing.xl, bottom: AppSpacing.md),
       child: Text(
         label,
-        style: TextStyle(
-          fontSize: AppTypography.bodyMedium,
-          fontWeight: AppTypography.bold,
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        style: AppTypography.cardTitle.copyWith(
+          color: context.mlColors.textSecondary,
         ),
       ),
     );
@@ -333,7 +341,8 @@ class _TickerNewsListScreenState extends State<TickerNewsListScreen> {
 
   Widget _buildNewsItem(BuildContext context, NewsItem item, {required bool isLastInGroup}) {
     final langCode = Localizations.localeOf(context).languageCode;
-    final dotColor = item.sentimentColor(context.mlColors);
+    final mlc = context.mlColors;
+    final dotColor = item.sentimentColor(mlc);
 
     return InkWell(
       onTap: () => MarketNewsModal.show(context, item),
@@ -384,10 +393,11 @@ class _TickerNewsListScreenState extends State<TickerNewsListScreen> {
                             color: dotColor.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(AppRadius.xs),
                           ),
+                          // 방향성 감정 배지 — 녹/적 유지, caption→bodySmall 한 단계 키움
                           child: Text(
                             item.sentimentLabelLocalized(AppLocalizations.of(context)),
                             style: TextStyle(
-                              fontSize: AppTypography.caption,
+                              fontSize: AppTypography.bodySmall,
                               fontWeight: AppTypography.bold,
                               color: dotColor,
                             ),
@@ -397,21 +407,19 @@ class _TickerNewsListScreenState extends State<TickerNewsListScreen> {
                         Text(
                           item.timeAgoLocalized(AppLocalizations.of(context)),
                           style: TextStyle(
-                            fontSize: AppTypography.caption,
-                            color: Theme.of(context).colorScheme.outline,
+                            fontSize: AppTypography.bodySmall,
+                            color: mlc.textSecondary,
                           ),
                         ),
                       ],
                     ),
                     const SizedBox(height: AppSpacing.xs),
 
-                    // Row 2: AI summary (localized)
+                    // Row 2: AI summary (localized) — 카드 내 유일한 강조 텍스트
                     Text(
                       item.aiSummary.localize(langCode),
-                      style: TextStyle(
-                        fontSize: AppTypography.bodyMedium,
-                        fontWeight: AppTypography.semiBold,
-                        color: Theme.of(context).colorScheme.onSurface,
+                      style: AppTypography.bodyStrong.copyWith(
+                        color: mlc.textPrimary,
                         height: 1.4,
                       ),
                       maxLines: 2,
@@ -420,12 +428,12 @@ class _TickerNewsListScreenState extends State<TickerNewsListScreen> {
 
                     // Row 3: source
                     if (item.source != null) ...[
-                      const SizedBox(height: AppSpacing.xxs),
+                      const SizedBox(height: AppSpacing.xs),
                       Text(
                         item.source!,
                         style: TextStyle(
-                          fontSize: AppTypography.caption,
-                          color: Theme.of(context).colorScheme.outline,
+                          fontSize: AppTypography.bodySmall,
+                          color: mlc.textSecondary,
                         ),
                       ),
                     ],

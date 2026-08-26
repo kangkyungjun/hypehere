@@ -90,6 +90,31 @@ abstract final class AppTypography {
     height: 1.25,
   );
 
+  // ── Key-Value 패턴 (레퍼런스 영수증/카드 라벨→값) ──────────
+  // 라벨=뮤트 medium, 값=near-black semiBold. 위계를 여백 없이 대비로 만든다.
+
+  /// 키밸류 라벨 — 뮤트 블루그레이(textSecondary와 함께 사용). (13px medium)
+  static const TextStyle kvLabel = TextStyle(
+    fontSize: bodyMedium,
+    fontWeight: medium,
+    height: 1.2,
+  );
+
+  /// 키밸류 값 — near-black 강조(textPrimary와 함께 사용), tabular. (14px semiBold)
+  static const TextStyle kvValue = TextStyle(
+    fontSize: bodyLarge,
+    fontWeight: semiBold,
+    height: 1.2,
+    fontFeatures: tabularFigures,
+  );
+
+  /// 값 뒤 작은 단위 접미사("만원"/"%"/"pt") — 값보다 2단 낮춤. (12px medium)
+  static const TextStyle unitSuffix = TextStyle(
+    fontSize: bodySmall,
+    fontWeight: medium,
+    height: 1.2,
+  );
+
   // ── Font Weights ────────────────────────────────────────
 
   /// 강한 강조, 주요 헤더 (w700)
@@ -115,6 +140,7 @@ abstract final class AppTypography {
   static const TextStyle priceHero = TextStyle(
     fontSize: heroMedium,
     fontWeight: bold,
+    height: 1.05,
     fontFeatures: tabularFigures,
   );
 
@@ -122,6 +148,7 @@ abstract final class AppTypography {
   static const TextStyle priceLarge = TextStyle(
     fontSize: displayMedium,
     fontWeight: semiBold,
+    height: 1.1,
     fontFeatures: tabularFigures,
   );
 
@@ -129,6 +156,7 @@ abstract final class AppTypography {
   static const TextStyle priceCard = TextStyle(
     fontSize: headlineMedium,
     fontWeight: semiBold,
+    height: 1.15,
     fontFeatures: tabularFigures,
   );
 
@@ -136,6 +164,7 @@ abstract final class AppTypography {
   static const TextStyle changeBadge = TextStyle(
     fontSize: bodyLarge,
     fontWeight: semiBold,
+    height: 1.1,
     fontFeatures: tabularFigures,
   );
 
@@ -143,6 +172,7 @@ abstract final class AppTypography {
   static const TextStyle numericSecondary = TextStyle(
     fontSize: bodySmall,
     fontWeight: medium,
+    height: 1.2,
     fontFeatures: tabularFigures,
   );
 }

@@ -121,7 +121,7 @@ class _ChatStorageSettingsScreenState extends State<ChatStorageSettingsScreen> {
             ),
             child: Text(
               l10n.aiChatStorageUsage,
-              style: AppTypography.label.copyWith(color: mlc.textTertiary),
+              style: AppTypography.label.copyWith(color: mlc.textSecondary),
             ),
           ),
           Padding(
@@ -174,7 +174,7 @@ class _ChatStorageSettingsScreenState extends State<ChatStorageSettingsScreen> {
             ),
             child: Text(
               l10n.aiChatGreetingCooldownTitle,
-              style: AppTypography.label.copyWith(color: mlc.textTertiary),
+              style: AppTypography.label.copyWith(color: mlc.textSecondary),
             ),
           ),
           ..._greetOptions(l10n).map((opt) {
@@ -206,7 +206,7 @@ class _ChatStorageSettingsScreenState extends State<ChatStorageSettingsScreen> {
             ),
             child: Text(
               l10n.aiChatStorageLimit,
-              style: AppTypography.label.copyWith(color: mlc.textTertiary),
+              style: AppTypography.label.copyWith(color: mlc.textSecondary),
             ),
           ),
           ..._options.map((n) {
@@ -309,7 +309,7 @@ class _ChatStorageSettingsScreenState extends State<ChatStorageSettingsScreen> {
           const SizedBox(height: AppSpacing.xxs),
           Text(
             label,
-            style: AppTypography.label.copyWith(color: mlc.textTertiary),
+            style: AppTypography.label.copyWith(color: mlc.textSecondary),
           ),
         ],
       ),

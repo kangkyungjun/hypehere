@@ -31,6 +31,25 @@ abstract final class AppSpacing {
   static const double section = 28.0;
 }
 
+/// 밀도(Density) 토큰 — 레퍼런스풍 "편안하되 절제된" 카드/행 내부 여백.
+///
+/// 전역 여백을 키우지 않고(사용자 타이트 선호 존중), 카드 내부 패딩·키밸류
+/// 행 높이 등 "굶주려 답답해 보이던" 지점만 단일 상수로 잡는다. 값을 여기서만
+/// 바꾸면 [MlCard]/[BentoCard]·키밸류 컴포넌트에 일괄 반영된다.
+abstract final class AppDensity {
+  /// 콘텐츠 카드 내부 패딩 — 레퍼런스 카드(≈16~20). 밀도 단일 레버.
+  static const double cardPad = 18.0;
+
+  /// 카드 상단은 제목이 바짝 붙지 않게 살짝 더.
+  static const double cardPadTop = 14.0;
+
+  /// 키밸류 행 세로 패딩 — 영수증풍 편안한 행 높이.
+  static const double rowV = 12.0;
+
+  /// 카드 사이 간격 — 카드가 개별 부유 객체로 읽히도록.
+  static const double cardGap = 16.0;
+}
+
 /// 화면 레이아웃 치수 토큰.
 ///
 /// 여러 화면이 공유해야 하는 구조적 높이/너비를 한곳에서 관리한다.

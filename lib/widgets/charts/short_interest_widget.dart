@@ -103,16 +103,22 @@ class ShortInterestWidget extends StatelessWidget {
             title,
             style: TextStyle(
               fontSize: AppTypography.bodySmall,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              color: context.mlColors.textSecondary,
               fontWeight: AppTypography.medium,
             ),
           ),
           const SizedBox(height: AppSpacing.md),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: AppTypography.displaySmall,
-              fontWeight: AppTypography.bold,
+          // 비방향성 집계 히어로 숫자 → accentBlue. FittedBox로 오버플로 방어.
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              value,
+              style: TextStyle(
+                fontSize: AppTypography.displaySmall,
+                fontWeight: AppTypography.bold,
+                color: context.mlColors.accentBlue,
+              ),
             ),
           ),
         ],

@@ -65,23 +65,29 @@ class CommentCard extends StatelessWidget {
             // Author + Time + Menu
             Row(
               children: [
-                Text(
-                  comment.author.nickname,
-                  style: TextStyle(
-                    fontSize: AppTypography.bodyLarge,
-                    fontWeight: AppTypography.semiBold,
-                    color: isLocked
-                        ? context.mlColors.textTertiary
-                        : context.mlColors.textPrimary,
+                Flexible(
+                  child: Text(
+                    comment.author.nickname,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: AppTypography.bodyLarge,
+                      fontWeight: AppTypography.semiBold,
+                      color: isLocked
+                          ? context.mlColors.textTertiary
+                          : context.mlColors.textPrimary,
+                    ),
                   ),
                 ),
                 const SizedBox(width: AppSpacing.md),
                 Text(
                   _formatTimeAgo(comment.createdAt, l10n),
                   style: TextStyle(
-                    fontSize: AppTypography.bodySmall,
-                    color: context.mlColors.textTertiary,
+                    fontSize: AppTypography.bodyMedium,
+                    color: context.mlColors.textSecondary,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 const Spacer(),
                 if (showMenu && !isLocked)
@@ -215,12 +221,14 @@ class CommentCard extends StatelessWidget {
                     color: context.mlColors.textTertiary,
                   ),
                   const SizedBox(width: AppSpacing.sm),
-                  Text(
-                    comment.content,
-                    style: TextStyle(
-                      fontSize: AppTypography.bodyLarge,
-                      color: context.mlColors.textTertiary,
-                      fontStyle: FontStyle.italic,
+                  Expanded(
+                    child: Text(
+                      comment.content,
+                      style: TextStyle(
+                        fontSize: AppTypography.bodyLarge,
+                        color: context.mlColors.textTertiary,
+                        fontStyle: FontStyle.italic,
+                      ),
                     ),
                   ),
                 ],
@@ -252,7 +260,7 @@ class CommentCard extends StatelessWidget {
                     Text(
                       '${comment.likeCount}',
                       style: TextStyle(
-                        fontSize: AppTypography.bodySmall,
+                        fontSize: AppTypography.bodyMedium,
                         color: comment.isLiked
                             ? context.mlColors.dangerColor
                             : context.mlColors.textSecondary,

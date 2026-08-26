@@ -405,8 +405,8 @@ class _AILensScreenState extends State<AILensScreen>
             child: Text(
               l10n.aiScoreSubtitle,
               style: TextStyle(
-                fontSize: AppTypography.caption,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                fontSize: AppTypography.bodySmall,
+                color: colors.textSecondary,
               ),
             ),
           ),
@@ -505,14 +505,18 @@ class _AILensScreenState extends State<AILensScreen>
             children: levels.map((level) {
               final count = _categoryCounts[level] ?? 0;
               return Expanded(
-                child: Text(
-                  l10n.nItems(count),
-                  style: TextStyle(
-                    fontSize: AppTypography.caption,
-                    fontWeight: AppTypography.bold,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    l10n.nItems(count),
+                    maxLines: 1,
+                    style: TextStyle(
+                      fontSize: AppTypography.caption,
+                      fontWeight: AppTypography.bold,
+                      color: colors.textSecondary,
+                    ),
+                    textAlign: TextAlign.center,
                   ),
-                  textAlign: TextAlign.center,
                 ),
               );
             }).toList(),
@@ -578,7 +582,7 @@ class _AILensScreenState extends State<AILensScreen>
             text,
             style: TextStyle(
               fontSize: AppTypography.bodySmall,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              color: context.mlColors.textSecondary,
             ),
           ),
         ),
@@ -669,12 +673,15 @@ class _AILensScreenState extends State<AILensScreen>
                 borderRadius: BorderRadius.circular(AppRadius.card),
               ),
               child: Center(
-                child: Text(
-                  ticker.score.toStringAsFixed(0),
-                  style: TextStyle(
-                    fontSize: AppTypography.bodyMedium,
-                    fontWeight: AppTypography.bold,
-                    color: scoreColor,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    ticker.score.toStringAsFixed(0),
+                    style: TextStyle(
+                      fontSize: AppTypography.bodyMedium,
+                      fontWeight: AppTypography.bold,
+                      color: scoreColor,
+                    ),
                   ),
                 ),
               ),
@@ -709,8 +716,8 @@ class _AILensScreenState extends State<AILensScreen>
                             TextSpan(
                               text: secondaryName,
                               style: TextStyle(
-                                fontSize: AppTypography.caption,
-                                color: context.mlColors.textTertiary,
+                                fontSize: AppTypography.bodySmall,
+                                color: context.mlColors.textSecondary,
                               ),
                             ),
                           ],
@@ -731,12 +738,16 @@ class _AILensScreenState extends State<AILensScreen>
                 color: scoreColor.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(AppRadius.badge),
               ),
-              child: Text(
-                ticker.signalLabelLocalized(l10n),
-                style: TextStyle(
-                  color: scoreColor,
-                  fontSize: AppTypography.caption,
-                  fontWeight: AppTypography.bold,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  ticker.signalLabelLocalized(l10n),
+                  maxLines: 1,
+                  style: TextStyle(
+                    color: scoreColor,
+                    fontSize: AppTypography.caption,
+                    fontWeight: AppTypography.bold,
+                  ),
                 ),
               ),
             ),
@@ -765,7 +776,7 @@ class _AILensScreenState extends State<AILensScreen>
         child: Text(
           message,
           style: TextStyle(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            color: context.mlColors.textSecondary,
             fontSize: AppTypography.bodyLarge,
           ),
         ),
@@ -806,14 +817,18 @@ class _AILensScreenState extends State<AILensScreen>
                       : context.mlColors.subtleBorder,
                 ),
               ),
-              child: Text(
-                label,
-                style: TextStyle(
-                  fontSize: AppTypography.bodySmall,
-                  fontWeight: AppTypography.semiBold,
-                  color: isSelected
-                      ? context.mlColors.accentBlue
-                      : context.mlColors.textSecondary,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  style: TextStyle(
+                    fontSize: AppTypography.bodySmall,
+                    fontWeight: AppTypography.semiBold,
+                    color: isSelected
+                        ? context.mlColors.accentBlue
+                        : context.mlColors.textSecondary,
+                  ),
                 ),
               ),
             ),

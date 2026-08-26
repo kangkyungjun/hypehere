@@ -224,14 +224,14 @@ class _TickerInsightSectionState extends State<TickerInsightSection> {
               if (latestData.aiBullishReasons != null && latestData.aiBullishReasons!.isNotEmpty) ...[
                 Row(
                   children: [
-                    Icon(Icons.thumb_up_outlined, size: 16, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                    Icon(Icons.thumb_up_outlined, size: 16, color: context.mlColors.gainColor),
                     const SizedBox(width: AppSpacing.sm),
                     Text(
                       l10n.bullishFactors,
                       style: TextStyle(
                         fontSize: AppTypography.bodyMedium,
                         fontWeight: AppTypography.semiBold,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        color: context.mlColors.textSecondary,
                       ),
                     ),
                   ],
@@ -259,14 +259,14 @@ class _TickerInsightSectionState extends State<TickerInsightSection> {
               if (latestData.aiBearishReasons != null && latestData.aiBearishReasons!.isNotEmpty) ...[
                 Row(
                   children: [
-                    Icon(Icons.thumb_down_outlined, size: 16, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                    Icon(Icons.thumb_down_outlined, size: 16, color: context.mlColors.lossColor),
                     const SizedBox(width: AppSpacing.sm),
                     Text(
                       l10n.bearishFactors,
                       style: TextStyle(
                         fontSize: AppTypography.bodyMedium,
                         fontWeight: AppTypography.semiBold,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        color: context.mlColors.textSecondary,
                       ),
                     ),
                   ],
@@ -346,14 +346,14 @@ class _TickerInsightSectionState extends State<TickerInsightSection> {
               const SizedBox(height: AppSpacing.md),
               Row(
                 children: [
-                  Icon(Icons.key, size: 16, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                  Icon(Icons.key, size: 16, color: context.mlColors.accentBlue),
                   const SizedBox(width: AppSpacing.sm),
                   Text(
                     l10n.expertKeyFactors,
                     style: TextStyle(
                       fontSize: AppTypography.bodyMedium,
                       fontWeight: AppTypography.semiBold,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      color: context.mlColors.textSecondary,
                     ),
                   ),
                 ],
@@ -413,7 +413,7 @@ class _TickerInsightSectionState extends State<TickerInsightSection> {
         // 목표가 (라벨 회색, 가격 초록)
         if (hasTarget) ...[
           Text(l10n.target,
-              style: TextStyle(fontSize: AppTypography.bodyMedium, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+              style: TextStyle(fontSize: AppTypography.bodyMedium, fontWeight: AppTypography.medium, color: context.mlColors.textSecondary)),
           Text(
             '\$${latestData.targetPrice!.toStringAsFixed(2)}',
             style: AppTypography.changeBadge.copyWith(
@@ -429,7 +429,7 @@ class _TickerInsightSectionState extends State<TickerInsightSection> {
         // 손절가 (라벨 회색, 가격 빨간색)
         if (hasStopLoss) ...[
           Text(l10n.stopLoss,
-              style: TextStyle(fontSize: AppTypography.bodyMedium, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+              style: TextStyle(fontSize: AppTypography.bodyMedium, fontWeight: AppTypography.medium, color: context.mlColors.textSecondary)),
           Text(
             '\$${latestData.stopLoss!.toStringAsFixed(2)}',
             style: AppTypography.changeBadge.copyWith(

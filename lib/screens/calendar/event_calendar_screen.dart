@@ -1398,7 +1398,7 @@ class _EventCalendarScreenState extends State<EventCalendarScreen>
                     l10n.noEventsSelectedDay,
                     style: TextStyle(
                       fontSize: AppTypography.bodyMedium,
-                      color: context.mlColors.textTertiary,
+                      color: context.mlColors.textSecondary,
                     ),
                   ),
                 ],
@@ -1498,37 +1498,41 @@ class _EventCalendarScreenState extends State<EventCalendarScreen>
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: AppSpacing.xs),
-                      Row(
+                      Wrap(
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: AppSpacing.sm,
+                        runSpacing: AppSpacing.xs,
                         children: [
-                          Text(
-                            event.date.substring(5),
-                            style: TextStyle(
-                              fontSize: AppTypography.bodySmall,
-                              color: mlc.textTertiary,
-                            ),
-                          ),
-                          if (event.ticker != null) ...[
-                            Text(
-                              '  ·  ',
-                              style: TextStyle(
-                                fontSize: AppTypography.bodySmall,
-                                color: mlc.textTertiary,
-                              ),
-                            ),
-                            Flexible(
-                              child: Text(
-                                event.ticker!,
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                event.date.substring(5),
                                 style: TextStyle(
                                   fontSize: AppTypography.bodySmall,
-                                  color: Theme.of(context).colorScheme.primary,
-                                  fontWeight: AppTypography.semiBold,
+                                  color: mlc.textSecondary,
                                 ),
-                                overflow: TextOverflow.ellipsis,
                               ),
-                            ),
-                          ],
+                              if (event.ticker != null) ...[
+                                Text(
+                                  '  ·  ',
+                                  style: TextStyle(
+                                    fontSize: AppTypography.bodySmall,
+                                    color: mlc.textTertiary,
+                                  ),
+                                ),
+                                Text(
+                                  event.ticker!,
+                                  style: TextStyle(
+                                    fontSize: AppTypography.bodySmall,
+                                    color: Theme.of(context).colorScheme.primary,
+                                    fontWeight: AppTypography.semiBold,
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
                           if (event.importance == 'high') ...[
-                            const SizedBox(width: AppSpacing.sm),
                             Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: AppSpacing.xs,
@@ -1552,7 +1556,6 @@ class _EventCalendarScreenState extends State<EventCalendarScreen>
                           ],
                           // 지난 일정 결과 팔로업 — 한 번에 인앱 웹뷰로
                           if (_hasResultLink(event)) ...[
-                            const SizedBox(width: AppSpacing.sm),
                             GestureDetector(
                               onTap: () => _openResultWebView(event),
                               behavior: HitTestBehavior.opaque,

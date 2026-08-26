@@ -298,19 +298,18 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
             ),
           ),
           const SizedBox(width: AppSpacing.md),
-          Text(
-            l10n.tickerOnlyBoard,
-            style: TextStyle(
-              fontSize: AppTypography.bodyMedium,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+          Expanded(
+            child: Text(
+              l10n.tickerOnlyBoard,
+              style: AppTypography.body.copyWith(
+                color: context.mlColors.textSecondary,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
-          const Spacer(),
-          Icon(
-            Icons.lock,
-            size: 18,
-            color: Theme.of(context).colorScheme.outline,
-          ),
+          const SizedBox(width: AppSpacing.sm),
+          Icon(Icons.lock, size: 18, color: context.mlColors.textTertiary),
         ],
       ),
     );
@@ -326,10 +325,8 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
       children: [
         Text(
           l10n.selectTicker,
-          style: TextStyle(
-            fontSize: AppTypography.bodySmall,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-            fontWeight: AppTypography.medium,
+          style: AppTypography.kvLabel.copyWith(
+            color: context.mlColors.textSecondary,
           ),
         ),
         const SizedBox(height: AppSpacing.md),
@@ -364,25 +361,26 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
               Expanded(
                 child: Text(
                   _tickerSubtitle(ticker),
-                  style: TextStyle(
-                    fontSize: AppTypography.bodyMedium,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  style: AppTypography.body.copyWith(
+                    color: context.mlColors.textSecondary,
                   ),
+                  maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
+              const SizedBox(width: AppSpacing.sm),
               GestureDetector(
                 onTap: _clearTicker,
                 child: Container(
                   padding: const EdgeInsets.all(AppSpacing.xs),
                   decoration: BoxDecoration(
-                    color: context.mlColors.subtleBorder,
+                    color: context.mlColors.groupedBackground,
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
                     Icons.close,
                     size: 16,
-                    color: context.mlColors.onPrimary,
+                    color: context.mlColors.textSecondary,
                   ),
                 ),
               ),
@@ -447,9 +445,8 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
           ),
           child: Text(
             l10n.tickerNotSelectedHint,
-            style: TextStyle(
-              fontSize: AppTypography.bodySmall,
-              color: Theme.of(context).colorScheme.outline,
+            style: AppTypography.label.copyWith(
+              color: context.mlColors.textSecondary,
             ),
           ),
         ),
@@ -500,9 +497,8 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
             child: Center(
               child: Text(
                 l10n.noTickerSearchResults,
-                style: TextStyle(
-                  fontSize: AppTypography.bodyMedium,
-                  color: Theme.of(context).colorScheme.outline,
+                style: AppTypography.body.copyWith(
+                  color: context.mlColors.textSecondary,
                 ),
               ),
             ),
@@ -549,7 +545,10 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                 children: [
                   Text(
                     _tickerSubtitle(item),
-                    style: const TextStyle(fontSize: AppTypography.bodyMedium),
+                    style: AppTypography.body.copyWith(
+                      color: context.mlColors.textPrimary,
+                    ),
+                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],
@@ -568,9 +567,8 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                 ),
                 child: Text(
                   item.category!,
-                  style: TextStyle(
-                    fontSize: AppTypography.caption,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  style: AppTypography.label.copyWith(
+                    color: context.mlColors.textSecondary,
                   ),
                 ),
               ),

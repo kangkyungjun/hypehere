@@ -289,31 +289,36 @@ class BollingerBandsChartWidget extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: AppSpacing.xs),
+                // 해석 가이드 본문: 의미있는 소형 텍스트 한 단계 승격(caption→bodySmall).
                 Text(
                   AppLocalizations.of(context).bbBandWidth,
                   style: TextStyle(
-                    fontSize: AppTypography.caption,
+                    fontSize: AppTypography.bodySmall,
+                    height: 1.4,
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
                 Text(
                   AppLocalizations.of(context).bbUpperApproach,
                   style: TextStyle(
-                    fontSize: AppTypography.caption,
+                    fontSize: AppTypography.bodySmall,
+                    height: 1.4,
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
                 Text(
                   AppLocalizations.of(context).bbLowerApproach,
                   style: TextStyle(
-                    fontSize: AppTypography.caption,
+                    fontSize: AppTypography.bodySmall,
+                    height: 1.4,
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
                 Text(
                   AppLocalizations.of(context).bbMiddleLine,
                   style: TextStyle(
-                    fontSize: AppTypography.caption,
+                    fontSize: AppTypography.bodySmall,
+                    height: 1.4,
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),

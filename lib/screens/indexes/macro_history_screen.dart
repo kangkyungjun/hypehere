@@ -16,6 +16,7 @@ import '../../theme/app_stroke.dart';
 import '../../theme/app_typography.dart';
 import '../../widgets/ads/banner_ad_widget.dart';
 import '../../widgets/ads/rewarded_ad_helper.dart';
+import '../../widgets/common/bento_card.dart';
 import 'widgets/macro_explanation_card.dart';
 
 /// Macro indicator history screen with trend chart + history list + detail dialog.
@@ -290,15 +291,12 @@ class _MacroHistoryScreenState extends State<MacroHistoryScreen> {
     final totalPoints = entries.length;
     final interval = totalPoints > 5 ? (totalPoints - 1) / 4.0 : 1.0;
 
-    return Container(
-      height: 180,
+    return BentoCard(
       margin: const EdgeInsets.only(bottom: AppSpacing.lg),
       padding: const EdgeInsets.all(AppSpacing.lg),
-      decoration: BoxDecoration(
-        color: mlc.cardBackground,
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-      ),
-      child: LineChart(
+      child: SizedBox(
+        height: 180,
+        child: LineChart(
         LineChartData(
           minY: chartMinY,
           maxY: chartMaxY,
@@ -417,6 +415,7 @@ class _MacroHistoryScreenState extends State<MacroHistoryScreen> {
           ),
         ),
       ),
+      ),
     );
   }
 
@@ -457,89 +456,102 @@ class _MacroHistoryScreenState extends State<MacroHistoryScreen> {
     // Date
     final dateStr = entry.observationDate ?? '';
 
-    return GestureDetector(
+    return BentoCard(
+      margin: const EdgeInsets.only(bottom: AppSpacing.xs),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.md,
+      ),
       onTap: () => _showDetailDialog(context, entry, mlc, l10n),
-      child: Padding(
-        padding: const EdgeInsets.only(bottom: AppSpacing.xs),
-        child: Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.lg,
-            vertical: AppSpacing.md,
+      child: Row(
+        children: [
+          Container(
+            width: 6,
+            height: 6,
+            decoration: BoxDecoration(
+              color: riskColor,
+              shape: BoxShape.circle,
+            ),
           ),
-          decoration: BoxDecoration(
-            color: mlc.cardBackground,
-            border: Border.all(color: mlc.subtleBorder),
-            borderRadius: BorderRadius.circular(AppRadius.md),
+          const SizedBox(width: AppSpacing.md),
+          // Date
+          SizedBox(
+            width: 82,
+            child: Text(
+              dateStr,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: AppTypography.bodyMedium,
+                color: mlc.textSecondary,
+              ),
+            ),
           ),
-          child: Row(
-            children: [
-              Container(
-                width: 6,
-                height: 6,
-                decoration: BoxDecoration(
-                  color: riskColor,
-                  shape: BoxShape.circle,
-                ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              // Date
-              SizedBox(
-                width: 82,
-                child: Text(
-                  dateStr,
-                  style: TextStyle(
-                    fontSize: AppTypography.bodySmall,
-                    color: mlc.textSecondary,
-                  ),
-                ),
-              ),
-              // Value
-              SizedBox(
-                width: 72,
+          // Value — 방향성 없는 지표값, FittedBox로 숫자 보존
+          SizedBox(
+            width: 72,
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
                 child: Text(
                   valueStr,
+                  maxLines: 1,
                   style: TextStyle(
-                    fontSize: AppTypography.bodyMedium,
+                    fontSize: AppTypography.headlineSmall,
                     fontWeight: AppTypography.semiBold,
                     color: mlc.textPrimary,
                   ),
                 ),
               ),
-              // Change
-              SizedBox(
-                width: 70,
+            ),
+          ),
+          // Change — 방향성(녹/적), FittedBox로 보존
+          SizedBox(
+            width: 70,
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
                 child: Text(
                   changeStr,
+                  maxLines: 1,
                   style: TextStyle(
-                    fontSize: AppTypography.bodySmall,
+                    fontSize: AppTypography.bodyMedium,
                     fontWeight: AppTypography.medium,
                     color: changeColor,
                   ),
                 ),
               ),
-              const Spacer(),
-              // Risk badge
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.md,
-                  vertical: AppSpacing.xxs,
-                ),
-                decoration: BoxDecoration(
-                  color: riskColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(AppRadius.sm),
-                ),
-                child: Text(
-                  riskLabel,
-                  style: TextStyle(
-                    fontSize: AppTypography.caption,
-                    fontWeight: AppTypography.medium,
-                    color: riskColor,
-                  ),
+            ),
+          ),
+          const Spacer(),
+          // Risk badge
+          Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.xxs,
+            ),
+            decoration: BoxDecoration(
+              color: riskColor.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(AppRadius.sm),
+            ),
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                riskLabel,
+                maxLines: 1,
+                style: TextStyle(
+                  fontSize: AppTypography.bodySmall,
+                  fontWeight: AppTypography.medium,
+                  color: riskColor,
                 ),
               ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -557,7 +569,7 @@ class _MacroHistoryScreenState extends State<MacroHistoryScreen> {
     final riskLabel = _riskLabel(context, entry.riskLevel);
     final message = entry.descriptionLocalized(l10n, langCode);
     final changeColor = entry.changeColor(mlc);
-    final subColor = mlc.textTertiary;
+    final subColor = mlc.textSecondary;
 
     showDialog(
       context: context,
@@ -605,24 +617,31 @@ class _MacroHistoryScreenState extends State<MacroHistoryScreen> {
                     const SizedBox(width: AppSpacing.sm),
                   ],
                   const Spacer(),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        widget.title,
-                        style: const TextStyle(
-                          fontSize: AppTypography.bodyLarge,
-                          fontWeight: AppTypography.bold,
+                  Flexible(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          widget.title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.end,
+                          style: const TextStyle(
+                            fontSize: AppTypography.bodyLarge,
+                            fontWeight: AppTypography.bold,
+                          ),
                         ),
-                      ),
-                      Text(
-                        entry.observationDate ?? '',
-                        style: TextStyle(
-                          fontSize: AppTypography.caption,
-                          color: subColor,
+                        Text(
+                          entry.observationDate ?? '',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: AppTypography.bodySmall,
+                            color: subColor,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -634,18 +653,26 @@ class _MacroHistoryScreenState extends State<MacroHistoryScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          '${entry.formattedValue}${entry.showPercentSuffix ? '%' : ''}',
-                          style: const TextStyle(
-                            fontSize: AppTypography.displayLarge,
-                            fontWeight: AppTypography.bold,
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            '${entry.formattedValue}${entry.showPercentSuffix ? '%' : ''}',
+                            maxLines: 1,
+                            style: const TextStyle(
+                              fontSize: AppTypography.displayLarge,
+                              fontWeight: AppTypography.bold,
+                            ),
                           ),
                         ),
                         const SizedBox(height: AppSpacing.xxs),
                         Text(
                           l10n.macroCurrentLabel,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontSize: AppTypography.caption,
+                            fontSize: AppTypography.bodySmall,
+                            fontWeight: AppTypography.medium,
                             color: subColor,
                           ),
                         ),
@@ -657,19 +684,27 @@ class _MacroHistoryScreenState extends State<MacroHistoryScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            '${entry.changeArrow} ${entry.changePct!.abs().toStringAsFixed(2)}%',
-                            style: TextStyle(
-                              fontSize: AppTypography.headlineMedium,
-                              fontWeight: AppTypography.semiBold,
-                              color: changeColor,
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              '${entry.changeArrow} ${entry.changePct!.abs().toStringAsFixed(2)}%',
+                              maxLines: 1,
+                              style: TextStyle(
+                                fontSize: AppTypography.headlineMedium,
+                                fontWeight: AppTypography.semiBold,
+                                color: changeColor,
+                              ),
                             ),
                           ),
                           const SizedBox(height: AppSpacing.xxs),
                           Text(
                             l10n.macroChangeLabel,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              fontSize: AppTypography.caption,
+                              fontSize: AppTypography.bodySmall,
+                              fontWeight: AppTypography.medium,
                               color: subColor,
                             ),
                           ),

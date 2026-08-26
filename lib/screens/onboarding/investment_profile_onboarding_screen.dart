@@ -315,13 +315,18 @@ class _InvestmentProfileOnboardingScreenState
                       color: Colors.white,
                     ),
                   )
-                : Text(
-                    _currentPage < 4
-                        ? l10n.next
-                        : l10n.investmentProfileComplete,
-                    style: const TextStyle(
-                      fontSize: AppTypography.bodyLarge,
-                      fontWeight: AppTypography.bold,
+                : FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      _currentPage < 4
+                          ? l10n.next
+                          : l10n.investmentProfileComplete,
+                      maxLines: 1,
+                      softWrap: false,
+                      style: const TextStyle(
+                        fontSize: AppTypography.bodyLarge,
+                        fontWeight: AppTypography.bold,
+                      ),
                     ),
                   ),
           ),
@@ -426,17 +431,21 @@ class _InvestmentProfileOnboardingScreenState
       child: Column(
         children: [
           const SizedBox(height: AppSpacing.xxl),
-          Text(
-            '${_riskTolerance.round()}',
-            style: TextStyle(
-              fontSize: AppTypography.heroSmall,
-              fontWeight: AppTypography.bold,
-              color: colors.accentBlue,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              '${_riskTolerance.round()}',
+              style: TextStyle(
+                fontSize: AppTypography.heroSmall,
+                fontWeight: AppTypography.bold,
+                color: colors.accentBlue,
+              ),
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
             labels[_riskTolerance.round() - 1],
+            textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: AppTypography.headlineMedium,
               fontWeight: AppTypography.semiBold,
@@ -457,18 +466,29 @@ class _InvestmentProfileOnboardingScreenState
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  l10n.riskLow,
-                  style: TextStyle(
-                    fontSize: AppTypography.bodySmall,
-                    color: colors.textTertiary,
+                Flexible(
+                  child: Text(
+                    l10n.riskLow,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: AppTypography.bodyMedium,
+                      fontWeight: AppTypography.medium,
+                      color: colors.textSecondary,
+                    ),
                   ),
                 ),
-                Text(
-                  l10n.riskHigh,
-                  style: TextStyle(
-                    fontSize: AppTypography.bodySmall,
-                    color: colors.textTertiary,
+                Flexible(
+                  child: Text(
+                    l10n.riskHigh,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.end,
+                    style: TextStyle(
+                      fontSize: AppTypography.bodyMedium,
+                      fontWeight: AppTypography.medium,
+                      color: colors.textSecondary,
+                    ),
                   ),
                 ),
               ],
@@ -629,9 +649,11 @@ class _InvestmentProfileOnboardingScreenState
                 children: [
                   Text(
                     title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: AppTypography.bodyLarge,
-                      fontWeight: AppTypography.bold,
+                      fontSize: AppTypography.headlineSmall,
+                      fontWeight: AppTypography.semiBold,
                       color: isSelected
                           ? colors.accentBlue
                           : colors.textPrimary,
@@ -641,9 +663,9 @@ class _InvestmentProfileOnboardingScreenState
                   Text(
                     subtitle,
                     style: TextStyle(
-                      fontSize: AppTypography.bodySmall,
+                      fontSize: AppTypography.bodyMedium,
                       color: colors.textSecondary,
-                      height: 1.3,
+                      height: 1.35,
                     ),
                   ),
                 ],

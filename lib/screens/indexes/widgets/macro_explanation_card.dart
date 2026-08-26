@@ -216,11 +216,15 @@ class _MacroExplanationCardState extends State<MacroExplanationCard> {
               children: [
                 Icon(Icons.auto_awesome, size: 16, color: mlc.accentBlue),
                 const SizedBox(width: 6),
-                Text(
-                  l.macroAiCardTitle,
-                  style: AppTypography.label.copyWith(
-                    color: mlc.accentBlue,
-                    fontWeight: AppTypography.bold,
+                Flexible(
+                  child: Text(
+                    l.macroAiCardTitle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.label.copyWith(
+                      color: mlc.accentBlue,
+                      fontWeight: AppTypography.bold,
+                    ),
                   ),
                 ),
                 const Spacer(),
@@ -323,11 +327,15 @@ class _MacroExplanationCardState extends State<MacroExplanationCard> {
                   Icon(Icons.play_circle_outline,
                       size: 16, color: mlc.accentBlue),
                   const SizedBox(width: 6),
-                  Text(
-                    l.macroAiCardWatchAdAction,
-                    style: AppTypography.label.copyWith(
-                      color: mlc.accentBlue,
-                      fontWeight: AppTypography.bold,
+                  Flexible(
+                    child: Text(
+                      l.macroAiCardWatchAdAction,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.label.copyWith(
+                        color: mlc.accentBlue,
+                        fontWeight: AppTypography.bold,
+                      ),
                     ),
                   ),
                 ],

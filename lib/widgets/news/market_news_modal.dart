@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../../l10n/app_localizations.dart';
+import '../../screens/common/webview_screen.dart';
 import '../../models/news_data.dart';
 import '../../screens/ticker_detail/ticker_detail_screen.dart';
 import '../../theme/app_colors.dart';
@@ -64,14 +64,14 @@ class MarketNewsModal {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xxs),
                     decoration: BoxDecoration(
-                      color: Theme.of(ctx).colorScheme.surfaceContainerHighest,
+                      color: ctx.mlColors.groupedBackground,
                       borderRadius: BorderRadius.circular(AppRadius.xs),
                     ),
                     child: Text(
                       isMarketNews(item) ? l10n.marketNews : item.ticker,
                       style: TextStyle(
                         fontSize: AppTypography.bodySmall,
-                        fontWeight: AppTypography.bold,
+                        fontWeight: AppTypography.semiBold,
                         color: ctx.mlColors.textSecondary,
                       ),
                     ),
@@ -87,7 +87,7 @@ class MarketNewsModal {
                       item.sentimentLabelLocalized(l10n),
                       style: TextStyle(
                         fontSize: AppTypography.bodySmall,
-                        fontWeight: AppTypography.bold,
+                        fontWeight: AppTypography.semiBold,
                         color: dotColor,
                       ),
                     ),
@@ -96,8 +96,8 @@ class MarketNewsModal {
                   Text(
                     item.timeAgoLocalized(l10n),
                     style: TextStyle(
-                      fontSize: AppTypography.caption,
-                      color: Theme.of(ctx).colorScheme.outline,
+                      fontSize: AppTypography.bodySmall,
+                      color: ctx.mlColors.textTertiary,
                     ),
                   ),
                 ],
@@ -109,7 +109,7 @@ class MarketNewsModal {
                   item.source!,
                   style: TextStyle(
                     fontSize: AppTypography.bodyMedium,
-                    color: Theme.of(ctx).colorScheme.outline,
+                    color: ctx.mlColors.textSecondary,
                   ),
                 ),
               ],
@@ -125,7 +125,7 @@ class MarketNewsModal {
                     height: 20,
                     margin: const EdgeInsets.only(top: AppSpacing.xxs),
                     decoration: BoxDecoration(
-                      color: Theme.of(ctx).colorScheme.primary,
+                      color: ctx.mlColors.accentBlue,
                       borderRadius: BorderRadius.circular(AppRadius.xxs),
                     ),
                   ),
@@ -136,7 +136,7 @@ class MarketNewsModal {
                       style: TextStyle(
                         fontSize: AppTypography.headlineLarge,
                         fontWeight: AppTypography.bold,
-                        color: Theme.of(ctx).colorScheme.onSurface,
+                        color: ctx.mlColors.textPrimary,
                         height: 1.3,
                       ),
                       maxLines: 3,
@@ -155,7 +155,7 @@ class MarketNewsModal {
                     style: TextStyle(
                       fontSize: AppTypography.headlineMedium,
                       fontWeight: AppTypography.medium,
-                      color: Theme.of(ctx).colorScheme.onSurface,
+                      color: ctx.mlColors.textPrimary,
                       height: 1.6,
                     ),
                   ),
@@ -193,9 +193,24 @@ class MarketNewsModal {
     const pad = EdgeInsets.symmetric(vertical: AppSpacing.lg);
 
     final originalBtn = OutlinedButton.icon(
-      onPressed: () => _launchUrl(item.sourceUrl!),
+      // 외부 브라우저 대신 앱 안 인앱 웹뷰로 원문을 연다.
+      onPressed: () {
+        Navigator.pop(sheetCtx);
+        Navigator.push(
+          navCtx,
+          appPageRoute(
+            builder: (_) => WebViewScreen(
+              title: l10n.viewOriginalArticle,
+              url: item.sourceUrl!,
+            ),
+          ),
+        );
+      },
       icon: const Icon(Icons.open_in_new, size: 16),
-      label: Text(l10n.viewOriginalArticle, overflow: TextOverflow.ellipsis),
+      label: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Text(l10n.viewOriginalArticle, maxLines: 1, softWrap: false),
+      ),
       style: OutlinedButton.styleFrom(padding: pad, shape: shape),
     );
 
@@ -208,7 +223,10 @@ class MarketNewsModal {
         );
       },
       icon: const Icon(Icons.show_chart, size: 16),
-      label: Text(l10n.viewTickerDetail, overflow: TextOverflow.ellipsis),
+      label: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Text(l10n.viewTickerDetail, maxLines: 1, softWrap: false),
+      ),
       style: FilledButton.styleFrom(padding: pad, shape: shape),
     );
 
@@ -230,10 +248,4 @@ class MarketNewsModal {
     ];
   }
 
-  static Future<void> _launchUrl(String url) async {
-    final uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    }
-  }
 }

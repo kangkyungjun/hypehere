@@ -162,12 +162,18 @@ class _StockRow extends StatelessWidget {
             ),
             const SizedBox(width: AppSpacing.md),
 
-            // Close price
+            // Close price — 큰 값 축소 방어(FittedBox)
             if (stock.close != null)
-              Text(
-                '\$${_formatClose(stock.close!)}',
-                style: AppTypography.changeBadge.copyWith(
-                  color: mlc.textPrimary,
+              Flexible(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    '\$${_formatClose(stock.close!)}',
+                    style: AppTypography.changeBadge.copyWith(
+                      color: mlc.textPrimary,
+                    ),
+                  ),
                 ),
               ),
             const SizedBox(width: AppSpacing.md),

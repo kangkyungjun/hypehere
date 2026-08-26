@@ -6,6 +6,7 @@ import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 import '../../theme/app_typography.dart';
 import '../../utils/score_mapper.dart';
+import '../common/bento_card.dart';
 
 /// 오늘의집 스타일 큐레이션 그리드 — "오늘의 추천 종목".
 ///
@@ -130,16 +131,10 @@ class _RecoCard extends StatelessWidget {
     final scoreColor = ScoreMapper.getScoreColor(score, mlc);
     final fraction = (score / 100).clamp(0.0, 1.0);
 
-    return Material(
-      color: mlc.cardBackground,
-      borderRadius: BorderRadius.circular(AppRadius.card),
-      clipBehavior: Clip.antiAlias,
-      surfaceTintColor: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.sm),
-          child: Column(
+    return BentoCard(
+      onTap: onTap,
+      padding: const EdgeInsets.all(AppSpacing.sm),
+      child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // 티커 + 점수 배지
@@ -238,8 +233,6 @@ class _RecoCard extends StatelessWidget {
               const SizedBox(height: AppSpacing.xxs),
               _buildChangePct(item.changePct, mlc),
             ],
-          ),
-        ),
       ),
     );
   }

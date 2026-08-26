@@ -4,10 +4,10 @@ import '../../models/mention_bubble_data.dart';
 import '../../l10n/app_localizations.dart';
 import '../../screens/ticker_detail/ticker_detail_screen.dart';
 import '../../theme/app_colors.dart';
-import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 import '../../theme/app_shadow.dart';
 import '../../theme/app_typography.dart';
+import '../common/bento_card.dart';
 
 /// Circle-packing bubble chart showing the most-mentioned tickers
 /// in the last 24 hours of news. Tap a bubble to navigate to
@@ -24,24 +24,22 @@ class MentionBubbleCard extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
 
-    return Card(
+    return BentoCard(
       margin: const EdgeInsets.only(bottom: AppSpacing.xl),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Title
-            Text(
-              l10n.newsBubbleTitle,
-              style: TextStyle(
-                fontSize: AppTypography.bodyLarge,
-                fontWeight: AppTypography.bold,
-                color: context.mlColors.textSecondary,
-              ),
+      padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.md),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Title
+          Text(
+            l10n.newsBubbleTitle,
+            style: TextStyle(
+              fontSize: AppTypography.bodyLarge,
+              fontWeight: AppTypography.semiBold,
+              color: context.mlColors.textSecondary,
             ),
-            const SizedBox(height: AppSpacing.md),
+          ),
+          const SizedBox(height: AppSpacing.md),
 
             // Bubble area
             SizedBox(
@@ -84,21 +82,29 @@ class MentionBubbleCard extends StatelessWidget {
                 },
               ),
             ),
-            const SizedBox(height: AppSpacing.sm),
+          const SizedBox(height: AppSpacing.sm),
 
-            // Legend
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _legendDot(context.mlColors.gainColor, l10n.newsBubbleLegendBullish),
-                const SizedBox(width: AppSpacing.xl),
-                _legendDot(context.mlColors.lossColor, l10n.newsBubbleLegendBearish),
-                const SizedBox(width: AppSpacing.xl),
-                _legendDot(context.mlColors.neutralColor, l10n.newsBubbleLegendMixed),
-              ],
-            ),
-          ],
-        ),
+          // Legend
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Flexible(
+                child: _legendDot(
+                    context.mlColors.gainColor, l10n.newsBubbleLegendBullish),
+              ),
+              const SizedBox(width: AppSpacing.lg),
+              Flexible(
+                child: _legendDot(
+                    context.mlColors.lossColor, l10n.newsBubbleLegendBearish),
+              ),
+              const SizedBox(width: AppSpacing.lg),
+              Flexible(
+                child: _legendDot(
+                    context.mlColors.neutralColor, l10n.newsBubbleLegendMixed),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -113,7 +119,14 @@ class MentionBubbleCard extends StatelessWidget {
           decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
         const SizedBox(width: AppSpacing.xs),
-        Text(label, style: const TextStyle(fontSize: AppTypography.micro)),
+        Flexible(
+          child: Text(
+            label,
+            style: const TextStyle(fontSize: AppTypography.caption),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
       ],
     );
   }

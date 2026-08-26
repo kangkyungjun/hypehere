@@ -15,6 +15,7 @@ import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 import '../../theme/app_typography.dart';
 import '../../widgets/common/error_state_view.dart';
+import '../../widgets/common/bento_card.dart';
 /// Explore Screen - 검색/탐색 (도구형 검색)
 ///
 /// ⚠️ HypeHere 검색과 다름: 종목 중심, 빠른 진입
@@ -231,8 +232,11 @@ class _ExploreScreenState extends State<ExploreScreen> {
             onSelected: (_) => _onClassificationTap(code),
             selectedColor: Theme.of(context).colorScheme.primaryContainer,
             labelStyle: TextStyle(
-              fontSize: AppTypography.bodySmall,
-              fontWeight: isSelected ? AppTypography.semiBold : AppTypography.regular,
+              fontSize: AppTypography.bodyMedium,
+              fontWeight: isSelected ? AppTypography.semiBold : AppTypography.medium,
+              color: isSelected
+                  ? context.mlColors.textPrimary
+                  : context.mlColors.textSecondary,
             ),
             visualDensity: VisualDensity.compact,
           );
@@ -251,7 +255,9 @@ class _ExploreScreenState extends State<ExploreScreen> {
           Localizations.localeOf(context).languageCode == 'ko'
               ? '해당 분류 종목이 없습니다'
               : 'No stocks in this category',
-          style: Theme.of(context).textTheme.bodyLarge,
+          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                color: context.mlColors.textSecondary,
+              ),
         ),
       );
     }
@@ -279,10 +285,13 @@ class _ExploreScreenState extends State<ExploreScreen> {
             child: Center(
               child: OutlinedButton(
                 onPressed: () => setState(() => _classificationDisplayCount += 20),
-                child: Text(
-                  Localizations.localeOf(context).languageCode == 'ko'
-                      ? '더보기 ($remaining)'
-                      : 'Show more ($remaining)',
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    Localizations.localeOf(context).languageCode == 'ko'
+                        ? '더보기 ($remaining)'
+                        : 'Show more ($remaining)',
+                  ),
                 ),
               ),
             ),
@@ -300,29 +309,61 @@ class _ExploreScreenState extends State<ExploreScreen> {
 
         return ListTile(
           leading: CircleAvatar(
-            backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-            child: Text(ticker[0], style: TextStyle(color: Theme.of(context).colorScheme.onPrimaryContainer)),
+            backgroundColor: context.mlColors.infoBg,
+            child: Text(
+              ticker[0],
+              style: TextStyle(
+                color: context.mlColors.accentBlue,
+                fontWeight: AppTypography.bold,
+              ),
+            ),
           ),
-          title: Text(ticker, style: const TextStyle(fontWeight: FontWeight.w600)),
-          subtitle: Text(displayName, maxLines: 1, overflow: TextOverflow.ellipsis),
+          title: Text(
+            ticker,
+            style: TextStyle(
+              fontWeight: AppTypography.semiBold,
+              color: context.mlColors.textPrimary,
+            ),
+          ),
+          subtitle: Text(
+            displayName,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: AppTypography.bodyMedium,
+              color: context.mlColors.textSecondary,
+            ),
+          ),
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               if (score != null)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.tertiaryContainer,
-                    borderRadius: BorderRadius.circular(4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.sm,
+                    vertical: AppSpacing.xxs,
                   ),
-                  child: Text(score.toStringAsFixed(0), style: TextStyle(fontSize: AppTypography.bodyMedium, color: Theme.of(context).colorScheme.onTertiaryContainer)),
+                  decoration: BoxDecoration(
+                    color: context.mlColors.infoBg,
+                    borderRadius: BorderRadius.circular(AppRadius.sm),
+                  ),
+                  child: Text(
+                    score.toStringAsFixed(0),
+                    style: TextStyle(
+                      fontSize: AppTypography.bodyMedium,
+                      fontWeight: AppTypography.semiBold,
+                      color: context.mlColors.accentBlue,
+                    ),
+                  ),
                 ),
               if (changePct != null) ...[
-                const SizedBox(width: 8),
+                const SizedBox(width: AppSpacing.sm),
                 Text(
                   '${changePct >= 0 ? '+' : ''}${changePct.toStringAsFixed(1)}%',
                   style: TextStyle(
-                    fontSize: AppTypography.bodyMedium,
+                    fontSize: AppTypography.bodyLarge,
+                    fontWeight: AppTypography.semiBold,
+                    fontFeatures: AppTypography.tabularFigures,
                     color: changePct >= 0
                         ? context.mlColors.gainColor
                         : context.mlColors.lossColor,
@@ -367,16 +408,18 @@ class _ExploreScreenState extends State<ExploreScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.search_off, size: 48, color: Theme.of(context).colorScheme.outline),
+            Icon(Icons.search_off, size: 48, color: context.mlColors.textTertiary),
             const SizedBox(height: AppSpacing.xl),
             Text(
               l10n.noSearchResults,
-              style: Theme.of(context).textTheme.titleLarge,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: context.mlColors.textPrimary,
+                  ),
             ),
             const SizedBox(height: AppSpacing.md),
             Text(
               l10n.tryDifferentSearch,
-              style: TextStyle(color: Theme.of(context).colorScheme.outline),
+              style: TextStyle(color: context.mlColors.textSecondary),
             ),
           ],
         ),
@@ -391,20 +434,29 @@ class _ExploreScreenState extends State<ExploreScreen> {
           final ticker = _searchResults[index];
           return ListTile(
             leading: CircleAvatar(
-              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+              backgroundColor: context.mlColors.infoBg,
               child: Text(
                 ticker.ticker.substring(0, 1),
                 style: TextStyle(
-                  color: Theme.of(context).colorScheme.onPrimaryContainer,
+                  color: context.mlColors.accentBlue,
                   fontWeight: AppTypography.bold,
                 ),
               ),
             ),
             title: Text(
               ticker.ticker,
-              style: const TextStyle(fontWeight: AppTypography.bold),
+              style: TextStyle(
+                fontWeight: AppTypography.semiBold,
+                color: context.mlColors.textPrimary,
+              ),
             ),
-            subtitle: Text(ticker.searchDisplayText),
+            subtitle: Text(
+              ticker.searchDisplayText,
+              style: TextStyle(
+                fontSize: AppTypography.bodyMedium,
+                color: context.mlColors.textSecondary,
+              ),
+            ),
             trailing: Consumer<WatchlistProvider>(
               builder: (context, wp, _) {
                 final isIn = wp.isInWatchlist(ticker.ticker);
@@ -412,8 +464,8 @@ class _ExploreScreenState extends State<ExploreScreen> {
                   icon: Icon(
                     isIn ? Icons.bookmark : Icons.bookmark_border,
                     color: isIn
-                        ? Theme.of(context).colorScheme.primary
-                        : Theme.of(context).colorScheme.outline,
+                        ? context.mlColors.accentBlue
+                        : context.mlColors.textSecondary,
                   ),
                   onPressed: () {
                     wp.toggleWatchlist(ticker.ticker);
@@ -447,16 +499,18 @@ class _ExploreScreenState extends State<ExploreScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.search, size: 64, color: Theme.of(context).colorScheme.outline),
+                Icon(Icons.search, size: 64, color: context.mlColors.textTertiary),
                 const SizedBox(height: AppSpacing.xl),
                 Text(
                   l10n.tickerSearch,
-                  style: Theme.of(context).textTheme.titleLarge,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: context.mlColors.textPrimary,
+                      ),
                 ),
                 const SizedBox(height: AppSpacing.md),
                 Text(
                   l10n.enterTickerAbove,
-                  style: TextStyle(color: Theme.of(context).colorScheme.outline),
+                  style: TextStyle(color: context.mlColors.textSecondary),
                 ),
                 const SizedBox(height: AppSpacing.xxxl),
                 // Bookmark guide card
@@ -478,6 +532,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                     l10n.recentSearches,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: AppTypography.bold,
+                          color: context.mlColors.textPrimary,
                         ),
                   ),
                   TextButton(
@@ -506,17 +561,25 @@ class _ExploreScreenState extends State<ExploreScreen> {
                   }
 
                   return ListTile(
-                    leading: const Icon(Icons.history),
+                    leading: Icon(
+                      Icons.history,
+                      color: context.mlColors.textSecondary,
+                    ),
                     title: Text(
                       ticker.ticker,
-                      style: const TextStyle(fontWeight: AppTypography.bold),
+                      style: TextStyle(
+                        fontWeight: AppTypography.semiBold,
+                        color: context.mlColors.textPrimary,
+                      ),
                     ),
                     subtitle: subtitleText != null
                         ? Text(
                             subtitleText,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              color: Theme.of(context).colorScheme.outline,
-                              fontSize: AppTypography.bodySmall,
+                              color: context.mlColors.textSecondary,
+                              fontSize: AppTypography.bodyMedium,
                             ),
                           )
                         : null,
@@ -539,22 +602,16 @@ class _ExploreScreenState extends State<ExploreScreen> {
   }
 
   Widget _buildBookmarkGuide(BuildContext context, AppLocalizations l10n) {
-    final theme = Theme.of(context);
-    return Container(
+    final mlc = context.mlColors;
+    return BentoCard(
       margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xxxl),
-      padding: const EdgeInsets.all(AppSpacing.xl),
-      decoration: BoxDecoration(
-        color: context.mlColors.sectionBackground,
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: context.mlColors.subtleBorder),
-      ),
       child: Column(
         children: [
           Text(
             l10n.bookmarkGuide,
             style: TextStyle(
-              fontSize: AppTypography.bodySmall,
-              color: theme.colorScheme.onSurfaceVariant,
+              fontSize: AppTypography.bodyMedium,
+              color: mlc.textSecondary,
             ),
             textAlign: TextAlign.center,
           ),
@@ -565,20 +622,20 @@ class _ExploreScreenState extends State<ExploreScreen> {
               Icon(
                 Icons.bookmark_border,
                 size: 28,
-                color: theme.colorScheme.outline,
+                color: mlc.textTertiary,
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
                 child: Icon(
                   Icons.arrow_forward,
                   size: 20,
-                  color: theme.colorScheme.outline,
+                  color: mlc.textSecondary,
                 ),
               ),
               Icon(
                 Icons.bookmark,
                 size: 28,
-                color: theme.colorScheme.primary,
+                color: mlc.accentBlue,
               ),
             ],
           ),

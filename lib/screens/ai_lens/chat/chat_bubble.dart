@@ -129,11 +129,13 @@ class ChatBubble extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 15, color: mlc.textTertiary),
+            Icon(icon, size: 15, color: mlc.textSecondary),
             const SizedBox(width: 3),
             Text(
               label,
-              style: AppTypography.label.copyWith(color: mlc.textTertiary),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTypography.label.copyWith(color: mlc.textSecondary),
             ),
           ],
         ),

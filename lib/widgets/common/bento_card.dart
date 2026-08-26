@@ -45,13 +45,15 @@ class BentoCard extends StatelessWidget {
           onTap: onTap,
           borderRadius: radius,
           child: Padding(
-            // 제목이 위에 바짝 붙지 않도록 top만 살짝 더 (12), 나머지는 타이트(8)
+            // 레퍼런스풍 편안한 카드 내부 패딩(밀도 토큰). 제목이 위에 바짝
+            // 붙지 않게 top만 살짝 더. 밀집 리스트 행은 명시적 padding을 넘겨
+            // 이 기본값의 영향을 받지 않는다.
             padding: padding ??
                 const EdgeInsets.fromLTRB(
-                  AppSpacing.sm,
-                  AppSpacing.md,
-                  AppSpacing.sm,
-                  AppSpacing.sm,
+                  AppDensity.cardPad,
+                  AppDensity.cardPadTop,
+                  AppDensity.cardPad,
+                  AppDensity.cardPad,
                 ),
             child: child,
           ),

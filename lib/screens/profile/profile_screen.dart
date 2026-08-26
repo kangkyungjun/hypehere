@@ -360,8 +360,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         l10n.addFirstHolding,
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: AppTypography.bodySmall,
-                          color: mlc.textTertiary,
+                          fontSize: AppTypography.bodyMedium,
+                          color: mlc.textSecondary,
                         ),
                       ),
                     ],
@@ -467,8 +467,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     Text(
                       l10n.joinDate(_formatDate(user.createdAt)),
                       style: TextStyle(
-                        fontSize: AppTypography.bodySmall,
-                        color: context.mlColors.textTertiary,
+                        fontSize: AppTypography.bodyMedium,
+                        color: context.mlColors.textSecondary,
                       ),
                     ),
                   ],
@@ -544,7 +544,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     style: TextStyle(
                       fontSize: AppTypography.headlineSmall,
                       fontWeight: AppTypography.semiBold,
-                      color: Theme.of(context).colorScheme.onSurface,
+                      color: context.mlColors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.sm),
@@ -552,7 +552,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     l10n.writeAPost,
                     style: TextStyle(
                       fontSize: AppTypography.bodyMedium,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      color: context.mlColors.textSecondary,
                     ),
                   ),
                 ],
@@ -642,7 +642,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     style: TextStyle(
                       fontSize: AppTypography.headlineSmall,
                       fontWeight: AppTypography.semiBold,
-                      color: Theme.of(context).colorScheme.onSurface,
+                      color: context.mlColors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.sm),
@@ -650,7 +650,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     l10n.noComments,
                     style: TextStyle(
                       fontSize: AppTypography.bodyMedium,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      color: context.mlColors.textSecondary,
                     ),
                   ),
                 ],

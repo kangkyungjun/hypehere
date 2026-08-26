@@ -52,11 +52,15 @@ class _TickerAnalystSectionState extends State<TickerAnalystSection> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  l10n.analystConsensus((consensus.count ?? '-').toString()),
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: AppTypography.bold,
-                      ),
+                Flexible(
+                  child: Text(
+                    l10n.analystConsensus((consensus.count ?? '-').toString()),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: AppTypography.bold,
+                        ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
                 if (consensus.recommendation != null)
                   Container(
@@ -90,29 +94,37 @@ class _TickerAnalystSectionState extends State<TickerAnalystSection> {
                   upsideStr = ' ($sign${upside.toStringAsFixed(1)}%)';
                   upsideColor = upside >= 0 ? context.mlColors.gainColor : context.mlColors.lossColor;
                 }
-                return RichText(
-                  text: TextSpan(
-                    children: [
-                      TextSpan(
-                        text: '\$${consensus.mean!.toStringAsFixed(2)}',
-                        style: TextStyle(
-                          fontSize: AppTypography.heroSmall,
-                          fontWeight: AppTypography.bold,
-                          color: Theme.of(context).colorScheme.onSurface,
-                          fontFeatures: AppTypography.tabularFigures,
-                        ),
-                      ),
-                      if (upsideStr.isNotEmpty)
+                return FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: RichText(
+                    maxLines: 1,
+                    softWrap: false,
+                    text: TextSpan(
+                      children: [
+                        // 비방향성 히어로 숫자(평균 목표가) → accentBlue.
                         TextSpan(
-                          text: upsideStr,
+                          text: '\$${consensus.mean!.toStringAsFixed(2)}',
                           style: TextStyle(
                             fontSize: AppTypography.heroSmall,
                             fontWeight: AppTypography.bold,
-                            color: upsideColor,
+                            color: context.mlColors.accentBlue,
                             fontFeatures: AppTypography.tabularFigures,
                           ),
                         ),
-                    ],
+                        // 방향성(현재가 대비 %)은 gain/loss 유지.
+                        if (upsideStr.isNotEmpty)
+                          TextSpan(
+                            text: upsideStr,
+                            style: TextStyle(
+                              fontSize: AppTypography.heroSmall,
+                              fontWeight: AppTypography.bold,
+                              color: upsideColor,
+                              fontFeatures: AppTypography.tabularFigures,
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
                 );
               }),
@@ -120,7 +132,7 @@ class _TickerAnalystSectionState extends State<TickerAnalystSection> {
             const SizedBox(height: AppSpacing.xs),
             Text(
               l10n.averageTargetPrice,
-              style: TextStyle(fontSize: AppTypography.bodySmall, color: Theme.of(context).colorScheme.onSurfaceVariant),
+              style: TextStyle(fontSize: AppTypography.bodyMedium, fontWeight: AppTypography.medium, color: context.mlColors.textSecondary),
             ),
             const SizedBox(height: AppSpacing.lg),
 
@@ -228,10 +240,10 @@ class _TickerAnalystSectionState extends State<TickerAnalystSection> {
                       width: 48,
                       child: Column(
                         children: [
-                          Text(l10n.targetPrice, style: TextStyle(fontSize: AppTypography.caption, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                          Text(l10n.targetPrice, style: TextStyle(fontSize: AppTypography.caption, color: context.mlColors.textSecondary)),
                           Text(
                             '\$${consensus.mean?.toStringAsFixed(0) ?? ''}',
-                            style: TextStyle(fontSize: AppTypography.caption, color: Theme.of(context).colorScheme.onSurfaceVariant, fontWeight: AppTypography.semiBold, fontFeatures: AppTypography.tabularFigures),
+                            style: TextStyle(fontSize: AppTypography.caption, color: context.mlColors.accentBlue, fontWeight: AppTypography.bold, fontFeatures: AppTypography.tabularFigures),
                           ),
                           const SizedBox(height: AppSpacing.xxs),
                           Container(
@@ -256,10 +268,10 @@ class _TickerAnalystSectionState extends State<TickerAnalystSection> {
                       width: 48,
                       child: Column(
                         children: [
-                          Text(l10n.currentPrice, style: TextStyle(fontSize: AppTypography.caption, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                          Text(l10n.currentPrice, style: TextStyle(fontSize: AppTypography.caption, color: context.mlColors.textSecondary)),
                           Text(
                             '\$${latestClose?.toStringAsFixed(0) ?? ''}',
-                            style: TextStyle(fontSize: AppTypography.caption, color: Theme.of(context).colorScheme.onSurfaceVariant, fontWeight: AppTypography.semiBold, fontFeatures: AppTypography.tabularFigures),
+                            style: TextStyle(fontSize: AppTypography.caption, color: context.mlColors.textPrimary, fontWeight: AppTypography.semiBold, fontFeatures: AppTypography.tabularFigures),
                           ),
                           const SizedBox(height: AppSpacing.xxs),
                           Container(
@@ -289,13 +301,24 @@ class _TickerAnalystSectionState extends State<TickerAnalystSection> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              l10n.lowestPrice('\$${low.toStringAsFixed(0)}'),
-              style: TextStyle(fontSize: AppTypography.caption, color: Theme.of(context).colorScheme.onSurfaceVariant, fontFeatures: AppTypography.tabularFigures),
+            Flexible(
+              child: Text(
+                // 템플릿("최저 ${price}")에 이미 $가 있어 값엔 $를 붙이지 않음(이중 $$ 방지).
+                l10n.lowestPrice(low.toStringAsFixed(0)),
+                style: TextStyle(fontSize: AppTypography.bodySmall, color: context.mlColors.textSecondary, fontFeatures: AppTypography.tabularFigures),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
-            Text(
-              l10n.highestPrice('\$${high.toStringAsFixed(0)}'),
-              style: TextStyle(fontSize: AppTypography.caption, color: Theme.of(context).colorScheme.onSurfaceVariant, fontFeatures: AppTypography.tabularFigures),
+            const SizedBox(width: AppSpacing.sm),
+            Flexible(
+              child: Text(
+                l10n.highestPrice(high.toStringAsFixed(0)),
+                style: TextStyle(fontSize: AppTypography.bodySmall, color: context.mlColors.textSecondary, fontFeatures: AppTypography.tabularFigures),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.end,
+              ),
             ),
           ],
         ),
@@ -340,11 +363,15 @@ class _TickerAnalystSectionState extends State<TickerAnalystSection> {
                   children: [
                     Row(
                       children: [
-                        Text(
-                          r.firm ?? l10n.unknownFirm,
-                          style: const TextStyle(
-                            fontSize: AppTypography.bodyMedium,
-                            fontWeight: AppTypography.semiBold,
+                        Flexible(
+                          child: Text(
+                            r.firm ?? l10n.unknownFirm,
+                            style: const TextStyle(
+                              fontSize: AppTypography.bodyMedium,
+                              fontWeight: AppTypography.semiBold,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         if (r.status != null) ...[
@@ -371,7 +398,9 @@ class _TickerAnalystSectionState extends State<TickerAnalystSection> {
                     if (r.rating != null)
                       Text(
                         translateRating(r.rating, l10n),
-                        style: TextStyle(fontSize: AppTypography.caption, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                        style: TextStyle(fontSize: AppTypography.bodySmall, color: context.mlColors.textSecondary),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                   ],
                 ),
@@ -381,20 +410,27 @@ class _TickerAnalystSectionState extends State<TickerAnalystSection> {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   if (r.targetFrom != null || r.targetTo != null)
-                    Text(
-                      r.targetFrom != null && r.targetTo != null
-                          ? '\$${r.targetFrom!.toStringAsFixed(0)} → \$${r.targetTo!.toStringAsFixed(0)}'
-                          : '\$${(r.targetTo ?? r.targetFrom)?.toStringAsFixed(0) ?? '--'}',
-                      style: const TextStyle(
-                        fontSize: AppTypography.bodyMedium,
-                        fontWeight: AppTypography.semiBold,
-                        fontFeatures: AppTypography.tabularFigures,
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerRight,
+                      child: Text(
+                        r.targetFrom != null && r.targetTo != null
+                            ? '\$${r.targetFrom!.toStringAsFixed(0)} → \$${r.targetTo!.toStringAsFixed(0)}'
+                            : '\$${(r.targetTo ?? r.targetFrom)?.toStringAsFixed(0) ?? '--'}',
+                        style: TextStyle(
+                          fontSize: AppTypography.bodyMedium,
+                          fontWeight: AppTypography.semiBold,
+                          color: context.mlColors.textPrimary,
+                          fontFeatures: AppTypography.tabularFigures,
+                        ),
+                        maxLines: 1,
+                        softWrap: false,
                       ),
                     ),
                   if (r.date != null)
                     Text(
                       r.date!,
-                      style: TextStyle(fontSize: AppTypography.micro, color: Theme.of(context).colorScheme.outline),
+                      style: TextStyle(fontSize: AppTypography.caption, color: context.mlColors.textTertiary),
                     ),
                 ],
               ),
@@ -464,9 +500,13 @@ class _TickerAnalystSectionState extends State<TickerAnalystSection> {
                     ),
                   ),
                   const SizedBox(width: AppSpacing.xs),
-                  Text(
-                    item.$2,
-                    style: TextStyle(fontSize: AppTypography.bodySmall, color: isZero ? Theme.of(context).colorScheme.outline : Theme.of(context).colorScheme.onSurfaceVariant),
+                  Flexible(
+                    child: Text(
+                      item.$2,
+                      style: TextStyle(fontSize: AppTypography.bodySmall, color: isZero ? context.mlColors.textTertiary : context.mlColors.textSecondary),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                   const SizedBox(width: AppSpacing.xxs),
                   Text(

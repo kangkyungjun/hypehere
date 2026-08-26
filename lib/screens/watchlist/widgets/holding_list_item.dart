@@ -166,19 +166,24 @@ class HoldingListItem extends StatelessWidget {
                   if (holding.shares != null && holding.avgPrice != null)
                     Row(
                       children: [
-                        Text(
-                          l10n.sharesAtPrice(
-                            holding.shares!.toStringAsFixed(
-                              holding.shares! ==
-                                      holding.shares!.truncateToDouble()
-                                  ? 0
-                                  : 2,
+                        Flexible(
+                          child: Text(
+                            l10n.sharesAtPrice(
+                              holding.shares!.toStringAsFixed(
+                                holding.shares! ==
+                                        holding.shares!.truncateToDouble()
+                                    ? 0
+                                    : 2,
+                              ),
+                              holding.avgPrice!.toStringAsFixed(2),
                             ),
-                            holding.avgPrice!.toStringAsFixed(2),
-                          ),
-                          style: TextStyle(
-                            fontSize: AppTypography.caption,
-                            color: mlc.textTertiary,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: AppTypography.bodySmall,
+                              color: mlc.textSecondary,
+                              fontFeatures: AppTypography.tabularFigures,
+                            ),
                           ),
                         ),
                         if (holding.createdAt != null) ...[
@@ -186,14 +191,15 @@ class HoldingListItem extends StatelessWidget {
                           Icon(
                             Icons.calendar_today,
                             size: 12,
-                            color: mlc.textTertiary,
+                            color: mlc.textSecondary,
                           ),
                           const SizedBox(width: AppSpacing.xxs),
                           Text(
                             _formatDate(holding.createdAt!),
                             style: TextStyle(
-                              fontSize: AppTypography.caption,
-                              color: mlc.textTertiary,
+                              fontSize: AppTypography.bodySmall,
+                              color: mlc.textSecondary,
+                              fontFeatures: AppTypography.tabularFigures,
                             ),
                           ),
                         ],
@@ -206,15 +212,19 @@ class HoldingListItem extends StatelessWidget {
             // Current value + P&L%
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 if (holding.currentPrice != null)
-                  Text(
-                    '\$${holding.currentValue.toStringAsFixed(2)}',
-                    style: TextStyle(
-                      fontSize: AppTypography.bodyLarge,
-                      fontWeight: AppTypography.semiBold,
-                      color: mlc.textPrimary,
-                      fontFeatures: AppTypography.tabularFigures,
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      '\$${holding.currentValue.toStringAsFixed(2)}',
+                      style: TextStyle(
+                        fontSize: AppTypography.bodyLarge,
+                        fontWeight: AppTypography.semiBold,
+                        color: mlc.textPrimary,
+                        fontFeatures: AppTypography.tabularFigures,
+                      ),
                     ),
                   ),
                 const SizedBox(height: AppSpacing.xxs),

@@ -91,18 +91,23 @@ class PostCard extends StatelessWidget {
                 ),
                 const SizedBox(width: AppSpacing.md),
                 // Author
-                Text(
-                  post.author.nickname,
-                  style: AppTypography.label.copyWith(
-                    color: context.mlColors.textSecondary,
+                Flexible(
+                  child: Text(
+                    post.author.nickname,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.label.copyWith(
+                      color: context.mlColors.textSecondary,
+                    ),
                   ),
                 ),
                 const Spacer(),
+                const SizedBox(width: AppSpacing.sm),
                 // Time
                 Text(
                   _formatTimeAgo(post.createdAt, l10n),
                   style: AppTypography.label.copyWith(
-                    color: context.mlColors.textTertiary,
+                    color: context.mlColors.textSecondary,
                   ),
                 ),
                 // 수정/삭제/신고/차단 메뉴

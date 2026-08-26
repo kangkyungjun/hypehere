@@ -6,6 +6,7 @@ import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 import '../../theme/app_typography.dart';
 import '../../utils/multilingual.dart';
+import '../common/bento_card.dart';
 import 'market_news_modal.dart';
 
 /// Collapsible "Today's Key News" card: a numbered 1..5 list of the
@@ -31,72 +32,71 @@ class _KeyNewsCardState extends State<KeyNewsCard> {
     final langCode = Localizations.localeOf(context).languageCode;
     final mlc = context.mlColors;
 
-    return Card(
+    return BentoCard(
       margin: const EdgeInsets.only(bottom: AppSpacing.xl),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppRadius.lg),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.sm,
+        AppSpacing.lg,
+        AppSpacing.sm,
       ),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.lg,
-          AppSpacing.sm,
-          AppSpacing.lg,
-          AppSpacing.sm,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header (tap to collapse/expand)
-            InkWell(
-              onTap: () => setState(() => _collapsed = !_collapsed),
-              borderRadius: BorderRadius.circular(AppRadius.sm),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-                child: Row(
-                  children: [
-                    Text(
-                      '❗',
-                      style: TextStyle(fontSize: AppTypography.bodyMedium),
-                    ),
-                    const SizedBox(width: AppSpacing.xs),
-                    Text(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header (tap to collapse/expand)
+          InkWell(
+            onTap: () => setState(() => _collapsed = !_collapsed),
+            borderRadius: BorderRadius.circular(AppRadius.sm),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+              child: Row(
+                children: [
+                  Text(
+                    '❗',
+                    style: TextStyle(fontSize: AppTypography.bodyMedium),
+                  ),
+                  const SizedBox(width: AppSpacing.xs),
+                  Expanded(
+                    child: Text(
                       l10n.keyNewsTitle,
                       style: TextStyle(
                         fontSize: AppTypography.bodyLarge,
-                        fontWeight: AppTypography.bold,
+                        fontWeight: AppTypography.semiBold,
                         color: mlc.textSecondary,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    const Spacer(),
-                    AnimatedRotation(
-                      turns: _collapsed ? 0.0 : 0.5,
-                      duration: const Duration(milliseconds: 200),
-                      child: Icon(
-                        Icons.expand_more,
-                        size: 22,
-                        color: mlc.textTertiary,
-                      ),
+                  ),
+                  const SizedBox(width: AppSpacing.xs),
+                  AnimatedRotation(
+                    turns: _collapsed ? 0.0 : 0.5,
+                    duration: const Duration(milliseconds: 200),
+                    child: Icon(
+                      Icons.expand_more,
+                      size: 22,
+                      color: mlc.textSecondary,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
-            // Body (animated collapse)
-            AnimatedSize(
-              duration: const Duration(milliseconds: 200),
-              alignment: Alignment.topCenter,
-              child: _collapsed
-                  ? const SizedBox(width: double.infinity)
-                  : Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        for (int i = 0; i < widget.items.length; i++)
-                          _buildRow(context, i, widget.items[i], langCode, mlc),
-                      ],
-                    ),
-            ),
-          ],
-        ),
+          ),
+          // Body (animated collapse)
+          AnimatedSize(
+            duration: const Duration(milliseconds: 200),
+            alignment: Alignment.topCenter,
+            child: _collapsed
+                ? const SizedBox(width: double.infinity)
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      for (int i = 0; i < widget.items.length; i++)
+                        _buildRow(context, i, widget.items[i], langCode, mlc),
+                    ],
+                  ),
+          ),
+        ],
       ),
     );
   }
@@ -133,7 +133,7 @@ class _KeyNewsCardState extends State<KeyNewsCard> {
               child: Text(
                 item.aiSummary.localize(langCode),
                 style: TextStyle(
-                  fontSize: AppTypography.bodyMedium,
+                  fontSize: AppTypography.bodyLarge,
                   color: mlc.textPrimary,
                   height: 1.3,
                 ),
@@ -142,7 +142,7 @@ class _KeyNewsCardState extends State<KeyNewsCard> {
               ),
             ),
             const SizedBox(width: AppSpacing.xs),
-            Icon(Icons.chevron_right, size: 18, color: mlc.textTertiary),
+            Icon(Icons.chevron_right, size: 18, color: mlc.textSecondary),
           ],
         ),
       ),

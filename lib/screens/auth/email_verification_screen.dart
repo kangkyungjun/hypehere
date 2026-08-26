@@ -11,6 +11,7 @@ import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 import '../../theme/app_stroke.dart';
 import '../../theme/app_typography.dart';
+import '../../widgets/common/bento_card.dart';
 
 class EmailVerificationScreen extends StatefulWidget {
   final String email;
@@ -193,108 +194,151 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
+    final mlc = context.mlColors;
 
     return Scaffold(
+      backgroundColor: mlc.sectionBackground,
       appBar: AppBar(
         title: Text(l10n.verificationTitle),
       ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.xxl),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const SizedBox(height: AppSpacing.xxxl),
-              Icon(
-                Icons.mark_email_read_outlined,
-                size: 64,
-                color: theme.primaryColor,
-              ),
-              const SizedBox(height: AppSpacing.xl),
-              Text(
-                l10n.verificationTitle,
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: AppTypography.displayLarge, fontWeight: AppTypography.bold),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              Text(
-                l10n.verificationSubtitle(widget.email),
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: AppTypography.bodyLarge, color: context.mlColors.textSecondary),
-              ),
-              const SizedBox(height: AppSpacing.md),
-              // 만료 타이머
-              Text(
-                l10n.verificationExpiry(_expiryText),
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: AppTypography.bodyMedium,
-                  color: _expirySeconds < 120 ? context.mlColors.dangerColor : context.mlColors.textTertiary,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.xxxl),
-              // 6자리 코드 입력
-              TextFormField(
-                controller: _codeController,
-                keyboardType: TextInputType.number,
-                textAlign: TextAlign.center,
-                maxLength: 6,
-                style: const TextStyle(
-                  fontSize: AppTypography.heroSmall,
-                  fontWeight: AppTypography.bold,
-                  letterSpacing: 12,
-                ),
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                decoration: InputDecoration(
-                  hintText: '000000',
-                  hintStyle: TextStyle(
-                    color: context.mlColors.textTertiary,
-                    fontSize: AppTypography.heroSmall,
-                    letterSpacing: 12,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(AppSpacing.xl),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 480),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const SizedBox(height: AppSpacing.xxl),
+                  Center(
+                    child: Container(
+                      width: 56,
+                      height: 56,
+                      decoration: BoxDecoration(
+                        color: mlc.infoBg,
+                        borderRadius: BorderRadius.circular(AppRadius.lg),
+                      ),
+                      child: Icon(
+                        Icons.mark_email_read_outlined,
+                        size: 30,
+                        color: mlc.accentBlue,
+                      ),
+                    ),
                   ),
-                  counterText: '',
-                  border: const OutlineInputBorder(),
-                  contentPadding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
-                ),
-                onChanged: (value) {
-                  if (value.length == 6) _handleVerify();
-                },
-              ),
-              const SizedBox(height: AppSpacing.xxl),
-              // 인증 버튼
-              ElevatedButton(
-                onPressed: _isLoading ? null : _handleVerify,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
-                  backgroundColor: theme.primaryColor,
-                  foregroundColor: context.mlColors.onPrimary,
-                ),
-                child: _isLoading
-                    ? SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: AppStroke.medium,
-                          valueColor: AlwaysStoppedAnimation<Color>(context.mlColors.onPrimary),
+                  const SizedBox(height: AppSpacing.lg),
+                  Text(
+                    l10n.verificationTitle,
+                    textAlign: TextAlign.center,
+                    style: AppTypography.screenTitle.copyWith(
+                      color: mlc.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    l10n.verificationSubtitle(widget.email),
+                    textAlign: TextAlign.center,
+                    style: AppTypography.body.copyWith(color: mlc.textSecondary),
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  // 만료 타이머 — 방향성 없는 상태값이므로 라벨은 secondary, 임박 시 danger
+                  Text(
+                    l10n.verificationExpiry(_expiryText),
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: AppTypography.bodyMedium,
+                      fontWeight: AppTypography.medium,
+                      color: _expirySeconds < 120
+                          ? mlc.dangerColor
+                          : mlc.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xxl),
+                  // 6자리 코드 입력
+                  BentoCard(
+                    child: TextFormField(
+                      controller: _codeController,
+                      keyboardType: TextInputType.number,
+                      textAlign: TextAlign.center,
+                      maxLength: 6,
+                      style: TextStyle(
+                        fontSize: AppTypography.heroSmall,
+                        fontWeight: AppTypography.bold,
+                        letterSpacing: 12,
+                        color: mlc.textPrimary,
+                      ),
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      decoration: InputDecoration(
+                        hintText: '000000',
+                        hintStyle: TextStyle(
+                          color: mlc.textTertiary,
+                          fontSize: AppTypography.heroSmall,
+                          letterSpacing: 12,
                         ),
-                      )
-                    : Text(l10n.verifyButton, style: const TextStyle(fontSize: AppTypography.headlineMedium)),
-              ),
-              const SizedBox(height: AppSpacing.xl),
-              // 재발송 버튼
-              TextButton(
-                onPressed: (_cooldownSeconds > 0 || _isResending) ? null : _handleResend,
-                child: Text(
-                  _cooldownSeconds > 0
-                      ? l10n.resendCodeCooldown(_cooldownSeconds)
-                      : l10n.resendCode,
-                  style: TextStyle(
-                    color: _cooldownSeconds > 0 ? context.mlColors.textTertiary : theme.primaryColor,
+                        counterText: '',
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: AppSpacing.xl,
+                        ),
+                      ),
+                      onChanged: (value) {
+                        if (value.length == 6) _handleVerify();
+                      },
+                    ),
                   ),
-                ),
+                  const SizedBox(height: AppSpacing.xl),
+                  // 인증 버튼
+                  FilledButton(
+                    onPressed: _isLoading ? null : _handleVerify,
+                    style: FilledButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: AppSpacing.lg,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(AppRadius.lg),
+                      ),
+                    ),
+                    child: _isLoading
+                        ? SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: AppStroke.medium,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                mlc.onPrimary,
+                              ),
+                            ),
+                          )
+                        : Text(
+                            l10n.verifyButton,
+                            style: const TextStyle(
+                              fontSize: AppTypography.headlineMedium,
+                              fontWeight: AppTypography.semiBold,
+                            ),
+                          ),
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  // 재발송 버튼 — 링크성 액션이므로 accentBlue
+                  TextButton(
+                    onPressed: (_cooldownSeconds > 0 || _isResending)
+                        ? null
+                        : _handleResend,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        _cooldownSeconds > 0
+                            ? l10n.resendCodeCooldown(_cooldownSeconds)
+                            : l10n.resendCode,
+                        style: TextStyle(
+                          color: _cooldownSeconds > 0
+                              ? mlc.textTertiary
+                              : mlc.accentBlue,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),

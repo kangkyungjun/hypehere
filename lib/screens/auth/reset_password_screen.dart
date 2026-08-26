@@ -7,6 +7,7 @@ import '../../theme/app_spacing.dart';
 import '../../theme/app_stroke.dart';
 import '../../theme/app_typography.dart';
 import '../../utils/error_localizer.dart';
+import '../../widgets/common/bento_card.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
   final String email;
@@ -85,101 +86,135 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
+    final mlc = context.mlColors;
 
     return Scaffold(
+      backgroundColor: mlc.sectionBackground,
       appBar: AppBar(
         title: Text(l10n.resetPassword),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppSpacing.xxl),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const SizedBox(height: AppSpacing.xxxl),
-                Icon(
-                  Icons.lock_open_outlined,
-                  size: 64,
-                  color: theme.primaryColor,
-                ),
-                const SizedBox(height: AppSpacing.xl),
-                Text(
-                  l10n.resetPassword,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: AppTypography.displayLarge, fontWeight: AppTypography.bold),
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                Text(
-                  l10n.resetPasswordSubtitle,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: AppTypography.bodyLarge, color: context.mlColors.textSecondary),
-                ),
-                const SizedBox(height: AppSpacing.xxxl),
-                // 새 비밀번호
-                TextFormField(
-                  controller: _passwordController,
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    labelText: l10n.newPassword,
-                    hintText: l10n.newPasswordHint,
-                    prefixIcon: const Icon(Icons.lock_outlined),
-                    border: const OutlineInputBorder(),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return l10n.newPasswordRequired;
-                    }
-                    if (value.length < 8) {
-                      return l10n.passwordTooShort;
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: AppSpacing.xl),
-                // 새 비밀번호 확인
-                TextFormField(
-                  controller: _passwordConfirmController,
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    labelText: l10n.newPasswordConfirm,
-                    hintText: l10n.newPasswordConfirmHint,
-                    prefixIcon: const Icon(Icons.lock_outlined),
-                    border: const OutlineInputBorder(),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return l10n.newPasswordConfirmRequired;
-                    }
-                    if (value != _passwordController.text) {
-                      return l10n.passwordMismatch;
-                    }
-                    return null;
-                  },
-                  onFieldSubmitted: (_) => _handleReset(),
-                ),
-                const SizedBox(height: AppSpacing.xxl),
-                ElevatedButton(
-                  onPressed: _isLoading ? null : _handleReset,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
-                    backgroundColor: theme.primaryColor,
-                    foregroundColor: context.mlColors.onPrimary,
-                  ),
-                  child: _isLoading
-                      ? SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: AppStroke.medium,
-                            valueColor: AlwaysStoppedAnimation<Color>(context.mlColors.onPrimary),
+          padding: const EdgeInsets.all(AppSpacing.xl),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 480),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const SizedBox(height: AppSpacing.xxl),
+                    Center(
+                      child: Container(
+                        width: 56,
+                        height: 56,
+                        decoration: BoxDecoration(
+                          color: mlc.infoBg,
+                          borderRadius: BorderRadius.circular(AppRadius.lg),
+                        ),
+                        child: Icon(
+                          Icons.lock_open_outlined,
+                          size: 30,
+                          color: mlc.accentBlue,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+                    Text(
+                      l10n.resetPassword,
+                      textAlign: TextAlign.center,
+                      style: AppTypography.screenTitle.copyWith(
+                        color: mlc.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      l10n.resetPasswordSubtitle,
+                      textAlign: TextAlign.center,
+                      style:
+                          AppTypography.body.copyWith(color: mlc.textSecondary),
+                    ),
+                    const SizedBox(height: AppSpacing.xxl),
+                    BentoCard(
+                      child: Column(
+                        children: [
+                          // 새 비밀번호
+                          TextFormField(
+                            controller: _passwordController,
+                            obscureText: true,
+                            decoration: InputDecoration(
+                              labelText: l10n.newPassword,
+                              hintText: l10n.newPasswordHint,
+                              prefixIcon: const Icon(Icons.lock_outlined),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return l10n.newPasswordRequired;
+                              }
+                              if (value.length < 8) {
+                                return l10n.passwordTooShort;
+                              }
+                              return null;
+                            },
                           ),
-                        )
-                      : Text(l10n.resetPassword, style: const TextStyle(fontSize: AppTypography.headlineMedium)),
+                          const SizedBox(height: AppSpacing.lg),
+                          // 새 비밀번호 확인
+                          TextFormField(
+                            controller: _passwordConfirmController,
+                            obscureText: true,
+                            decoration: InputDecoration(
+                              labelText: l10n.newPasswordConfirm,
+                              hintText: l10n.newPasswordConfirmHint,
+                              prefixIcon: const Icon(Icons.lock_outlined),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return l10n.newPasswordConfirmRequired;
+                              }
+                              if (value != _passwordController.text) {
+                                return l10n.passwordMismatch;
+                              }
+                              return null;
+                            },
+                            onFieldSubmitted: (_) => _handleReset(),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xl),
+                    FilledButton(
+                      onPressed: _isLoading ? null : _handleReset,
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: AppSpacing.lg,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(AppRadius.lg),
+                        ),
+                      ),
+                      child: _isLoading
+                          ? SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: AppStroke.medium,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  mlc.onPrimary,
+                                ),
+                              ),
+                            )
+                          : Text(
+                              l10n.resetPassword,
+                              style: const TextStyle(
+                                fontSize: AppTypography.headlineMedium,
+                                fontWeight: AppTypography.semiBold,
+                              ),
+                            ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         ),

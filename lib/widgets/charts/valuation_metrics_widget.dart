@@ -45,12 +45,16 @@ class ValuationMetricsWidget extends StatelessWidget {
                     ),
               ),
               if (m.marketCap != null)
-                Text(
-                  _formatMarketCap(m.marketCap!),
-                  style: TextStyle(
-                    fontSize: AppTypography.bodyLarge,
-                    fontWeight: AppTypography.semiBold,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                Flexible(
+                  child: Text(
+                    _formatMarketCap(m.marketCap!),
+                    style: TextStyle(
+                      fontSize: AppTypography.bodyLarge,
+                      fontWeight: AppTypography.semiBold,
+                      color: context.mlColors.textSecondary,
+                    ),
+                    textAlign: TextAlign.right,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
             ],
@@ -126,21 +130,28 @@ class ValuationMetricsWidget extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: AppTypography.caption,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-              fontWeight: AppTypography.medium,
+          // 지표 라벨: 의미있는 소형 텍스트 한 단계 승격(caption→bodySmall) + textSecondary.
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: AppTypography.bodySmall,
+                color: context.mlColors.textSecondary,
+                fontWeight: AppTypography.medium,
+              ),
             ),
           ),
           const SizedBox(height: AppSpacing.xs),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: AppTypography.headlineSmall,
-              fontWeight: AppTypography.semiBold,
-              fontFeatures: AppTypography.tabularFigures,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              value,
+              style: const TextStyle(
+                fontSize: AppTypography.headlineSmall,
+                fontWeight: AppTypography.semiBold,
+                fontFeatures: AppTypography.tabularFigures,
+              ),
             ),
           ),
         ],
@@ -196,7 +207,7 @@ class ValuationMetricsWidget extends StatelessWidget {
                 const SizedBox(height: AppSpacing.xxs),
                 Text(
                   _healthDetails(context, m),
-                  style: TextStyle(fontSize: AppTypography.caption, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                  style: TextStyle(fontSize: AppTypography.bodySmall, color: context.mlColors.textSecondary),
                 ),
               ],
             ),

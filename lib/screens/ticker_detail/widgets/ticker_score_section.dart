@@ -7,6 +7,7 @@ import '../../../theme/app_spacing.dart';
 import '../../../theme/app_stroke.dart';
 import '../../../theme/app_typography.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../widgets/common/bento_card.dart';
 import '../../../widgets/common/coach_mark_overlay.dart';
 import '../../../providers/coach_mark_provider.dart';
 
@@ -28,26 +29,21 @@ class _TickerScoreSectionState extends State<TickerScoreSection> {
     return CoachMark(
       coachKey: CoachMarkProvider.keyTickerScore,
       message: l10n.coachMarkTickerScore,
-      child: Container(
-        decoration: BoxDecoration(
-          color: context.mlColors.cardBackground,
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-          border: Border.all(
-            color: context.mlColors.chartGridLine.withValues(alpha: 0.62),
-            width: 0.8,
-          ),
-        ),
-        child: Column(
-          children: [
-            InkWell(
-              onTap: () => setState(() => _showScoreChart = !_showScoreChart),
-              borderRadius: BorderRadius.circular(AppRadius.lg),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.lg,
-                  vertical: AppSpacing.md,
-                ),
-                child: Row(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
+        child: BentoCard(
+          padding: EdgeInsets.zero,
+          child: Column(
+            children: [
+              InkWell(
+                onTap: () => setState(() => _showScoreChart = !_showScoreChart),
+                borderRadius: BorderRadius.circular(AppRadius.card),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.lg,
+                    vertical: AppSpacing.md,
+                  ),
+                  child: Row(
                   children: [
                     Icon(
                       Icons.bar_chart_rounded,
@@ -83,8 +79,9 @@ class _TickerScoreSectionState extends State<TickerScoreSection> {
                 ),
               ),
             ),
-            if (_showScoreChart) _buildScoreChart(),
-          ],
+              if (_showScoreChart) _buildScoreChart(),
+            ],
+          ),
         ),
       ),
     );

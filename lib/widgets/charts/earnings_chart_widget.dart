@@ -310,8 +310,8 @@ class EarningsChartWidget extends StatelessWidget {
         Text(
           label,
           style: TextStyle(
-            fontSize: AppTypography.caption,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            fontSize: AppTypography.bodySmall,
+            color: context.mlColors.textSecondary,
           ),
         ),
       ],

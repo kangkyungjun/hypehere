@@ -75,8 +75,10 @@ class LoginRequiredBanner extends StatelessWidget {
                   const SizedBox(height: AppSpacing.xxs),
                   Text(
                     l10n.loginForPortfolioHint,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: AppTypography.caption,
+                      fontSize: AppTypography.bodySmall,
                       color: mlc.textSecondary,
                     ),
                   ),

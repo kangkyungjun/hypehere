@@ -88,12 +88,35 @@ class TickerSummaryCards extends StatelessWidget {
                           ),
                         ),
                       const SizedBox(height: AppSpacing.md),
-                      Text(
-                        consensus?.mean != null
-                            ? '${l10n.target}\$${consensus!.mean!.toStringAsFixed(2)}'
-                            : '${l10n.target}--',
-                        style: AppTypography.priceCard.copyWith(
-                          color: context.mlColors.textPrimary,
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Text.rich(
+                          TextSpan(children: [
+                            TextSpan(
+                              text: '${l10n.target} ',
+                              style: AppTypography.unitSuffix.copyWith(
+                                color: context.mlColors.textSecondary,
+                              ),
+                            ),
+                            if (consensus?.mean != null)
+                              TextSpan(
+                                text:
+                                    '\$${consensus!.mean!.toStringAsFixed(2)}',
+                                style: AppTypography.priceLarge.copyWith(
+                                  color: context.mlColors.accentBlue,
+                                ),
+                              )
+                            else
+                              TextSpan(
+                                text: '--',
+                                style: AppTypography.priceLarge.copyWith(
+                                  color: context.mlColors.textTertiary,
+                                ),
+                              ),
+                          ]),
+                          maxLines: 1,
+                          softWrap: false,
                         ),
                       ),
                     ],
@@ -124,14 +147,23 @@ class TickerSummaryCards extends StatelessWidget {
                             ),
                             if (score != null) ...[
                               const SizedBox(width: AppSpacing.sm),
-                              Text(
-                                l10n.scorePoints(score.toInt().toString()),
-                                style: AppTypography.priceCard.copyWith(
-                                  fontWeight: AppTypography.bold,
-                                  color: ScoreMapper.getScoreColor(
-                                    score,
-                                    context.mlColors,
+                              // FittedBox(scaleDown): 점수 숫자가 '…'로 잘려
+                              // 자릿수가 숨는 것을 방지(축소로 대응).
+                              FittedBox(
+                                fit: BoxFit.scaleDown,
+                                alignment: Alignment.centerRight,
+                                child: Text(
+                                  // 점수 16→20 bold: 카드 헤드라인 숫자로 강조.
+                                  l10n.scorePoints(score.toInt().toString()),
+                                  style: AppTypography.priceLarge.copyWith(
+                                    fontWeight: AppTypography.bold,
+                                    color: ScoreMapper.getScoreColor(
+                                      score,
+                                      context.mlColors,
+                                    ),
                                   ),
+                                  maxLines: 1,
+                                  softWrap: false,
                                 ),
                               ),
                             ],
@@ -157,14 +189,40 @@ class TickerSummaryCards extends StatelessWidget {
                         Row(
                           children: [
                             Expanded(
-                              child: Text(
-                                latestData.targetPrice != null
-                                    ? '${l10n.target}\$${latestData.targetPrice!.toStringAsFixed(2)}'
-                                    : '${l10n.target}--',
-                                style: AppTypography.priceCard.copyWith(
-                                  color: context.mlColors.textPrimary,
+                              // FittedBox(scaleDown): 좁은 반쪽 열에서 가격이
+                              // '…'로 잘리지 않게 축소(가격 숫자 은닉 방지).
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                alignment: Alignment.centerLeft,
+                                child: Text.rich(
+                                  // "목표" 라벨은 작게 뮤트, 숫자는 크게+블루
+                                  // — 레퍼런스의 "큰 파란 히어로 숫자" 시그니처.
+                                  TextSpan(children: [
+                                    TextSpan(
+                                      text: '${l10n.target} ',
+                                      style: AppTypography.unitSuffix.copyWith(
+                                        color: context.mlColors.textSecondary,
+                                      ),
+                                    ),
+                                    if (latestData.targetPrice != null)
+                                      TextSpan(
+                                        text:
+                                            '\$${latestData.targetPrice!.toStringAsFixed(2)}',
+                                        style: AppTypography.priceLarge.copyWith(
+                                          color: context.mlColors.accentBlue,
+                                        ),
+                                      )
+                                    else
+                                      TextSpan(
+                                        text: '--',
+                                        style: AppTypography.priceLarge.copyWith(
+                                          color: context.mlColors.textTertiary,
+                                        ),
+                                      ),
+                                  ]),
+                                  maxLines: 1,
+                                  softWrap: false,
                                 ),
-                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
                             Icon(

@@ -171,9 +171,8 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
             Text(
               l10n.cannotLoadPosts,
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: AppTypography.bodyLarge,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              style: AppTypography.body.copyWith(
+                color: context.mlColors.textSecondary,
               ),
             ),
             const SizedBox(height: AppSpacing.xxl),
@@ -209,10 +208,9 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
               // 제목
               Text(
                 l10n.startWithFirstPost,
-                style: TextStyle(
-                  fontSize: AppTypography.displayMedium,
-                  fontWeight: AppTypography.bold,
-                  color: Theme.of(context).colorScheme.onSurface,
+                textAlign: TextAlign.center,
+                style: AppTypography.sectionTitle.copyWith(
+                  color: context.mlColors.textPrimary,
                 ),
               ),
               const SizedBox(height: AppSpacing.lg),
@@ -221,9 +219,8 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
               Text(
                 l10n.shareThoughtsPrompt,
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: AppTypography.bodyLarge,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                style: AppTypography.body.copyWith(
+                  color: context.mlColors.textSecondary,
                   height: 1.5,
                 ),
               ),

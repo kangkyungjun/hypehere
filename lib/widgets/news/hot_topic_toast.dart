@@ -99,7 +99,7 @@ class HotTopicToast extends StatelessWidget {
                                 child: Text(
                                   previewItems[i].aiSummary.localize(langCode),
                                   style: TextStyle(
-                                    fontSize: AppTypography.bodySmall,
+                                    fontSize: AppTypography.bodyMedium,
                                     fontWeight: i == 0
                                         ? AppTypography.semiBold
                                         : AppTypography.regular,
@@ -141,7 +141,7 @@ class HotTopicToast extends StatelessWidget {
                           child: Text(
                             l10n.hotTopicMore(moreCount),
                             style: TextStyle(
-                              fontSize: AppTypography.caption,
+                              fontSize: AppTypography.bodySmall,
                               fontWeight: AppTypography.medium,
                               color: theme.colorScheme.onErrorContainer
                                   .withValues(alpha: 0.7),

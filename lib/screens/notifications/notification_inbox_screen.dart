@@ -333,11 +333,16 @@ class _NotificationInboxScreenState extends State<NotificationInboxScreen> {
                         ),
                       ),
                       const SizedBox(width: AppSpacing.md),
-                      Text(
-                        item.timeAgoLocalized(l10n),
-                        style: TextStyle(
-                          fontSize: AppTypography.bodySmall,
-                          color: context.mlColors.textTertiary,
+                      Flexible(
+                        child: Text(
+                          item.timeAgoLocalized(l10n),
+                          style: TextStyle(
+                            fontSize: AppTypography.bodySmall,
+                            fontWeight: AppTypography.medium,
+                            color: context.mlColors.textSecondary,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],

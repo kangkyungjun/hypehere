@@ -312,14 +312,18 @@ class _RecordDetailScreenState extends State<RecordDetailScreen> {
         heroBody = Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text(
-              amt == null
-                  ? '—'
-                  : '${isIn ? '+' : '-'}${_won(amt)}',
-              style: TextStyle(
-                fontSize: AppTypography.displaySmall,
-                fontWeight: AppTypography.bold,
-                color: isIn ? mlc.gainColor : mlc.lossColor,
+            // 방향성(수익/지출) 히어로 금액 — 녹/적 유지, 큰 값은 scaleDown 방어.
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                amt == null ? '—' : '${isIn ? '+' : '-'}${_won(amt)}',
+                maxLines: 1,
+                style: TextStyle(
+                  fontSize: AppTypography.displaySmall,
+                  fontWeight: AppTypography.bold,
+                  fontFeatures: AppTypography.tabularFigures,
+                  color: isIn ? mlc.gainColor : mlc.lossColor,
+                ),
               ),
             ),
             const SizedBox(height: 2),
@@ -342,18 +346,23 @@ class _RecordDetailScreenState extends State<RecordDetailScreen> {
                 children: [
                   Text(
                     '등록번호',
-                    style: TextStyle(
-                      fontSize: AppTypography.micro,
+                    style: AppTypography.kvLabel.copyWith(
                       color: mlc.textSecondary,
                     ),
                   ),
                   const SizedBox(height: 2),
-                  Text(
-                    _record.assetNo ?? '—',
-                    style: TextStyle(
-                      fontSize: AppTypography.headlineMedium,
-                      fontWeight: AppTypography.bold,
-                      color: mlc.accentBlue,
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      _record.assetNo ?? '—',
+                      maxLines: 1,
+                      style: TextStyle(
+                        fontSize: AppTypography.headlineMedium,
+                        fontWeight: AppTypography.bold,
+                        fontFeatures: AppTypography.tabularFigures,
+                        color: mlc.accentBlue,
+                      ),
                     ),
                   ),
                   const SizedBox(height: AppSpacing.xs),
@@ -419,7 +428,7 @@ class _RecordDetailScreenState extends State<RecordDetailScreen> {
                   ? '체크리스트 없음'
                   : '$doneCount / ${tasks.length} 완료',
               style: TextStyle(
-                fontSize: AppTypography.micro,
+                fontSize: AppTypography.bodySmall,
                 color: mlc.textSecondary,
               ),
             ),
@@ -811,9 +820,11 @@ class _RecordDetailScreenState extends State<RecordDetailScreen> {
                   Text(
                     '담당 $assignee${commentCount > 0 ? '  ·  💬 $commentCount' : ''}',
                     style: TextStyle(
-                      fontSize: AppTypography.micro,
-                      color: mlc.textTertiary,
+                      fontSize: AppTypography.caption,
+                      color: mlc.textSecondary,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),

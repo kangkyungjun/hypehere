@@ -5,6 +5,7 @@ import '../../theme/app_colors.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 import '../../theme/app_typography.dart';
+import '../common/bento_card.dart';
 
 /// Compact card showing bullish vs bearish news counts over the last 24h
 /// as two proportional horizontal bars.
@@ -32,56 +33,51 @@ class BullBearBarCard extends StatelessWidget {
     final maxCount = [counts.bullish, counts.neutral, counts.bearish]
         .reduce((a, b) => a > b ? a : b);
 
-    return Card(
+    return BentoCard(
       margin: const EdgeInsets.only(bottom: AppSpacing.xl),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppRadius.lg),
+      // Tighter top/bottom so 3 bars keep ~the same footprint as 2
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.md,
+        AppSpacing.lg,
+        AppSpacing.md,
       ),
-      child: Padding(
-        // Tighter top/bottom so 3 bars keep ~the same footprint as 2
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.lg,
-          AppSpacing.md,
-          AppSpacing.lg,
-          AppSpacing.md,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              l10n.newsSentiment24hTitle,
-              style: TextStyle(
-                fontSize: AppTypography.bodyLarge,
-                fontWeight: AppTypography.bold,
-                color: mlc.textSecondary,
-              ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.newsSentiment24hTitle,
+            style: TextStyle(
+              fontSize: AppTypography.bodyLarge,
+              fontWeight: AppTypography.semiBold,
+              color: mlc.textSecondary,
             ),
-            const SizedBox(height: AppSpacing.sm),
-            _BarRow(
-              label: l10n.newsBullish,
-              count: counts.bullish,
-              maxCount: maxCount,
-              color: mlc.gainColor,
-              countText: l10n.newsCountUnit(counts.bullish),
-            ),
-            const SizedBox(height: AppSpacing.xs),
-            _BarRow(
-              label: l10n.newsNeutral,
-              count: counts.neutral,
-              maxCount: maxCount,
-              color: mlc.neutralColor,
-              countText: l10n.newsCountUnit(counts.neutral),
-            ),
-            const SizedBox(height: AppSpacing.xs),
-            _BarRow(
-              label: l10n.newsBearish,
-              count: counts.bearish,
-              maxCount: maxCount,
-              color: mlc.lossColor,
-              countText: l10n.newsCountUnit(counts.bearish),
-            ),
-          ],
-        ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          _BarRow(
+            label: l10n.newsBullish,
+            count: counts.bullish,
+            maxCount: maxCount,
+            color: mlc.gainColor,
+            countText: l10n.newsCountUnit(counts.bullish),
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          _BarRow(
+            label: l10n.newsNeutral,
+            count: counts.neutral,
+            maxCount: maxCount,
+            color: mlc.neutralColor,
+            countText: l10n.newsCountUnit(counts.neutral),
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          _BarRow(
+            label: l10n.newsBearish,
+            count: counts.bearish,
+            maxCount: maxCount,
+            color: mlc.lossColor,
+            countText: l10n.newsCountUnit(counts.bearish),
+          ),
+        ],
       ),
     );
   }
@@ -111,12 +107,16 @@ class _BarRow extends StatelessWidget {
       children: [
         SizedBox(
           width: 52,
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: AppTypography.caption,
-              fontWeight: AppTypography.semiBold,
-              color: mlc.textSecondary,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: AppTypography.bodySmall,
+                fontWeight: AppTypography.medium,
+                color: mlc.textSecondary,
+              ),
             ),
           ),
         ),
@@ -145,14 +145,18 @@ class _BarRow extends StatelessWidget {
         const SizedBox(width: AppSpacing.sm),
         SizedBox(
           width: 48,
-          child: Text(
-            countText,
-            textAlign: TextAlign.end,
-            style: TextStyle(
-              fontSize: AppTypography.bodySmall,
-              fontWeight: AppTypography.bold,
-              color: mlc.textPrimary,
-              fontFeatures: AppTypography.tabularFigures,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerRight,
+            child: Text(
+              countText,
+              textAlign: TextAlign.end,
+              style: TextStyle(
+                fontSize: AppTypography.bodyLarge,
+                fontWeight: AppTypography.semiBold,
+                color: mlc.textPrimary,
+                fontFeatures: AppTypography.tabularFigures,
+              ),
             ),
           ),
         ),

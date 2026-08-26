@@ -153,7 +153,7 @@ class WatchlistTab extends StatelessWidget {
             child: Text(
               l10n.watchlistSubtitle,
               style: TextStyle(
-                fontSize: AppTypography.caption,
+                fontSize: AppTypography.bodySmall,
                 color: context.mlColors.textSecondary,
               ),
             ),
@@ -296,12 +296,18 @@ class WatchlistTab extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: AppSpacing.xs),
-                Text(
-                  priceStr,
-                  style: AppTypography.numericSecondary.copyWith(
-                    fontSize: AppTypography.bodyMedium,
-                    fontWeight: AppTypography.bold,
-                    color: mlc.textPrimary,
+                Flexible(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      priceStr,
+                      style: AppTypography.numericSecondary.copyWith(
+                        fontSize: AppTypography.bodyMedium,
+                        fontWeight: AppTypography.bold,
+                        color: mlc.textPrimary,
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -325,8 +331,10 @@ class WatchlistTab extends StatelessWidget {
                   const SizedBox(width: AppSpacing.xs),
                   Text(
                     '${score!.changePct! >= 0 ? '▲' : '▼'} ${score.changePct!.abs().toStringAsFixed(2)}%',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: AppTypography.caption,
+                      fontSize: AppTypography.bodySmall,
                       fontWeight: AppTypography.semiBold,
                       color: score.changePct! >= 0
                           ? mlc.gainColor
@@ -359,7 +367,8 @@ class WatchlistTab extends StatelessWidget {
                         child: Text(
                           l10n.alreadyHeld,
                           style: TextStyle(
-                            fontSize: AppTypography.micro,
+                            fontSize: AppTypography.caption,
+                            fontWeight: AppTypography.medium,
                             color: mlc.textSecondary,
                           ),
                         ),
@@ -526,9 +535,9 @@ class WatchlistTab extends StatelessWidget {
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
-            fontSize: AppTypography.caption,
+            fontSize: AppTypography.bodySmall,
             color: mlc.textSecondary,
-            height: 1.35,
+            height: 1.4,
           ),
         ),
       ],
@@ -557,21 +566,32 @@ class WatchlistTab extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxs),
       child: Row(
         children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: AppTypography.caption,
-              color: mlc.textSecondary,
+          Flexible(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: AppTypography.bodySmall,
+                fontWeight: AppTypography.medium,
+                color: mlc.textSecondary,
+              ),
             ),
           ),
-          const Spacer(),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: AppTypography.bodyMedium,
-              fontWeight: AppTypography.medium,
-              color: mlc.textPrimary,
-              fontFeatures: AppTypography.tabularFigures,
+          const SizedBox(width: AppSpacing.sm),
+          Flexible(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerRight,
+              child: Text(
+                value,
+                style: TextStyle(
+                  fontSize: AppTypography.bodyLarge,
+                  fontWeight: AppTypography.semiBold,
+                  color: mlc.textPrimary,
+                  fontFeatures: AppTypography.tabularFigures,
+                ),
+              ),
             ),
           ),
         ],

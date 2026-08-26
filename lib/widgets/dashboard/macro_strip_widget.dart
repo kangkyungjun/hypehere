@@ -153,14 +153,15 @@ class MacroStripWidget extends StatelessWidget {
               child: Text(
                 label,
                 style: TextStyle(
-                  fontSize: AppTypography.micro,
-                  color: mlc.textTertiary,
+                  fontSize: AppTypography.bodySmall,
+                  fontWeight: AppTypography.medium,
+                  color: mlc.textSecondary,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            Icon(Icons.chevron_right, size: 16, color: mlc.textTertiary),
+            Icon(Icons.chevron_right, size: 16, color: mlc.accentBlue),
           ],
         ),
         const SizedBox(height: 2),

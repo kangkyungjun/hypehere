@@ -193,7 +193,7 @@ class MarketLensColors extends ThemeExtension<MarketLensColors> {
     groupedBackground: Color(0xFFF4F5F7),
     gainColor: Color(0xFF059669),
     lossColor: Color(0xFFDC2626),
-    neutralColor: Color(0xFF8A94A6),
+    neutralColor: Color(0xFF78828F),
     gainBg: Color(0xFFD4F3E3),
     lossBg: Color(0xFFFFDFDF),
     textPrimary: Color(0xFF111827),

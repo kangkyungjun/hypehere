@@ -102,16 +102,22 @@ class InstitutionalFlowWidget extends StatelessWidget {
             title,
             style: TextStyle(
               fontSize: AppTypography.bodySmall,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              color: context.mlColors.textSecondary,
               fontWeight: AppTypography.medium,
             ),
           ),
           const SizedBox(height: AppSpacing.md),
-          Text(
-            ownership != null ? '${ownership.toStringAsFixed(1)}%' : 'N/A',
-            style: const TextStyle(
-              fontSize: AppTypography.displayLarge,
-              fontWeight: AppTypography.bold,
+          // 비방향성 집계 히어로 숫자 → accentBlue. FittedBox로 오버플로 방어.
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              ownership != null ? '${ownership.toStringAsFixed(1)}%' : 'N/A',
+              style: TextStyle(
+                fontSize: AppTypography.displayLarge,
+                fontWeight: AppTypography.bold,
+                color: context.mlColors.accentBlue,
+              ),
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
