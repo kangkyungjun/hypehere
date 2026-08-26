@@ -59,6 +59,9 @@ secrets/
 *.p8
 *.p12
 *.pem
+*.key
+*.mobileprovision
+*.cer
 /android/key.properties
 
 # Environment variables
