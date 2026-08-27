@@ -180,7 +180,8 @@ class _RecoCard extends StatelessWidget {
                     child: Text(
                       '${score.round()}',
                       style: TextStyle(
-                        fontSize: AppTypography.bodySmall,
+                        // 홈 핵심 AI 신호(점수) 12→15로 또렷하게.
+                        fontSize: AppTypography.headlineSmall,
                         fontWeight: AppTypography.bold,
                         color: scoreColor,
                         fontFeatures: AppTypography.tabularFigures,
