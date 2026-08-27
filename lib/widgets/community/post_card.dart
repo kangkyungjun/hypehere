@@ -235,10 +235,12 @@ class PostCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: AppSpacing.md),
-            // Title
+            // Title — 게시글 헤드라인 16→18 볼드로 강조
             Text(
               post.title,
               style: AppTypography.cardTitle.copyWith(
+                fontSize: AppTypography.headlineLarge,
+                fontWeight: AppTypography.bold,
                 color: context.mlColors.textPrimary,
               ),
               maxLines: 2,
