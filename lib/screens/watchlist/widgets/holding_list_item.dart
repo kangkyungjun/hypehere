@@ -220,7 +220,8 @@ class HoldingListItem extends StatelessWidget {
                     child: Text(
                       '\$${holding.currentValue.toStringAsFixed(2)}',
                       style: TextStyle(
-                        fontSize: AppTypography.bodyLarge,
+                        // 행의 히어로 값(평가액) 14→16 강조.
+                        fontSize: AppTypography.headlineMedium,
                         fontWeight: AppTypography.semiBold,
                         color: mlc.textPrimary,
                         fontFeatures: AppTypography.tabularFigures,
@@ -228,15 +229,18 @@ class HoldingListItem extends StatelessWidget {
                     ),
                   ),
                 const SizedBox(height: AppSpacing.xxs),
-                Text(
-                  '${holding.pnlPct >= 0 ? '▲' : '▼'} ${holding.pnlPct.abs().toStringAsFixed(2)}%',
-                  style: TextStyle(
-                    fontSize: AppTypography.bodySmall,
-                    fontWeight: AppTypography.semiBold,
-                    color: holding.pnlPct >= 0
-                        ? context.mlColors.gainColor
-                        : context.mlColors.lossColor,
-                    fontFeatures: AppTypography.tabularFigures,
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    '${holding.pnlPct >= 0 ? '▲' : '▼'} ${holding.pnlPct.abs().toStringAsFixed(2)}%',
+                    style: TextStyle(
+                      fontSize: AppTypography.bodyMedium,
+                      fontWeight: AppTypography.semiBold,
+                      color: holding.pnlPct >= 0
+                          ? context.mlColors.gainColor
+                          : context.mlColors.lossColor,
+                      fontFeatures: AppTypography.tabularFigures,
+                    ),
                   ),
                 ),
               ],
