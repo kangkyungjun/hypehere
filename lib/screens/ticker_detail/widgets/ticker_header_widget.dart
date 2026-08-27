@@ -61,11 +61,10 @@ class TickerHeaderWidget extends StatelessWidget {
         Text(
           '\$${latestData.close?.toStringAsFixed(2) ?? '--'}',
           style: AppTypography.priceHero.copyWith(
-            fontSize: isSmallScreen
-                ? AppTypography.displayLarge
-                : AppTypography.heroMedium,
+            // 현재가를 화면의 명확한 히어로로 — 30→36(작은화면 28).
+            fontSize: isSmallScreen ? AppTypography.heroSmall : 36,
             color: mlc.textPrimary,
-            height: 1.08,
+            height: 1.05,
           ),
         ),
         const SizedBox(height: AppSpacing.sm),
