@@ -415,12 +415,13 @@ class _TickerNewsListScreenState extends State<TickerNewsListScreen> {
                     ),
                     const SizedBox(height: AppSpacing.xs),
 
-                    // Row 2: AI summary (localized) — 카드 내 유일한 강조 텍스트
+                    // Row 2: AI summary (localized) — 카드 헤드라인, 14→16 확대
                     Text(
                       item.aiSummary.localize(langCode),
                       style: AppTypography.bodyStrong.copyWith(
+                        fontSize: AppTypography.headlineMedium,
                         color: mlc.textPrimary,
-                        height: 1.4,
+                        height: 1.35,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,

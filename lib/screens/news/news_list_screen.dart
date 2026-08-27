@@ -639,10 +639,13 @@ class _NewsListScreenState extends State<NewsListScreen> {
                       ),
                       const SizedBox(height: AppSpacing.sm),
 
-                      // Row 2: AI summary (localized)
+                      // Row 2: AI summary (localized) — 뉴스 카드의 헤드라인.
+                      // 14→16으로 키워 스캔이 쉽게(줄바꿈 2줄 유지 → 안전).
                       Text(
                         item.aiSummary.localize(langCode),
                         style: AppTypography.bodyStrong.copyWith(
+                          fontSize: AppTypography.headlineMedium,
+                          height: 1.35,
                           color: mlc.textPrimary,
                         ),
                         maxLines: 2,
