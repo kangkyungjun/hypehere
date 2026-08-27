@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../../../models/chart_data.dart';
 import '../../../theme/app_colors.dart';
-import '../../../theme/app_radius.dart';
 import '../../../theme/app_spacing.dart';
 import '../../../theme/app_typography.dart';
+import '../../../widgets/common/bento_card.dart';
 
 /// 헤더(업데이트 날짜) ↔ 전문가 요약 사이의 작은 밸류에이션 카드.
 ///  - 접힘: 현재 PER · 선행 PER · EPS (한 줄)
@@ -72,32 +72,19 @@ class _ValuationCardState extends State<ValuationCard> {
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
-      child: Material(
-        color: mlc.cardBackground,
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: () => setState(() => _expanded = !_expanded),
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(AppRadius.lg),
-              border: Border.all(color: mlc.subtleBorder, width: 0.8),
-            ),
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.lg,
-              vertical: AppSpacing.md,
-            ),
-            child: Column(
+      child: BentoCard(
+        onTap: () => setState(() => _expanded = !_expanded),
+        padding: const EdgeInsets.all(AppDensity.cardPad),
+        child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 제목 + chevron
+                // 섹션 헤더(볼드·near-black) + chevron
                 Row(
                   children: [
                     Text(
                       _title(lang),
-                      style: AppTypography.label.copyWith(
-                        color: mlc.textSecondary,
-                        fontWeight: AppTypography.bold,
+                      style: AppTypography.sectionTitle.copyWith(
+                        color: mlc.textPrimary,
                       ),
                     ),
                     const Spacer(),
@@ -106,13 +93,19 @@ class _ValuationCardState extends State<ValuationCard> {
                       turns: _expanded ? 0.5 : 0,
                       child: Icon(
                         Icons.keyboard_arrow_down_rounded,
-                        size: 18,
+                        size: 20,
                         color: mlc.textTertiary,
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: AppSpacing.sm),
+                // 헤더 아래 헤어라인(섹션 구분)
+                Divider(
+                  height: 1,
+                  color: mlc.subtleBorder.withValues(alpha: 0.6),
+                ),
+                const SizedBox(height: AppSpacing.md),
                 // 접힘 줄
                 _row(mlc, [
                   (_lbl('curPe', lang), _num(m.pe)),
@@ -157,8 +150,6 @@ class _ValuationCardState extends State<ValuationCard> {
                 ),
               ],
             ),
-          ),
-        ),
       ),
     );
   }

@@ -91,3 +91,4 @@ SubscriptionKey_*.p8
 # Databases
 *.db
 *.sqlite3
+lib/preview_harness.dart
