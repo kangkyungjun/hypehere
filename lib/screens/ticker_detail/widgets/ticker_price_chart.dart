@@ -318,7 +318,8 @@ class _TickerPriceChartState extends State<TickerPriceChart> {
                       // if (dataPoints.any((d) => d.bbLower != null))
                       //   LineChartBarData( ... ),
 
-                      // Price Line
+                      // Price Line — 레퍼런스풍: 굵은 블루 곡선 + 마지막점
+                      // 헤일로 강조 + 하단 옅은 블루 필. (방향은 상단 변동배지 담당)
                       LineChartBarData(
                         spots: dataPoints
                             .asMap()
@@ -329,16 +330,27 @@ class _TickerPriceChartState extends State<TickerPriceChart> {
                             )
                             .toList(),
                         isCurved: true,
-                        color: context.mlColors.textPrimary.withValues(
-                          alpha: 0.94,
-                        ),
-                        barWidth: 2.0,
+                        color: context.mlColors.accentBlue,
+                        barWidth: 3.0,
                         isStrokeCapRound: true,
-                        dotData: const FlDotData(show: false),
+                        // 마지막(현재가) 점만 헤일로와 함께 강조 — "여기가 현재".
+                        dotData: FlDotData(
+                          show: true,
+                          checkToShowDot: (spot, bar) =>
+                              bar.spots.isNotEmpty && spot.x == bar.spots.last.x,
+                          getDotPainter: (spot, pct, bar, i) =>
+                              FlDotCirclePainter(
+                            radius: 4.5,
+                            color: context.mlColors.accentBlue,
+                            strokeWidth: 4,
+                            strokeColor: context.mlColors.accentBlue
+                                .withValues(alpha: 0.25),
+                          ),
+                        ),
                         belowBarData: BarAreaData(
                           show: true,
-                          color: context.mlColors.textPrimary.withValues(
-                            alpha: 0.04,
+                          color: context.mlColors.accentBlue.withValues(
+                            alpha: 0.08,
                           ),
                         ),
                       ),
@@ -348,6 +360,19 @@ class _TickerPriceChartState extends State<TickerPriceChart> {
                     ],
 
                     extraLinesData: ExtraLinesData(
+                      // 현재 위치 파란 점선 세로 가이드(레퍼런스: x축까지 내려긋는 선).
+                      verticalLines: [
+                        if (dataPoints.any((d) => d.close != null))
+                          VerticalLine(
+                            x: dataPoints
+                                .lastIndexWhere((d) => d.close != null)
+                                .toDouble(),
+                            color: context.mlColors.accentBlue
+                                .withValues(alpha: 0.45),
+                            strokeWidth: 1.5,
+                            dashArray: const [4, 4],
+                          ),
+                      ],
                       horizontalLines: [
                         if (latestData.targetPrice != null)
                           HorizontalLine(
@@ -410,7 +435,7 @@ class _TickerPriceChartState extends State<TickerPriceChart> {
                         children: [
                           _buildChartLegendItem(
                             'Price',
-                            Theme.of(context).colorScheme.onSurface,
+                            context.mlColors.accentBlue,
                           ),
                         ],
                       ),
