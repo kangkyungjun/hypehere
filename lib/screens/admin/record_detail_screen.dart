@@ -575,8 +575,10 @@ class _RecordDetailScreenState extends State<RecordDetailScreen> {
             children: [
               Text(
                 '처분 / 상태 이력',
-                style:
-                    AppTypography.cardTitle.copyWith(color: mlc.textPrimary),
+                style: AppTypography.cardTitle.copyWith(
+                  color: mlc.textPrimary,
+                  fontWeight: AppTypography.bold,
+                ),
               ),
               const Spacer(),
               TextButton.icon(
@@ -684,8 +686,10 @@ class _RecordDetailScreenState extends State<RecordDetailScreen> {
             children: [
               Text(
                 '체크리스트',
-                style:
-                    AppTypography.cardTitle.copyWith(color: mlc.textPrimary),
+                style: AppTypography.cardTitle.copyWith(
+                  color: mlc.textPrimary,
+                  fontWeight: AppTypography.bold,
+                ),
               ),
               const SizedBox(width: 6),
               if (tasks.isNotEmpty) _progressMini(tasks, mlc),

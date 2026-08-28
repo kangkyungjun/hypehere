@@ -499,8 +499,8 @@ class _MacroHistoryScreenState extends State<MacroHistoryScreen> {
                   valueStr,
                   maxLines: 1,
                   style: TextStyle(
-                    fontSize: AppTypography.headlineSmall,
-                    fontWeight: AppTypography.semiBold,
+                    fontSize: AppTypography.headlineLarge,
+                    fontWeight: AppTypography.bold,
                     color: mlc.textPrimary,
                   ),
                 ),

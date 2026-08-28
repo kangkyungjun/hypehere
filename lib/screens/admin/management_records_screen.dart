@@ -606,8 +606,10 @@ class _ManagementRecordsScreenState extends State<ManagementRecordsScreen> {
               children: [
                 Text(
                   '업무 진척률',
-                  style: AppTypography.cardTitle
-                      .copyWith(color: mlc.textPrimary),
+                  style: AppTypography.cardTitle.copyWith(
+                    color: mlc.textPrimary,
+                    fontWeight: AppTypography.bold,
+                  ),
                 ),
                 const SizedBox(width: AppSpacing.xs),
                 Text(
@@ -678,8 +680,8 @@ class _ManagementRecordsScreenState extends State<ManagementRecordsScreen> {
                 style: AppTypography.label.copyWith(color: mlc.textSecondary),
               ),
               const SizedBox(height: 2),
-              // 금액은 3분할 셀에서 넘칠 수 있어 ellipsis 대신 scaleDown으로 방어
-              // (값을 잘라 숫자를 숨기지 않는다).
+              // P&L 금액을 확 띄게 headlineMedium16 bold로 키움. 3분할 셀에서
+              // 넘칠 수 있어 ellipsis 대신 scaleDown으로 방어(값 숨김 금지).
               FittedBox(
                 fit: BoxFit.scaleDown,
                 alignment: Alignment.centerLeft,
@@ -687,6 +689,8 @@ class _ManagementRecordsScreenState extends State<ManagementRecordsScreen> {
                   won(v),
                   maxLines: 1,
                   style: AppTypography.bodyStrong.copyWith(
+                    fontSize: AppTypography.headlineMedium,
+                    fontWeight: AppTypography.bold,
                     color: c,
                     fontFeatures: AppTypography.tabularFigures,
                   ),
@@ -718,7 +722,10 @@ class _ManagementRecordsScreenState extends State<ManagementRecordsScreen> {
         children: [
           Text(
             '${s?.month ?? ''} 손익',
-            style: AppTypography.cardTitle.copyWith(color: mlc.textPrimary),
+            style: AppTypography.cardTitle.copyWith(
+              color: mlc.textPrimary,
+              fontWeight: AppTypography.bold,
+            ),
           ),
           const SizedBox(height: AppSpacing.sm),
           Row(
@@ -828,8 +835,10 @@ class _ManagementRecordsScreenState extends State<ManagementRecordsScreen> {
             children: [
               Text(
                 '카테고리별 ${b.month}',
-                style:
-                    AppTypography.cardTitle.copyWith(color: mlc.textPrimary),
+                style: AppTypography.cardTitle.copyWith(
+                  color: mlc.textPrimary,
+                  fontWeight: AppTypography.bold,
+                ),
               ),
               const Spacer(),
               if (incomeTotal > 0)
@@ -884,7 +893,10 @@ class _ManagementRecordsScreenState extends State<ManagementRecordsScreen> {
         children: [
           Text(
             '월별 순익 ($year년)',
-            style: AppTypography.cardTitle.copyWith(color: mlc.textPrimary),
+            style: AppTypography.cardTitle.copyWith(
+              color: mlc.textPrimary,
+              fontWeight: AppTypography.bold,
+            ),
           ),
           const SizedBox(height: AppSpacing.sm),
           ..._monthly.map((m) {

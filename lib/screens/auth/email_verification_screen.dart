@@ -308,11 +308,16 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
                               ),
                             ),
                           )
-                        : Text(
-                            l10n.verifyButton,
-                            style: const TextStyle(
-                              fontSize: AppTypography.headlineMedium,
-                              fontWeight: AppTypography.semiBold,
+                        : FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              l10n.verifyButton,
+                              maxLines: 1,
+                              softWrap: false,
+                              style: const TextStyle(
+                                fontSize: AppTypography.headlineMedium,
+                                fontWeight: AppTypography.bold,
+                              ),
                             ),
                           ),
                   ),

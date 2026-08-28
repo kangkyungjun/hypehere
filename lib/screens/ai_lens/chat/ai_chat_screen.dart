@@ -453,7 +453,9 @@ class _AiChatScreenState extends State<AiChatScreen> {
           else ...[
             Text(
               l10n.aiChatEmptyTitle,
+              textAlign: TextAlign.center,
               style: AppTypography.sectionTitle.copyWith(
+                fontSize: AppTypography.displayMedium,
                 color: mlc.textPrimary,
               ),
             ),
@@ -571,8 +573,12 @@ class _AiChatScreenState extends State<AiChatScreen> {
         children: [
           Text(
             isKo ? g.ko : g.en,
-            style:
-                AppTypography.body.copyWith(color: mlc.textPrimary, height: 1.5),
+            style: AppTypography.body.copyWith(
+              fontSize: AppTypography.headlineSmall,
+              fontWeight: AppTypography.semiBold,
+              color: mlc.textPrimary,
+              height: 1.5,
+            ),
           ),
           if (hasHoldings) ...[
             const SizedBox(height: AppSpacing.md),

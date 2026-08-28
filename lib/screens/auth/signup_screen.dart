@@ -498,11 +498,16 @@ class _SignupScreenState extends State<SignupScreen> {
                                 ),
                               ),
                             )
-                          : Text(
-                              l10n.signup,
-                              style: const TextStyle(
-                                fontSize: AppTypography.headlineMedium,
-                                fontWeight: AppTypography.semiBold,
+                          : FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                l10n.signup,
+                                maxLines: 1,
+                                softWrap: false,
+                                style: const TextStyle(
+                                  fontSize: AppTypography.headlineMedium,
+                                  fontWeight: AppTypography.bold,
+                                ),
                               ),
                             ),
                     ),

@@ -324,7 +324,7 @@ class _InvestmentProfileOnboardingScreenState
                       maxLines: 1,
                       softWrap: false,
                       style: const TextStyle(
-                        fontSize: AppTypography.bodyLarge,
+                        fontSize: AppTypography.headlineMedium,
                         fontWeight: AppTypography.bold,
                       ),
                     ),
@@ -579,9 +579,10 @@ class _InvestmentProfileOnboardingScreenState
           Text(
             title,
             style: TextStyle(
-              fontSize: AppTypography.displayMedium,
+              fontSize: AppTypography.displayLarge,
               fontWeight: AppTypography.bold,
               color: colors.textPrimary,
+              height: 1.2,
             ),
           ),
           const SizedBox(height: AppSpacing.sm),

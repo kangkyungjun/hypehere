@@ -324,9 +324,12 @@ class _NotificationInboxScreenState extends State<NotificationInboxScreen> {
                       Expanded(
                         child: Text(
                           item.title,
-                          style: const TextStyle(
-                            fontSize: AppTypography.bodyLarge,
-                            fontWeight: AppTypography.semiBold,
+                          style: TextStyle(
+                            fontSize: AppTypography.headlineSmall,
+                            fontWeight: item.isRead
+                                ? AppTypography.semiBold
+                                : AppTypography.bold,
+                            color: context.mlColors.textPrimary,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,

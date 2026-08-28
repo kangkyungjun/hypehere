@@ -586,10 +586,13 @@ class SettingsScreen extends StatelessWidget {
                     Text(
                       'MarketLens',
                       style: TextStyle(
-                        fontSize: AppTypography.headlineMedium,
+                        fontSize: AppTypography.headlineLarge,
                         fontWeight: AppTypography.bold,
+                        letterSpacing: -0.2,
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: AppSpacing.xs),
                     Text(
@@ -898,8 +901,11 @@ class SettingsScreen extends StatelessWidget {
                                   child: Text(
                                     user.nickname,
                                     style: AppTypography.cardTitle.copyWith(
+                                      fontSize: AppTypography.headlineLarge,
+                                      fontWeight: AppTypography.bold,
                                       color: context.mlColors.textPrimary,
                                     ),
+                                    maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
@@ -951,8 +957,23 @@ class SettingsScreen extends StatelessWidget {
                             color: context.mlColors.accentBlue,
                           ),
                         ),
-                        title: Text(l10n.login),
-                        subtitle: Text(l10n.loginSubtitle),
+                        title: Text(
+                          l10n.login,
+                          style: AppTypography.bodyStrong.copyWith(
+                            fontSize: AppTypography.headlineSmall,
+                            color: context.mlColors.textPrimary,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        subtitle: Text(
+                          l10n.loginSubtitle,
+                          style: AppTypography.kvLabel.copyWith(
+                            color: context.mlColors.textSecondary,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                         trailing: const Icon(Icons.chevron_right),
                         onTap: () => _navigateToLogin(context),
                       ),
@@ -967,8 +988,23 @@ class SettingsScreen extends StatelessWidget {
                             color: context.mlColors.accentBlue,
                           ),
                         ),
-                        title: Text(l10n.signup),
-                        subtitle: Text(l10n.signupSubtitle),
+                        title: Text(
+                          l10n.signup,
+                          style: AppTypography.bodyStrong.copyWith(
+                            fontSize: AppTypography.headlineSmall,
+                            color: context.mlColors.textPrimary,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        subtitle: Text(
+                          l10n.signupSubtitle,
+                          style: AppTypography.kvLabel.copyWith(
+                            color: context.mlColors.textSecondary,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                         trailing: const Icon(Icons.chevron_right),
                         onTap: () => _navigateToSignup(context),
                       ),
@@ -1276,13 +1312,18 @@ class SettingsScreen extends StatelessWidget {
       title: Text(
         title,
         style: AppTypography.bodyStrong.copyWith(
+          fontSize: AppTypography.headlineSmall,
           color: titleColor ?? mlc.textPrimary,
         ),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
       ),
       subtitle: subtitle != null
           ? Text(
               subtitle,
               style: AppTypography.kvLabel.copyWith(color: mlc.textSecondary),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             )
           : null,
       trailing: Icon(

@@ -329,7 +329,7 @@ class _AiSectorScreenState extends State<AiSectorScreen> {
                   child: Text(
                     t.score.toStringAsFixed(0),
                     style: TextStyle(
-                      fontSize: AppTypography.bodyLarge,
+                      fontSize: AppTypography.headlineSmall,
                       fontWeight: AppTypography.bold,
                       color: scoreColor,
                     ),
@@ -346,10 +346,12 @@ class _AiSectorScreenState extends State<AiSectorScreen> {
                   Text(
                     t.ticker,
                     style: TextStyle(
-                      fontSize: AppTypography.bodyLarge,
+                      fontSize: AppTypography.headlineSmall,
                       fontWeight: AppTypography.bold,
                       color: mlc.textPrimary,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   if (primaryName != null)
                     Text(
@@ -372,8 +374,8 @@ class _AiSectorScreenState extends State<AiSectorScreen> {
                   '${pct >= 0 ? '+' : ''}${pct.toStringAsFixed(1)}%',
                   maxLines: 1,
                   style: TextStyle(
-                    fontSize: AppTypography.bodyMedium,
-                    fontWeight: AppTypography.semiBold,
+                    fontSize: AppTypography.bodyLarge,
+                    fontWeight: AppTypography.bold,
                     color: pct >= 0 ? mlc.gainColor : mlc.lossColor,
                     fontFeatures: AppTypography.tabularFigures,
                   ),

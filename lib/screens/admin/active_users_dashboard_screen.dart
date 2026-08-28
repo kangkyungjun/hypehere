@@ -248,7 +248,8 @@ class _ActiveUsersDashboardScreenState
               style: AppTypography.label.copyWith(color: mlc.textSecondary),
             ),
             const SizedBox(height: AppSpacing.xs),
-            // 히어로 숫자 — 큰 값이 3분할 카드에서 넘치지 않게 scaleDown 방어.
+            // 히어로 숫자 — 확 띄게 displayMedium20 bold. 큰 값이 3분할 카드에서
+            // 넘치지 않게 scaleDown 방어(값 숨김 금지).
             FittedBox(
               fit: BoxFit.scaleDown,
               alignment: Alignment.centerLeft,
@@ -256,6 +257,7 @@ class _ActiveUsersDashboardScreenState
                 value,
                 maxLines: 1,
                 style: AppTypography.sectionTitle.copyWith(
+                  fontSize: AppTypography.displayMedium,
                   color: mlc.textPrimary,
                   fontFeatures: AppTypography.tabularFigures,
                 ),
@@ -308,7 +310,10 @@ class _ActiveUsersDashboardScreenState
             children: [
               Text(
                 '최근 30일',
-                style: AppTypography.cardTitle.copyWith(color: mlc.textPrimary),
+                style: AppTypography.cardTitle.copyWith(
+                  color: mlc.textPrimary,
+                  fontWeight: AppTypography.bold,
+                ),
               ),
               const Spacer(),
               _legendDot(mlc.accentBlue, '일간(DAU)'),
@@ -393,7 +398,10 @@ class _ActiveUsersDashboardScreenState
         children: [
           Text(
             '플랫폼 분리',
-            style: AppTypography.cardTitle.copyWith(color: mlc.textPrimary),
+            style: AppTypography.cardTitle.copyWith(
+              color: mlc.textPrimary,
+              fontWeight: AppTypography.bold,
+            ),
           ),
           const SizedBox(height: AppSpacing.sm),
           _splitRow('DAU', u?.dauAndroid ?? 0, u?.dauIos ?? 0, context),
@@ -455,7 +463,10 @@ class _ActiveUsersDashboardScreenState
         children: [
           Text(
             '수익 · 설치',
-            style: AppTypography.cardTitle.copyWith(color: mlc.textPrimary),
+            style: AppTypography.cardTitle.copyWith(
+              color: mlc.textPrimary,
+              fontWeight: AppTypography.bold,
+            ),
           ),
           const SizedBox(height: AppSpacing.sm),
           _kv(

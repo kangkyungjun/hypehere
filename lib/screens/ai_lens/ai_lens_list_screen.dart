@@ -120,6 +120,8 @@ class AILensListScreen extends StatelessWidget {
                       fontWeight: AppTypography.bold,
                       color: context.mlColors.textPrimary,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   if (primaryName != null)
                     Text.rich(

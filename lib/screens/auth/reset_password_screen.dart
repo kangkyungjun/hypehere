@@ -204,11 +204,16 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                                 ),
                               ),
                             )
-                          : Text(
-                              l10n.resetPassword,
-                              style: const TextStyle(
-                                fontSize: AppTypography.headlineMedium,
-                                fontWeight: AppTypography.semiBold,
+                          : FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                l10n.resetPassword,
+                                maxLines: 1,
+                                softWrap: false,
+                                style: const TextStyle(
+                                  fontSize: AppTypography.headlineMedium,
+                                  fontWeight: AppTypography.bold,
+                                ),
                               ),
                             ),
                     ),

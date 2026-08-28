@@ -225,11 +225,16 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                               ),
                             )
-                          : Text(
-                              l10n.login,
-                              style: const TextStyle(
-                                fontSize: AppTypography.headlineMedium,
-                                fontWeight: AppTypography.semiBold,
+                          : FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                l10n.login,
+                                maxLines: 1,
+                                softWrap: false,
+                                style: const TextStyle(
+                                  fontSize: AppTypography.headlineMedium,
+                                  fontWeight: AppTypography.bold,
+                                ),
                               ),
                             ),
                     ),

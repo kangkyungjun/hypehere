@@ -145,7 +145,7 @@ class _EarningsCalendarScreenState extends State<EarningsCalendarScreen> {
               Text(
                 dayLabel,
                 style: TextStyle(
-                  fontSize: AppTypography.headlineSmall,
+                  fontSize: AppTypography.headlineLarge,
                   fontWeight: AppTypography.bold,
                   color: isToday ? context.mlColors.accentBlue : context.mlColors.textPrimary,
                 ),
@@ -238,7 +238,7 @@ class _EarningsCalendarScreenState extends State<EarningsCalendarScreen> {
                           child: Text(
                             event.surpriseLabel,
                             style: TextStyle(
-                              fontSize: AppTypography.bodySmall,
+                              fontSize: AppTypography.headlineSmall,
                               fontWeight: AppTypography.bold,
                               color: event.surpriseColor(context.mlColors),
                             ),

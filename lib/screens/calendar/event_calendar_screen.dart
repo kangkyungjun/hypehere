@@ -754,12 +754,16 @@ class _EventCalendarScreenState extends State<EventCalendarScreen>
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  _monthName(_month, lang),
-                  style: TextStyle(
-                    fontSize: AppTypography.bodyLarge,
-                    fontWeight: AppTypography.bold,
-                    color: context.mlColors.textSecondary,
+                Flexible(
+                  child: Text(
+                    _monthName(_month, lang),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: AppTypography.displayMedium,
+                      fontWeight: AppTypography.bold,
+                      color: context.mlColors.textPrimary,
+                    ),
                   ),
                 ),
                 if (_calendarData != null && _calendarData!.totalCount > 0) ...[
@@ -1333,9 +1337,9 @@ class _EventCalendarScreenState extends State<EventCalendarScreen>
                 Text(
                   headerDate,
                   style: TextStyle(
-                    fontSize: AppTypography.bodyMedium,
+                    fontSize: AppTypography.headlineMedium,
                     fontWeight: AppTypography.bold,
-                    color: mlc.textSecondary,
+                    color: mlc.textPrimary,
                   ),
                 ),
                 const SizedBox(width: AppSpacing.sm),
@@ -1490,9 +1494,9 @@ class _EventCalendarScreenState extends State<EventCalendarScreen>
                       Text(
                         event.title,
                         style: const TextStyle(
-                          fontSize: AppTypography.bodyLarge,
-                          fontWeight: AppTypography.semiBold,
-                          height: 1.3,
+                          fontSize: AppTypography.headlineMedium,
+                          fontWeight: AppTypography.bold,
+                          height: 1.25,
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,

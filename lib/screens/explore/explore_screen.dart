@@ -321,7 +321,8 @@ class _ExploreScreenState extends State<ExploreScreen> {
           title: Text(
             ticker,
             style: TextStyle(
-              fontWeight: AppTypography.semiBold,
+              fontSize: AppTypography.headlineMedium,
+              fontWeight: AppTypography.bold,
               color: context.mlColors.textPrimary,
             ),
           ),
@@ -446,7 +447,8 @@ class _ExploreScreenState extends State<ExploreScreen> {
             title: Text(
               ticker.ticker,
               style: TextStyle(
-                fontWeight: AppTypography.semiBold,
+                fontSize: AppTypography.headlineMedium,
+                fontWeight: AppTypography.bold,
                 color: context.mlColors.textPrimary,
               ),
             ),

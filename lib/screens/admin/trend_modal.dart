@@ -178,7 +178,13 @@ class _TrendModalState extends State<_TrendModal> {
         Expanded(
           child: Text(
             drilled ? '$_drilledYear년 손익' : '손익 추이',
-            style: AppTypography.cardTitle.copyWith(color: mlc.textPrimary),
+            style: AppTypography.cardTitle.copyWith(
+              fontSize: AppTypography.headlineLarge,
+              color: mlc.textPrimary,
+              fontWeight: AppTypography.bold,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
         IconButton(

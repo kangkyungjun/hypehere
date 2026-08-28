@@ -50,7 +50,7 @@ class AiAnalysisComingSoon extends StatelessWidget {
               l10n.aiAnalysisComingSoonTitle,
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: AppTypography.headlineLarge,
+                fontSize: AppTypography.displayMedium,
                 fontWeight: AppTypography.bold,
                 color: mlc.textPrimary,
               ),

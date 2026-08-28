@@ -198,11 +198,16 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                 ),
                               ),
                             )
-                          : Text(
-                              l10n.sendVerificationCode,
-                              style: const TextStyle(
-                                fontSize: AppTypography.headlineMedium,
-                                fontWeight: AppTypography.semiBold,
+                          : FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                l10n.sendVerificationCode,
+                                maxLines: 1,
+                                softWrap: false,
+                                style: const TextStyle(
+                                  fontSize: AppTypography.headlineMedium,
+                                  fontWeight: AppTypography.bold,
+                                ),
                               ),
                             ),
                     ),

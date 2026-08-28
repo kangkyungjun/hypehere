@@ -357,12 +357,22 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                 style: AppTypography.kvLabel.copyWith(color: mlc.textSecondary),
               ),
               const SizedBox(width: AppSpacing.sm),
-              Text(
-                '$total${_unitMyeong(l10n)}',
-                style: AppTypography.cardTitle.copyWith(
-                  color: mlc.textPrimary,
-                  fontWeight: AppTypography.bold,
-                  fontFeatures: AppTypography.tabularFigures,
+              // 총 가입자 수 — 확 띄게 displayMedium20 bold. 자릿수 커도 넘치지
+              // 않게 Flexible+FittedBox(scaleDown)로 방어(값 숨김 금지).
+              Flexible(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    '$total${_unitMyeong(l10n)}',
+                    maxLines: 1,
+                    style: AppTypography.cardTitle.copyWith(
+                      fontSize: AppTypography.displayMedium,
+                      color: mlc.textPrimary,
+                      fontWeight: AppTypography.bold,
+                      fontFeatures: AppTypography.tabularFigures,
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -407,13 +417,14 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
             ),
           ),
           const SizedBox(height: 2),
-          // 카운트도 좁은 4분할 셀에서 자릿수 넘침 방지.
+          // 카운트를 확 띄게 headlineLarge18 bold로 키우되, 좁은 4분할 셀에서
+          // 자릿수 넘침은 FittedBox(scaleDown)로 방어(값 숨김 금지).
           FittedBox(
             fit: BoxFit.scaleDown,
             child: Text(
               '$count',
               style: const TextStyle(
-                fontSize: AppTypography.headlineSmall,
+                fontSize: AppTypography.headlineLarge,
                 fontWeight: AppTypography.bold,
                 fontFeatures: AppTypography.tabularFigures,
               ),

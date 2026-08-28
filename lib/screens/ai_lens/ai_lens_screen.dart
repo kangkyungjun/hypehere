@@ -282,9 +282,11 @@ class _AILensScreenState extends State<AILensScreen>
             Expanded(
               child: Text(
                 title,
-                style: AppTypography.cardTitle.copyWith(
+                style: AppTypography.sectionTitle.copyWith(
                   color: colors.textPrimary,
                 ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
             if (items.length > 5)
@@ -357,9 +359,11 @@ class _AILensScreenState extends State<AILensScreen>
             Expanded(
               child: Text(
                 AppLocalizations.of(context).marketLensAIScore,
-                style: AppTypography.cardTitle.copyWith(
+                style: AppTypography.sectionTitle.copyWith(
                   color: context.mlColors.textPrimary,
                 ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],
@@ -678,7 +682,7 @@ class _AILensScreenState extends State<AILensScreen>
                   child: Text(
                     ticker.score.toStringAsFixed(0),
                     style: TextStyle(
-                      fontSize: AppTypography.bodyMedium,
+                      fontSize: AppTypography.headlineSmall,
                       fontWeight: AppTypography.bold,
                       color: scoreColor,
                     ),
@@ -694,10 +698,12 @@ class _AILensScreenState extends State<AILensScreen>
                   Text(
                     ticker.ticker,
                     style: TextStyle(
-                      fontSize: AppTypography.bodyLarge,
+                      fontSize: AppTypography.headlineSmall,
                       fontWeight: AppTypography.bold,
                       color: context.mlColors.textPrimary,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   if (primaryName != null)
                     Text.rich(
