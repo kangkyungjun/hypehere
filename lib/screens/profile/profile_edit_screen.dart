@@ -239,9 +239,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                   ),
                   const SizedBox(height: AppSpacing.md),
                   Text(
-                    '• 닉네임: 2-30자, 다른 사용자와 중복 가능\n'
-                    '• 소개글: 최대 200자 (선택사항)\n'
-                    '• 프로필 사진: 권장 크기 800x800px',
+                    l10n.profileEditGuideDetails,
                     style: TextStyle(
                       fontSize: AppTypography.bodyLarge,
                       color: context.mlColors.textSecondary,

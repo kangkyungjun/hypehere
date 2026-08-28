@@ -1577,6 +1577,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get profileEditGuide => '编辑资料指南';
 
   @override
+  String get profileEditGuideDetails =>
+      '• 昵称：2-30个字符，可与他人重复\n• 简介：最多200字符（可选）\n• 头像：建议尺寸 800×800px';
+
+  @override
   String get updatedDate => '更新日期：';
 
   @override

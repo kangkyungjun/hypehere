@@ -3098,6 +3098,12 @@ abstract class AppLocalizations {
   /// **'Profile Edit Guide'**
   String get profileEditGuide;
 
+  /// No description provided for @profileEditGuideDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'• Nickname: 2–30 characters, duplicates allowed\n• Bio: up to 200 characters (optional)\n• Profile photo: 800×800px recommended'**
+  String get profileEditGuideDetails;
+
   /// No description provided for @updatedDate.
   ///
   /// In en, this message translates to:

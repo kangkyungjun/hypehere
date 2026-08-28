@@ -1624,6 +1624,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get profileEditGuide => 'Guía de edición de perfil';
 
   @override
+  String get profileEditGuideDetails =>
+      '• Apodo: 2-30 caracteres, se permiten duplicados\n• Biografía: hasta 200 caracteres (opcional)\n• Foto de perfil: 800×800px recomendado';
+
+  @override
   String get updatedDate => 'Actualizado:';
 
   @override

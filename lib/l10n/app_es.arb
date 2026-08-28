@@ -546,6 +546,7 @@
   "bioLabel": "Biografía",
   "bioHint": "Cuéntanos sobre ti",
   "profileEditGuide": "Guía de edición de perfil",
+  "profileEditGuideDetails": "• Apodo: 2-30 caracteres, se permiten duplicados\n• Biografía: hasta 200 caracteres (opcional)\n• Foto de perfil: 800×800px recomendado",
   "updatedDate": "Actualizado:",
 
   "tabCalendar": "Calendario",

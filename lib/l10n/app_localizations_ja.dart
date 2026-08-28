@@ -1581,6 +1581,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get profileEditGuide => 'プロフィール編集ガイド';
 
   @override
+  String get profileEditGuideDetails =>
+      '• ニックネーム: 2〜30文字、他ユーザーと重複可\n• 自己紹介: 最大200文字（任意）\n• プロフィール写真: 推奨サイズ 800×800px';
+
+  @override
   String get updatedDate => '更新日：';
 
   @override

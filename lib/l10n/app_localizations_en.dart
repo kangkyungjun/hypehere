@@ -1605,6 +1605,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileEditGuide => 'Profile Edit Guide';
 
   @override
+  String get profileEditGuideDetails =>
+      '• Nickname: 2–30 characters, duplicates allowed\n• Bio: up to 200 characters (optional)\n• Profile photo: 800×800px recommended';
+
+  @override
   String get updatedDate => 'Updated:';
 
   @override

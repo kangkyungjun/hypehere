@@ -601,6 +601,7 @@
   "bioLabel": "소개글",
   "bioHint": "자신을 소개해주세요",
   "profileEditGuide": "프로필 편집 안내",
+  "profileEditGuideDetails": "• 닉네임: 2-30자, 다른 사용자와 중복 가능\n• 소개글: 최대 200자 (선택사항)\n• 프로필 사진: 권장 크기 800x800px",
   "updatedDate": "업데이트:",
 
   "tabCalendar": "캘린더",

@@ -717,6 +717,7 @@
   "bioLabel": "Bio",
   "bioHint": "Tell us about yourself",
   "profileEditGuide": "Profile Edit Guide",
+  "profileEditGuideDetails": "• Nickname: 2–30 characters, duplicates allowed\n• Bio: up to 200 characters (optional)\n• Profile photo: 800×800px recommended",
   "updatedDate": "Updated:",
 
   "tabCalendar": "Calendar",
