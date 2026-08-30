@@ -191,7 +191,7 @@ class MacdChartWidget extends StatelessWidget {
                             return Text(
                               value.toStringAsFixed(2),
                               style: TextStyle(
-                                fontSize: AppTypography.micro,
+                                fontSize: AppTypography.caption,
                                 color: Theme.of(context).colorScheme.outline,
                               ),
                             );
@@ -201,7 +201,7 @@ class MacdChartWidget extends StatelessWidget {
                       bottomTitles: AxisTitles(
                         sideTitles: SideTitles(
                           showTitles: true,
-                          reservedSize: 30,
+                          reservedSize: 34,
                           interval: ((macdData.length / 0.6) / 4)
                               .ceilToDouble(), // 60:40 비율에 맞춰 간격 조정
                           getTitlesWidget: (value, meta) {
@@ -217,7 +217,7 @@ class MacdChartWidget extends StatelessWidget {
                                 child: Text(
                                   '${date.month}/${date.day}',
                                   style: const TextStyle(
-                                    fontSize: AppTypography.micro,
+                                    fontSize: AppTypography.caption,
                                   ),
                                 ),
                               );
@@ -239,7 +239,7 @@ class MacdChartWidget extends StatelessWidget {
                                 child: Text(
                                   '${futureDate.month}/${futureDate.day}',
                                   style: TextStyle(
-                                    fontSize: AppTypography.micro,
+                                    fontSize: AppTypography.caption,
                                     color: Theme.of(
                                       context,
                                     ).colorScheme.outline, // 미래 날짜는 회색으로 구분

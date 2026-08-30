@@ -181,26 +181,15 @@ class _TickerScoreSectionState extends State<TickerScoreSection> {
             padding: const EdgeInsets.all(AppSpacing.md),
             child: LineChart(
               LineChartData(
+                // 레퍼런스 그리드: 가로선만. 세로선은 격자를 만들어 선의 흐름을 끊는다.
                 gridData: FlGridData(
                   show: true,
-                  drawVerticalLine: true,
+                  drawVerticalLine: false,
                   horizontalInterval: 20, // 0, 20, 40, 60, 80, 100
-                  verticalInterval: ((dataPoints.length / 0.6) / 5)
-                      .ceilToDouble(), // 60:40 비율에 맞춰 grid 간격 조정
                   getDrawingHorizontalLine: (value) {
                     return FlLine(
-                      color: context.mlColors.chartGridLine.withValues(
-                        alpha: 0.72,
-                      ),
-                      strokeWidth: AppStroke.hairline,
-                    );
-                  },
-                  getDrawingVerticalLine: (value) {
-                    return FlLine(
-                      color: context.mlColors.chartGridLine.withValues(
-                        alpha: 0.45,
-                      ),
-                      strokeWidth: AppStroke.hairline,
+                      color: context.mlColors.chartGridLine,
+                      strokeWidth: AppStroke.thin,
                     );
                   },
                 ),
@@ -239,7 +228,7 @@ class _TickerScoreSectionState extends State<TickerScoreSection> {
                         return Text(
                           value.toInt().toString(),
                           style: TextStyle(
-                            fontSize: AppTypography.micro,
+                            fontSize: AppTypography.caption,
                             color: context.mlColors.textTertiary,
                           ),
                         );
@@ -266,7 +255,7 @@ class _TickerScoreSectionState extends State<TickerScoreSection> {
                             child: Text(
                               '${date.month}/${date.day}',
                               style: const TextStyle(
-                                fontSize: AppTypography.micro,
+                                fontSize: AppTypography.caption,
                               ),
                             ),
                           );
@@ -286,7 +275,7 @@ class _TickerScoreSectionState extends State<TickerScoreSection> {
                             child: Text(
                               '${futureDate.month}/${futureDate.day}',
                               style: TextStyle(
-                                fontSize: AppTypography.micro,
+                                fontSize: AppTypography.caption,
                                 color: Theme.of(
                                   context,
                                 ).colorScheme.outline, // 미래 날짜는 회색으로 구분

@@ -185,7 +185,7 @@ class TickerVolumeChart extends StatelessWidget {
                   leftTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: true,
-                      reservedSize: 45,
+                      reservedSize: 48,
                       getTitlesWidget: (value, meta) {
                         // 최상단/최하단 라벨만 표시
                         if (value <= 0 || value >= chartMaxY * 0.95) {
@@ -193,9 +193,10 @@ class TickerVolumeChart extends StatelessWidget {
                         }
                         return Text(
                           _formatVolume(value.toInt()),
+                          // 레퍼런스 축 라벨 11.5dp. 좌축은 폭 제약(48)이라 안전.
                           style: TextStyle(
-                            fontSize: AppTypography.chartLabel,
-                            color: Theme.of(context).colorScheme.outline,
+                            fontSize: AppTypography.caption,
+                            color: context.mlColors.textTertiary,
                           ),
                         );
                       },

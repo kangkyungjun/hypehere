@@ -365,7 +365,7 @@ class RsiChartWidget extends StatelessWidget {
             return Text(
               value.toInt().toString(),
               style: TextStyle(
-                fontSize: AppTypography.micro,
+                fontSize: AppTypography.caption,
                 color: context.mlColors.textTertiary,
               ),
             );
@@ -375,7 +375,7 @@ class RsiChartWidget extends StatelessWidget {
       bottomTitles: AxisTitles(
         sideTitles: SideTitles(
           showTitles: true,
-          reservedSize: 30,
+          reservedSize: 34,
           interval: dataPoints.length > 1
               ? ((dataPoints.length / 0.6) / 4).ceilToDouble()
               : 1,
@@ -388,7 +388,7 @@ class RsiChartWidget extends StatelessWidget {
                 padding: const EdgeInsets.only(top: AppSpacing.md),
                 child: Text(
                   '${date.month}/${date.day}',
-                  style: const TextStyle(fontSize: AppTypography.micro),
+                  style: const TextStyle(fontSize: AppTypography.caption),
                 ),
               );
             }
@@ -405,7 +405,7 @@ class RsiChartWidget extends StatelessWidget {
                 child: Text(
                   '${futureDate.month}/${futureDate.day}',
                   style: TextStyle(
-                    fontSize: AppTypography.micro,
+                    fontSize: AppTypography.caption,
                     color: Theme.of(context).colorScheme.outline,
                   ),
                 ),
@@ -435,7 +435,7 @@ class RsiChartWidget extends StatelessWidget {
             labelResolver: (line) => '80',
             style: TextStyle(
               color: context.mlColors.gainColor,
-              fontSize: AppTypography.micro,
+              fontSize: AppTypography.caption,
             ),
           ),
         ),
@@ -449,7 +449,7 @@ class RsiChartWidget extends StatelessWidget {
             labelResolver: (line) => '20',
             style: TextStyle(
               color: context.mlColors.lossColor,
-              fontSize: AppTypography.micro,
+              fontSize: AppTypography.caption,
             ),
           ),
         ),

@@ -6,7 +6,6 @@ import '../../../services/analytics_api_client.dart';
 import '../../../theme/app_colors.dart';
 import '../../../theme/app_radius.dart';
 import '../../../theme/app_spacing.dart';
-import '../../../theme/app_stroke.dart';
 import '../../../theme/app_typography.dart';
 
 /// 종목 상세 페이지의 단기 차트 — 1h(시간봉) ↔ 1d(최근 7일 일봉) 토글.
@@ -188,7 +187,7 @@ class _TickerIntradayChartState extends State<TickerIntradayChart> {
             fontWeight: selected ? AppTypography.bold : AppTypography.regular,
             color: selected
                 ? mlc.onPrimary
-                : Theme.of(context).colorScheme.onSurfaceVariant,
+                : mlc.textSecondary,
           ),
         ),
       ),
@@ -271,13 +270,20 @@ class _TickerIntradayChartState extends State<TickerIntradayChart> {
         spots: spots,
         isCurved: false,
         color: lineColor,
-        barWidth: AppStroke.medium,
+        // Tier 2(보조 차트) — 히어로인 일봉 차트(5.0)보다 얇게 유지해야
+        // 화면 안에서 위계가 선다. 색은 방향성(당일 시가 대비)이라 녹/적.
+        barWidth: 2.5,
+        // 전 지점에 점을 찍으면 분봉에서는 선이 점으로 뭉개진다.
+        // 레퍼런스처럼 **현재 지점만** 헤일로와 함께 표시한다.
         dotData: FlDotData(
           show: true,
+          checkToShowDot: (spot, bar) =>
+              bar.spots.isNotEmpty && spot.x == bar.spots.last.x,
           getDotPainter: (spot, _, __, ___) => FlDotCirclePainter(
-            radius: 2.5,
+            radius: 5,
             color: lineColor,
-            strokeWidth: 0,
+            strokeWidth: 4,
+            strokeColor: lineColor.withValues(alpha: 0.22),
           ),
         ),
         belowBarData: BarAreaData(
@@ -308,7 +314,7 @@ class _TickerIntradayChartState extends State<TickerIntradayChart> {
           bottomTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
-              reservedSize: 22,
+              reservedSize: 26,
               interval: 1,
               getTitlesWidget: (value, meta) {
                 // 슬롯 시각만 라벨 노출.
@@ -322,7 +328,7 @@ class _TickerIntradayChartState extends State<TickerIntradayChart> {
                   child: Text(
                     '${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}',
                     style: TextStyle(
-                      fontSize: AppTypography.micro,
+                      fontSize: AppTypography.caption,
                       color: mlc.textTertiary,
                     ),
                   ),
@@ -345,7 +351,7 @@ class _TickerIntradayChartState extends State<TickerIntradayChart> {
                   '\$${s.y.toStringAsFixed(2)}',
                   TextStyle(
                     color: lineColor,
-                    fontSize: AppTypography.micro,
+                    fontSize: AppTypography.caption,
                     fontWeight: AppTypography.bold,
                   ),
                 )).toList(),
@@ -412,16 +418,19 @@ class _TickerIntradayChartState extends State<TickerIntradayChart> {
     final lineBars = <LineChartBarData>[
       LineChartBarData(
         spots: spots,
-        isCurved: false,
+        isCurved: true,
+        curveSmoothness: 0.28,
         color: lineColor,
-        barWidth: AppStroke.medium,
+        barWidth: 2.5,
         dotData: FlDotData(
           show: true,
+          checkToShowDot: (spot, bar) =>
+              bar.spots.isNotEmpty && spot.x == bar.spots.last.x,
           getDotPainter: (spot, _, __, ___) => FlDotCirclePainter(
-            radius: 4,
+            radius: 5,
             color: lineColor,
-            strokeWidth: 2,
-            strokeColor: mlc.onPrimary,
+            strokeWidth: 4,
+            strokeColor: lineColor.withValues(alpha: 0.22),
           ),
         ),
         belowBarData: BarAreaData(
@@ -452,7 +461,7 @@ class _TickerIntradayChartState extends State<TickerIntradayChart> {
           bottomTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
-              reservedSize: 22,
+              reservedSize: 26,
               interval: 1,
               getTitlesWidget: (value, meta) {
                 final idx = value.round();
@@ -465,7 +474,7 @@ class _TickerIntradayChartState extends State<TickerIntradayChart> {
                   child: Text(
                     '${d.month.toString().padLeft(2, '0')}/${d.day.toString().padLeft(2, '0')}',
                     style: TextStyle(
-                      fontSize: AppTypography.micro,
+                      fontSize: AppTypography.caption,
                       color: mlc.textTertiary,
                     ),
                   ),
@@ -488,7 +497,7 @@ class _TickerIntradayChartState extends State<TickerIntradayChart> {
                   '\$${s.y.toStringAsFixed(2)}',
                   TextStyle(
                     color: lineColor,
-                    fontSize: AppTypography.micro,
+                    fontSize: AppTypography.caption,
                     fontWeight: AppTypography.bold,
                   ),
                 )).toList(),
