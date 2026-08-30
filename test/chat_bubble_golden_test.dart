@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:marketlens/l10n/app_localizations.dart';
 import 'package:marketlens/models/chat_message.dart';
 import 'package:marketlens/screens/ai_lens/chat/chat_bubble.dart';
 import 'package:marketlens/theme/app_colors.dart';
@@ -10,11 +11,16 @@ import 'package:marketlens/theme/app_colors.dart';
 void main() {
   testWidgets('ChatBubble golden — user/assistant on grouped bg',
       (tester) async {
-    await tester.binding.setSurfaceSize(const Size(380, 360));
+    await tester.binding.setSurfaceSize(const Size(380, 400));
 
     await tester.pumpWidget(
       MaterialApp(
         debugShowCheckedModeBanner: false,
+        // ChatBubble이 l10n을 참조하므로 델리게이트가 없으면
+        // AppLocalizations.of(context)! 가 null 역참조로 터진다.
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('ko'),
         theme: ThemeData(
           useMaterial3: true,
           extensions: const [MarketLensColors.light],
