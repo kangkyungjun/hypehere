@@ -104,7 +104,6 @@ class TickerSummaryCards extends StatelessWidget {
                                 text:
                                     '\$${consensus!.mean!.toStringAsFixed(2)}',
                                 style: AppTypography.priceLarge.copyWith(
-                                  fontSize: AppTypography.heroSmall,
                                   fontWeight: AppTypography.bold,
                                   color: context.mlColors.accentBlue,
                                 ),
@@ -158,7 +157,6 @@ class TickerSummaryCards extends StatelessWidget {
                                   // 점수 16→20 bold: 카드 헤드라인 숫자로 강조.
                                   l10n.scorePoints(score.toInt().toString()),
                                   style: AppTypography.priceLarge.copyWith(
-                                    fontSize: AppTypography.heroSmall,
                                     fontWeight: AppTypography.bold,
                                     color: ScoreMapper.getScoreColor(
                                       score,
@@ -212,7 +210,6 @@ class TickerSummaryCards extends StatelessWidget {
                                         text:
                                             '\$${latestData.targetPrice!.toStringAsFixed(2)}',
                                         style: AppTypography.priceLarge.copyWith(
-                                          fontSize: AppTypography.heroSmall,
                                           fontWeight: AppTypography.bold,
                                           color: context.mlColors.accentBlue,
                                         ),

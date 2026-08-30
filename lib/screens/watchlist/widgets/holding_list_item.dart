@@ -219,12 +219,9 @@ class HoldingListItem extends StatelessWidget {
                     fit: BoxFit.scaleDown,
                     child: Text(
                       '\$${holding.currentValue.toStringAsFixed(2)}',
-                      style: TextStyle(
-                        // 행의 히어로 값(평가액) 14→16 강조.
-                        fontSize: AppTypography.headlineMedium,
-                        fontWeight: AppTypography.semiBold,
+                      // 행의 히어로 값(평가액) — priceCard(17).
+                      style: AppTypography.priceCard.copyWith(
                         color: mlc.textPrimary,
-                        fontFeatures: AppTypography.tabularFigures,
                       ),
                     ),
                   ),
@@ -233,13 +230,12 @@ class HoldingListItem extends StatelessWidget {
                   fit: BoxFit.scaleDown,
                   child: Text(
                     '${holding.pnlPct >= 0 ? '▲' : '▼'} ${holding.pnlPct.abs().toStringAsFixed(2)}%',
-                    style: TextStyle(
-                      fontSize: AppTypography.bodyMedium,
-                      fontWeight: AppTypography.semiBold,
+                    // 방향성 수치 — changeBadge(14 w700). 크기는 그대로 두고
+                    // 굵기만 승격해 오버플로 위험 없이 대비를 얻는다.
+                    style: AppTypography.changeBadge.copyWith(
                       color: holding.pnlPct >= 0
                           ? context.mlColors.gainColor
                           : context.mlColors.lossColor,
-                      fontFeatures: AppTypography.tabularFigures,
                     ),
                   ),
                 ),

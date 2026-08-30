@@ -62,7 +62,6 @@ class PortfolioSummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
 
     final totalCost = portfolio.totalCost;
     final totalPnl = portfolio.totalPnl;
@@ -121,24 +120,20 @@ class PortfolioSummaryCard extends StatelessWidget {
                     label: l10n.returnRate,
                     value:
                         '${totalPnlPct >= 0 ? '▲' : '▼'} ${totalPnlPct.abs().toStringAsFixed(2)}%',
-                    valueStyle: TextStyle(
-                      fontSize: AppTypography.headlineMedium,
-                      fontWeight: AppTypography.bold,
+                    // 2순위 — 히어로(평가금 30) 다음 가는 값.
+                    valueStyle: AppTypography.changeHero.copyWith(
                       color: pnlColor,
-                      fontFeatures: AppTypography.tabularFigures,
                     ),
                   ),
                 ),
                 Expanded(
                   child: _GridCell(
                     label: l10n.purchaseAmount,
-                    value: _formatMoney(totalCost),
-                    valueStyle: TextStyle(
-                      fontSize: AppTypography.bodyLarge,
-                      fontWeight: AppTypography.bold,
-                      color: theme.colorScheme.onSurface,
-                      fontFeatures: AppTypography.tabularFigures,
+                    // 보조값 — bold 해제(카드당 w700은 히어로 1개만).
+                    valueStyle: AppTypography.kvValue.copyWith(
+                      color: context.mlColors.textPrimary,
                     ),
+                    value: _formatMoney(totalCost),
                   ),
                 ),
               ],
@@ -157,12 +152,8 @@ class PortfolioSummaryCard extends StatelessWidget {
                   child: _GridCell(
                     label: l10n.profitAmount,
                     value: _formatMoneyWithSign(totalPnl),
-                    valueStyle: TextStyle(
-                      fontSize: AppTypography.headlineMedium,
-                      fontWeight: AppTypography.bold,
-                      color: pnlColor,
-                      fontFeatures: AppTypography.tabularFigures,
-                    ),
+                    // 보조값 — bold 해제. 방향은 색이 이미 말해준다.
+                    valueStyle: AppTypography.kvValue.copyWith(color: pnlColor),
                     subValue: '(${_formatPct(totalPnlPct)})',
                     subValueColor: pnlColor,
                   ),
@@ -171,11 +162,10 @@ class PortfolioSummaryCard extends StatelessWidget {
                   child: _GridCell(
                     label: l10n.evaluationAmount,
                     value: _formatMoney(totalValue),
-                    valueStyle: TextStyle(
-                      fontSize: AppTypography.bodyLarge,
-                      fontWeight: AppTypography.bold,
-                      color: theme.colorScheme.onSurface,
-                      fontFeatures: AppTypography.tabularFigures,
+                    // ★ 이 카드의 유일한 히어로 — 총자산.
+                    // 개편 전 14px으로 수익률(16)보다 작아 위계가 역전돼 있었다.
+                    valueStyle: AppTypography.priceLarge.copyWith(
+                      color: context.mlColors.textPrimary,
                     ),
                     subValue: '(${_formatPct(totalPnlPct)})',
                     subValueColor: pnlColor,

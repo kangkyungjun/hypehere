@@ -61,10 +61,11 @@ class TickerHeaderWidget extends StatelessWidget {
         Text(
           '\$${latestData.close?.toStringAsFixed(2) ?? '--'}',
           style: AppTypography.priceHero.copyWith(
-            // 현재가를 화면의 명확한 히어로로 — 30→36(작은화면 28).
-            fontSize: isSmallScreen ? AppTypography.heroSmall : 36,
+            // 현재가 = 이 화면의 유일한 히어로(40, 작은화면 30).
+            // 하드코딩 36을 제거하고 토큰이 최대치를 되찾았다.
+            // 색은 textPrimary(검정) — 블루는 목표가 등 비방향성 히어로 몫이다.
+            fontSize: isSmallScreen ? AppTypography.heroSmall : null,
             color: mlc.textPrimary,
-            height: 1.05,
           ),
         ),
         const SizedBox(height: AppSpacing.sm),
@@ -85,15 +86,21 @@ class TickerHeaderWidget extends StatelessWidget {
                   isPositive
                       ? Icons.trending_up_rounded
                       : Icons.trending_down_rounded,
-                  size: 16,
+                  size: 18,
                   color: changeColor,
                 ),
                 const SizedBox(width: AppSpacing.xs),
-                Text(
-                  '${isPositive ? '+' : ''}\$${priceChangeAmt.abs().toStringAsFixed(2)} (${isPositive ? '+' : ''}${priceChangePct.toStringAsFixed(2)}%)',
-                  style: AppTypography.changeBadge.copyWith(
-                    fontWeight: AppTypography.semiBold,
-                    color: changeColor,
+                // 히어로(40) 옆 변동률은 changeHero(20) — 2:1 리듬을 만든다.
+                Flexible(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      '${isPositive ? '+' : ''}\$${priceChangeAmt.abs().toStringAsFixed(2)} (${isPositive ? '+' : ''}${priceChangePct.toStringAsFixed(2)}%)',
+                      style: AppTypography.changeHero.copyWith(
+                        color: changeColor,
+                      ),
+                    ),
                   ),
                 ),
               ],

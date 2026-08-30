@@ -120,10 +120,19 @@ class _IndexCard extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
             ),
             const SizedBox(height: AppSpacing.xxs),
-            // 종가
-            Text(
-              index.close.toStringAsFixed(2),
-              style: AppTypography.priceCard.copyWith(color: mlc.textPrimary),
+            // 종가 — 선택된 지수를 홈 화면의 히어로로 세운다.
+            // 개편 전 홈 대시보드에는 히어로 토큰 호출부가 0개였고, 그래서
+            // 타이포 토큰만 올려도 홈은 최대 20px에서 멈췄다.
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                index.close.toStringAsFixed(2),
+                style:
+                    (isSelected
+                            ? AppTypography.priceLarge
+                            : AppTypography.priceCard)
+                        .copyWith(color: mlc.textPrimary),
+              ),
             ),
             const SizedBox(height: AppSpacing.xxs),
             // 변동률

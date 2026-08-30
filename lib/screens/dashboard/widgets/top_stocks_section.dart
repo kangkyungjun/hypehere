@@ -124,26 +124,29 @@ class _StockRow extends StatelessWidget {
               ),
               child: Text(
                 '$rank',
-                style: TextStyle(
-                  fontSize: AppTypography.bodyMedium,
-                  fontWeight: AppTypography.bold,
-                  color: rank <= 3 ? mlc.accentBlue : mlc.textTertiary,
+                // 순위는 데이터축이다 — 블루(=탭 가능 신호)를 쓰지 않는다.
+                // 상위 3위는 색이 아니라 진하기로 구분한다.
+                style: AppTypography.kvValue.copyWith(
+                  color: rank <= 3 ? mlc.textPrimary : mlc.textTertiary,
                 ),
               ),
             ),
             const SizedBox(width: AppSpacing.md),
 
-            // Ticker (bold)
+            // Ticker — 56px에 17px 볼드 5자(GOOGL)는 확대 시 잘려 종목코드가
+            // 은닉됐다. 폭을 72로 넓히고 FittedBox로 방어한다.
             SizedBox(
-              width: 56,
-              child: Text(
-                stock.ticker,
-                style: TextStyle(
-                  fontSize: AppTypography.headlineMedium,
-                  fontWeight: AppTypography.bold,
-                  color: mlc.textPrimary,
+              width: 72,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  stock.ticker,
+                  style: AppTypography.cardTitle.copyWith(
+                    fontWeight: AppTypography.bold,
+                    color: mlc.textPrimary,
+                  ),
                 ),
-                overflow: TextOverflow.ellipsis,
               ),
             ),
             const SizedBox(width: AppSpacing.md),

@@ -421,17 +421,17 @@ class UpDownTab extends StatelessWidget {
                 ),
                 const SizedBox(width: AppSpacing.lg),
 
-                // Change % with arrow
+                // Change % with arrow — 이 화면의 주인공이므로 changeBadge(14 w700).
+                // 폭 80→96: 14px w700 + 화살표 + 부호가 확대 1.3×에서 넘쳤다.
                 SizedBox(
-                  width: 80,
-                  child: Text(
-                    '$arrow $sign${pct.toStringAsFixed(2)}%',
-                    textAlign: TextAlign.right,
-                    style: TextStyle(
-                      fontSize: AppTypography.bodyMedium,
-                      fontWeight: AppTypography.semiBold,
-                      color: color,
-                      fontFeatures: AppTypography.tabularFigures,
+                  width: 96,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      '$arrow $sign${pct.toStringAsFixed(2)}%',
+                      textAlign: TextAlign.right,
+                      style: AppTypography.changeBadge.copyWith(color: color),
                     ),
                   ),
                 ),
