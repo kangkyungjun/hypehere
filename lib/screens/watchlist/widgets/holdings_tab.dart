@@ -502,15 +502,11 @@ class _HoldingsTabState extends State<HoldingsTab> {
 
           // Holdings section header
           SliverToBoxAdapter(
+            // 여백은 SectionHeader 기본값(위 16 / 아래 4)에 맡긴다 —
+            // 두 헤더가 서로 다른 패딩을 쓰면 섹션 리듬이 깨진다.
             child: SectionHeader(
               title: l10n.myHoldings,
               subtitle: l10n.nHoldings(holdings.length),
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.xl,
-                AppSpacing.lg,
-                AppSpacing.xl,
-                AppSpacing.xs,
-              ),
             ),
           ),
 
@@ -532,15 +528,7 @@ class _HoldingsTabState extends State<HoldingsTab> {
           // Recent transactions section
           if (allTxn.isNotEmpty) ...[
             SliverToBoxAdapter(
-              child: SectionHeader(
-                title: l10n.recentTransactions,
-                padding: const EdgeInsets.fromLTRB(
-                  AppSpacing.xl,
-                  AppSpacing.xxl,
-                  AppSpacing.xl,
-                  AppSpacing.sm,
-                ),
-              ),
+              child: SectionHeader(title: l10n.recentTransactions),
             ),
             SliverList(
               delegate: SliverChildBuilderDelegate((context, index) {

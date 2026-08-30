@@ -290,7 +290,7 @@ class _DashboardScreenState extends State<DashboardScreen>
           ),
           // ===== 거시 배너 아래 가로 막대: VIX | 10년물 국채금리 =====
           if (_vixIndicator != null || _dgs10Indicator != null) ...[
-            const SizedBox(height: AppSpacing.sm),
+            const SizedBox(height: AppDensity.cardGap),
             MacroStripWidget(
               vix: _vixIndicator,
               treasury10y: _dgs10Indicator,
@@ -322,7 +322,7 @@ class _DashboardScreenState extends State<DashboardScreen>
           ],
 
           if (_macroData != null || _signalsData != null)
-            const SizedBox(height: AppSpacing.sm),
+            const SizedBox(height: AppDensity.cardGap),
 
           // ===== Indices Bar (S&P, NASDAQ, DOW) — individual cards =====
           IndicesBarWidget(
@@ -337,7 +337,7 @@ class _DashboardScreenState extends State<DashboardScreen>
           if (_indicesData != null && _indicesData!.indices.isNotEmpty) ...[
             const SizedBox(height: AppSpacing.xs),
             const IndexFilterHint(),
-            const SizedBox(height: AppSpacing.sm),
+            const SizedBox(height: AppDensity.cardGap),
           ],
 
           // ===== Sector Bar Chart Card (탭 → 섹터별 시장현황 트리맵) =====
@@ -378,7 +378,7 @@ class _DashboardScreenState extends State<DashboardScreen>
               final recos = RecommendationGrid.compute(_treemapData);
               if (recos.isEmpty) return const SizedBox.shrink();
               return Padding(
-                padding: const EdgeInsets.only(top: AppSpacing.lg),
+                padding: const EdgeInsets.only(top: AppDensity.sectionGap),
                 child: RecommendationGrid(
                   items: recos,
                   onTickerTap: _onTickerTap,

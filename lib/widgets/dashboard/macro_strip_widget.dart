@@ -92,7 +92,11 @@ class MacroStripWidget extends StatelessWidget {
             pctColor,
           ),
         if (v.avg3m != null)
-          _ValuePart('· 3M ${v.avg3m!.toStringAsFixed(1)}', mlc.textSecondary),
+          _ValuePart(
+            '· 3M ${v.avg3m!.toStringAsFixed(1)}',
+            mlc.textTertiary,
+            meta: true,
+          ),
       ]);
     }
     return _tappable(context, onVixTap, content);
@@ -183,12 +187,18 @@ class MacroStripWidget extends StatelessWidget {
                 Text(
                   p.text,
                   style: TextStyle(
+                    // 3단: 대표값(15 bold) > 방향값(13 w600) > 메타(11 w500).
+                    // 메타를 낮춰야 세 조각이 한 줄에 들어간다.
                     fontSize: p.big
                         ? AppTypography.bodyLarge
-                        : AppTypography.bodySmall,
+                        : (p.meta
+                              ? AppTypography.caption
+                              : AppTypography.bodySmall),
                     fontWeight: p.big
                         ? AppTypography.bold
-                        : AppTypography.semiBold,
+                        : (p.meta
+                              ? AppTypography.medium
+                              : AppTypography.semiBold),
                     color: p.color,
                     fontFeatures: AppTypography.tabularFigures,
                   ),
@@ -203,6 +213,17 @@ class MacroStripWidget extends StatelessWidget {
 class _ValuePart {
   final String text;
   final Color color;
+
+  /// 셀의 대표값 — 큰 글씨 볼드.
   final bool big;
-  const _ValuePart(this.text, this.color, {this.big = false});
+
+  /// 부가 참고값(3M 평균 등) — 한 단계 낮춰 한 줄에 들어가게 한다.
+  final bool meta;
+
+  const _ValuePart(
+    this.text,
+    this.color, {
+    this.big = false,
+    this.meta = false,
+  });
 }

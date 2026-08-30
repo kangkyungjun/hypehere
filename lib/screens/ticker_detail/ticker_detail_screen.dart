@@ -470,12 +470,14 @@ class _TickerDetailScreenState extends State<TickerDetailScreen> {
               onScrollToAIInsight: _scrollToAIInsight,
             ),
 
-            const SizedBox(height: AppSpacing.sm),
+            // 카드 사이(12) > 카드 안쪽 블록 간격(≤8). 개편 전엔 8이라
+            // 카드 안이 밖보다 넓어 경계가 읽히지 않았다.
+            const SizedBox(height: AppDensity.cardGap),
 
             // 1.5 밸류에이션 카드 (접이식) — 업데이트 날짜 ↔ 전문가 요약 사이
             ValuationCard(metrics: _chartData!.keyMetrics),
 
-            const SizedBox(height: AppSpacing.sm),
+            const SizedBox(height: AppDensity.cardGap),
 
             // 2. 전문가 vs AI 요약 카드
             TickerSummaryCards(
@@ -570,7 +572,7 @@ class _TickerDetailScreenState extends State<TickerDetailScreen> {
               onPeriodChanged: _onPeriodChanged,
             ),
 
-            const SizedBox(height: AppSpacing.xxs),
+            const SizedBox(height: AppSpacing.md),
 
             // 18. RSI 차트 (서버 계산 값 시각화)
             RsiChartWidget(dataPoints: _chartData!.data),
