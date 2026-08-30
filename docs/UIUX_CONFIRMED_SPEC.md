@@ -209,16 +209,26 @@ Phase 0이 원자적으로 설계돼 있어 첫 항목이 145개 감사를 요�
 부수 수정: 홈 종목코드 `GOOGL` 잘림(56→72 + FittedBox), 순위 배지 블루 오염 제거(RULE-BLUE B1),
 `up_down_tab` 등락률 폭 80→96, `portfolio_summary_card`의 `colorScheme` 드리프트 제거.
 
-### 🔄 진행 중 — 프리미티브 스윕
+### ✅ 프리미티브 스윕 — 확장·더보기 완료
 
-| 프리미티브 | 이관 | 남음 | 비고 |
+| 프리미티브 | 채택 | 잔여 | 비고 |
 |---|--:|--:|---|
-| `MlKeyValueRow` | **8/14** | 6 | `kvValue`·`rowV` 死코드 활성화 |
-| `MlExpandableCard` | **4/13** | 9 | `showChevron`/`headerBuilder`로 어포던스 위임 지원 |
-| `MlShowMore` | **6/7** | 1 | 단방향 4곳 → 접기 가능, `showLess` l10n 신설 |
+| `MlKeyValueRow` | **9파일** | 1 | `kvValue`·`rowV` 死코드 활성화. 등급 5단(normal/strong/blue/blueHero/directional) |
+| `MlExpandableCard` | **5파일** | **0** | 제자리 확장 전량 이관 |
+| `MlShowMore` | **7파일** | **0** | 더보기 전량 이관 |
 
-**순 라인**: 프리미티브 3개 신설 구간은 순증(+370)이었고, 신규 없이 이관만 한
-2차 배치부터 감소로 돌아섰다(−7). 남은 16벌을 흡수하면 누적도 뒤집힌다.
+#### ⚠️ 초기 진단의 집계 오류를 정정한다
+레이아웃 전문가는 확장 **13벌**, 더보기 **7벌**로 집계했으나, 실제로 이관해보니
+`bool _show*` 패턴에 **확장이 아닌 것들이 섞여 있었다**:
+
+- `_showScrollTop`(스크롤 상단 버튼), `_showSearchResults`(검색 상태),
+  `_showDailyDisclaimer`(1회성 안내), `_showConversationControls`(final 상수)
+- `ticker_price_chart._showLegend` — 확장이 아니라 **오버레이 표시/숨김**
+- `ai_lens_screen`·`top_stocks_section`·`up_down_tab`의 `viewMore` — 인라인
+  더보기가 아니라 **화면 이동 링크**(`onViewMore` 콜백)
+
+→ 실제 이관 대상은 확장 6벌 / 더보기 7벌이었고 **둘 다 전량 완료**했다.
+grep 패턴으로 센 집계는 의도까지 구분하지 못한다는 교훈.
 
 #### 프리미티브에 넣지 않기로 한 것 (근거)
 - `admin_panel._statCell` / `chat_storage._statCell` — **stat 타일**(큰 숫자 +
@@ -226,12 +236,11 @@ Phase 0이 원자적으로 설계돼 있어 첫 항목이 145개 감사를 요�
   온다. 억지로 넣으면 프리미티브가 잡동사니가 된다.
 - `portfolio_summary_card._GridCell` — 히어로 그리드 셀. 값이 `priceLarge`(31)·
   `changeHero`(20)로 KV 등급 밖이다.
-- `ticker_price_chart` 범례 토글 — 확장이 아니라 오버레이 표시/숨김.
+- `macro_strip_widget` — 3단 위계(대표/방향/메타)를 가진 전용 셀. 잔여 1벌.
 
 ### ⬜ 남음
 | 단계 | 내용 | 눈에 보이는 변화 |
 |---|---|---|
-| P1 | KV 6벌 · 확장 9벌 · 더보기 1벌 잔여 이관 | 화면별 편차 해소, 순 라인 감소 전환 |
 | P2 | 파일럿 화면 완성 (`holding_detail_sheet` 452줄 → 레퍼런스 ① 룩) | 헤이딜러 카드 리듬 |
 | P3 | 섹션 헤더 19벌 이관 | 제목 크기 7종 → 2종 |
 | P4 | 카드 표면 수렴 (`Border.all` 16곳) + 배지 | 표면 5종 → 1종 |

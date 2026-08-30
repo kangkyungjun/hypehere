@@ -7,9 +7,9 @@ import '../../../theme/app_spacing.dart';
 import '../../../theme/app_stroke.dart';
 import '../../../theme/app_typography.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../../widgets/common/bento_card.dart';
 import '../../../widgets/common/coach_mark_overlay.dart';
 import '../../../providers/coach_mark_provider.dart';
+import '../../../widgets/common/ml_expandable_card.dart';
 
 class TickerScoreSection extends StatefulWidget {
   final CompleteChartData chartData;
@@ -21,7 +21,6 @@ class TickerScoreSection extends StatefulWidget {
 }
 
 class _TickerScoreSectionState extends State<TickerScoreSection> {
-  bool _showScoreChart = true;
 
   @override
   Widget build(BuildContext context) {
@@ -31,57 +30,43 @@ class _TickerScoreSectionState extends State<TickerScoreSection> {
       message: l10n.coachMarkTickerScore,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
-        child: BentoCard(
-          padding: EdgeInsets.zero,
-          child: Column(
+        // 개편 전: 애니메이션 없이 `if (_showScoreChart)`로 즉시 나타나
+        // 차트가 pop-in으로 튀었다. chevron도 아이콘 스왑(arrow_up↔down) 방언.
+        // 헤더에 정보 아이콘(별도 탭 대상)이 있어 tapTarget: headerOnly.
+        child: MlExpandableCard(
+          initiallyExpanded: true,
+          tapTarget: MlExpandTapTarget.headerOnly,
+          divider: false,
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg,
+            vertical: AppSpacing.md,
+          ),
+          header: Row(
             children: [
-              InkWell(
-                onTap: () => setState(() => _showScoreChart = !_showScoreChart),
-                borderRadius: BorderRadius.circular(AppRadius.card),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.lg,
-                    vertical: AppSpacing.md,
-                  ),
-                  child: Row(
-                  children: [
-                    Icon(
-                      Icons.bar_chart_rounded,
-                      size: 20,
-                      color: context.mlColors.warningColor,
-                    ),
-                    const SizedBox(width: AppSpacing.md),
-                    Text(
-                      'AI ${l10n.score}',
-                      style: TextStyle(
-                        fontSize: AppTypography.headlineSmall,
-                        fontWeight: AppTypography.bold,
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.xs),
-                    GestureDetector(
-                      onTap: () => _showScoreGuide(context, l10n),
-                      child: Icon(
-                        Icons.info_outline,
-                        size: 16,
-                        color: Theme.of(context).colorScheme.outline,
-                      ),
-                    ),
-                    const Spacer(),
-                    Icon(
-                      _showScoreChart
-                          ? Icons.keyboard_arrow_up
-                          : Icons.keyboard_arrow_down,
-                      color: Theme.of(context).colorScheme.outline,
-                    ),
-                  ],
+              Icon(
+                Icons.bar_chart_rounded,
+                size: 20,
+                color: context.mlColors.warningColor,
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Text(
+                'AI ${l10n.score}',
+                style: AppTypography.cardTitle.copyWith(
+                  color: context.mlColors.textPrimary,
                 ),
               ),
-            ),
-              if (_showScoreChart) _buildScoreChart(),
+              const SizedBox(width: AppSpacing.xs),
+              GestureDetector(
+                onTap: () => _showScoreGuide(context, l10n),
+                child: Icon(
+                  Icons.info_outline,
+                  size: 16,
+                  color: context.mlColors.textTertiary,
+                ),
+              ),
             ],
           ),
+          detail: (_) => _buildScoreChart(),
         ),
       ),
     );

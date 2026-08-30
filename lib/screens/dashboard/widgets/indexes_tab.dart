@@ -10,6 +10,7 @@ import '../../../widgets/ads/banner_ad_widget.dart';
 import '../../../widgets/charts/macro_gauge_painter.dart';
 import '../../../widgets/common/bento_card.dart';
 import '../../indexes/macro_history_screen.dart';
+import '../../../widgets/common/ml_show_more.dart';
 
 /// Dashboard "Indexes" tab showing detailed macro economic indicators as a list.
 ///
@@ -135,29 +136,10 @@ class _IndexesTabState extends State<IndexesTab> {
     // "더보기" button
     if (hasMore) {
       children.add(
-        Padding(
-          padding: const EdgeInsets.only(top: AppSpacing.md),
-          child: SizedBox(
-            width: double.infinity,
-            child: TextButton(
-              onPressed: () => setState(() => _showAll = true),
-              style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppRadius.md),
-                  side: BorderSide(color: mlc.subtleBorder),
-                ),
-              ),
-              child: Text(
-                l10n.viewMore,
-                style: TextStyle(
-                  fontSize: AppTypography.bodySmall,
-                  fontWeight: AppTypography.semiBold,
-                  color: mlc.accentBlue,
-                ),
-              ),
-            ),
-          ),
+        MlShowMoreButton(
+          // 개편 전 단방향(`_showAll = true`)이라 한 번 펼치면 되돌릴 수 없었다.
+          expanded: _showAll,
+          onPressed: () => setState(() => _showAll = !_showAll),
         ),
       );
     }
