@@ -130,6 +130,25 @@ flutter:
   # For details regarding adding assets from package dependencies, see
   # https://flutter.dev/to/asset-from-package
 
+  # Pretendard (SIL OFL 1.1, assets/fonts/LICENSE.txt) — 굵기 위계를 위해 번들.
+  #
+  # 시스템 폰트 폴백일 때 안드로이드는 Noto Sans CJK KR을 쓰는데 실질
+  # Regular/Bold 2단뿐이라 w500·w600이 스냅되어 사라진다. 즉 굵기로 만든
+  # 위계가 안드로이드에서만 통째로 증발한다. 4단 스태틱 OTF를 번들해
+  # w400/w500/w600/w700을 두 플랫폼에서 동일하게 보장한다.
+  # (가변폰트 대신 스태틱을 쓰는 이유: 축 스냅 위험 없이 용량이 같다 — 6.0MB)
+  fonts:
+    - family: Pretendard
+      fonts:
+        - asset: assets/fonts/Pretendard-Regular.otf
+          weight: 400
+        - asset: assets/fonts/Pretendard-Medium.otf
+          weight: 500
+        - asset: assets/fonts/Pretendard-SemiBold.otf
+          weight: 600
+        - asset: assets/fonts/Pretendard-Bold.otf
+          weight: 700
+
   # To add custom fonts to your application, add a fonts section here,
   # in this "flutter" section. Each entry in this list should have a
   # "family" key with the font family name, and a "fonts" key with a

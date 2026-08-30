@@ -185,13 +185,31 @@ class MarketLensApp extends StatelessWidget {
       },
       theme: ThemeData(
         // MarketLens brand colors (HypeHere와 다름!)
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF1A56DB), // Deep Trust Blue (brand seed)
-          brightness: Brightness.light,
-          surface: MarketLensColors.light.cardBackground,
-        ),
+        // ⚠️ 두 색 체계 정합 — 앱에는 `mlColors`(ThemeExtension)와 M3
+        // `colorScheme` 두 벌이 공존하고, 200개 파일 중 42개가 한 파일 안에서
+        // 둘을 섞어 쓴다. seed 파생값은 우리 팔레트와 전혀 다르다:
+        //   primary #4B5C92(탁한 슬레이트) / onSurfaceVariant #45464F(2배 진함)
+        //   outline #767680(웜뉴트럴인데 실사용은 텍스트 색, 65곳)
+        // 아래 오버라이드로 호출부를 한 줄도 고치지 않고 156곳을 정렬시킨다.
+        colorScheme:
+            ColorScheme.fromSeed(
+              seedColor: const Color(0xFF1A56DB), // Deep Trust Blue
+              brightness: Brightness.light,
+              surface: MarketLensColors.light.cardBackground,
+            ).copyWith(
+              primary: MarketLensColors.light.accentBlue,
+              onSurface: MarketLensColors.light.textPrimary,
+              onSurfaceVariant: MarketLensColors.light.textSecondary,
+              outline: MarketLensColors.light.textTertiary,
+              outlineVariant: MarketLensColors.light.subtleBorder,
+              error: MarketLensColors.light.dangerColor,
+            ),
         // 에디토리얼 청킹: 페이지 배경을 연회색으로 → 흰 카드가 떠 보임
         scaffoldBackgroundColor: MarketLensColors.light.groupedBackground,
+        // Pretendard 4단 웨이트 — 안드로이드 시스템 폰트(Noto Sans CJK KR)는
+        // 실질 Regular/Bold 2단뿐이라 w500·w600이 스냅되어 굵기 위계가
+        // 증발한다. 번들 폰트로 두 플랫폼의 위계를 동일하게 맞춘다.
+        fontFamily: 'Pretendard',
         useMaterial3: true,
         extensions: const [MarketLensColors.light],
         dividerTheme: DividerThemeData(
@@ -226,11 +244,9 @@ class MarketLensApp extends StatelessWidget {
           margin: EdgeInsets.zero,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppRadius.card),
-            side: BorderSide(
-              color: MarketLensColors.light.subtleBorder.withValues(
-                alpha: 0.72,
-              ),
-            ),
+            // 무테 + 그림자가 앱의 카드 언어다(BentoCard 참조).
+            // 전역 Card에 테두리를 강제하면 두 언어가 공존해 낡아 보인다.
+            side: BorderSide.none,
           ),
         ),
         chipTheme: ChipThemeData(
@@ -320,13 +336,26 @@ class MarketLensApp extends StatelessWidget {
 
       // Dark theme
       darkTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF1A56DB), // Deep Trust Blue (brand seed)
-          brightness: Brightness.dark,
-          surface: MarketLensColors.dark.cardBackground,
-        ),
+        // 라이트와 동일한 정합 오버라이드 — 위 주석 참조.
+        colorScheme:
+            ColorScheme.fromSeed(
+              seedColor: const Color(0xFF1A56DB), // Deep Trust Blue
+              brightness: Brightness.dark,
+              surface: MarketLensColors.dark.cardBackground,
+            ).copyWith(
+              primary: MarketLensColors.dark.accentBlue,
+              onSurface: MarketLensColors.dark.textPrimary,
+              onSurfaceVariant: MarketLensColors.dark.textSecondary,
+              outline: MarketLensColors.dark.textTertiary,
+              outlineVariant: MarketLensColors.dark.subtleBorder,
+              error: MarketLensColors.dark.dangerColor,
+            ),
         // 에디토리얼 청킹: 페이지 배경을 카드보다 어둡게 → 카드 분리감
         scaffoldBackgroundColor: MarketLensColors.dark.groupedBackground,
+        // Pretendard 4단 웨이트 — 안드로이드 시스템 폰트(Noto Sans CJK KR)는
+        // 실질 Regular/Bold 2단뿐이라 w500·w600이 스냅되어 굵기 위계가
+        // 증발한다. 번들 폰트로 두 플랫폼의 위계를 동일하게 맞춘다.
+        fontFamily: 'Pretendard',
         useMaterial3: true,
         extensions: const [MarketLensColors.dark],
         dividerTheme: DividerThemeData(
@@ -360,9 +389,9 @@ class MarketLensApp extends StatelessWidget {
           margin: EdgeInsets.zero,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppRadius.card),
-            side: BorderSide(
-              color: MarketLensColors.dark.subtleBorder.withValues(alpha: 0.72),
-            ),
+            // 무테 + 그림자가 앱의 카드 언어다(BentoCard 참조).
+            // 전역 Card에 테두리를 강제하면 두 언어가 공존해 낡아 보인다.
+            side: BorderSide.none,
           ),
         ),
         chipTheme: ChipThemeData(
