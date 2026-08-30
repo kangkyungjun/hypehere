@@ -2395,6 +2395,24 @@ class AppLocalizationsKo extends AppLocalizations {
   String get showLess => '줄이기';
 
   @override
+  String get chartLatest => '최신';
+
+  @override
+  String get intradayHint => '최근 7거래일 · 점을 탭하면 그 날의 1시간 차트';
+
+  @override
+  String get marketHoursHint => '미국 장중 09:30~16:00 ET';
+
+  @override
+  String get noIntradayData => '시간봉 정보가 아직 없어요';
+
+  @override
+  String get noDailyData => '일봉 정보가 없어요';
+
+  @override
+  String get closePriceUnavailable => '종가를 불러올 수 없습니다. 직접 입력해주세요.';
+
+  @override
   String get gaugeStrongNegativeDesc => '강력부정: 주가 하락 확률 매우 높음';
 
   @override

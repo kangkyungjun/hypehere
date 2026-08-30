@@ -2394,6 +2394,24 @@ class AppLocalizationsJa extends AppLocalizations {
   String get showLess => '折りたたむ';
 
   @override
+  String get chartLatest => '最新';
+
+  @override
+  String get intradayHint => '直近7営業日 · 点をタップするとその日の1時間チャート';
+
+  @override
+  String get marketHoursHint => '米国立会時間 09:30〜16:00 ET';
+
+  @override
+  String get noIntradayData => '時間足データはまだありません';
+
+  @override
+  String get noDailyData => '日足データがありません';
+
+  @override
+  String get closePriceUnavailable => '終値を取得できません。手動で入力してください。';
+
+  @override
   String get gaugeStrongNegativeDesc => '強いネガティブ：株価下落の確率が非常に高い';
 
   @override

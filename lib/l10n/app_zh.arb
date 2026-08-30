@@ -894,6 +894,12 @@
   "topByMarketCap": "市值排名",
   "viewMore": "查看更多",
   "showLess": "收起",
+  "chartLatest": "最新",
+  "intradayHint": "最近7个交易日 · 点击圆点查看当日小时图",
+  "marketHoursHint": "美股交易时段 09:30–16:00 ET",
+  "noIntradayData": "暂无分时数据",
+  "noDailyData": "暂无日线数据",
+  "closePriceUnavailable": "无法获取收盘价，请手动输入。",
 
   "gaugeStrongNegativeDesc": "强烈负面：股价下跌概率极高",
   "gaugeNegativeDesc": "负面：股价下跌概率较高",

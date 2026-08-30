@@ -4628,6 +4628,42 @@ abstract class AppLocalizations {
   /// **'Show Less'**
   String get showLess;
 
+  /// No description provided for @chartLatest.
+  ///
+  /// In en, this message translates to:
+  /// **'Latest'**
+  String get chartLatest;
+
+  /// No description provided for @intradayHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 7 sessions · Tap a point for that day\'s hourly chart'**
+  String get intradayHint;
+
+  /// No description provided for @marketHoursHint.
+  ///
+  /// In en, this message translates to:
+  /// **'US market hours 09:30–16:00 ET'**
+  String get marketHoursHint;
+
+  /// No description provided for @noIntradayData.
+  ///
+  /// In en, this message translates to:
+  /// **'No intraday data yet'**
+  String get noIntradayData;
+
+  /// No description provided for @noDailyData.
+  ///
+  /// In en, this message translates to:
+  /// **'No daily data'**
+  String get noDailyData;
+
+  /// No description provided for @closePriceUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load the closing price. Please enter it manually.'**
+  String get closePriceUnavailable;
+
   /// No description provided for @gaugeStrongNegativeDesc.
   ///
   /// In en, this message translates to:

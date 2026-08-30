@@ -2435,6 +2435,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get showLess => 'Show Less';
 
   @override
+  String get chartLatest => 'Latest';
+
+  @override
+  String get intradayHint =>
+      'Last 7 sessions · Tap a point for that day\'s hourly chart';
+
+  @override
+  String get marketHoursHint => 'US market hours 09:30–16:00 ET';
+
+  @override
+  String get noIntradayData => 'No intraday data yet';
+
+  @override
+  String get noDailyData => 'No daily data';
+
+  @override
+  String get closePriceUnavailable =>
+      'Could not load the closing price. Please enter it manually.';
+
+  @override
   String get gaugeStrongNegativeDesc =>
       'Strong Negative: Very high probability of decline';
 

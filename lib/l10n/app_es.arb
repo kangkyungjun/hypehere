@@ -894,6 +894,12 @@
   "topByMarketCap": "Top por capitalización",
   "viewMore": "Ver más",
   "showLess": "Ver menos",
+  "chartLatest": "Reciente",
+  "intradayHint": "Últimas 7 sesiones · Toca un punto para ver el gráfico horario",
+  "marketHoursHint": "Horario de EE. UU. 09:30–16:00 ET",
+  "noIntradayData": "Aún no hay datos intradía",
+  "noDailyData": "No hay datos diarios",
+  "closePriceUnavailable": "No se pudo cargar el precio de cierre. Introdúcelo manualmente.",
 
   "gaugeStrongNegativeDesc": "Muy Negativo: Muy alta probabilidad de caída",
   "gaugeNegativeDesc": "Negativo: Alta probabilidad de caída",

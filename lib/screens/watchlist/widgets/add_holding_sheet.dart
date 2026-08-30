@@ -289,7 +289,7 @@ class _AddHoldingSheetState extends State<AddHoldingSheet> {
                 padding: const EdgeInsets.only(top: AppSpacing.xs),
                 child: Text(
                   Localizations.localeOf(context).languageCode == 'ko'
-                      ? '종가를 불러올 수 없습니다. 직접 입력해주세요.'
+                      ? AppLocalizations.of(context).closePriceUnavailable
                       : 'Could not load close price. Please enter manually.',
                   style: TextStyle(
                     fontSize: AppTypography.caption,

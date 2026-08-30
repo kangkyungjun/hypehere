@@ -894,6 +894,12 @@
   "topByMarketCap": "時価総額上位",
   "viewMore": "もっと見る",
   "showLess": "折りたたむ",
+  "chartLatest": "最新",
+  "intradayHint": "直近7営業日 · 点をタップするとその日の1時間チャート",
+  "marketHoursHint": "米国立会時間 09:30〜16:00 ET",
+  "noIntradayData": "時間足データはまだありません",
+  "noDailyData": "日足データがありません",
+  "closePriceUnavailable": "終値を取得できません。手動で入力してください。",
 
   "gaugeStrongNegativeDesc": "強いネガティブ：株価下落の確率が非常に高い",
   "gaugeNegativeDesc": "ネガティブ：株価下落の確率が高い",

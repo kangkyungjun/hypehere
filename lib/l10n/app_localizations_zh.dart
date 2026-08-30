@@ -2389,6 +2389,24 @@ class AppLocalizationsZh extends AppLocalizations {
   String get showLess => '收起';
 
   @override
+  String get chartLatest => '最新';
+
+  @override
+  String get intradayHint => '最近7个交易日 · 点击圆点查看当日小时图';
+
+  @override
+  String get marketHoursHint => '美股交易时段 09:30–16:00 ET';
+
+  @override
+  String get noIntradayData => '暂无分时数据';
+
+  @override
+  String get noDailyData => '暂无日线数据';
+
+  @override
+  String get closePriceUnavailable => '无法获取收盘价，请手动输入。';
+
+  @override
   String get gaugeStrongNegativeDesc => '强烈负面：股价下跌概率极高';
 
   @override

@@ -1100,6 +1100,12 @@
   "topByMarketCap": "Top by Market Cap",
   "viewMore": "View More",
   "showLess": "Show Less",
+  "chartLatest": "Latest",
+  "intradayHint": "Last 7 sessions · Tap a point for that day's hourly chart",
+  "marketHoursHint": "US market hours 09:30–16:00 ET",
+  "noIntradayData": "No intraday data yet",
+  "noDailyData": "No daily data",
+  "closePriceUnavailable": "Could not load the closing price. Please enter it manually.",
 
   "gaugeStrongNegativeDesc": "Strong Negative: Very high probability of decline",
   "gaugeNegativeDesc": "Negative: High probability of decline",

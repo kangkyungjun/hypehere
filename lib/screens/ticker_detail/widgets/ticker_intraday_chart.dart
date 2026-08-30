@@ -7,6 +7,7 @@ import '../../../theme/app_colors.dart';
 import '../../../theme/app_radius.dart';
 import '../../../theme/app_spacing.dart';
 import '../../../theme/app_typography.dart';
+import '../../../l10n/app_localizations.dart';
 
 /// 종목 상세 페이지의 단기 차트 — 1h(시간봉) ↔ 1d(최근 7일 일봉) 토글.
 ///
@@ -146,7 +147,7 @@ class _TickerIntradayChartState extends State<TickerIntradayChart> {
           TextButton.icon(
             onPressed: _backToLatestIntraday,
             icon: const Icon(Icons.arrow_back_rounded, size: 14),
-            label: const Text('최신'),
+            label: Text(AppLocalizations.of(context).chartLatest),
             style: TextButton.styleFrom(
               padding: const EdgeInsets.symmetric(
                 horizontal: AppSpacing.sm,
@@ -197,11 +198,11 @@ class _TickerIntradayChartState extends State<TickerIntradayChart> {
   Widget _buildSubtitle(MarketLensColors mlc) {
     final style = AppTypography.label.copyWith(color: mlc.textTertiary);
     if (_mode == _Mode.daily) {
-      return Text('최근 7거래일 · 점을 탭하면 그 날의 1시간 차트', style: style);
+      return Text(AppLocalizations.of(context).intradayHint, style: style);
     }
     final dateEt = _intraday?.latestDateEt;
     if (dateEt == null) {
-      return Text('미국 장중 09:30~16:00 ET', style: style);
+      return Text(AppLocalizations.of(context).marketHoursHint, style: style);
     }
     return Text('$dateEt · 미국 장중 09:30~16:00 ET', style: style);
   }
@@ -212,7 +213,10 @@ class _TickerIntradayChartState extends State<TickerIntradayChart> {
     }
     if (_error != null) {
       return Center(
-        child: Text('불러오지 못함', style: TextStyle(color: mlc.dangerColor)),
+        child: Text(
+          AppLocalizations.of(context).cannotLoadData,
+          style: TextStyle(color: mlc.dangerColor),
+        ),
       );
     }
     if (_mode == _Mode.daily) {
@@ -227,7 +231,7 @@ class _TickerIntradayChartState extends State<TickerIntradayChart> {
     if (bars.isEmpty) {
       return Center(
         child: Text(
-          '시간봉 정보가 아직 없어요',
+          AppLocalizations.of(context).noIntradayData,
           style: AppTypography.label.copyWith(color: mlc.textTertiary),
         ),
       );
@@ -251,7 +255,7 @@ class _TickerIntradayChartState extends State<TickerIntradayChart> {
     if (spots.isEmpty) {
       return Center(
         child: Text(
-          '시간봉 정보가 아직 없어요',
+          AppLocalizations.of(context).noIntradayData,
           style: AppTypography.label.copyWith(color: mlc.textTertiary),
         ),
       );
@@ -390,7 +394,7 @@ class _TickerIntradayChartState extends State<TickerIntradayChart> {
     if (all.isEmpty) {
       return Center(
         child: Text(
-          '일봉 정보가 없어요',
+          AppLocalizations.of(context).noDailyData,
           style: AppTypography.label.copyWith(color: mlc.textTertiary),
         ),
       );

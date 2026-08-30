@@ -2460,6 +2460,26 @@ class AppLocalizationsEs extends AppLocalizations {
   String get showLess => 'Ver menos';
 
   @override
+  String get chartLatest => 'Reciente';
+
+  @override
+  String get intradayHint =>
+      'Últimas 7 sesiones · Toca un punto para ver el gráfico horario';
+
+  @override
+  String get marketHoursHint => 'Horario de EE. UU. 09:30–16:00 ET';
+
+  @override
+  String get noIntradayData => 'Aún no hay datos intradía';
+
+  @override
+  String get noDailyData => 'No hay datos diarios';
+
+  @override
+  String get closePriceUnavailable =>
+      'No se pudo cargar el precio de cierre. Introdúcelo manualmente.';
+
+  @override
   String get gaugeStrongNegativeDesc =>
       'Muy Negativo: Muy alta probabilidad de caída';
 
