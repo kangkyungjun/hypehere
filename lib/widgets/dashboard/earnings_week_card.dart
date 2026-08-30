@@ -130,22 +130,31 @@ class EarningsWeekCard extends StatelessWidget {
                 color: event.surpriseColor(context.mlColors).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(AppRadius.xs),
               ),
+              // 고정 52×28에 Text 2개. 확대 1.3×에서 28.08 > 28로 이미 넘치고
+              // 있었다(개편 전부터). FittedBox로 방어한다 —
+              // 동일 UI인 earnings_calendar_screen(52×40)은 이미 방어돼 있었다.
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
-                    l10n.previousEarnings,
-                    style: TextStyle(
-                      fontSize: AppTypography.chartMicro,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      l10n.previousEarnings,
+                      style: TextStyle(
+                        fontSize: AppTypography.chartMicro,
+                        color: context.mlColors.textSecondary,
+                      ),
                     ),
                   ),
-                  Text(
-                    event.surpriseLabel,
-                    style: TextStyle(
-                      fontSize: AppTypography.micro,
-                      fontWeight: AppTypography.bold,
-                      color: event.surpriseColor(context.mlColors),
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      event.surpriseLabel,
+                      style: TextStyle(
+                        fontSize: AppTypography.micro,
+                        fontWeight: AppTypography.bold,
+                        color: event.surpriseColor(context.mlColors),
+                      ),
                     ),
                   ),
                 ],

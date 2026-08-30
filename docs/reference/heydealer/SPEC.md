@@ -282,3 +282,54 @@ dp = (요소 크기 ‰) / 1000 × (화면 논리 폭)
 ## 검증
 `flutter analyze` 클린 · 오버플로 0건 · 프리뷰 하네스(`lib/preview_harness.dart`)에
 가격 차트 추가 + 실제 테마(Pretendard·ColorScheme 정합) 적용 + 곡선형 목데이터로 교체.
+
+---
+
+# 부록 C — 차트 2단 규약 (2026-08-30)
+
+## 왜 2단인가
+레퍼런스는 한 화면에 **히어로 차트 하나**만 두고 굵은 블루 곡선으로 그린다.
+우리 티커 상세에는 차트가 6개 이상 쌓여 있어, 전부에 히어로 처리를 하면
+**위계가 죽고 화면이 시끄러워진다.** 역할을 나눈다.
+
+## Tier 1 — 히어로 차트
+대상: `ticker_price_chart` (일봉 가격, 250px)
+
+| 항목 | 값 |
+|---|---|
+| 주 라인 | **accentBlue, 5.0dp**, 스플라인(`curveSmoothness: 0.32`) |
+| 현재 마커 | 반경 9.5 + 헤일로 stroke 8 (지름 19 / 35) |
+| 가이드 | x축까지 블루 점선 1.7dp, **하단에 블루 볼드 라벨** |
+| 하단 필 | accentBlue @ 8% |
+
+## Tier 2 — 보조 차트
+대상: `ticker_intraday_chart`(180px, 헤더 내), `ticker_score_section`,
+`rsi/macd/bollinger_chart_widget`, `ticker_volume_chart`, `earnings_chart_widget`
+
+| 항목 | 값 |
+|---|---|
+| 주 라인 | **2.5dp 이하**. 히어로와 경쟁하지 않는다 |
+| 색 | 방향성 데이터는 gain/loss, 그 외 지표색 유지 |
+| 마커 | 마지막 지점만 반경 5 + 헤일로 stroke 4 (전 지점 점 찍기 금지) |
+
+> 인트라데이는 헤더 안의 압축 차트라 Tier 2다. 색도 **당일 시가 대비 방향성**이라
+> 녹/적이 맞다 — 일봉(블루)과 다른 것은 역할이 다르기 때문이지 불일치가 아니다.
+
+## 전 차트 공통 (Tier 무관)
+
+| 항목 | 규칙 | 근거 |
+|---|---|---|
+| **세로 그리드** | **금지** (`drawVerticalLine: false`) | 격자가 선의 흐름을 끊는다. 레퍼런스는 가로선만 |
+| 가로 그리드 | `chartGridLine` 원색, `AppStroke.thin` | 알파 조절 대신 토큰 색을 그대로 |
+| 축 선 | 없음 (`borderData.show: false`) | 레퍼런스 일치 |
+| 축 라벨 | **`caption`(11)**. 레퍼런스 11.5dp | `micro`(10)는 읽기 어려웠다 |
+| 색 소스 | **`mlColors`만**. `colorScheme` 금지 | 축 라벨 색이 두 체계에 걸쳐 있었다 |
+
+### ⚠️ 축 라벨을 올릴 때 반드시 함께 볼 것
+fl_chart `reservedSize`는 **하드 클립 경계**라 소프트 폴백이 없다.
+- **좌축** = 폭 제약 → 라벨 상향에 여유가 있다 (40~50이면 11px 안전)
+- **하단축** = 높이 제약 → **`reservedSize`를 함께 올려야 한다** (30 → 34)
+
+이번 스윕에서 확대 1.3× 기준으로 이미 넘치고 있던 기존 결함 2건도 해소:
+`earnings_chart_widget`(하단 40 → 52, Text 3개 누적), `earnings_week_card`
+(고정 52×28에 28.08 필요 → FittedBox 방어).

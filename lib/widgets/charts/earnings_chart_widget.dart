@@ -156,12 +156,12 @@ class EarningsChartWidget extends StatelessWidget {
                   leftTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: true,
-                      reservedSize: 45,
+                      reservedSize: 48,
                       getTitlesWidget: (value, meta) {
                         return Text(
                           '\$${value.toStringAsFixed(2)}',
                           style: TextStyle(
-                            fontSize: AppTypography.chartLabel,
+                            fontSize: AppTypography.caption,
                             color: context.mlColors.textTertiary,
                           ),
                         );
@@ -171,7 +171,9 @@ class EarningsChartWidget extends StatelessWidget {
                   bottomTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: true,
-                      reservedSize: 40,
+                      // 하단에 Text 3개가 쌓이는데 40은 확대 1.3×에서 3px 넘쳤다
+                      // (개편 전부터 있던 결함). 라벨 상향과 함께 여유 확보.
+                      reservedSize: 52,
                       getTitlesWidget: (value, meta) {
                         final index = value.toInt();
                         if (index < 0 || index >= entries.length) {
@@ -196,7 +198,7 @@ class EarningsChartWidget extends StatelessWidget {
                               Text(
                                 label,
                                 style: const TextStyle(
-                                  fontSize: AppTypography.chartLabel,
+                                  fontSize: AppTypography.caption,
                                 ),
                               ),
                               // Surprise % below date
@@ -204,7 +206,7 @@ class EarningsChartWidget extends StatelessWidget {
                                 Text(
                                   '${e.surprisePct! >= 0 ? '+' : ''}${e.surprisePct!.toStringAsFixed(1)}%',
                                   style: TextStyle(
-                                    fontSize: AppTypography.chartMicro,
+                                    fontSize: AppTypography.caption,
                                     fontWeight: AppTypography.bold,
                                     color: e.isBeat
                                         ? context.mlColors.gainColor
@@ -215,7 +217,7 @@ class EarningsChartWidget extends StatelessWidget {
                                 Text(
                                   l10n.earningsScheduled,
                                   style: TextStyle(
-                                    fontSize: AppTypography.chartMicro,
+                                    fontSize: AppTypography.caption,
                                     color: context.mlColors.accentBlue,
                                     fontWeight: AppTypography.medium,
                                   ),
