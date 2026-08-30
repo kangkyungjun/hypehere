@@ -11,7 +11,7 @@ import 'package:marketlens/theme/app_colors.dart';
 void main() {
   testWidgets('ChatBubble golden — user/assistant on grouped bg',
       (tester) async {
-    await tester.binding.setSurfaceSize(const Size(380, 400));
+    await tester.binding.setSurfaceSize(const Size(380, 460));
 
     await tester.pumpWidget(
       MaterialApp(

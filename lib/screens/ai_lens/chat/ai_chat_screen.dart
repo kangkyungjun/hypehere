@@ -319,11 +319,12 @@ class _AiChatScreenState extends State<AiChatScreen> {
     ChatProvider chat,
   ) {
     return Container(
+      // 세로 패딩이 2px라 액션 바가 눌려 있었고 탭 타깃도 좁았다.
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.sm,
-        AppSpacing.xxs,
+        AppSpacing.xs,
         AppSpacing.sm,
-        AppSpacing.xxs,
+        AppSpacing.xs,
       ),
       decoration: BoxDecoration(
         border: Border(
@@ -433,9 +434,11 @@ class _AiChatScreenState extends State<AiChatScreen> {
         children: [
           // 오늘 첫 진입이면 면책 안내를 맨 위에 1회.
           if (_showDailyDisclaimer) _dailyDisclaimerBubble(l10n, mlc),
+          // 아이콘이 64라 화면 상단을 과하게 먹었다. 56으로 줄이고
+          // 아래 여백을 늘려 "아이콘+타이틀+부제"가 한 덩어리로 읽히게 한다.
           Container(
-            width: 64,
-            height: 64,
+            width: 56,
+            height: 56,
             decoration: BoxDecoration(
               color: mlc.infoBg,
               borderRadius: BorderRadius.circular(AppRadius.xl),
@@ -446,7 +449,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
               size: 30,
             ),
           ),
-          const SizedBox(height: AppSpacing.md),
+          const SizedBox(height: AppSpacing.lg),
 
           // 접속 인사("대화를 걸어주는" 멘트) — 2시간 쿨다운 통과 시에만.
           // 그 외엔 기존 빈 상태 타이틀/서브타이틀.
@@ -461,7 +464,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
                 color: mlc.textPrimary,
               ),
             ),
-            const SizedBox(height: AppSpacing.xs),
+            const SizedBox(height: AppSpacing.sm),
             Text(
               l10n.aiChatEmptySubtitle,
               textAlign: TextAlign.center,
@@ -471,7 +474,9 @@ class _AiChatScreenState extends State<AiChatScreen> {
 
           // 추천(예시) 질문 — 랜덤 5개, 탭 시 바로 전송.
           if (_suggestions.isNotEmpty) ...[
-            const SizedBox(height: AppSpacing.xl),
+            // 안내 덩어리와 추천 질문은 성격이 다른 구간이다.
+            // 불변식: 덩어리 안(8~16) < 구간 사이(32).
+            const SizedBox(height: AppSpacing.xxxl),
             Row(
               children: [
                 // 섹션 제목이 본문·버튼과 같은 13px이라 구간이 안 읽혔다.
@@ -511,7 +516,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: AppSpacing.sm),
+            const SizedBox(height: AppSpacing.md),
             Wrap(
               spacing: AppSpacing.sm,
               runSpacing: AppSpacing.sm,

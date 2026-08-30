@@ -34,10 +34,14 @@ class ChatBubble extends StatelessWidget {
           constraints: BoxConstraints(
             maxWidth: MediaQuery.of(context).size.width * 0.78,
           ),
+          // 발화 사이가 8px이라 턴 경계가 안 읽혔다. 한 턴(유저→AI)이
+          // 한 덩어리로 보이도록 유저 말풍선 아래는 좁게, AI 답변 아래는
+          // 넓게 둔다 — 근접성으로 턴을 묶는다.
           margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+          // 본문이 16px인데 패딩이 12/8이라 글자가 가장자리에 붙었다.
           padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.md,
-            vertical: AppSpacing.sm,
+            horizontal: AppSpacing.lg,
+            vertical: AppSpacing.md,
           ),
           decoration: BoxDecoration(
             color: mlc.accentBlue,
@@ -60,7 +64,10 @@ class ChatBubble extends StatelessWidget {
     final isErr = message.isError;
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.only(top: AppSpacing.xs, bottom: AppSpacing.lg),
+      margin: const EdgeInsets.only(
+        top: AppSpacing.xs,
+        bottom: AppDensity.sectionGap,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
