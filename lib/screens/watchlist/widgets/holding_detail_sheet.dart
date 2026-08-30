@@ -12,6 +12,7 @@ import '../../../utils/multilingual.dart';
 import 'transaction_row.dart';
 import '../../../widgets/common/ml_key_value_row.dart';
 import '../../../widgets/common/ml_show_more.dart';
+import '../../../widgets/common/bento_card.dart';
 
 /// Actions that can be returned from HoldingDetailSheet.
 enum HoldingAction { additionalBuy, sell, edit, delete, viewDetail }
@@ -102,18 +103,19 @@ class _HoldingDetailContentState extends State<_HoldingDetailContent> {
     final adviceList = portfolio.advice;
     final tickerAdvice = adviceList.where((a) => a.ticker == ticker).toList();
     final langCode = effectiveLanguageCode(context);
+    final mlc = context.mlColors;
 
     if (tickerAdvice.isEmpty) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
         child: Row(
           children: [
-            Icon(Icons.auto_awesome, size: 16, color: theme.colorScheme.outline),
+            Icon(Icons.auto_awesome, size: 16, color: mlc.textTertiary),
             const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: Text(
                 l10n.noAnalysisYet,
-                style: TextStyle(fontSize: AppTypography.bodySmall, color: theme.colorScheme.outline, fontStyle: FontStyle.italic),
+                style: TextStyle(fontSize: AppTypography.bodySmall, color: mlc.textTertiary, fontStyle: FontStyle.italic),
               ),
             ),
           ],
@@ -126,7 +128,7 @@ class _HoldingDetailContentState extends State<_HoldingDetailContent> {
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
-      color: theme.colorScheme.primaryContainer.withValues(alpha: 0.2),
+      color: mlc.infoBg,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.lg),
         child: Column(
@@ -134,16 +136,16 @@ class _HoldingDetailContentState extends State<_HoldingDetailContent> {
           children: [
             Row(
               children: [
-                Icon(Icons.auto_awesome, size: 14, color: theme.colorScheme.primary),
+                Icon(Icons.auto_awesome, size: 14, color: mlc.accentBlue),
                 const SizedBox(width: AppSpacing.sm),
-                Text(l10n.aiAdvice, style: TextStyle(fontSize: AppTypography.bodyMedium, fontWeight: AppTypography.semiBold, color: theme.colorScheme.primary)),
+                Text(l10n.aiAdvice, style: TextStyle(fontSize: AppTypography.bodyMedium, fontWeight: AppTypography.semiBold, color: mlc.accentBlue)),
               ],
             ),
             if (advice.summary != null) ...[
               const SizedBox(height: AppSpacing.sm),
               Text(
                 localizePacked(advice.summary!, langCode),
-                style: TextStyle(fontSize: AppTypography.bodyMedium, height: 1.4, color: theme.colorScheme.onSurface),
+                style: TextStyle(fontSize: AppTypography.bodyMedium, height: 1.4, color: mlc.textPrimary),
               ),
             ],
             if (advice.targetAction != null && advice.targetAction!.isNotEmpty) ...[
@@ -152,19 +154,19 @@ class _HoldingDetailContentState extends State<_HoldingDetailContent> {
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(AppRadius.md),
-                  color: theme.colorScheme.secondaryContainer.withValues(alpha: 0.3),
+                  color: mlc.groupedBackground,
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       '${l10n.recommendedAction}: ',
-                      style: TextStyle(fontSize: AppTypography.bodySmall, fontWeight: AppTypography.bold, color: theme.colorScheme.onSurfaceVariant),
+                      style: TextStyle(fontSize: AppTypography.bodySmall, fontWeight: AppTypography.bold, color: mlc.textSecondary),
                     ),
                     Expanded(
                       child: Text(
                         localizePacked(advice.targetAction!, langCode),
-                        style: TextStyle(fontSize: AppTypography.bodySmall, fontWeight: AppTypography.semiBold, height: 1.3, color: theme.colorScheme.onSurface),
+                        style: TextStyle(fontSize: AppTypography.bodySmall, fontWeight: AppTypography.semiBold, height: 1.3, color: mlc.textPrimary),
                       ),
                     ),
                   ],
@@ -212,6 +214,7 @@ class _HoldingDetailContentState extends State<_HoldingDetailContent> {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final h = widget.holding;
+    final mlc = context.mlColors;
     final isKo = Localizations.localeOf(context).languageCode == 'ko';
     final displayName = isKo && h.nameKo != null ? h.nameKo! : h.name ?? h.ticker;
 
@@ -224,20 +227,20 @@ class _HoldingDetailContentState extends State<_HoldingDetailContent> {
       padding: EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.md, AppSpacing.xl,
           AppSpacing.xxl + MediaQuery.of(context).viewPadding.bottom),
       children: [
-        // Drag handle
+        // ── 헤더: 핸들 + 티커 + 시그널 배지 ──
         Center(
           child: Container(
-            width: 40, height: 4,
+            width: 40,
+            height: 4,
             margin: const EdgeInsets.only(bottom: AppSpacing.lg),
             decoration: BoxDecoration(
-              color: theme.colorScheme.outline.withValues(alpha: 0.3),
+              color: mlc.subtleBorder,
               borderRadius: BorderRadius.circular(AppRadius.xxs),
             ),
           ),
         ),
-
-        // Header: ticker (tap→detail) + price + signal
         Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
               child: GestureDetector(
@@ -248,89 +251,129 @@ class _HoldingDetailContentState extends State<_HoldingDetailContent> {
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(h.ticker, style: TextStyle(fontSize: AppTypography.displayMedium, fontWeight: AppTypography.bold, color: theme.colorScheme.primary)),
+                        Text(
+                          h.ticker,
+                          style: AppTypography.screenTitle.copyWith(
+                            color: mlc.textPrimary,
+                          ),
+                        ),
                         const SizedBox(width: AppSpacing.xs),
-                        Icon(Icons.open_in_new, size: 14, color: theme.colorScheme.primary),
+                        Icon(
+                          Icons.open_in_new,
+                          size: 16,
+                          color: mlc.accentBlue,
+                        ),
                       ],
                     ),
-                    Text(displayName, style: TextStyle(fontSize: AppTypography.bodyMedium, color: theme.colorScheme.onSurfaceVariant)),
+                    Text(
+                      displayName,
+                      style: AppTypography.body.copyWith(
+                        color: mlc.textSecondary,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ],
                 ),
               ),
             ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                if (h.currentPrice != null)
-                  Text('\$${h.currentPrice!.toStringAsFixed(2)}', style: const TextStyle(fontSize: AppTypography.headlineMedium, fontWeight: AppTypography.semiBold, fontFeatures: AppTypography.tabularFigures))
-                else
-                  Text('—', style: TextStyle(fontSize: AppTypography.headlineMedium, color: theme.colorScheme.outline)),
-                Text(
-                  '${(h.changePct ?? 0) >= 0 ? '+' : ''}${(h.changePct ?? 0).toStringAsFixed(2)}%',
-                  style: TextStyle(fontSize: AppTypography.bodyMedium, color: (h.changePct ?? 0) >= 0 ? context.mlColors.gainColor : context.mlColors.lossColor, fontFeatures: AppTypography.tabularFigures),
-                ),
-              ],
-            ),
-            if (h.signal != null && _signalLabel(context, h.signal).isNotEmpty) ...[
-              const SizedBox(width: AppSpacing.md),
+            if (h.signal != null && _signalLabel(context, h.signal).isNotEmpty)
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.xs),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                  vertical: AppSpacing.xs,
+                ),
                 decoration: BoxDecoration(
                   color: _signalColor(context, h.signal),
-                  borderRadius: BorderRadius.circular(AppRadius.lg),
+                  borderRadius: BorderRadius.circular(AppRadius.badge),
                 ),
                 child: Text(
                   _signalLabel(context, h.signal),
-                  style: TextStyle(color: context.mlColors.onPrimary, fontSize: AppTypography.caption, fontWeight: AppTypography.bold),
+                  style: AppTypography.badgeLabel.copyWith(
+                    color: mlc.onPrimary,
+                  ),
                 ),
               ),
-            ],
           ],
         ),
-        const SizedBox(height: AppSpacing.lg),
+        const SizedBox(height: AppDensity.cardGap),
 
-        // Holding status card
-        Card(
-          elevation: 0,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
-          color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.lg),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(l10n.holdingStatus, style: TextStyle(fontSize: AppTypography.bodyMedium, fontWeight: AppTypography.semiBold, color: theme.colorScheme.onSurfaceVariant)),
-                const SizedBox(height: AppSpacing.sm),
-                Row(
-                  children: [
-                    _InfoItem(label: l10n.shares, value: h.shares?.toStringAsFixed(h.shares == h.shares?.truncateToDouble() ? 0 : 2) ?? '—'),
-                    _InfoItem(label: l10n.avgPriceLabel, value: '\$${h.avgPrice?.toStringAsFixed(2) ?? '—'}'),
-                    _InfoItem(label: l10n.currentValueLabel, value: h.currentPrice != null ? '\$${h.currentValue.toStringAsFixed(2)}' : '—'),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.xs),
-                Row(
-                  children: [
-                    Text(
-                      '${l10n.unrealizedPnl}: ',
-                      style: TextStyle(fontSize: AppTypography.bodySmall, color: theme.colorScheme.onSurfaceVariant),
-                    ),
-                    Text(
-                      '${h.pnl >= 0 ? '+' : ''}\$${h.pnl.toStringAsFixed(2)} (${h.pnlPct >= 0 ? '+' : ''}${h.pnlPct.toStringAsFixed(1)}%)',
-                      style: TextStyle(
-                        fontSize: AppTypography.bodySmall,
-                        fontWeight: AppTypography.semiBold,
-                        color: h.pnl >= 0 ? context.mlColors.gainColor : context.mlColors.lossColor,
-                        fontFeatures: AppTypography.tabularFigures,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+        // ── 현재가 카드 (레퍼런스 ①의 "내차 예상시세" 대응) ──
+        //
+        // 개편 전: 헤더 오른쪽에 16px로 눌려 있어 이 시트의 히어로가 없었다.
+        BentoCard(
+          child: Column(
+            children: [
+              MlKeyValueRow(
+                label: l10n.currentPrice,
+                value: h.currentPrice != null
+                    ? '\$${h.currentPrice!.toStringAsFixed(2)}'
+                    : '',
+                emphasis: MlKvEmphasis.strong,
+              ),
+              MlKeyValueRow(
+                label: l10n.macroChangeLabel,
+                value:
+                    '${(h.changePct ?? 0) >= 0 ? '+' : ''}'
+                    '${(h.changePct ?? 0).toStringAsFixed(2)}',
+                unit: '%',
+                emphasis: MlKvEmphasis.directional,
+              ),
+            ],
           ),
         ),
-        const SizedBox(height: AppSpacing.lg),
+        const SizedBox(height: AppDensity.cardGap),
+
+        // ── 보유 현황 카드 (레퍼런스 ③의 확장형 KV 대응) ──
+        //
+        // 개편 전: `Card(surfaceContainerHighest α0.4)` — 앱의 유일한 Material
+        // Card 표면이라 다른 카드와 회색이 미세하게 달랐다. BentoCard로 통일.
+        BentoCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.holdingStatus,
+                style: AppTypography.cardTitle.copyWith(
+                  color: mlc.textPrimary,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              MlKeyValueRow(
+                label: l10n.shares,
+                value:
+                    h.shares?.toStringAsFixed(
+                      h.shares == h.shares?.truncateToDouble() ? 0 : 2,
+                    ) ??
+                    '',
+              ),
+              MlKeyValueRow(
+                label: l10n.avgPriceLabel,
+                value: h.avgPrice != null
+                    ? '\$${h.avgPrice!.toStringAsFixed(2)}'
+                    : '',
+              ),
+              MlKeyValueRow(
+                label: l10n.currentValueLabel,
+                value: h.currentPrice != null
+                    ? '\$${h.currentValue.toStringAsFixed(2)}'
+                    : '',
+                emphasis: MlKvEmphasis.strong,
+              ),
+              MlKeyValueRow(
+                label: l10n.unrealizedPnl,
+                value:
+                    '${h.pnl >= 0 ? '+' : ''}\$${h.pnl.toStringAsFixed(2)}',
+                sub:
+                    '(${h.pnlPct >= 0 ? '+' : ''}'
+                    '${h.pnlPct.toStringAsFixed(1)}%)',
+                subColor: h.pnl >= 0 ? mlc.gainColor : mlc.lossColor,
+                emphasis: MlKvEmphasis.directional,
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: AppDensity.cardGap),
 
         // Inline AI advice
         _buildInlineAdvice(context, theme, l10n, h.ticker),
@@ -347,7 +390,7 @@ class _HoldingDetailContentState extends State<_HoldingDetailContent> {
         else if (_transactions.isEmpty)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
-            child: Text('—', style: TextStyle(color: theme.colorScheme.outline)),
+            child: Text('—', style: TextStyle(color: mlc.textTertiary)),
           )
         else ...[
           ...displayTxn.map((txn) => TransactionRow(txn: txn, avgPrice: h.avgPrice ?? 0)),
@@ -418,23 +461,3 @@ class _HoldingDetailContentState extends State<_HoldingDetailContent> {
   }
 }
 
-/// 보유 상세의 라벨+값 셀. 라벨이 `colorScheme.outline`(11px, 회색 배경 위
-/// 4.11:1로 AA 미달)이라 앱에서 가장 흐린 라벨이었다 — 프리미티브가 통일한다.
-class _InfoItem extends StatelessWidget {
-  final String label;
-  final String value;
-
-  const _InfoItem({required this.label, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: MlKeyValueRow(
-        label: label,
-        value: value,
-        layout: MlKvLayout.stack,
-        dense: true,
-      ),
-    );
-  }
-}
