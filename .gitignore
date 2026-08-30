@@ -91,4 +91,10 @@ SubscriptionKey_*.p8
 # Databases
 *.db
 *.sqlite3
-lib/preview_harness.dart
+# lib/preview_harness.dart — 추적 대상으로 전환(2026-08-30).
+# 배포 진입점이 아니라 별도 -t 타깃이라 앱 번들에 들어가지 않는다.
+# 로그인·네트워크 없이 티커상세를 렌더해 디자인 회귀를 눈으로 잡는 도구이므로
+# 커밋해서 재현 가능하게 둔다.
+
+# 골든 테스트 실패 산출물 (재생성 대상, 커밋 금지)
+test/failures/
