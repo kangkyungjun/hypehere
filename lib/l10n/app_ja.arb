@@ -893,6 +893,7 @@
   "volumeTop": "出来高",
   "topByMarketCap": "時価総額上位",
   "viewMore": "もっと見る",
+  "showLess": "折りたたむ",
 
   "gaugeStrongNegativeDesc": "強いネガティブ：株価下落の確率が非常に高い",
   "gaugeNegativeDesc": "ネガティブ：株価下落の確率が高い",

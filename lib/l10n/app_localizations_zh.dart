@@ -2386,6 +2386,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get viewMore => '查看更多';
 
   @override
+  String get showLess => '收起';
+
+  @override
   String get gaugeStrongNegativeDesc => '强烈负面：股价下跌概率极高';
 
   @override

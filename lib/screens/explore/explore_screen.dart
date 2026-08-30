@@ -16,6 +16,7 @@ import '../../theme/app_spacing.dart';
 import '../../theme/app_typography.dart';
 import '../../widgets/common/error_state_view.dart';
 import '../../widgets/common/bento_card.dart';
+import '../../widgets/common/ml_show_more.dart';
 /// Explore Screen - 검색/탐색 (도구형 검색)
 ///
 /// ⚠️ HypeHere 검색과 다름: 종목 중심, 빠른 진입
@@ -279,22 +280,14 @@ class _ExploreScreenState extends State<ExploreScreen> {
       itemBuilder: (context, index) {
         // "Load more" button at the end
         if (index == displayItems.length) {
-          final remaining = sorted.length - _classificationDisplayCount;
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
-            child: Center(
-              child: OutlinedButton(
-                onPressed: () => setState(() => _classificationDisplayCount += 20),
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text(
-                    Localizations.localeOf(context).languageCode == 'ko'
-                        ? '더보기 ($remaining)'
-                        : 'Show more ($remaining)',
-                  ),
-                ),
-              ),
-            ),
+          // 라벨이 인라인 하드코딩(ko/en 2개국어)이라 ja/zh/es에서 영어가 나왔다.
+          // 프리미티브가 l10n을 쓴다.
+          return MlShowMoreButton(
+            expanded: false,
+            collapsible: false,
+            remaining: sorted.length - _classificationDisplayCount,
+            onPressed: () =>
+                setState(() => _classificationDisplayCount += 20),
           );
         }
 

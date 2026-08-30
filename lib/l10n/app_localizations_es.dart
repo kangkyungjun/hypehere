@@ -2457,6 +2457,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get viewMore => 'Ver más';
 
   @override
+  String get showLess => 'Ver menos';
+
+  @override
   String get gaugeStrongNegativeDesc =>
       'Muy Negativo: Muy alta probabilidad de caída';
 

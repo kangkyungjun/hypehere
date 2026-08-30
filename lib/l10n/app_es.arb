@@ -893,6 +893,7 @@
   "volumeTop": "Volumen",
   "topByMarketCap": "Top por capitalización",
   "viewMore": "Ver más",
+  "showLess": "Ver menos",
 
   "gaugeStrongNegativeDesc": "Muy Negativo: Muy alta probabilidad de caída",
   "gaugeNegativeDesc": "Negativo: Alta probabilidad de caída",

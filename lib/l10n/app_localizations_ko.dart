@@ -2392,6 +2392,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get viewMore => '더보기';
 
   @override
+  String get showLess => '줄이기';
+
+  @override
   String get gaugeStrongNegativeDesc => '강력부정: 주가 하락 확률 매우 높음';
 
   @override

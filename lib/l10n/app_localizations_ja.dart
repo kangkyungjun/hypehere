@@ -2391,6 +2391,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get viewMore => 'もっと見る';
 
   @override
+  String get showLess => '折りたたむ';
+
+  @override
   String get gaugeStrongNegativeDesc => '強いネガティブ：株価下落の確率が非常に高い';
 
   @override

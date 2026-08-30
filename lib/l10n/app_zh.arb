@@ -893,6 +893,7 @@
   "volumeTop": "成交量",
   "topByMarketCap": "市值排名",
   "viewMore": "查看更多",
+  "showLess": "收起",
 
   "gaugeStrongNegativeDesc": "强烈负面：股价下跌概率极高",
   "gaugeNegativeDesc": "负面：股价下跌概率较高",

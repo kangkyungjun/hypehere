@@ -2432,6 +2432,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get viewMore => 'View More';
 
   @override
+  String get showLess => 'Show Less';
+
+  @override
   String get gaugeStrongNegativeDesc =>
       'Strong Negative: Very high probability of decline';
 

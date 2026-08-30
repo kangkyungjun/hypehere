@@ -3,12 +3,12 @@ import '../../models/ticker_score.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/analytics_api_client.dart';
 import '../../theme/app_colors.dart';
-import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 import '../../theme/app_typography.dart';
 import '../../widgets/ads/banner_ad_widget.dart';
 import '../../widgets/common/ml_divider.dart';
 import '../ticker_detail/ticker_detail_screen.dart';
+import '../../widgets/common/ml_show_more.dart';
 
 /// Full list screen for top stocks by AI score.
 ///
@@ -94,35 +94,12 @@ class _TopStocksListScreenState extends State<TopStocksListScreen> {
               itemBuilder: (context, index) {
                 // Last item = Load More button
                 if (hasMore && index == totalCount - 1) {
-                  return Padding(
-                    padding:
-                        const EdgeInsets.symmetric(vertical: AppSpacing.lg),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: TextButton(
-                        onPressed: () {
-                          setState(() {
-                            _displayCount += 30;
-                          });
-                        },
-                        style: TextButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: AppSpacing.md),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(AppRadius.md),
-                            side: BorderSide(color: mlc.subtleBorder),
-                          ),
-                        ),
-                        child: Text(
-                          l10n.viewMore,
-                          style: TextStyle(
-                            fontSize: AppTypography.bodySmall,
-                            fontWeight: AppTypography.semiBold,
-                            color: mlc.accentBlue,
-                          ),
-                        ),
-                      ),
-                    ),
+                  return MlShowMoreButton(
+                    expanded: false,
+                    collapsible: false,
+                    remaining: _stocks.length - visibleCount,
+                    onPressed: () =>
+                        setState(() => _displayCount += 30),
                   );
                 }
 

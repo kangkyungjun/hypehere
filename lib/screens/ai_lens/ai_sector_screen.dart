@@ -11,6 +11,7 @@ import '../../utils/app_page_route.dart';
 import '../../widgets/ads/banner_ad_widget.dart';
 import '../../widgets/common/error_state_view.dart';
 import '../ticker_detail/ticker_detail_screen.dart';
+import '../../widgets/common/ml_show_more.dart';
 
 /// AI섹터 탭 — AI 점수 순으로 종목을 전체부터 나열.
 ///
@@ -102,10 +103,6 @@ class _AiSectorScreenState extends State<AiSectorScreen> {
     if (_classification == code) return;
     setState(() => _classification = code);
     _load();
-  }
-
-  void _loadMore() {
-    setState(() => _visible = (_visible + _pageSize).clamp(0, _items.length));
   }
 
   void _onTickerTap(String ticker) {
@@ -254,29 +251,18 @@ class _AiSectorScreenState extends State<AiSectorScreen> {
     return widgets;
   }
 
+  /// 개편 전에는 접기가 불가능한 단방향이었다(한 번 펼치면 되돌릴 수 없음).
+  /// 프리미티브가 접기까지 담당한다.
   Widget _buildLoadMore(AppLocalizations l10n) {
-    final remaining = _items.length - _visible;
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: AppSpacing.sm,
-      ),
-      child: OutlinedButton(
-        onPressed: _loadMore,
-        style: OutlinedButton.styleFrom(
-          minimumSize: const Size.fromHeight(44),
-          side: BorderSide(color: context.mlColors.subtleBorder),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppRadius.full),
-          ),
-        ),
-        child: Text(
-          '${l10n.seeMore} (+$remaining)',
-          style: TextStyle(
-            fontSize: AppTypography.chipLabel.fontSize,
-            fontWeight: AppTypography.semiBold,
-            color: context.mlColors.accentBlue,
-          ),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+      child: MlShowMoreButton(
+        expanded: _visible >= _items.length,
+        remaining: _items.length - _visible,
+        onPressed: () => setState(
+          () => _visible = _visible >= _items.length
+              ? _pageSize
+              : (_visible + _pageSize).clamp(0, _items.length),
         ),
       ),
     );

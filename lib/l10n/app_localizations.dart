@@ -4622,6 +4622,12 @@ abstract class AppLocalizations {
   /// **'View More'**
   String get viewMore;
 
+  /// No description provided for @showLess.
+  ///
+  /// In en, this message translates to:
+  /// **'Show Less'**
+  String get showLess;
+
   /// No description provided for @gaugeStrongNegativeDesc.
   ///
   /// In en, this message translates to:

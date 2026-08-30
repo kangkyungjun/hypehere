@@ -978,6 +978,7 @@
   "volumeTop": "거래량",
   "topByMarketCap": "시가총액 상위",
   "viewMore": "더보기",
+  "showLess": "줄이기",
 
   "gaugeStrongNegativeDesc": "강력부정: 주가 하락 확률 매우 높음",
   "gaugeNegativeDesc": "부정: 주가 하락 확률 높음",

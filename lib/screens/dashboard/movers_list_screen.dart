@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import '../../models/treemap_data.dart';
 import '../../l10n/app_localizations.dart';
 import '../../theme/app_colors.dart';
-import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 import '../../theme/app_typography.dart';
 import '../../widgets/ads/banner_ad_widget.dart';
 import '../../widgets/common/ml_divider.dart';
 import '../ticker_detail/ticker_detail_screen.dart';
+import '../../widgets/common/ml_show_more.dart';
 
 /// Full list screen for movers (trading volume / gainers / losers).
 ///
@@ -87,7 +87,6 @@ class _MoversListScreenState extends State<MoversListScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final mlc = context.mlColors;
 
     final visibleCount =
         _displayCount.clamp(0, _sortedItems.length);
@@ -109,34 +108,12 @@ class _MoversListScreenState extends State<MoversListScreen> {
         itemBuilder: (context, index) {
           // Last item = Load More button
           if (hasMore && index == totalCount - 1) {
-            return Padding(
-              padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
-              child: SizedBox(
-                width: double.infinity,
-                child: TextButton(
-                  onPressed: () {
-                    setState(() {
-                      _displayCount += 30;
-                    });
-                  },
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: AppSpacing.md),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(AppRadius.md),
-                      side: BorderSide(color: mlc.subtleBorder),
-                    ),
-                  ),
-                  child: Text(
-                    l10n.viewMore,
-                    style: TextStyle(
-                      fontSize: AppTypography.bodySmall,
-                      fontWeight: AppTypography.semiBold,
-                      color: mlc.accentBlue,
-                    ),
-                  ),
-                ),
-              ),
+            return MlShowMoreButton(
+              expanded: false,
+              collapsible: false,
+              remaining: _sortedItems.length - visibleCount,
+              onPressed: () =>
+                  setState(() => _displayCount += 30),
             );
           }
 
