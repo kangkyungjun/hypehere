@@ -11,6 +11,7 @@ import '../../../theme/app_typography.dart';
 import '../../../utils/multilingual.dart';
 import 'transaction_row.dart';
 import '../../../widgets/common/ml_key_value_row.dart';
+import '../../../widgets/common/ml_show_more.dart';
 
 /// Actions that can be returned from HoldingDetailSheet.
 enum HoldingAction { additionalBuy, sell, edit, delete, viewDetail }
@@ -350,28 +351,13 @@ class _HoldingDetailContentState extends State<_HoldingDetailContent> {
           )
         else ...[
           ...displayTxn.map((txn) => TransactionRow(txn: txn, avgPrice: h.avgPrice ?? 0)),
-          if (hasMoreTxn && !_showAllTxn)
-            Padding(
-              padding: const EdgeInsets.only(top: AppSpacing.xs),
-              child: TextButton(
-                onPressed: () => setState(() => _showAllTxn = true),
-                child: Text(
-                  l10n.viewAllTransactions(_transactions.length),
-                  style: TextStyle(fontSize: AppTypography.bodySmall, color: theme.colorScheme.primary),
-                ),
-              ),
-            )
-          else if (_showAllTxn && hasMoreTxn)
-            Padding(
-              padding: const EdgeInsets.only(top: AppSpacing.xs),
-              child: TextButton.icon(
-                onPressed: () => setState(() => _showAllTxn = false),
-                icon: Icon(Icons.keyboard_arrow_up, size: 16, color: theme.colorScheme.primary),
-                label: Text(
-                  Localizations.localeOf(context).languageCode == 'ko' ? '줄이기' : 'Show less',
-                  style: TextStyle(fontSize: AppTypography.bodySmall, color: theme.colorScheme.primary),
-                ),
-              ),
+          // holdings_tab의 같은 블록과 **복붙**이었다(임계값만 3 vs 5).
+          // 프리미티브로 수렴 — 하드코딩 '줄이기'/'Show less'도 l10n으로.
+          if (hasMoreTxn)
+            MlShowMoreButton(
+              expanded: _showAllTxn,
+              remaining: _transactions.length - displayTxn.length,
+              onPressed: () => setState(() => _showAllTxn = !_showAllTxn),
             ),
         ],
 

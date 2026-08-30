@@ -7,6 +7,7 @@ import '../../../theme/app_typography.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../utils/multilingual.dart';
 import '../../../utils/score_mapper.dart';
+import '../../../widgets/common/ml_expandable_card.dart';
 
 class TickerInsightSection extends StatefulWidget {
   final CompleteChartData chartData;
@@ -23,7 +24,6 @@ class TickerInsightSection extends StatefulWidget {
 }
 
 class _TickerInsightSectionState extends State<TickerInsightSection> {
-  bool _showAIReasons = false;
 
   @override
   Widget build(BuildContext context) {
@@ -191,33 +191,39 @@ class _TickerInsightSectionState extends State<TickerInsightSection> {
           if ((latestData.aiBullishReasons != null && latestData.aiBullishReasons!.isNotEmpty) ||
               (latestData.aiBearishReasons != null && latestData.aiBearishReasons!.isNotEmpty)) ...[
             const SizedBox(height: AppSpacing.md),
-            InkWell(
-              onTap: () => setState(() => _showAIReasons = !_showAIReasons),
-              child: Container(
+            // 개편 전: 애니메이션 없이 `if (_showAIReasons)`로 즉시 나타나
+            // pop-in으로 튀었다. 트리거는 가운데 정렬 링크라 모양이 이미
+            // 정해져 있으므로 chevron은 호출부가 계속 갖는다(showChevron: false).
+            MlExpandableCard(
+              card: false,
+              divider: false,
+              showChevron: false,
+              tapTarget: MlExpandTapTarget.headerOnly,
+              headerBuilder: (context, expanded) => Container(
                 constraints: const BoxConstraints(minHeight: 44),
                 alignment: Alignment.center,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      _showAIReasons ? l10n.hideBullBearFactors : l10n.showBullBearFactors,
-                      style: TextStyle(
-                        fontSize: AppTypography.bodyLarge,
+                      expanded
+                          ? l10n.hideBullBearFactors
+                          : l10n.showBullBearFactors,
+                      style: AppTypography.bodyStrong.copyWith(
                         color: context.mlColors.accentBlue,
-                        fontWeight: AppTypography.semiBold,
                       ),
                     ),
                     Icon(
-                      _showAIReasons ? Icons.expand_less : Icons.expand_more,
+                      expanded ? Icons.expand_less : Icons.expand_more,
                       size: 18,
                       color: context.mlColors.accentBlue,
                     ),
                   ],
                 ),
               ),
-            ),
-
-            if (_showAIReasons) ...[
+              detail: (context) => Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
               const SizedBox(height: AppSpacing.md),
 
               // Bullish Reasons (강세 요인)
@@ -288,7 +294,9 @@ class _TickerInsightSectionState extends State<TickerInsightSection> {
                       ),
                     )),
               ],
-            ],
+                ],
+              ),
+            ),
           ],
 
           // Expert Analysis Section

@@ -25,6 +25,7 @@ import 'transaction_row.dart';
 import 'login_required_banner.dart';
 import '../../../widgets/common/coach_mark_overlay.dart';
 import '../../../providers/coach_mark_provider.dart';
+import '../../../widgets/common/ml_show_more.dart';
 
 /// Holdings tab: summary card, AI card, holdings list, recent transactions, empty state.
 class HoldingsTab extends StatefulWidget {
@@ -571,40 +572,16 @@ class _HoldingsTabState extends State<HoldingsTab> {
                 );
               }, childCount: displayRecentTxn.length),
             ),
-            if (hasMoreRecentTxn && !_showAllRecentTxn)
+            // 개편 전: 펼침/접힘이 각각 다른 위젯(TextButton / TextButton.icon)에
+            // 하드코딩 라벨('줄이기' : 'Show less')까지 있어 ja·zh·es에 영어가
+            // 나갔다. 프리미티브가 라벨·형태·l10n을 한 벌로 처리한다.
+            if (hasMoreRecentTxn)
               SliverToBoxAdapter(
-                child: Center(
-                  child: TextButton(
-                    onPressed: () => setState(() => _showAllRecentTxn = true),
-                    child: Text(
-                      l10n.viewAllTransactions(allTxn.length),
-                      style: TextStyle(
-                        fontSize: AppTypography.bodySmall,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                    ),
-                  ),
-                ),
-              )
-            else if (_showAllRecentTxn)
-              SliverToBoxAdapter(
-                child: Center(
-                  child: TextButton.icon(
-                    onPressed: () => setState(() => _showAllRecentTxn = false),
-                    icon: Icon(
-                      Icons.keyboard_arrow_up,
-                      size: 16,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                    label: Text(
-                      Localizations.localeOf(context).languageCode == 'ko'
-                          ? '줄이기'
-                          : 'Show less',
-                      style: TextStyle(
-                        fontSize: AppTypography.bodySmall,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                    ),
+                child: MlShowMoreButton(
+                  expanded: _showAllRecentTxn,
+                  remaining: allTxn.length - displayRecentTxn.length,
+                  onPressed: () => setState(
+                    () => _showAllRecentTxn = !_showAllRecentTxn,
                   ),
                 ),
               ),

@@ -176,4 +176,43 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('상세'), findsOneWidget);
   });
+
+  testWidgets('showChevron: false + headerBuilder — 호출부가 어포던스를 갖는다', (
+    tester,
+  ) async {
+    // 가운데 정렬 토글 링크처럼 트리거 모양이 이미 정해진 경우.
+    // 상태·애니메이션·접근성은 프리미티브가 제공하되 chevron은 넘긴다.
+    await tester.pumpWidget(
+      _host(
+        MlExpandableCard(
+          card: false,
+          showChevron: false,
+          tapTarget: MlExpandTapTarget.headerOnly,
+          headerBuilder: (_, expanded) => Text(expanded ? '접기' : '펼치기'),
+          detail: (_) => const Text('상세'),
+        ),
+      ),
+    );
+
+    expect(find.text('펼치기'), findsOneWidget);
+    expect(find.byIcon(Icons.keyboard_arrow_down_rounded), findsNothing);
+
+    await tester.tap(find.text('펼치기'));
+    await tester.pumpAndSettle();
+
+    // 라벨이 상태를 따라간다
+    expect(find.text('접기'), findsOneWidget);
+    expect(find.text('상세'), findsOneWidget);
+  });
+
+  testWidgets('header와 headerBuilder를 동시에 주면 assert', (tester) async {
+    expect(
+      () => MlExpandableCard(
+        header: const Text('제목'),
+        headerBuilder: (_, __) => const Text('제목'),
+        detail: (_) => const Text('상세'),
+      ),
+      throwsAssertionError,
+    );
+  });
 }

@@ -37,7 +37,8 @@ enum MlExpandTapTarget {
 class MlExpandableCard extends StatefulWidget {
   const MlExpandableCard({
     super.key,
-    required this.header,
+    this.header,
+    this.headerBuilder,
     required this.detail,
     this.summary,
     this.initiallyExpanded = false,
@@ -46,11 +47,21 @@ class MlExpandableCard extends StatefulWidget {
     this.margin,
     this.divider = true,
     this.card = true,
+    this.showChevron = true,
     this.onExpansionChanged,
-  });
+  }) : assert(
+         (header == null) != (headerBuilder == null),
+         'header 또는 headerBuilder 중 정확히 하나를 준다',
+       );
 
   /// 항상 보이는 헤더. chevron은 이 컴포넌트가 오른쪽에 붙인다.
-  final Widget header;
+  final Widget? header;
+
+  /// 접힘 상태에 따라 달라지는 헤더 — 라벨이 `펼치기 ↔ 접기`로 바뀌는 경우.
+  ///
+  /// [showChevron]`: false`와 함께 쓴다: 호출부가 어포던스를 직접 그리므로
+  /// 상태를 알아야 한다.
+  final Widget Function(BuildContext context, bool expanded)? headerBuilder;
 
   /// 펼쳤을 때만 보이는 내용. 접힌 동안 만들지 않도록 빌더로 받는다.
   final WidgetBuilder detail;
@@ -67,6 +78,12 @@ class MlExpandableCard extends StatefulWidget {
 
   /// 요약과 상세 사이 헤어라인.
   final bool divider;
+
+  /// 헤더 오른쪽에 기본 chevron을 붙일지.
+  ///
+  /// `false`면 **호출부가 어포던스를 직접 갖는다** — 가운데 정렬 토글 링크처럼
+  /// 트리거 모양이 이미 정해진 경우. 상태·애니메이션·접근성은 그대로 제공한다.
+  final bool showChevron;
 
   /// 카드 표면(BentoCard)으로 감쌀지.
   ///
@@ -95,22 +112,27 @@ class _MlExpandableCardState extends State<MlExpandableCard> {
     final noMotion = MediaQuery.disableAnimationsOf(context);
     final duration = noMotion ? Duration.zero : AppDuration.fast;
 
-    final headerRow = Row(
-      children: [
-        Expanded(child: widget.header),
-        const SizedBox(width: AppSpacing.sm),
-        AnimatedRotation(
-          duration: duration,
-          curve: AppDuration.standard,
-          turns: _expanded ? 0.5 : 0,
-          child: Icon(
-            Icons.keyboard_arrow_down_rounded,
-            size: 20,
-            color: mlc.textTertiary,
-          ),
-        ),
-      ],
-    );
+    final header =
+        widget.header ?? widget.headerBuilder!(context, _expanded);
+
+    final headerRow = widget.showChevron
+        ? Row(
+            children: [
+              Expanded(child: header),
+              const SizedBox(width: AppSpacing.sm),
+              AnimatedRotation(
+                duration: duration,
+                curve: AppDuration.standard,
+                turns: _expanded ? 0.5 : 0,
+                child: Icon(
+                  Icons.keyboard_arrow_down_rounded,
+                  size: 20,
+                  color: mlc.textTertiary,
+                ),
+              ),
+            ],
+          )
+        : header;
 
     final body = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
