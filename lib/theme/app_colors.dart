@@ -186,23 +186,23 @@ class MarketLensColors extends ThemeExtension<MarketLensColors> {
   static const light = MarketLensColors(
     cardBackground: Colors.white,
     chartBackground: Color(0xFFFFFFFF),
-    chartGridLine: Color(0xFFD9DFE8),
+    chartGridLine: Color(0xFFE7EAEE),
     chartTooltipBg: Color(0xEE111827),
-    subtleBorder: Color(0xFFD4D8DF),
+    subtleBorder: Color(0xFFD0D5DD),
     sectionBackground: Color(0xFFFFFFFF),
-    groupedBackground: Color(0xFFF4F5F7),
-    gainColor: Color(0xFF059669),
-    lossColor: Color(0xFFDC2626),
-    neutralColor: Color(0xFF78828F),
-    gainBg: Color(0xFFD4F3E3),
-    lossBg: Color(0xFFFFDFDF),
-    textPrimary: Color(0xFF111827),
-    textSecondary: Color(0xFF667085),
-    textTertiary: Color(0xFF7A8494),
-    accentBlue: Color(0xFF2563EB),
+    groupedBackground: Color(0xFFF2F4F7),
+    gainColor: Color(0xFF047857),
+    lossColor: Color(0xFFC81E1E),
+    neutralColor: Color(0xFF5A6472),
+    gainBg: Color(0xFFD1FAE5),
+    lossBg: Color(0xFFFEE2E2),
+    textPrimary: Color(0xFF101828),
+    textSecondary: Color(0xFF3D4757),
+    textTertiary: Color(0xFF667085),
+    accentBlue: Color(0xFF1D4ED8),
     warningColor: Color(0xFFB45309),
     warningBg: Color(0xFFFFF7E8),
-    dangerColor: Color(0xFFDC2626),
+    dangerColor: Color(0xFFC81E1E),
     dangerBg: Color(0xFFFFF0F0),
     onPrimary: Colors.white,
     infoBg: Color(0xFFF3F6FA),
@@ -234,25 +234,25 @@ class MarketLensColors extends ThemeExtension<MarketLensColors> {
   );
 
   static const dark = MarketLensColors(
-    cardBackground: Color(0xFF111111),
-    chartBackground: Color(0xFF111111),
-    chartGridLine: Color(0xFF2A2A2A),
+    cardBackground: Color(0xFF191C21),
+    chartBackground: Color(0xFF191C21),
+    chartGridLine: Color(0xFF262A31),
     chartTooltipBg: Color(0xFF080808),
-    subtleBorder: Color(0xFF3A3A3A),
-    sectionBackground: Color(0xFF000000),
-    groupedBackground: Color(0xFF0A0A0A),
+    subtleBorder: Color(0xFF333842),
+    sectionBackground: Color(0xFF191C21),
+    groupedBackground: Color(0xFF090A0C),
     gainColor: Color(0xFF34D399), // Emerald 400 — 다크 배경에 가독성 확보
-    lossColor: Color(0xFFF87171), // Red 400 — 다크 배경에 가독성 확보
-    neutralColor: Color(0xFFBDBDBD), // grey 400
-    gainBg: Color(0xFF064E3B), // Emerald 900 계열
-    lossBg: Color(0xFF450A0A), // Red 950 계열
-    textPrimary: Color(0xFFF8FAFC),
-    textSecondary: Color(0xFFCBD5E1),
-    textTertiary: Color(0xFF94A3B8),
-    accentBlue: Color(0xFF60A5FA), // Blue 400 — 다크 배경에 선명
+    lossColor: Color(0xFFFB8A8A), // 다크 카드 위 7.41:1
+    neutralColor: Color(0xFF8F9AA9), // 블루뉴트럴 — 라이트와 대비 패리티 1.00x
+    gainBg: Color(0xFF0F2E22), // Emerald 900 계열
+    lossBg: Color(0xFF351717), // Red 950 계열
+    textPrimary: Color(0xFFF1F5F9),
+    textSecondary: Color(0xFFAEB9C7),
+    textTertiary: Color(0xFF7C8798),
+    accentBlue: Color(0xFF7DB3FB), // Blue 400 — 다크 배경에 선명
     warningColor: Color(0xFFFFB74D), // orange 300 — 다크 배경에 가독성 확보
     warningBg: Color(0xFF3E2A1E), // 다크 orange tint
-    dangerColor: Color(0xFFEF5350), // red 400
+    dangerColor: Color(0xFFFB8A8A), // red 400
     dangerBg: Color(0xFF3E1E1E), // 다크 red tint
     onPrimary: Colors.white,
     infoBg: Color(0xFF171A1F),

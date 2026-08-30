@@ -27,28 +27,23 @@ class BentoCard extends StatelessWidget {
     final radius = BorderRadius.circular(AppRadius.card);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    // 오늘의집 톤: 테두리 없이 부드러운 그림자로 카드를 띄운다.
+    // 테두리 없이 부드러운 그림자로 카드를 띄운다(레퍼런스 일치).
     // 기본은 옅은 card 그림자, emphasized는 한 단계 강한 md 그림자.
     //
-    // 다크 모드: 검정 그림자는 어두운 배경 위에서 사실상 보이지 않고,
-    // 카드(#111) vs 배경(#0A0A0A) 명도 단차가 매우 약해 카드 경계가
-    // 뭉개진다. 라이트 테마의 무테 디자인은 유지하면서, 다크에서만
-    // subtleBorder 기반 저알파 헤어라인으로 카드 분리를 회복한다.
-    final border = isDark
-        ? Border.all(
-            color: mlc.subtleBorder.withValues(alpha: 0.55),
-            width: 0.5,
-          )
-        : null;
-
+    // 다크 모드: 검정 배경 위의 검정 그림자는 보이지 않으므로 **명도 스텝**으로
+    // 카드를 분리한다. 개편 전 카드(#111111) vs 배경(#0A0A0A)이 1.048:1이라
+    // 사실상 구분이 안 됐고, 그 실패를 저알파 헤어라인으로 임시 보완하고 있었다.
+    // 이제 카드(#191C21) vs 배경(#090A0C) = 1.159:1로 스텝 자체가 충분하므로
+    // 헤어라인을 제거하고, 무의미한 그림자 렌더링도 끈다.
     return Container(
       margin: margin,
       decoration: BoxDecoration(
         borderRadius: radius,
-        border: border,
-        boxShadow: emphasized
-            ? AppShadow.md(Colors.black)
-            : AppShadow.card(Colors.black),
+        boxShadow: isDark
+            ? const []
+            : (emphasized
+                  ? AppShadow.md(Colors.black)
+                  : AppShadow.card(Colors.black)),
       ),
       child: Material(
         color: mlc.cardBackground,
