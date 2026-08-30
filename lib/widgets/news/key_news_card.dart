@@ -6,7 +6,7 @@ import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 import '../../theme/app_typography.dart';
 import '../../utils/multilingual.dart';
-import '../common/bento_card.dart';
+import '../common/ml_expandable_card.dart';
 import 'market_news_modal.dart';
 
 /// Collapsible "Today's Key News" card: a numbered 1..5 list of the
@@ -22,8 +22,6 @@ class KeyNewsCard extends StatefulWidget {
 }
 
 class _KeyNewsCardState extends State<KeyNewsCard> {
-  bool _collapsed = false;
-
   @override
   Widget build(BuildContext context) {
     if (widget.items.isEmpty) return const SizedBox.shrink();
@@ -32,70 +30,41 @@ class _KeyNewsCardState extends State<KeyNewsCard> {
     final langCode = Localizations.localeOf(context).languageCode;
     final mlc = context.mlColors;
 
-    return BentoCard(
+    // 개편 전: `_collapsed`(다른 곳은 전부 `_expanded`라 **극성이 반대**),
+    // chevron 회전 turns도 뒤집혀 있었고, curve 없이 200ms 하드코딩이었다.
+    // 프리미티브가 상태·회전·애니메이션·Semantics를 전부 담당한다.
+    return MlExpandableCard(
+      initiallyExpanded: true,
+      tapTarget: MlExpandTapTarget.headerOnly,
       margin: const EdgeInsets.only(bottom: AppSpacing.xl),
+      divider: false,
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.lg,
         AppSpacing.sm,
         AppSpacing.lg,
         AppSpacing.sm,
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      header: Row(
         children: [
-          // Header (tap to collapse/expand)
-          InkWell(
-            onTap: () => setState(() => _collapsed = !_collapsed),
-            borderRadius: BorderRadius.circular(AppRadius.sm),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-              child: Row(
-                children: [
-                  Text(
-                    '❗',
-                    style: TextStyle(fontSize: AppTypography.bodyMedium),
-                  ),
-                  const SizedBox(width: AppSpacing.xs),
-                  Expanded(
-                    child: Text(
-                      l10n.keyNewsTitle,
-                      style: TextStyle(
-                        fontSize: AppTypography.bodyLarge,
-                        fontWeight: AppTypography.semiBold,
-                        color: mlc.textSecondary,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.xs),
-                  AnimatedRotation(
-                    turns: _collapsed ? 0.0 : 0.5,
-                    duration: const Duration(milliseconds: 200),
-                    child: Icon(
-                      Icons.expand_more,
-                      size: 22,
-                      color: mlc.textSecondary,
-                    ),
-                  ),
-                ],
+          Text('❗', style: TextStyle(fontSize: AppTypography.bodyMedium)),
+          const SizedBox(width: AppSpacing.xs),
+          Expanded(
+            child: Text(
+              l10n.keyNewsTitle,
+              style: AppTypography.bodyStrong.copyWith(
+                color: mlc.textSecondary,
               ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
-          // Body (animated collapse)
-          AnimatedSize(
-            duration: const Duration(milliseconds: 200),
-            alignment: Alignment.topCenter,
-            child: _collapsed
-                ? const SizedBox(width: double.infinity)
-                : Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      for (int i = 0; i < widget.items.length; i++)
-                        _buildRow(context, i, widget.items[i], langCode, mlc),
-                    ],
-                  ),
-          ),
+        ],
+      ),
+      detail: (_) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          for (int i = 0; i < widget.items.length; i++)
+            _buildRow(context, i, widget.items[i], langCode, mlc),
         ],
       ),
     );

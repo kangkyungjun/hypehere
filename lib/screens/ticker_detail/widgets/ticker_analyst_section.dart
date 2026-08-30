@@ -7,6 +7,7 @@ import '../../../theme/app_spacing.dart';
 import '../../../theme/app_typography.dart';
 import '../../../l10n/app_localizations.dart';
 import 'ticker_detail_helpers.dart';
+import '../../../widgets/common/ml_expandable_card.dart';
 
 class TickerAnalystSection extends StatefulWidget {
   final CompleteChartData chartData;
@@ -21,7 +22,6 @@ class TickerAnalystSection extends StatefulWidget {
 }
 
 class _TickerAnalystSectionState extends State<TickerAnalystSection> {
-  bool _showAllRatings = false;
 
   @override
   Widget build(BuildContext context) {
@@ -151,36 +151,32 @@ class _TickerAnalystSectionState extends State<TickerAnalystSection> {
           ],
 
           // Ratings 리스트 (접기/펼치기)
-          if (ratings != null && ratings.isNotEmpty) ...[
-            InkWell(
-              onTap: () => setState(() => _showAllRatings = !_showAllRatings),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          //
+          // 개편 전: 애니메이션 없이 `if (_showAllRatings)`로 즉시 나타나
+          // 콘텐츠가 pop-in으로 튀었다. chevron도 아이콘 스왑(expand_less↔more)
+          // 방언이었다. 프리미티브가 회전·AnimatedSize·Semantics를 담당한다.
+          // 이미 카드 안이므로 `card: false`.
+          if (ratings != null && ratings.isNotEmpty)
+            MlExpandableCard(
+              card: false,
+              divider: false,
+              header: Text(
+                l10n.recentAnalystRatings,
+                style: AppTypography.cardTitle.copyWith(
+                  color: context.mlColors.textPrimary,
+                ),
+              ),
+              detail: (_) => Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    l10n.recentAnalystRatings,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: AppTypography.bold,
-                        ),
-                  ),
-                  Icon(
-                    _showAllRatings ? Icons.expand_less : Icons.expand_more,
-                    color: Theme.of(context).colorScheme.outline,
-                  ),
+                  // 상태 분포 요약
+                  _buildStatusDistribution(ratings),
+                  const SizedBox(height: AppSpacing.md),
+                  // 정렬: target_to 기준 내림차순
+                  ..._buildRatingsListAll(ratings),
                 ],
               ),
             ),
-            if (_showAllRatings) ...[
-              const SizedBox(height: AppSpacing.md),
-
-              // 상태 분포 요약
-              _buildStatusDistribution(ratings),
-              const SizedBox(height: AppSpacing.md),
-
-              // 정렬: target_to 기준 내림차순
-              ..._buildRatingsListAll(ratings),
-            ],
-          ],
         ],
       ),
     );

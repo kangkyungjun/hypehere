@@ -1,28 +1,19 @@
 import 'package:flutter/material.dart';
 
 import '../../../models/chart_data.dart';
-import '../../../theme/app_colors.dart';
 import '../../../theme/app_spacing.dart';
-import '../../../theme/app_typography.dart';
 import '../../../widgets/common/ml_key_value_row.dart';
-import '../../../widgets/common/bento_card.dart';
+import '../../../widgets/common/ml_expandable_card.dart';
 
 /// 헤더(업데이트 날짜) ↔ 전문가 요약 사이의 작은 밸류에이션 카드.
 ///  - 접힘: 현재 PER · 선행 PER · EPS (한 줄)
 ///  - 탭 → 아래로 확장: PBR/ROE/ROA · 영업이익률/PSR/BPS · 매출성장/이익성장/부채비율
 ///  - 라벨=작은 회색, 숫자=크고 검정. 여백은 타이트하게, 기존 디자인 톤 유지.
 ///  - l10n 파일 변경 회피 위해 라벨은 인라인 다국어.
-class ValuationCard extends StatefulWidget {
+class ValuationCard extends StatelessWidget {
   final KeyMetrics? metrics;
 
   const ValuationCard({super.key, required this.metrics});
-
-  @override
-  State<ValuationCard> createState() => _ValuationCardState();
-}
-
-class _ValuationCardState extends State<ValuationCard> {
-  bool _expanded = false;
 
   // ── 포맷 헬퍼 ──
   static String _num(double? v) => v == null ? '-' : v.toStringAsFixed(1);
@@ -77,8 +68,7 @@ class _ValuationCardState extends State<ValuationCard> {
 
   @override
   Widget build(BuildContext context) {
-    final m = widget.metrics;
-    final mlc = context.mlColors;
+    final m = metrics;
     final lang = Localizations.localeOf(context).languageCode;
 
     // 접힘 3개가 전부 없으면 카드 숨김.
@@ -86,81 +76,37 @@ class _ValuationCardState extends State<ValuationCard> {
         m == null || (m.pe == null && m.forwardPe == null && m.eps == null);
     if (topEmpty) return const SizedBox.shrink();
 
+    // 확장 상태·chevron 회전·AnimatedSize·divider·Semantics는 전부
+    // MlExpandableCard가 담당한다. 여기 남는 건 "무엇을 접을지"뿐이다.
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
-      child: BentoCard(
-        onTap: () => setState(() => _expanded = !_expanded),
-        padding: const EdgeInsets.all(AppDensity.cardPad),
-        child: Column(
+      child: MlExpandableCard(
+        header: MlCardTitle(_title(lang)),
+        summary: _row([
+          (_lbl('curPe', lang), _num(m.pe)),
+          (_lbl('fwdPe', lang), _num(m.forwardPe)),
+          ('EPS', _money(m.eps)),
+        ]),
+        detail: (_) => Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 섹션 헤더(볼드·near-black) + chevron
-            Row(
-              children: [
-                Text(
-                  _title(lang),
-                  style: AppTypography.sectionTitle.copyWith(
-                    color: mlc.textPrimary,
-                  ),
-                ),
-                const Spacer(),
-                AnimatedRotation(
-                  duration: const Duration(milliseconds: 200),
-                  turns: _expanded ? 0.5 : 0,
-                  child: Icon(
-                    Icons.keyboard_arrow_down_rounded,
-                    size: 20,
-                    color: mlc.textTertiary,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            // 헤더 아래 헤어라인(섹션 구분)
-            Divider(height: 1, color: mlc.subtleBorder.withValues(alpha: 0.6)),
-            const SizedBox(height: AppSpacing.md),
-            // 접힘 줄
             _row([
-              (_lbl('curPe', lang), _num(m.pe)),
-              (_lbl('fwdPe', lang), _num(m.forwardPe)),
-              ('EPS', _money(m.eps)),
+              ('PBR', _num(m.pb)),
+              ('ROE', _pct(m.roe)),
+              ('ROA', _pct(m.roa)),
             ]),
-            // 펼침
-            AnimatedSize(
-              duration: const Duration(milliseconds: 200),
-              curve: Curves.easeInOut,
-              alignment: Alignment.topCenter,
-              child: _expanded
-                  ? Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: AppSpacing.sm),
-                        Divider(
-                          height: 1,
-                          color: mlc.subtleBorder.withValues(alpha: 0.6),
-                        ),
-                        const SizedBox(height: AppSpacing.sm),
-                        _row([
-                          ('PBR', _num(m.pb)),
-                          ('ROE', _pct(m.roe)),
-                          ('ROA', _pct(m.roa)),
-                        ]),
-                        const SizedBox(height: AppSpacing.md),
-                        _row([
-                          (_lbl('opMargin', lang), _pct(m.operatingMargin)),
-                          ('PSR', _num(m.ps)),
-                          ('BPS', _money(m.bps)),
-                        ]),
-                        const SizedBox(height: AppSpacing.md),
-                        _row([
-                          (_lbl('revG', lang), _pctSigned(m.revenueGrowth)),
-                          (_lbl('earnG', lang), _pctSigned(m.earningsGrowth)),
-                          (_lbl('de', lang), _num(m.debtToEquity)),
-                        ]),
-                      ],
-                    )
-                  : const SizedBox(width: double.infinity),
-            ),
+            const SizedBox(height: AppSpacing.md),
+            _row([
+              (_lbl('opMargin', lang), _pct(m.operatingMargin)),
+              ('PSR', _num(m.ps)),
+              ('BPS', _money(m.bps)),
+            ]),
+            const SizedBox(height: AppSpacing.md),
+            _row([
+              (_lbl('revG', lang), _pctSigned(m.revenueGrowth)),
+              (_lbl('earnG', lang), _pctSigned(m.earningsGrowth)),
+              (_lbl('de', lang), _num(m.debtToEquity)),
+            ]),
           ],
         ),
       ),
