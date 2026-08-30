@@ -294,7 +294,9 @@ class _AiChatScreenState extends State<AiChatScreen> {
                   ),
                   label: Text(
                     l10n.watchAd,
-                    style: AppTypography.label.copyWith(color: mlc.accentBlue),
+                    style: AppTypography.bodyStrong.copyWith(
+                      color: mlc.accentBlue,
+                    ),
                   ),
                 )
               else
@@ -343,7 +345,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
                 l10n.aiChatHistory,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: AppTypography.label.copyWith(color: mlc.textSecondary),
+                style: AppTypography.bodyStrong.copyWith(color: mlc.textSecondary),
               ),
             ),
           ),
@@ -355,7 +357,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
                 l10n.aiChatNew,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: AppTypography.label.copyWith(color: mlc.accentBlue),
+                style: AppTypography.bodyStrong.copyWith(color: mlc.accentBlue),
               ),
             ),
           ),
@@ -472,9 +474,12 @@ class _AiChatScreenState extends State<AiChatScreen> {
             const SizedBox(height: AppSpacing.xl),
             Row(
               children: [
+                // 섹션 제목이 본문·버튼과 같은 13px이라 구간이 안 읽혔다.
                 Text(
                   l10n.aiChatSuggestionsTitle,
-                  style: AppTypography.label.copyWith(color: mlc.textSecondary),
+                  style: AppTypography.cardTitle.copyWith(
+                    color: mlc.textPrimary,
+                  ),
                 ),
                 const Spacer(),
                 InkWell(
@@ -496,7 +501,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
                         const SizedBox(width: 2),
                         Text(
                           l10n.aiChatShuffle,
-                          style: AppTypography.label.copyWith(
+                          style: AppTypography.bodyStrong.copyWith(
                             color: mlc.accentBlue,
                           ),
                         ),
@@ -616,9 +621,10 @@ class _AiChatScreenState extends State<AiChatScreen> {
             children: [
               Icon(Icons.auto_awesome, size: 16, color: mlc.accentBlue),
               const SizedBox(width: 6),
+              // 이 화면의 주요 CTA다. 13px은 부차적 안내처럼 보였다.
               Text(
                 l.aiChatAnalyzeMyHoldings,
-                style: AppTypography.label.copyWith(
+                style: AppTypography.bodyStrong.copyWith(
                   color: mlc.accentBlue,
                   fontWeight: AppTypography.bold,
                 ),
@@ -674,9 +680,10 @@ class _AiChatScreenState extends State<AiChatScreen> {
             borderRadius: BorderRadius.circular(AppRadius.full),
             border: Border.all(color: mlc.subtleBorder),
           ),
+          // 탭하면 바로 전송되는 대상이라 읽히는 크기여야 한다.
           child: Text(
             s.text(isKo),
-            style: AppTypography.label.copyWith(color: mlc.textSecondary),
+            style: AppTypography.body.copyWith(color: mlc.textPrimary),
           ),
         ),
       ),
@@ -693,7 +700,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
       ),
       child: Text(
         l10n.aiChatErrorRetry,
-        style: AppTypography.label.copyWith(color: mlc.dangerColor),
+        style: AppTypography.bodyStrong.copyWith(color: mlc.dangerColor),
       ),
     );
   }

@@ -46,9 +46,7 @@ class ChatBubble extends StatelessWidget {
           ),
           child: Text(
             message.content,
-            style: AppTypography.body.copyWith(
-              fontSize: AppTypography.headlineMedium,
-              height: 1.55,
+            style: AppTypography.chatBody.copyWith(
               color: mlc.onPrimary,
             ),
           ),
@@ -79,10 +77,8 @@ class ChatBubble extends StatelessWidget {
           ),
           SelectableText(
             message.content,
-            style: AppTypography.body.copyWith(
-              fontSize: AppTypography.headlineMedium,
+            style: AppTypography.chatBody.copyWith(
               color: isErr ? mlc.dangerColor : mlc.textPrimary,
-              height: 1.55,
             ),
           ),
           // 정상 답변일 때만 복사 / 공유 노출.
@@ -135,7 +131,7 @@ class ChatBubble extends StatelessWidget {
               label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: AppTypography.label.copyWith(color: mlc.textSecondary),
+              style: AppTypography.bodyStrong.copyWith(color: mlc.textSecondary),
             ),
           ],
         ),

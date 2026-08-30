@@ -170,6 +170,16 @@ abstract final class AppTypography {
     height: 1.45,
   );
 
+  /// 채팅 산문 — 대화는 길게 읽으므로 본문(15)보다 한 단계 크고 행간도 넉넉히.
+  ///
+  /// 개편 전 두 말풍선이 각각 `body.copyWith(fontSize: headlineMedium,
+  /// height: 1.55)`로 같은 오버라이드를 반복하고 있었다.
+  static const TextStyle chatBody = TextStyle(
+    fontSize: headlineMedium,
+    fontWeight: regular,
+    height: 1.55,
+  );
+
   /// 강조 본문. (14 w600)
   static const TextStyle bodyStrong = TextStyle(
     fontSize: bodyLarge,
