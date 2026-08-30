@@ -22,10 +22,15 @@ enum MlKvEmphasis {
   /// 카드의 대표값 — `priceCard`(16 w600).
   strong,
 
-  /// 비방향성 히어로(목표가·집계 규모) — accentBlue.
+  /// 비방향성 히어로(목표가·집계 규모) — accentBlue + `priceCard`(20).
   ///
   /// ⚠️ 방향성 수치(가격 변동·손익)에는 쓰지 않는다. RULE-BLUE 참조.
   blue,
+
+  /// 카드 하나를 통째로 대표하는 집계 숫자 — accentBlue + `priceLarge`(31).
+  ///
+  /// 공매도 비율·기관 순매수처럼 그 카드의 존재 이유인 값에만 쓴다.
+  blueHero,
 
   /// 방향성 수치 — 값의 부호로 gain/loss 색이 자동 결정된다.
   directional,
@@ -100,18 +105,18 @@ class MlKeyValueRow extends StatelessWidget {
         ? mlc.textTertiary
         : switch (emphasis) {
             MlKvEmphasis.normal || MlKvEmphasis.strong => mlc.textPrimary,
-            MlKvEmphasis.blue => mlc.accentBlue,
+            MlKvEmphasis.blue || MlKvEmphasis.blueHero => mlc.accentBlue,
             MlKvEmphasis.directional =>
               shown.startsWith('-') || shown.startsWith('▼')
                   ? mlc.lossColor
                   : mlc.gainColor,
           };
 
-    final valueStyle =
-        (emphasis == MlKvEmphasis.strong
-                ? AppTypography.priceCard
-                : AppTypography.kvValue)
-            .copyWith(color: valueColor);
+    final valueStyle = switch (emphasis) {
+      MlKvEmphasis.blueHero => AppTypography.priceLarge,
+      MlKvEmphasis.strong || MlKvEmphasis.blue => AppTypography.priceCard,
+      _ => AppTypography.kvValue,
+    }.copyWith(color: valueColor);
 
     final labelWidget = Text(
       label,

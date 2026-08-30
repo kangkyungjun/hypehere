@@ -5,6 +5,7 @@ import '../../theme/app_colors.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 import '../../theme/app_typography.dart';
+import '../common/ml_key_value_row.dart';
 
 /// 공매도 위젯
 ///
@@ -85,6 +86,7 @@ class ShortInterestWidget extends StatelessWidget {
     return null;
   }
 
+  /// 공매도 집계 카드 — 값은 **비방향성 히어로**라 블루(RULE-BLUE).
   Widget _buildMetricCard(
     BuildContext context, {
     required String title,
@@ -96,32 +98,11 @@ class ShortInterestWidget extends StatelessWidget {
         color: context.mlColors.cardBackground,
         borderRadius: BorderRadius.circular(AppRadius.lg),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: AppTypography.bodySmall,
-              color: context.mlColors.textSecondary,
-              fontWeight: AppTypography.medium,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          // 비방향성 집계 히어로 숫자 → accentBlue. FittedBox로 오버플로 방어.
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child: Text(
-              value,
-              style: TextStyle(
-                fontSize: AppTypography.displaySmall,
-                fontWeight: AppTypography.bold,
-                color: context.mlColors.accentBlue,
-              ),
-            ),
-          ),
-        ],
+      child: MlKeyValueRow(
+        label: title,
+        value: value,
+        layout: MlKvLayout.stack,
+        emphasis: MlKvEmphasis.blueHero,
       ),
     );
   }

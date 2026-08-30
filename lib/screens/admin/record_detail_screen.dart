@@ -9,6 +9,7 @@ import '../../theme/app_typography.dart';
 import '../../widgets/common/bento_card.dart';
 import 'record_form_sheet.dart';
 import 'subtask_detail_sheet.dart';
+import '../../widgets/common/ml_key_value_row.dart';
 
 /// 기록 상세 (Master 전용).
 /// kind별 hero 영역 + 라벨/값 리스트 + 종류별 보조 액션.
@@ -899,33 +900,9 @@ class _RecordDetailScreenState extends State<RecordDetailScreen> {
   }
 
   // ── 작은 위젯들 ──
+  /// 라벨 고정폭 80 — 값 시작 x를 세로로 맞춘다(레퍼런스 KV 리듬).
   Widget _kv(String k, String v) {
-    final mlc = context.mlColors;
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: 80,
-          child: Text(
-            k,
-            style: TextStyle(
-              fontSize: AppTypography.bodySmall,
-              color: mlc.textSecondary,
-            ),
-          ),
-        ),
-        Expanded(
-          child: Text(
-            v,
-            style: TextStyle(
-              fontSize: AppTypography.bodyLarge,
-              color: mlc.textPrimary,
-              fontWeight: AppTypography.semiBold,
-            ),
-          ),
-        ),
-      ],
-    );
+    return MlKeyValueRow(label: k, value: v, labelWidth: 80, dense: true);
   }
 
   Widget _statusChip(String? status, Color color, MarketLensColors mlc) {

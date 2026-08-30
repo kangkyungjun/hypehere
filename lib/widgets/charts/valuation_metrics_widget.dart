@@ -5,6 +5,7 @@ import '../../theme/app_colors.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 import '../../theme/app_typography.dart';
+import '../common/ml_key_value_row.dart';
 
 /// Valuation metrics, profitability, and financial health grade widget
 ///
@@ -120,41 +121,24 @@ class ValuationMetricsWidget extends StatelessWidget {
     return Column(children: rows);
   }
 
+  /// 지표 타일 — 표면(카드)은 이 함수가, 라벨/값 위계는 프리미티브가 담당한다.
   Widget _buildMetricTile(BuildContext context, String label, String value) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xxs),
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg, horizontal: AppSpacing.md),
+      padding: const EdgeInsets.symmetric(
+        vertical: AppSpacing.sm,
+        horizontal: AppSpacing.md,
+      ),
       decoration: BoxDecoration(
         color: context.mlColors.cardBackground,
         borderRadius: BorderRadius.circular(AppRadius.md),
       ),
-      child: Column(
-        children: [
-          // 지표 라벨: 의미있는 소형 텍스트 한 단계 승격(caption→bodySmall) + textSecondary.
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Text(
-              label,
-              style: TextStyle(
-                fontSize: AppTypography.bodySmall,
-                color: context.mlColors.textSecondary,
-                fontWeight: AppTypography.medium,
-              ),
-            ),
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Text(
-              value,
-              style: const TextStyle(
-                fontSize: AppTypography.headlineSmall,
-                fontWeight: AppTypography.semiBold,
-                fontFeatures: AppTypography.tabularFigures,
-              ),
-            ),
-          ),
-        ],
+      child: MlKeyValueRow(
+        label: label,
+        value: value,
+        layout: MlKvLayout.stack,
+        emphasis: MlKvEmphasis.strong,
+        dense: true,
       ),
     );
   }

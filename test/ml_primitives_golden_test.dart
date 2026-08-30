@@ -64,6 +64,12 @@ void main() {
                               value: r'$212.00',
                               emphasis: MlKvEmphasis.blue,
                             ),
+                            MlKeyValueRow(
+                              label: '공매도 비율',
+                              value: '18.4',
+                              unit: '%',
+                              emphasis: MlKvEmphasis.blueHero,
+                            ),
                             MlKeyValueRow(label: '배당수익률', value: ''),
                           ],
                         ),

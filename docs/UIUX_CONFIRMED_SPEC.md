@@ -209,19 +209,33 @@ Phase 0이 원자적으로 설계돼 있어 첫 항목이 145개 감사를 요�
 부수 수정: 홈 종목코드 `GOOGL` 잘림(56→72 + FittedBox), 순위 배지 블루 오염 제거(RULE-BLUE B1),
 `up_down_tab` 등락률 폭 80→96, `portfolio_summary_card`의 `colorScheme` 드리프트 제거.
 
+### 🔄 진행 중 — 프리미티브 스윕
+
+| 프리미티브 | 이관 | 남음 | 비고 |
+|---|--:|--:|---|
+| `MlKeyValueRow` | **8/14** | 6 | `kvValue`·`rowV` 死코드 활성화 |
+| `MlExpandableCard` | **4/13** | 9 | `showChevron`/`headerBuilder`로 어포던스 위임 지원 |
+| `MlShowMore` | **6/7** | 1 | 단방향 4곳 → 접기 가능, `showLess` l10n 신설 |
+
+**순 라인**: 프리미티브 3개 신설 구간은 순증(+370)이었고, 신규 없이 이관만 한
+2차 배치부터 감소로 돌아섰다(−7). 남은 16벌을 흡수하면 누적도 뒤집힌다.
+
+#### 프리미티브에 넣지 않기로 한 것 (근거)
+- `admin_panel._statCell` / `chat_storage._statCell` — **stat 타일**(큰 숫자 +
+  캡션)이지 KV 행이 아니다. 전자는 라벨이 역할색으로 칠해지고 후자는 값이 위에
+  온다. 억지로 넣으면 프리미티브가 잡동사니가 된다.
+- `portfolio_summary_card._GridCell` — 히어로 그리드 셀. 값이 `priceLarge`(31)·
+  `changeHero`(20)로 KV 등급 밖이다.
+- `ticker_price_chart` 범례 토글 — 확장이 아니라 오버레이 표시/숨김.
+
 ### ⬜ 남음
 | 단계 | 내용 | 눈에 보이는 변화 |
 |---|---|---|
-| P1 | 프리미티브 5종 (`MlCard`·`MlKeyValueRow`·`MlSectionHeader`·`MlExpandableCard`·`MlShowMoreList`) | 헤이딜러 KV 리듬 등장 |
-| P2 | 파일럿 2화면 (`valuation_card` 203→110줄, `holding_detail_sheet` 452→260줄) | 보유 상세가 레퍼런스 ① 룩으로 |
-| P3 | 확장 로직 13벌 이관 | pop-in → 부드러운 확장, 접기 가능 |
-| P4 | 섹션 헤더 19벌 이관 | 제목 크기 7종 → 2종 |
-| P5 | 카드 표면 수렴 (`Border.all` 16곳) + 배지 | 표면 5종 → 1종 |
-| — | 차트 언어 (굵은 블루 스플라인·헤일로 마커·점선 가이드·Y축 물결) | 레퍼런스 ① 차트 |
-
-**예상 순 절감 ≈ -1,600줄.**
-
----
+| P1 | KV 6벌 · 확장 9벌 · 더보기 1벌 잔여 이관 | 화면별 편차 해소, 순 라인 감소 전환 |
+| P2 | 파일럿 화면 완성 (`holding_detail_sheet` 452줄 → 레퍼런스 ① 룩) | 헤이딜러 카드 리듬 |
+| P3 | 섹션 헤더 19벌 이관 | 제목 크기 7종 → 2종 |
+| P4 | 카드 표면 수렴 (`Border.all` 16곳) + 배지 | 표면 5종 → 1종 |
+| P5 | 티커 상세 섹션에 이름 붙이기 (l10n 필요) | 12개 무명 섹션이 구분됨 |
 
 ## 6. 이번엔 멈추지 않게 하는 장치
 
