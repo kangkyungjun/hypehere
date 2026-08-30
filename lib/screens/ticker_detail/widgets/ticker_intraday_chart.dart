@@ -8,6 +8,7 @@ import '../../../theme/app_radius.dart';
 import '../../../theme/app_spacing.dart';
 import '../../../theme/app_typography.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../theme/app_shadow.dart';
 
 /// 종목 상세 페이지의 단기 차트 — 1h(시간봉) ↔ 1d(최근 7일 일봉) 토글.
 ///
@@ -106,10 +107,12 @@ class _TickerIntradayChartState extends State<TickerIntradayChart> {
         vertical: AppSpacing.sm,
       ),
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+      // 앱의 카드 언어는 무테 + 그림자다. 테두리 박스는 다른 카드들과
+      // 나란히 놓였을 때 혼자 낡아 보인다.
       decoration: BoxDecoration(
         color: mlc.cardBackground,
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: mlc.subtleBorder),
+        borderRadius: BorderRadius.circular(AppRadius.card),
+        boxShadow: AppShadow.card(Colors.black),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

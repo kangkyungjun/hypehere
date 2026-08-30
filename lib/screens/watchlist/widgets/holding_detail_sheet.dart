@@ -125,12 +125,15 @@ class _HoldingDetailContentState extends State<_HoldingDetailContent> {
 
     final advice = tickerAdvice.first;
 
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
-      color: mlc.infoBg,
+    // 흰 카드가 아니라 **틴트 안내 표면**이다. Material `Card`를 쓰면 전역
+    // cardTheme(흰색·무테)과 섞여 의도가 흐려지므로 Container로 명시한다.
+    return Container(
+      decoration: BoxDecoration(
+        color: mlc.infoBg,
+        borderRadius: BorderRadius.circular(AppRadius.card),
+      ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.lg),
+        padding: const EdgeInsets.all(AppDensity.cardPad),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

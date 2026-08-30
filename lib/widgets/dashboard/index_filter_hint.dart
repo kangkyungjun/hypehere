@@ -5,6 +5,7 @@ import '../../theme/app_colors.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 import '../../theme/app_typography.dart';
+import '../../theme/app_shadow.dart';
 
 /// 지수 카드(S&P/NASDAQ/DOW) 탭 → 트리맵 필터 동작을 알리는 1회성 안내 배너.
 ///
@@ -63,8 +64,8 @@ class _IndexFilterHintState extends State<IndexFilterHint> {
       ),
       decoration: BoxDecoration(
         color: mlc.cardBackground,
-        borderRadius: BorderRadius.circular(AppRadius.md),
-        border: Border.all(color: mlc.subtleBorder, width: 1.0),
+        borderRadius: BorderRadius.circular(AppRadius.card),
+        boxShadow: AppShadow.card(Colors.black),
       ),
       child: Row(
         children: [

@@ -97,10 +97,14 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           padding: const EdgeInsets.all(AppSpacing.xl),
           children: [
             // 안내 카드
-            Card(
-              color: context.mlColors.infoBg,
+            // 틴트 안내 표면 — 위 주석과 같은 이유로 Container.
+            Container(
+              decoration: BoxDecoration(
+                color: context.mlColors.infoBg,
+                borderRadius: BorderRadius.circular(AppRadius.card),
+              ),
               child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.xl),
+                padding: const EdgeInsets.all(AppDensity.cardPad),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
