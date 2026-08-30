@@ -10,6 +10,7 @@ import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 import '../../theme/app_typography.dart';
 import '../../widgets/common/bento_card.dart';
+import '../../widgets/common/ml_key_value_row.dart';
 
 /// 활성 사용자 대시보드 — **Master 전용**.
 ///
@@ -496,35 +497,13 @@ class _ActiveUsersDashboardScreenState
 
   /// 라벨=뮤트, 값=진한 semiBold. [accent]=true면 비방향성 집계(수익/eCPM)를
   /// accentBlue로 강조. 값은 넘치지 않게 Flexible+scaleDown로 방어.
+  /// 관리자 통계 카드의 라벨+값 한 행.
   Widget _kv(String k, String v, BuildContext context, {bool accent = false}) {
-    final mlc = context.mlColors;
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 3),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              k,
-              style: AppTypography.kvLabel.copyWith(color: mlc.textSecondary),
-            ),
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          Flexible(
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.centerRight,
-              child: Text(
-                v,
-                maxLines: 1,
-                style: AppTypography.bodyStrong.copyWith(
-                  color: accent ? mlc.accentBlue : mlc.textPrimary,
-                  fontFeatures: AppTypography.tabularFigures,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
+    return MlKeyValueRow(
+      label: k,
+      value: v,
+      emphasis: accent ? MlKvEmphasis.blue : MlKvEmphasis.normal,
+      dense: true,
     );
   }
 }

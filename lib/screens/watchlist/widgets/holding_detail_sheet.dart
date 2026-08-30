@@ -10,6 +10,7 @@ import '../../../theme/app_radius.dart';
 import '../../../theme/app_typography.dart';
 import '../../../utils/multilingual.dart';
 import 'transaction_row.dart';
+import '../../../widgets/common/ml_key_value_row.dart';
 
 /// Actions that can be returned from HoldingDetailSheet.
 enum HoldingAction { additionalBuy, sell, edit, delete, viewDetail }
@@ -431,6 +432,8 @@ class _HoldingDetailContentState extends State<_HoldingDetailContent> {
   }
 }
 
+/// 보유 상세의 라벨+값 셀. 라벨이 `colorScheme.outline`(11px, 회색 배경 위
+/// 4.11:1로 AA 미달)이라 앱에서 가장 흐린 라벨이었다 — 프리미티브가 통일한다.
 class _InfoItem extends StatelessWidget {
   final String label;
   final String value;
@@ -440,12 +443,11 @@ class _InfoItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: Column(
-        children: [
-          Text(label, style: TextStyle(fontSize: AppTypography.caption, color: Theme.of(context).colorScheme.outline)),
-          const SizedBox(height: AppSpacing.xxs),
-          Text(value, style: const TextStyle(fontSize: AppTypography.bodyMedium, fontWeight: AppTypography.semiBold, fontFeatures: AppTypography.tabularFigures)),
-        ],
+      child: MlKeyValueRow(
+        label: label,
+        value: value,
+        layout: MlKvLayout.stack,
+        dense: true,
       ),
     );
   }

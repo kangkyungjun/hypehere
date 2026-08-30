@@ -58,6 +58,9 @@ abstract final class AppDensity {
   ///   못했다. 여백 총량을 늘리는 게 아니라 안쪽에서 바깥으로 옮기는 것이다.
   static const double cardGap = 12.0;
 
+  /// 4행 이상이 붙는 표에서의 키밸류 행 패딩 — [MlKeyValueRow]`(dense: true)`.
+  static const double rowVDense = 4.0;
+
   /// 서로 다른 성격의 **섹션 사이** 간격.
   ///
   /// 섹션 가시성은 글씨를 키워서가 아니라 이 여백의 비대칭(위 넓게/아래 좁게)과

@@ -7,6 +7,7 @@ import '../../../theme/app_radius.dart';
 import '../../../theme/app_spacing.dart';
 import '../../../theme/app_typography.dart';
 import '../../../utils/tax_calculator.dart';
+import '../../../widgets/common/ml_key_value_row.dart';
 
 /// Korean-only card showing estimated capital gains tax on US stock trades.
 ///
@@ -136,6 +137,11 @@ class TaxEstimateCard extends StatelessWidget {
   }
 }
 
+/// 세금 계산 카드의 라벨+값 한 행.
+///
+/// `bold`(합계 행)는 [MlKvEmphasis.strong]으로 옮긴다. 라벨이
+/// `colorScheme.onSurfaceVariant`(textSecondary보다 2배 진함)라 같은 화면의
+/// 다른 라벨과 색이 어긋나 있었다.
 class _TaxRow extends StatelessWidget {
   final String label;
   final String value;
@@ -151,26 +157,11 @@ class _TaxRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: AppTypography.bodySmall,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-            fontWeight: bold ? AppTypography.semiBold : AppTypography.regular,
-          ),
-        ),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: AppTypography.bodySmall,
-            fontWeight: bold ? AppTypography.bold : AppTypography.medium,
-            color: valueColor,
-          ),
-        ),
-      ],
+    return MlKeyValueRow(
+      label: label,
+      value: value,
+      emphasis: bold ? MlKvEmphasis.strong : MlKvEmphasis.normal,
+      dense: true,
     );
   }
 }

@@ -15,6 +15,7 @@ import '../../../theme/app_typography.dart';
 import '../../../widgets/dashboard/watchlist_discovery_card.dart';
 import '../../../widgets/ads/banner_ad_widget.dart';
 import '../../../widgets/common/bento_card.dart';
+import '../../../widgets/common/ml_key_value_row.dart';
 import '../../../widgets/common/error_state_view.dart';
 import '../../../widgets/common/coach_mark_overlay.dart';
 import '../../../providers/coach_mark_provider.dart';
@@ -35,11 +36,14 @@ class WatchlistEnrichment {
 class WatchlistTab extends StatelessWidget {
   final Map<String, TickerScore> tickerScores;
   final Map<String, WatchlistEnrichment> enrichment;
+
   /// ticker → 개인화 AI 의견. 서버 읽기 API(요청2) 확정·연결 전까지 비어 있으며,
   /// 비어 있으면 카드 하단 AI 블록은 렌더되지 않는다.
   final Map<String, WatchlistOpinion> opinions;
+
   /// 광고 시청으로 오늘 관심종목 AI 의견이 활성화됐는지(ad-free/Gold면 항상 활성).
   final bool opinionsAdUnlocked;
+
   /// AI 의견 잠금 해제용 보상형 광고 요청 콜백.
   final VoidCallback? onWatchAdForOpinions;
   final bool isLoading;
@@ -321,7 +325,9 @@ class WatchlistTab extends StatelessWidget {
                     name ?? l10n.tapToViewDetails,
                     style: TextStyle(
                       fontSize: AppTypography.bodySmall,
-                      color: name == null ? mlc.textTertiary : mlc.textSecondary,
+                      color: name == null
+                          ? mlc.textTertiary
+                          : mlc.textSecondary,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -387,7 +393,9 @@ class WatchlistTab extends StatelessWidget {
                                 height: 34,
                                 decoration: BoxDecoration(
                                   color: mlc.infoBg.withValues(alpha: 0.58),
-                                  borderRadius: BorderRadius.circular(AppRadius.lg),
+                                  borderRadius: BorderRadius.circular(
+                                    AppRadius.lg,
+                                  ),
                                 ),
                                 child: Icon(
                                   Icons.add_business,
@@ -463,8 +471,11 @@ class WatchlistTab extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  Icon(Icons.play_circle_outline,
-                      size: 18, color: mlc.textTertiary),
+                  Icon(
+                    Icons.play_circle_outline,
+                    size: 18,
+                    color: mlc.textTertiary,
+                  ),
                 ],
               ),
             ),
@@ -477,8 +488,8 @@ class WatchlistTab extends StatelessWidget {
     final stanceColor = stance == 'BUY'
         ? mlc.gainColor
         : stance == 'SELL'
-            ? mlc.lossColor
-            : mlc.textSecondary;
+        ? mlc.lossColor
+        : mlc.textSecondary;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -560,47 +571,12 @@ class WatchlistTab extends StatelessWidget {
     }
   }
 
+  /// 관심카드의 라벨+값 한 행. 스타일·정렬·축소 방어는 [MlKeyValueRow]가 담당.
   Widget _statRow(BuildContext context, String label, String value) {
-    final mlc = context.mlColors;
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxs),
-      child: Row(
-        children: [
-          Flexible(
-            child: Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: AppTypography.bodySmall,
-                fontWeight: AppTypography.medium,
-                color: mlc.textSecondary,
-              ),
-            ),
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          Flexible(
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.centerRight,
-              child: Text(
-                value,
-                style: TextStyle(
-                  fontSize: AppTypography.bodyLarge,
-                  fontWeight: AppTypography.semiBold,
-                  color: mlc.textPrimary,
-                  fontFeatures: AppTypography.tabularFigures,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+    return MlKeyValueRow(label: label, value: value, dense: true);
   }
 
-  String _fmtPrice(double? v) =>
-      v == null ? '—' : '\$${v.toStringAsFixed(2)}';
+  String _fmtPrice(double? v) => v == null ? '—' : '\$${v.toStringAsFixed(2)}';
 
   Widget _buildEmptyState(
     BuildContext context,
