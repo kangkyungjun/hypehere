@@ -3,7 +3,6 @@ import 'package:fl_chart/fl_chart.dart';
 import '../../../models/chart_data.dart';
 import '../../../theme/app_colors.dart';
 import '../../../theme/app_radius.dart';
-import '../../../theme/app_shadow.dart';
 import '../../../theme/app_spacing.dart';
 import '../../../theme/app_stroke.dart';
 import '../../../theme/app_typography.dart';
@@ -163,27 +162,16 @@ class _TickerPriceChartState extends State<TickerPriceChart> {
                 // Price Chart
                 LineChart(
                   LineChartData(
+                    // 레퍼런스 그리드: **가로선만**, 아주 연하게.
+                    // 세로선은 격자를 만들어 곡선의 흐름을 끊는다 — 레퍼런스에 없다.
                     gridData: FlGridData(
                       show: true,
-                      drawVerticalLine: true,
+                      drawVerticalLine: false,
                       horizontalInterval: priceRange > 0 ? priceRange / 5 : 1,
-                      verticalInterval: dataPoints.length > 1
-                          ? ((dataPoints.length / 0.6) / 5).ceilToDouble()
-                          : 1,
                       getDrawingHorizontalLine: (value) {
                         return FlLine(
-                          color: context.mlColors.chartGridLine.withValues(
-                            alpha: 0.72,
-                          ),
-                          strokeWidth: AppStroke.hairline,
-                        );
-                      },
-                      getDrawingVerticalLine: (value) {
-                        return FlLine(
-                          color: context.mlColors.chartGridLine.withValues(
-                            alpha: 0.45,
-                          ),
-                          strokeWidth: AppStroke.hairline,
+                          color: context.mlColors.chartGridLine,
+                          strokeWidth: AppStroke.thin,
                         );
                       },
                     ),
@@ -226,12 +214,22 @@ class _TickerPriceChartState extends State<TickerPriceChart> {
                       leftTitles: AxisTitles(
                         sideTitles: SideTitles(
                           showTitles: true,
-                          reservedSize: 50,
+                          reservedSize: 52,
+                          interval: priceRange > 0 ? priceRange / 5 : null,
                           getTitlesWidget: (value, meta) {
+                            // 축 끝값 라벨은 바로 옆 눈금과 겹친다($140 위에 $139).
+                            // 간격의 30% 이내로 붙으면 그리지 않는다.
+                            final step = priceRange > 0 ? priceRange / 5 : 1;
+                            if ((value - meta.min).abs() < step * 0.3 ||
+                                (meta.max - value).abs() < step * 0.3) {
+                              return const SizedBox.shrink();
+                            }
                             return Text(
                               '\$${value.toInt()}',
+                              // 레퍼런스 축 라벨 28.6‰ = 11.5dp. 10은 읽기 어려웠다.
+                              // 가로 폭 제약이라 확대해도 클립되지 않는다.
                               style: TextStyle(
-                                fontSize: AppTypography.micro,
+                                fontSize: AppTypography.caption,
                                 color: context.mlColors.textTertiary,
                               ),
                             );
@@ -244,11 +242,13 @@ class _TickerPriceChartState extends State<TickerPriceChart> {
                       bottomTitles: AxisTitles(
                         sideTitles: SideTitles(
                           showTitles: true,
-                          reservedSize: 30,
+                          // 라벨 11px + 상단 패딩 12 + 확대 1.3× 여유.
+                          reservedSize: 34,
                           interval: ((dataPoints.length / 0.6) / 4)
                               .ceilToDouble(), // 60:40 비율에 맞춰 간격 조정
                           getTitlesWidget: (value, meta) {
                             final index = value.toInt();
+                            final mlc = context.mlColors;
 
                             // 과거 데이터 영역 (왼쪽 60%)
                             if (index >= 0 && index < dataPoints.length) {
@@ -259,8 +259,9 @@ class _TickerPriceChartState extends State<TickerPriceChart> {
                                 ),
                                 child: Text(
                                   '${date.month}/${date.day}',
-                                  style: const TextStyle(
-                                    fontSize: AppTypography.micro,
+                                  style: TextStyle(
+                                    fontSize: AppTypography.caption,
+                                    color: mlc.textTertiary,
                                   ),
                                 ),
                               );
@@ -282,10 +283,10 @@ class _TickerPriceChartState extends State<TickerPriceChart> {
                                 child: Text(
                                   '${futureDate.month}/${futureDate.day}',
                                   style: TextStyle(
-                                    fontSize: AppTypography.micro,
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.outline, // 미래 날짜는 회색으로 구분
+                                    fontSize: AppTypography.caption,
+                                    // 미래 날짜는 한 단계 더 흐리게 구분
+                                    color: context.mlColors.textTertiary
+                                        .withValues(alpha: 0.6),
                                   ),
                                 ),
                               );
@@ -330,22 +331,28 @@ class _TickerPriceChartState extends State<TickerPriceChart> {
                             )
                             .toList(),
                         isCurved: true,
+                        // 레퍼런스 계측(화면폭 대비): 라인 13.0‰ = 5.2dp.
+                        // 3.0은 얇아서 "굵은 블루 곡선"이라는 인상이 안 났다.
+                        curveSmoothness: 0.32,
                         color: context.mlColors.accentBlue,
-                        barWidth: 3.0,
+                        barWidth: 5.0,
                         isStrokeCapRound: true,
                         // 마지막(현재가) 점만 헤일로와 함께 강조 — "여기가 현재".
+                        // 계측: 마커 지름 47.6‰ = 19.1dp(반경 9.5),
+                        //       헤일로 지름 86.6‰ = 34.8dp(반경 17.4 → stroke 8).
                         dotData: FlDotData(
                           show: true,
                           checkToShowDot: (spot, bar) =>
-                              bar.spots.isNotEmpty && spot.x == bar.spots.last.x,
+                              bar.spots.isNotEmpty &&
+                              spot.x == bar.spots.last.x,
                           getDotPainter: (spot, pct, bar, i) =>
                               FlDotCirclePainter(
-                            radius: 4.5,
-                            color: context.mlColors.accentBlue,
-                            strokeWidth: 4,
-                            strokeColor: context.mlColors.accentBlue
-                                .withValues(alpha: 0.25),
-                          ),
+                                radius: 9.5,
+                                color: context.mlColors.accentBlue,
+                                strokeWidth: 8,
+                                strokeColor: context.mlColors.accentBlue
+                                    .withValues(alpha: 0.22),
+                              ),
                         ),
                         belowBarData: BarAreaData(
                           show: true,
@@ -367,10 +374,35 @@ class _TickerPriceChartState extends State<TickerPriceChart> {
                             x: dataPoints
                                 .lastIndexWhere((d) => d.close != null)
                                 .toDouble(),
-                            color: context.mlColors.accentBlue
-                                .withValues(alpha: 0.45),
-                            strokeWidth: 1.5,
-                            dashArray: const [4, 4],
+                            color: context.mlColors.accentBlue.withValues(
+                              alpha: 0.55,
+                            ),
+                            strokeWidth: 1.7,
+                            dashArray: const [5, 5],
+                            // 레퍼런스는 점선 하단에 파란 볼드 라벨(`2만km`)을 붙여
+                            // "지금 어디인지"를 축에서도 읽게 한다.
+                            //
+                            // 축 눈금에 강조를 주는 방식은 성립하지 않는다 —
+                            // 눈금은 일정 간격으로 찍히고 현재 지점은 그 사이에
+                            // 떨어지므로 두 위치가 거의 겹치지 않는다.
+                            label: VerticalLineLabel(
+                              show: true,
+                              alignment: Alignment.bottomCenter,
+                              padding: const EdgeInsets.only(
+                                top: AppSpacing.xs,
+                              ),
+                              style: AppTypography.badgeLabel.copyWith(
+                                color: context.mlColors.accentBlue,
+                              ),
+                              labelResolver: (line) {
+                                final d =
+                                    dataPoints[dataPoints.lastIndexWhere(
+                                          (e) => e.close != null,
+                                        )]
+                                        .date;
+                                return '${d.month}/${d.day}';
+                              },
+                            ),
                           ),
                       ],
                       horizontalLines: [
@@ -416,18 +448,20 @@ class _TickerPriceChartState extends State<TickerPriceChart> {
                   Positioned(
                     top: 8,
                     right: 8,
+                    // 레퍼런스 범례는 차트 우상단에 **박스 없이** 얹힌다
+                    // (블루 점 + 뮤트 라벨). 테두리·그림자 상자는 차트 위에
+                    // 또 하나의 카드를 만들어 시선을 뺏는다.
                     child: Container(
-                      constraints: const BoxConstraints(maxWidth: 150),
-                      padding: const EdgeInsets.all(AppSpacing.md),
+                      constraints: const BoxConstraints(maxWidth: 160),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.sm,
+                        vertical: AppSpacing.xs,
+                      ),
                       decoration: BoxDecoration(
                         color: context.mlColors.cardBackground.withValues(
-                          alpha: 0.9,
+                          alpha: 0.85,
                         ),
-                        borderRadius: BorderRadius.circular(AppRadius.xs),
-                        border: Border.all(
-                          color: context.mlColors.subtleBorder,
-                        ),
-                        boxShadow: AppShadow.md(context.mlColors.overlayDim),
+                        borderRadius: BorderRadius.circular(AppRadius.badge),
                       ),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
@@ -460,26 +494,26 @@ class _TickerPriceChartState extends State<TickerPriceChart> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            width: 16,
-            height: 2,
-            decoration: BoxDecoration(
-              color: dashed ? null : color,
-              border: dashed
-                  ? Border(top: BorderSide(color: color, width: 1))
-                  : null,
-            ),
-            child: dashed
-                ? CustomPaint(painter: _DashedLinePainter(color))
-                : null,
-          ),
-          const SizedBox(width: AppSpacing.sm),
+          // 레퍼런스 범례 마커는 선분이 아니라 **점**(계측 15.2‰ = 6.1dp).
+          dashed
+              ? SizedBox(
+                  width: 16,
+                  height: 2,
+                  child: CustomPaint(painter: _DashedLinePainter(color)),
+                )
+              : Container(
+                  width: 6,
+                  height: 6,
+                  decoration: BoxDecoration(
+                    color: color,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+          const SizedBox(width: AppSpacing.xs),
           Text(
             label,
-            style: TextStyle(
-              fontSize: AppTypography.micro,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-              fontWeight: AppTypography.medium,
+            style: AppTypography.label.copyWith(
+              color: context.mlColors.textSecondary,
             ),
           ),
         ],
