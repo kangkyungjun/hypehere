@@ -351,7 +351,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                   child: Text(
                     score.toStringAsFixed(0),
                     style: TextStyle(
-                      fontSize: AppTypography.bodyMedium,
+                      fontSize: AppTypography.chipLabel.fontSize,
                       fontWeight: AppTypography.semiBold,
                       color: context.mlColors.accentBlue,
                     ),

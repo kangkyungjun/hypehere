@@ -37,17 +37,32 @@ abstract final class AppSpacing {
 /// 행 높이 등 "굶주려 답답해 보이던" 지점만 단일 상수로 잡는다. 값을 여기서만
 /// 바꾸면 [MlCard]/[BentoCard]·키밸류 컴포넌트에 일괄 반영된다.
 abstract final class AppDensity {
-  /// 콘텐츠 카드 내부 패딩 — 레퍼런스 카드(≈16~20). 밀도 단일 레버.
-  static const double cardPad = 18.0;
+  /// 콘텐츠 카드 내부 패딩. 밀도 단일 레버 — 여기만 바꾸면 26개 카드 일괄 반영.
+  ///
+  /// 18 → 16 (사용자 "과하다" 판정). 레퍼런스 계측도 16~18이라 하한을 택했다.
+  static const double cardPad = 16.0;
 
-  /// 카드 상단은 제목이 바짝 붙지 않게 살짝 더.
-  static const double cardPadTop = 14.0;
+  /// 카드 상단 — 제목이 바짝 붙지 않게 살짝만 더.
+  static const double cardPadTop = 12.0;
 
-  /// 키밸류 행 세로 패딩 — 영수증풍 편안한 행 높이.
-  static const double rowV = 12.0;
+  /// 키밸류 행의 **한쪽** 세로 패딩. 인접 행 사이 간격 = 2×rowV = 16.
+  ///
+  /// 계획서의 12는 현행 실측(0/2/3/4)에서 3~6배 점프라 과했다. 8이면
+  /// 모든 현행값보다는 크되 레퍼런스 행 간격(14~16)과 일치한다.
+  static const double rowV = 8.0;
 
-  /// 카드 사이 간격 — 카드가 개별 부유 객체로 읽히도록.
-  static const double cardGap = 16.0;
+  /// 카드 **사이** 간격.
+  ///
+  /// ★ 불변식: 카드 안쪽 블록 간격(≤sm=8) < 카드 사이(12) < 섹션 사이(sectionGap).
+  ///   개편 전에는 이게 뒤집혀 있어(안 18/12 vs 밖 8) 눈이 카드 경계를 읽지
+  ///   못했다. 여백 총량을 늘리는 게 아니라 안쪽에서 바깥으로 옮기는 것이다.
+  static const double cardGap = 12.0;
+
+  /// 서로 다른 성격의 **섹션 사이** 간격.
+  ///
+  /// 섹션 가시성은 글씨를 키워서가 아니라 이 여백의 비대칭(위 넓게/아래 좁게)과
+  /// [SectionHeader]의 액센트 바로 만든다.
+  static const double sectionGap = 20.0;
 }
 
 /// 화면 레이아웃 치수 토큰.

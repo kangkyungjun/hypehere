@@ -166,7 +166,7 @@ class _AiSectorScreenState extends State<AiSectorScreen> {
               borderRadius: BorderRadius.circular(AppRadius.badge),
             ),
             labelStyle: TextStyle(
-              fontSize: AppTypography.bodyMedium,
+              fontSize: AppTypography.chipLabel.fontSize,
               fontWeight: AppTypography.semiBold,
               color: selected
                   ? context.mlColors.accentBlue
@@ -273,7 +273,7 @@ class _AiSectorScreenState extends State<AiSectorScreen> {
         child: Text(
           '${l10n.seeMore} (+$remaining)',
           style: TextStyle(
-            fontSize: AppTypography.bodyMedium,
+            fontSize: AppTypography.chipLabel.fontSize,
             fontWeight: AppTypography.semiBold,
             color: context.mlColors.accentBlue,
           ),
