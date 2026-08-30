@@ -5,6 +5,7 @@ import '../../theme/app_colors.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 import '../../theme/app_typography.dart';
+import '../common/section_header.dart';
 import '../../utils/score_mapper.dart';
 import '../common/bento_card.dart';
 
@@ -66,29 +67,19 @@ class RecommendationGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     if (items.isEmpty) return const SizedBox.shrink();
 
-    final mlc = context.mlColors;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // ── 섹션 헤더 ──
-        Padding(
+        // 공용 SectionHeader로 수렴 — 손수 만든 헤더는 비대칭 여백·자격태그
+        // 같은 구간 분리 장치를 못 받는다. 아이콘이 있으므로 액센트 바는 자동 생략.
+        SectionHeader(
+          // "오늘의" 접두 제거 — 단순 "추천 종목"(인라인 5개국어, l10n 무변경).
+          title: _picksLabel(Localizations.localeOf(context).languageCode),
+          leading: const Icon(Icons.auto_awesome_rounded),
           padding: const EdgeInsets.only(
-            bottom: AppSpacing.md,
             left: AppSpacing.xxs,
-          ),
-          child: Row(
-            children: [
-              Icon(Icons.auto_awesome_rounded, color: mlc.accentBlue, size: 18),
-              const SizedBox(width: AppSpacing.sm),
-              Text(
-                // "오늘의" 접두 제거 — 단순 "추천 종목"(인라인 5개국어, l10n 무변경).
-                _picksLabel(Localizations.localeOf(context).languageCode),
-                style: AppTypography.sectionTitle.copyWith(
-                  color: mlc.textPrimary,
-                ),
-              ),
-            ],
+            bottom: AppSpacing.sm,
           ),
         ),
         // ── 2열 그리드 (상위 8개) ──
@@ -101,7 +92,11 @@ class RecommendationGrid extends StatelessWidget {
             crossAxisCount: 2,
             crossAxisSpacing: AppSpacing.md,
             mainAxisSpacing: AppSpacing.md,
-            mainAxisExtent: 160,
+            // 레퍼런스 ‰ 매칭으로 티커 16→18, 종가 16→20으로 커진 뒤 재실측:
+            // 1.0×에서 123, 텍스트 확대 1.3×에서 147. 150은 여유 3px.
+            // (Spacer 제거 전 160은 1.0×에서 47px을 빈 공간으로 낭비했다 —
+            //  지금 150은 글자가 커져서 채운 값이지 낭비가 아니다.)
+            mainAxisExtent: 150,
           ),
           itemBuilder: (context, i) => _RecoCard(
             item: items[i],
@@ -219,20 +214,36 @@ class _RecoCard extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
 
-              const Spacer(),
+              const SizedBox(height: AppSpacing.sm),
 
-              // 종가 + 변동률
-              if (item.close != null)
-                Text(
-                  '\$${_formatClose(item.close!)}',
-                  style: AppTypography.priceCard.copyWith(
-                    color: mlc.textPrimary,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+              // 종가 + 변동률 — 한 줄로 합친다.
+              //
+              // 개편 전: Spacer()가 라벨과 가격을 위아래로 갈라놓고, 종가와
+              // 변동률이 각각 별도 줄이었다. 고정 높이 160 대비 콘텐츠는 ~122라
+              // 38px(카드의 24%)가 가운데 구멍으로 남아 균형이 깨져 있었다.
+              // 한 줄로 합치고 Spacer를 없애 콘텐츠를 연속시킨다.
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
+                  children: [
+                    if (item.close != null) ...[
+                      Text(
+                        '\$${_formatClose(item.close!)}',
+                        style: AppTypography.priceCard.copyWith(
+                          color: mlc.textPrimary,
+                        ),
+                        maxLines: 1,
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                    ],
+                    _buildChangePct(item.changePct, mlc),
+                  ],
                 ),
-              const SizedBox(height: AppSpacing.xxs),
-              _buildChangePct(item.changePct, mlc),
+              ),
             ],
       ),
     );

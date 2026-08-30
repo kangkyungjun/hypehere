@@ -26,6 +26,7 @@ class WatchlistDiscoveryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     if (topItems.isEmpty) return const SizedBox.shrink();
+    final mlc = context.mlColors;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -40,19 +41,13 @@ class WatchlistDiscoveryCard extends StatelessWidget {
           ),
           child: Row(
             children: [
-              Icon(
-                Icons.bookmark_outline,
-                size: 20,
-                color: Theme.of(context).colorScheme.primary,
-              ),
+              Icon(Icons.bookmark_outline, size: 20, color: mlc.accentBlue),
               const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Text(
                   l10n.watchlistDiscoveryTitle,
-                  style: TextStyle(
-                    fontSize: AppTypography.headlineSmall,
-                    fontWeight: AppTypography.bold,
-                    color: Theme.of(context).colorScheme.onSurface,
+                  style: AppTypography.sectionTitle.copyWith(
+                    color: mlc.textPrimary,
                   ),
                 ),
               ),
@@ -70,10 +65,7 @@ class WatchlistDiscoveryCard extends StatelessWidget {
           ),
           child: Text(
             l10n.watchlistDiscoverySubtitle,
-            style: TextStyle(
-              fontSize: AppTypography.bodySmall,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
+            style: AppTypography.kvLabel.copyWith(color: mlc.textSecondary),
           ),
         ),
 
@@ -87,11 +79,7 @@ class WatchlistDiscoveryCard extends StatelessWidget {
           ),
           child: Text(
             l10n.topTradingVolume,
-            style: TextStyle(
-              fontSize: AppTypography.bodyMedium,
-              fontWeight: AppTypography.semiBold,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
+            style: AppTypography.bodyStrong.copyWith(color: mlc.textSecondary),
           ),
         ),
 
@@ -105,21 +93,41 @@ class WatchlistDiscoveryCard extends StatelessWidget {
           ),
           child: Consumer<WatchlistProvider>(
             builder: (context, watchlistProvider, _) {
-              return Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: topItems.map((item) {
-                  return _TickerTile(
-                    item: item,
-                    isInWatchlist: watchlistProvider.isInWatchlist(item.ticker),
-                    onToggle: () => _onToggleWatchlist(
-                      context,
-                      watchlistProvider,
-                      item.ticker,
-                    ),
-                    onTap: () => onTickerTap?.call(item.ticker),
+              // 가용 폭을 3등분해 타일 폭을 계산한다.
+              //
+              // 개편 전에는 `width: 110` 고정이라 3개(110×3) + 간격(8×2) = 346이
+              // 가용폭 358에 못 미쳐 **오른쪽에 12px이 남고 왼쪽으로 쏠렸다**.
+              // 화면 폭이 바뀌면 남는 양도 제각각이라 정렬이 항상 어긋난다.
+              // 폭을 계산하면 타일이 행을 꽉 채워 좌우 여백이 대칭이 되고,
+              // 카드도 그만큼 커진다.
+              return LayoutBuilder(
+                builder: (context, constraints) {
+                  const columns = 3;
+                  const gap = AppSpacing.sm;
+                  final tileWidth =
+                      (constraints.maxWidth - gap * (columns - 1)) / columns;
+                  return Wrap(
+                    spacing: gap,
+                    runSpacing: gap,
+                    children: topItems.map((item) {
+                      return SizedBox(
+                        width: tileWidth,
+                        child: _TickerTile(
+                          item: item,
+                          isInWatchlist: watchlistProvider.isInWatchlist(
+                            item.ticker,
+                          ),
+                          onToggle: () => _onToggleWatchlist(
+                            context,
+                            watchlistProvider,
+                            item.ticker,
+                          ),
+                          onTap: () => onTickerTap?.call(item.ticker),
+                        ),
+                      );
+                    }).toList(),
                   );
-                }).toList(),
+                },
               );
             },
           ),
@@ -175,71 +183,68 @@ class _TickerTile extends StatelessWidget {
     final arrow = isPositive ? '▲' : '▼';
     final sign = isPositive ? '+' : '';
 
-    return SizedBox(
-      width: 110,
-      child: BentoCard(
-        onTap: onTap,
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md,
-          vertical: AppSpacing.md,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Ticker + star
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    item.ticker,
-                    style: const TextStyle(
-                      fontSize: AppTypography.bodyMedium,
-                      fontWeight: AppTypography.bold,
-                    ),
-                    overflow: TextOverflow.ellipsis,
+    // 폭은 부모가 준다(행을 꽉 채우도록 계산됨). 여기서 고정하지 않는다.
+    return BentoCard(
+      onTap: onTap,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.md,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Ticker + star
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  item.ticker,
+                  // 이 타일의 대표값 — 13은 탭 대상 제목으로 너무 작았다.
+                  // 홈 추천 카드의 티커(16)와 같은 위계로 맞춘다.
+                  style: AppTypography.cardTitle.copyWith(
+                    fontWeight: AppTypography.bold,
+                    color: mlc.textPrimary,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                GestureDetector(
-                  onTap: onToggle,
-                  behavior: HitTestBehavior.opaque,
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: AppSpacing.xs),
-                    child: Icon(
-                      isInWatchlist ? Icons.bookmark : Icons.bookmark_border,
-                      size: 18,
-                      color: isInWatchlist
-                          ? Theme.of(context).colorScheme.primary
-                          : Theme.of(context).colorScheme.outline,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.xxs),
-
-            // Korean name
-            Text(
-              item.name ?? item.ticker,
-              style: TextStyle(
-                fontSize: AppTypography.bodySmall,
-                color: context.mlColors.textSecondary,
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            const SizedBox(height: AppSpacing.xs),
+              GestureDetector(
+                onTap: onToggle,
+                behavior: HitTestBehavior.opaque,
+                child: Padding(
+                  padding: const EdgeInsets.only(left: AppSpacing.xs),
+                  child: Icon(
+                    isInWatchlist ? Icons.bookmark : Icons.bookmark_border,
+                    size: 20,
+                    color: isInWatchlist ? mlc.accentBlue : mlc.textTertiary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.xxs),
 
-            // Change %
-            Text(
+          // Korean name
+          Text(
+            item.name ?? item.ticker,
+            style: AppTypography.kvLabel.copyWith(color: mlc.textSecondary),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: AppSpacing.xs),
+
+          // Change %
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
               '$arrow $sign${changePct.toStringAsFixed(1)}%',
-              style: TextStyle(
-                fontSize: AppTypography.bodySmall,
-                fontWeight: AppTypography.semiBold,
-                color: changeColor,
-              ),
+              // 방향성 수치는 앱 전체가 changeBadge(14 w700) 규격이다.
+              style: AppTypography.changeBadge.copyWith(color: changeColor),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
