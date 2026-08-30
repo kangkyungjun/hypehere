@@ -181,7 +181,6 @@ class _TrendModalState extends State<_TrendModal> {
             style: AppTypography.cardTitle.copyWith(
               fontSize: AppTypography.headlineLarge,
               color: mlc.textPrimary,
-              fontWeight: AppTypography.bold,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,

@@ -578,7 +578,6 @@ class _RecordDetailScreenState extends State<RecordDetailScreen> {
                 '처분 / 상태 이력',
                 style: AppTypography.cardTitle.copyWith(
                   color: mlc.textPrimary,
-                  fontWeight: AppTypography.bold,
                 ),
               ),
               const Spacer(),
@@ -689,7 +688,6 @@ class _RecordDetailScreenState extends State<RecordDetailScreen> {
                 '체크리스트',
                 style: AppTypography.cardTitle.copyWith(
                   color: mlc.textPrimary,
-                  fontWeight: AppTypography.bold,
                 ),
               ),
               const SizedBox(width: 6),

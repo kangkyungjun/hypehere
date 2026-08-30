@@ -7,6 +7,7 @@ import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 import '../../theme/app_typography.dart';
 import 'earnings_chart_widget.dart';
+import '../common/ml_expandable_card.dart';
 
 /// Upcoming Events card widget (earnings date, dividends, estimates)
 ///
@@ -321,27 +322,9 @@ class _EventsCalendarWidgetState extends State<EventsCalendarWidget>
   // Modal helper widgets
   // ---------------------------------------------------------------------------
 
-  Widget _buildSectionLabel(BuildContext ctx, String text) {
-    return Row(
-      children: [
-        Container(
-          width: 3,
-          height: 16,
-          decoration: BoxDecoration(
-            color: Theme.of(ctx).colorScheme.primary,
-            borderRadius: BorderRadius.circular(AppRadius.xxs),
-          ),
-        ),
-        const SizedBox(width: AppSpacing.md),
-        Text(
-          text,
-          style: Theme.of(ctx).textTheme.titleSmall?.copyWith(
-                fontWeight: AppTypography.semiBold,
-              ),
-        ),
-      ],
-    );
-  }
+  /// 두 파일에 한 글자도 다르지 않게 복붙돼 있던 헬퍼 — 프리미티브로 수렴.
+  Widget _buildSectionLabel(BuildContext ctx, String text) =>
+      MlCardSectionLabel(text);
 
   Widget _buildModalEarningsRow(BuildContext ctx, TickerCalendar calendar) {
     String dateDisplay = calendar.nextEarningsDate!;

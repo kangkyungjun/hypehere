@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../theme/app_colors.dart';
 import '../../theme/app_duration.dart';
+import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 import '../../theme/app_typography.dart';
 import 'bento_card.dart';
@@ -227,6 +228,46 @@ class MlCardTitle extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
+      ],
+    );
+  }
+}
+
+/// 카드 **안**의 소제목 — 액센트 바 + 볼드 텍스트.
+///
+/// `SectionHeader`는 화면 레벨(자체 좌우 게터·비대칭 여백)이라 카드 안에서는
+/// 여백이 겹친다. 카드 내부 구간 나누기는 이쪽을 쓴다.
+///
+/// 개편 전 `events_calendar_widget._buildSectionLabel`과
+/// `company_profile_card._buildSectionLabel`이 **한 글자도 다르지 않은 복붙**
+/// 이었다.
+class MlCardSectionLabel extends StatelessWidget {
+  const MlCardSectionLabel(this.text, {super.key});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final mlc = context.mlColors;
+    return Row(
+      children: [
+        Container(
+          width: 3,
+          height: 16,
+          decoration: BoxDecoration(
+            color: mlc.accentBlue,
+            borderRadius: BorderRadius.circular(AppRadius.badge),
+          ),
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        Expanded(
+          child: Text(
+            text,
+            style: AppTypography.bodyStrong.copyWith(color: mlc.textPrimary),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
       ],
     );
   }

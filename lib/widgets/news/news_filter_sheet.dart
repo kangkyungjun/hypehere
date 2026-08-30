@@ -213,7 +213,6 @@ class _NewsFilterSheetState extends State<NewsFilterSheet> {
                     l10n.filterSource,
                     style: AppTypography.cardTitle.copyWith(
                       color: colors.textPrimary,
-                      fontWeight: AppTypography.bold,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.md),
@@ -225,7 +224,6 @@ class _NewsFilterSheetState extends State<NewsFilterSheet> {
                     l10n.filterSentiment,
                     style: AppTypography.cardTitle.copyWith(
                       color: colors.textPrimary,
-                      fontWeight: AppTypography.bold,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.md),

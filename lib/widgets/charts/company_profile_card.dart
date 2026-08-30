@@ -12,6 +12,7 @@ import 'valuation_metrics_widget.dart';
 import 'institutional_flow_widget.dart';
 import 'short_interest_widget.dart';
 import '../common/modal_handle_bar.dart';
+import '../common/ml_expandable_card.dart';
 
 /// Company profile overview card
 ///
@@ -288,25 +289,7 @@ class _CompanyProfileCardState extends State<CompanyProfileCard> {
   // Helpers
   // ---------------------------------------------------------------------------
 
-  Widget _buildSectionLabel(BuildContext ctx, String text) {
-    return Row(
-      children: [
-        Container(
-          width: 3,
-          height: 16,
-          decoration: BoxDecoration(
-            color: Theme.of(ctx).colorScheme.primary,
-            borderRadius: BorderRadius.circular(AppRadius.xxs),
-          ),
-        ),
-        const SizedBox(width: AppSpacing.md),
-        Text(
-          text,
-          style: Theme.of(ctx).textTheme.titleSmall?.copyWith(
-                fontWeight: AppTypography.semiBold,
-              ),
-        ),
-      ],
-    );
-  }
+  /// 두 파일에 한 글자도 다르지 않게 복붙돼 있던 헬퍼 — 프리미티브로 수렴.
+  Widget _buildSectionLabel(BuildContext ctx, String text) =>
+      MlCardSectionLabel(text);
 }

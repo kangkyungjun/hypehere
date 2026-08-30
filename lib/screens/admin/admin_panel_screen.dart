@@ -321,7 +321,6 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                   auth.roleDisplayName,
                   style: AppTypography.cardTitle.copyWith(
                     color: mlc.textPrimary,
-                    fontWeight: AppTypography.bold,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.xxs),
@@ -369,7 +368,6 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                     style: AppTypography.cardTitle.copyWith(
                       fontSize: AppTypography.displayMedium,
                       color: mlc.textPrimary,
-                      fontWeight: AppTypography.bold,
                       fontFeatures: AppTypography.tabularFigures,
                     ),
                   ),
@@ -723,7 +721,6 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                             nickname,
                             style: AppTypography.cardTitle.copyWith(
                               color: mlc.textPrimary,
-                              fontWeight: AppTypography.bold,
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),

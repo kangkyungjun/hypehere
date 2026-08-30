@@ -202,7 +202,6 @@ class _TickerTile extends StatelessWidget {
                   // 이 타일의 대표값 — 13은 탭 대상 제목으로 너무 작았다.
                   // 홈 추천 카드의 티커(16)와 같은 위계로 맞춘다.
                   style: AppTypography.cardTitle.copyWith(
-                    fontWeight: AppTypography.bold,
                     color: mlc.textPrimary,
                   ),
                   maxLines: 1,

@@ -143,7 +143,6 @@ class _StockRow extends StatelessWidget {
                 child: Text(
                   stock.ticker,
                   style: AppTypography.cardTitle.copyWith(
-                    fontWeight: AppTypography.bold,
                     color: mlc.textPrimary,
                   ),
                 ),

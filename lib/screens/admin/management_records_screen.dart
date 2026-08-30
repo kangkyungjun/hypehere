@@ -608,7 +608,6 @@ class _ManagementRecordsScreenState extends State<ManagementRecordsScreen> {
                   '업무 진척률',
                   style: AppTypography.cardTitle.copyWith(
                     color: mlc.textPrimary,
-                    fontWeight: AppTypography.bold,
                   ),
                 ),
                 const SizedBox(width: AppSpacing.xs),
@@ -724,7 +723,6 @@ class _ManagementRecordsScreenState extends State<ManagementRecordsScreen> {
             '${s?.month ?? ''} 손익',
             style: AppTypography.cardTitle.copyWith(
               color: mlc.textPrimary,
-              fontWeight: AppTypography.bold,
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
@@ -837,7 +835,6 @@ class _ManagementRecordsScreenState extends State<ManagementRecordsScreen> {
                 '카테고리별 ${b.month}',
                 style: AppTypography.cardTitle.copyWith(
                   color: mlc.textPrimary,
-                  fontWeight: AppTypography.bold,
                 ),
               ),
               const Spacer(),
@@ -895,7 +892,6 @@ class _ManagementRecordsScreenState extends State<ManagementRecordsScreen> {
             '월별 순익 ($year년)',
             style: AppTypography.cardTitle.copyWith(
               color: mlc.textPrimary,
-              fontWeight: AppTypography.bold,
             ),
           ),
           const SizedBox(height: AppSpacing.sm),

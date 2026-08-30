@@ -148,10 +148,17 @@ abstract final class AppTypography {
     letterSpacing: -0.3,
   );
 
-  /// 카드 제목. **w700이 아니라 w600** — 카드 안의 w700은 숫자 몫이다. (17 w600)
+  /// 카드·리스트 제목. (18 w700)
+  ///
+  /// 처음엔 w600으로 두고 "카드 안의 w700은 숫자 몫"이라 규정했으나,
+  /// **호출부 55%가 `copyWith(fontWeight: bold)`로 덮고 있었다** — 토큰이
+  /// 틀렸다는 신호다. 레퍼런스도 카드 제목(`비슷한 차 견적결과`)과 리스트
+  /// 1행(`2023년형 │ 3만km`)이 Bold다.
+  ///
+  /// 규율은 "카드당 w700 1개"가 아니라 **"제목 1 + 히어로 숫자 1"** 이다.
   static const TextStyle cardTitle = TextStyle(
     fontSize: headlineLarge,
-    fontWeight: semiBold,
+    fontWeight: bold,
     height: 1.30,
     letterSpacing: -0.2,
   );

@@ -313,7 +313,6 @@ class _ActiveUsersDashboardScreenState
                 '최근 30일',
                 style: AppTypography.cardTitle.copyWith(
                   color: mlc.textPrimary,
-                  fontWeight: AppTypography.bold,
                 ),
               ),
               const Spacer(),
@@ -401,7 +400,6 @@ class _ActiveUsersDashboardScreenState
             '플랫폼 분리',
             style: AppTypography.cardTitle.copyWith(
               color: mlc.textPrimary,
-              fontWeight: AppTypography.bold,
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
@@ -466,7 +464,6 @@ class _ActiveUsersDashboardScreenState
             '수익 · 설치',
             style: AppTypography.cardTitle.copyWith(
               color: mlc.textPrimary,
-              fontWeight: AppTypography.bold,
             ),
           ),
           const SizedBox(height: AppSpacing.sm),

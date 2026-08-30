@@ -206,6 +206,22 @@ class MarketLensApp extends StatelessWidget {
             ),
         // 에디토리얼 청킹: 페이지 배경을 연회색으로 → 흰 카드가 떠 보임
         scaffoldBackgroundColor: MarketLensColors.light.groupedBackground,
+        // ⚠️ 두 타이포 체계 정합 — `textTheme`이 지정돼 있지 않아 M3 기본값이
+        // 우리 스케일과 무관하게 적용되고 있었다. `textTheme.title*`를 쓰는
+        // 호출부가 23곳인데, `titleMedium.copyWith(bold)`는 cardTitle(18 w600)
+        // 과도 sectionTitle(22 w700)과도 다른 **제3의 렌더링**을 만들었다.
+        // ColorScheme과 같은 수법으로 호출부를 고치지 않고 슬롯을 재정의한다.
+        //
+        // body* 슬롯은 건드리지 않는다 — 지정 없는 Text가 전부 상속받아
+        // 파급 범위를 예측하기 어렵다.
+        textTheme: TextTheme(
+          titleLarge: AppTypography.sectionTitle,
+          titleMedium: AppTypography.cardTitle,
+          titleSmall: AppTypography.bodyStrong,
+          labelLarge: AppTypography.bodyStrong,
+          labelMedium: AppTypography.label,
+          labelSmall: AppTypography.badgeLabel,
+        ).apply(bodyColor: MarketLensColors.light.textPrimary),
         // Pretendard 4단 웨이트 — 안드로이드 시스템 폰트(Noto Sans CJK KR)는
         // 실질 Regular/Bold 2단뿐이라 w500·w600이 스냅되어 굵기 위계가
         // 증발한다. 번들 폰트로 두 플랫폼의 위계를 동일하게 맞춘다.
@@ -352,6 +368,15 @@ class MarketLensApp extends StatelessWidget {
             ),
         // 에디토리얼 청킹: 페이지 배경을 카드보다 어둡게 → 카드 분리감
         scaffoldBackgroundColor: MarketLensColors.dark.groupedBackground,
+        // 라이트와 동일한 타이포 슬롯 정합 — 위 주석 참조.
+        textTheme: TextTheme(
+          titleLarge: AppTypography.sectionTitle,
+          titleMedium: AppTypography.cardTitle,
+          titleSmall: AppTypography.bodyStrong,
+          labelLarge: AppTypography.bodyStrong,
+          labelMedium: AppTypography.label,
+          labelSmall: AppTypography.badgeLabel,
+        ).apply(bodyColor: MarketLensColors.dark.textPrimary),
         // Pretendard 4단 웨이트 — 안드로이드 시스템 폰트(Noto Sans CJK KR)는
         // 실질 Regular/Bold 2단뿐이라 w500·w600이 스냅되어 굵기 위계가
         // 증발한다. 번들 폰트로 두 플랫폼의 위계를 동일하게 맞춘다.

@@ -902,7 +902,6 @@ class SettingsScreen extends StatelessWidget {
                                     user.nickname,
                                     style: AppTypography.cardTitle.copyWith(
                                       fontSize: AppTypography.headlineLarge,
-                                      fontWeight: AppTypography.bold,
                                       color: context.mlColors.textPrimary,
                                     ),
                                     maxLines: 1,
