@@ -45,9 +45,7 @@ class TickerSummaryCards extends StatelessWidget {
                     children: [
                       Text(
                         l10n.expertCount(consensus?.count?.toString() ?? '-'),
-                        style: AppTypography.label.copyWith(
-                          fontSize: AppTypography.bodyMedium,
-                          fontWeight: AppTypography.semiBold,
+                        style: AppTypography.bodyStrong.copyWith(
                           color: context.mlColors.textSecondary,
                         ),
                       ),
@@ -138,9 +136,7 @@ class TickerSummaryCards extends StatelessWidget {
                             Expanded(
                               child: Text(
                                 l10n.marketlensAI,
-                                style: AppTypography.label.copyWith(
-                                  fontSize: AppTypography.bodyMedium,
-                                  fontWeight: AppTypography.semiBold,
+                                style: AppTypography.bodyStrong.copyWith(
                                   color: context.mlColors.textSecondary,
                                 ),
                                 overflow: TextOverflow.ellipsis,

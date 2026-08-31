@@ -54,9 +54,8 @@ class RsiChartWidget extends StatelessWidget {
           // 타이틀 (MFI 유무에 따라 변경)
           Text(
             hasMfi ? 'RSI / MFI Crossover' : 'RSI (Relative Strength Index)',
-            style: const TextStyle(
-              fontSize: AppTypography.headlineMedium,
-              fontWeight: AppTypography.bold,
+            style: AppTypography.cardTitle.copyWith(
+              color: context.mlColors.textPrimary,
             ),
           ),
           const SizedBox(height: AppSpacing.xl),

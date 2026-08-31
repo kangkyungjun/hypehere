@@ -46,10 +46,8 @@ class TickerNewsCard extends StatelessWidget {
                 const SizedBox(width: AppSpacing.sm),
                 Text(
                   l10n.tickerNews(ticker),
-                  style: TextStyle(
-                    fontSize: AppTypography.headlineSmall,
-                    fontWeight: AppTypography.bold,
-                    color: Theme.of(context).colorScheme.onSurface,
+                  style: AppTypography.cardTitle.copyWith(
+                    color: context.mlColors.textPrimary,
                   ),
                 ),
                 const SizedBox(width: AppSpacing.sm),
