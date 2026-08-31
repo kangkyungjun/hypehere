@@ -5,6 +5,7 @@ import '../../l10n/app_localizations.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 import '../../theme/app_typography.dart';
+import '../../theme/app_colors.dart';
 
 /// A simple coach mark tooltip that appears on first visit.
 ///
@@ -73,7 +74,6 @@ class _CoachMarkBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
 
     return Container(
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
@@ -82,7 +82,7 @@ class _CoachMarkBanner extends StatelessWidget {
         vertical: AppSpacing.md,
       ),
       decoration: BoxDecoration(
-        color: theme.colorScheme.primaryContainer.withValues(alpha: 0.9),
+        color: context.mlColors.infoBg.withValues(alpha: 0.9),
         borderRadius: BorderRadius.circular(AppRadius.md),
       ),
       child: Row(
@@ -90,7 +90,7 @@ class _CoachMarkBanner extends StatelessWidget {
           Icon(
             Icons.lightbulb_outline,
             size: 18,
-            color: theme.colorScheme.primary,
+            color: context.mlColors.accentBlue,
           ),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
@@ -98,7 +98,7 @@ class _CoachMarkBanner extends StatelessWidget {
               message,
               style: TextStyle(
                 fontSize: AppTypography.caption,
-                color: theme.colorScheme.onPrimaryContainer,
+                color: context.mlColors.accentBlue,
               ),
             ),
           ),
@@ -111,7 +111,7 @@ class _CoachMarkBanner extends StatelessWidget {
                 vertical: AppSpacing.xs,
               ),
               decoration: BoxDecoration(
-                color: theme.colorScheme.primary,
+                color: context.mlColors.accentBlue,
                 borderRadius: BorderRadius.circular(AppRadius.sm),
               ),
               child: Text(
@@ -119,7 +119,7 @@ class _CoachMarkBanner extends StatelessWidget {
                 style: TextStyle(
                   fontSize: AppTypography.micro,
                   fontWeight: AppTypography.bold,
-                  color: theme.colorScheme.onPrimary,
+                  color: context.mlColors.onPrimary,
                 ),
               ),
             ),

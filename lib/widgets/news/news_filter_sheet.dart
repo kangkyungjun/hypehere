@@ -362,7 +362,7 @@ class _NewsFilterSheetState extends State<NewsFilterSheet> {
               Text(
                 '${_sectors.length}',
                 style: TextStyle(
-                  color: theme.colorScheme.primary,
+                  color: context.mlColors.accentBlue,
                   fontWeight: AppTypography.bold,
                 ),
               ),

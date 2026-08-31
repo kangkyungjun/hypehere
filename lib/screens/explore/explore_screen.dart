@@ -185,7 +185,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
               borderSide: BorderSide.none,
             ),
             filled: true,
-            fillColor: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+            fillColor: context.mlColors.groupedBackground.withValues(alpha: 0.5),
           ),
           style: const TextStyle(fontSize: AppTypography.bodyLarge),
           textInputAction: TextInputAction.search,
@@ -231,7 +231,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
             label: Text(label),
             selected: isSelected,
             onSelected: (_) => _onClassificationTap(code),
-            selectedColor: Theme.of(context).colorScheme.primaryContainer,
+            selectedColor: context.mlColors.infoBg,
             labelStyle: TextStyle(
               fontSize: AppTypography.bodyMedium,
               fontWeight: isSelected ? AppTypography.semiBold : AppTypography.medium,

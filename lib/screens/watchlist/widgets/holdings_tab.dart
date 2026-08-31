@@ -332,7 +332,7 @@ class _HoldingsTabState extends State<HoldingsTab> {
                         l10n.noHoldingsHint,
                         style: TextStyle(
                           fontSize: AppTypography.bodyLarge,
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          color: context.mlColors.textSecondary,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -453,7 +453,7 @@ class _HoldingsTabState extends State<HoldingsTab> {
                           l10n.goToWatchlistTab,
                           style: TextStyle(
                             fontSize: AppTypography.bodySmall,
-                            color: theme.colorScheme.onSurfaceVariant,
+                            color: context.mlColors.textSecondary,
                           ),
                         ),
                       ),
@@ -560,9 +560,7 @@ class _HoldingsTabState extends State<HoldingsTab> {
                             style: TextStyle(
                               fontSize: AppTypography.bodySmall,
                               fontWeight: AppTypography.semiBold,
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.onSurfaceVariant,
+                              color: context.mlColors.textSecondary,
                             ),
                           ),
                         ),

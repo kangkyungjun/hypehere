@@ -73,7 +73,7 @@ class _CompanyProfileCardState extends State<CompanyProfileCard> {
                 Icon(
                   Icons.chevron_right,
                   size: 20,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  color: context.mlColors.textSecondary,
                 ),
               ],
             ),
@@ -98,17 +98,17 @@ class _CompanyProfileCardState extends State<CompanyProfileCard> {
                   if (p.industry != null)
                     Text(
                       p.industry!,
-                      style: TextStyle(fontSize: AppTypography.bodyMedium, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                      style: TextStyle(fontSize: AppTypography.bodyMedium, color: context.mlColors.textSecondary),
                     ),
                   if (p.industry != null && p.country != null)
                     Text(
                       '  ·  ',
-                      style: TextStyle(fontSize: AppTypography.bodyMedium, color: Theme.of(context).colorScheme.outline),
+                      style: TextStyle(fontSize: AppTypography.bodyMedium, color: context.mlColors.textTertiary),
                     ),
                   if (p.country != null)
                     Text(
                       p.country!,
-                      style: TextStyle(fontSize: AppTypography.bodyMedium, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                      style: TextStyle(fontSize: AppTypography.bodyMedium, color: context.mlColors.textSecondary),
                     ),
                 ],
               ),
@@ -118,7 +118,7 @@ class _CompanyProfileCardState extends State<CompanyProfileCard> {
               const SizedBox(height: AppSpacing.xs),
               Text(
                 l10n.employeeCount(NumberFormat.compact().format(p.employees)),
-                style: TextStyle(fontSize: AppTypography.bodySmall, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                style: TextStyle(fontSize: AppTypography.bodySmall, color: context.mlColors.textSecondary),
               ),
             ],
           ],
@@ -180,17 +180,17 @@ class _CompanyProfileCardState extends State<CompanyProfileCard> {
                     if (p.industry != null)
                       Text(
                         p.industry!,
-                        style: TextStyle(fontSize: AppTypography.bodyLarge, color: Theme.of(ctx).colorScheme.onSurfaceVariant),
+                        style: TextStyle(fontSize: AppTypography.bodyLarge, color: ctx.mlColors.textSecondary),
                       ),
                     if (p.industry != null && p.country != null)
                       Text(
                         '  ·  ',
-                        style: TextStyle(fontSize: AppTypography.bodyLarge, color: Theme.of(ctx).colorScheme.outline),
+                        style: TextStyle(fontSize: AppTypography.bodyLarge, color: ctx.mlColors.textTertiary),
                       ),
                     if (p.country != null)
                       Text(
                         p.country!,
-                        style: TextStyle(fontSize: AppTypography.bodyLarge, color: Theme.of(ctx).colorScheme.onSurfaceVariant),
+                        style: TextStyle(fontSize: AppTypography.bodyLarge, color: ctx.mlColors.textSecondary),
                       ),
                   ],
                 ),
@@ -200,7 +200,7 @@ class _CompanyProfileCardState extends State<CompanyProfileCard> {
                 const SizedBox(height: AppSpacing.xs),
                 Text(
                   AppLocalizations.of(ctx).employeeCount(NumberFormat('#,###').format(p.employees)),
-                  style: TextStyle(fontSize: AppTypography.bodyMedium, color: Theme.of(ctx).colorScheme.onSurfaceVariant),
+                  style: TextStyle(fontSize: AppTypography.bodyMedium, color: ctx.mlColors.textSecondary),
                 ),
               ],
 
@@ -213,7 +213,7 @@ class _CompanyProfileCardState extends State<CompanyProfileCard> {
                   p.summary!.localize(langCode),
                   style: TextStyle(
                     fontSize: AppTypography.bodyMedium,
-                    color: Theme.of(ctx).colorScheme.onSurface,
+                    color: ctx.mlColors.textPrimary,
                     height: 1.5,
                   ),
                 ),

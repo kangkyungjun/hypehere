@@ -75,7 +75,7 @@ class TickerCommunitySectionState extends State<TickerCommunitySection> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xxs),
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primaryContainer,
+                        color: context.mlColors.infoBg,
                         borderRadius: BorderRadius.circular(AppRadius.sm),
                       ),
                       child: Text(
@@ -83,7 +83,7 @@ class TickerCommunitySectionState extends State<TickerCommunitySection> {
                         style: TextStyle(
                           fontSize: AppTypography.caption,
                           fontWeight: AppTypography.bold,
-                          color: Theme.of(context).colorScheme.primary,
+                          color: context.mlColors.accentBlue,
                         ),
                       ),
                     ),
@@ -147,7 +147,7 @@ class TickerCommunitySectionState extends State<TickerCommunitySection> {
                       l10n.cannotLoadPosts,
                       style: TextStyle(
                         fontSize: AppTypography.bodyLarge,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        color: context.mlColors.textSecondary,
                       ),
                     ),
                   ),
@@ -164,14 +164,14 @@ class TickerCommunitySectionState extends State<TickerCommunitySection> {
                         Icon(
                           Icons.forum_outlined,
                           size: 48,
-                          color: Theme.of(context).colorScheme.outline,
+                          color: context.mlColors.textTertiary,
                         ),
                         const SizedBox(height: AppSpacing.md),
                         Text(
                           l10n.noPostsInTicker,
                           style: TextStyle(
                             fontSize: AppTypography.bodyLarge,
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            color: context.mlColors.textSecondary,
                           ),
                         ),
                         const SizedBox(height: AppSpacing.sm),

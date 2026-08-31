@@ -192,7 +192,7 @@ class MacdChartWidget extends StatelessWidget {
                               value.toStringAsFixed(2),
                               style: TextStyle(
                                 fontSize: AppTypography.caption,
-                                color: Theme.of(context).colorScheme.outline,
+                                color: context.mlColors.textTertiary,
                               ),
                             );
                           },
@@ -240,9 +240,7 @@ class MacdChartWidget extends StatelessWidget {
                                   '${futureDate.month}/${futureDate.day}',
                                   style: TextStyle(
                                     fontSize: AppTypography.caption,
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.outline, // 미래 날짜는 회색으로 구분
+                                    color: context.mlColors.textTertiary, // 미래 날짜는 회색으로 구분
                                   ),
                                 ),
                               );
@@ -372,7 +370,7 @@ class MacdChartWidget extends StatelessWidget {
                     'Histogram',
                     style: TextStyle(
                       fontSize: AppTypography.bodySmall,
-                      color: Theme.of(context).colorScheme.outline,
+                      color: context.mlColors.textTertiary,
                       fontWeight: AppTypography.medium,
                     ),
                   ),

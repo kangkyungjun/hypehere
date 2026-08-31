@@ -500,7 +500,7 @@ class _AILensScreenState extends State<AILensScreen>
                         text,
                         style: TextStyle(
                           fontSize: AppTypography.chartLabel,
-                          color: Theme.of(context).colorScheme.outline,
+                          color: context.mlColors.textTertiary,
                         ),
                         textAlign: align,
                       ),

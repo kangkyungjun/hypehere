@@ -30,7 +30,6 @@ class HotTopicToast extends StatelessWidget {
 
     final l10n = AppLocalizations.of(context);
     final langCode = Localizations.localeOf(context).languageCode;
-    final theme = Theme.of(context);
 
     final previewItems = hotTopics.take(3).toList();
     final moreCount = hotTopics.length - previewItems.length;
@@ -56,7 +55,7 @@ class HotTopicToast extends StatelessWidget {
               AppSpacing.lg,
             ),
             decoration: BoxDecoration(
-              color: theme.colorScheme.errorContainer.withValues(alpha: 0.92),
+              color: context.mlColors.dangerBg.withValues(alpha: 0.92),
               borderRadius: BorderRadius.circular(AppRadius.lg),
               boxShadow: AppShadow.sm(context.mlColors.overlayDim),
             ),
@@ -84,7 +83,7 @@ class HotTopicToast extends StatelessWidget {
                           Divider(
                             height: 8,
                             thickness: 0.5,
-                            color: theme.colorScheme.onErrorContainer
+                            color: context.mlColors.dangerColor
                                 .withValues(alpha: 0.15),
                           ),
                         Row(
@@ -103,7 +102,7 @@ class HotTopicToast extends StatelessWidget {
                                     fontWeight: i == 0
                                         ? AppTypography.semiBold
                                         : AppTypography.regular,
-                                    color: theme.colorScheme.onErrorContainer,
+                                    color: context.mlColors.dangerColor,
                                     height: 1.3,
                                   ),
                                   maxLines: i == 0 ? 2 : 1,
@@ -119,7 +118,7 @@ class HotTopicToast extends StatelessWidget {
                                 child: Icon(
                                   Icons.close,
                                   size: 14,
-                                  color: theme.colorScheme.onErrorContainer
+                                  color: context.mlColors.dangerColor
                                       .withValues(alpha: 0.5),
                                 ),
                               ),
@@ -131,7 +130,7 @@ class HotTopicToast extends StatelessWidget {
                         Divider(
                           height: 8,
                           thickness: 0.5,
-                          color: theme.colorScheme.onErrorContainer.withValues(
+                          color: context.mlColors.dangerColor.withValues(
                             alpha: 0.15,
                           ),
                         ),
@@ -143,7 +142,7 @@ class HotTopicToast extends StatelessWidget {
                             style: TextStyle(
                               fontSize: AppTypography.bodySmall,
                               fontWeight: AppTypography.medium,
-                              color: theme.colorScheme.onErrorContainer
+                              color: context.mlColors.dangerColor
                                   .withValues(alpha: 0.7),
                             ),
                           ),

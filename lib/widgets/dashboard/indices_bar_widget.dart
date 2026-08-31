@@ -77,7 +77,7 @@ class _IndexCard extends StatelessWidget {
         ? mlc.gainColor
         : index.changePct < 0
         ? mlc.lossColor
-        : Theme.of(context).colorScheme.outline;
+        : context.mlColors.textTertiary;
     final arrow = index.changePct > 0
         ? '▲'
         : index.changePct < 0

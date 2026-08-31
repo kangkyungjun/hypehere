@@ -51,7 +51,7 @@ class EarningsWeekCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: AppTypography.headlineSmall,
                     fontWeight: AppTypography.bold,
-                    color: Theme.of(context).colorScheme.onSurface,
+                    color: context.mlColors.textPrimary,
                   ),
                 ),
                 const SizedBox(width: AppSpacing.md),
@@ -173,7 +173,7 @@ class EarningsWeekCard extends StatelessWidget {
             Expanded(
               child: Text(
                 event.displayNameLocalized(Localizations.localeOf(context).languageCode),
-                style: TextStyle(fontSize: AppTypography.caption, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                style: TextStyle(fontSize: AppTypography.caption, color: context.mlColors.textSecondary),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -199,7 +199,7 @@ class EarningsWeekCard extends StatelessWidget {
             else
               Text(
                 _formatShortDate(event.earningsDate),
-                style: TextStyle(fontSize: AppTypography.caption, color: Theme.of(context).colorScheme.outline),
+                style: TextStyle(fontSize: AppTypography.caption, color: context.mlColors.textTertiary),
               ),
           ],
         ),

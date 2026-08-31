@@ -86,7 +86,7 @@ class TickerVolumeChart extends StatelessWidget {
                   l10n.averageVolume(_formatVolume(avgVolume.toInt())),
                   style: TextStyle(
                     fontSize: AppTypography.bodySmall,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    color: context.mlColors.textSecondary,
                   ),
                 ),
               ],
@@ -223,7 +223,7 @@ class TickerVolumeChart extends StatelessWidget {
                   horizontalLines: [
                     HorizontalLine(
                       y: avgVolume,
-                      color: Theme.of(context).colorScheme.outline,
+                      color: context.mlColors.textTertiary,
                       strokeWidth: AppStroke.thin,
                       dashArray: [4, 4],
                       label: HorizontalLineLabel(show: false),

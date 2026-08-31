@@ -441,14 +441,14 @@ class _TickerDetailScreenState extends State<TickerDetailScreen> {
             Icon(
               Icons.data_usage_outlined,
               size: 48,
-              color: Theme.of(context).colorScheme.outline,
+              color: context.mlColors.textTertiary,
             ),
             const SizedBox(height: AppSpacing.xl),
             Text(l10n.noData, style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: AppSpacing.md),
             Text(
               l10n.tryDifferentSearch,
-              style: TextStyle(color: Theme.of(context).colorScheme.outline),
+              style: TextStyle(color: context.mlColors.textTertiary),
             ),
           ],
         ),

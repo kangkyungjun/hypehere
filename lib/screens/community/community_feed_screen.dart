@@ -725,7 +725,7 @@ class _CommunityFeedScreenState extends State<CommunityFeedScreen> {
             Icon(
               isFiltering ? Icons.search_off : Icons.article_outlined,
               size: 64,
-              color: Theme.of(context).colorScheme.outline,
+              color: context.mlColors.textTertiary,
             ),
             const SizedBox(height: AppSpacing.xl),
             Text(

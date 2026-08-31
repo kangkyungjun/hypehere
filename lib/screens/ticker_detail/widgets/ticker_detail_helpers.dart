@@ -32,7 +32,7 @@ Color getStatusColor(BuildContext context, String? status) {
     case 'reiterated':
       return context.mlColors.accentBlue;
     case 'initiated':
-      return Theme.of(context).colorScheme.tertiary;
+      return context.mlColors.accentBlue;
     default:
       return context.mlColors.neutralColor;
   }

@@ -29,7 +29,7 @@ class AddHoldingSheet extends StatefulWidget {
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
-      backgroundColor: Theme.of(context).colorScheme.surface,
+      backgroundColor: context.mlColors.cardBackground,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
           top: Radius.circular(AppRadius.xxl),
@@ -124,7 +124,6 @@ class _AddHoldingSheetState extends State<AddHoldingSheet> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
     final mlc = context.mlColors;
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
     final bottomPadding = MediaQuery.of(context).viewPadding.bottom;
@@ -293,7 +292,7 @@ class _AddHoldingSheetState extends State<AddHoldingSheet> {
                       : 'Could not load close price. Please enter manually.',
                   style: TextStyle(
                     fontSize: AppTypography.caption,
-                    color: theme.colorScheme.error,
+                    color: context.mlColors.dangerColor,
                   ),
                 ),
               ),

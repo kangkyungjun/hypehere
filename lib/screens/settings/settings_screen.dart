@@ -191,7 +191,7 @@ class SettingsScreen extends StatelessWidget {
           '© 2026 MarketLens',
           style: TextStyle(
             fontSize: AppTypography.bodySmall,
-            color: Theme.of(context).colorScheme.outline,
+            color: context.mlColors.textTertiary,
           ),
         ),
       ],
@@ -580,7 +580,7 @@ class SettingsScreen extends StatelessWidget {
                     Icon(
                       Icons.analytics_outlined,
                       size: 48,
-                      color: Theme.of(context).colorScheme.outline,
+                      color: context.mlColors.textTertiary,
                     ),
                     const SizedBox(height: AppSpacing.md),
                     Text(
@@ -589,7 +589,7 @@ class SettingsScreen extends StatelessWidget {
                         fontSize: AppTypography.headlineLarge,
                         fontWeight: AppTypography.bold,
                         letterSpacing: -0.2,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        color: context.mlColors.textSecondary,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -599,7 +599,7 @@ class SettingsScreen extends StatelessWidget {
                       l10n.aiStockAnalysis,
                       style: TextStyle(
                         fontSize: AppTypography.bodySmall,
-                        color: Theme.of(context).colorScheme.outline,
+                        color: context.mlColors.textTertiary,
                       ),
                     ),
                     const SizedBox(height: AppSpacing.xl),
@@ -613,9 +613,7 @@ class SettingsScreen extends StatelessWidget {
                             l10n.privacyPolicy,
                             style: TextStyle(
                               fontSize: AppTypography.bodySmall,
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.onSurfaceVariant,
+                              color: context.mlColors.textSecondary,
                               decoration: TextDecoration.underline,
                             ),
                           ),
@@ -628,7 +626,7 @@ class SettingsScreen extends StatelessWidget {
                             '|',
                             style: TextStyle(
                               fontSize: AppTypography.bodySmall,
-                              color: Theme.of(context).colorScheme.outline,
+                              color: context.mlColors.textTertiary,
                             ),
                           ),
                         ),
@@ -638,9 +636,7 @@ class SettingsScreen extends StatelessWidget {
                             l10n.termsOfService,
                             style: TextStyle(
                               fontSize: AppTypography.bodySmall,
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.onSurfaceVariant,
+                              color: context.mlColors.textSecondary,
                               decoration: TextDecoration.underline,
                             ),
                           ),
@@ -652,7 +648,7 @@ class SettingsScreen extends StatelessWidget {
                       'marketlens.service@gmail.com',
                       style: TextStyle(
                         fontSize: AppTypography.caption,
-                        color: Theme.of(context).colorScheme.outline,
+                        color: context.mlColors.textTertiary,
                       ),
                     ),
                   ],

@@ -89,12 +89,12 @@ class _TickerPriceChartState extends State<TickerPriceChart> {
                       ),
                       decoration: BoxDecoration(
                         color: isSelected
-                            ? Theme.of(context).colorScheme.inverseSurface
+                            ? context.mlColors.textPrimary
                             : Colors.transparent,
                         borderRadius: BorderRadius.circular(AppRadius.lg),
                         border: Border.all(
                           color: isSelected
-                              ? Theme.of(context).colorScheme.inverseSurface
+                              ? context.mlColors.textPrimary
                               : context.mlColors.subtleBorder,
                         ),
                       ),
@@ -107,7 +107,7 @@ class _TickerPriceChartState extends State<TickerPriceChart> {
                               : AppTypography.regular,
                           color: isSelected
                               ? context.mlColors.onPrimary
-                              : Theme.of(context).colorScheme.onSurfaceVariant,
+                              : context.mlColors.textSecondary,
                         ),
                       ),
                     ),

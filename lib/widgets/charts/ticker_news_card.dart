@@ -132,7 +132,7 @@ class TickerNewsCard extends StatelessWidget {
                 l10n.noNews,
                 style: TextStyle(
                   fontSize: AppTypography.bodySmall,
-                  color: Theme.of(context).colorScheme.outline,
+                  color: context.mlColors.textTertiary,
                 ),
               ),
             ),
@@ -150,7 +150,7 @@ class TickerNewsCard extends StatelessWidget {
           style: TextStyle(
             fontSize: AppTypography.chartLabel,
             fontWeight: AppTypography.semiBold,
-            color: Theme.of(context).colorScheme.outline,
+            color: context.mlColors.textTertiary,
           ),
         ),
         const SizedBox(width: AppSpacing.xs),
@@ -253,7 +253,7 @@ class TickerNewsCard extends StatelessWidget {
                             item.timeAgoLocalized(AppLocalizations.of(context)),
                             style: TextStyle(
                               fontSize: AppTypography.micro,
-                              color: Theme.of(context).colorScheme.outline,
+                              color: context.mlColors.textTertiary,
                             ),
                           ),
                         ],
@@ -266,7 +266,7 @@ class TickerNewsCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: AppTypography.bodySmall,
                           fontWeight: AppTypography.semiBold,
-                          color: Theme.of(context).colorScheme.onSurface,
+                          color: context.mlColors.textPrimary,
                           height: 1.4,
                         ),
                         maxLines: 2,

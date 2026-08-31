@@ -217,7 +217,7 @@ class ValuationMetricsWidget extends StatelessWidget {
   Color _gradeColor(BuildContext context, String grade) {
     switch (grade) {
       case 'S':
-        return Theme.of(context).colorScheme.tertiary;
+        return context.mlColors.accentBlue;
       case 'A':
         return context.mlColors.gainColor;
       case 'B':

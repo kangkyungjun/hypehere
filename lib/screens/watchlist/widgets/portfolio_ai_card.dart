@@ -350,11 +350,11 @@ class _PortfolioAICardState extends State<PortfolioAICard> {
           style: FilledButton.styleFrom(
             // Visually de-emphasize when there is nothing new to analyze.
             backgroundColor: canUpdate
-                ? theme.colorScheme.primary
-                : theme.colorScheme.surfaceContainerHighest,
+                ? context.mlColors.accentBlue
+                : context.mlColors.groupedBackground,
             foregroundColor: canUpdate
-                ? theme.colorScheme.onPrimary
-                : theme.colorScheme.outline,
+                ? context.mlColors.onPrimary
+                : context.mlColors.textTertiary,
             padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(AppRadius.md),
@@ -367,7 +367,7 @@ class _PortfolioAICardState extends State<PortfolioAICard> {
             l10n.aiNoChangeToAnalyze,
             style: TextStyle(
               fontSize: AppTypography.caption,
-              color: theme.colorScheme.outline,
+              color: context.mlColors.textTertiary,
             ),
             textAlign: TextAlign.center,
           ),
@@ -443,7 +443,7 @@ class _PortfolioAICardState extends State<PortfolioAICard> {
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.xs),
       child: Container(
         decoration: BoxDecoration(
-          color: theme.colorScheme.primaryContainer.withValues(alpha: 0.08),
+          color: context.mlColors.infoBg.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(AppRadius.md),
         ),
         child: Padding(
@@ -456,7 +456,7 @@ class _PortfolioAICardState extends State<PortfolioAICard> {
                 style: TextStyle(
                   fontSize: AppTypography.headlineMedium,
                   fontWeight: AppTypography.bold,
-                  color: theme.colorScheme.primary,
+                  color: context.mlColors.accentBlue,
                 ),
               ),
               const SizedBox(height: AppSpacing.md),
@@ -476,11 +476,11 @@ class _PortfolioAICardState extends State<PortfolioAICard> {
               ] else ...[
                 Row(
                   children: [
-                    Icon(Icons.hourglass_empty, size: 16, color: theme.colorScheme.outline),
+                    Icon(Icons.hourglass_empty, size: 16, color: context.mlColors.textTertiary),
                     const SizedBox(width: AppSpacing.sm),
                     Text(
                       l10n.analysisWaiting,
-                      style: TextStyle(fontSize: AppTypography.bodyMedium, color: theme.colorScheme.outline),
+                      style: TextStyle(fontSize: AppTypography.bodyMedium, color: context.mlColors.textTertiary),
                     ),
                   ],
                 ),
@@ -503,19 +503,19 @@ class _PortfolioAICardState extends State<PortfolioAICard> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
           decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+            color: context.mlColors.groupedBackground.withValues(alpha: 0.5),
             borderRadius: BorderRadius.circular(AppRadius.sm),
           ),
           child: Row(
             children: [
-              Icon(Icons.history, size: 14, color: theme.colorScheme.outline),
+              Icon(Icons.history, size: 14, color: context.mlColors.textTertiary),
               const SizedBox(width: AppSpacing.xs),
               Expanded(
                 child: Text(
                   l10n.viewingPreviousAnalysis,
                   style: TextStyle(
                     fontSize: AppTypography.caption,
-                    color: theme.colorScheme.outline,
+                    color: context.mlColors.textTertiary,
                   ),
                 ),
               ),
@@ -524,7 +524,7 @@ class _PortfolioAICardState extends State<PortfolioAICard> {
                 borderRadius: BorderRadius.circular(AppRadius.xs),
                 child: Padding(
                   padding: const EdgeInsets.all(AppSpacing.xs),
-                  child: Icon(Icons.close, size: 16, color: theme.colorScheme.outline),
+                  child: Icon(Icons.close, size: 16, color: context.mlColors.textTertiary),
                 ),
               ),
             ],
@@ -557,19 +557,19 @@ class _PortfolioAICardState extends State<PortfolioAICard> {
         else
           _buildColoredText(
             localizePacked(aiSummary, langCode),
-            TextStyle(fontSize: AppTypography.bodyLarge, color: theme.colorScheme.onSurface, height: 1.5),
+            TextStyle(fontSize: AppTypography.bodyLarge, color: context.mlColors.textPrimary, height: 1.5),
             mlColors,
           ),
 
         const SizedBox(height: AppSpacing.sm),
         Row(
           children: [
-            Icon(Icons.schedule, size: 12, color: theme.colorScheme.outline),
+            Icon(Icons.schedule, size: 12, color: context.mlColors.textTertiary),
             const SizedBox(width: AppSpacing.xs),
             Flexible(
               child: Text(
                 l10n.aiAnalysisOnDemandHint,
-                style: TextStyle(fontSize: AppTypography.caption, color: theme.colorScheme.outline),
+                style: TextStyle(fontSize: AppTypography.caption, color: context.mlColors.textTertiary),
               ),
             ),
           ],
@@ -580,7 +580,7 @@ class _PortfolioAICardState extends State<PortfolioAICard> {
             padding: const EdgeInsets.only(left: AppSpacing.xl),
             child: Text(
               l10n.lastUpdateTime(_formatSummaryTime(widget.summary!.date, l10n)),
-              style: TextStyle(fontSize: AppTypography.caption, color: theme.colorScheme.outline),
+              style: TextStyle(fontSize: AppTypography.caption, color: context.mlColors.textTertiary),
             ),
           ),
         ],
@@ -617,18 +617,18 @@ class _PortfolioAICardState extends State<PortfolioAICard> {
             padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(AppRadius.sm),
-              color: theme.colorScheme.surface.withValues(alpha: 0.3),
+              color: context.mlColors.cardBackground.withValues(alpha: 0.3),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.lock_outline, size: 32, color: theme.colorScheme.primary),
+                Icon(Icons.lock_outline, size: 32, color: context.mlColors.accentBlue),
                 const SizedBox(height: AppSpacing.sm),
                 Text(
                   l10n.newAiAnalysisAvailable,
                   style: TextStyle(
                     fontSize: AppTypography.bodySmall,
-                    color: theme.colorScheme.onSurfaceVariant,
+                    color: context.mlColors.textSecondary,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -644,8 +644,8 @@ class _PortfolioAICardState extends State<PortfolioAICard> {
                       icon: const Icon(Icons.play_circle_outline, size: 16),
                       label: Text(l10n.watchAd, style: const TextStyle(fontSize: AppTypography.bodySmall)),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: theme.colorScheme.primary,
-                        foregroundColor: theme.colorScheme.onPrimary,
+                        backgroundColor: context.mlColors.accentBlue,
+                        foregroundColor: context.mlColors.onPrimary,
                         padding: const EdgeInsets.symmetric(
                           horizontal: AppSpacing.md, vertical: AppSpacing.xs,
                         ),
@@ -676,12 +676,12 @@ class _PortfolioAICardState extends State<PortfolioAICard> {
                   const SizedBox(height: AppSpacing.sm),
                   TextButton.icon(
                     onPressed: () => setState(() => _showingPrevious = true),
-                    icon: Icon(Icons.close, size: 16, color: theme.colorScheme.outline),
+                    icon: Icon(Icons.close, size: 16, color: context.mlColors.textTertiary),
                     label: Text(
                       l10n.viewingPreviousAnalysis,
                       style: TextStyle(
                         fontSize: AppTypography.bodySmall,
-                        color: theme.colorScheme.outline,
+                        color: context.mlColors.textTertiary,
                       ),
                     ),
                   ),
@@ -815,10 +815,10 @@ class _PortfolioAICardState extends State<PortfolioAICard> {
       margin: const EdgeInsets.only(top: AppSpacing.md),
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerLowest.withValues(alpha: 0.5),
+        color: context.mlColors.cardBackground.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(AppRadius.md),
         border: Border.all(
-          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
+          color: context.mlColors.subtleBorder.withValues(alpha: 0.3),
           width: 0.5,
         ),
       ),
@@ -831,7 +831,7 @@ class _PortfolioAICardState extends State<PortfolioAICard> {
             style: TextStyle(
               fontSize: AppTypography.bodyLarge,
               fontWeight: AppTypography.bold,
-              color: theme.colorScheme.onSurface,
+              color: context.mlColors.textPrimary,
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
@@ -842,7 +842,7 @@ class _PortfolioAICardState extends State<PortfolioAICard> {
               localizePacked(aiSummary, langCode),
               TextStyle(
                 fontSize: AppTypography.bodyMedium,
-                color: theme.colorScheme.onSurface,
+                color: context.mlColors.textPrimary,
                 height: 1.5,
               ),
               mlColors,
@@ -985,7 +985,7 @@ class _PortfolioAICardState extends State<PortfolioAICard> {
           style: TextStyle(
             fontSize: AppTypography.bodyMedium,
             fontWeight: AppTypography.semiBold,
-            color: theme.colorScheme.onSurfaceVariant,
+            color: context.mlColors.textSecondary,
           ),
         ),
       ),
@@ -1016,7 +1016,7 @@ class _PortfolioAICardState extends State<PortfolioAICard> {
                 style: TextStyle(
                   fontSize: AppTypography.bodyMedium,
                   fontWeight: AppTypography.semiBold,
-                  color: accentColor ?? theme.colorScheme.onSurfaceVariant,
+                  color: accentColor ?? context.mlColors.textSecondary,
                 ),
               ),
             ),
@@ -1052,7 +1052,7 @@ class _PortfolioAICardState extends State<PortfolioAICard> {
                 isHigh ? ' \u25B6 ' : ' \u2022 ',
                 style: TextStyle(
                   fontSize: isHigh ? AppTypography.bodySmall : AppTypography.bodyMedium,
-                  color: isHigh ? theme.colorScheme.error : theme.colorScheme.onSurfaceVariant,
+                  color: isHigh ? context.mlColors.dangerColor : context.mlColors.textSecondary,
                 ),
               ),
             ),
@@ -1063,7 +1063,7 @@ class _PortfolioAICardState extends State<PortfolioAICard> {
                   fontSize: AppTypography.bodyMedium,
                   height: 1.5,
                   fontWeight: isHigh ? AppTypography.semiBold : AppTypography.regular,
-                  color: isHigh ? theme.colorScheme.error : theme.colorScheme.onSurface,
+                  color: isHigh ? context.mlColors.dangerColor : context.mlColors.textPrimary,
                 ),
                 mlColors,
               ),
@@ -1089,7 +1089,7 @@ class _PortfolioAICardState extends State<PortfolioAICard> {
         style: TextStyle(
           fontSize: AppTypography.bodyLarge,
           fontWeight: AppTypography.bold,
-          color: theme.colorScheme.onSurface,
+          color: context.mlColors.textPrimary,
         ),
       ),
       const SizedBox(height: AppSpacing.xs),
@@ -1110,7 +1110,7 @@ class _PortfolioAICardState extends State<PortfolioAICard> {
                   isHigh ? ' \u25B6 ' : ' \u2022 ',
                   style: TextStyle(
                     fontSize: isHigh ? AppTypography.bodySmall : AppTypography.bodyMedium,
-                    color: isHigh ? theme.colorScheme.error : theme.colorScheme.onSurfaceVariant,
+                    color: isHigh ? context.mlColors.dangerColor : context.mlColors.textSecondary,
                   ),
                 ),
               ),
@@ -1121,7 +1121,7 @@ class _PortfolioAICardState extends State<PortfolioAICard> {
                     fontSize: AppTypography.bodyMedium,
                     height: 1.5,
                     fontWeight: isHigh ? AppTypography.semiBold : AppTypography.regular,
-                    color: isHigh ? theme.colorScheme.error : theme.colorScheme.onSurface,
+                    color: isHigh ? context.mlColors.dangerColor : context.mlColors.textPrimary,
                   ),
                   mlColors,
                 ),

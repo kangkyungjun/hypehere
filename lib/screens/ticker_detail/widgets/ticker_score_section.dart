@@ -85,7 +85,7 @@ class _TickerScoreSectionState extends State<TickerScoreSection> {
               l10n.aiScoreGuideDescription,
               style: TextStyle(
                 fontSize: AppTypography.bodyMedium,
-                color: Theme.of(context).colorScheme.onSurface,
+                color: context.mlColors.textPrimary,
               ),
             ),
             const SizedBox(height: AppSpacing.lg),
@@ -101,7 +101,7 @@ class _TickerScoreSectionState extends State<TickerScoreSection> {
             const SizedBox(height: AppSpacing.xs),
             _scoreRangeRow(
               l10n.aiScoreGuideNeutral,
-              Theme.of(context).colorScheme.outline,
+              context.mlColors.textTertiary,
             ),
             const SizedBox(height: AppSpacing.xs),
             _scoreRangeRow(
@@ -261,9 +261,7 @@ class _TickerScoreSectionState extends State<TickerScoreSection> {
                               '${futureDate.month}/${futureDate.day}',
                               style: TextStyle(
                                 fontSize: AppTypography.caption,
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.outline, // 미래 날짜는 회색으로 구분
+                                color: context.mlColors.textTertiary, // 미래 날짜는 회색으로 구분
                               ),
                             ),
                           );

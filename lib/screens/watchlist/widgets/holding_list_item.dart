@@ -51,7 +51,6 @@ class HoldingListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
     final mlc = context.mlColors;
     final isKo = Localizations.localeOf(context).languageCode == 'ko';
     final displayName = isKo && holding.nameKo != null
@@ -111,7 +110,7 @@ class HoldingListItem extends StatelessWidget {
                         context,
                         holding.signal,
                       ).withValues(alpha: 0.1)
-                    : theme.colorScheme.surfaceContainerHighest,
+                    : context.mlColors.groupedBackground,
                 borderRadius: BorderRadius.circular(AppRadius.card),
               ),
               child: Column(
@@ -124,7 +123,7 @@ class HoldingListItem extends StatelessWidget {
                       fontWeight: AppTypography.bold,
                       color: holding.score != null
                           ? _signalColor(context, holding.signal)
-                          : theme.colorScheme.outline,
+                          : context.mlColors.textTertiary,
                       fontFeatures: AppTypography.tabularFigures,
                     ),
                   ),

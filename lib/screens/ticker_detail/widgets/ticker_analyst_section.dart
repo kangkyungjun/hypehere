@@ -87,7 +87,7 @@ class _TickerAnalystSectionState extends State<TickerAnalystSection> {
               Builder(builder: (context) {
                 final latestClose = widget.chartData.data.isNotEmpty ? widget.chartData.data.last.close : null;
                 String upsideStr = '';
-                Color upsideColor = Theme.of(context).colorScheme.outline;
+                Color upsideColor = context.mlColors.textTertiary;
                 if (latestClose != null && latestClose > 0) {
                   final upside = ((consensus.mean! - latestClose) / latestClose) * 100;
                   final sign = upside >= 0 ? '+' : '';
@@ -274,7 +274,7 @@ class _TickerAnalystSectionState extends State<TickerAnalystSection> {
                             width: 16,
                             height: 16,
                             decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.onSurface,
+                              color: context.mlColors.textPrimary,
                               shape: BoxShape.circle,
                               border: Border.all(color: context.mlColors.cardBackground, width: 2),
                               boxShadow: AppShadow.sm(context.mlColors.overlayDim),
@@ -482,7 +482,7 @@ class _TickerAnalystSectionState extends State<TickerAnalystSection> {
         Row(
           children: items.map((item) {
             final isZero = item.$3 == 0;
-            final color = isZero ? Theme.of(context).colorScheme.outline : getStatusColor(context, item.$1);
+            final color = isZero ? context.mlColors.textTertiary : getStatusColor(context, item.$1);
             return Expanded(
               child: Row(
                 mainAxisSize: MainAxisSize.min,

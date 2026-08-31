@@ -239,7 +239,7 @@ class UpDownTab extends StatelessWidget {
                         : AppTypography.regular,
                     color: isSelected
                         ? context.mlColors.accentBlue
-                        : Theme.of(context).colorScheme.onSurfaceVariant,
+                        : context.mlColors.textSecondary,
                   ),
                 ),
               ),

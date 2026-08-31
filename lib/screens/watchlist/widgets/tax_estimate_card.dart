@@ -24,7 +24,6 @@ class TaxEstimateCard extends StatelessWidget {
     if (!isKo) return const SizedBox.shrink();
 
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
     final exchangeRate = portfolio.exchangeRate;
 
     // Need exchange rate and transactions to calculate
@@ -67,7 +66,7 @@ class TaxEstimateCard extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.xs),
       child: Container(
         decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.2),
+          color: context.mlColors.groupedBackground.withValues(alpha: 0.2),
           borderRadius: BorderRadius.circular(AppRadius.md),
         ),
         child: Padding(
@@ -78,20 +77,20 @@ class TaxEstimateCard extends StatelessWidget {
               // Title
               Row(
                 children: [
-                  Icon(Icons.receipt_long, size: 16, color: theme.colorScheme.primary),
+                  Icon(Icons.receipt_long, size: 16, color: context.mlColors.accentBlue),
                   const SizedBox(width: AppSpacing.sm),
                   Text(
                     l10n.taxEstimateTitle,
                     style: TextStyle(
                       fontSize: AppTypography.bodyLarge,
                       fontWeight: AppTypography.semiBold,
-                      color: theme.colorScheme.primary,
+                      color: context.mlColors.accentBlue,
                     ),
                   ),
                   const Spacer(),
                   Text(
                     '$currentYear',
-                    style: TextStyle(fontSize: AppTypography.caption, color: theme.colorScheme.outline),
+                    style: TextStyle(fontSize: AppTypography.caption, color: context.mlColors.textTertiary),
                   ),
                 ],
               ),
@@ -107,7 +106,7 @@ class TaxEstimateCard extends StatelessWidget {
               _TaxRow(
                 label: l10n.annualExemption,
                 value: '-${krwFormat.format(summary.exemptionUsedKrw.round())}${l10n.krwSuffix}',
-                valueColor: theme.colorScheme.onSurfaceVariant,
+                valueColor: context.mlColors.textSecondary,
               ),
               const Divider(height: 12),
               _TaxRow(
@@ -127,7 +126,7 @@ class TaxEstimateCard extends StatelessWidget {
               const SizedBox(height: AppSpacing.sm),
               Text(
                 '${sellTxns.length}${l10n.taxTradeCount} | 1\$ = ${krwFormat.format(exchangeRate.usdKrw.round())}${l10n.krwSuffix}',
-                style: TextStyle(fontSize: AppTypography.micro, color: theme.colorScheme.outline),
+                style: TextStyle(fontSize: AppTypography.micro, color: context.mlColors.textTertiary),
               ),
             ],
           ),
@@ -140,7 +139,7 @@ class TaxEstimateCard extends StatelessWidget {
 /// 세금 계산 카드의 라벨+값 한 행.
 ///
 /// `bold`(합계 행)는 [MlKvEmphasis.strong]으로 옮긴다. 라벨이
-/// `colorScheme.onSurfaceVariant`(textSecondary보다 2배 진함)라 같은 화면의
+/// `context.mlColors.textSecondary`(textSecondary보다 2배 진함)라 같은 화면의
 /// 다른 라벨과 색이 어긋나 있었다.
 class _TaxRow extends StatelessWidget {
   final String label;

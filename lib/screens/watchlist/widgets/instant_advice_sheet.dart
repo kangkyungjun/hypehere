@@ -52,7 +52,6 @@ class InstantAdviceSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
     final isKo = Localizations.localeOf(context).languageCode == 'ko';
 
     return DraggableScrollableSheet(
@@ -76,7 +75,7 @@ class InstantAdviceSheet extends StatelessWidget {
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
+                      color: context.mlColors.textSecondary.withValues(alpha: 0.3),
                       borderRadius: BorderRadius.circular(AppRadius.xxs),
                     ),
                   ),
@@ -99,7 +98,7 @@ class InstantAdviceSheet extends StatelessWidget {
                         advice.nameKo!,
                         style: TextStyle(
                           fontSize: AppTypography.bodyLarge,
-                          color: theme.colorScheme.onSurfaceVariant,
+                          color: context.mlColors.textSecondary,
                         ),
                       ),
                     ] else if (advice.name != null) ...[
@@ -108,7 +107,7 @@ class InstantAdviceSheet extends StatelessWidget {
                         advice.name!,
                         style: TextStyle(
                           fontSize: AppTypography.bodyLarge,
-                          color: theme.colorScheme.onSurfaceVariant,
+                          color: context.mlColors.textSecondary,
                         ),
                       ),
                     ],
@@ -139,7 +138,7 @@ class InstantAdviceSheet extends StatelessWidget {
                     '${l10n.confidence}: ${(advice.confidence! * 100).toStringAsFixed(0)}%',
                     style: TextStyle(
                       fontSize: AppTypography.bodyMedium,
-                      color: theme.colorScheme.onSurfaceVariant,
+                      color: context.mlColors.textSecondary,
                       fontFeatures: AppTypography.tabularFigures,
                     ),
                   ),
@@ -164,7 +163,7 @@ class InstantAdviceSheet extends StatelessWidget {
                     style: TextStyle(
                       fontSize: AppTypography.bodyLarge,
                       height: 1.5,
-                      color: theme.colorScheme.onSurface,
+                      color: context.mlColors.textPrimary,
                     ),
                   ),
 
@@ -233,14 +232,14 @@ class InstantAdviceSheet extends StatelessWidget {
                 const SizedBox(height: AppSpacing.md),
                 Row(
                   children: [
-                    Icon(Icons.schedule, size: 16, color: theme.colorScheme.outline),
+                    Icon(Icons.schedule, size: 16, color: context.mlColors.textTertiary),
                     const SizedBox(width: AppSpacing.sm),
                     Expanded(
                       child: Text(
                         l10n.detailedAnalysisComingSoon,
                         style: TextStyle(
                           fontSize: AppTypography.bodySmall,
-                          color: theme.colorScheme.outline,
+                          color: context.mlColors.textTertiary,
                           fontStyle: FontStyle.italic,
                         ),
                       ),

@@ -393,7 +393,7 @@ class _TickerInsightSectionState extends State<TickerInsightSection> {
     switch (prediction.toLowerCase()) {
       case 'bullish': return context.mlColors.gainColor;
       case 'bearish': return context.mlColors.lossColor;
-      default: return Theme.of(context).colorScheme.onSurfaceVariant;
+      default: return context.mlColors.textSecondary;
     }
   }
 
@@ -431,7 +431,7 @@ class _TickerInsightSectionState extends State<TickerInsightSection> {
         ],
         if (hasTarget && hasStopLoss) ...[
           const SizedBox(width: AppSpacing.lg),
-          Container(height: 14, width: 1, color: Theme.of(context).colorScheme.outline),
+          Container(height: 14, width: 1, color: context.mlColors.textTertiary),
           const SizedBox(width: AppSpacing.lg),
         ],
         // 손절가 (라벨 회색, 가격 빨간색)

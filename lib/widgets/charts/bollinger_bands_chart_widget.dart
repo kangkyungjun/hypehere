@@ -110,7 +110,7 @@ class BollingerBandsChartWidget extends StatelessWidget {
                           value.toStringAsFixed(0),
                           style: TextStyle(
                             fontSize: AppTypography.caption,
-                            color: Theme.of(context).colorScheme.outline,
+                            color: context.mlColors.textTertiary,
                           ),
                         );
                       },
@@ -154,9 +154,7 @@ class BollingerBandsChartWidget extends StatelessWidget {
                               '${futureDate.month}/${futureDate.day}',
                               style: TextStyle(
                                 fontSize: AppTypography.caption,
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.outline, // 미래 날짜는 회색으로 구분
+                                color: context.mlColors.textTertiary, // 미래 날짜는 회색으로 구분
                               ),
                             ),
                           );
@@ -263,7 +261,7 @@ class BollingerBandsChartWidget extends StatelessWidget {
               const SizedBox(width: AppSpacing.lg),
               _buildLegendItem(
                 'Price',
-                Theme.of(context).colorScheme.onSurface,
+                context.mlColors.textPrimary,
               ),
             ],
           ),
@@ -285,7 +283,7 @@ class BollingerBandsChartWidget extends StatelessWidget {
                   style: TextStyle(
                     fontSize: AppTypography.bodySmall,
                     fontWeight: AppTypography.bold,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    color: context.mlColors.textSecondary,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.xs),
@@ -295,7 +293,7 @@ class BollingerBandsChartWidget extends StatelessWidget {
                   style: TextStyle(
                     fontSize: AppTypography.bodySmall,
                     height: 1.4,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    color: context.mlColors.textSecondary,
                   ),
                 ),
                 Text(
@@ -303,7 +301,7 @@ class BollingerBandsChartWidget extends StatelessWidget {
                   style: TextStyle(
                     fontSize: AppTypography.bodySmall,
                     height: 1.4,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    color: context.mlColors.textSecondary,
                   ),
                 ),
                 Text(
@@ -311,7 +309,7 @@ class BollingerBandsChartWidget extends StatelessWidget {
                   style: TextStyle(
                     fontSize: AppTypography.bodySmall,
                     height: 1.4,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    color: context.mlColors.textSecondary,
                   ),
                 ),
                 Text(
@@ -319,7 +317,7 @@ class BollingerBandsChartWidget extends StatelessWidget {
                   style: TextStyle(
                     fontSize: AppTypography.bodySmall,
                     height: 1.4,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    color: context.mlColors.textSecondary,
                   ),
                 ),
               ],

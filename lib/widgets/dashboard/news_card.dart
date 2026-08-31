@@ -44,7 +44,7 @@ class NewsCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: AppTypography.headlineSmall,
                     fontWeight: AppTypography.bold,
-                    color: Theme.of(context).colorScheme.onSurface,
+                    color: context.mlColors.textPrimary,
                   ),
                 ),
                 const Spacer(),
@@ -146,8 +146,8 @@ class NewsCard extends StatelessWidget {
                             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xxs),
                             decoration: BoxDecoration(
                               color: isMarket
-                                  ? Theme.of(context).colorScheme.surfaceContainerHighest
-                                  : Theme.of(context).colorScheme.primaryContainer,
+                                  ? context.mlColors.groupedBackground
+                                  : context.mlColors.infoBg,
                               borderRadius: BorderRadius.circular(AppRadius.xs),
                             ),
                             child: Text(
@@ -161,7 +161,7 @@ class NewsCard extends StatelessWidget {
                                 fontWeight: AppTypography.bold,
                                 color: isMarket
                                     ? context.mlColors.textSecondary
-                                    : Theme.of(context).colorScheme.onPrimaryContainer,
+                                    : context.mlColors.accentBlue,
                               ),
                             ),
                           ),
@@ -198,7 +198,7 @@ class NewsCard extends StatelessWidget {
                               item.sectorShort!,
                               style: TextStyle(
                                 fontSize: AppTypography.micro,
-                                color: Theme.of(context).colorScheme.outline,
+                                color: context.mlColors.textTertiary,
                               ),
                             ),
                             const SizedBox(width: AppSpacing.sm),
@@ -209,7 +209,7 @@ class NewsCard extends StatelessWidget {
                             item.timeAgoLocalized(l10n),
                             style: TextStyle(
                               fontSize: AppTypography.micro,
-                              color: Theme.of(context).colorScheme.outline,
+                              color: context.mlColors.textTertiary,
                             ),
                           ),
                         ],
@@ -222,7 +222,7 @@ class NewsCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: AppTypography.bodySmall,
                           fontWeight: AppTypography.semiBold,
-                          color: Theme.of(context).colorScheme.onSurface,
+                          color: context.mlColors.textPrimary,
                           height: 1.4,
                         ),
                         maxLines: 2,

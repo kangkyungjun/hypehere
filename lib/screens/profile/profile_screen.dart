@@ -248,14 +248,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Icon(
                     Icons.person_outline,
                     size: 64,
-                    color: Theme.of(context).colorScheme.outline,
+                    color: context.mlColors.textTertiary,
                   ),
                   const SizedBox(height: AppSpacing.xl),
                   Text(
                     l10n.loginPromptMessage,
                     style: TextStyle(
                       fontSize: AppTypography.headlineMedium,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      color: context.mlColors.textSecondary,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.xxl),

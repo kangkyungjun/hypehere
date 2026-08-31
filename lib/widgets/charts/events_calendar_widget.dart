@@ -110,7 +110,7 @@ class _EventsCalendarWidgetState extends State<EventsCalendarWidget>
                 Icon(
                   Icons.chevron_right,
                   size: 20,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  color: context.mlColors.textSecondary,
                 ),
               ],
             ),
@@ -127,7 +127,7 @@ class _EventsCalendarWidgetState extends State<EventsCalendarWidget>
                   padding: const EdgeInsets.only(left: AppSpacing.xxxl),
                   child: Text(
                     _formatEstimate(calendar.earningsEstimate!),
-                    style: TextStyle(fontSize: AppTypography.bodySmall, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                    style: TextStyle(fontSize: AppTypography.bodySmall, color: context.mlColors.textSecondary),
                   ),
                 ),
               ],
@@ -139,7 +139,7 @@ class _EventsCalendarWidgetState extends State<EventsCalendarWidget>
                   padding: const EdgeInsets.only(left: AppSpacing.xxxl),
                   child: Text(
                     _formatRevenueEstimate(calendar.revenueEstimate!),
-                    style: TextStyle(fontSize: AppTypography.bodySmall, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                    style: TextStyle(fontSize: AppTypography.bodySmall, color: context.mlColors.textSecondary),
                   ),
                 ),
               ],
@@ -248,7 +248,7 @@ class _EventsCalendarWidgetState extends State<EventsCalendarWidget>
                       _formatEstimate(calendar.earningsEstimate!),
                       style: TextStyle(
                         fontSize: AppTypography.bodySmall,
-                        color: Theme.of(ctx).colorScheme.onSurfaceVariant,
+                        color: ctx.mlColors.textSecondary,
                       ),
                     ),
                   ),
@@ -261,7 +261,7 @@ class _EventsCalendarWidgetState extends State<EventsCalendarWidget>
                       _formatRevenueEstimate(calendar.revenueEstimate!),
                       style: TextStyle(
                         fontSize: AppTypography.bodySmall,
-                        color: Theme.of(ctx).colorScheme.onSurfaceVariant,
+                        color: ctx.mlColors.textSecondary,
                       ),
                     ),
                   ),
@@ -341,7 +341,7 @@ class _EventsCalendarWidgetState extends State<EventsCalendarWidget>
 
     return Row(
       children: [
-        Icon(Icons.bar_chart, size: 18, color: Theme.of(ctx).colorScheme.onSurfaceVariant),
+        Icon(Icons.bar_chart, size: 18, color: ctx.mlColors.textSecondary),
         const SizedBox(width: AppSpacing.md),
         Text(
           AppLocalizations.of(ctx).nextEarningsDate,
@@ -370,7 +370,7 @@ class _EventsCalendarWidgetState extends State<EventsCalendarWidget>
   }) {
     return Row(
       children: [
-        Icon(icon, size: 18, color: Theme.of(ctx).colorScheme.onSurfaceVariant),
+        Icon(icon, size: 18, color: ctx.mlColors.textSecondary),
         const SizedBox(width: AppSpacing.md),
         Text(
           label,
@@ -408,7 +408,7 @@ class _EventsCalendarWidgetState extends State<EventsCalendarWidget>
                 style: TextStyle(
                   fontSize: AppTypography.bodyMedium,
                   fontWeight: AppTypography.semiBold,
-                  color: Theme.of(ctx).colorScheme.onSurface,
+                  color: ctx.mlColors.textPrimary,
                 ),
               ),
               const SizedBox(width: AppSpacing.md),
@@ -426,7 +426,7 @@ class _EventsCalendarWidgetState extends State<EventsCalendarWidget>
                 AppLocalizations.of(ctx).epsEstimateValue((entry.epsEstimate ?? 0).toStringAsFixed(2)),
                 style: TextStyle(
                   fontSize: AppTypography.bodySmall,
-                  color: Theme.of(ctx).colorScheme.onSurfaceVariant,
+                  color: ctx.mlColors.textSecondary,
                 ),
               ),
               if (entry.surprisePct != null) ...[
@@ -477,7 +477,7 @@ class _EventsCalendarWidgetState extends State<EventsCalendarWidget>
 
     return Row(
       children: [
-        Icon(Icons.bar_chart, size: 18, color: Theme.of(context).colorScheme.onSurfaceVariant),
+        Icon(Icons.bar_chart, size: 18, color: context.mlColors.textSecondary),
         const SizedBox(width: AppSpacing.md),
         Text(
           AppLocalizations.of(context).nextEarningsDate,
@@ -589,7 +589,7 @@ class _EventsCalendarWidgetState extends State<EventsCalendarWidget>
   }) {
     return Row(
       children: [
-        Icon(icon, size: 18, color: Theme.of(context).colorScheme.onSurfaceVariant),
+        Icon(icon, size: 18, color: context.mlColors.textSecondary),
         const SizedBox(width: AppSpacing.md),
         Text(
           label,

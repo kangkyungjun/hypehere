@@ -38,7 +38,7 @@ class SellHoldingSheet extends StatefulWidget {
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
-      backgroundColor: Theme.of(context).colorScheme.surface,
+      backgroundColor: context.mlColors.cardBackground,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
           top: Radius.circular(AppRadius.xxl),
@@ -158,7 +158,6 @@ class _SellHoldingSheetState extends State<SellHoldingSheet> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
     final mlc = context.mlColors;
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
     final bottomPadding = MediaQuery.of(context).viewPadding.bottom;
@@ -313,7 +312,7 @@ class _SellHoldingSheetState extends State<SellHoldingSheet> {
                       : 'Could not load close price. Please enter manually.',
                   style: TextStyle(
                     fontSize: AppTypography.caption,
-                    color: theme.colorScheme.error,
+                    color: context.mlColors.dangerColor,
                   ),
                 ),
               ),
@@ -406,7 +405,7 @@ class _SellHoldingSheetState extends State<SellHoldingSheet> {
                         l10n.sellAmount,
                         style: TextStyle(
                           fontSize: AppTypography.bodyMedium,
-                          color: theme.colorScheme.onSurfaceVariant,
+                          color: context.mlColors.textSecondary,
                         ),
                       ),
                       Text(
@@ -429,7 +428,7 @@ class _SellHoldingSheetState extends State<SellHoldingSheet> {
                         l10n.realizedPnlLabel,
                         style: TextStyle(
                           fontSize: AppTypography.bodyMedium,
-                          color: theme.colorScheme.onSurfaceVariant,
+                          color: context.mlColors.textSecondary,
                         ),
                       ),
                       if (_realizedPnl != null)

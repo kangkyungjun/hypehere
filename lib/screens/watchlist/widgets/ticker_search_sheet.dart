@@ -6,6 +6,7 @@ import '../../../services/analytics_api_client.dart';
 import '../../../theme/app_radius.dart';
 import '../../../theme/app_spacing.dart';
 import '../../../theme/app_typography.dart';
+import '../../../theme/app_colors.dart';
 
 /// Bottom sheet with ticker search for direct holding addition.
 ///
@@ -79,7 +80,6 @@ class _TickerSearchSheetState extends State<TickerSearchSheet> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
     final isKo = Localizations.localeOf(context).languageCode == 'ko';
 
     return DraggableScrollableSheet(
@@ -99,7 +99,7 @@ class _TickerSearchSheetState extends State<TickerSearchSheet> {
                   height: 4,
                   margin: const EdgeInsets.only(bottom: AppSpacing.lg),
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.outline.withValues(alpha: 0.3),
+                    color: context.mlColors.textTertiary.withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(AppRadius.xxs),
                   ),
                 ),
@@ -145,14 +145,14 @@ class _TickerSearchSheetState extends State<TickerSearchSheet> {
                                     l10n.searchTickerHint,
                                     style: TextStyle(
                                       fontSize: AppTypography.bodyMedium,
-                                      color: theme.colorScheme.outline,
+                                      color: context.mlColors.textTertiary,
                                     ),
                                   )
                                 : Text(
                                     l10n.noData,
                                     style: TextStyle(
                                       fontSize: AppTypography.bodyMedium,
-                                      color: theme.colorScheme.outline,
+                                      color: context.mlColors.textTertiary,
                                     ),
                                   ),
                           )
@@ -168,13 +168,13 @@ class _TickerSearchSheetState extends State<TickerSearchSheet> {
                                 dense: true,
                                 leading: CircleAvatar(
                                   radius: 18,
-                                  backgroundColor: theme.colorScheme.primaryContainer,
+                                  backgroundColor: context.mlColors.infoBg,
                                   child: Text(
                                     ticker.ticker.substring(0, ticker.ticker.length > 2 ? 2 : ticker.ticker.length),
                                     style: TextStyle(
                                       fontSize: AppTypography.bodySmall,
                                       fontWeight: AppTypography.bold,
-                                      color: theme.colorScheme.onPrimaryContainer,
+                                      color: context.mlColors.accentBlue,
                                     ),
                                   ),
                                 ),
@@ -189,7 +189,7 @@ class _TickerSearchSheetState extends State<TickerSearchSheet> {
                                   displayName,
                                   style: TextStyle(
                                     fontSize: AppTypography.bodySmall,
-                                    color: theme.colorScheme.onSurfaceVariant,
+                                    color: context.mlColors.textSecondary,
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,

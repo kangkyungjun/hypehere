@@ -141,7 +141,7 @@ class RsiChartWidget extends StatelessWidget {
                 .map((e) => FlSpot(e.key.toDouble(), e.value.rsi!))
                 .toList(),
             isCurved: true,
-            color: Theme.of(context).colorScheme.tertiary,
+            color: context.mlColors.accentBlue,
             barWidth: 1.5,
             isStrokeCapRound: true,
             dotData: const FlDotData(show: false),
@@ -230,7 +230,7 @@ class RsiChartWidget extends StatelessWidget {
                 .map((e) => FlSpot(e.key.toDouble(), e.value.rsi!))
                 .toList(),
             isCurved: true,
-            color: Theme.of(context).colorScheme.tertiary,
+            color: context.mlColors.accentBlue,
             barWidth: 1.5,
             isStrokeCapRound: true,
             dotData: const FlDotData(show: false),
@@ -242,7 +242,7 @@ class RsiChartWidget extends StatelessWidget {
                 .map((e) => FlSpot(e.key.toDouble(), e.value.mfi!))
                 .toList(),
             isCurved: true,
-            color: Theme.of(context).colorScheme.secondary,
+            color: context.mlColors.neutralColor,
             barWidth: 1.5,
             isStrokeCapRound: true,
             dotData: const FlDotData(show: false),
@@ -405,7 +405,7 @@ class RsiChartWidget extends StatelessWidget {
                   '${futureDate.month}/${futureDate.day}',
                   style: TextStyle(
                     fontSize: AppTypography.caption,
-                    color: Theme.of(context).colorScheme.outline,
+                    color: context.mlColors.textTertiary,
                   ),
                 ),
               );
@@ -463,7 +463,7 @@ class RsiChartWidget extends StatelessWidget {
       spacing: 12,
       runSpacing: 4,
       children: [
-        _buildLegendItem('RSI', Theme.of(context).colorScheme.tertiary),
+        _buildLegendItem('RSI', context.mlColors.accentBlue),
         _buildDashedLegendItem('80', context.mlColors.gainColor),
         _buildDashedLegendItem('20', context.mlColors.lossColor),
       ],
@@ -477,8 +477,8 @@ class RsiChartWidget extends StatelessWidget {
       spacing: 12,
       runSpacing: 4,
       children: [
-        _buildLegendItem('RSI', Theme.of(context).colorScheme.tertiary),
-        _buildLegendItem('MFI', Theme.of(context).colorScheme.secondary),
+        _buildLegendItem('RSI', context.mlColors.accentBlue),
+        _buildLegendItem('MFI', context.mlColors.neutralColor),
         _buildFillLegendItem(
           'Accumulation',
           context.mlColors.lossColor.withValues(alpha: 0.3),

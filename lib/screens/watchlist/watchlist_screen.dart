@@ -26,6 +26,7 @@ import '../../theme/app_typography.dart';
 import 'widgets/add_holding_sheet.dart';
 import 'widgets/instant_advice_sheet.dart';
 import 'widgets/watchlist_tab.dart';
+import '../../theme/app_colors.dart';
 
 /// Watchlist Screen — 관심종목 전용 (보유종목은 별도 HoldingsScreen으로 분리됨)
 class WatchlistScreen extends StatefulWidget {
@@ -397,7 +398,7 @@ class _WatchlistScreenState extends State<WatchlistScreen> {
           Expanded(
             child: Text(
               text,
-              style: TextStyle(fontSize: AppTypography.bodyMedium, color: theme.colorScheme.onSurface),
+              style: TextStyle(fontSize: AppTypography.bodyMedium, color: context.mlColors.textPrimary),
             ),
           ),
         ],

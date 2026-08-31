@@ -37,7 +37,7 @@ class EditHoldingSheet extends StatefulWidget {
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
-      backgroundColor: Theme.of(context).colorScheme.surface,
+      backgroundColor: context.mlColors.cardBackground,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
           top: Radius.circular(AppRadius.xxl),

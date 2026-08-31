@@ -592,7 +592,7 @@ class _EventCalendarScreenState extends State<EventCalendarScreen>
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(AppRadius.md),
-        color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.3),
+        color: context.mlColors.cardBackground.withValues(alpha: 0.3),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -795,14 +795,14 @@ class _EventCalendarScreenState extends State<EventCalendarScreen>
                       vertical: 1,
                     ),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primaryContainer,
+                      color: context.mlColors.infoBg,
                       borderRadius: BorderRadius.circular(AppRadius.xs),
                     ),
                     child: Text(
                       l10n.today,
                       style: TextStyle(
                         fontSize: AppTypography.caption,
-                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                        color: context.mlColors.accentBlue,
                         fontWeight: AppTypography.semiBold,
                       ),
                     ),
@@ -906,7 +906,7 @@ class _EventCalendarScreenState extends State<EventCalendarScreen>
                       final isSelected = pickerYear == _year && m == _month;
                       final isTodayMonth =
                           pickerYear == now.year && m == now.month;
-                      final primary = Theme.of(context).colorScheme.primary;
+                      final primary = context.mlColors.accentBlue;
 
                       return GestureDetector(
                         onTap: () {
@@ -936,7 +936,7 @@ class _EventCalendarScreenState extends State<EventCalendarScreen>
                                   ? AppTypography.bold
                                   : AppTypography.regular,
                               color: isSelected
-                                  ? Theme.of(context).colorScheme.onPrimary
+                                  ? context.mlColors.onPrimary
                                   : null,
                             ),
                           ),
@@ -1122,9 +1122,7 @@ class _EventCalendarScreenState extends State<EventCalendarScreen>
                   height: 44,
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? Theme.of(
-                            context,
-                          ).colorScheme.primaryContainer.withValues(alpha: 0.5)
+                        ? context.mlColors.infoBg.withValues(alpha: 0.5)
                         : null,
                     borderRadius: BorderRadius.circular(AppRadius.md),
                   ),
@@ -1136,7 +1134,7 @@ class _EventCalendarScreenState extends State<EventCalendarScreen>
                         height: 28,
                         decoration: isToday
                             ? BoxDecoration(
-                                color: Theme.of(context).colorScheme.primary,
+                                color: context.mlColors.accentBlue,
                                 shape: BoxShape.circle,
                               )
                             : null,
@@ -1149,7 +1147,7 @@ class _EventCalendarScreenState extends State<EventCalendarScreen>
                                 ? AppTypography.bold
                                 : AppTypography.regular,
                             color: isToday
-                                ? Theme.of(context).colorScheme.onPrimary
+                                ? context.mlColors.onPrimary
                                 : col == 0
                                 ? context.mlColors.sundayColor
                                 : col == 6
@@ -1360,7 +1358,7 @@ class _EventCalendarScreenState extends State<EventCalendarScreen>
                   ),
                   style: TextStyle(
                     fontSize: AppTypography.caption,
-                    color: Theme.of(context).colorScheme.primary,
+                    color: context.mlColors.accentBlue,
                   ),
                 ),
               ],
@@ -1529,7 +1527,7 @@ class _EventCalendarScreenState extends State<EventCalendarScreen>
                                   event.ticker!,
                                   style: TextStyle(
                                     fontSize: AppTypography.bodySmall,
-                                    color: Theme.of(context).colorScheme.primary,
+                                    color: context.mlColors.accentBlue,
                                     fontWeight: AppTypography.semiBold,
                                   ),
                                 ),
@@ -1569,9 +1567,7 @@ class _EventCalendarScreenState extends State<EventCalendarScreen>
                                   vertical: 1,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.primary.withValues(alpha: 0.12),
+                                  color: context.mlColors.accentBlue.withValues(alpha: 0.12),
                                   borderRadius: BorderRadius.circular(
                                     AppRadius.xs,
                                   ),
@@ -1582,18 +1578,14 @@ class _EventCalendarScreenState extends State<EventCalendarScreen>
                                     Icon(
                                       Icons.insights,
                                       size: 12,
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.primary,
+                                      color: context.mlColors.accentBlue,
                                     ),
                                     const SizedBox(width: 2),
                                     Text(
                                       l10n.calendarViewResult,
                                       style: TextStyle(
                                         fontSize: AppTypography.bodySmall,
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.primary,
+                                        color: context.mlColors.accentBlue,
                                         fontWeight: AppTypography.semiBold,
                                       ),
                                     ),
