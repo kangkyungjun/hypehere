@@ -62,7 +62,16 @@ class _AILensScreenState extends State<AILensScreen>
       aiChatSubTabActive.value = _tabController.index == 0;
     });
     // 초기값 반영(기본 initialIndex=0=분석/채팅 → true).
-    aiChatSubTabActive.value = _tabController.index == 0;
+    //
+    // ⚠️ initState에서 **동기로** 값을 바꾸면 이 신호를 듣는 부모
+    // (main.dart의 ValueListenableBuilder)가 **자기 빌드 도중** rebuild
+    // 요청을 받아 "setState() called during build"로 터진다.
+    // 실앱에서는 IndexedStack이 이 화면을 지연 생성해 드러나지 않았지만
+    // 위젯 테스트에서는 즉시 재현된다 — 프레임 이후로 미룬다.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      aiChatSubTabActive.value = _tabController.index == 0;
+    });
     _loadData();
   }
 

@@ -6,10 +6,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:marketlens/l10n/app_localizations.dart';
 import 'package:marketlens/main.dart';
 import 'package:marketlens/providers/auth_provider.dart';
+import 'package:marketlens/providers/chat_provider.dart';
 import 'package:marketlens/providers/coach_mark_provider.dart';
+import 'package:marketlens/providers/investment_profile_provider.dart';
 import 'package:marketlens/providers/locale_provider.dart';
 import 'package:marketlens/providers/portfolio_provider.dart';
 import 'package:marketlens/providers/recent_search_provider.dart';
+import 'package:marketlens/providers/recommendation_provider.dart';
 import 'package:marketlens/providers/subscription_provider.dart';
 import 'package:marketlens/providers/watchlist_provider.dart';
 import 'package:marketlens/theme/app_colors.dart';
@@ -32,6 +35,12 @@ void main() {
           ChangeNotifierProvider(create: (_) => PortfolioProvider()),
           ChangeNotifierProvider(create: (_) => SubscriptionProvider()),
           ChangeNotifierProvider(create: (_) => CoachMarkProvider()),
+          // main.dart가 등록하는 10개와 **같은 집합**이어야 한다.
+          // 이 셋이 빠져 있어 MainNavigationScreen이
+          // ProviderNotFoundException으로 죽고 있었다(2026-08-15부터).
+          ChangeNotifierProvider(create: (_) => InvestmentProfileProvider()),
+          ChangeNotifierProvider(create: (_) => RecommendationProvider()),
+          ChangeNotifierProvider(create: (_) => ChatProvider()),
         ],
         child: MaterialApp(
           localizationsDelegates: AppLocalizations.localizationsDelegates,
