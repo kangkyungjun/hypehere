@@ -48,6 +48,7 @@ import 'models/news_data.dart';
 import 'utils/multilingual.dart';
 import 'widgets/news/market_news_modal.dart';
 import 'widgets/ads/app_open_ad_helper.dart';
+import 'widgets/ads/banner_ad_widget.dart' show kScreenshotMode;
 import 'widgets/version_aware_upgrader.dart';
 import 'package:upgrader/upgrader.dart';
 
@@ -116,6 +117,23 @@ void main() async {
 Future<void> _initializeRemoteServices(
   SubscriptionProvider subscriptionProvider,
 ) async {
+  // ⚠️ 스크린샷 캡처 모드에서는 **원격 서비스를 전부 건너뛴다**.
+  //
+  // ATT(앱 추적 투명성) 동의창은 **iOS 시스템 모달**이라 Flutter 위젯 트리 밖에
+  // 뜨고 화면 전체를 덮는다. 자동 캡처가 8번 실패한 원인이 이것이었다.
+  //
+  // 범인을 좁히는 데 오래 걸렸다:
+  //   1) ATT 요청 코드를 막았다 → `[ATT]` 로그가 안 찍히는데도 동의창이 떴다
+  //   2) AdMob 초기화를 막았다 → 여전히 떴다
+  //   3) 남은 건 **RevenueCat**(`subscriptionProvider.initialize()`) — IDFA를
+  //      수집하므로 iOS가 시스템 차원에서 동의창을 띄운다
+  //
+  // 스크린샷에는 푸시·결제·광고가 모두 불필요하므로 통째로 건너뛴다.
+  if (kScreenshotMode) {
+    debugPrint('[SCREENSHOT] 원격 서비스(Firebase·FCM·RevenueCat·광고) 건너뜀');
+    return;
+  }
+
   try {
     await Firebase.initializeApp().timeout(const Duration(seconds: 10));
   } catch (e) {
