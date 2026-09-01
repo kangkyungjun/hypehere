@@ -28,7 +28,7 @@ import 'package:marketlens/main.dart' as app;
 /// 없어 이후 이동이 전부 실패한다. 처음 시도에서 04~08이 전부 같은 AI 화면으로
 /// 찍힌 원인이 이것이었다.
 void main() {
-  final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   /// 네트워크 응답을 기다린다. `pumpAndSettle`은 무한 애니메이션(스켈레톤·
   /// 광고 로딩)이 있으면 타임아웃 나므로 고정 시간으로 돌린다.
@@ -39,18 +39,19 @@ void main() {
     }
   }
 
-  // ⚠️ `convertFlutterSurfaceToImage()`는 **한 번만** 호출한다.
-  // 매 촬영마다 부르면 표면이 첫 프레임에 고정돼 이후 화면 변화가 반영되지
-  // 않는다 — 두 번째 시도에서 5장이 전부 같은 파일(동일 MD5)로 나온 원인.
-  var surfaceReady = false;
-
+  /// 화면이 준비됐음을 로그로 알리고 잠시 멈춘다.
+  ///
+  /// ## 왜 `binding.takeScreenshot()`을 안 쓰나
+  /// iOS integration_test의 `takeScreenshot`은 **매번 같은 이미지**를 돌려준다
+  /// (4번 시도해 8장이 전부 동일 MD5). `convertFlutterSurfaceToImage()`는
+  /// 안드로이드 전용이라 해법도 아니다.
+  ///
+  /// 그래서 캡처는 외부 `xcrun simctl io screenshot`에 맡기고, 이 테스트는
+  /// **화면을 그 상태로 붙잡아 주는 역할**만 한다. `tool/capture_screens.sh`가
+  /// 이 마커를 보고 찍는다.
   Future<void> shot(WidgetTester tester, String name) async {
-    if (!surfaceReady) {
-      await binding.convertFlutterSurfaceToImage();
-      surfaceReady = true;
-    }
-    await tester.pump(const Duration(milliseconds: 400));
-    await binding.takeScreenshot(name);
+    debugPrint('SHOT_READY:$name');
+    await settle(tester, seconds: 4); // 외부 캡처가 끝날 시간
   }
 
   /// 하단 탭 이동. 라벨은 로케일마다 다르므로 아이콘으로 찾는다.
@@ -68,9 +69,35 @@ void main() {
     await settle(tester, seconds: wait);
   }
 
+  /// 심사용 데모 계정으로 로그인한다.
+  ///
+  /// 관심종목·보유종목은 비로그인 시 "로그인하여 포트폴리오를 관리하세요"
+  /// 안내만 나온다. 계정은 `fastlane/metadata/review_information/`의
+  /// Apple 심사용 데모 계정을 그대로 쓴다.
+  Future<bool> login(WidgetTester tester) async {
+    final loginBtn = find.textContaining(RegExp(r'로그인|Log ?in|Sign ?in'));
+    if (loginBtn.evaluate().isEmpty) return false;
+    await tester.tap(loginBtn.first, warnIfMissed: false);
+    await settle(tester, seconds: 4);
+
+    final fields = find.byType(TextFormField);
+    if (fields.evaluate().length < 2) return false;
+    await tester.enterText(fields.at(0), 'test_appstore@apple.com');
+    await tester.enterText(fields.at(1), '1234qwer!Q');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await settle(tester, seconds: 2);
+
+    final submit = find.widgetWithText(ElevatedButton, '로그인');
+    if (submit.evaluate().isNotEmpty) {
+      await tester.tap(submit.first, warnIfMissed: false);
+    }
+    await settle(tester, seconds: 9);
+    return true;
+  }
+
   testWidgets('앱스토어 스크린샷 8장', (tester) async {
     app.main();
-    await settle(tester, seconds: 12);
+    await settle(tester, seconds: 14);
 
     // 01 홈 — 거시지표 · 지수 카드 · 섹터 차트
     await shot(tester, '01_home');
@@ -80,8 +107,7 @@ void main() {
     await shot(tester, '02_home_picks');
 
     // 03 티커 상세 — 현재가 히어로 + 목표가 + AI 점수
-    final ticker = find.textContaining(RegExp(r'^[A-Z]{2,5}$')).first;
-    await tester.tap(ticker);
+    await tester.tap(find.textContaining(RegExp(r'^[A-Z]{2,5}$')).first);
     await settle(tester, seconds: 9);
     await shot(tester, '03_ticker_hero');
 
@@ -93,27 +119,32 @@ void main() {
     await scroll(tester, 1900, wait: 4);
     await shot(tester, '05_ticker_chart');
 
-    // 06 뉴스 — 종목별 뉴스 + 감성
-    // `pageBack()`은 Cupertino 뒤로가기 버튼을 찾는다. 티커 상세는 Material
-    // 라우트라 없으므로 시스템 pop을 직접 부른다.
-    final navigator = tester.state<NavigatorState>(find.byType(Navigator).first);
-    navigator.pop();
+    tester.state<NavigatorState>(find.byType(Navigator).first).pop();
     await settle(tester, seconds: 3);
+
+    // 06 뉴스 — ⚠️ 뉴스 탭의 **첫 화면은 캘린더**다(내부 탭: 캘린더 | 뉴스).
+    // 두 번째 내부 탭으로 이동해야 실제 뉴스가 나온다.
     await tapTab(tester, Icons.newspaper_outlined);
+    final innerTabs = find.byType(Tab);
+    if (innerTabs.evaluate().length >= 2) {
+      await tester.tap(innerTabs.at(1), warnIfMissed: false);
+      await settle(tester, seconds: 4);
+    }
     await shot(tester, '06_news');
 
-    // 07 홈 등락 탭 — 상승/하락 리스트
+    // 07 홈 등락 탭 — 시가총액/거래대금 상위
     await tapTab(tester, Icons.home_outlined);
-    final upDown = find.byType(Tab);
-    if (upDown.evaluate().length > 1) {
-      await tester.tap(upDown.at(1));
+    final homeTabs = find.byType(Tab);
+    if (homeTabs.evaluate().length > 1) {
+      await tester.tap(homeTabs.at(1), warnIfMissed: false);
       await settle(tester);
     }
     await shot(tester, '07_updown');
 
-    // 08 AI 렌즈 — **마지막**. 여기 들어가면 탭바가 접혀 이동이 막힌다.
-    await tapTab(tester, Icons.auto_awesome_outlined);
+    // 08 관심종목 — 로그인이 되면 실제 목록, 안 되면 건너뛴다.
+    await tapTab(tester, Icons.star_border_rounded);
+    await login(tester);
     await settle(tester, seconds: 4);
-    await shot(tester, '08_ai');
+    await shot(tester, '08_watchlist');
   });
 }

@@ -10,6 +10,15 @@ import '../../providers/subscription_provider.dart';
 ///
 /// Google AdMob 배너 광고를 표시합니다.
 /// 테스트 환경에서는 Google 제공 테스트 광고 ID를 사용합니다.
+/// 앱스토어 스크린샷 캡처 모드.
+///
+/// `--dart-define=SCREENSHOT_MODE=true`로 켜면 배너 광고가 렌더되지 않는다.
+/// 디버그 빌드는 테스트 광고("Test mode" 배너)를 강제하는데, 그게 찍힌
+/// 스크린샷을 제출하면 리젝 사유가 된다. 실광고를 넣는 것도 부적절하므로
+/// 캡처 중에는 아예 자리를 비운다.
+const bool kScreenshotMode =
+    bool.fromEnvironment('SCREENSHOT_MODE', defaultValue: false);
+
 class BannerAdWidget extends StatefulWidget {
   /// 광고 크기 (기본: 320x50 배너)
   final AdSize adSize;
@@ -72,6 +81,9 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
 
   @override
   Widget build(BuildContext context) {
+    // 앱스토어 스크린샷 캡처 중에는 광고 자리를 비운다(위 주석 참조).
+    if (kScreenshotMode) return const SizedBox.shrink();
+
     // Gold: 항상 숨김 / Manager·Master: 토글로 제어 / Regular: 항상 표시
     final authProvider = context.watch<AuthProvider>();
     final sub = context.watch<SubscriptionProvider>();
