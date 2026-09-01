@@ -1,1 +1,9 @@
-Multi-language support update
+Complete visual redesign
+
+• Rebuilt type scale and color contrast so numbers and headings read clearly
+• Key figures like current price and holdings value are now the focal point
+• Cleaned up spacing between cards so groupings are easy to see
+• Redrew charts with bolder lines and a clear "you are here" marker
+• Expandable sections now animate smoothly, and expanded lists can be collapsed again
+• Filled in text that previously appeared only in Korean or English across all 5 languages
+• Adjusted gain color contrast to meet accessibility standards

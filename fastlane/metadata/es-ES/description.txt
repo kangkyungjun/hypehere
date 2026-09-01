@@ -25,10 +25,10 @@ Funciones principales
 - Alertas en tiempo real para valores favoritos (disponible proximamente)
 - Funcion de gestion de cartera (disponible proximamente)
 
-    5. Comunidad de inversores
-- Comparte y debate ideas de inversion
-- Foro por valores y funcion de comentarios
-- Intercambio de informacion entre inversores
+    5. Gestion de cartera
+- Registra acciones y precio medio, con perdidas y ganancias en tiempo real
+- Compara la opinion de la IA y el precio objetivo de cada posicion
+- Historial de operaciones
 
 
     Que son las senales de IA?
@@ -59,7 +59,7 @@ Funciones principales
 
 - Analisis objetivo basado en datos: informacion fundamentada en datos, no en emociones
 - Experiencia de usuario intuitiva: informacion de inversion compleja presentada de forma clara y sencilla
-- Informacion basada en la comunidad: comparte opiniones y analisis con otros inversores
+- Legible de un vistazo: cifras clave grandes, detalles de apoyo discretos
 - Actualizaciones continuas: mejoras periodicas que reflejan las ultimas tendencias del mercado
 
 
@@ -68,7 +68,7 @@ Recomendado para
 - Inversores principiantes que comienzan en bolsa
 - Inversores que buscan un analisis objetivo basado en datos
 - Inversores que desean conocer rapidamente las tendencias del mercado
-- Inversores que quieren intercambiar informacion en una comunidad
+- Inversores que quieren ver de un vistazo las ganancias de su cartera
 
 
     Proteccion de datos

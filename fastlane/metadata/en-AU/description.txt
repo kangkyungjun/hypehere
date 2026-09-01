@@ -25,10 +25,10 @@ Key Features
 - Real-time alerts for watchlist stocks (coming soon)
 - Portfolio management tools (coming soon)
 
-    5. Investor Community
-- Share and discuss investment ideas
-- Stock-specific boards and comments
-- Connect and exchange insights with fellow investors
+    5. Holdings Management
+- Track shares, average cost, and live unrealized P&L
+- Compare AI opinion and target price per holding
+- Transaction history
 
 
     What Are AI Signals?
@@ -59,7 +59,7 @@ Key Features
 
 - Data-Driven Objectivity: Insights grounded in data, not emotion
 - Intuitive User Experience: Complex market data presented clearly and simply
-- Community-Powered Insights: Share opinions and analysis with other investors
+- Readable at a Glance: Key figures large, supporting details calm
 - Continuous Improvement: Regular updates reflecting the latest market trends
 
 
@@ -68,7 +68,7 @@ Key Features
 - Beginner investors getting started in the stock market
 - Investors seeking objective, data-driven analysis
 - Investors who want to stay on top of market trends quickly
-- Investors looking to exchange ideas in an active community
+- Investors who want their holdings' P&L at a glance
 
 
     Privacy

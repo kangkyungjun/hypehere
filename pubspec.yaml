@@ -97,6 +97,11 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
+  # 앱스토어 스크린샷 자동 캡처용 — 실기기/시뮬레이터에서 앱을 실제로 조작해
+  # 화면을 찍는다. `flutter drive`로 실행(`docs/SCREENSHOTS.md` 참조).
+  integration_test:
+    sdk: flutter
+
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
   # activated in the `analysis_options.yaml` file located at the root of your

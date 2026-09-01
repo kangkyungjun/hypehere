@@ -1,1 +1,9 @@
-Actualizacion con soporte multiidioma.
+Rediseño visual completo
+
+• Rehicimos la escala tipográfica y el contraste para que cifras y títulos se lean con claridad
+• Cifras clave como el precio actual y el valor de la cartera son ahora el foco
+• Ajustamos el espaciado entre tarjetas para distinguir mejor los grupos
+• Redibujamos los gráficos con líneas más gruesas y un marcador de posición actual
+• Las secciones plegables se animan con suavidad y las listas ampliadas vuelven a plegarse
+• Completamos en 5 idiomas los textos que antes solo aparecían en coreano o inglés
+• Ajustamos el contraste del color de ganancia según criterios de accesibilidad
