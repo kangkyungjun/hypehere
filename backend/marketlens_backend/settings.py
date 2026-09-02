@@ -224,6 +224,22 @@ AD_FAILURE_ALERT_THROTTLE_SECONDS = int(
     os.getenv('AD_FAILURE_ALERT_THROTTLE_SECONDS', '1800')
 )
 
+# 알림 throttle이 의존하는 캐시.
+#
+# 이 설정이 없으면 Django 기본값 LocMemCache가 쓰이는데, 그건 **프로세스별**
+# 메모리라 gunicorn 워커가 N개면 30분에 N번까지 알림이 나가고 서버를 재시작할
+# 때마다 초기화된다. 광고 실패 알림이 쏟아진 두 원인 중 하나였다.
+#
+# 파일 기반이면 워커 간 공유되고 재시작에도 살아남는다. Redis 같은 별도
+# 인프라가 필요 없다. 현재 Django 캐시 사용처는 ops_alerts의 이 throttle
+# 하나뿐이라(전수 확인) 다른 기능에 영향이 없다.
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': os.getenv('DJANGO_CACHE_DIR', '/var/tmp/marketlens_cache'),
+    }
+}
+
 # Email verification settings
 VERIFICATION_CODE_EXPIRY_MINUTES = 10
 VERIFICATION_CODE_MAX_ATTEMPTS = 5

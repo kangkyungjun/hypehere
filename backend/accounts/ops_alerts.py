@@ -21,10 +21,66 @@ logger = logging.getLogger(__name__)
 
 _AD_FAILURE_THROTTLE_KEY = 'ops:ad_failure_alert_sent'
 
-# AdMob LoadAdError code 중 알림 제외 대상.
-#   3 = NO_FILL → 인벤토리 부족(특히 보상형/한국)으로 일상적 발생. 알림 가치 없음.
-# 그 외(0=INTERNAL, 1=INVALID_REQUEST, 2=NETWORK, 8=APP_ID_MISSING 등)는 설정/네트워크 문제 → 알림 유지.
-_IGNORED_ERROR_CODES = {3}
+# 알림에서 제외할 "광고 재고 없음" 코드 — **플랫폼마다 번호가 다르다.**
+#
+# google_mobile_ads 플러그인은 네이티브 코드를 정규화 없이 그대로 올린다
+# (ios/Classes/FLTAd_Internal.m: `_code = error.code;`). 따라서 같은 숫자가
+# 안드로이드와 iOS에서 전혀 다른 뜻이다:
+#
+#   코드 | Android (AdRequest.ERROR_CODE_*) | iOS (GADErrorCode)
+#   -----+----------------------------------+--------------------
+#     0  | INTERNAL_ERROR                   | InvalidRequest
+#     1  | INVALID_REQUEST                  | **NoFill**
+#     2  | NETWORK_ERROR                    | NetworkError
+#     3  | **NO_FILL**                      | ServerError
+#     9  | MEDIATION_NO_FILL                | MediationNoFill(deprecated)
+#    20  | —                                | ApplicationIdentifierMissing
+#
+# 과거 이 필터는 {3}뿐이어서 **안드로이드 기준만** 맞았다. 그 결과:
+#   · iOS의 정상적인 재고 없음(1)이 "INVALID_REQUEST"로 오인돼 알림 폭주
+#   · iOS의 진짜 서버 오류(3)는 NO_FILL로 오인돼 조용히 누락
+# 둘 다 이 표로 바로잡는다.
+#
+# 재고 없음은 신규 앱·소규모 트래픽에서 일상적으로 발생하며 운영자가 손쓸 것이
+# 없다. 트래픽과 이력이 쌓이면 자연히 채워진다. 그래서 알림 대상이 아니다.
+# 반면 설정 오류(iOS 20 / Android 8)·서버 오류·네트워크 오류는 그대로 알린다.
+_IGNORED_CODES_BY_PLATFORM = {
+    'android': {3, 9},   # NO_FILL, MEDIATION_NO_FILL
+    'ios': {1, 9},       # NoFill, MediationNoFill
+}
+
+# platform이 비어 있는 구버전 클라이언트용 보조 판별.
+_IOS_DOMAIN_HINT = 'admob'
+_ANDROID_DOMAIN_HINT = 'android.gms.ads'
+
+
+def _resolve_platform(platform, error_domain):
+    """보고된 platform을 정규화한다. 없으면 error_domain으로 추정한다."""
+    p = (platform or '').strip().lower()
+    if p in _IGNORED_CODES_BY_PLATFORM:
+        return p
+    d = (error_domain or '').lower()
+    if _ANDROID_DOMAIN_HINT in d:
+        return 'android'
+    if _IOS_DOMAIN_HINT in d:
+        return 'ios'
+    return ''
+
+
+def _is_no_fill(error_code, platform, error_domain):
+    """이 실패가 '광고 재고 없음'(정상)인지 판정한다."""
+    if error_code is None:
+        return False
+    resolved = _resolve_platform(platform, error_domain)
+    if resolved:
+        return error_code in _IGNORED_CODES_BY_PLATFORM[resolved]
+    # 플랫폼을 특정하지 못하면 양쪽 no-fill 코드의 합집합으로 보수적으로 판단한다.
+    # 알림 폭주를 막는 쪽을 택하되, 아래에서 warning 로그를 남겨 추적 가능하게 한다.
+    logger.warning(
+        '[AdFailureAlert] platform 미상 (platform=%r domain=%r) — 합집합 필터 적용',
+        platform, error_domain,
+    )
+    return error_code in {1, 3, 9}
 
 
 def notify_ad_failure(
@@ -38,10 +94,10 @@ def notify_ad_failure(
 ):
     """광고 로드 실패 알림 발송 (throttle + NO_FILL 필터). 실제로 발송하면 True 반환."""
 
-    # NO_FILL 등 일상적 오류는 알림 skip (서버 로그만 남김)
-    if error_code in _IGNORED_ERROR_CODES:
+    # 재고 없음(no-fill)은 정상 동작이므로 알림 skip (서버 로그만 남김)
+    if _is_no_fill(error_code, platform, error_domain):
         logger.info(
-            '[AdFailureAlert] ignored code=%s ad_unit=%s platform=%s',
+            '[AdFailureAlert] no-fill 무시 code=%s ad_unit=%s platform=%s',
             error_code, ad_unit, platform,
         )
         return False
