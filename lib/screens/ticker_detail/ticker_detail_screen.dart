@@ -16,7 +16,6 @@ import '../../widgets/charts/events_calendar_widget.dart';
 import '../../widgets/charts/ticker_news_card.dart';
 import '../../widgets/ads/banner_ad_widget.dart';
 import '../../widgets/ads/interstitial_ad_helper.dart';
-import '../../widgets/common/ml_divider.dart';
 import '../../config/feature_flags.dart';
 import '../../widgets/common/gold_upgrade_sheet.dart';
 import '../../widgets/community/signup_prompt_dialog.dart';
@@ -486,19 +485,10 @@ class _TickerDetailScreenState extends State<TickerDetailScreen> {
               onScrollToAIInsight: _scrollToAIInsight,
             ),
 
-            // Intraday(시간봉) 차트는 헤더 가격 옆 미니 스파크라인 탭 → 모달로 이동.
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
-              child: Divider(
-                color: context.mlColors.subtleBorder,
-                thickness: 1,
-                height: 16,
-              ),
-            ),
-
-            // 3. Analyst Consensus & Ratings 섹션 (주요일정 위로 이동)
+            // 3. Analyst Consensus & Ratings 섹션
+            // 애널리스트 헤더는 padding zero이므로 여기서 간격을 준다.
+            const SizedBox(height: AppDensity.cardGap),
             TickerAnalystSection(chartData: _chartData!),
-            const SizedBox(height: AppSpacing.lg),
 
             // 4. Calendar Events (earnings, dividends) — tap opens modal
             if (_chartData!.calendar != null)
@@ -506,7 +496,6 @@ class _TickerDetailScreenState extends State<TickerDetailScreen> {
                 calendar: _chartData!.calendar!,
                 earningsHistory: _chartData!.earningsHistory,
               ),
-            if (_chartData!.calendar != null) const MlDivider(),
 
             // 5. 뉴스 카드 (3건 + 감성 통계)
             if (_chartData!.news != null && _chartData!.news!.isNotEmpty ||
@@ -517,15 +506,13 @@ class _TickerDetailScreenState extends State<TickerDetailScreen> {
                 items: _chartData!.news ?? [],
                 stats: _chartData!.newsSentimentStats,
               ),
-            if (_chartData!.news != null && _chartData!.news!.isNotEmpty ||
-                _chartData!.newsSentimentStats != null)
-              const MlDivider(),
 
             // 6. 배너 광고
-            if (!kIsWeb && (Platform.isAndroid || Platform.isIOS))
+            if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) ...[
+              const SizedBox(height: AppDensity.sectionGap),
               const BannerAdWidget(),
-            if (!kIsWeb && (Platform.isAndroid || Platform.isIOS))
-              const SizedBox(height: AppSpacing.lg),
+              const SizedBox(height: AppDensity.sectionGap),
+            ],
 
             // 7. Volume 바 차트
             TickerVolumeChart(
@@ -534,7 +521,7 @@ class _TickerDetailScreenState extends State<TickerDetailScreen> {
               periodDays: _periodDays,
             ),
 
-            const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: AppDensity.cardGap),
 
             // 9. AI Insight 섹션 (마켓랜즈 AI 의견)
             TickerInsightSection(
@@ -542,12 +529,11 @@ class _TickerDetailScreenState extends State<TickerDetailScreen> {
               aiInsightKey: _aiInsightKey,
             ),
 
-            const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: AppDensity.cardGap),
 
             // 10. AI 점수 이력 (접힘/펼침)
             TickerScoreSection(chartData: _chartData!),
 
-            const SizedBox(height: AppSpacing.md),
 
             // 11. Company Profile (tap opens modal with dividends, valuation, institutional, short)
             CompanyProfileCard(
@@ -556,13 +542,13 @@ class _TickerDetailScreenState extends State<TickerDetailScreen> {
               keyMetrics: _chartData!.keyMetrics,
               dataPoints: _chartData!.data,
             ),
-            const SizedBox(height: AppSpacing.md),
 
             // 16. 배너 광고
-            if (!kIsWeb && (Platform.isAndroid || Platform.isIOS))
+            if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) ...[
+              const SizedBox(height: AppDensity.sectionGap),
               const BannerAdWidget(),
-            if (!kIsWeb && (Platform.isAndroid || Platform.isIOS))
-              const SizedBox(height: AppSpacing.md),
+              const SizedBox(height: AppDensity.sectionGap),
+            ],
 
             // 17. Price 차트
             TickerPriceChart(
@@ -572,16 +558,14 @@ class _TickerDetailScreenState extends State<TickerDetailScreen> {
               onPeriodChanged: _onPeriodChanged,
             ),
 
-            const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: AppDensity.cardGap),
 
             // 18. RSI 차트 (서버 계산 값 시각화)
             RsiChartWidget(dataPoints: _chartData!.data),
 
-            const SizedBox(height: AppSpacing.md),
-
             // MACD 차트 - 임시 숨김
             // MacdChartWidget(dataPoints: _chartData!.data),
-            const SizedBox(height: AppSpacing.xl),
+            const SizedBox(height: AppDensity.sectionGap),
 
             // 19. 실시간 토크 섹션 (커뮤니티 통합)
             // [COMMUNITY_FLAG] 커뮤니티 비활성화 시 숨김.
@@ -592,7 +576,7 @@ class _TickerDetailScreenState extends State<TickerDetailScreen> {
                 ticker: widget.ticker,
               ),
 
-            const SizedBox(height: AppSpacing.xl),
+            const SizedBox(height: AppDensity.sectionGap),
           ],
         ),
       ),
