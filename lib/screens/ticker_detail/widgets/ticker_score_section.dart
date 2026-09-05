@@ -6,6 +6,7 @@ import '../../../theme/app_radius.dart';
 import '../../../theme/app_spacing.dart';
 import '../../../theme/app_stroke.dart';
 import '../../../theme/app_typography.dart';
+import '../../../widgets/common/section_header.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../widgets/common/coach_mark_overlay.dart';
 import '../../../providers/coach_mark_provider.dart';
@@ -41,30 +42,17 @@ class _TickerScoreSectionState extends State<TickerScoreSection> {
             horizontal: AppSpacing.lg,
             vertical: AppSpacing.md,
           ),
-          header: Row(
-            children: [
-              Icon(
-                Icons.bar_chart_rounded,
-                size: 20,
-                color: context.mlColors.warningColor,
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Text(
-                'AI ${l10n.score}',
-                style: AppTypography.cardTitle.copyWith(
-                  color: context.mlColors.textPrimary,
-                ),
-              ),
-              const SizedBox(width: AppSpacing.xs),
-              GestureDetector(
-                onTap: () => _showScoreGuide(context, l10n),
-                child: Icon(
-                  Icons.info_outline,
-                  size: 16,
-                  color: context.mlColors.textTertiary,
-                ),
-              ),
-            ],
+          // 주황 아이콘 앵커를 걷어내고 액센트 바로 통일한다(시각 앵커 1종).
+          // 확장 카드가 이미 패딩을 갖고 있어 헤더 패딩은 0.
+          header: SectionHeader(
+            title: 'AI ${l10n.score}',
+            padding: EdgeInsets.zero,
+            onTrailingTap: () => _showScoreGuide(context, l10n),
+            trailing: Icon(
+              Icons.info_outline,
+              size: 16,
+              color: context.mlColors.textTertiary,
+            ),
           ),
           detail: (_) => _buildScoreChart(),
         ),

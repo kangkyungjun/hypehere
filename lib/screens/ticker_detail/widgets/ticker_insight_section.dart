@@ -4,6 +4,7 @@ import '../../../theme/app_colors.dart';
 import '../../../theme/app_radius.dart';
 import '../../../theme/app_spacing.dart';
 import '../../../theme/app_typography.dart';
+import '../../../widgets/common/section_header.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../utils/multilingual.dart';
 import '../../../utils/score_mapper.dart';
@@ -51,19 +52,11 @@ class _TickerInsightSectionState extends State<TickerInsightSection> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Icon(Icons.auto_awesome, size: 20, color: context.mlColors.warningColor),
-                const SizedBox(width: AppSpacing.sm),
-                Text(
-                  l10n.marketlensAIOpinion,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: AppTypography.bold,
-                      ),
-                ),
-              ],
+            // 주황 아이콘 앵커 제거 → 액센트 바로 통일(시각 앵커 1종).
+            SectionHeader(
+              title: l10n.marketlensAIOpinion,
+              padding: const EdgeInsets.only(bottom: AppSpacing.sm),
             ),
-            const SizedBox(height: AppSpacing.md),
             _buildTargetStopLossRow(),
             const SizedBox(height: AppSpacing.md),
             Text(
@@ -97,17 +90,11 @@ class _TickerInsightSectionState extends State<TickerInsightSection> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  Icon(Icons.auto_awesome, size: 20, color: context.mlColors.warningColor),
-                  const SizedBox(width: AppSpacing.sm),
-                  Text(
-                    l10n.marketlensAIOpinion,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: AppTypography.bold,
-                        ),
-                  ),
-                ],
+              Expanded(
+                child: SectionHeader(
+                  title: l10n.marketlensAIOpinion,
+                  padding: EdgeInsets.zero,
+                ),
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.xs),

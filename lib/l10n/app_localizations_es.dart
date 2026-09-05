@@ -1348,6 +1348,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get volume => 'Volumen';
 
   @override
+  String get priceChartTitle => 'Gráfico de precios';
+
+  @override
   String get legend => 'Leyenda';
 
   @override

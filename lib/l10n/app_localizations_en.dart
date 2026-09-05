@@ -1331,6 +1331,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get volume => 'Volume';
 
   @override
+  String get priceChartTitle => 'Price Chart';
+
+  @override
   String get legend => 'Legend';
 
   @override

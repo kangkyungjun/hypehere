@@ -1315,6 +1315,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get volume => '거래량';
 
   @override
+  String get priceChartTitle => '주가 차트';
+
+  @override
   String get legend => '범례';
 
   @override

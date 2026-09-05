@@ -6,6 +6,7 @@ import '../../../theme/app_radius.dart';
 import '../../../theme/app_spacing.dart';
 import '../../../theme/app_stroke.dart';
 import '../../../theme/app_typography.dart';
+import '../../../widgets/common/section_header.dart';
 import '../../../l10n/app_localizations.dart';
 
 /// Price 차트 위젯 (독립 좌표계 - Auto-scale)
@@ -65,17 +66,39 @@ class _TickerPriceChartState extends State<TickerPriceChart> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 헤더 (Price + 기간 필터 + 범례)
+          // 섹션 헤더 — 제목과 기간 칩을 분리한다. 기간 선택은 이 차트만이
+          // 아니라 화면 전체 데이터를 다시 받으므로(`_reloadForPeriod`),
+          // 제목 줄에 끼워 넣지 않고 차트 바로 위 자기 줄에 둔다.
+          SectionHeader(
+            title: l10n.priceChartTitle,
+            padding: const EdgeInsets.only(
+              top: AppSpacing.xs,
+              bottom: AppSpacing.xs,
+            ),
+            onTrailingTap: () => setState(() => _showLegend = !_showLegend),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.info_outline,
+                  size: 16,
+                  color: context.mlColors.accentBlue,
+                ),
+                const SizedBox(width: AppSpacing.xs),
+                Text(
+                  l10n.legend,
+                  style: AppTypography.label.copyWith(
+                    color: context.mlColors.accentBlue,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // 기간 칩 — 선택 상태는 배경색으로 표시한다. 굵기로 표시하면
+          // 카드당 w700 예산을 칩 개수만큼 잡아먹는다.
           Row(
             children: [
-              Text(
-                'Price',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: AppTypography.bold,
-                ),
-              ),
-              const SizedBox(width: AppSpacing.lg),
-              // 기간 선택 버튼
               ...widget.periodDays.keys.map((period) {
                 final isSelected = period == widget.selectedPeriod;
                 return Padding(
@@ -100,11 +123,7 @@ class _TickerPriceChartState extends State<TickerPriceChart> {
                       ),
                       child: Text(
                         period,
-                        style: TextStyle(
-                          fontSize: AppTypography.caption,
-                          fontWeight: isSelected
-                              ? AppTypography.bold
-                              : AppTypography.regular,
+                        style: AppTypography.chipLabel.copyWith(
                           color: isSelected
                               ? context.mlColors.onPrimary
                               : context.mlColors.textSecondary,
@@ -114,37 +133,6 @@ class _TickerPriceChartState extends State<TickerPriceChart> {
                   ),
                 );
               }),
-              const Spacer(),
-              // 범례 토글 버튼
-              InkWell(
-                onTap: () => setState(() => _showLegend = !_showLegend),
-                borderRadius: BorderRadius.circular(AppRadius.xs),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.md,
-                    vertical: AppSpacing.xs,
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.info_outline,
-                        size: 16,
-                        color: context.mlColors.accentBlue,
-                      ),
-                      const SizedBox(width: AppSpacing.xs),
-                      Text(
-                        l10n.legend,
-                        style: TextStyle(
-                          fontSize: AppTypography.bodySmall,
-                          color: context.mlColors.accentBlue,
-                          fontWeight: AppTypography.medium,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
             ],
           ),
           const SizedBox(height: AppSpacing.md),

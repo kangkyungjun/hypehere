@@ -454,6 +454,7 @@
   "recentAnalystRatings": "最新アナリスト評価",
   "unknownFirm": "不明",
   "volume": "出来高",
+  "priceChartTitle": "株価チャート",
   "legend": "凡例",
 
   "ratingBuy": "買い",

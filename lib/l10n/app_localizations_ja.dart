@@ -1315,6 +1315,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get volume => '出来高';
 
   @override
+  String get priceChartTitle => '株価チャート';
+
+  @override
   String get legend => '凡例';
 
   @override

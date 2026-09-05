@@ -7,6 +7,7 @@ import '../../theme/app_shadow.dart';
 import '../../theme/app_spacing.dart';
 import '../../theme/app_stroke.dart';
 import '../../theme/app_typography.dart';
+import '../common/section_header.dart';
 
 /// RSI / MFI Crossover 차트 위젯
 ///
@@ -51,14 +52,16 @@ class RsiChartWidget extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 타이틀 (MFI 유무에 따라 변경)
-          Text(
-            hasMfi ? 'RSI / MFI Crossover' : 'RSI (Relative Strength Index)',
-            style: AppTypography.cardTitle.copyWith(
-              color: context.mlColors.textPrimary,
+          // 섹션 헤더 — 액센트 바 + 비대칭 여백(위 lg / 아래 xs).
+          // 카드가 이미 가로 패딩을 갖고 있어 가로는 0으로 상쇄한다.
+          SectionHeader(
+            title: hasMfi ? 'RSI / MFI Crossover' : 'RSI',
+            subtitle: hasMfi ? null : 'Relative Strength Index',
+            padding: const EdgeInsets.only(
+              top: AppSpacing.xs,
+              bottom: AppSpacing.sm,
             ),
           ),
-          const SizedBox(height: AppSpacing.xl),
 
           // 차트
           SizedBox(

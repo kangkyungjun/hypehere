@@ -5,6 +5,7 @@ import '../../../theme/app_radius.dart';
 import '../../../theme/app_shadow.dart';
 import '../../../theme/app_spacing.dart';
 import '../../../theme/app_typography.dart';
+import '../../../widgets/common/section_header.dart';
 import '../../../l10n/app_localizations.dart';
 import 'ticker_detail_helpers.dart';
 import '../../../widgets/common/ml_expandable_card.dart';
@@ -48,22 +49,14 @@ class _TickerAnalystSectionState extends State<TickerAnalystSection> {
         children: [
           // Consensus 섹션
           if (consensus != null) ...[
-            // 헤더: 타이틀 (분석가 수 포함) + recommendation 뱃지 (한글)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Flexible(
-                  child: Text(
-                    l10n.analystConsensus((consensus.count ?? '-').toString()),
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: AppTypography.bold,
-                        ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                if (consensus.recommendation != null)
-                  Container(
+            // 섹션 헤더 — 분석가 수는 자격 태그(subtitle)로 내리고
+            // 추천 배지는 trailing으로 분리한다.
+            SectionHeader(
+              title: l10n.analystConsensus((consensus.count ?? '-').toString()),
+              padding: EdgeInsets.zero,
+              trailing: consensus.recommendation == null
+                  ? null
+                  : Container(
                     padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.xs),
                     decoration: BoxDecoration(
                       color: getRecommendationColor(context, consensus.recommendation),
@@ -78,9 +71,7 @@ class _TickerAnalystSectionState extends State<TickerAnalystSection> {
                       ),
                     ),
                   ),
-              ],
             ),
-            const SizedBox(height: AppSpacing.md),
 
             // 평균 목표가 + 현재가 대비 %
             if (consensus.mean != null) ...[

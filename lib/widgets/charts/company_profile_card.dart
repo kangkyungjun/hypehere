@@ -7,6 +7,7 @@ import '../../theme/app_colors.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 import '../../theme/app_typography.dart';
+import '../common/section_header.dart';
 import 'dividends_widget.dart';
 import 'valuation_metrics_widget.dart';
 import 'institutional_flow_widget.dart';
@@ -59,25 +60,19 @@ class _CompanyProfileCardState extends State<CompanyProfileCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header with chevron
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    l10n.companyOverview,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: AppTypography.bold,
-                        ),
-                  ),
-                ),
-                Icon(
-                  Icons.chevron_right,
-                  size: 20,
-                  color: context.mlColors.textSecondary,
-                ),
-              ],
+            // 섹션 헤더 — 부모가 가로 패딩을 주므로 가로는 0으로 상쇄.
+            SectionHeader(
+              title: l10n.companyOverview,
+              padding: const EdgeInsets.only(
+                top: AppSpacing.lg,
+                bottom: AppSpacing.xs,
+              ),
+              trailing: Icon(
+                Icons.chevron_right,
+                size: 20,
+                color: context.mlColors.textSecondary,
+              ),
             ),
-            const SizedBox(height: AppSpacing.lg),
 
             // Company name
             if (p.longName != null)

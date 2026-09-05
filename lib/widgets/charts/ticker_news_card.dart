@@ -7,6 +7,7 @@ import '../../theme/app_colors.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 import '../../theme/app_typography.dart';
+import '../common/section_header.dart';
 import '../news/market_news_modal.dart';
 
 /// Ticker detail news card (3 items + inline sentiment stats)
@@ -35,88 +36,57 @@ class TickerNewsCard extends StatelessWidget {
     return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header row
-          Padding(
-            padding: const EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.xl, AppSpacing.lg, 0),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          // 섹션 헤더 — 주황 아이콘 앵커를 걷어내고 액센트 바로 통일한다.
+          // 건수는 자격 태그(subtitle)로, 전체보기는 trailing으로 분리했다.
+          // 감성 통계는 헤더에 눌려 있었으므로 아래 자기 줄로 내린다.
+          SectionHeader(
+            title: l10n.tickerNews(ticker),
+            subtitle: items.isNotEmpty ? l10n.newsCount(items.length) : null,
+            onTrailingTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => TickerNewsListScreen(
+                  ticker: ticker,
+                  stats: stats,
+                ),
+              ),
+            ),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                // Left: icon + title + badge
-                Icon(Icons.article_outlined, size: 20, color: context.mlColors.warningColor),
-                const SizedBox(width: AppSpacing.sm),
                 Text(
-                  l10n.tickerNews(ticker),
-                  style: AppTypography.cardTitle.copyWith(
-                    color: context.mlColors.textPrimary,
+                  l10n.viewAll,
+                  style: AppTypography.label.copyWith(
+                    color: context.mlColors.accentBlue,
                   ),
                 ),
-                const SizedBox(width: AppSpacing.sm),
-                if (items.isNotEmpty)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xxs),
-                    decoration: BoxDecoration(
-                      color: context.mlColors.warningBg,
-                      borderRadius: BorderRadius.circular(AppRadius.lg),
-                    ),
-                    child: Text(
-                      l10n.newsCount(items.length),
-                      style: TextStyle(
-                        fontSize: AppTypography.caption,
-                        fontWeight: AppTypography.bold,
-                        color: context.mlColors.warningColor,
-                      ),
-                    ),
-                  ),
-
-                const SizedBox(width: AppSpacing.lg),
-
-                // Center: sentiment stats (2 lines)
-                if (stats != null)
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        _buildStatsRow(context, l10n.oneWeek, stats!.week),
-                        const SizedBox(height: AppSpacing.xxs),
-                        _buildStatsRow(context, l10n.oneMonth, stats!.month),
-                      ],
-                    ),
-                  )
-                else
-                  const Spacer(),
-
-                const SizedBox(width: AppSpacing.xs),
-
-                // Right: 전체보기
-                TextButton(
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => TickerNewsListScreen(
-                        ticker: ticker,
-                        stats: stats,
-                      ),
-                    ),
-                  ),
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        l10n.viewAll,
-                        style: TextStyle(fontSize: AppTypography.caption, color: context.mlColors.warningColor),
-                      ),
-                      Icon(Icons.chevron_right, size: 14, color: context.mlColors.warningColor),
-                    ],
-                  ),
+                Icon(
+                  Icons.chevron_right,
+                  size: 14,
+                  color: context.mlColors.accentBlue,
                 ),
               ],
             ),
           ),
+
+          // 감성 통계 — 헤더에서 분리된 독립 행.
+          if (stats != null)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.xl,
+                AppSpacing.xs,
+                AppSpacing.xl,
+                0,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildStatsRow(context, l10n.oneWeek, stats!.week),
+                  const SizedBox(height: AppSpacing.xxs),
+                  _buildStatsRow(context, l10n.oneMonth, stats!.month),
+                ],
+              ),
+            ),
 
           // Timeline items
           if (items.isNotEmpty) ...[

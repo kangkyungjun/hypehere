@@ -6,6 +6,7 @@ import '../../theme/app_duration.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 import '../../theme/app_typography.dart';
+import '../common/section_header.dart';
 import 'earnings_chart_widget.dart';
 import '../common/ml_expandable_card.dart';
 
@@ -96,25 +97,20 @@ class _EventsCalendarWidgetState extends State<EventsCalendarWidget>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header with chevron
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    l10n.keyEvents,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: AppTypography.bold,
-                        ),
-                  ),
-                ),
-                Icon(
-                  Icons.chevron_right,
-                  size: 20,
-                  color: context.mlColors.textSecondary,
-                ),
-              ],
+            // 섹션 헤더 — 액센트 바 + 비대칭 여백은 SectionHeader가 갖는다.
+            // 부모가 이미 가로 xl 패딩을 주므로 가로는 0으로 상쇄한다.
+            SectionHeader(
+              title: l10n.keyEvents,
+              padding: const EdgeInsets.only(
+                top: AppSpacing.lg,
+                bottom: AppSpacing.xs,
+              ),
+              trailing: Icon(
+                Icons.chevron_right,
+                size: 20,
+                color: context.mlColors.textSecondary,
+              ),
             ),
-            const SizedBox(height: AppSpacing.lg),
 
             // Next Earnings Date
             if (calendar.nextEarningsDate != null) ...[

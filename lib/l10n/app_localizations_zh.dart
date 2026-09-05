@@ -1311,6 +1311,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get volume => '成交量';
 
   @override
+  String get priceChartTitle => '股价图表';
+
+  @override
   String get legend => '图例';
 
   @override

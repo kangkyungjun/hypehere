@@ -2600,6 +2600,12 @@ abstract class AppLocalizations {
   /// **'Volume'**
   String get volume;
 
+  /// No description provided for @priceChartTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Price Chart'**
+  String get priceChartTitle;
+
   /// No description provided for @legend.
   ///
   /// In en, this message translates to:

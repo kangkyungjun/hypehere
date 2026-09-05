@@ -6,6 +6,7 @@ import '../../../theme/app_radius.dart';
 import '../../../theme/app_spacing.dart';
 import '../../../theme/app_stroke.dart';
 import '../../../theme/app_typography.dart';
+import '../../../widgets/common/section_header.dart';
 import '../../../l10n/app_localizations.dart';
 
 /// Volume 바 차트 위젯 — 양봉(초록)/음봉(빨강) 색상 + 평균선
@@ -67,29 +68,19 @@ class TickerVolumeChart extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 헤더: Volume + Avg
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 0,
-              vertical: AppSpacing.md,
+          // 섹션 헤더 — 평균 거래량은 trailing 메타로 붙인다.
+          // 부모가 가로 xl 패딩을 주므로 가로는 0으로 상쇄.
+          SectionHeader(
+            title: l10n.volume,
+            padding: const EdgeInsets.only(
+              top: AppSpacing.lg,
+              bottom: AppSpacing.xs,
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  l10n.volume,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: AppTypography.bold,
-                  ),
-                ),
-                Text(
-                  l10n.averageVolume(_formatVolume(avgVolume.toInt())),
-                  style: TextStyle(
-                    fontSize: AppTypography.bodySmall,
-                    color: context.mlColors.textSecondary,
-                  ),
-                ),
-              ],
+            trailing: Text(
+              l10n.averageVolume(_formatVolume(avgVolume.toInt())),
+              style: AppTypography.label.copyWith(
+                color: context.mlColors.textTertiary,
+              ),
             ),
           ),
 
