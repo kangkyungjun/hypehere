@@ -79,7 +79,9 @@ class _CompanyProfileCardState extends State<CompanyProfileCard> {
               Text(
                 p.longName!,
                 style: const TextStyle(
-                  fontSize: AppTypography.headlineLarge,
+                  // 섹션 제목(22)의 자식이므로 L4 값 층위(15).
+                  // 이전엔 18이라 제목과 크기가 같아 위계가 붕괴했다.
+                  fontSize: AppTypography.bodyLarge,
                   fontWeight: AppTypography.semiBold,
                 ),
               ),

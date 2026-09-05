@@ -2576,6 +2576,18 @@ abstract class AppLocalizations {
   /// **'Current'**
   String get currentPrice;
 
+  /// No description provided for @upsidePotential.
+  ///
+  /// In en, this message translates to:
+  /// **'Upside'**
+  String get upsidePotential;
+
+  /// No description provided for @aiTargetPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Target'**
+  String get aiTargetPrice;
+
   /// No description provided for @targetPrice.
   ///
   /// In en, this message translates to:

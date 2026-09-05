@@ -108,7 +108,9 @@ class _TickerAnalystSectionState extends State<TickerAnalystSection> {
                           TextSpan(
                             text: upsideStr,
                             style: TextStyle(
-                              fontSize: AppTypography.heroSmall,
+                              // 목표가(31)의 동반 단위 → 한 단계 아래(20).
+                              // 둘 다 31이면 무엇이 주값인지 갈리지 않는다.
+                              fontSize: AppTypography.displayMedium,
                               fontWeight: AppTypography.bold,
                               color: upsideColor,
                               fontFeatures: AppTypography.tabularFigures,

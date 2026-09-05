@@ -1319,6 +1319,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get currentPrice => 'Current';
 
   @override
+  String get upsidePotential => 'Upside';
+
+  @override
+  String get aiTargetPrice => 'AI Target';
+
+  @override
   String get targetPrice => 'Target';
 
   @override

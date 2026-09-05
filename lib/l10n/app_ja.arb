@@ -450,6 +450,8 @@
   "stopLoss": "損切 ",
   "averageTargetPrice": "平均目標株価",
   "currentPrice": "現在値",
+  "upsidePotential": "上昇余地",
+  "aiTargetPrice": "AI目標株価",
   "targetPrice": "目標株価",
   "recentAnalystRatings": "最新アナリスト評価",
   "unknownFirm": "不明",

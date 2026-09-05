@@ -1299,6 +1299,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get currentPrice => '当前价';
 
   @override
+  String get upsidePotential => '上涨空间';
+
+  @override
+  String get aiTargetPrice => 'AI目标价';
+
+  @override
   String get targetPrice => '目标价';
 
   @override

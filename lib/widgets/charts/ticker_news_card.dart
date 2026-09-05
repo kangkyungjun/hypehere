@@ -234,7 +234,9 @@ class TickerNewsCard extends StatelessWidget {
                       Text(
                         item.aiSummary.localize(langCode),
                         style: TextStyle(
-                          fontSize: AppTypography.bodySmall,
+                          // 인사이트의 AI 요약과 같은 L4(15)로 통일.
+                          // 같은 성격의 글이 16과 13으로 갈려 있었다.
+                          fontSize: AppTypography.bodyLarge,
                           fontWeight: AppTypography.semiBold,
                           color: context.mlColors.textPrimary,
                           height: 1.4,

@@ -1303,6 +1303,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get currentPrice => '現在値';
 
   @override
+  String get upsidePotential => '上昇余地';
+
+  @override
+  String get aiTargetPrice => 'AI目標株価';
+
+  @override
   String get targetPrice => '目標株価';
 
   @override

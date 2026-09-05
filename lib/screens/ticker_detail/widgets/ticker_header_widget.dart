@@ -131,7 +131,8 @@ class TickerHeaderWidget extends StatelessWidget {
                   children: [
                     Text(
                       chartData.ticker,
-                      style: AppTypography.screenTitle.copyWith(
+                      // 24는 사용처 1건 · 22와 1.09배인 死단계였다.
+                      style: AppTypography.sectionTitle.copyWith(
                         color: mlc.textPrimary,
                       ),
                     ),

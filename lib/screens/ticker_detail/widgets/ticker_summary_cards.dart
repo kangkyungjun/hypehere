@@ -89,33 +89,53 @@ class TickerSummaryCards extends StatelessWidget {
                       FittedBox(
                         fit: BoxFit.scaleDown,
                         alignment: Alignment.centerLeft,
-                        child: Text.rich(
-                          TextSpan(children: [
-                            TextSpan(
-                              text: '${l10n.target} ',
-                              style: AppTypography.unitSuffix.copyWith(
-                                color: context.mlColors.textSecondary,
-                              ),
-                            ),
-                            if (consensus?.mean != null)
-                              TextSpan(
-                                text:
-                                    '\$${consensus!.mean!.toStringAsFixed(2)}',
-                                style: AppTypography.priceLarge.copyWith(
-                                  fontWeight: AppTypography.bold,
-                                  color: context.mlColors.accentBlue,
+                        child: Builder(
+                          builder: (context) {
+                            // 애널리스트 컨센서스는 목표가($)가 아니라
+                            // **상승여력(%)** 으로 보여준다. 우측 AI 목표가와
+                            // 라벨·색·크기가 같아 두 숫자를 구분할 수 없었고,
+                            // 애초에 의사결정에 쓰이는 값은 현재가 대비 여력이다.
+                            final close = latestData.close;
+                            final mean = consensus?.mean;
+                            final upside = (mean != null &&
+                                    close != null &&
+                                    close > 0)
+                                ? ((mean - close) / close) * 100
+                                : null;
+                            return Text.rich(
+                              TextSpan(children: [
+                                TextSpan(
+                                  text: '${l10n.upsidePotential} ',
+                                  style: AppTypography.unitSuffix.copyWith(
+                                    color: context.mlColors.textSecondary,
+                                  ),
                                 ),
-                              )
-                            else
-                              TextSpan(
-                                text: '--',
-                                style: AppTypography.priceLarge.copyWith(
-                                  color: context.mlColors.textTertiary,
-                                ),
-                              ),
-                          ]),
-                          maxLines: 1,
-                          softWrap: false,
+                                if (upside != null)
+                                  TextSpan(
+                                    // 방향성 값 → gain/loss (RULE-BLUE)
+                                    text:
+                                        '${upside >= 0 ? '+' : ''}${upside.toStringAsFixed(1)}%',
+                                    style: AppTypography.priceLarge.copyWith(
+                                      fontWeight: AppTypography.bold,
+                                      color: upside >= 0
+                                          ? context.mlColors.gainColor
+                                          : context.mlColors.lossColor,
+                                      fontFeatures:
+                                          AppTypography.tabularFigures,
+                                    ),
+                                  )
+                                else
+                                  TextSpan(
+                                    text: '–',
+                                    style: AppTypography.priceLarge.copyWith(
+                                      color: context.mlColors.textTertiary,
+                                    ),
+                                  ),
+                              ]),
+                              maxLines: 1,
+                              softWrap: false,
+                            );
+                          },
                         ),
                       ),
                     ],
@@ -196,7 +216,7 @@ class TickerSummaryCards extends StatelessWidget {
                                   // — 레퍼런스의 "큰 파란 히어로 숫자" 시그니처.
                                   TextSpan(children: [
                                     TextSpan(
-                                      text: '${l10n.target} ',
+                                      text: '${l10n.aiTargetPrice} ',
                                       style: AppTypography.unitSuffix.copyWith(
                                         color: context.mlColors.textSecondary,
                                       ),

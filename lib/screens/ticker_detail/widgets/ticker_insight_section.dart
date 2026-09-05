@@ -133,7 +133,9 @@ class _TickerInsightSectionState extends State<TickerInsightSection> {
                 Text(
                   l10n.scorePoints(score.toStringAsFixed(1)),
                   style: TextStyle(
-                    fontSize: AppTypography.displaySmall,
+                    // 카드 대표 숫자 → L1. 22는 이웃 제목(18)보다 크면서
+                    // 히어로(31)에 못 미치는 死단계였다.
+                    fontSize: AppTypography.heroSmall,
                     fontWeight: AppTypography.bold,
                     color: ScoreMapper.getScoreColor(score, context.mlColors),
                     fontFeatures: AppTypography.tabularFigures,
@@ -168,7 +170,9 @@ class _TickerInsightSectionState extends State<TickerInsightSection> {
           Text(
             latestData.aiSummary!.localize(langCode),
             style: const TextStyle(
-              fontSize: AppTypography.headlineSmall,
+              // 본문 산문은 L4(15). 16은 제목(18)과 1.13배라
+              // 산문이 제목 높이까지 올라오는 死단계였다.
+              fontSize: AppTypography.bodyLarge,
               fontWeight: AppTypography.semiBold,
               height: 1.4,
             ),

@@ -1303,6 +1303,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get currentPrice => '현재가';
 
   @override
+  String get upsidePotential => '상승여력';
+
+  @override
+  String get aiTargetPrice => 'AI 목표가';
+
+  @override
   String get targetPrice => '목표가';
 
   @override

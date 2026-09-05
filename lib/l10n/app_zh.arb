@@ -450,6 +450,8 @@
   "stopLoss": "止损 ",
   "averageTargetPrice": "平均目标价",
   "currentPrice": "当前价",
+  "upsidePotential": "上涨空间",
+  "aiTargetPrice": "AI目标价",
   "targetPrice": "目标价",
   "recentAnalystRatings": "近期分析师评级",
   "unknownFirm": "未知",

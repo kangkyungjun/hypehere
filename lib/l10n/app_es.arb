@@ -450,6 +450,8 @@
   "stopLoss": "Stop ",
   "averageTargetPrice": "Precio objetivo promedio",
   "currentPrice": "Actual",
+  "upsidePotential": "Potencial",
+  "aiTargetPrice": "Objetivo IA",
   "targetPrice": "Objetivo",
   "recentAnalystRatings": "Calificaciones recientes de analistas",
   "unknownFirm": "Desconocido",

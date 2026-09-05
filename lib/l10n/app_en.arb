@@ -581,6 +581,8 @@
   "stopLoss": "Stop ",
   "averageTargetPrice": "Avg Target Price",
   "currentPrice": "Current",
+  "upsidePotential": "Upside",
+  "aiTargetPrice": "AI Target",
   "targetPrice": "Target",
   "recentAnalystRatings": "Recent Analyst Ratings",
   "unknownFirm": "Unknown",

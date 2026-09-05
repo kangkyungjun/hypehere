@@ -470,6 +470,8 @@
   "stopLoss": "손절 ",
   "averageTargetPrice": "평균 목표가",
   "currentPrice": "현재가",
+  "upsidePotential": "상승여력",
+  "aiTargetPrice": "AI 목표가",
   "targetPrice": "목표가",
   "recentAnalystRatings": "최근 투자 의견",
   "unknownFirm": "미상",
