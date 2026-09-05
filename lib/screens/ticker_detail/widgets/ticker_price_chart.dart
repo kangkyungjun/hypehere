@@ -405,7 +405,7 @@ class _TickerPriceChartState extends State<TickerPriceChart> {
                                   'Target \$${line.y.toStringAsFixed(2)}',
                               style: TextStyle(
                                 color: context.mlColors.gainColor,
-                                fontSize: AppTypography.micro,
+                                fontSize: AppTypography.caption,
                                 fontWeight: AppTypography.bold,
                               ),
                             ),
@@ -421,7 +421,7 @@ class _TickerPriceChartState extends State<TickerPriceChart> {
                                   'Stop \$${line.y.toStringAsFixed(2)}',
                               style: TextStyle(
                                 color: context.mlColors.lossColor,
-                                fontSize: AppTypography.micro,
+                                fontSize: AppTypography.caption,
                                 fontWeight: AppTypography.bold,
                               ),
                             ),

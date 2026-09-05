@@ -438,7 +438,7 @@ class _EventsCalendarWidgetState extends State<EventsCalendarWidget>
                 const SizedBox(width: AppSpacing.xs),
                 Text(
                   beat ? '\u{1F7E2}' : '\u{1F534}',
-                  style: const TextStyle(fontSize: AppTypography.micro),
+                  style: const TextStyle(fontSize: AppTypography.caption),
                 ),
               ],
             ],
@@ -512,7 +512,7 @@ class _EventsCalendarWidgetState extends State<EventsCalendarWidget>
           const SizedBox(width: AppSpacing.xxs),
           Text(
             '(TBD)',
-            style: TextStyle(fontSize: AppTypography.micro, color: context.mlColors.warningColor),
+            style: TextStyle(fontSize: AppTypography.caption, color: context.mlColors.warningColor),
           ),
         ],
       );

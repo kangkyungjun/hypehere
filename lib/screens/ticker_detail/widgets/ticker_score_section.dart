@@ -311,7 +311,7 @@ class _TickerScoreSectionState extends State<TickerScoreSection> {
                         labelResolver: (line) => 'Strong Buy (70)',
                         style: TextStyle(
                           color: context.mlColors.gainColor,
-                          fontSize: AppTypography.chartLabel,
+                          fontSize: AppTypography.caption,
                         ),
                         alignment: Alignment.topRight,
                       ),
@@ -327,7 +327,7 @@ class _TickerScoreSectionState extends State<TickerScoreSection> {
                         labelResolver: (line) => 'Strong Sell (30)',
                         style: TextStyle(
                           color: context.mlColors.lossColor,
-                          fontSize: AppTypography.chartLabel,
+                          fontSize: AppTypography.caption,
                         ),
                         alignment: Alignment.bottomRight,
                       ),

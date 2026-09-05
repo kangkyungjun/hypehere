@@ -118,7 +118,7 @@ class TickerNewsCard extends StatelessWidget {
         Text(
           period,
           style: TextStyle(
-            fontSize: AppTypography.chartLabel,
+            fontSize: AppTypography.caption,
             fontWeight: AppTypography.semiBold,
             color: context.mlColors.textTertiary,
           ),
@@ -145,7 +145,7 @@ class TickerNewsCard extends StatelessWidget {
         const SizedBox(width: AppSpacing.xxs),
         Text(
           '$label$count',
-          style: TextStyle(fontSize: AppTypography.chartLabel, color: color.withValues(alpha: 0.8)),
+          style: TextStyle(fontSize: AppTypography.caption, color: color.withValues(alpha: 0.8)),
         ),
       ],
     );
@@ -212,7 +212,7 @@ class TickerNewsCard extends StatelessWidget {
                             child: Text(
                               item.sentimentLabelLocalized(AppLocalizations.of(context)),
                               style: TextStyle(
-                                fontSize: AppTypography.micro,
+                                fontSize: AppTypography.caption,
                                 fontWeight: AppTypography.bold,
                                 color: dotColor,
                               ),
@@ -222,7 +222,7 @@ class TickerNewsCard extends StatelessWidget {
                           Text(
                             item.timeAgoLocalized(AppLocalizations.of(context)),
                             style: TextStyle(
-                              fontSize: AppTypography.micro,
+                              fontSize: AppTypography.caption,
                               color: context.mlColors.textTertiary,
                             ),
                           ),
