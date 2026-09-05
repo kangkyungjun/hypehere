@@ -150,10 +150,8 @@ class _TickerInsightSectionState extends State<TickerInsightSection> {
                   ),
                   child: Text(
                     ScoreMapper.getScoreLabelLocalized(score, l10n),
-                    style: TextStyle(
+                    style: AppTypography.badgeLabel.copyWith(
                       color: context.mlColors.onPrimary,
-                      fontSize: AppTypography.bodyMedium,
-                      fontWeight: AppTypography.bold,
                     ),
                   ),
                 ),
@@ -320,10 +318,11 @@ class _TickerInsightSectionState extends State<TickerInsightSection> {
                     ),
                     child: Text(
                       _predictionLabel(latestData.aiExpertPrediction!, l10n),
-                      style: TextStyle(
-                        fontSize: AppTypography.bodyMedium,
-                        fontWeight: AppTypography.bold,
-                        color: _predictionColor(latestData.aiExpertPrediction!, context),
+                      style: AppTypography.badgeLabel.copyWith(
+                        color: _predictionColor(
+                          latestData.aiExpertPrediction!,
+                          context,
+                        ),
                       ),
                     ),
                   ),

@@ -64,10 +64,8 @@ class _TickerAnalystSectionState extends State<TickerAnalystSection> {
                     ),
                     child: Text(
                       translateRecommendation(consensus.recommendation, l10n),
-                      style: TextStyle(
+                      style: AppTypography.badgeLabel.copyWith(
                         color: context.mlColors.onPrimary,
-                        fontSize: AppTypography.bodySmall,
-                        fontWeight: AppTypography.bold,
                       ),
                     ),
                   ),
@@ -111,7 +109,9 @@ class _TickerAnalystSectionState extends State<TickerAnalystSection> {
                               // 목표가(31)의 동반 단위 → 한 단계 아래(20).
                               // 둘 다 31이면 무엇이 주값인지 갈리지 않는다.
                               fontSize: AppTypography.displayMedium,
-                              fontWeight: AppTypography.bold,
+                              // 히어로(31)의 동반 단위 → w600.
+                              // 둘 다 w700이면 주값이 갈리지 않는다.
+                              fontWeight: AppTypography.semiBold,
                               color: upsideColor,
                               fontFeatures: AppTypography.tabularFigures,
                             ),

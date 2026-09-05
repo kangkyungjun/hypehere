@@ -70,10 +70,8 @@ class TickerSummaryCards extends StatelessWidget {
                               consensus.recommendation,
                               l10n,
                             ),
-                            style: TextStyle(
+                            style: AppTypography.badgeLabel.copyWith(
                               color: context.mlColors.onPrimary,
-                              fontSize: AppTypography.bodyMedium,
-                              fontWeight: AppTypography.bold,
                             ),
                           ),
                         )
@@ -192,8 +190,10 @@ class TickerSummaryCards extends StatelessWidget {
                               ? ScoreMapper.getScoreLabelLocalized(score, l10n)
                               : '--',
                           style: TextStyle(
+                            // 색(ScoreMapper)이 이미 의미를 나른다.
+                            // 굵기까지 w700이면 히어로 숫자와 경쟁한다.
                             fontSize: AppTypography.headlineLarge,
-                            fontWeight: AppTypography.bold,
+                            fontWeight: AppTypography.semiBold,
                             color: score != null
                                 ? ScoreMapper.getScoreColor(
                                     score,
@@ -225,8 +225,10 @@ class TickerSummaryCards extends StatelessWidget {
                                       TextSpan(
                                         text:
                                             '\$${latestData.targetPrice!.toStringAsFixed(2)}',
-                                        style: AppTypography.priceLarge.copyWith(
-                                          fontWeight: AppTypography.bold,
+                                        // 같은 반쪽에 31 볼드가 둘이면
+                                        // 헤드라인이 갈리지 않는다. 점수를
+                                        // 히어로로 두고 목표가는 한 단계 아래.
+                                        style: AppTypography.priceCard.copyWith(
                                           color: context.mlColors.accentBlue,
                                         ),
                                       )
