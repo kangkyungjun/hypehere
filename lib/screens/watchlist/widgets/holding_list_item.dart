@@ -113,6 +113,10 @@ class HoldingListItem extends StatelessWidget {
                     : context.mlColors.groupedBackground,
                 borderRadius: BorderRadius.circular(AppRadius.card),
               ),
+              // ⚠️ 48px 고정 박스 안의 텍스트에는 **명시적 행간이 필수**다.
+              // 비워두면 Pretendard 기본 행간(~1.45)으로 렌더돼
+              // (16+11) × 1.45 × 1.3배 = 50.9 > 48로 넘친다.
+              // 1.2로 고정하면 1.3배에서도 42.1 < 48로 들어간다.
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -121,6 +125,7 @@ class HoldingListItem extends StatelessWidget {
                     style: TextStyle(
                       fontSize: AppTypography.headlineMedium,
                       fontWeight: AppTypography.bold,
+                      height: 1.2,
                       color: holding.score != null
                           ? _signalColor(context, holding.signal)
                           : context.mlColors.textTertiary,
@@ -131,6 +136,7 @@ class HoldingListItem extends StatelessWidget {
                     l10n.score,
                     style: TextStyle(
                       fontSize: AppTypography.caption,
+                      height: 1.2,
                       color: mlc.textTertiary,
                     ),
                   ),

@@ -9,10 +9,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:marketlens/l10n/app_localizations.dart';
 import 'package:marketlens/models/indices_data.dart';
 import 'package:marketlens/models/macro_data.dart';
 import 'package:marketlens/models/mention_bubble_data.dart';
+import 'package:marketlens/models/portfolio_data.dart';
+import 'package:marketlens/models/ticker_score.dart';
 import 'package:marketlens/models/news_data.dart';
 import 'package:marketlens/models/treemap_data.dart';
 import 'package:marketlens/theme/app_colors.dart';
@@ -24,6 +27,15 @@ import 'package:marketlens/widgets/dashboard/indices_bar_widget.dart';
 import 'package:marketlens/widgets/dashboard/macro_strip_widget.dart';
 import 'package:marketlens/widgets/dashboard/recommendation_grid.dart';
 import 'package:marketlens/widgets/dashboard/sector_bar_chart_widget.dart';
+import 'package:provider/provider.dart';
+
+import 'package:marketlens/providers/auth_provider.dart';
+import 'package:marketlens/providers/portfolio_provider.dart';
+import 'package:marketlens/providers/subscription_provider.dart';
+import 'package:marketlens/providers/watchlist_provider.dart';
+import 'package:marketlens/screens/watchlist/widgets/holding_list_item.dart';
+import 'package:marketlens/screens/watchlist/widgets/portfolio_summary_card.dart';
+import 'package:marketlens/screens/watchlist/widgets/watchlist_tab.dart';
 import 'package:marketlens/widgets/news/mention_bubble_card.dart';
 import 'package:marketlens/widgets/news/news_article_row.dart';
 import 'package:marketlens/widgets/news/news_detail_sheet.dart';
@@ -43,6 +55,8 @@ void main() {
   final outDir = Directory('build/screens');
 
   setUpAll(() async {
+    // 구독·관심종목 프로바이더가 생성 시 SharedPreferences를 읽는다.
+    SharedPreferences.setMockInitialValues({});
     if (!outDir.existsSync()) outDir.createSync(recursive: true);
     final loader = FontLoader('Pretendard');
     for (final f in ['Regular', 'Medium', 'SemiBold', 'Bold']) {
@@ -288,6 +302,77 @@ void main() {
         ),
       );
 
+  // ── 관심종목 ─────────────────────────────────────────────────────────
+  TickerScore score(String t, String ko, double sc, double close, double pct) =>
+      TickerScore(
+        ticker: t,
+        score: sc,
+        signal: sc >= 70 ? 'BUY' : 'HOLD',
+        nameKo: ko,
+        name: ko,
+        close: close,
+        changePct: pct,
+      );
+
+  final watchScores = {
+    'NVDA': score('NVDA', '엔비디아', 78, 184.22, 1.84),
+    'AAPL': score('AAPL', '애플', 66, 271.40, -0.52),
+    'GOOGL': score('GOOGL', '알파벳', 71, 254.11, 0.93),
+    'TSLA': score('TSLA', '테슬라', 54, 412.05, -2.31),
+  };
+  const watchEnrich = {
+    'NVDA': WatchlistEnrichment(target: 210.0, price1m: 172.3, price3m: 158.9),
+    'AAPL': WatchlistEnrichment(target: 290.0, price1m: 265.1, price3m: 240.7),
+    'GOOGL': WatchlistEnrichment(target: 275.0, price1m: 241.8, price3m: 219.4),
+    'TSLA': WatchlistEnrichment(target: 380.0, price1m: 431.2, price3m: 398.6),
+  };
+
+  Widget watchlist() => WatchlistTab(
+        tickerScores: watchScores,
+        enrichment: watchEnrich,
+        isLoading: false,
+        onTickerTap: (_) {},
+        onAddHolding: (_, __) {},
+        onRefresh: () async {},
+        onRetry: () {},
+      );
+
+  // ── 보유종목 ─────────────────────────────────────────────────────────
+  PortfolioHolding hold(String t, String ko, double shares, double avg,
+          double cur, double pct, double sc, String sig) =>
+      PortfolioHolding(
+        ticker: t,
+        shares: shares,
+        avgPrice: avg,
+        name: ko,
+        nameKo: ko,
+        currentPrice: cur,
+        changePct: pct,
+        score: sc,
+        signal: sig,
+      );
+
+  final holdings = [
+    hold('NVDA', '엔비디아', 12, 142.10, 184.22, 1.84, 78, 'BUY'),
+    hold('AAPL', '애플', 30, 254.80, 271.40, -0.52, 66, 'HOLD'),
+    hold('TSLA', '테슬라', 5, 448.90, 412.05, -2.31, 54, 'SELL'),
+  ];
+
+  Widget portfolio() => ListView(
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.xl,
+          AppSpacing.md,
+          AppSpacing.xl,
+          AppSpacing.xl,
+        ),
+        children: [
+          PortfolioSummaryCard(portfolio: _MockPortfolio(holdings)),
+          const SizedBox(height: AppDensity.sectionGap),
+          for (final h in holdings)
+            HoldingListItem(holding: h, onTap: () {}, onDelete: () {}),
+        ],
+      );
+
   Widget app(Widget body, {required bool dark, required double scale}) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -320,7 +405,23 @@ void main() {
           size: const Size(w, h),
           textScaler: TextScaler.linear(scale),
         ),
-        child: Scaffold(body: SafeArea(child: body)),
+        // 관심종목 탭은 Auth·Portfolio·Subscription을 `context.watch`로 읽는다.
+        // 캡쳐 하네스에도 얹어야 실제 화면과 같은 경로로 렌더된다.
+        child: MultiProvider(
+          providers: [
+            ChangeNotifierProvider<AuthProvider>.value(value: _MockAuth()),
+            ChangeNotifierProvider<PortfolioProvider>.value(
+              value: _MockPortfolio(holdings),
+            ),
+            ChangeNotifierProvider<SubscriptionProvider>.value(
+              value: _MockSubscription(),
+            ),
+            ChangeNotifierProvider<WatchlistProvider>.value(
+              value: _MockWatchlist(watchScores.keys.toList()),
+            ),
+          ],
+          child: Scaffold(body: SafeArea(child: body)),
+        ),
       ),
     );
   }
@@ -360,6 +461,28 @@ void main() {
   ];
 
   for (final v in variants) {
+    testWidgets('capture watchlist ${v.$1}', (tester) async {
+      tester.view.physicalSize = const Size(w * 3, h * 3);
+      tester.view.devicePixelRatio = 3.0;
+      addTearDown(tester.view.reset);
+      await shoot(
+        tester,
+        'watchlist-${v.$1}',
+        app(watchlist(), dark: v.$2, scale: v.$3),
+      );
+    });
+
+    testWidgets('capture portfolio ${v.$1}', (tester) async {
+      tester.view.physicalSize = const Size(w * 3, h * 3);
+      tester.view.devicePixelRatio = 3.0;
+      addTearDown(tester.view.reset);
+      await shoot(
+        tester,
+        'portfolio-${v.$1}',
+        app(portfolio(), dark: v.$2, scale: v.$3),
+      );
+    });
+
     testWidgets('capture sheet ${v.$1}', (tester) async {
       tester.view.physicalSize = const Size(w * 3, h * 3);
       tester.view.devicePixelRatio = 3.0;
@@ -393,4 +516,51 @@ void main() {
       );
     });
   }
+}
+
+/// `PortfolioSummaryCard`가 데이터 모델이 아니라 **프로바이더**를 받는다.
+/// 합계는 전부 private `_holdings`에서 계산되므로 게터만 덮어쓴다.
+class _MockPortfolio extends PortfolioProvider {
+  _MockPortfolio(this._items);
+
+  final List<PortfolioHolding> _items;
+
+  @override
+  List<PortfolioHolding> get holdings => _items;
+
+  @override
+  double get totalValue =>
+      _items.fold(0, (sum, h) => sum + h.currentValue);
+
+  @override
+  double get totalCost => _items.fold(0, (sum, h) => sum + h.costBasis);
+
+  @override
+  double get totalPnl => totalValue - totalCost;
+
+  @override
+  double get totalPnlPct => totalCost > 0 ? (totalPnl / totalCost) * 100 : 0;
+
+  @override
+  DateTime? get lastRefreshedAt => DateTime(2026, 10, 1, 9, 30);
+}
+
+/// 로그인 상태만 필요하다 — 비로그인이면 관심종목이 안내 배너로 바뀐다.
+class _MockAuth extends AuthProvider {
+  @override
+  bool get isLoggedIn => true;
+}
+
+class _MockWatchlist extends WatchlistProvider {
+  _MockWatchlist(this._tickers);
+
+  final List<String> _tickers;
+
+  @override
+  List<String> get watchlist => _tickers;
+}
+
+class _MockSubscription extends SubscriptionProvider {
+  @override
+  bool get isGoldActive => false;
 }

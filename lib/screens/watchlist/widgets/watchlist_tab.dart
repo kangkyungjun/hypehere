@@ -12,6 +12,7 @@ import '../../../theme/app_colors.dart';
 import '../../../theme/app_radius.dart';
 import '../../../theme/app_spacing.dart';
 import '../../../theme/app_typography.dart';
+import '../../../utils/score_mapper.dart';
 import '../../../widgets/dashboard/watchlist_discovery_card.dart';
 import '../../../widgets/ads/banner_ad_widget.dart';
 import '../../../widgets/common/bento_card.dart';
@@ -359,9 +360,74 @@ class WatchlistTab extends StatelessWidget {
             _aiOpinionBlock(context, ticker, opinionsUnlocked),
             if (isLoggedIn) ...[
               const SizedBox(height: AppSpacing.xs),
-              Align(
-                alignment: Alignment.centerRight,
-                child: isHeld
+              // 카드 맨 아래 행 — **왼쪽 AI 점수 / 오른쪽 액션**.
+              //
+              // 개편 전에는 액션 버튼만 우측 정렬로 떠 있어 **왼쪽 절반이
+              // 통째로 비어** 있었다. 버튼을 어디로 옮기든 그 빈 칸은 남는다.
+              // 진짜 문제는 위치가 아니라 **행이 비어 있다는 것**이었다.
+              //
+              // 이 카드는 `TickerScore`를 받으면서 점수를 **한 번도 쓰지
+              // 않고 있었다** — 홈 추천 카드는 같은 값을 배지로 보여준다.
+              // 빈 칸을 없애는 게 아니라 있는 정보로 채운다.
+              Row(
+                children: [
+                  if (score != null) _scoreBadge(context, score.score, l10n),
+                  const Spacer(),
+                  _heldOrAdd(context, ticker, score, isHeld, l10n, mlc),
+                ],
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// AI 점수 배지 — 홈 추천 카드(`recommendation_grid`)와 같은 언어를 쓴다.
+  Widget _scoreBadge(BuildContext context, double value, AppLocalizations l10n) {
+    final mlc = context.mlColors;
+    final color = ScoreMapper.getScoreColor(value, mlc);
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.14),
+            borderRadius: BorderRadius.circular(AppRadius.badge),
+          ),
+          child: Text(
+            '${value.round()}',
+            style: TextStyle(
+              fontSize: AppTypography.headlineSmall,
+              fontWeight: AppTypography.bold,
+              color: color,
+              fontFeatures: AppTypography.tabularFigures,
+            ),
+          ),
+        ),
+        const SizedBox(width: AppSpacing.xs),
+        Flexible(
+          child: Text(
+            ScoreMapper.getScoreLabelLocalized(value, l10n),
+            style: AppTypography.badgeLabel.copyWith(color: color),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _heldOrAdd(
+    BuildContext context,
+    String ticker,
+    TickerScore? score,
+    bool isHeld,
+    AppLocalizations l10n,
+    MarketLensColors mlc,
+  ) {
+    return isHeld
                     ? Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: AppSpacing.sm,
@@ -407,13 +473,7 @@ class WatchlistTab extends StatelessWidget {
                             ),
                           ),
                         ),
-                      ),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
+                      );
   }
 
   /// 카드 하단 개인화 AI 의견 블록.
