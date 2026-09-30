@@ -2,6 +2,7 @@
 library;
 
 import 'dart:io';
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -11,15 +12,20 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:marketlens/l10n/app_localizations.dart';
 import 'package:marketlens/models/indices_data.dart';
 import 'package:marketlens/models/macro_data.dart';
+import 'package:marketlens/models/mention_bubble_data.dart';
+import 'package:marketlens/models/news_data.dart';
 import 'package:marketlens/models/treemap_data.dart';
 import 'package:marketlens/theme/app_colors.dart';
 import 'package:marketlens/theme/app_spacing.dart';
+import 'package:marketlens/theme/app_typography.dart';
 import 'package:marketlens/widgets/charts/macro_banner_widget.dart';
 import 'package:marketlens/widgets/common/bento_card.dart';
 import 'package:marketlens/widgets/dashboard/indices_bar_widget.dart';
 import 'package:marketlens/widgets/dashboard/macro_strip_widget.dart';
 import 'package:marketlens/widgets/dashboard/recommendation_grid.dart';
 import 'package:marketlens/widgets/dashboard/sector_bar_chart_widget.dart';
+import 'package:marketlens/widgets/news/mention_bubble_card.dart';
+import 'package:marketlens/widgets/news/news_article_row.dart';
 
 /// 디자인 검토용 스크린샷 생성기 (검증 테스트가 아니다).
 ///
@@ -55,11 +61,17 @@ void main() {
         prevClose: close * (1 - pct / 100),
         change: close * pct / 100,
         changePct: pct,
+        // ⚠️ 무작위 톱니는 실제 지수와 다르게 보여 캡쳐를 왜곡한다.
+        // 완만한 추세 + 작은 노이즈로 실제 차트 모양을 흉내낸다.
         chart: [
           for (var i = 0; i < 30; i++)
             IndexChartPoint(
               date: '2026-09-${(i % 30) + 1}',
-              close: close * (1 + 0.004 * ((i * 7) % 11 - 5)),
+              close: close *
+                  (1 +
+                      0.012 * math.sin(i / 7.0) +
+                      0.004 * math.sin(i / 2.3) +
+                      0.0015 * math.cos(i / 1.1)),
             ),
         ],
       );
@@ -157,6 +169,110 @@ void main() {
         ],
       );
 
+  // 캡쳐와 같은 분포: 큰 것 2개(혼합/약세) + 중간 + 작은 것들.
+  final bubbles = MentionBubbleData(
+    periodHours: 24,
+    items: [
+      TickerMention(ticker: 'META', mentionCount: 35, dominantSentiment: 'neutral'),
+      TickerMention(ticker: 'DOW', mentionCount: 33, dominantSentiment: 'bearish'),
+      TickerMention(ticker: 'AMD', mentionCount: 24, dominantSentiment: 'bullish'),
+      TickerMention(ticker: 'DELL', mentionCount: 21, dominantSentiment: 'bullish'),
+      TickerMention(ticker: 'HAS', mentionCount: 19, dominantSentiment: 'bullish'),
+      TickerMention(ticker: 'C', mentionCount: 17, dominantSentiment: 'bullish'),
+      TickerMention(ticker: 'JPM', mentionCount: 14, dominantSentiment: 'neutral'),
+      TickerMention(ticker: 'MCD', mentionCount: 12, dominantSentiment: 'bullish'),
+      TickerMention(ticker: 'LLY', mentionCount: 11, dominantSentiment: 'bullish'),
+      TickerMention(ticker: 'CPB', mentionCount: 9, dominantSentiment: 'bullish'),
+    ],
+  );
+
+  NewsItem news({
+    required String ticker,
+    String? nameKo,
+    required String summary,
+    required String grade,
+    required String label,
+    required String source,
+    required String sector,
+    required int minutesAgo,
+    bool breaking = false,
+  }) =>
+      NewsItem(
+        date: '2026-09-30',
+        ticker: ticker,
+        title: summary,
+        source: source,
+        publishedAt: DateTime.now().toUtc().subtract(Duration(minutes: minutesAgo)),
+        aiSummary: summary,
+        sentimentGrade: grade,
+        sentimentLabel: label,
+        tickerNameKo: nameKo,
+        sector: sector,
+        isBreaking: breaking,
+      );
+
+  final articles = [
+    news(
+      ticker: 'GRMN',
+      nameKo: '가민',
+      summary: '가민은 최근 애널리스트들로부터 \'중립 매수\'라는 합의 추천을 '
+          '받았습니다. 이 추천은 회사의 주가에 긍정적인 영향을 미칠 것으로 보입니다.',
+      grade: 'neutral',
+      label: '중립',
+      source: 'MarketBeat',
+      sector: 'Consumer Discretionary',
+      minutesAgo: 19,
+    ),
+    news(
+      ticker: 'WMT',
+      nameKo: '월마트',
+      summary: '월마트는 인도에서 새로운 AI 쇼핑 테스트를 시작했습니다. '
+          '이는 고객 경험을 개선하고 판매를 늘리는 데 도움이 될 수 있습니다.',
+      grade: 'bullish',
+      label: '강세',
+      source: 'simplywall.st',
+      sector: 'Consumer Staples',
+      minutesAgo: 21,
+      breaking: true,
+    ),
+    news(
+      ticker: 'META',
+      nameKo: '메타 플랫폼스',
+      summary: '메타가 데이터센터 투자를 확대한다고 발표하면서 단기 마진 압박 '
+          '우려가 제기됐습니다.',
+      grade: 'bearish',
+      label: '약세',
+      source: 'Reuters',
+      sector: 'Communication Services',
+      minutesAgo: 44,
+    ),
+  ];
+
+  Widget newsTimeline() => ListView(
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.xl,
+          AppSpacing.md,
+          AppSpacing.xl,
+          AppSpacing.xl,
+        ),
+        children: [
+          MentionBubbleCard(data: bubbles),
+          Padding(
+            padding: const EdgeInsets.only(
+              top: AppDensity.sectionGap,
+              bottom: AppSpacing.xs,
+            ),
+            child: Text(
+              '오늘 · 9/30 수',
+              style: AppTypography.label.copyWith(
+                color: MarketLensColors.light.textTertiary,
+              ),
+            ),
+          ),
+          for (final a in articles) NewsArticleRow(item: a, onTap: () {}),
+        ],
+      );
+
   Widget app(Widget body, {required bool dark, required double scale}) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -217,6 +333,17 @@ void main() {
   ];
 
   for (final v in variants) {
+    testWidgets('capture news ${v.$1}', (tester) async {
+      tester.view.physicalSize = const Size(w * 3, h * 3);
+      tester.view.devicePixelRatio = 3.0;
+      addTearDown(tester.view.reset);
+      await shoot(
+        tester,
+        'news-${v.$1}',
+        app(newsTimeline(), dark: v.$2, scale: v.$3),
+      );
+    });
+
     testWidgets('capture home ${v.$1}', (tester) async {
       tester.view.physicalSize = const Size(w * 3, h * 3);
       tester.view.devicePixelRatio = 3.0;

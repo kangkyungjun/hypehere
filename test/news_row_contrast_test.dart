@@ -2,7 +2,9 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:marketlens/models/mention_bubble_data.dart';
 import 'package:marketlens/theme/app_colors.dart';
+import 'package:marketlens/widgets/news/mention_bubble_card.dart';
 
 /// 버블차트 텍스트 대비 계약.
 ///
@@ -84,4 +86,39 @@ void main() {
       expect(broken, greaterThan(0));
     });
   }
+
+  group('버블 배치 개수', () {
+    // 카드의 실제 차트 박스: 높이 200, 폭은 402 − 화면패딩 32 − 카드패딩 32.
+    const box = Size(338, 200);
+
+    List<TickerMention> mentions(List<int> counts) => [
+          for (var i = 0; i < counts.length; i++)
+            TickerMention(
+              ticker: 'T$i',
+              mentionCount: counts[i],
+              dominantSentiment: 'neutral',
+            ),
+        ];
+
+    test('상위 10개가 모두 배치된다', () {
+      // 실제 분포(35/33/24/21/19/17/14/12/11/9).
+      final n = packedBubbleCount(
+        mentions([35, 33, 24, 21, 19, 17, 14, 12, 11, 9]),
+        box,
+      );
+      // `break` + minR 20 + maxR 52 조합에서는 4개만 배치됐다.
+      expect(n, 10, reason: '$n개만 배치됨 — 나머지는 말없이 사라진다');
+    });
+
+    test('큰 버블이 실패해도 작은 것들은 계속 시도한다', () {
+      // 1등이 압도적이라 자리를 많이 먹는 경우.
+      final n = packedBubbleCount(mentions([200, 9, 8, 7, 6, 5]), box);
+      expect(n, greaterThanOrEqualTo(5),
+          reason: '한 번 실패하고 멈추면(break) 뒤가 전부 버려진다');
+    });
+
+    test('빈 입력은 빈 결과', () {
+      expect(packedBubbleCount(const [], box), 0);
+    });
+  });
 }

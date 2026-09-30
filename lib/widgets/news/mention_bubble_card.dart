@@ -92,6 +92,7 @@ class MentionBubbleCard extends StatelessWidget {
                         // 2.3~2.9까지 떨어졌다 — 라이트에서만 검증하면 못 잡는다.
                         inkOnDarkFill: context.mlColors.onPrimary,
                         inkOnLightFill: MarketLensColors.light.textPrimary,
+                        fontFamily: theme.textTheme.bodyMedium?.fontFamily,
                       ),
                     ),
                   );
@@ -176,6 +177,12 @@ double _contrast(Color a, Color b) {
 }
 
 /// Pack circles using spiral placement with collision resolution.
+/// 배치된 버블 수 — 테스트에서 "몇 개가 실제로 보이는가"를 계약으로 건다.
+/// `break`로 바꿨다가 10개 중 4개만 남은 적이 있고, 그건 캡쳐로만 보였다.
+@visibleForTesting
+int packedBubbleCount(List<TickerMention> items, Size size) =>
+    _packCircles(items, size).length;
+
 List<_BubbleNode> _packCircles(List<TickerMention> items, Size size) {
   if (items.isEmpty) return [];
 
@@ -186,11 +193,14 @@ List<_BubbleNode> _packCircles(List<TickerMention> items, Size size) {
   final maxCount = sorted.first.mentionCount;
   if (maxCount == 0) return [];
 
-  // 반경 20 미만은 `_drawText`가 아무 텍스트도 그리지 않아 **빈 원**이 된다.
-  // 캡쳐에서 10개 중 4개가 티커나 건수 없이 떠 있었다. 하한을 20으로 올려
-  // 렌더되는 모든 버블이 최소한 티커는 담게 한다.
-  const minR = 20.0;
-  const maxR = 52.0;
+  // 하한은 **텍스트가 들어가는 최소 크기**에 맞춘다. 개편 전 14는
+  // `_drawText`가 아무것도 그리지 않는 구간이라 빈 원이 떴다(캡쳐에서 10개 중
+  // 4개). 18이면 지름 32px에 9px 티커가 들어간다.
+  //
+  // 상한은 52 → 42로 줄인다. 가장 큰 버블이 박스를 독차지하면 나머지가
+  // 자리를 못 찾는다 — 20/52 조합에서 10개 중 4개만 배치됐다.
+  const minR = 18.0;
+  const maxR = 42.0;
 
   final cx = size.width / 2;
   final cy = size.height / 2;
@@ -220,10 +230,10 @@ List<_BubbleNode> _packCircles(List<TickerMention> items, Size size) {
       }
     }
 
-    // 자리를 못 찾으면 **말없이 사라진다.** 호출부가 상위 N개를 넘겨도
-    // 실제로 몇 개가 보이는지 알 수 없었다. 배치 실패는 더 작은 버블에서도
-    // 반복되므로, 첫 실패에서 멈춰 "큰 것부터 들어간 만큼"을 확정한다.
-    if (!placed) break;
+    // 자리를 못 찾은 것은 건너뛴다. `break`로 바꿨더니 큰 것 하나가 실패하는
+    // 순간 **뒤의 작은 것들까지 전부 버려져** 10개 중 4개만 남았다 —
+    // 더 작은 버블은 같은 자리에 들어갈 수 있으므로 계속 시도해야 한다.
+    if (!placed) continue;
   }
 
   return nodes;
@@ -265,7 +275,11 @@ class _BubblePainter extends CustomPainter {
   final Color inkOnDarkFill;
   final Color inkOnLightFill;
 
-  _BubblePainter({required this.nodes, required this.brightness, required this.formatMentions, required this.gainColor, required this.lossColor, required this.neutralSentimentColor, required this.inkOnDarkFill, required this.inkOnLightFill});
+  /// 앱 폰트. `TextPainter`는 테마를 상속하지 않아서, 비워두면 이 라벨만
+  /// 시스템 폰트로 그려진다 — 앱 전체가 Pretendard인데 버블만 달라 보였다.
+  final String? fontFamily;
+
+  _BubblePainter({required this.nodes, required this.brightness, required this.formatMentions, required this.gainColor, required this.lossColor, required this.neutralSentimentColor, required this.inkOnDarkFill, required this.inkOnLightFill, this.fontFamily});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -301,15 +315,15 @@ class _BubblePainter extends CustomPainter {
               _contrast(color, inkOnDarkFill)
           ? inkOnLightFill
           : inkOnDarkFill;
-      if (node.radius >= 26) {
+      // 임계값은 minR(18)과 맞물려야 한다. 어떤 버블도 **빈 원**으로 남으면 안 된다.
+      if (node.radius >= 28) {
         // Large: ticker + count
         _drawText(canvas, node.x, node.y - 6, node.item.ticker, AppTypography.caption, AppTypography.bold, textColor, node.radius * 2 - 6);
         _drawText(canvas, node.x, node.y + 7, formatMentions(node.item.mentionCount), AppTypography.chartLabel, AppTypography.regular, textColor.withValues(alpha: 0.85), node.radius * 2 - 6);
-      } else if (node.radius >= 20) {
+      } else {
         // Medium: ticker only
         _drawText(canvas, node.x, node.y, node.item.ticker, AppTypography.chartLabel, AppTypography.bold, textColor, node.radius * 2 - 4);
       }
-      // Small: no text
     }
   }
 
@@ -322,7 +336,8 @@ class _BubblePainter extends CustomPainter {
           color: color,
           fontSize: fontSize,
           fontWeight: weight,
-            ),
+          fontFamily: fontFamily,
+        ),
       ),
       textAlign: TextAlign.center,
       textDirection: TextDirection.ltr,
@@ -349,5 +364,6 @@ class _BubblePainter extends CustomPainter {
       oldDelegate.nodes != nodes || oldDelegate.brightness != brightness || oldDelegate.formatMentions != formatMentions ||
       oldDelegate.neutralSentimentColor != neutralSentimentColor ||
       oldDelegate.inkOnDarkFill != inkOnDarkFill ||
-      oldDelegate.inkOnLightFill != inkOnLightFill;
+      oldDelegate.inkOnLightFill != inkOnLightFill ||
+      oldDelegate.fontFamily != fontFamily;
 }
