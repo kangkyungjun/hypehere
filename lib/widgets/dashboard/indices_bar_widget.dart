@@ -223,13 +223,25 @@ class _IndexHeroCard extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: AppSpacing.xxs),
-          // 히어로에 붙는 등락률은 `changeHero`(20)다 — 레퍼런스의
-          // 히어로:단위 = 37.5:19.9 = 1.88:1 리듬과 일치한다(우리는 37:20 = 1.85:1).
-          // `changeBadge`(15)면 2.47:1이라 히어로가 홀로 붕 뜨고, 15가 이 화면에
-          // 혼자 남아 크기 단계만 하나 더 늘린다.
+          // 등락률은 히어로보다 **확실히 작아야 한다.**
+          //
+          // 처음에 `changeHero`(20 w700)를 쓴 근거는 레퍼런스의 히어로:단위
+          // = 1.88:1이었는데, 그건 **잘못된 매핑**이었다. 레퍼런스에서 그
+          // 자리는 `만원` — 뮤트 회색 **접미사**다. 우리가 넣은 것은 굵은
+          // 빨강 **방향값**이라 같은 크기라도 시각 질량이 훨씬 크다.
+          // 20 w700 빨강은 37px 히어로와 대등하게 겨뤄 화면이 시끄러워졌다.
+          //
+          // 16 w600이면 37:16 = 2.31로 히어로가 확실히 앞서고, 16은 이 화면에
+          // 이미 있는 단계라 크기 단계도 늘지 않는다. 색은 방향 신호라 유지한다.
           Text(
-            '${v.arrow} ${v.changeText}',
-            style: AppTypography.changeHero.copyWith(color: v.color),
+            '${v.arrow}${v.changeText}',
+            style: TextStyle(
+              fontSize: AppTypography.headlineMedium,
+              fontWeight: AppTypography.semiBold,
+              color: v.color,
+              fontFeatures: AppTypography.tabularFigures,
+              height: 1.2,
+            ),
             maxLines: 1,
           ),
           if (index.chart.length >= 2) ...[
@@ -278,6 +290,10 @@ class _IndexCompactCard extends StatelessWidget {
       decoration: _cardDecoration(mlc, v.color, isSelected),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        // 보조 카드는 히어로 카드 높이에 맞춰 늘어난다. 내용을 위로 붙이면
+        // 카드 아래쪽에 빈 칸이 몰려 "덜 채운 카드"로 보인다 — 가운데 두면
+        // 남는 공간이 위아래로 갈려 패딩처럼 읽힌다.
+        mainAxisAlignment: MainAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
         children: [
           // 1행: 이름 + 등락률. 둘 다 기물 크기(11)라 종가와 겨루지 않는다.
