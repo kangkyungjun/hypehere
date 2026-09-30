@@ -130,121 +130,126 @@ class _RecoCard extends StatelessWidget {
       onTap: onTap,
       padding: const EdgeInsets.all(AppSpacing.sm),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 티커 + 점수 배지
+          Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 티커 + 점수 배지
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          item.ticker,
-                          style: TextStyle(
-                            fontSize: AppTypography.headlineMedium,
-                            fontWeight: AppTypography.bold,
-                            color: mlc.textPrimary,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        Text(
-                          displayName,
-                          style: TextStyle(
-                            fontSize: AppTypography.bodySmall,
-                            color: mlc.textSecondary,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 3,
-                    ),
-                    decoration: BoxDecoration(
-                      color: scoreColor.withValues(alpha: 0.14),
-                      borderRadius: BorderRadius.circular(AppRadius.badge),
-                    ),
-                    child: Text(
-                      '${score.round()}',
-                      style: TextStyle(
-                        // 홈 핵심 AI 신호(점수) 12→15로 또렷하게.
-                        fontSize: AppTypography.headlineSmall,
-                        fontWeight: AppTypography.bold,
-                        color: scoreColor,
-                        fontFeatures: AppTypography.tabularFigures,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.sm),
-
-              // 점수 게이지 (히어로)
-              SizedBox(
-                height: 7,
-                width: double.infinity,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(AppRadius.badge),
-                  child: Stack(
-                    children: [
-                      Positioned.fill(child: ColoredBox(color: mlc.overlayDim)),
-                      FractionallySizedBox(
-                        widthFactor: fraction,
-                        heightFactor: 1.0,
-                        alignment: Alignment.centerLeft,
-                        child: ColoredBox(color: scoreColor),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: AppSpacing.xs),
-              Text(
-                ScoreMapper.getScoreLabelLocalized(score, l10n),
-                style: AppTypography.label.copyWith(color: scoreColor),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-
-              const SizedBox(height: AppSpacing.sm),
-
-              // 종가 + 변동률 — 한 줄로 합친다.
-              //
-              // 개편 전: Spacer()가 라벨과 가격을 위아래로 갈라놓고, 종가와
-              // 변동률이 각각 별도 줄이었다. 고정 높이 160 대비 콘텐츠는 ~122라
-              // 38px(카드의 24%)가 가운데 구멍으로 남아 균형이 깨져 있었다.
-              // 한 줄로 합치고 Spacer를 없애 콘텐츠를 연속시킨다.
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                alignment: Alignment.centerLeft,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.baseline,
-                  textBaseline: TextBaseline.alphabetic,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (item.close != null) ...[
-                      Text(
-                        '\$${_formatClose(item.close!)}',
-                        style: AppTypography.priceCard.copyWith(
-                          color: mlc.textPrimary,
-                        ),
-                        maxLines: 1,
+                    Text(
+                      item.ticker,
+                      style: TextStyle(
+                        // 레퍼런스 리스트 1행 18.1 대응. `mainAxisExtent: 150`은
+                        // 애초에 18 기준으로 잡혀 있었다(아래 주석 참조) —
+                        // 코드만 16에 머물러 예산을 다 안 쓰고 있었다.
+                        fontSize: AppTypography.headlineLarge,
+                        fontWeight: AppTypography.bold,
+                        color: mlc.textPrimary,
                       ),
-                      const SizedBox(width: AppSpacing.sm),
-                    ],
-                    _buildChangePct(item.changePct, mlc),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      displayName,
+                      style: TextStyle(
+                        // 레퍼런스의 2행(`520i 럭셔리`)은 뮤트다. 티커(18 w700
+                        // primary)와 2단으로 갈라져야 티커가 앵커로 선다.
+                        fontSize: AppTypography.bodySmall,
+                        color: mlc.textTertiary,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ],
                 ),
               ),
+              const SizedBox(width: AppSpacing.sm),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: scoreColor.withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(AppRadius.badge),
+                ),
+                child: Text(
+                  '${score.round()}',
+                  style: TextStyle(
+                    // 홈 핵심 AI 신호(점수) 12→15로 또렷하게.
+                    fontSize: AppTypography.headlineSmall,
+                    fontWeight: AppTypography.bold,
+                    color: scoreColor,
+                    fontFeatures: AppTypography.tabularFigures,
+                  ),
+                ),
+              ),
             ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
+
+          // 점수 게이지 (히어로)
+          SizedBox(
+            height: 7,
+            width: double.infinity,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(AppRadius.badge),
+              child: Stack(
+                children: [
+                  Positioned.fill(child: ColoredBox(color: mlc.overlayDim)),
+                  FractionallySizedBox(
+                    widthFactor: fraction,
+                    heightFactor: 1.0,
+                    alignment: Alignment.centerLeft,
+                    child: ColoredBox(color: scoreColor),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            ScoreMapper.getScoreLabelLocalized(score, l10n),
+            // 게이지 바 직하의 상태 라벨은 배지 성격이다. 13이면 카드 안에
+            // 13px이 셋(종목명·등급·등락률)이 되어 다시 뭉친다.
+            // 11로 내려 U4(티커 16→18)의 세로 증가분을 상쇄한다.
+            style: AppTypography.badgeLabel.copyWith(color: scoreColor),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+
+          const SizedBox(height: AppSpacing.sm),
+
+          // 종가 + 변동률 — 한 줄로 합친다.
+          //
+          // 개편 전: Spacer()가 라벨과 가격을 위아래로 갈라놓고, 종가와
+          // 변동률이 각각 별도 줄이었다. 고정 높이 160 대비 콘텐츠는 ~122라
+          // 38px(카드의 24%)가 가운데 구멍으로 남아 균형이 깨져 있었다.
+          // 한 줄로 합치고 Spacer를 없애 콘텐츠를 연속시킨다.
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
+              children: [
+                if (item.close != null) ...[
+                  Text(
+                    '\$${_formatClose(item.close!)}',
+                    style: AppTypography.priceCard.copyWith(
+                      color: mlc.textPrimary,
+                    ),
+                    maxLines: 1,
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                ],
+                _buildChangePct(item.changePct, mlc),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

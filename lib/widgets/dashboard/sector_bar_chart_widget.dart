@@ -29,18 +29,35 @@ class SectorBarChartWidget extends StatelessWidget {
   final int maxBars;
 
   static const double _maxBarHeight = 40;
-  static const double _labelHeight = 16;
-  // 섹터명 영역: 긴 이름이 잘리지 않도록 2줄(micro 10pt) 높이 확보
-  static const double _nameHeight = 28;
+
+  // ⚠️ 라벨·섹터명 박스는 **배율에 연동해야 한다.** 고정값이면 접근성 확대에서
+  // 텍스트가 박스를 넘고, 넘친 만큼 막대 영역을 밀어내 막대가 섹터명 위로
+  // 번진다(1.3배 캡쳐에서 실제로 그랬다).
+  //
+  // 개편 전에도 `_nameHeight = 28`은 1.3배에서 이미 넘치고 있었다
+  // (micro 10 × 1.3 × 1.15 × 2줄 = 29.9 > 28). 축 라벨을 caption(11)으로
+  // 올리면서 `_labelHeight`까지 같이 넘쳤다(17.2 > 16).
+  @visibleForTesting
+  static const double labelLineHeight = 1.2;
+  static const double _nameLineHeight = 1.15;
+
+  // +1은 반올림 여유다. 0으로 두면 부동소수점 오차만으로 오버플로가 난다.
+  double _labelHeightOf(double scale) =>
+      AppTypography.caption * scale * labelLineHeight + 1;
+
+  double _nameHeightOf(double scale) =>
+      AppTypography.caption * scale * _nameLineHeight * 2 + 1;
 
   @override
   Widget build(BuildContext context) {
     final mlc = context.mlColors;
+    final scale = MediaQuery.textScalerOf(context).scale(1.0);
+    final labelHeight = _labelHeightOf(scale);
+    final nameHeight = _nameHeightOf(scale);
 
     // 등락률 보유 섹터만, 내림차순 정렬 후 상위 maxBars개
-    final shown =
-        sectors.where((s) => s.avgChangePct != null).toList()
-          ..sort((a, b) => b.avgChangePct!.compareTo(a.avgChangePct!));
+    final shown = sectors.where((s) => s.avgChangePct != null).toList()
+      ..sort((a, b) => b.avgChangePct!.compareTo(a.avgChangePct!));
     final bars = shown.take(maxBars).toList();
 
     if (bars.isEmpty) {
@@ -49,10 +66,7 @@ class SectorBarChartWidget extends StatelessWidget {
         SizedBox(
           height: 96,
           child: Center(
-            child: Text(
-              '—',
-              style: TextStyle(color: mlc.textTertiary),
-            ),
+            child: Text('—', style: TextStyle(color: mlc.textTertiary)),
           ),
         ),
       );
@@ -70,14 +84,14 @@ class SectorBarChartWidget extends StatelessWidget {
         children: [
           // 막대 영역 (상단 라벨+막대 / 기준선 / 하단 막대+라벨 / 섹터명)
           SizedBox(
-            height: (_labelHeight + _maxBarHeight) * 2 + _nameHeight,
+            height: (labelHeight + _maxBarHeight) * 2 + nameHeight,
             child: Stack(
               children: [
                 // 0 기준선
                 Positioned(
                   left: 0,
                   right: 0,
-                  top: _labelHeight + _maxBarHeight,
+                  top: labelHeight + _maxBarHeight,
                   child: Divider(height: 1, color: mlc.subtleBorder),
                 ),
                 Row(
@@ -89,8 +103,8 @@ class SectorBarChartWidget extends StatelessWidget {
                           sector: s,
                           maxAbs: maxAbs,
                           maxBarHeight: _maxBarHeight,
-                          labelHeight: _labelHeight,
-                          nameHeight: _nameHeight,
+                          labelHeight: labelHeight,
+                          nameHeight: nameHeight,
                         ),
                       ),
                   ],
@@ -117,7 +131,6 @@ class SectorBarChartWidget extends StatelessWidget {
       ),
     );
   }
-
 }
 
 /// 개별 섹터 막대 (상단=상승, 하단=하락)
@@ -145,9 +158,15 @@ class _SectorBar extends StatelessWidget {
     final barH = (pct.abs() / maxAbs * maxBarHeight).clamp(3.0, maxBarHeight);
     final pctLabel = '${pct >= 0 ? '+' : ''}${pct.toStringAsFixed(0)}%';
 
+    // 부록 C: 차트성 라벨은 caption(11). micro(10)는 읽기 어려웠다.
+    // 섹터명도 11이지만 이쪽은 w700 + 방향색이라 위계가 굵기·색으로 갈린다.
     final labelStyle = TextStyle(
-      fontSize: AppTypography.micro,
+      fontSize: AppTypography.caption,
       fontWeight: AppTypography.bold,
+      // ⚠️ `height`를 비워두면 Pretendard 기본 행간(1.2보다 크다)으로 렌더돼
+      // `_labelHeightOf`의 계산과 어긋나고, 그 차이만큼 막대 영역을 밀어낸다.
+      // 렌더와 계산은 **같은 상수**를 봐야 한다.
+      height: SectorBarChartWidget.labelLineHeight,
       color: color,
     );
 
@@ -198,9 +217,11 @@ class _SectorBar extends StatelessWidget {
             textAlign: TextAlign.center,
             softWrap: true,
             style: TextStyle(
-              fontSize: AppTypography.micro,
+              // 7열이 병렬로 늘어서는 축 라벨은 뮤트가 정석이다. 진한 회색이면
+              // 바로 위 방향값(-1%)과 경쟁해 둘 다 안 읽힌다.
+              fontSize: AppTypography.caption,
               height: 1.15,
-              color: mlc.textSecondary,
+              color: mlc.textTertiary,
             ),
           ),
         ),

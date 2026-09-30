@@ -49,14 +49,18 @@ class MarketSegmentedTabs extends StatelessWidget {
         ),
         labelColor: colors.accentBlue,
         unselectedLabelColor: colors.textSecondary,
+        // 격리 규칙: 칩·탭 라벨은 `chipLabel`(12)만 쓴다. `bodySmall`을 직접
+        // 쓰면 읽기 스케일이 바뀔 때 고정높이 `Tab(height: 32)`가 같이 흔들린다.
         labelStyle: const TextStyle(
-          fontSize: AppTypography.bodySmall,
+          fontSize: AppTypography.chipLabelSize,
           fontWeight: AppTypography.bold,
           height: 1.2,
         ),
+        // 비선택을 w500으로 내려 선택(w700)과 2단을 확보한다.
+        // w700 ↔ w600은 눈이 구분하지 못한다.
         unselectedLabelStyle: const TextStyle(
-          fontSize: AppTypography.bodySmall,
-          fontWeight: AppTypography.semiBold,
+          fontSize: AppTypography.chipLabelSize,
+          fontWeight: AppTypography.medium,
           height: 1.2,
         ),
         overlayColor: WidgetStateProperty.all(Colors.transparent),

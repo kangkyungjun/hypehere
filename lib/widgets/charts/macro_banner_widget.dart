@@ -105,7 +105,10 @@ class MacroBannerWidget extends StatelessWidget {
             Text(
               _riskAccessibilityIcon(overall?.riskLevel),
               style: TextStyle(
-                fontSize: AppTypography.micro,
+                // 색맹 사용자에게는 이 글리프가 판정의 **유일한** 비색상 단서다.
+                // 10px는 그 역할을 하기엔 작았고, 이 화면에 10px을 혼자 남겨
+                // 크기 단계만 하나 더 만들고 있었다.
+                fontSize: AppTypography.caption,
                 color: onColor,
                 fontWeight: AppTypography.bold,
               ),
@@ -113,17 +116,31 @@ class MacroBannerWidget extends StatelessWidget {
             const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: Text.rich(
+                // 3단 위계: 접두(13) < 판정(18 w700) < 요약(13 뮤트).
+                //
+                // 개편 전에는 '거시경제: 양호'가 통째로 15 w600, 괄호 요약이
+                // 14 w400이었다. 인접비 1.07 — 어디가 결론값인지 안 보였다.
+                // 결론은 `riskLabel` 한 단어뿐이므로 그것만 키운다. 접두와
+                // 요약을 같은 13으로 내려 판정이 홀로 서게 한다.
                 TextSpan(
                   children: [
                     TextSpan(
-                      text: '${l10n.macroOverall}: $riskLabel',
-                      style: AppTypography.bodyStrong.copyWith(color: onColor),
+                      text: '${l10n.macroOverall}: ',
+                      style: TextStyle(
+                        fontSize: AppTypography.bodySmall,
+                        fontWeight: AppTypography.medium,
+                        color: onColor.withValues(alpha: 0.82),
+                      ),
+                    ),
+                    TextSpan(
+                      text: riskLabel,
+                      style: AppTypography.cardTitle.copyWith(color: onColor),
                     ),
                     if (summary.isNotEmpty)
                       TextSpan(
-                        text: ' ($summary)',
+                        text: '  $summary',
                         style: TextStyle(
-                          fontSize: AppTypography.bodyMedium,
+                          fontSize: AppTypography.bodySmall,
                           color: onColor.withValues(alpha: 0.82),
                         ),
                       ),

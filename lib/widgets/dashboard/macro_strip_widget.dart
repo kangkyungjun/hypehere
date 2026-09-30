@@ -111,11 +111,15 @@ class MacroStripWidget extends StatelessWidget {
     if (t == null) {
       content = _cell(context, label, const [], placeholder: true);
     } else {
-      // 임계 색상: <4.3 기본(검정) / 4.3~4.5 노랑 / ≥4.5 빨강.
+      // RULE-BLUE: 녹/적은 **부호가 있는 방향값**(등락·손익)에만 쓴다.
+      // 금리 '수준'은 부호 없는 사실이라 기본은 검정이다 — 빨강으로 칠했더니
+      // 캡쳐에서 "금리가 떨어졌나?"로 오독됐다.
+      //
+      // 임계 경고 자체는 유지하되 **방향 어휘 밖의 색**(warning=앰버)만 쓴다.
+      // 빨강 단계는 제거: 경고는 한 단계면 충분하고, 두 단계를 색으로만
+      // 구분하면 어느 쪽도 안 읽힌다.
       final val = t.value;
-      final Color color = val >= 4.5
-          ? mlc.dangerColor
-          : (val >= 4.3 ? mlc.warningColor : mlc.textPrimary);
+      final Color color = val >= 4.3 ? mlc.warningColor : mlc.textPrimary;
       content = _cell(context, label, [
         _ValuePart('${val.toStringAsFixed(2)}%', color, big: true),
       ]);
@@ -157,9 +161,11 @@ class MacroStripWidget extends StatelessWidget {
               child: Text(
                 label,
                 style: TextStyle(
+                  // 레퍼런스의 KV 라벨은 Regular·뮤트다. 값과 크기로 겨루지
+                  // 않고 색으로만 물러선다(대비 9.39 → 4.97, 1.89배 분리).
                   fontSize: AppTypography.bodySmall,
-                  fontWeight: AppTypography.medium,
-                  color: mlc.textSecondary,
+                  fontWeight: AppTypography.regular,
+                  color: mlc.textTertiary,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -173,7 +179,9 @@ class MacroStripWidget extends StatelessWidget {
           Text(
             '-',
             style: TextStyle(
-              fontSize: AppTypography.bodyLarge,
+              // 플레이스홀더는 자기가 대체하는 값(대표값 20)과 같은 급이어야
+              // 데이터가 도착할 때 자리가 흔들리지 않는다.
+              fontSize: AppTypography.displayMedium,
               fontWeight: AppTypography.bold,
               color: mlc.textTertiary,
             ),
@@ -187,10 +195,13 @@ class MacroStripWidget extends StatelessWidget {
                 Text(
                   p.text,
                   style: TextStyle(
-                    // 3단: 대표값(15 bold) > 방향값(13 w600) > 메타(11 w500).
-                    // 메타를 낮춰야 세 조각이 한 줄에 들어간다.
+                    // 3단: 대표값(20 bold) > 방향값(13 w600) > 메타(11 w500).
+                    //
+                    // 대표값을 15에서 20으로 올린다. 15일 때 메타(11)와의 비가
+                    // 1.36이라 한 줄 안에서 세 조각의 위계가 안 읽혔다("다닥다닥"의
+                    // 정체). 20이면 1.82로 벌어지고, 보조 지수 카드와도 같은 급이 된다.
                     fontSize: p.big
-                        ? AppTypography.bodyLarge
+                        ? AppTypography.displayMedium
                         : (p.meta
                               ? AppTypography.caption
                               : AppTypography.bodySmall),

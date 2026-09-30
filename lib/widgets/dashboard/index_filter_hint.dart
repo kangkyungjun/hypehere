@@ -69,11 +69,7 @@ class _IndexFilterHintState extends State<IndexFilterHint> {
       ),
       child: Row(
         children: [
-          Icon(
-            Icons.info_outline,
-            size: 14,
-            color: mlc.textSecondary,
-          ),
+          Icon(Icons.info_outline, size: 14, color: mlc.textSecondary),
           const SizedBox(width: AppSpacing.xs),
           Expanded(
             child: Text(
@@ -98,10 +94,9 @@ class _IndexFilterHintState extends State<IndexFilterHint> {
             ),
             child: Text(
               l10n.confirm,
-              style: TextStyle(
-                fontSize: AppTypography.bodySmall,
-                fontWeight: AppTypography.semiBold,
-              ),
+              // 본문과 같은 13이면 액션이 서지 않고 오히려 본문과 경쟁한다.
+              // 액션 신호는 크기가 아니라 블루가 담당한다.
+              style: AppTypography.chipLabel,
             ),
           ),
         ],
