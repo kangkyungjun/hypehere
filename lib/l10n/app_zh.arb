@@ -1111,5 +1111,9 @@
   "maxLoss20Desc": "中等，标准市场波动水平",
   "maxLoss40Desc": "激进，能承受大幅下跌",
   "maxLossUnlimited": "不限",
-  "maxLossUnlimitedDesc": "无上限，全力追求长期收益"
+  "maxLossUnlimitedDesc": "无上限，全力追求长期收益",
+  "webviewLoadFailed": "无法打开此页面",
+  "webviewOpenInBrowser": "在浏览器中打开",
+  "webviewShare": "分享",
+  "webviewNoAppForLink": "没有可打开此链接的应用"
 }

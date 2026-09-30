@@ -2875,4 +2875,16 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get maxLossUnlimitedDesc => '无上限，全力追求长期收益';
+
+  @override
+  String get webviewLoadFailed => '无法打开此页面';
+
+  @override
+  String get webviewOpenInBrowser => '在浏览器中打开';
+
+  @override
+  String get webviewShare => '分享';
+
+  @override
+  String get webviewNoAppForLink => '没有可打开此链接的应用';
 }

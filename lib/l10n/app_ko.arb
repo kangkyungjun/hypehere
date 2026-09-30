@@ -1196,5 +1196,9 @@
   "maxLoss20Desc": "보통, 일반적인 시장 변동성 수준",
   "maxLoss40Desc": "공격적, 큰 폭의 하락도 감수 가능",
   "maxLossUnlimited": "제한 없음",
-  "maxLossUnlimitedDesc": "제한 없이, 장기 수익에 전념"
+  "maxLossUnlimitedDesc": "제한 없이, 장기 수익에 전념",
+  "webviewLoadFailed": "페이지를 열 수 없습니다",
+  "webviewOpenInBrowser": "브라우저에서 열기",
+  "webviewShare": "공유",
+  "webviewNoAppForLink": "이 링크를 열 수 있는 앱이 없습니다"
 }

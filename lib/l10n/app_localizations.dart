@@ -5557,6 +5557,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No limit, fully committed to long-term gains'**
   String get maxLossUnlimitedDesc;
+
+  /// No description provided for @webviewLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load this page'**
+  String get webviewLoadFailed;
+
+  /// No description provided for @webviewOpenInBrowser.
+  ///
+  /// In en, this message translates to:
+  /// **'Open in browser'**
+  String get webviewOpenInBrowser;
+
+  /// No description provided for @webviewShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get webviewShare;
+
+  /// No description provided for @webviewNoAppForLink.
+  ///
+  /// In en, this message translates to:
+  /// **'No app can open this link'**
+  String get webviewNoAppForLink;
 }
 
 class _AppLocalizationsDelegate

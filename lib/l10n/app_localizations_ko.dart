@@ -2883,4 +2883,16 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get maxLossUnlimitedDesc => '제한 없이, 장기 수익에 전념';
+
+  @override
+  String get webviewLoadFailed => '페이지를 열 수 없습니다';
+
+  @override
+  String get webviewOpenInBrowser => '브라우저에서 열기';
+
+  @override
+  String get webviewShare => '공유';
+
+  @override
+  String get webviewNoAppForLink => '이 링크를 열 수 있는 앱이 없습니다';
 }

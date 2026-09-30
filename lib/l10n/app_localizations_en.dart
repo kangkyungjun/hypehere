@@ -2953,4 +2953,16 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get maxLossUnlimitedDesc =>
       'No limit, fully committed to long-term gains';
+
+  @override
+  String get webviewLoadFailed => 'Couldn\'t load this page';
+
+  @override
+  String get webviewOpenInBrowser => 'Open in browser';
+
+  @override
+  String get webviewShare => 'Share';
+
+  @override
+  String get webviewNoAppForLink => 'No app can open this link';
 }

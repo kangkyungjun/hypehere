@@ -1111,5 +1111,9 @@
   "maxLoss20Desc": "Moderado, volatilidad estándar del mercado",
   "maxLoss40Desc": "Agresivo, puede soportar caídas significativas",
   "maxLossUnlimited": "Sin límite",
-  "maxLossUnlimitedDesc": "Sin límite, totalmente comprometido con ganancias a largo plazo"
+  "maxLossUnlimitedDesc": "Sin límite, totalmente comprometido con ganancias a largo plazo",
+  "webviewLoadFailed": "No se pudo cargar la página",
+  "webviewOpenInBrowser": "Abrir en el navegador",
+  "webviewShare": "Compartir",
+  "webviewNoAppForLink": "Ninguna app puede abrir este enlace"
 }

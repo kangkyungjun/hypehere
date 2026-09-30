@@ -53,5 +53,20 @@
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
         </intent>
+        <!-- 인앱 웹뷰가 처리 못 하는 스킴을 OS에 넘길 때 url_launcher의
+             canLaunchUrl/launchUrl이 Android 11+에서 보이도록 선언한다.
+             (webview_screen.dart의 _launchExternal) -->
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:scheme="https"/>
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:scheme="mailto"/>
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.DIAL"/>
+            <data android:scheme="tel"/>
+        </intent>
     </queries>
 </manifest>

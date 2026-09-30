@@ -1111,5 +1111,9 @@
   "maxLoss20Desc": "普通、一般的な市場変動レベル",
   "maxLoss40Desc": "積極的、大幅な下落にも耐えられる",
   "maxLossUnlimited": "制限なし",
-  "maxLossUnlimitedDesc": "制限なく、長期的な利益に専念"
+  "maxLossUnlimitedDesc": "制限なく、長期的な利益に専念",
+  "webviewLoadFailed": "ページを開けませんでした",
+  "webviewOpenInBrowser": "ブラウザで開く",
+  "webviewShare": "共有",
+  "webviewNoAppForLink": "このリンクを開けるアプリがありません"
 }

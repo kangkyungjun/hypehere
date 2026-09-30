@@ -37,10 +37,15 @@ class MarketNewsModal {
         ),
         decoration: BoxDecoration(
           color: Theme.of(ctx).scaffoldBackgroundColor,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
+          borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(AppRadius.xl),
+          ),
         ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl, vertical: AppSpacing.lg),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.xxl,
+            vertical: AppSpacing.lg,
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -62,7 +67,10 @@ class MarketNewsModal {
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xxs),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.md,
+                      vertical: AppSpacing.xxs,
+                    ),
                     decoration: BoxDecoration(
                       color: ctx.mlColors.groupedBackground,
                       borderRadius: BorderRadius.circular(AppRadius.xs),
@@ -78,7 +86,10 @@ class MarketNewsModal {
                   ),
                   const SizedBox(width: AppSpacing.md),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xxs),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.md,
+                      vertical: AppSpacing.xxs,
+                    ),
                     decoration: BoxDecoration(
                       color: dotColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(AppRadius.xs),
@@ -200,7 +211,10 @@ class MarketNewsModal {
           navCtx,
           appPageRoute(
             builder: (_) => WebViewScreen(
-              title: l10n.viewOriginalArticle,
+              // 제목은 동사구("원문 기사 보기")가 아니라 출처명이어야 한다 —
+              // 웹뷰가 어디를 열었는지 알려주는 유일한 단서다. 출처가 없으면
+              // 화면이 호스트를 부제로 띄운다.
+              title: item.source ?? l10n.viewOriginalArticle,
               url: item.sourceUrl!,
             ),
           ),
@@ -247,5 +261,4 @@ class MarketNewsModal {
         ),
     ];
   }
-
 }

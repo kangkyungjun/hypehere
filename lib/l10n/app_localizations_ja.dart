@@ -2883,4 +2883,16 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get maxLossUnlimitedDesc => '制限なく、長期的な利益に専念';
+
+  @override
+  String get webviewLoadFailed => 'ページを開けませんでした';
+
+  @override
+  String get webviewOpenInBrowser => 'ブラウザで開く';
+
+  @override
+  String get webviewShare => '共有';
+
+  @override
+  String get webviewNoAppForLink => 'このリンクを開けるアプリがありません';
 }

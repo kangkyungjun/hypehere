@@ -1317,5 +1317,9 @@
   "maxLoss20Desc": "Moderate, standard market volatility",
   "maxLoss40Desc": "Aggressive, can withstand significant drops",
   "maxLossUnlimited": "Unlimited",
-  "maxLossUnlimitedDesc": "No limit, fully committed to long-term gains"
+  "maxLossUnlimitedDesc": "No limit, fully committed to long-term gains",
+  "webviewLoadFailed": "Couldn't load this page",
+  "webviewOpenInBrowser": "Open in browser",
+  "webviewShare": "Share",
+  "webviewNoAppForLink": "No app can open this link"
 }
