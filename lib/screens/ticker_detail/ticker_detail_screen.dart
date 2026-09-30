@@ -112,19 +112,39 @@ class _TickerDetailScreenState extends State<TickerDetailScreen> {
       final toDate = DateTime.now();
       final fromDate = toDate.subtract(Duration(days: days));
 
-      // Load chart data and ticker info in parallel
-      final results = await Future.wait([
-        _apiClient.getChartData(
-          widget.ticker,
-          fromDate: fromDate,
-          toDate: toDate,
-        ),
-        _apiClient.getTickerInfo(widget.ticker),
-      ]);
+      // 차트와 기업정보를 **독립적으로** 받는다.
+      //
+      // 개편 전에는 `Future.wait([chart, info])`였는데, `Future.wait`은
+      // **하나라도 실패하면 전체를 버린다.** 그래서 기업정보가 404인 종목
+      // (트리맵에는 있는데 정보 테이블에는 없는 BE 같은 케이스)은 차트가
+      // 멀쩡해도 화면 전체가 에러로 떨어졌다.
+      //
+      // `_tickerInfo`는 이 화면의 모든 소비처에서 **이미 nullable**이다
+      // (`:267` 표시명, `:469`·`:485` 섹션 인자). 즉 화면은 기업정보 없이도
+      // 성립하도록 만들어져 있었는데 로딩이 그걸 막고 있었다.
+      //
+      // 차트는 화면의 뼈대라 실패하면 진짜 에러다. 기업정보는 보조 데이터라
+      // 실패를 삼키고 null로 둔다 — 사용자는 실패를 느끼지 못한다.
+      final chartFuture = _apiClient.getChartData(
+        widget.ticker,
+        fromDate: fromDate,
+        toDate: toDate,
+      );
+      final infoFuture = _apiClient
+          .getTickerInfo(widget.ticker)
+          .then<TickerInfo?>((v) => v)
+          .catchError((Object e) {
+        debugPrint('[TICKER_INFO] ${widget.ticker} 실패 — 보조 데이터라 무시: $e');
+        return null;
+      });
 
+      final chart = await chartFuture;
+      final info = await infoFuture;
+
+      if (!mounted) return;
       setState(() {
-        _chartData = results[0] as CompleteChartData;
-        _tickerInfo = results[1] as TickerInfo;
+        _chartData = chart;
+        _tickerInfo = info;
         _isLoading = false;
       });
 

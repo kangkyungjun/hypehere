@@ -194,16 +194,41 @@ class PortfolioProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      // Parallel fetch: core + AI data together
-      final results = await Future.wait([
-        _apiClient.getHoldings(),
-        _apiClient.getWatchlist(),
-        _apiClient.getAlerts(limit: 20),
-      ]);
+      // 셋을 **독립적으로** 받는다.
+      //
+      // 개편 전에는 `Future.wait([holdings, watchlist, alerts])`였다.
+      // `Future.wait`은 하나라도 실패하면 전체를 버리므로, **알림 API 하나가
+      // 죽으면 사용자의 보유종목과 관심종목이 통째로 사라졌다.** 알림은
+      // 부차 기능인데 핵심 자산 데이터를 인질로 잡고 있었던 셈이다.
+      //
+      // 이제 각자 실패한다. 하나가 죽어도 나머지는 그대로 뜨고, 실패한
+      // 것만 직전 값을 유지한다(빈 리스트로 덮어써서 "없는 것처럼" 보이는
+      // 것보다 낫다).
+      // ⚠️ 핸들러는 Future를 **만들자마자** 붙인다. `await` 하나를 사이에
+      // 두고 나중에 붙이면, 그 await 동안 도착한 실패가 리스너 없는 에러로
+      // 터진다(Dart unhandled async error).
+      Future<T?> soft<T>(Future<T> f, String label) => f.then<T?>((v) => v)
+          .catchError((Object e) {
+            debugPrint('[PORTFOLIO] $label 실패 — 나머지는 유지: $e');
+            return null;
+          });
 
-      _holdings = results[0] as List<PortfolioHolding>;
-      _watchlist = results[1] as List<WatchlistItem>;
-      _alerts = results[2] as List<UserAlert>;
+      final holdingsFuture = soft(_apiClient.getHoldings(), 'holdings');
+      final watchlistFuture = soft(_apiClient.getWatchlist(), 'watchlist');
+      final alertsFuture = soft(_apiClient.getAlerts(limit: 20), 'alerts');
+
+      final holdings = await holdingsFuture;
+      final watchlist = await watchlistFuture;
+      final alerts = await alertsFuture;
+
+      if (holdings != null) _holdings = holdings;
+      if (watchlist != null) _watchlist = watchlist;
+      if (alerts != null) _alerts = alerts;
+
+      // 핵심 데이터가 **둘 다** 실패했을 때만 화면에 에러를 세운다.
+      if (holdings == null && watchlist == null) {
+        _error = 'refresh_failed';
+      }
 
       // Await AI data so UI has complete state on first render
       await _refreshAIData();
