@@ -1,0 +1,11 @@
+# `capture` 태그는 **검증 테스트가 아니라 스크린샷 생성기**다.
+# 실행에 수 분이 걸리고 PNG만 남기므로 기본 스위트에서 건너뛴다.
+#
+#   flutter test                                        → 건너뜀
+#   flutter test --tags capture --run-skipped           → 명시 실행
+#
+# ⚠️ `--run-skipped`가 필요하다. `skip:`은 `--tags`보다 우선이라
+#    `--tags capture`만으로는 실행되지 않는다(처음에 이걸로 한 번 헛돌았다).
+tags:
+  capture:
+    skip: "스크린샷 생성기 — `--tags capture --run-skipped`로 실행"
