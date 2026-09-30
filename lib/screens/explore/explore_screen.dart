@@ -406,7 +406,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
             const SizedBox(height: AppSpacing.xl),
             Text(
               l10n.noSearchResults,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              style: AppTypography.sectionTitle.copyWith(
                     color: context.mlColors.textPrimary,
                   ),
             ),
@@ -498,7 +498,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                 const SizedBox(height: AppSpacing.xl),
                 Text(
                   l10n.tickerSearch,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  style: AppTypography.sectionTitle.copyWith(
                         color: context.mlColors.textPrimary,
                       ),
                 ),
@@ -525,7 +525,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                 children: [
                   Text(
                     l10n.recentSearches,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    style: AppTypography.cardTitle.copyWith(
                           fontWeight: AppTypography.bold,
                           color: context.mlColors.textPrimary,
                         ),

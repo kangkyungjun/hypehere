@@ -427,7 +427,9 @@ class _TrendModalState extends State<_TrendModal> {
                       values[i] == 0 ? '—' : wonShort(values[i]),
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: 9,
+                        // 막대 위 값 라벨 — 차트성 텍스트라 `chartLabel`(9).
+                        // lib/ 전체에 남아 있던 마지막 fontSize 리터럴이었다.
+                        fontSize: AppTypography.chartLabel,
                         color: values[i] == 0
                             ? mlc.textTertiary
                             : (values[i] >= 0

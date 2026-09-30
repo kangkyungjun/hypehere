@@ -50,7 +50,7 @@ abstract final class AppTypography {
   /// 섹션 타이틀의 기반값. (22px)
   ///
   /// ⚠️ 별칭이 **아니다.** 스펙 §3은 "`displayLarge`와 통합(24)"이라 기록했으나
-  /// 실제로는 독립값 22로 남았고, `sectionTitle` → `SectionHeader`·`MlCardTitle`
+  /// 실제로는 독립값 22로 남았고, `sectionTitle` → `SectionHeader`
   /// 경로로 앱 전체 제목에 파급된다.
   static const double displaySmall = 22.0;
 

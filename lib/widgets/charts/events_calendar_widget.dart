@@ -223,7 +223,7 @@ class _EventsCalendarWidgetState extends State<EventsCalendarWidget>
               // Title
               Text(
                 l10n.eventDetails,
-                style: Theme.of(ctx).textTheme.titleLarge?.copyWith(
+                style: AppTypography.sectionTitle.copyWith(
                       fontWeight: AppTypography.bold,
                     ),
               ),

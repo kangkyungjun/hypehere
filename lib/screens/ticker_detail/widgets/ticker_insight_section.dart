@@ -303,7 +303,7 @@ class _TickerInsightSectionState extends State<TickerInsightSection> {
                     const SizedBox(width: AppSpacing.sm),
                     Text(
                       l10n.expertAnalysis,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      style: AppTypography.cardTitle.copyWith(
                             fontWeight: AppTypography.bold,
                           ),
                     ),

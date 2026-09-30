@@ -156,7 +156,7 @@ class _CompanyProfileCardState extends State<CompanyProfileCard> {
               // Title
               Text(
                 AppLocalizations.of(ctx).companyDetails,
-                style: Theme.of(ctx).textTheme.titleLarge?.copyWith(
+                style: AppTypography.sectionTitle.copyWith(
                       fontWeight: AppTypography.bold,
                     ),
               ),

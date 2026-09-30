@@ -200,39 +200,6 @@ class _MlExpandableCardState extends State<MlExpandableCard> {
 /// [MlExpandableCard.header] 에 넣는 기본 제목.
 ///
 /// 확장 카드의 제목은 카드 안이므로 `SectionHeader`(자체 패딩·액센트 바를
-/// 가진 화면 레벨 컴포넌트)가 아니라 이쪽을 쓴다.
-class MlCardTitle extends StatelessWidget {
-  const MlCardTitle(this.title, {super.key, this.subtitle});
-
-  final String title;
-
-  /// 레퍼런스의 `무사고 기준` 같은 자격 태그.
-  final String? subtitle;
-
-  @override
-  Widget build(BuildContext context) {
-    final mlc = context.mlColors;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: AppTypography.sectionTitle.copyWith(color: mlc.textPrimary),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        if (subtitle != null)
-          Text(
-            subtitle!,
-            style: AppTypography.label.copyWith(color: mlc.textTertiary),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-      ],
-    );
-  }
-}
-
 /// 카드 **안**의 소제목 — 액센트 바 + 볼드 텍스트.
 ///
 /// `SectionHeader`는 화면 레벨(자체 좌우 게터·비대칭 여백)이라 카드 안에서는

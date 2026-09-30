@@ -41,7 +41,7 @@ class ValuationMetricsWidget extends StatelessWidget {
             children: [
               Text(
                 l10n.valuation,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                style: AppTypography.cardTitle.copyWith(
                       fontWeight: AppTypography.bold,
                     ),
               ),
@@ -78,7 +78,7 @@ class ValuationMetricsWidget extends StatelessWidget {
           // Profitability & Growth
           Text(
             l10n.profitabilityGrowth,
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+            style: AppTypography.bodyStrong.copyWith(
                   fontWeight: AppTypography.bold,
                 ),
           ),

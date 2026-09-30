@@ -4,6 +4,7 @@ import '../../../models/chart_data.dart';
 import '../../../theme/app_spacing.dart';
 import '../../../widgets/common/ml_key_value_row.dart';
 import '../../../widgets/common/ml_expandable_card.dart';
+import '../../../widgets/common/section_header.dart';
 
 /// 헤더(업데이트 날짜) ↔ 전문가 요약 사이의 작은 밸류에이션 카드.
 ///  - 접힘: 현재 PER · 선행 PER · EPS (한 줄)
@@ -81,7 +82,10 @@ class ValuationCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
       child: MlExpandableCard(
-        header: MlCardTitle(_title(lang)),
+        // 형제 확장 카드(`ticker_score_section`)와 **같은 컴포넌트**를 쓴다.
+        // 개편 전에는 이 카드만 `MlCardTitle`이라 액센트 바가 없었고,
+        // 같은 화면 같은 슬롯에서 한 카드만 앵커가 빠져 보였다.
+        header: SectionHeader(title: _title(lang), padding: EdgeInsets.zero),
         summary: _row([
           (_lbl('curPe', lang), _num(m.pe)),
           (_lbl('fwdPe', lang), _num(m.forwardPe)),

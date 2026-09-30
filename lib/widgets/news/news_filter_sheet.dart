@@ -353,7 +353,7 @@ class _NewsFilterSheetState extends State<NewsFilterSheet> {
           children: [
             Text(
               l10n.filterSector,
-              style: theme.textTheme.titleSmall?.copyWith(
+              style: AppTypography.bodyStrong.copyWith(
                 fontWeight: AppTypography.bold,
               ),
             ),

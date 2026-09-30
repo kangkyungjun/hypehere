@@ -44,7 +44,7 @@ class DividendsWidget extends StatelessWidget {
           // Header
           Text(
             l10n.dividends,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            style: AppTypography.cardTitle.copyWith(
                   fontWeight: AppTypography.bold,
                 ),
           ),

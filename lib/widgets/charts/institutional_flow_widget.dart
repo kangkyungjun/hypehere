@@ -35,7 +35,7 @@ class InstitutionalFlowWidget extends StatelessWidget {
         children: [
           Text(
             l10n.institutionalInsiderFlow,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            style: AppTypography.cardTitle.copyWith(
                   fontWeight: AppTypography.bold,
                 ),
           ),

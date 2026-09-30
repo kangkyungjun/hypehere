@@ -1,4 +1,5 @@
 import 'dart:io' show Platform;
+import '../../theme/app_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:provider/provider.dart';
@@ -443,7 +444,7 @@ class _TickerDetailScreenState extends State<TickerDetailScreen> {
               color: context.mlColors.textTertiary,
             ),
             const SizedBox(height: AppSpacing.xl),
-            Text(l10n.noData, style: Theme.of(context).textTheme.titleLarge),
+            Text(l10n.noData, style: AppTypography.sectionTitle),
             const SizedBox(height: AppSpacing.md),
             Text(
               l10n.tryDifferentSearch,
