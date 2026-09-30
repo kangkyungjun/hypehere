@@ -26,6 +26,7 @@ import 'package:marketlens/widgets/dashboard/recommendation_grid.dart';
 import 'package:marketlens/widgets/dashboard/sector_bar_chart_widget.dart';
 import 'package:marketlens/widgets/news/mention_bubble_card.dart';
 import 'package:marketlens/widgets/news/news_article_row.dart';
+import 'package:marketlens/widgets/news/news_detail_sheet.dart';
 
 /// 디자인 검토용 스크린샷 생성기 (검증 테스트가 아니다).
 ///
@@ -189,6 +190,7 @@ void main() {
   NewsItem news({
     required String ticker,
     String? nameKo,
+    required String title,
     required String summary,
     required String grade,
     required String label,
@@ -200,7 +202,7 @@ void main() {
       NewsItem(
         date: '2026-09-30',
         ticker: ticker,
-        title: summary,
+        title: title,
         source: source,
         publishedAt: DateTime.now().toUtc().subtract(Duration(minutes: minutesAgo)),
         aiSummary: summary,
@@ -215,6 +217,7 @@ void main() {
     news(
       ticker: 'GRMN',
       nameKo: '가민',
+      title: 'Garmin Receives Consensus "Moderate Buy" Rating from Analysts',
       summary: '가민은 최근 애널리스트들로부터 \'중립 매수\'라는 합의 추천을 '
           '받았습니다. 이 추천은 회사의 주가에 긍정적인 영향을 미칠 것으로 보입니다.',
       grade: 'neutral',
@@ -226,6 +229,7 @@ void main() {
     news(
       ticker: 'WMT',
       nameKo: '월마트',
+      title: 'Walmart Launches New AI Shopping Pilot in India',
       summary: '월마트는 인도에서 새로운 AI 쇼핑 테스트를 시작했습니다. '
           '이는 고객 경험을 개선하고 판매를 늘리는 데 도움이 될 수 있습니다.',
       grade: 'bullish',
@@ -238,6 +242,7 @@ void main() {
     news(
       ticker: 'META',
       nameKo: '메타 플랫폼스',
+      title: 'Meta Expands Data Center Spending, Raising Margin Concerns',
       summary: '메타가 데이터센터 투자를 확대한다고 발표하면서 단기 마진 압박 '
           '우려가 제기됐습니다.',
       grade: 'bearish',
@@ -273,6 +278,16 @@ void main() {
         ],
       );
 
+  // 기사 상세 시트 — 리스트 행을 탭하면 열린다.
+  Widget detailSheet() => Align(
+        alignment: Alignment.bottomCenter,
+        child: NewsDetailSheet(
+          item: articles[0],
+          onOpenOriginal: () {},
+          onOpenTicker: () {},
+        ),
+      );
+
   Widget app(Widget body, {required bool dark, required double scale}) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -283,6 +298,18 @@ void main() {
         useMaterial3: true,
         brightness: dark ? Brightness.dark : Brightness.light,
         fontFamily: 'Pretendard',
+        // main.dart가 `ColorScheme`을 우리 팔레트로 오버라이드한다. 이걸
+        // 빼면 버튼이 시드 파생 보라로 나와 캡쳐가 실제와 달라진다.
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: (dark ? MarketLensColors.dark : MarketLensColors.light)
+              .accentBlue,
+          brightness: dark ? Brightness.dark : Brightness.light,
+        ).copyWith(
+          primary: (dark ? MarketLensColors.dark : MarketLensColors.light)
+              .accentBlue,
+          onPrimary: (dark ? MarketLensColors.dark : MarketLensColors.light)
+              .onPrimary,
+        ),
         scaffoldBackgroundColor: dark
             ? MarketLensColors.dark.groupedBackground
             : MarketLensColors.light.groupedBackground,
@@ -333,6 +360,17 @@ void main() {
   ];
 
   for (final v in variants) {
+    testWidgets('capture sheet ${v.$1}', (tester) async {
+      tester.view.physicalSize = const Size(w * 3, h * 3);
+      tester.view.devicePixelRatio = 3.0;
+      addTearDown(tester.view.reset);
+      await shoot(
+        tester,
+        'sheet-${v.$1}',
+        app(detailSheet(), dark: v.$2, scale: v.$3),
+      );
+    });
+
     testWidgets('capture news ${v.$1}', (tester) async {
       tester.view.physicalSize = const Size(w * 3, h * 3);
       tester.view.devicePixelRatio = 3.0;
