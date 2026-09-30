@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:marketlens/models/treemap_data.dart';
 import 'package:marketlens/theme/app_colors.dart';
+import 'package:marketlens/utils/sector_names.dart';
 import 'package:marketlens/widgets/dashboard/sector_bar_chart_widget.dart';
 
 /// 섹터 막대차트의 **배율 내성** 계약.
@@ -105,6 +106,67 @@ void main() {
       h13,
       greaterThan(h10),
       reason: '배율이 올라가도 높이가 그대로면 텍스트가 막대 영역을 밀어낸다',
+    );
+  });
+
+  testWidgets('섹터명은 축약형으로 렌더된다 — 단어 중간 끊김 방지', (tester) async {
+    await tester.pumpWidget(harness(1.0));
+    // 서버 원문이 아니라 축약형이 화면에 있어야 한다.
+    expect(find.text('Discret.'), findsOneWidget);
+    expect(find.text('Staples'), findsOneWidget);
+    expect(find.text('Comm'), findsOneWidget);
+    expect(find.text('Health'), findsOneWidget);
+    expect(find.text('Consumer Discretionary'), findsNothing);
+    expect(find.text('Communication Services'), findsNothing);
+  });
+
+  test('축약 사전은 알려진 GICS 섹터를 한 줄 길이로 줄인다', () {
+    for (final full in [
+      'Consumer Discretionary',
+      'Communication Services',
+      'Consumer Staples',
+      'Information Technology',
+      'Health Care',
+      'Real Estate',
+    ]) {
+      expect(
+        sectorNameFitsOneLine(full),
+        isTrue,
+        reason: '$full → ${shortSectorName(full)} (여전히 길다)',
+      );
+    }
+    // 사전에 없으면 지어내지 않고 원문 그대로.
+    expect(shortSectorName('Quantum Widgets'), 'Quantum Widgets');
+  });
+
+  testWidgets('양수 섹터가 없으면 상단 영역이 사라진다 — 죽은 공간 제거', (tester) async {
+    double chartHeight(WidgetTester t) => t
+        .widget<SizedBox>(find
+            .ancestor(of: find.byType(Stack), matching: find.byType(SizedBox))
+            .first)
+        .height!;
+
+    // 양수 2 + 음수 5 (캡쳐와 동일)
+    await tester.pumpWidget(harness(1.0));
+    final mixed = chartHeight(tester);
+
+    // 전부 음수 — 상단 라벨 줄과 막대 예산이 둘 다 불필요하다.
+    final allNeg = sectors
+        .map((s) => TreemapSector(
+              sector: s.sector,
+              tickerCount: s.tickerCount,
+              avgChangePct: -(s.avgChangePct!.abs()),
+              items: const [],
+            ))
+        .toList();
+    await tester.pumpWidget(harness(1.0, data: allNeg));
+    await tester.pumpAndSettle();
+    final negOnly = chartHeight(tester);
+
+    expect(
+      negOnly,
+      lessThan(mixed),
+      reason: '양수가 없는데도 상단 예산을 잡고 있으면 그만큼 빈 칸이 된다',
     );
   });
 

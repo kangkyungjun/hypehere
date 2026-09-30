@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/sector_names.dart';
 
 import '../l10n/app_localizations.dart';
 import '../theme/app_colors.dart';
@@ -15,25 +16,6 @@ DateTime _parseAsUtc(String s) {
 }
 
 /// GICS sector → short abbreviation mapping
-const _sectorAbbreviations = {
-  'Technology': 'Tech',
-  'Information Technology': 'Tech',
-  'Healthcare': 'Health',
-  'Health Care': 'Health',
-  'Consumer Cyclical': 'Cyclical',
-  'Consumer Defensive': 'Defensive',
-  'Consumer Discretionary': 'Discret.',
-  'Consumer Staples': 'Staples',
-  'Communication Services': 'Comm',
-  'Financial Services': 'Finance',
-  'Financials': 'Finance',
-  'Industrials': 'Indust.',
-  'Energy': 'Energy',
-  'Utilities': 'Util.',
-  'Real Estate': 'RE',
-  'Basic Materials': 'Materials',
-  'Materials': 'Materials',
-};
 
 /// Single news item from MarketLens AI news API
 class NewsItem {
@@ -76,7 +58,7 @@ class NewsItem {
   /// Abbreviated sector name for compact display
   String? get sectorShort {
     if (sector == null) return null;
-    return _sectorAbbreviations[sector!] ?? sector!;
+    return shortSectorName(sector!);
   }
 
   factory NewsItem.fromJson(Map<String, dynamic> json) {

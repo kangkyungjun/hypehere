@@ -4,6 +4,7 @@ import '../../theme/app_colors.dart';
 import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 import '../../theme/app_typography.dart';
+import '../../utils/sector_names.dart';
 
 /// 컴팩트 섹터 등락 막대 차트 (홈-오늘 above-fold용)
 ///
@@ -76,6 +77,35 @@ class SectorBarChartWidget extends StatelessWidget {
         .map((s) => s.avgChangePct!.abs())
         .fold<double>(1.0, (m, v) => v > m ? v : m);
 
+    // 위/아래 **예산을 실제 필요한 만큼만** 잡는다.
+    //
+    // 개편 전에는 0 기준선이 위에서 `labelHeight + 40`에 고정돼 있어,
+    // 하락장(양수 폭이 작을 때) 상단 44.6px — 차트 높이의 32% — 가 그냥
+    // 비었다. 사용자의 "여백 타이트" 선호에 정면으로 어긋난다.
+    //
+    // ⚠️ 스케일은 **단일**로 유지한다(`pct / maxAbs`). 각 방향을 자기 최대값에
+    // 맞춰 늘리면 +0.4%와 -1.4% 막대가 같은 길이로 보여 데이터를 왜곡한다.
+    // 바꾸는 것은 막대 길이가 아니라 **빈 칸의 크기**다.
+    final maxPos = bars
+        .map((s) => s.avgChangePct!)
+        .fold<double>(0, (m, v) => v > m ? v : m);
+    final maxNeg = bars
+        .map((s) => -s.avgChangePct!)
+        .fold<double>(0, (m, v) => v > m ? v : m);
+
+    // 막대 최소 3px(아래 clamp와 같은 값)보다 작은 예산은 막대를 넘치게 한다.
+    double budget(double side) =>
+        side <= 0 ? 0 : (side / maxAbs * _maxBarHeight).clamp(3.0, _maxBarHeight);
+
+    final upBudget = budget(maxPos);
+    final downBudget = budget(maxNeg);
+
+    // 막대가 없는 쪽은 라벨 줄도 통째로 없앤다.
+    final upLabelHeight = upBudget > 0 ? labelHeight : 0.0;
+    final downLabelHeight = downBudget > 0 ? labelHeight : 0.0;
+    final upHeight = upLabelHeight + upBudget;
+    final downHeight = downBudget + downLabelHeight;
+
     return _wrap(
       context,
       Column(
@@ -84,14 +114,14 @@ class SectorBarChartWidget extends StatelessWidget {
         children: [
           // 막대 영역 (상단 라벨+막대 / 기준선 / 하단 막대+라벨 / 섹터명)
           SizedBox(
-            height: (labelHeight + _maxBarHeight) * 2 + nameHeight,
+            height: upHeight + downHeight + nameHeight,
             child: Stack(
               children: [
                 // 0 기준선
                 Positioned(
                   left: 0,
                   right: 0,
-                  top: labelHeight + _maxBarHeight,
+                  top: upHeight,
                   child: Divider(height: 1, color: mlc.subtleBorder),
                 ),
                 Row(
@@ -103,7 +133,8 @@ class SectorBarChartWidget extends StatelessWidget {
                           sector: s,
                           maxAbs: maxAbs,
                           maxBarHeight: _maxBarHeight,
-                          labelHeight: labelHeight,
+                          upHeight: upHeight,
+                          downHeight: downHeight,
                           nameHeight: nameHeight,
                         ),
                       ),
@@ -139,14 +170,21 @@ class _SectorBar extends StatelessWidget {
     required this.sector,
     required this.maxAbs,
     required this.maxBarHeight,
-    required this.labelHeight,
+    required this.upHeight,
+    required this.downHeight,
     required this.nameHeight,
   });
 
   final TreemapSector sector;
   final double maxAbs;
   final double maxBarHeight;
-  final double labelHeight;
+
+  /// 0 기준선 **위** 영역(라벨 + 막대). 양수 섹터가 없으면 0이다.
+  final double upHeight;
+
+  /// 0 기준선 **아래** 영역(막대 + 라벨).
+  final double downHeight;
+
   final double nameHeight;
 
   @override
@@ -181,9 +219,9 @@ class _SectorBar extends StatelessWidget {
 
     return Column(
       children: [
-        // 상단(상승) 영역
+        // 상단(상승) 영역 — 양수 섹터가 하나도 없으면 높이 0이라 사라진다.
         SizedBox(
-          height: labelHeight + maxBarHeight,
+          height: upHeight,
           child: isUp
               ? Column(
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -196,7 +234,7 @@ class _SectorBar extends StatelessWidget {
         ),
         // 하단(하락) 영역
         SizedBox(
-          height: labelHeight + maxBarHeight,
+          height: downHeight,
           child: !isUp
               ? Column(
                   mainAxisAlignment: MainAxisAlignment.start,
@@ -211,7 +249,10 @@ class _SectorBar extends StatelessWidget {
         SizedBox(
           height: nameHeight,
           child: Text(
-            sector.sector,
+            // 서버 원문(`Consumer Discretionary`)을 그대로 넣으면 열당 ~50pt
+            // 안에서 **단어 중간에 끊긴다**(`Consum / er Discre…`). 끊긴
+            // 조각은 읽히지 않는다. 축약형은 대부분 한 줄에 들어간다.
+            shortSectorName(sector.sector),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,

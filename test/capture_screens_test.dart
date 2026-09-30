@@ -185,15 +185,29 @@ void main() {
   Future<void> shoot(WidgetTester tester, String name, Widget child) async {
     final key = GlobalKey();
     await tester.pumpWidget(RepaintBoundary(key: key, child: child));
-    await tester.pumpAndSettle(const Duration(milliseconds: 400));
+    // ⚠️ `pumpAndSettle`을 쓰지 않는다. 첫 인자는 **타임아웃이 아니라 펌프
+    // 간격**이고, 기본 타임아웃은 가짜시계 10분이다. 화면에 계속 프레임을
+    // 스케줄하는 위젯이 하나라도 있으면 변이마다 10분을 태운다(실제로 그랬다).
+    // 스크린샷은 레이아웃만 잡히면 되므로 두 번 펌프하면 충분하다.
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump(const Duration(milliseconds: 300));
 
     final boundary =
         key.currentContext!.findRenderObject()! as RenderRepaintBoundary;
-    final image = await boundary.toImage(pixelRatio: 3.0);
-    final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
-    File('${outDir.path}/$name.png').writeAsBytesSync(
-      bytes!.buffer.asUint8List(),
-    );
+
+    // ⚠️ `toImage`/`toByteData`는 엔진 콜백으로 완료되므로 **실제 비동기**가
+    // 필요하다. `testWidgets`의 가짜 비동기 존에서 그냥 await하면 PNG는
+    // 쓰이지만 그 뒤로 Future가 영영 안 풀려 테스트가 10분 타임아웃까지
+    // 매달린다(CPU 0%로 순수 대기). `runAsync`가 진짜 이벤트 루프를 준다.
+    late final Uint8List png;
+    await tester.runAsync(() async {
+      final image = await boundary.toImage(pixelRatio: 3.0);
+      final data = await image.toByteData(format: ui.ImageByteFormat.png);
+      png = data!.buffer.asUint8List();
+      image.dispose(); // 남겨두면 엔진이 이미지를 붙들고 있다.
+    });
+
+    File('${outDir.path}/$name.png').writeAsBytesSync(png);
   }
 
   final variants = [
