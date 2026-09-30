@@ -36,7 +36,10 @@ class _KeyNewsCardState extends State<KeyNewsCard> {
     return MlExpandableCard(
       initiallyExpanded: true,
       tapTarget: MlExpandTapTarget.headerOnly,
-      margin: const EdgeInsets.only(bottom: AppSpacing.xl),
+      // 카드 **사이** 간격은 `cardGap`(12)이다. 개편 전 `xl`(16)은 기사 사이
+      // 간격(16)과 값이 같아 층위 구분이 0이었다 — 눈이 "카드 묶음이 끝나고
+      // 리스트가 시작됐다"를 읽지 못했다.
+      margin: const EdgeInsets.only(bottom: AppDensity.cardGap),
       divider: false,
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.lg,

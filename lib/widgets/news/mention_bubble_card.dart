@@ -5,7 +5,6 @@ import '../../l10n/app_localizations.dart';
 import '../../screens/ticker_detail/ticker_detail_screen.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_spacing.dart';
-import '../../theme/app_shadow.dart';
 import '../../theme/app_typography.dart';
 import '../common/bento_card.dart';
 
@@ -25,21 +24,34 @@ class MentionBubbleCard extends StatelessWidget {
     final theme = Theme.of(context);
 
     return BentoCard(
-      margin: const EdgeInsets.only(bottom: AppSpacing.xl),
-      padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.md),
+      // 카드 **사이** 간격은 `cardGap`(12)이다. 개편 전 `xl`(16)은 기사 사이
+      // 간격(16)과 값이 같아 층위 구분이 0이었다 — 눈이 "카드 묶음이 끝나고
+      // 리스트가 시작됐다"를 읽지 못했다.
+      margin: const EdgeInsets.only(bottom: AppDensity.cardGap),
+      // 개편 전 (16,16,16,12)는 토큰 의도와 **상하가 반대**였다.
+      // `cardPadTop`(12)은 제목이 바짝 붙지 않게 살짝만 주는 값이고
+      // 바닥은 `cardPad`(16)다.
+      padding: const EdgeInsets.fromLTRB(
+        AppDensity.cardPad,
+        AppDensity.cardPadTop,
+        AppDensity.cardPad,
+        AppDensity.cardPad,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Title
+          // 섹션 제목인데 본문 크기(15)에 뮤트색이라 제목으로 안 읽혔다.
+          // `cardTitle`(18 w700 primary)로 올린다 — 세로 비용 3px.
           Text(
             l10n.newsBubbleTitle,
             style: TextStyle(
-              fontSize: AppTypography.bodyLarge,
-              fontWeight: AppTypography.semiBold,
-              color: context.mlColors.textSecondary,
+              fontSize: AppTypography.headlineLarge,
+              fontWeight: AppTypography.bold,
+              color: context.mlColors.textPrimary,
             ),
           ),
-          const SizedBox(height: AppSpacing.md),
+          // 불변식: 카드 **안쪽** 블록(≤8) < 카드 **사이**(12) < 섹션 사이(20).
+        const SizedBox(height: AppSpacing.sm),
 
             // Bubble area
             SizedBox(
@@ -75,7 +87,11 @@ class MentionBubbleCard extends StatelessWidget {
                         gainColor: context.mlColors.gainColor,
                         lossColor: context.mlColors.lossColor,
                         neutralSentimentColor: context.mlColors.neutralColor,
-                        bubbleTextColor: context.mlColors.onPrimary,
+                        // 잉크는 **채움 밝기에 따라** 고른다. 고정 흰색이었을 때
+                        // 다크모드의 밝은 감정색(#FB8A8A 등) 위에서 대비가
+                        // 2.3~2.9까지 떨어졌다 — 라이트에서만 검증하면 못 잡는다.
+                        inkOnDarkFill: context.mlColors.onPrimary,
+                        inkOnLightFill: MarketLensColors.light.textPrimary,
                       ),
                     ),
                   );
@@ -150,6 +166,15 @@ class _BubbleNode {
   String get ticker => item.ticker;
 }
 
+/// WCAG 명도 대비비. 잉크 선택에만 쓴다.
+double _contrast(Color a, Color b) {
+  final la = a.computeLuminance();
+  final lb = b.computeLuminance();
+  final hi = la > lb ? la : lb;
+  final lo = la > lb ? lb : la;
+  return (hi + 0.05) / (lo + 0.05);
+}
+
 /// Pack circles using spiral placement with collision resolution.
 List<_BubbleNode> _packCircles(List<TickerMention> items, Size size) {
   if (items.isEmpty) return [];
@@ -161,7 +186,10 @@ List<_BubbleNode> _packCircles(List<TickerMention> items, Size size) {
   final maxCount = sorted.first.mentionCount;
   if (maxCount == 0) return [];
 
-  const minR = 14.0;
+  // 반경 20 미만은 `_drawText`가 아무 텍스트도 그리지 않아 **빈 원**이 된다.
+  // 캡쳐에서 10개 중 4개가 티커나 건수 없이 떠 있었다. 하한을 20으로 올려
+  // 렌더되는 모든 버블이 최소한 티커는 담게 한다.
+  const minR = 20.0;
   const maxR = 52.0;
 
   final cx = size.width / 2;
@@ -192,8 +220,10 @@ List<_BubbleNode> _packCircles(List<TickerMention> items, Size size) {
       }
     }
 
-    // Skip bubble if no valid position — don't force-overlap
-    if (!placed) continue;
+    // 자리를 못 찾으면 **말없이 사라진다.** 호출부가 상위 N개를 넘겨도
+    // 실제로 몇 개가 보이는지 알 수 없었다. 배치 실패는 더 작은 버블에서도
+    // 반복되므로, 첫 실패에서 멈춰 "큰 것부터 들어간 만큼"을 확정한다.
+    if (!placed) break;
   }
 
   return nodes;
@@ -232,9 +262,10 @@ class _BubblePainter extends CustomPainter {
   final Color gainColor;
   final Color lossColor;
   final Color neutralSentimentColor;
-  final Color bubbleTextColor;
+  final Color inkOnDarkFill;
+  final Color inkOnLightFill;
 
-  _BubblePainter({required this.nodes, required this.brightness, required this.formatMentions, required this.gainColor, required this.lossColor, required this.neutralSentimentColor, required this.bubbleTextColor});
+  _BubblePainter({required this.nodes, required this.brightness, required this.formatMentions, required this.gainColor, required this.lossColor, required this.neutralSentimentColor, required this.inkOnDarkFill, required this.inkOnLightFill});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -245,7 +276,11 @@ class _BubblePainter extends CustomPainter {
       canvas.drawCircle(
         Offset(node.x, node.y),
         node.radius,
-        Paint()..color = color.withValues(alpha: 0.7),
+        // ⚠️ 여기에 알파를 씌우면 안 된다. `withValues(alpha: 0.7)`이었을 때
+        // 흰 카드 위 실효색이 밝아져 **흰 텍스트 대비가 세 색 모두 AA 미달**
+        // 이었다(강세 3.12 / 약세 3.59 / 혼합 3.13). 불투명 토큰색이면
+        // 5.48 / 5.74 / 6.00으로 전부 통과한다.
+        Paint()..color = color,
       );
 
       // Border
@@ -259,14 +294,20 @@ class _BubblePainter extends CustomPainter {
       );
 
       // Text: ticker + (count)
-      final textColor = bubbleTextColor;
+      // 고정 임계값(휘도 0.45)은 중간 밝기 채움에서 틀린 쪽을 골랐다 —
+      // 다크 `neutralColor`(#8F9AA9, 휘도 0.31)에 흰 잉크가 뽑혀 2.85:1이었다.
+      // **두 후보 중 대비가 큰 쪽**을 고르면 경계값이 필요 없다.
+      final textColor = _contrast(color, inkOnLightFill) >=
+              _contrast(color, inkOnDarkFill)
+          ? inkOnLightFill
+          : inkOnDarkFill;
       if (node.radius >= 26) {
         // Large: ticker + count
         _drawText(canvas, node.x, node.y - 6, node.item.ticker, AppTypography.caption, AppTypography.bold, textColor, node.radius * 2 - 6);
-        _drawText(canvas, node.x, node.y + 7, formatMentions(node.item.mentionCount), 9, AppTypography.regular, textColor.withValues(alpha: 0.85), node.radius * 2 - 6);
+        _drawText(canvas, node.x, node.y + 7, formatMentions(node.item.mentionCount), AppTypography.chartLabel, AppTypography.regular, textColor.withValues(alpha: 0.85), node.radius * 2 - 6);
       } else if (node.radius >= 20) {
         // Medium: ticker only
-        _drawText(canvas, node.x, node.y, node.item.ticker, 9, AppTypography.bold, textColor, node.radius * 2 - 4);
+        _drawText(canvas, node.x, node.y, node.item.ticker, AppTypography.chartLabel, AppTypography.bold, textColor, node.radius * 2 - 4);
       }
       // Small: no text
     }
@@ -281,8 +322,7 @@ class _BubblePainter extends CustomPainter {
           color: color,
           fontSize: fontSize,
           fontWeight: weight,
-          shadows: AppShadow.textDrop,
-        ),
+            ),
       ),
       textAlign: TextAlign.center,
       textDirection: TextDirection.ltr,
@@ -307,5 +347,7 @@ class _BubblePainter extends CustomPainter {
   @override
   bool shouldRepaint(_BubblePainter oldDelegate) =>
       oldDelegate.nodes != nodes || oldDelegate.brightness != brightness || oldDelegate.formatMentions != formatMentions ||
-      oldDelegate.neutralSentimentColor != neutralSentimentColor || oldDelegate.bubbleTextColor != bubbleTextColor;
+      oldDelegate.neutralSentimentColor != neutralSentimentColor ||
+      oldDelegate.inkOnDarkFill != inkOnDarkFill ||
+      oldDelegate.inkOnLightFill != inkOnLightFill;
 }

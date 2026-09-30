@@ -12,7 +12,6 @@ import '../../widgets/news/bull_bear_bar_card.dart';
 import '../../widgets/news/key_news_card.dart';
 import '../../models/mention_bubble_data.dart';
 import '../../theme/app_colors.dart';
-import '../../theme/app_radius.dart';
 import '../../theme/app_spacing.dart';
 import '../../theme/app_typography.dart';
 import '../../providers/watchlist_provider.dart';
@@ -328,7 +327,8 @@ class _NewsListScreenState extends State<NewsListScreen> {
           AppSpacing.xl,
           // embedded(뉴스 탭)일 때만 플로팅 탭바 클리어런스, 단독은 자체 Scaffold
           widget.embedded
-              ? MediaQuery.of(context).viewPadding.bottom + 64
+              ? MediaQuery.of(context).viewPadding.bottom +
+                    AppLayout.bottomNavClearance
               : AppSpacing.xl,
         ),
         itemCount: _buildListItemCount(),
@@ -453,12 +453,22 @@ class _NewsListScreenState extends State<NewsListScreen> {
 
   Widget _buildDateHeader(BuildContext context, NewsItem item) {
     final label = _formatDateLabel(item.date);
+    // 그룹 라벨이 콘텐츠보다 크면 안 된다. 개편 전에는 날짜가 `cardTitle`(18)로
+    // **헤드라인(16)보다 컸다** — 위계가 역전돼 있었다. 레퍼런스의 `🕐 4일 전`은
+    // 작고 뮤트다.
+    //
+    // 위 여백은 `sectionGap`(20), 아래는 `xs`(4). 비대칭이라 헤더가 아래
+    // 콘텐츠에 붙어 한 덩어리가 된다 — 대칭(16/8)일 때는 헤더가 위아래
+    // 어디에도 속하지 않아 구간이 안 생겼다.
     return Padding(
-      padding: const EdgeInsets.only(top: AppSpacing.xl, bottom: AppSpacing.sm),
+      padding: const EdgeInsets.only(
+        top: AppDensity.sectionGap,
+        bottom: AppSpacing.xs,
+      ),
       child: Text(
         label,
-        style: AppTypography.cardTitle.copyWith(
-          color: context.mlColors.textSecondary,
+        style: AppTypography.label.copyWith(
+          color: context.mlColors.textTertiary,
         ),
       ),
     );
@@ -506,170 +516,120 @@ class _NewsListScreenState extends State<NewsListScreen> {
 
     final isMarket = MarketNewsModal.isMarketNews(item);
 
+    // 메타 4종(감정·출처·섹터·시간)을 한 줄 11px로 합친다.
+    // 개편 전에는 이 넷이 전부 13px이었고 그중 둘(티커·감정)은 굵기까지
+    // w700으로 같았다 — 한 행에 13px이 다섯 개. 사용자가 말한 "다닥다닥"의
+    // 기계적 정체다. 감정 라벨은 **지우지 않는다**: 점 색만 남기면 색맹
+    // 사용자에게 단서가 사라진다. pill 배경만 걷고 색 + 텍스트 2중 인코딩을 유지한다.
+    final meta = <TextSpan>[
+      TextSpan(
+        text: item.sentimentLabelLocalized(l10n),
+        style: TextStyle(color: dotColor, fontWeight: AppTypography.semiBold),
+      ),
+      if (item.source != null) TextSpan(text: '  ·  ${item.source!}'),
+      if (item.sectorShort != null) TextSpan(text: '  ·  ${item.sectorShort!}'),
+      TextSpan(text: '  ·  ${item.timeAgoLocalized(l10n)}'),
+    ];
+
     return InkWell(
       onTap: () => MarketNewsModal.show(context, item),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 0),
-        child: IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Timeline dot + line
-              SizedBox(
-                width: 20,
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 타임라인 점. 세로 연결선은 제거했다 — 같은 날짜 그룹이라는
+            // 정보를 바로 위 날짜 헤더가 이미 명시하므로 중복이었고,
+            // 32pt(가용폭의 8.6%)를 점 하나에 쓰고 있었다. 12+8 = 20pt로 줄여
+            // 헤드라인 가로폭 12pt를 회수한다.
+            SizedBox(
+              width: 12,
+              child: Column(
+                children: [
+                  const SizedBox(height: AppSpacing.sm),
+                  Container(
+                    width: 9,
+                    height: 9,
+                    decoration: BoxDecoration(
+                      color: dotColor,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.md),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: AppSpacing.sm),
-                    Container(
-                      width: 9,
-                      height: 9,
-                      decoration: BoxDecoration(
-                        color: dotColor,
-                        shape: BoxShape.circle,
+                    // 1행 — 티커가 이 행의 히어로다.
+                    //
+                    // 레퍼런스 리스트 행에서 유일하게 크고 블루인 것은 가격이다.
+                    // 우리 도메인의 대응물은 티커다. pill을 해체하고 18 w700로
+                    // 세우면 18/11 = 1.64로 레퍼런스(1.62)와 같은 리듬이 된다.
+                    // 블루가 행당 한 곳뿐이라 "블루=탭 가능" 신호도 순수해진다.
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            isMarket
+                                ? l10n.marketNews
+                                : (langCode == 'ko' && item.tickerNameKo != null)
+                                    ? '${item.ticker} ${item.tickerNameKo}'
+                                    : item.ticker,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: AppTypography.headlineLarge,
+                              fontWeight: AppTypography.bold,
+                              color: isMarket
+                                  ? mlc.textSecondary
+                                  : mlc.accentBlue,
+                            ),
+                          ),
+                        ),
+                        if (item.isBreaking) ...[
+                          const SizedBox(width: AppSpacing.xs),
+                          const Text(
+                            '\u{1F6A8}',
+                            style: TextStyle(fontSize: AppTypography.bodySmall),
+                          ),
+                        ],
+                      ],
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+
+                    // 2행 — 헤드라인(AI 요약).
+                    Text(
+                      item.aiSummary.localize(langCode),
+                      style: AppTypography.bodyStrong.copyWith(
+                        fontSize: AppTypography.headlineMedium,
+                        height: 1.35,
+                        color: mlc.textPrimary,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+
+                    // 3행 — 메타 한 줄. 별도의 '출처' 행을 없애 21pt 회수.
+                    Text.rich(
+                      TextSpan(children: meta),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: AppTypography.caption,
+                        color: mlc.textTertiary,
                       ),
                     ),
-                    if (!isLastInGroup)
-                      Expanded(
-                        child: Container(width: 1, color: mlc.chartGridLine),
-                      ),
                   ],
                 ),
               ),
-              const SizedBox(width: AppSpacing.md),
-
-              // Content
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: AppSpacing.lg),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Row 1: ticker + sentiment + time
-                      Row(
-                        children: [
-                          // 티커 배지 — 종목명이 길 때 overflow 방어(Flexible+ellipsis)
-                          Flexible(
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: AppSpacing.sm,
-                                vertical: AppSpacing.xs,
-                              ),
-                              decoration: BoxDecoration(
-                                color: isMarket
-                                    ? mlc.sectionBackground
-                                    : mlc.infoBg,
-                                borderRadius: BorderRadius.circular(
-                                  AppRadius.badge,
-                                ),
-                                border: Border.all(color: mlc.subtleBorder),
-                              ),
-                              child: Text(
-                                isMarket
-                                    ? l10n.marketNews
-                                    : (langCode == 'ko' &&
-                                          item.tickerNameKo != null)
-                                    ? '${item.ticker} ${item.tickerNameKo}'
-                                    : item.ticker,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                // 비방향성 티커 링크 강조 — accentBlue 유지
-                                // caption→bodySmall 한 단계 키움
-                                style: TextStyle(
-                                  fontSize: AppTypography.bodySmall,
-                                  fontWeight: AppTypography.bold,
-                                  color: isMarket
-                                      ? mlc.textSecondary
-                                      : mlc.accentBlue,
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: AppSpacing.sm),
-                          // Breaking badge
-                          if (item.isBreaking) ...[
-                            const Text(
-                              '\u{1F6A8}',
-                              style: TextStyle(
-                                fontSize: AppTypography.bodySmall,
-                              ),
-                            ),
-                            const SizedBox(width: AppSpacing.xs),
-                          ],
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: AppSpacing.sm,
-                              vertical: AppSpacing.xs,
-                            ),
-                            decoration: BoxDecoration(
-                              color: dotColor.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(
-                                AppRadius.badge,
-                              ),
-                            ),
-                            // 방향성 감정 배지 — 녹/적 유지, 한 단계 키움
-                            child: Text(
-                              item.sentimentLabelLocalized(l10n),
-                              style: TextStyle(
-                                fontSize: AppTypography.bodySmall,
-                                fontWeight: AppTypography.bold,
-                                color: dotColor,
-                              ),
-                            ),
-                          ),
-                          const Spacer(),
-                          // Sector abbreviation (뮤트 라벨 → textSecondary 승격)
-                          if (item.sectorShort != null) ...[
-                            Text(
-                              item.sectorShort!,
-                              style: TextStyle(
-                                fontSize: AppTypography.bodySmall,
-                                color: mlc.textSecondary,
-                              ),
-                            ),
-                            const SizedBox(width: AppSpacing.sm),
-                          ],
-                          Text(
-                            item.timeAgoLocalized(l10n),
-                            style: TextStyle(
-                              fontSize: AppTypography.bodySmall,
-                              color: mlc.textSecondary,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: AppSpacing.sm),
-
-                      // Row 2: AI summary (localized) — 뉴스 카드의 헤드라인.
-                      // 14→16으로 키워 스캔이 쉽게(줄바꿈 2줄 유지 → 안전).
-                      Text(
-                        item.aiSummary.localize(langCode),
-                        style: AppTypography.bodyStrong.copyWith(
-                          fontSize: AppTypography.headlineMedium,
-                          height: 1.35,
-                          color: mlc.textPrimary,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      // Row 3: source
-                      if (item.source != null) ...[
-                        const SizedBox(height: AppSpacing.xs),
-                        Text(
-                          item.source!,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: AppTypography.bodySmall,
-                            color: mlc.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
