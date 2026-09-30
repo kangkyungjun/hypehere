@@ -578,9 +578,8 @@ class _HoldingsTabState extends State<HoldingsTab> {
                 child: MlShowMoreButton(
                   expanded: _showAllRecentTxn,
                   remaining: allTxn.length - displayRecentTxn.length,
-                  onPressed: () => setState(
-                    () => _showAllRecentTxn = !_showAllRecentTxn,
-                  ),
+                  onPressed: () =>
+                      setState(() => _showAllRecentTxn = !_showAllRecentTxn),
                 ),
               ),
           ],
@@ -588,7 +587,9 @@ class _HoldingsTabState extends State<HoldingsTab> {
           // Bottom padding — 플로팅 탭바(extendBody)에 마지막 콘텐츠가 가리지 않도록
           SliverToBoxAdapter(
             child: SizedBox(
-              height: MediaQuery.of(context).viewPadding.bottom + 64,
+              height:
+                  MediaQuery.of(context).viewPadding.bottom +
+                  AppLayout.bottomNavClearance,
             ),
           ),
         ],

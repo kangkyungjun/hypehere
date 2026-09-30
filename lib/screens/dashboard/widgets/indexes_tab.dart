@@ -21,11 +21,7 @@ class IndexesTab extends StatefulWidget {
   final MacroIndicatorsData? data;
   final MacroSignalsData? signals;
 
-  const IndexesTab({
-    super.key,
-    this.data,
-    this.signals,
-  });
+  const IndexesTab({super.key, this.data, this.signals});
 
   @override
   State<IndexesTab> createState() => _IndexesTabState();
@@ -149,12 +145,10 @@ class _IndexesTabState extends State<IndexesTab> {
         AppSpacing.xl,
         AppSpacing.xl,
         AppSpacing.xl,
-        MediaQuery.of(context).viewPadding.bottom + 64,
+        MediaQuery.of(context).viewPadding.bottom +
+            AppLayout.bottomNavClearance,
       ),
-      children: [
-        _buildGaugeHeader(context, mlc, l10n),
-        ...children,
-      ],
+      children: [_buildGaugeHeader(context, mlc, l10n), ...children],
     );
   }
 
@@ -163,8 +157,9 @@ class _IndexesTabState extends State<IndexesTab> {
   MacroSignal? _overallMacro() {
     if (widget.signals == null) return null;
     try {
-      return widget.signals!.signals
-          .firstWhere((s) => s.signalCode == 'overall_macro');
+      return widget.signals!.signals.firstWhere(
+        (s) => s.signalCode == 'overall_macro',
+      );
     } catch (_) {
       return null;
     }
@@ -366,7 +361,8 @@ class _IndexesTabState extends State<IndexesTab> {
                       ),
                     ),
                   ),
-                  if (item.isIndicator && item.indicator!.changePct != null) ...[
+                  if (item.isIndicator &&
+                      item.indicator!.changePct != null) ...[
                     const SizedBox(width: AppSpacing.xs),
                     Text(
                       '${item.indicator!.changeArrow}${item.indicator!.changePct!.abs().toStringAsFixed(2)}%',
@@ -472,8 +468,7 @@ class _IndexItem {
   factory _IndexItem.fromIndicator(MacroIndicator ind) =>
       _IndexItem._(indicator: ind);
 
-  factory _IndexItem.fromSignal(MacroSignal sig) =>
-      _IndexItem._(signal: sig);
+  factory _IndexItem.fromSignal(MacroSignal sig) => _IndexItem._(signal: sig);
 
   bool get isIndicator => indicator != null;
   bool get isSignal => signal != null;

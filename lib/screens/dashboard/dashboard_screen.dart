@@ -266,7 +266,8 @@ class _DashboardScreenState extends State<DashboardScreen>
           AppSpacing.md,
           AppSpacing.xl,
           // 플로팅 탭바(extendBody) 뒤로 마지막 콘텐츠가 가리지 않도록 하단 여백 확보
-          MediaQuery.of(context).viewPadding.bottom + 64,
+          MediaQuery.of(context).viewPadding.bottom +
+              AppLayout.bottomNavClearance,
         ),
         children: [
           // ===== Macro Banner Card =====
@@ -297,27 +298,27 @@ class _DashboardScreenState extends State<DashboardScreen>
               onVixTap: _vixIndicator == null
                   ? null
                   : () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const MacroHistoryScreen(
-                            indicatorCode: 'VIXCLS',
-                            title: 'VIX',
-                          ),
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const MacroHistoryScreen(
+                          indicatorCode: 'VIXCLS',
+                          title: 'VIX',
                         ),
                       ),
+                    ),
               onTreasuryTap: _dgs10Indicator == null
                   ? null
                   : () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => MacroHistoryScreen(
-                            indicatorCode: 'DGS10',
-                            title: MacroStripWidget.treasuryTitle(
-                              Localizations.localeOf(context).languageCode,
-                            ),
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => MacroHistoryScreen(
+                          indicatorCode: 'DGS10',
+                          title: MacroStripWidget.treasuryTitle(
+                            Localizations.localeOf(context).languageCode,
                           ),
                         ),
                       ),
+                    ),
             ),
           ],
 

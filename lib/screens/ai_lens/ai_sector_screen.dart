@@ -207,7 +207,9 @@ class _AiSectorScreenState extends State<AiSectorScreen> {
       key: const PageStorageKey('ai_sector_list'),
       padding: EdgeInsets.only(
         top: AppSpacing.xs,
-        bottom: MediaQuery.of(context).viewPadding.bottom + 64,
+        bottom:
+            MediaQuery.of(context).viewPadding.bottom +
+            AppLayout.bottomNavClearance,
       ),
       itemCount: rows.length,
       itemBuilder: (context, i) => rows[i],

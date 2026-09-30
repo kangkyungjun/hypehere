@@ -112,7 +112,8 @@ class UpDownTab extends StatelessWidget {
         AppSpacing.xs,
         AppSpacing.xs,
         AppSpacing.xs,
-        MediaQuery.of(context).viewPadding.bottom + 64,
+        MediaQuery.of(context).viewPadding.bottom +
+            AppLayout.bottomNavClearance,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

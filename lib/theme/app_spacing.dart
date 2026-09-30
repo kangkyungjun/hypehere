@@ -26,16 +26,13 @@ abstract final class AppSpacing {
 
   /// 24px — 대형 섹션 간 간격
   static const double xxxl = 24.0;
-
-  /// 28px — 에디토리얼 섹션 리듬 (콘텐츠 블록 사이 큰 여백)
-  static const double section = 28.0;
 }
 
 /// 밀도(Density) 토큰 — 레퍼런스풍 "편안하되 절제된" 카드/행 내부 여백.
 ///
 /// 전역 여백을 키우지 않고(사용자 타이트 선호 존중), 카드 내부 패딩·키밸류
 /// 행 높이 등 "굶주려 답답해 보이던" 지점만 단일 상수로 잡는다. 값을 여기서만
-/// 바꾸면 [MlCard]/[BentoCard]·키밸류 컴포넌트에 일괄 반영된다.
+/// 바꾸면 [BentoCard]·키밸류 컴포넌트에 일괄 반영된다.
 abstract final class AppDensity {
   /// 콘텐츠 카드 내부 패딩. 밀도 단일 레버 — 여기만 바꾸면 26개 카드 일괄 반영.
   ///
@@ -78,8 +75,23 @@ abstract final class AppLayout {
   /// 플로팅 하단 탭바의 콘텐츠 높이(안전영역 제외).
   ///
   /// SafeArea min top(xs=4) + 내부 padding(xs=4)*2 + 아이템(48) = 60.
-  /// main.dart의 `_buildModernBottomNav`와 AI 채팅 입력창 클리어런스가 공유하여,
-  /// 탭바 디자인이 바뀌어도 입력창이 탭바 밑으로 겹치지 않도록 보장한다.
+  /// `main.dart`의 `_buildModernBottomNav` 구조와 1:1 대응한다.
   static const double bottomNavContentHeight =
       AppSpacing.xs + (AppSpacing.xs * 2) + bottomNavItemHeight;
+
+  /// 스크롤 화면이 플로팅 탭바를 피하려고 바닥에 비워야 하는 높이.
+  ///
+  /// `MediaQuery.viewPadding.bottom`에 **더해서** 쓴다:
+  /// ```dart
+  /// padding: EdgeInsets.only(
+  ///   bottom: MediaQuery.of(context).viewPadding.bottom
+  ///       + AppLayout.bottomNavClearance,
+  /// )
+  /// ```
+  ///
+  /// `bottomNavContentHeight`(60) + 여유 4. 개편 전에는 이 계산이 리터럴 `64`로
+  /// **9개 화면에 복붙**돼 있었고 토큰은 사용처 0이었다 — 탭바 높이를 건드리는
+  /// 순간 9곳이 동시에 어긋나는 상태였다.
+  static const double bottomNavClearance =
+      bottomNavContentHeight + AppSpacing.xs;
 }

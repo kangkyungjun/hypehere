@@ -238,7 +238,8 @@ class WatchlistTab extends StatelessWidget {
               AppSpacing.xl,
               AppSpacing.md,
               AppSpacing.xl,
-              MediaQuery.of(context).viewPadding.bottom + 64,
+              MediaQuery.of(context).viewPadding.bottom +
+                  AppLayout.bottomNavClearance,
             ),
             children: children,
           ),
@@ -595,7 +596,8 @@ class WatchlistTab extends StatelessWidget {
             AppSpacing.xl,
             AppSpacing.xl,
             AppSpacing.xl,
-            MediaQuery.of(context).viewPadding.bottom + 64,
+            MediaQuery.of(context).viewPadding.bottom +
+                AppLayout.bottomNavClearance,
           ),
           child: Column(
             children: [

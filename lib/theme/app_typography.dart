@@ -3,54 +3,55 @@ import 'package:flutter/material.dart';
 /// MarketLens 타이포그래피 상수
 ///
 /// 전체 앱에서 일관된 글꼴 크기/굵기 사용을 위한 시맨틱 토큰.
-/// 값 변경 시 이 파일만 수정하면 전체 앱에 반영됨(하드코딩 fontSize는 앱 전체에 0건).
 ///
-/// ## 스케일 설계 (2026-08-30 개편)
+/// ## 스케일 정본은 `docs/reference/heydealer/SPEC.md` **부록 A**다
 ///
-/// 레퍼런스(헤이딜러, `docs/reference/heydealer/SPEC.md`)는 13↔40px = **약 3.1배**
-/// 진폭을 한 화면 안에서 실제로 쓴다. 개편 전 우리 앱은 토큰상 8↔30이었으나
-/// 실사용 호출부 951개 중 **76.2%가 12~16px 구간**에 몰려 있어 체감 진폭이
-/// 1.8배에 그쳤다 — 1px 차이는 눈이 읽지 못하므로 사실상 전부 같은 크기였다.
-///
-/// 그래서 **읽기 스케일 7단계 + 기물 스케일 3단계**로 재편한다.
+/// 레퍼런스를 화면폭 대비 천분율(‰)로 재측정하고 402pt 화면으로 환산한 값을
+/// 반올림해 쓴다. 절대 dp 추정은 기기 폭 가정이 틀리면 전부 틀어지므로 폐기했다.
 ///
 /// ```
-/// 읽기(위계 담당):  40 · 30 · 24 · 20 · 17 · 14 · 12
-/// 기물(위계 아님):  11(배지) · 10(차트축) · 9(차트미세)
-/// 인접비:          1.33  1.25  1.20  1.18  1.21  1.17
+/// 읽기:  37 · 31 · 24 · 22 · 20 · 18 · 16 · 15 · 14 · 13
+/// 기물:  11(배지) · 10(차트축) · 9(차트미세)
 /// ```
 ///
-/// ### 두 가지 불변 원칙
+/// ⚠️ `docs/UIUX_CONFIRMED_SPEC.md` §3의 표(34/28/…/12)는 **이 파일과 일치한 적이
+/// 없다.** 그 문서를 작성한 바로 그 커밋(`b760b5e`, 2026-08-30)이 처음부터 부록 A
+/// 값을 코드에 썼다. 2026-09-30에 문서를 코드에 맞춰 정정했다 — **값의 정본은
+/// 여기고, 문서가 코드를 따른다.**
 ///
-/// 1. **하한 동결** — 12/11/10/9는 절대 올리지 않는다. 밀집도(사용자 최우선
-///    제약)를 지키는 방어선이며, 고정높이 pill 31곳·차트 `reservedSize`가
-///    여기에 하드 의존한다.
-/// 2. **상한 개방** — 히어로는 자기 행을 독점하므로 크기를 키워도 밀집도
-///    비용이 0이다. 30→40으로 열어 위계를 만든다.
+/// ### 불변 원칙
 ///
-/// 결과: 크기가 **줄어드는 호출부 0건**, 여백 토큰 변경 0건,
-/// 리스트 행 높이 +1px(+1.3%).
+/// 1. **하한 동결** — 13/11/10/9는 올리지 않는다. 밀집도(사용자 최우선 제약)를
+///    지키는 방어선이며, 고정높이 pill과 차트 `reservedSize`가 하드 의존한다.
+/// 2. **상한 개방** — 히어로는 자기 행을 독점하므로 키워도 밀집도 비용이 0이다.
+/// 3. **프리셋을 쓴다** — `TextStyle(fontSize: AppTypography.x)`로 크기만 빌려
+///    쓰면 `height`·`letterSpacing`·tabular가 빠진다. 현재 이 우회가 **629건
+///    (68.5%)** 이라 행간이 흩어져 있다. 신규 코드는 프리셋(`body`·`cardTitle`·
+///    `priceCard` …)을 쓸 것.
 ///
-/// ### 이름을 바꾸지 않는 이유
-/// 사라지는 5단계(22·18·15·13·8)는 삭제하지 않고 **이웃 값으로 재정의**한다.
-/// 951개 호출부를 한 줄도 수정하지 않고 스케일을 교체하기 위함이다.
+/// 하드코딩 `fontSize:` 숫자는 `trend_modal.dart:430` 1건만 남아 있다.
 abstract final class AppTypography {
   // ── 읽기 스케일 (7단계) ──────────────────────────────────
   // 위계를 만드는 단계. 인접 비율 1.17배 이상을 유지한다.
 
-  /// 화면당 단 하나뿐인 히어로 숫자 — 티커 현재가, 총자산 평가액. (34px)
+  /// 화면당 단 하나뿐인 히어로 숫자 — 티커 현재가, 총자산 평가액. (37px)
   ///
-  /// 1차 개편에서 40으로 열었으나 사용자 판정 "과하다" → 34로 후퇴.
-  /// 34/13 = 2.6배로 히어로 대비는 유지하면서 부피를 덜어낸다.
+  /// 부록 A 계측 37.5를 반올림. 37/14 = 2.64배로 게이트(≥2.5)를 넘긴다.
   static const double heroMedium = 37.0;
 
-  /// 2순위 히어로 — 카드 내 대표 숫자, 종합점수, 애널리스트 목표가. (28px)
+  /// 2순위 히어로 — 카드 내 대표 숫자, 종합점수, 애널리스트 목표가. (31px)
+  ///
+  /// 부록 A의 번호판 칩 31.4 대응. 31/14 = 2.21배.
   static const double heroSmall = 31.0;
 
   /// 화면 최상단 타이틀. (24px)
   static const double displayLarge = 24.0;
 
-  /// `displayLarge`와 통합됨(구 22px). 22와 24는 눈이 구분하지 못한다. (24px, 4 호출부)
+  /// 섹션 타이틀의 기반값. (22px)
+  ///
+  /// ⚠️ 별칭이 **아니다.** 스펙 §3은 "`displayLarge`와 통합(24)"이라 기록했으나
+  /// 실제로는 독립값 22로 남았고, `sectionTitle` → `SectionHeader`·`MlCardTitle`
+  /// 경로로 앱 전체 제목에 파급된다.
   static const double displaySmall = 22.0;
 
   /// 화면 타이틀, AppBar. (20px)
@@ -74,29 +75,41 @@ abstract final class AppTypography {
   /// `headlineMedium`과 통합됨(구 15px). 14와 16 사이에 낀 死단계였다. (16px)
   static const double headlineSmall = headlineMedium;
 
-  /// 본문 기준선, 키밸류 값. (14px)
+  /// 본문 기준선, 키밸류 값. (15px)
+  ///
+  /// 부록 A의 "값·2행 `520i 럭셔리` 15.1" 대응.
   static const double bodyLarge = 15.0;
 
-  /// 보조 본문, 키밸류 라벨. (13px)
+  /// 보조 본문, 키밸류 라벨. (14px)
   ///
-  /// 1차 개편에서 14로 병합했으나 호출부가 147개라 앱 전체가 부풀어 보였다.
-  /// 13으로 원복 — 라벨/값 위계는 1px + 굵기(w500↔w600) + 색으로 만든다.
+  /// 부록 A의 "라벨·KV·그룹헤더 14.5" 대응.
+  ///
+  /// ⚠️ 라벨/값 위계는 **크기가 아니라 색·굵기로만** 만든다(레퍼런스의 라벨:값
+  /// 크기비는 1.04배). 현재 `kvLabel`(14)과 `kvValue`(15)가 1px 벌어져 있어
+  /// 그 기법이 무력화돼 있다 — 둘을 같은 값으로 맞추는 것이 통일 규약 2다.
   static const double bodyMedium = 14.0;
 
-  /// 라벨 기준선, 보조 정보. (12px)
+  /// 라벨 기준선, 보조 정보. (13px)
   ///
-  /// **최다 사용 단계(300건)이며 불변이 밀집도를 보증한다.**
+  /// **앱 최다 사용 단계(183 호출부 / 67파일).** 여기가 읽기 스케일의 하한이며
+  /// 동결한다. 더 작은 것은 전부 기물 스케일(11/10/9)로 내려보낸다.
+  ///
+  /// ⚠️ 스펙 §3은 이 값을 "12 동결"이라 기록했으나 코드는 처음부터 13이었다.
   static const double bodySmall = 13.0;
 
   // ── 기물 스케일 (3단계) ──────────────────────────────────
   // 위계 요소가 아니라 고정 크기 부품. 스케일 개편에서 값을 바꾸지 않는다.
 
-  /// 배지/pill 전용. (11px)
+  /// 배지/pill 전용 + 차트 축 라벨. (11px)
+  ///
+  /// 부록 C 규정: 축 라벨은 `caption`(11)을 쓴다. `micro`(10)는 읽기 어려웠다.
   ///
   /// ⚠️ 세로 패딩 ≤4px인 pill이 앱 전체에 31곳 있다. 올리면 전부 넘친다.
   static const double caption = 11.0;
 
-  /// 차트 축 라벨 전용. (10px)
+  /// 하단 탭 라벨·알림 뱃지 등 초소형 기물. (10px)
+  ///
+  /// ⚠️ 차트 축에는 쓰지 않는다 — 부록 C가 `caption`(11)으로 규정했다.
   ///
   /// ⚠️ fl_chart `reservedSize`는 하드 클립 경계라 소프트 폴백이 없다.
   /// 현재 여유가 2~3px뿐이므로 **동결**.
@@ -106,6 +119,8 @@ abstract final class AppTypography {
   static const double chartLabel = 9.0;
 
   /// `chartLabel`과 통합됨(구 8px). 8px는 접근성 하한 미달이었다. (9px)
+  ///
+  /// 호출부 1곳. 사실상 死토큰이다.
   static const double chartMicro = chartLabel;
 
   // ── Font Weights ────────────────────────────────────────
@@ -140,7 +155,7 @@ abstract final class AppTypography {
     letterSpacing: -0.4,
   );
 
-  /// 섹션 타이틀. (20 w700)
+  /// 섹션 타이틀. (22 w700 — `displaySmall`)
   static const TextStyle sectionTitle = TextStyle(
     fontSize: displaySmall,
     fontWeight: bold,
@@ -163,7 +178,7 @@ abstract final class AppTypography {
     letterSpacing: -0.2,
   );
 
-  /// 산문 본문 — AI 답변·뉴스 요약·채팅. (14 w400)
+  /// 산문 본문 — AI 답변·뉴스 요약·채팅. (15 w400 — `bodyLarge`)
   static const TextStyle body = TextStyle(
     fontSize: bodyLarge,
     fontWeight: regular,
@@ -180,14 +195,14 @@ abstract final class AppTypography {
     height: 1.55,
   );
 
-  /// 강조 본문. (14 w600)
+  /// 강조 본문. (15 w600 — `bodyLarge`)
   static const TextStyle bodyStrong = TextStyle(
     fontSize: bodyLarge,
     fontWeight: semiBold,
     height: 1.40,
   );
 
-  /// 라벨, 부가 정보. (12 w500)
+  /// 라벨, 부가 정보. (13 w500 — `bodySmall`)
   static const TextStyle label = TextStyle(
     fontSize: bodySmall,
     fontWeight: medium,
@@ -205,7 +220,7 @@ abstract final class AppTypography {
   //   이것이 "여백 타이트 유지"와 위계를 양립시키는 정확한 기법이다.
   //   크기를 벌리면 행 높이가 늘지만, 색과 굵기는 **픽셀 비용이 0**이다.
 
-  /// 키밸류 라벨 — `textSecondary`와 함께 쓴다. (14 w500)
+  /// 키밸류 라벨 — `textTertiary`와 함께 쓴다. (14 w500 — `bodyMedium`)
   static const TextStyle kvLabel = TextStyle(
     fontSize: bodyMedium,
     fontWeight: medium,
@@ -213,7 +228,10 @@ abstract final class AppTypography {
     letterSpacing: 0.1,
   );
 
-  /// 키밸류 값 — `textPrimary`와 함께 쓴다. 라벨과 **같은 크기**. (14 w600)
+  /// 키밸류 값 — `textPrimary`와 함께 쓴다. (15 w600 — `bodyLarge`)
+  ///
+  /// ⚠️ 라벨(14)과 **1px 벌어져 있다.** 레퍼런스의 기법은 크기를 같게 두고
+  /// 색·굵기로만 나누는 것이다 — 통일 규약 2에서 맞춘다.
   static const TextStyle kvValue = TextStyle(
     fontSize: bodyLarge,
     fontWeight: semiBold,
@@ -232,21 +250,21 @@ abstract final class AppTypography {
   //     priceLarge(30) ↔ unitSuffixLarge(14)  비 2.14
   //     priceCard(17)  ↔ unitSuffix(12)       비 1.42
 
-  /// 소형 값(≤17px) 뒤 단위 — `%`/`pt`. (12 w500)
+  /// 소형 값 뒤 단위 — `%`/`pt`. (12 w500 — `chipLabelSize`)
   static const TextStyle unitSuffix = TextStyle(
-    fontSize: 12.0,
+    fontSize: chipLabelSize,
     fontWeight: medium,
     height: 1.2,
   );
 
-  /// 30px 히어로 뒤 단위 — `M`/`T`/`만원`. (14 w600)
+  /// 31px 히어로 뒤 단위 — `M`/`T`/`만원`. (15 w600) ⚠️ 호출부 0 — 死토큰
   static const TextStyle unitSuffixLarge = TextStyle(
     fontSize: bodyLarge,
     fontWeight: semiBold,
     height: 1.1,
   );
 
-  /// 40px 히어로 뒤/앞 단위 — 통화기호 `$`. (17 w600)
+  /// 37px 히어로 뒤/앞 단위 — 통화기호 `\$`. (16 w600) ⚠️ 호출부 0 — 死토큰
   static const TextStyle unitSuffixHero = TextStyle(
     fontSize: headlineMedium,
     fontWeight: semiBold,
@@ -255,7 +273,7 @@ abstract final class AppTypography {
 
   // ── Numeric Styles (주가, 수익률 등 숫자 강조용) ──────────
 
-  /// 화면당 유일한 히어로 숫자. (40 w700 tabular)
+  /// 화면당 유일한 히어로 숫자. (37 w700 tabular — `heroMedium`)
   static const TextStyle priceHero = TextStyle(
     fontSize: heroMedium,
     fontWeight: bold,
@@ -264,7 +282,7 @@ abstract final class AppTypography {
     fontFeatures: tabularFigures,
   );
 
-  /// 카드 내 대표 숫자. (30 w700 tabular)
+  /// 카드 내 대표 숫자. (31 w700 tabular — `heroSmall`)
   static const TextStyle priceLarge = TextStyle(
     fontSize: heroSmall,
     fontWeight: bold,
@@ -273,7 +291,7 @@ abstract final class AppTypography {
     fontFeatures: tabularFigures,
   );
 
-  /// 리스트 행의 값. (17 w600 tabular)
+  /// 리스트 행의 값. (20 w600 tabular — `displayMedium`)
   static const TextStyle priceCard = TextStyle(
     fontSize: displayMedium,
     fontWeight: semiBold,
@@ -282,7 +300,7 @@ abstract final class AppTypography {
     fontFeatures: tabularFigures,
   );
 
-  /// 변동률 배지 — 크기는 그대로, **굵기만 승격**(w600→w700). 오버플로 0. (14 w700)
+  /// 변동률 배지 — 굵기 승격(w600→w700). 오버플로 0. (15 w700 — `bodyLarge`)
   static const TextStyle changeBadge = TextStyle(
     fontSize: bodyLarge,
     fontWeight: bold,
@@ -298,7 +316,7 @@ abstract final class AppTypography {
     fontFeatures: tabularFigures,
   );
 
-  /// 보조 숫자 — 거래량, 시가총액 등. (12 w500 tabular)
+  /// 보조 숫자 — 거래량, 시가총액 등. (13 w500 tabular — `bodySmall`)
   static const TextStyle numericSecondary = TextStyle(
     fontSize: bodySmall,
     fontWeight: medium,
@@ -313,9 +331,16 @@ abstract final class AppTypography {
   //
   // **규칙: pill 내부 텍스트는 badgeLabel, 칩/탭 라벨은 chipLabel만 쓴다.**
 
+  /// 칩·세그먼트 탭 라벨 크기. (12)
+  ///
+  /// 읽기 스케일(13~37)과 기물 스케일(11/10/9) **사이**에 끼어 있는 격리 값이다.
+  /// 굵기만 다르게 써야 하는 곳(선택/비선택 탭)을 위해 크기를 따로 노출한다 —
+  /// 이름 없는 `12.0` 리터럴이 프리셋 안에 박혀 있어 참조할 수가 없었다.
+  static const double chipLabelSize = 12.0;
+
   /// 칩·세그먼트 탭 라벨 전용. (12 w600)
   static const TextStyle chipLabel = TextStyle(
-    fontSize: 12.0,
+    fontSize: chipLabelSize,
     fontWeight: semiBold,
     height: 1.15,
   );
