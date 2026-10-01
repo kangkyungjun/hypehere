@@ -1,4 +1,5 @@
 import 'dart:async';
+import '../utils/ticker_query.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
@@ -390,7 +391,20 @@ class AnalyticsApiClient {
   /// ```dart
   /// final results = await client.searchTickers('AAPL');
   /// ```
+  /// 티커 검색. 클래스주 표기 차이를 흡수한다.
+  ///
+  /// 파이프라인은 하이픈 표기(`BRK-B`)를 쓰는데 사용자는 `BRK.B`·`BRKB`로도
+  /// 친다. 원본으로 먼저 묻고, **빈 결과일 때만** 변형을 시도한다 —
+  /// 서버가 이미 정규화를 한다면 추가 요청이 아예 안 나간다.
   Future<List<TickerInfo>> searchTickers(String query) async {
+    for (final variant in tickerQueryVariants(query)) {
+      final hits = await _searchExact(variant);
+      if (hits.isNotEmpty) return hits;
+    }
+    return [];
+  }
+
+  Future<List<TickerInfo>> _searchExact(String query) async {
     try {
       if (query.trim().isEmpty) {
         return [];
