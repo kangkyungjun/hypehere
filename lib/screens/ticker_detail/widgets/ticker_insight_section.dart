@@ -26,6 +26,18 @@ class TickerInsightSection extends StatefulWidget {
 
 class _TickerInsightSectionState extends State<TickerInsightSection> {
 
+  /// 전문가 코멘트 — `expert_analysis` → `final_comment` → `summary`.
+  ///
+  /// 파이프라인이 `expert_analysis`를 드물게 null로 보낸다. 개편 전에는 그때
+  /// **블록이 통째로 사라져서**, AI 의견 섹션에 요약도 결론도 없이 확률만
+  /// 남았다. 셋 다 null일 때만 숨긴다.
+  ///
+  /// `expertAnalysisForLang`은 **언어별 필드**를 본다. 한국어만 채워진
+  /// 종목을 영어 사용자가 보면 null이 나오므로, 이 대체 체인이 그 구멍도
+  /// 같이 막는다. (`docs/DATA_QUALITY_RESPONSE_2026-10.md` §7)
+  String? _expertText(ChartDataPoint d, String langCode) =>
+      d.expertAnalysisForLang(langCode) ?? d.aiFinalComment ?? d.aiSummary;
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -37,8 +49,16 @@ class _TickerInsightSectionState extends State<TickerInsightSection> {
       orElse: () => widget.chartData.data.last,
     );
 
-    // AI 데이터가 없으면 fallback 표시
-    if (latestData.aiSummary == null) {
+    // AI 데이터가 없으면 fallback 표시.
+    //
+    // ⚠️ `aiProbability`도 함께 본다. 확률이 null인데 아래에서 `?? 0.5`로
+    // 메우면 **"AI 상승 확률 50%" + 상승 아이콘**(0.5 >= 0.5)이 그려진다 —
+    // 서버가 아무 판단도 주지 않았는데 앱이 "중립 판정"을 지어내는 것이다.
+    //
+    // 파이프라인의 `limited` 종목(상장 40~119거래일)은 실제로 확률을 0.5로
+    // 보낸다. 그 경우도 같은 이유로 확률 블록을 그리면 안 된다
+    // (`docs/DATA_QUALITY_RESPONSE_2026-10.md` §1).
+    if (latestData.aiSummary == null || latestData.aiProbability == null) {
       return Container(
         key: widget.aiInsightKey,
         margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
@@ -68,8 +88,8 @@ class _TickerInsightSectionState extends State<TickerInsightSection> {
       );
     }
 
-    // AI 상승 확률 계산
-    final probability = latestData.aiProbability ?? 0.5;
+    // 위 가드를 통과했으므로 non-null이 보장된다.
+    final probability = latestData.aiProbability!;
     final isUptrend = probability >= 0.5;
     final confidencePercent = (probability * 100).toStringAsFixed(0);
 
@@ -289,7 +309,8 @@ class _TickerInsightSectionState extends State<TickerInsightSection> {
           ],
 
           // Expert Analysis Section
-          if (latestData.expertAnalysisForLang(langCode) != null) ...[
+          // 전문가 코멘트 대체 체인 — `_expertText` 참조.
+          if (_expertText(latestData, langCode) != null) ...[
             const Divider(height: 32),
             const SizedBox(height: AppSpacing.sm),
 
@@ -332,7 +353,7 @@ class _TickerInsightSectionState extends State<TickerInsightSection> {
 
             // Expert analysis text
             Text(
-              latestData.expertAnalysisForLang(langCode)!,
+              _expertText(latestData, langCode)!,
               style: const TextStyle(
                 fontSize: AppTypography.bodyLarge,
                 height: 1.5,
