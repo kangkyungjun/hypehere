@@ -117,6 +117,7 @@ class InstitutionalFlowWidget extends StatelessWidget {
                 fontSize: AppTypography.displayLarge,
                 fontWeight: AppTypography.bold,
                 color: context.mlColors.accentBlue,
+                fontFeatures: AppTypography.tabularFigures,
               ),
             ),
           ),
@@ -149,6 +150,7 @@ class InstitutionalFlowWidget extends StatelessWidget {
           color: isPositive ? context.mlColors.gainColor : context.mlColors.lossColor,
           fontSize: AppTypography.caption,
           fontWeight: AppTypography.bold,
+          fontFeatures: AppTypography.tabularFigures,
         ),
       ),
     );

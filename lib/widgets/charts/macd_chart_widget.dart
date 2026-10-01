@@ -193,6 +193,7 @@ class MacdChartWidget extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: AppTypography.caption,
                                 color: context.mlColors.textTertiary,
+                                fontFeatures: AppTypography.tabularFigures,
                               ),
                             );
                           },

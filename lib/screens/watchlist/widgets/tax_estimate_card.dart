@@ -126,7 +126,11 @@ class TaxEstimateCard extends StatelessWidget {
               const SizedBox(height: AppSpacing.sm),
               Text(
                 '${sellTxns.length}${l10n.taxTradeCount} | 1\$ = ${krwFormat.format(exchangeRate.usdKrw.round())}${l10n.krwSuffix}',
-                style: TextStyle(fontSize: AppTypography.micro, color: context.mlColors.textTertiary),
+                style: TextStyle(
+                  fontSize: AppTypography.micro,
+                  color: context.mlColors.textTertiary,
+                  fontFeatures: AppTypography.tabularFigures,
+                ),
               ),
             ],
           ),

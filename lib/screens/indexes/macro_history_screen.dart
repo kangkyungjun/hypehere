@@ -694,6 +694,7 @@ class _MacroHistoryScreenState extends State<MacroHistoryScreen> {
                                 fontSize: AppTypography.headlineMedium,
                                 fontWeight: AppTypography.semiBold,
                                 color: changeColor,
+                                fontFeatures: AppTypography.tabularFigures,
                               ),
                             ),
                           ),

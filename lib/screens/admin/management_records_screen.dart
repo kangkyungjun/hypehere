@@ -1128,6 +1128,7 @@ class _ManagementRecordsScreenState extends State<ManagementRecordsScreen> {
           fontSize: AppTypography.micro,
           fontWeight: AppTypography.bold,
           color: color,
+          fontFeatures: AppTypography.tabularFigures,
         ),
       ),
     );

@@ -309,6 +309,7 @@ class _EarningsCalendarScreenState extends State<EarningsCalendarScreen> {
           fontSize: AppTypography.bodySmall,
           color: color,
           fontWeight: AppTypography.medium,
+          fontFeatures: AppTypography.tabularFigures,
         ),
       ));
     }
@@ -326,6 +327,7 @@ class _EarningsCalendarScreenState extends State<EarningsCalendarScreen> {
         style: TextStyle(
           fontSize: AppTypography.bodySmall,
           color: context.mlColors.textSecondary,
+          fontFeatures: AppTypography.tabularFigures,
         ),
       ));
     }

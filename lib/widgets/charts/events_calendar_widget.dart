@@ -423,6 +423,7 @@ class _EventsCalendarWidgetState extends State<EventsCalendarWidget>
                 style: TextStyle(
                   fontSize: AppTypography.bodySmall,
                   color: ctx.mlColors.textSecondary,
+                  fontFeatures: AppTypography.tabularFigures,
                 ),
               ),
               if (entry.surprisePct != null) ...[
@@ -433,6 +434,7 @@ class _EventsCalendarWidgetState extends State<EventsCalendarWidget>
                     fontSize: AppTypography.bodySmall,
                     fontWeight: AppTypography.bold,
                     color: surpriseColor,
+                    fontFeatures: AppTypography.tabularFigures,
                   ),
                 ),
                 const SizedBox(width: AppSpacing.xs),

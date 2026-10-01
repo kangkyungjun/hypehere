@@ -232,6 +232,7 @@ class _RecommendationCard extends StatelessWidget {
                         fontSize: AppTypography.bodySmall,
                         fontWeight: AppTypography.semiBold,
                         color: colors.accentBlue,
+                        fontFeatures: AppTypography.tabularFigures,
                       ),
                     ),
                     if (changePct != null)
@@ -242,6 +243,7 @@ class _RecommendationCard extends StatelessWidget {
                           color: changePct >= 0
                               ? colors.gainColor
                               : colors.lossColor,
+                          fontFeatures: AppTypography.tabularFigures,
                         ),
                       ),
                   ],

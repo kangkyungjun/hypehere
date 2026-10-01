@@ -193,6 +193,7 @@ class _SellHoldingSheetState extends State<SellHoldingSheet> {
               style: TextStyle(
                 fontSize: AppTypography.bodySmall,
                 color: mlc.textSecondary,
+                fontFeatures: AppTypography.tabularFigures,
               ),
             ),
             const SizedBox(height: AppSpacing.xl),

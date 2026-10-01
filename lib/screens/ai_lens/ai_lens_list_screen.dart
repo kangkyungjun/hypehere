@@ -103,6 +103,7 @@ class AILensListScreen extends StatelessWidget {
                       fontSize: AppTypography.headlineMedium,
                       fontWeight: AppTypography.bold,
                       color: scoreColor,
+                      fontFeatures: AppTypography.tabularFigures,
                     ),
                   ),
                 ),

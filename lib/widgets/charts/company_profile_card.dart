@@ -115,7 +115,11 @@ class _CompanyProfileCardState extends State<CompanyProfileCard> {
               const SizedBox(height: AppSpacing.xs),
               Text(
                 l10n.employeeCount(NumberFormat.compact().format(p.employees)),
-                style: TextStyle(fontSize: AppTypography.bodySmall, color: context.mlColors.textSecondary),
+                style: TextStyle(
+                  fontSize: AppTypography.bodySmall,
+                  color: context.mlColors.textSecondary,
+                  fontFeatures: AppTypography.tabularFigures,
+                ),
               ),
             ],
           ],
@@ -197,7 +201,11 @@ class _CompanyProfileCardState extends State<CompanyProfileCard> {
                 const SizedBox(height: AppSpacing.xs),
                 Text(
                   AppLocalizations.of(ctx).employeeCount(NumberFormat('#,###').format(p.employees)),
-                  style: TextStyle(fontSize: AppTypography.bodyMedium, color: ctx.mlColors.textSecondary),
+                  style: TextStyle(
+                    fontSize: AppTypography.bodyMedium,
+                    color: ctx.mlColors.textSecondary,
+                    fontFeatures: AppTypography.tabularFigures,
+                  ),
                 ),
               ],
 

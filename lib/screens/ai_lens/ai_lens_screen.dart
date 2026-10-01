@@ -695,6 +695,7 @@ class _AILensScreenState extends State<AILensScreen>
                       fontSize: AppTypography.headlineSmall,
                       fontWeight: AppTypography.bold,
                       color: scoreColor,
+                      fontFeatures: AppTypography.tabularFigures,
                     ),
                   ),
                 ),

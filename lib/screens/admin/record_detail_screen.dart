@@ -409,6 +409,7 @@ class _RecordDetailScreenState extends State<RecordDetailScreen> {
                     fontSize: AppTypography.bodyLarge,
                     fontWeight: AppTypography.bold,
                     color: mlc.textPrimary,
+                    fontFeatures: AppTypography.tabularFigures,
                   ),
                 ),
               ],
@@ -744,6 +745,7 @@ class _RecordDetailScreenState extends State<RecordDetailScreen> {
           fontSize: AppTypography.micro,
           fontWeight: AppTypography.bold,
           color: color,
+          fontFeatures: AppTypography.tabularFigures,
         ),
       ),
     );

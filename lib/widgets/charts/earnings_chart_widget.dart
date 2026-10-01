@@ -163,6 +163,7 @@ class EarningsChartWidget extends StatelessWidget {
                           style: TextStyle(
                             fontSize: AppTypography.caption,
                             color: context.mlColors.textTertiary,
+                            fontFeatures: AppTypography.tabularFigures,
                           ),
                         );
                       },
@@ -211,6 +212,7 @@ class EarningsChartWidget extends StatelessWidget {
                                     color: e.isBeat
                                         ? context.mlColors.gainColor
                                         : context.mlColors.lossColor,
+                                    fontFeatures: AppTypography.tabularFigures,
                                   ),
                                 ),
                               if (e.reportedEps == null)

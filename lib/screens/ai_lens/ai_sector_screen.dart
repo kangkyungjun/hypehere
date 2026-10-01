@@ -320,6 +320,7 @@ class _AiSectorScreenState extends State<AiSectorScreen> {
                       fontSize: AppTypography.headlineSmall,
                       fontWeight: AppTypography.bold,
                       color: scoreColor,
+                      fontFeatures: AppTypography.tabularFigures,
                     ),
                   ),
                 ),

@@ -347,6 +347,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                       fontSize: AppTypography.chipLabel.fontSize,
                       fontWeight: AppTypography.semiBold,
                       color: context.mlColors.accentBlue,
+                      fontFeatures: AppTypography.tabularFigures,
                     ),
                   ),
                 ),

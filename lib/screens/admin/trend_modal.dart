@@ -435,6 +435,7 @@ class _TrendModalState extends State<_TrendModal> {
                             : (values[i] >= 0
                                 ? mlc.gainColor
                                 : mlc.lossColor),
+                        fontFeatures: AppTypography.tabularFigures,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.visible,
