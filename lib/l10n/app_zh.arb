@@ -1115,5 +1115,16 @@
   "webviewLoadFailed": "无法打开此页面",
   "webviewOpenInBrowser": "在浏览器中打开",
   "webviewShare": "分享",
-  "webviewNoAppForLink": "没有可打开此链接的应用"
+  "webviewNoAppForLink": "没有可打开此链接的应用",
+  "unavailableOfflineTitle": "连接不稳定",
+  "unavailableOfflineBody": "请检查网络后重试。",
+  "unavailableServerTitle": "出现临时问题",
+  "unavailableServerBody": "请稍后重试。如果持续出现，请告诉我们。",
+  "unavailableNotReadyTitle": "数据正在准备中",
+  "unavailableNotReadyTitleFor": "{subject} 的数据正在准备中",
+  "unavailableNotReadyBody": "该标的尚未纳入收录范围。告诉我们，我们会优先处理。",
+  "unavailableReport": "告诉我们",
+  "unavailableGoBack": "返回上一页",
+  "unavailableReportSent": "感谢告知，我们会尽快确认。",
+  "@unavailableNotReadyTitleFor": { "placeholders": { "subject": { "type": "String" } } }
 }

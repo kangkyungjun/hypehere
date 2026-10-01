@@ -5581,6 +5581,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No app can open this link'**
   String get webviewNoAppForLink;
+
+  /// No description provided for @unavailableOfflineTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection is unstable'**
+  String get unavailableOfflineTitle;
+
+  /// No description provided for @unavailableOfflineBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your network and try again.'**
+  String get unavailableOfflineBody;
+
+  /// No description provided for @unavailableServerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong temporarily'**
+  String get unavailableServerTitle;
+
+  /// No description provided for @unavailableServerBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Please try again shortly. Let us know if it keeps happening.'**
+  String get unavailableServerBody;
+
+  /// No description provided for @unavailableNotReadyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This data isn\'t ready yet'**
+  String get unavailableNotReadyTitle;
+
+  /// No description provided for @unavailableNotReadyTitleFor.
+  ///
+  /// In en, this message translates to:
+  /// **'{subject} data isn\'t ready yet'**
+  String unavailableNotReadyTitleFor(String subject);
+
+  /// No description provided for @unavailableNotReadyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This ticker isn\'t in our coverage yet. Tell us and we\'ll prioritize it.'**
+  String get unavailableNotReadyBody;
+
+  /// No description provided for @unavailableReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Let us know'**
+  String get unavailableReport;
+
+  /// No description provided for @unavailableGoBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Go back'**
+  String get unavailableGoBack;
+
+  /// No description provided for @unavailableReportSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Thanks for letting us know. We\'ll look into it.'**
+  String get unavailableReportSent;
 }
 
 class _AppLocalizationsDelegate

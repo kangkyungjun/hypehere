@@ -1321,5 +1321,16 @@
   "webviewLoadFailed": "Couldn't load this page",
   "webviewOpenInBrowser": "Open in browser",
   "webviewShare": "Share",
-  "webviewNoAppForLink": "No app can open this link"
+  "webviewNoAppForLink": "No app can open this link",
+  "unavailableOfflineTitle": "Connection is unstable",
+  "unavailableOfflineBody": "Check your network and try again.",
+  "unavailableServerTitle": "Something went wrong temporarily",
+  "unavailableServerBody": "Please try again shortly. Let us know if it keeps happening.",
+  "unavailableNotReadyTitle": "This data isn't ready yet",
+  "unavailableNotReadyTitleFor": "{subject} data isn't ready yet",
+  "unavailableNotReadyBody": "This ticker isn't in our coverage yet. Tell us and we'll prioritize it.",
+  "unavailableReport": "Let us know",
+  "unavailableGoBack": "Go back",
+  "unavailableReportSent": "Thanks for letting us know. We'll look into it.",
+  "@unavailableNotReadyTitleFor": { "placeholders": { "subject": { "type": "String" } } }
 }

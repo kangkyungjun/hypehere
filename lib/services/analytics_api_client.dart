@@ -1168,4 +1168,45 @@ class AnalyticsApiClient {
   void dispose() {
     _httpClient.close();
   }
+
+  /// 데이터 부재·오류를 운영자에게 알린다.
+  ///
+  /// 사용자가 "알려주기"를 누르면 호출된다. **실패해도 조용히 삼킨다** —
+  /// 알림이 실패했다고 또 에러를 띄우면 이미 실패 화면을 보고 있는
+  /// 사용자에게 실패를 두 번 보여주는 꼴이다.
+  ///
+  /// ⚠️ 서버 엔드포인트가 아직 없다. [dataIssueReportEnabled]가 false인
+  /// 동안은 호출부가 버튼 자체를 그리지 않으므로 여기까지 오지 않는다.
+  /// 서버가 준비되면 플래그만 켠다.
+  Future<void> reportDataIssue({
+    required String subject,
+    required String kind,
+    String? detail,
+  }) async {
+    if (!dataIssueReportEnabled) return;
+    try {
+      await http
+          .post(
+            Uri.parse('$_baseUrl/support/data-issue/'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              'subject': subject,
+              'kind': kind,
+              if (detail != null) 'detail': detail,
+              'reported_at': DateTime.now().toUtc().toIso8601String(),
+            }),
+          )
+          .timeout(const Duration(seconds: 5));
+    } catch (e) {
+      debugPrint('[DATA_ISSUE] 전송 실패(무시): $e');
+    }
+  }
+
+  /// 데이터 이슈 신고 기능 on/off.
+  ///
+  /// 서버 `/support/data-issue/`가 배포되면 true로 바꾼다. 그 전에 버튼을
+  /// 보여주면 **눌러도 아무 데도 안 가는 버튼**이 되는데, 그건 지금의
+  /// 어설픈 화면보다 더 나쁘다.
+  static const bool dataIssueReportEnabled = false;
+
 }

@@ -2992,4 +2992,38 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get webviewNoAppForLink => 'Ninguna app puede abrir este enlace';
+
+  @override
+  String get unavailableOfflineTitle => 'La conexión es inestable';
+
+  @override
+  String get unavailableOfflineBody => 'Revisa tu red e inténtalo de nuevo.';
+
+  @override
+  String get unavailableServerTitle => 'Ha ocurrido un problema temporal';
+
+  @override
+  String get unavailableServerBody =>
+      'Inténtalo de nuevo en un momento. Avísanos si continúa.';
+
+  @override
+  String get unavailableNotReadyTitle => 'Estos datos aún no están listos';
+
+  @override
+  String unavailableNotReadyTitleFor(String subject) {
+    return 'Los datos de $subject aún no están listos';
+  }
+
+  @override
+  String get unavailableNotReadyBody =>
+      'Este valor todavía no está en nuestra cobertura. Avísanos y le daremos prioridad.';
+
+  @override
+  String get unavailableReport => 'Avísanos';
+
+  @override
+  String get unavailableGoBack => 'Volver';
+
+  @override
+  String get unavailableReportSent => 'Gracias por avisarnos. Lo revisaremos.';
 }

@@ -36,6 +36,9 @@ import 'package:marketlens/providers/watchlist_provider.dart';
 import 'package:marketlens/screens/watchlist/widgets/holding_list_item.dart';
 import 'package:marketlens/screens/watchlist/widgets/portfolio_summary_card.dart';
 import 'package:marketlens/screens/watchlist/widgets/watchlist_tab.dart';
+import 'package:marketlens/exceptions/api_error_codes.dart';
+import 'package:marketlens/exceptions/api_exception.dart';
+import 'package:marketlens/widgets/common/data_unavailable_view.dart';
 import 'package:marketlens/widgets/news/mention_bubble_card.dart';
 import 'package:marketlens/widgets/news/news_article_row.dart';
 import 'package:marketlens/widgets/news/news_detail_sheet.dart';
@@ -373,6 +376,36 @@ void main() {
         ],
       );
 
+  // 실패 상태 3종을 한 화면에 — 생김새가 같은 계열인지 눈으로 본다.
+  Widget failureStates() => Column(
+        children: [
+          Expanded(
+            child: DataUnavailableView.fromError(
+              TickerNotFoundException(ticker: 'BE'),
+              subject: 'BE',
+              onReport: () {},
+              onBack: () {},
+            ),
+          ),
+          const Divider(height: 1),
+          Expanded(
+            child: DataUnavailableView.fromError(
+              ApiException(ApiErrorCode.networkFailed),
+              onRetry: () {},
+            ),
+          ),
+          const Divider(height: 1),
+          Expanded(
+            child: DataUnavailableView.fromError(
+              ApiException(ApiErrorCode.serverError),
+              subject: 'GOOGL',
+              onRetry: () {},
+              onReport: () {},
+            ),
+          ),
+        ],
+      );
+
   Widget app(Widget body, {required bool dark, required double scale}) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -461,6 +494,17 @@ void main() {
   ];
 
   for (final v in variants) {
+    testWidgets('capture failure ${v.$1}', (tester) async {
+      tester.view.physicalSize = const Size(w * 3, h * 3);
+      tester.view.devicePixelRatio = 3.0;
+      addTearDown(tester.view.reset);
+      await shoot(
+        tester,
+        'failure-${v.$1}',
+        app(failureStates(), dark: v.$2, scale: v.$3),
+      );
+    });
+
     testWidgets('capture watchlist ${v.$1}', (tester) async {
       tester.view.physicalSize = const Size(w * 3, h * 3);
       tester.view.devicePixelRatio = 3.0;

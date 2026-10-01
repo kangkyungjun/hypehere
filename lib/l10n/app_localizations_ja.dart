@@ -2895,4 +2895,37 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get webviewNoAppForLink => 'このリンクを開けるアプリがありません';
+
+  @override
+  String get unavailableOfflineTitle => '接続が不安定です';
+
+  @override
+  String get unavailableOfflineBody => 'ネットワークを確認してもう一度お試しください。';
+
+  @override
+  String get unavailableServerTitle => '一時的な問題が発生しました';
+
+  @override
+  String get unavailableServerBody => 'しばらくしてからお試しください。続く場合はお知らせください。';
+
+  @override
+  String get unavailableNotReadyTitle => 'データを準備中です';
+
+  @override
+  String unavailableNotReadyTitleFor(String subject) {
+    return '$subject のデータを準備中です';
+  }
+
+  @override
+  String get unavailableNotReadyBody =>
+      'この銘柄はまだ収集範囲に入っていません。お知らせいただければ優先して対応します。';
+
+  @override
+  String get unavailableReport => '知らせる';
+
+  @override
+  String get unavailableGoBack => '前の画面へ';
+
+  @override
+  String get unavailableReportSent => 'お知らせありがとうございます。確認いたします。';
 }

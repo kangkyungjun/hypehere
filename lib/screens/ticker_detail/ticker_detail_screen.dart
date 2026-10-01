@@ -1,10 +1,10 @@
 import 'dart:io' show Platform;
-import '../../theme/app_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:provider/provider.dart';
 import '../../services/analytics_api_client.dart';
 import '../../utils/error_localizer.dart';
+import '../../widgets/common/data_unavailable_view.dart';
 import '../../models/chart_data.dart';
 import '../../models/ticker_info.dart';
 import '../../providers/auth_provider.dart';
@@ -23,7 +23,6 @@ import '../../widgets/community/signup_prompt_dialog.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_duration.dart';
 import '../../theme/app_spacing.dart';
-import '../../widgets/common/error_state_view.dart';
 import '../../l10n/app_localizations.dart';
 import '../auth/login_screen.dart';
 import '../auth/signup_screen.dart';
@@ -67,7 +66,9 @@ class _TickerDetailScreenState extends State<TickerDetailScreen> {
   CompleteChartData? _chartData;
   TickerInfo? _tickerInfo;
   bool _isLoading = true;
-  String? _error;
+  /// 원본 예외를 들고 있는다. 문자열로 바꿔 버리면 **네트워크 끊김인지
+  /// 종목 데이터 부재인지 구분할 수 없어** 모두 같은 빨간 화면이 된다.
+  Object? _error;
 
   // AI 의견 섹션 스크롤 타겟
   final GlobalKey _aiInsightKey = GlobalKey();
@@ -98,6 +99,26 @@ class _TickerDetailScreenState extends State<TickerDetailScreen> {
   void dispose() {
     _apiClient.dispose();
     super.dispose();
+  }
+
+  /// 서버 엔드포인트가 아직 없으면 **버튼 자체를 그리지 않는다.**
+  /// 눌러도 아무 데도 안 가는 버튼은 지금의 어설픈 화면보다 나쁘다.
+  VoidCallback? _reportDataIssue(BuildContext context) {
+    if (!AnalyticsApiClient.dataIssueReportEnabled) return null;
+    return () async {
+      final l10n = AppLocalizations.of(context);
+      final messenger = ScaffoldMessenger.of(context);
+      await _apiClient.reportDataIssue(
+        subject: widget.ticker,
+        kind: _error == null
+            ? 'empty'
+            : DataUnavailableView.kindOf(_error!).name,
+        detail: _error?.toString(),
+      );
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.unavailableReportSent)),
+      );
+    };
   }
 
   Future<void> _loadChartData() async {
@@ -163,7 +184,7 @@ class _TickerDetailScreenState extends State<TickerDetailScreen> {
       }
     } catch (e) {
       setState(() {
-        _error = ErrorLocalizer.getMessage(context, e);
+        _error = e;
         _isLoading = false;
       });
     }
@@ -436,42 +457,38 @@ class _TickerDetailScreenState extends State<TickerDetailScreen> {
   }
 
   Widget _buildBody() {
-    final l10n = AppLocalizations.of(context);
     // 로딩 상태
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    // 에러 상태
+    // 실패 상태 — 종류를 구분해서 보여준다.
+    //
+    // 개편 전에는 네트워크 끊김·서버 오류·이 종목만 데이터 없음이 **전부
+    // 같은 빨간 느낌표 화면**이었다. 사용자가 뭘 해야 할지 알 수 없었고,
+    // 데이터 부재를 "오류"로 표기해 멀쩡한 앱을 고장난 것처럼 보이게 했다.
     if (_error != null) {
-      return ErrorStateView(
-        message: l10n.cannotLoadData,
-        detail: _error!,
+      return DataUnavailableView.fromError(
+        _error!,
+        subject: widget.ticker,
+        detail: ErrorLocalizer.getMessage(context, _error!),
         onRetry: _loadChartData,
-        retryLabel: l10n.tryAgain,
+        onReport: _reportDataIssue(context),
+        onBack: () => Navigator.of(context).maybePop(),
       );
     }
 
-    // 데이터 없음
+    // 데이터 없음 — 차트가 비어 있다. 앱 오류가 아니라 **이 종목만**
+    // 아직 수집 범위 밖이라는 뜻이다.
+    //
+    // 개편 전 문구는 `다른 티커를 검색해보세요`였다. 추천 카드를 탭해
+    // 들어온 사용자에게 검색 맥락의 안내가 뜨고 있었다.
     if (_chartData == null || _chartData!.data.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.data_usage_outlined,
-              size: 48,
-              color: context.mlColors.textTertiary,
-            ),
-            const SizedBox(height: AppSpacing.xl),
-            Text(l10n.noData, style: AppTypography.sectionTitle),
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              l10n.tryDifferentSearch,
-              style: TextStyle(color: context.mlColors.textTertiary),
-            ),
-          ],
-        ),
+      return DataUnavailableView(
+        kind: UnavailableKind.notReady,
+        subject: widget.ticker,
+        onReport: _reportDataIssue(context),
+        onBack: () => Navigator.of(context).maybePop(),
       );
     }
 

@@ -2895,4 +2895,38 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get webviewNoAppForLink => '이 링크를 열 수 있는 앱이 없습니다';
+
+  @override
+  String get unavailableOfflineTitle => '연결이 불안정합니다';
+
+  @override
+  String get unavailableOfflineBody => '네트워크 상태를 확인하고 다시 시도해 주세요.';
+
+  @override
+  String get unavailableServerTitle => '일시적인 문제가 발생했습니다';
+
+  @override
+  String get unavailableServerBody =>
+      '잠시 후 다시 시도해 주세요. 계속되면 알려주시면 빠르게 확인하겠습니다.';
+
+  @override
+  String get unavailableNotReadyTitle => '아직 데이터를 준비 중입니다';
+
+  @override
+  String unavailableNotReadyTitleFor(String subject) {
+    return '$subject 데이터를 준비 중입니다';
+  }
+
+  @override
+  String get unavailableNotReadyBody =>
+      '이 종목은 아직 수집 범위에 들어오지 않았습니다. 알려주시면 우선 반영하겠습니다.';
+
+  @override
+  String get unavailableReport => '알려주기';
+
+  @override
+  String get unavailableGoBack => '이전 화면으로';
+
+  @override
+  String get unavailableReportSent => '알려주셔서 감사합니다. 빠르게 확인하겠습니다.';
 }

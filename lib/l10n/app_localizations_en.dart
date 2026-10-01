@@ -2965,4 +2965,39 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get webviewNoAppForLink => 'No app can open this link';
+
+  @override
+  String get unavailableOfflineTitle => 'Connection is unstable';
+
+  @override
+  String get unavailableOfflineBody => 'Check your network and try again.';
+
+  @override
+  String get unavailableServerTitle => 'Something went wrong temporarily';
+
+  @override
+  String get unavailableServerBody =>
+      'Please try again shortly. Let us know if it keeps happening.';
+
+  @override
+  String get unavailableNotReadyTitle => 'This data isn\'t ready yet';
+
+  @override
+  String unavailableNotReadyTitleFor(String subject) {
+    return '$subject data isn\'t ready yet';
+  }
+
+  @override
+  String get unavailableNotReadyBody =>
+      'This ticker isn\'t in our coverage yet. Tell us and we\'ll prioritize it.';
+
+  @override
+  String get unavailableReport => 'Let us know';
+
+  @override
+  String get unavailableGoBack => 'Go back';
+
+  @override
+  String get unavailableReportSent =>
+      'Thanks for letting us know. We\'ll look into it.';
 }

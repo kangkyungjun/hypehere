@@ -2887,4 +2887,36 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get webviewNoAppForLink => '没有可打开此链接的应用';
+
+  @override
+  String get unavailableOfflineTitle => '连接不稳定';
+
+  @override
+  String get unavailableOfflineBody => '请检查网络后重试。';
+
+  @override
+  String get unavailableServerTitle => '出现临时问题';
+
+  @override
+  String get unavailableServerBody => '请稍后重试。如果持续出现，请告诉我们。';
+
+  @override
+  String get unavailableNotReadyTitle => '数据正在准备中';
+
+  @override
+  String unavailableNotReadyTitleFor(String subject) {
+    return '$subject 的数据正在准备中';
+  }
+
+  @override
+  String get unavailableNotReadyBody => '该标的尚未纳入收录范围。告诉我们，我们会优先处理。';
+
+  @override
+  String get unavailableReport => '告诉我们';
+
+  @override
+  String get unavailableGoBack => '返回上一页';
+
+  @override
+  String get unavailableReportSent => '感谢告知，我们会尽快确认。';
 }

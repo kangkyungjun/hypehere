@@ -1115,5 +1115,16 @@
   "webviewLoadFailed": "No se pudo cargar la página",
   "webviewOpenInBrowser": "Abrir en el navegador",
   "webviewShare": "Compartir",
-  "webviewNoAppForLink": "Ninguna app puede abrir este enlace"
+  "webviewNoAppForLink": "Ninguna app puede abrir este enlace",
+  "unavailableOfflineTitle": "La conexión es inestable",
+  "unavailableOfflineBody": "Revisa tu red e inténtalo de nuevo.",
+  "unavailableServerTitle": "Ha ocurrido un problema temporal",
+  "unavailableServerBody": "Inténtalo de nuevo en un momento. Avísanos si continúa.",
+  "unavailableNotReadyTitle": "Estos datos aún no están listos",
+  "unavailableNotReadyTitleFor": "Los datos de {subject} aún no están listos",
+  "unavailableNotReadyBody": "Este valor todavía no está en nuestra cobertura. Avísanos y le daremos prioridad.",
+  "unavailableReport": "Avísanos",
+  "unavailableGoBack": "Volver",
+  "unavailableReportSent": "Gracias por avisarnos. Lo revisaremos.",
+  "@unavailableNotReadyTitleFor": { "placeholders": { "subject": { "type": "String" } } }
 }

@@ -1115,5 +1115,16 @@
   "webviewLoadFailed": "ページを開けませんでした",
   "webviewOpenInBrowser": "ブラウザで開く",
   "webviewShare": "共有",
-  "webviewNoAppForLink": "このリンクを開けるアプリがありません"
+  "webviewNoAppForLink": "このリンクを開けるアプリがありません",
+  "unavailableOfflineTitle": "接続が不安定です",
+  "unavailableOfflineBody": "ネットワークを確認してもう一度お試しください。",
+  "unavailableServerTitle": "一時的な問題が発生しました",
+  "unavailableServerBody": "しばらくしてからお試しください。続く場合はお知らせください。",
+  "unavailableNotReadyTitle": "データを準備中です",
+  "unavailableNotReadyTitleFor": "{subject} のデータを準備中です",
+  "unavailableNotReadyBody": "この銘柄はまだ収集範囲に入っていません。お知らせいただければ優先して対応します。",
+  "unavailableReport": "知らせる",
+  "unavailableGoBack": "前の画面へ",
+  "unavailableReportSent": "お知らせありがとうございます。確認いたします。",
+  "@unavailableNotReadyTitleFor": { "placeholders": { "subject": { "type": "String" } } }
 }
