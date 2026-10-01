@@ -2929,4 +2929,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get unavailableReportSent => '알려주셔서 감사합니다. 빠르게 확인하겠습니다.';
+
+  @override
+  String get viewAiOpinion => 'AI 의견 보기';
 }

@@ -207,7 +207,10 @@ class _TickerIntradayChartState extends State<TickerIntradayChart> {
     if (dateEt == null) {
       return Text(AppLocalizations.of(context).marketHoursHint, style: style);
     }
-    return Text('$dateEt · 미국 장중 09:30~16:00 ET', style: style);
+    // 바로 위 분기가 쓰는 `marketHoursHint`에 이미 5개 로케일 번역이 있다.
+    // 여기만 한글 하드코딩이라 **외국인 사용자에게 한글이 그대로 나갔다.**
+    final hours = AppLocalizations.of(context).marketHoursHint;
+    return Text('$dateEt · $hours', style: style);
   }
 
   Widget _buildChartArea(MarketLensColors mlc) {

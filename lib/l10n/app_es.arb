@@ -1126,5 +1126,6 @@
   "unavailableReport": "Avísanos",
   "unavailableGoBack": "Volver",
   "unavailableReportSent": "Gracias por avisarnos. Lo revisaremos.",
-  "@unavailableNotReadyTitleFor": { "placeholders": { "subject": { "type": "String" } } }
+  "@unavailableNotReadyTitleFor": { "placeholders": { "subject": { "type": "String" } } },
+  "viewAiOpinion": "Ver opinión de IA"
 }

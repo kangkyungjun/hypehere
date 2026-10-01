@@ -5641,6 +5641,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Thanks for letting us know. We\'ll look into it.'**
   String get unavailableReportSent;
+
+  /// No description provided for @viewAiOpinion.
+  ///
+  /// In en, this message translates to:
+  /// **'View AI opinion'**
+  String get viewAiOpinion;
 }
 
 class _AppLocalizationsDelegate

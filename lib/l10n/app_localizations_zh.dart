@@ -2919,4 +2919,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get unavailableReportSent => '感谢告知，我们会尽快确认。';
+
+  @override
+  String get viewAiOpinion => '查看 AI 观点';
 }

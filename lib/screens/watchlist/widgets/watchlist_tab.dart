@@ -522,7 +522,7 @@ class WatchlistTab extends StatelessWidget {
                   const SizedBox(width: AppSpacing.xs),
                   Expanded(
                     child: Text(
-                      _viewOpinionLabel(lang),
+                      AppLocalizations.of(context).viewAiOpinion,
                       style: TextStyle(
                         fontSize: AppTypography.bodySmall,
                         fontWeight: AppTypography.semiBold,
@@ -614,22 +614,6 @@ class WatchlistTab extends StatelessWidget {
         ),
       ],
     );
-  }
-
-  /// 잠금 CTA 라벨 — l10n 파일 변경(다른 WIP와 충돌) 회피 위해 인라인 다국어.
-  static String _viewOpinionLabel(String lang) {
-    switch (lang) {
-      case 'ko':
-        return 'AI 의견 보기';
-      case 'zh':
-        return '查看 AI 观点';
-      case 'ja':
-        return 'AI 意見を見る';
-      case 'es':
-        return 'Ver opinión de IA';
-      default:
-        return 'View AI opinion';
-    }
   }
 
   /// 관심카드의 라벨+값 한 행. 스타일·정렬·축소 방어는 [MlKeyValueRow]가 담당.

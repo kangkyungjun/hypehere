@@ -2928,4 +2928,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get unavailableReportSent => 'お知らせありがとうございます。確認いたします。';
+
+  @override
+  String get viewAiOpinion => 'AI 意見を見る';
 }

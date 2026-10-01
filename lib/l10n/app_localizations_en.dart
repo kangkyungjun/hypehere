@@ -3000,4 +3000,7 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get unavailableReportSent =>
       'Thanks for letting us know. We\'ll look into it.';
+
+  @override
+  String get viewAiOpinion => 'View AI opinion';
 }

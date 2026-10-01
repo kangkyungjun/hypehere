@@ -1211,5 +1211,6 @@
   "unavailableReport": "알려주기",
   "unavailableGoBack": "이전 화면으로",
   "unavailableReportSent": "알려주셔서 감사합니다. 빠르게 확인하겠습니다.",
-  "@unavailableNotReadyTitleFor": { "placeholders": { "subject": { "type": "String" } } }
+  "@unavailableNotReadyTitleFor": { "placeholders": { "subject": { "type": "String" } } },
+  "viewAiOpinion": "AI 의견 보기"
 }

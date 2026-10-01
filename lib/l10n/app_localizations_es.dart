@@ -3026,4 +3026,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get unavailableReportSent => 'Gracias por avisarnos. Lo revisaremos.';
+
+  @override
+  String get viewAiOpinion => 'Ver opinión de IA';
 }

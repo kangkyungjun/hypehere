@@ -1126,5 +1126,6 @@
   "unavailableReport": "知らせる",
   "unavailableGoBack": "前の画面へ",
   "unavailableReportSent": "お知らせありがとうございます。確認いたします。",
-  "@unavailableNotReadyTitleFor": { "placeholders": { "subject": { "type": "String" } } }
+  "@unavailableNotReadyTitleFor": { "placeholders": { "subject": { "type": "String" } } },
+  "viewAiOpinion": "AI 意見を見る"
 }

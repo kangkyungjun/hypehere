@@ -1332,5 +1332,6 @@
   "unavailableReport": "Let us know",
   "unavailableGoBack": "Go back",
   "unavailableReportSent": "Thanks for letting us know. We'll look into it.",
-  "@unavailableNotReadyTitleFor": { "placeholders": { "subject": { "type": "String" } } }
+  "@unavailableNotReadyTitleFor": { "placeholders": { "subject": { "type": "String" } } },
+  "viewAiOpinion": "View AI opinion"
 }

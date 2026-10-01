@@ -1126,5 +1126,6 @@
   "unavailableReport": "告诉我们",
   "unavailableGoBack": "返回上一页",
   "unavailableReportSent": "感谢告知，我们会尽快确认。",
-  "@unavailableNotReadyTitleFor": { "placeholders": { "subject": { "type": "String" } } }
+  "@unavailableNotReadyTitleFor": { "placeholders": { "subject": { "type": "String" } } },
+  "viewAiOpinion": "查看 AI 观点"
 }

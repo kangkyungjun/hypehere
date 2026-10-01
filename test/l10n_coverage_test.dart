@@ -38,6 +38,55 @@ void main() {
     expect(problems, isEmpty, reason: problems.join('\n'));
   });
 
+  /// ⚠️ 위 두 테스트는 **arb 파일만** 본다. 코드에 한글을 직접 박으면
+  /// 키 집합은 멀쩡하므로 통과한다 — 실제로 `ticker_intraday_chart`에
+  /// `'$dateEt · 미국 장중 09:30~16:00 ET'`가 한 줄 박혀 있었고, 바로 위
+  /// 분기는 같은 뜻의 `marketHoursHint`를 쓰고 있었다. **외국인 사용자에게
+  /// 한글이 그대로 나갔다.**
+  test('사용자 화면 코드에 한글 하드코딩이 없다', () {
+    // Master 전용 어드민은 운영자(한국어 사용자) 전용이라 제외한다.
+    const exemptDirs = [
+      'lib/screens/admin/',
+      'lib/l10n/',
+      'lib/preview_harness.dart', // 개발 전용 진입점, 배포되지 않는다
+    ];
+    // Master 게이트(`if (authProvider.isMaster)`) 안의 어드민 진입 메뉴.
+    const exemptFiles = ['lib/screens/settings/settings_screen.dart'];
+
+    final hangul = RegExp(r'[가-힣]');
+    // Text(...) / label: / title: / hintText: 등 **사용자에게 보이는** 자리.
+    final uiString = RegExp(
+      r"(Text|label|title|subtitle|message|hintText|labelText|tooltip|content)"
+      r"\s*[:(]\s*(const\s+)?(Text\()?'[^']*",
+    );
+
+    final offenders = <String>[];
+    for (final f in Directory('lib')
+        .listSync(recursive: true)
+        .whereType<File>()
+        .where((f) => f.path.endsWith('.dart'))) {
+      if (exemptDirs.any((d) => f.path.startsWith(d))) continue;
+      if (exemptFiles.contains(f.path)) continue;
+      final lines = f.readAsLinesSync();
+      for (var i = 0; i < lines.length; i++) {
+        final l = lines[i];
+        final t = l.trimLeft();
+        if (t.startsWith('//') || t.startsWith('///')) continue;
+        if (l.contains('debugPrint')) continue; // 로그는 사용자가 안 본다
+        final m = uiString.firstMatch(l);
+        if (m != null && hangul.hasMatch(m.group(0)!)) {
+          offenders.add('${f.path}:${i + 1}  ${t.length > 90 ? t.substring(0, 90) : t}');
+        }
+      }
+    }
+    expect(
+      offenders,
+      isEmpty,
+      reason: 'AppLocalizations를 쓸 것 — 외국인 사용자에게 한글이 나간다:\n'
+          '${offenders.join("\n")}',
+    );
+  });
+
   test('번역이 비어 있거나 한국어 원문 그대로가 아니다', () {
     final ko = arb('ko');
     final hangul = RegExp(r'[가-힣]');
