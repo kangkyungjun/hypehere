@@ -1,0 +1,893 @@
+from sqlalchemy import Column, String, Date, Float, BigInteger, Integer, Boolean, TIMESTAMP, Text, text
+from sqlalchemy.dialects.postgresql import JSONB
+from app.database import Base
+
+
+class TickerScore(Base):
+    """
+    Ticker daily scores for mobile app consumption.
+
+    **Serving Layer** - Read-only for FastAPI
+    Mac mini uploads daily calculated scores here.
+
+    MVP Fields:
+    - ticker: Stock symbol or ticker name
+    - date: Score calculation date
+    - score: Calculated score value
+    - signal: Trading signal (BUY/SELL/HOLD)
+    """
+    __tablename__ = "ticker_scores"
+    __table_args__ = {'schema': 'analytics'}
+
+    ticker = Column(String(50), primary_key=True, index=True)
+    date = Column(Date, primary_key=True, index=True)
+    score = Column(Float, nullable=False)
+    signal = Column(String(20))  # BUY, SELL, HOLD (supports Korean signals)
+    calculated_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class Ticker(Base):
+    """
+    Ticker metadata (symbol, name, category).
+
+    **Metadata Layer** - For search and display
+    Provides human-readable names and categorization.
+    """
+    __tablename__ = "tickers"
+    __table_args__ = {'schema': 'analytics'}
+
+    ticker = Column(String(50), primary_key=True, index=True)
+    ticker_type = Column(String(50))  # For backward compatibility
+    ticker_name = Column(String(200), index=True)  # Searchable name
+    name = Column(String(200))  # Display name
+    category = Column(String(50))  # Category/sector
+    sector = Column(String(100))  # GICS sector
+    sub_industry = Column(String(200))  # GICS sub-industry
+    extra_data = Column("metadata", JSONB)  # Additional JSON data
+
+
+class TickerPrice(Base):
+    """
+    Ticker daily OHLCV price data for charting.
+
+    **Price Layer** - Read-only for FastAPI
+    Mac mini uploads daily price data here.
+
+    Fields:
+    - ticker: Stock symbol
+    - date: Price data date
+    - open/high/low/close: OHLC prices
+    - volume: Trading volume
+    """
+    __tablename__ = "ticker_prices"
+    __table_args__ = {'schema': 'analytics'}
+
+    ticker = Column(String(10), primary_key=True, index=True)
+    date = Column(Date, primary_key=True, index=True)
+    open = Column(Float)
+    high = Column(Float)
+    low = Column(Float)
+    close = Column(Float)
+    volume = Column(BigInteger)
+    change_pct = Column(Float)  # Daily price change %
+    trading_value = Column(Float)  # close * volume (USD)
+    created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class TickerIntraday(Base):
+    """
+    Ticker intraday(시간봉) OHLCV. v1=마감 후 1회 + v2=장중 매시 :50 크론으로
+    맥미니가 ET ISO-8601 타임스탬프로 push → POST /internal/ingest/intraday.
+
+    Primary key: (ticker, datetime). interval 기본 '1h' (v1 범위).
+    같은 거래일 데이터가 다시 들어오면 통째로 덮어쓰기(맥미니 정책).
+    """
+    __tablename__ = "ticker_intraday"
+    __table_args__ = {'schema': 'analytics'}
+
+    ticker = Column(String(10), primary_key=True, index=True)
+    datetime = Column(TIMESTAMP(timezone=True), primary_key=True)  # ET offset 입력, UTC 저장
+    interval = Column(String(8), nullable=False, server_default=text("'1h'"))
+    open = Column(Float)
+    high = Column(Float)
+    low = Column(Float)
+    close = Column(Float)
+    volume = Column(BigInteger)
+    updated_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class TickerIndicator(Base):
+    """
+    Technical indicators (RSI, MFI, MACD, Bollinger Bands).
+
+    **Indicator Layer** - Read-only for FastAPI
+    Mac mini uploads calculated indicators here.
+
+    Fields:
+    - ticker: Stock symbol
+    - date: Indicator calculation date
+    - rsi: Relative Strength Index (0-100)
+    - mfi: Money Flow Index (0-100, volume-weighted RSI)
+    - macd: MACD line value
+    - macd_signal: MACD signal line
+    - macd_hist: MACD histogram
+    - bb_width: Bollinger Band width
+    - bb_upper/lower/middle: Bollinger Band levels
+    """
+    __tablename__ = "ticker_indicators"
+    __table_args__ = {'schema': 'analytics'}
+
+    ticker = Column(String(10), primary_key=True, index=True)
+    date = Column(Date, primary_key=True, index=True)
+    rsi = Column(Float)
+    macd = Column(Float)
+    macd_signal = Column(Float)
+    macd_hist = Column(Float)
+    bb_width = Column(Float)
+    bb_upper = Column(Float)
+    bb_lower = Column(Float)
+    bb_middle = Column(Float)
+    mfi = Column(Float)  # Money Flow Index (0-100)
+    created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class TickerTarget(Base):
+    """
+    Target price and stop loss levels.
+
+    **Target Layer** - Read-only for FastAPI
+    Mac mini uploads AI-calculated targets here.
+
+    Fields:
+    - ticker: Stock symbol
+    - date: Target calculation date
+    - target_price: AI-calculated target price
+    - stop_loss: AI-calculated stop loss level
+    - risk_reward_ratio: R/R ratio
+    """
+    __tablename__ = "ticker_targets"
+    __table_args__ = {'schema': 'analytics'}
+
+    ticker = Column(String(10), primary_key=True, index=True)
+    date = Column(Date, primary_key=True, index=True)
+    target_price = Column(Float)
+    stop_loss = Column(Float)
+    risk_reward_ratio = Column(Float)
+    analyst_target_mean = Column(Float)
+    analyst_target_high = Column(Float)
+    analyst_target_low = Column(Float)
+    analyst_count = Column(Integer)
+    recommendation = Column(String(20))
+    created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class TickerTrendline(Base):
+    """
+    Trendline coefficients for chart rendering.
+
+    **Trendline Layer** - Read-only for FastAPI
+    Mac mini uploads calculated trendline parameters here.
+
+    Fields:
+    - ticker: Stock symbol
+    - date: Trendline calculation date
+    - high_slope/intercept: High price trendline (y = mx + b)
+    - low_slope/intercept: Low price trendline
+    - high_r_squared/low_r_squared: R² coefficients (reliability)
+    - trend_period_days: Calculation period (default 30)
+    """
+    __tablename__ = "ticker_trendlines"
+    __table_args__ = {'schema': 'analytics'}
+
+    ticker = Column(String(10), primary_key=True, index=True)
+    date = Column(Date, primary_key=True, index=True)
+    high_slope = Column(Float)
+    high_intercept = Column(Float)
+    high_r_squared = Column(Float)
+    low_slope = Column(Float)
+    low_intercept = Column(Float)
+    low_r_squared = Column(Float)
+    trend_period_days = Column(Integer, default=30)
+    high_values = Column(JSONB)  # Pre-calculated y-values: [{"date": "2024-10-20", "y": 148.20}, ...]
+    low_values = Column(JSONB)   # Pre-calculated y-values: [{"date": "2024-10-20", "y": 130.15}, ...]
+    created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class TickerInstitution(Base):
+    """
+    Institutional and foreign ownership data.
+
+    **Institution Layer** - Read-only for FastAPI
+    Mac mini uploads ownership change data here.
+
+    Fields:
+    - ticker: Stock symbol
+    - date: Ownership data date
+    - inst_ownership: Institutional ownership %
+    - foreign_ownership: Foreign ownership %
+    - inst_chg_*: Institutional ownership changes (1d/5d/15d/30d)
+    - foreign_chg_*: Foreign ownership changes (1d/5d/15d/30d)
+    """
+    __tablename__ = "ticker_institutions"
+    __table_args__ = {'schema': 'analytics'}
+
+    ticker = Column(String(10), primary_key=True, index=True)
+    date = Column(Date, primary_key=True, index=True)
+    inst_ownership = Column(Float)
+    foreign_ownership = Column(Float)
+    insider_ownership = Column(Float)  # Insider ownership %
+    inst_chg_1d = Column(Float)
+    inst_chg_5d = Column(Float)
+    inst_chg_15d = Column(Float)
+    inst_chg_30d = Column(Float)
+    foreign_chg_1d = Column(Float)
+    foreign_chg_5d = Column(Float)
+    foreign_chg_15d = Column(Float)
+    foreign_chg_30d = Column(Float)
+    created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class TickerShort(Base):
+    """
+    Short selling metrics.
+
+    **Short Layer** - Read-only for FastAPI
+    Mac mini uploads short selling data here.
+
+    Fields:
+    - ticker: Stock symbol
+    - date: Short data date
+    - short_ratio: Days to cover (short interest / avg volume)
+    - short_percent_float: Short % of float
+    - short_percent_shares: Short % of shares outstanding
+    - short_interest: Absolute shares shorted
+    """
+    __tablename__ = "ticker_shorts"
+    __table_args__ = {'schema': 'analytics'}
+
+    ticker = Column(String(10), primary_key=True, index=True)
+    date = Column(Date, primary_key=True, index=True)
+    short_ratio = Column(Float)
+    short_percent_float = Column(Float)
+    short_percent_shares = Column(Float)
+    short_interest = Column(BigInteger)
+    created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class TickerAIAnalysis(Base):
+    """
+    AI-generated analysis and predictions.
+
+    **AI Analysis Layer** - Read-only for FastAPI
+    Mac mini uploads AI analysis results here.
+
+    Fields:
+    - ticker: Stock symbol
+    - date: Analysis date
+    - probability: Prediction confidence (0.0-1.0)
+    - summary: Brief analysis summary (max 200 chars)
+    - bullish_reasons: List of bullish factors (JSONB array)
+    - bearish_reasons: List of bearish factors (JSONB array)
+    - final_comment: Final recommendation (max 500 chars)
+    """
+    __tablename__ = "ticker_ai_analysis"
+    __table_args__ = {'schema': 'analytics'}
+
+    ticker = Column(String(10), primary_key=True, index=True)
+    date = Column(Date, primary_key=True, index=True)
+    probability = Column(Float, nullable=False)
+    summary = Column(String(4000), nullable=False)
+    bullish_reasons = Column(JSONB)  # Array of strings
+    bearish_reasons = Column(JSONB)  # Array of strings
+    final_comment = Column(String(4000))
+    analysis_ko = Column(Text)
+    analysis_en = Column(Text)
+    analysis_zh = Column(Text)
+    analysis_ja = Column(Text)
+    analysis_es = Column(Text)
+    expert_prediction = Column(String(20))    # "bullish" / "bearish" / "neutral"
+    expert_key_factors = Column(JSONB)        # ["factor1", "factor2", ...]
+    created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class CompanyProfile(Base):
+    """
+    Company profile data (one row per ticker, non-time-series).
+
+    **Profile Layer** - Read-only for FastAPI
+    Mac mini uploads company fundamentals from yfinance here.
+    """
+    __tablename__ = "company_profile"
+    __table_args__ = {'schema': 'analytics'}
+
+    ticker = Column(String(10), primary_key=True, index=True)
+    long_name = Column(String(255))
+    industry = Column(String(100))
+    website = Column(String(255))
+    country = Column(String(50))
+    employees = Column(Integer)
+    summary = Column(String)
+    updated_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class TickerKeyMetrics(Base):
+    """
+    Key valuation and financial metrics (daily time-series).
+
+    **Metrics Layer** - Read-only for FastAPI
+    Mac mini uploads daily fundamental metrics from yfinance here.
+    """
+    __tablename__ = "ticker_key_metrics"
+    __table_args__ = {'schema': 'analytics'}
+
+    date = Column(Date, primary_key=True, index=True)
+    ticker = Column(String(10), primary_key=True, index=True)
+    market_cap = Column(Float)
+    pe = Column(Float)
+    forward_pe = Column(Float)
+    peg = Column(Float)
+    pb = Column(Float)
+    ps = Column(Float)
+    eps = Column(Float)
+    bps = Column(Float)
+    ev_revenue = Column(Float)
+    ev_ebitda = Column(Float)
+    profit_margin = Column(Float)
+    operating_margin = Column(Float)
+    gross_margin = Column(Float)
+    roe = Column(Float)
+    roa = Column(Float)
+    debt_to_equity = Column(Float)
+    current_ratio = Column(Float)
+    beta = Column(Float)
+    dividend_yield = Column(Float)
+    payout_ratio = Column(Float)
+    earnings_growth = Column(Float)
+    revenue_growth = Column(Float)
+    created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class TickerFinancials(Base):
+    """
+    Financial statements stored as JSONB (one row per ticker).
+
+    **Financials Layer** - Read-only for FastAPI
+    Mac mini uploads income/balance_sheet/cash_flow from yfinance here.
+    """
+    __tablename__ = "ticker_financials"
+    __table_args__ = {'schema': 'analytics'}
+
+    ticker = Column(String(10), primary_key=True, index=True)
+    latest_quarter = Column(String(10))
+    income = Column(JSONB)
+    balance_sheet = Column(JSONB)
+    cash_flow = Column(JSONB)
+    updated_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class TickerDividend(Base):
+    """
+    Dividend history (ticker + ex_date composite key).
+
+    **Dividend Layer** - Read-only for FastAPI
+    Mac mini uploads dividend history from yfinance here.
+    """
+    __tablename__ = "ticker_dividends"
+    __table_args__ = {'schema': 'analytics'}
+
+    ticker = Column(String(10), primary_key=True, index=True)
+    ex_date = Column(Date, primary_key=True)
+    amount = Column(Float)
+
+
+class TickerAnalystRating(Base):
+    """
+    Individual analyst ratings from financial institutions (finvizfinance).
+
+    **Analyst Rating Layer** - Read-only for FastAPI
+    Mac mini uploads institutional analyst ratings here.
+
+    Fields:
+    - ticker: Stock symbol
+    - date: Data upload date (score date)
+    - rating_date: Report publication date
+    - firm: Institution name (e.g., 'Barclays', 'Morgan Stanley')
+    - status: Rating change type (Upgrade/Downgrade/Reiterated/Initiated)
+    - rating: Investment opinion (Overweight/Equal-Weight/Buy/Hold/Sell)
+    - target_from: Previous target price
+    - target_to: New target price
+    """
+    __tablename__ = "ticker_analyst_ratings"
+    __table_args__ = {'schema': 'analytics'}
+
+    ticker = Column(String(10), primary_key=True, index=True)
+    date = Column(Date, primary_key=True, index=True)
+    rating_date = Column(Date, primary_key=True)
+    firm = Column(String(100), primary_key=True)
+    status = Column(String(30))
+    rating = Column(String(50))
+    target_from = Column(Float)
+    target_to = Column(Float)
+    created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class MacroIndicator(Base):
+    """Macro economic indicators from FRED + signals (yield_curve, m2_liquidity)."""
+    __tablename__ = "macro_indicators"
+    __table_args__ = {'schema': 'analytics'}
+
+    date = Column(Date, primary_key=True)
+    indicator_code = Column(String(30), primary_key=True)
+    indicator_name = Column(String(100))
+    observation_date = Column(Date)
+    value = Column(Float, nullable=False)
+    previous_value = Column(Float)
+    change_pct = Column(Float)
+    source = Column(String(30))
+    risk_level = Column(String(20))       # CRITICAL/WARNING/NORMAL (시장레이더)
+    signal_message = Column(String)       # 한국어 설명 메시지
+    liquidity_status = Column(String(20)) # EXPANDING/CONTRACTING/NEUTRAL (머니프린팅)
+    updated_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class MacroChartData(Base):
+    """Macro chart time-series data (t10y2y, m2_growth etc.)."""
+    __tablename__ = "macro_chart_data"
+    __table_args__ = {'schema': 'analytics'}
+
+    series_id = Column(String(30), primary_key=True)  # t10y2y, m2_growth
+    date = Column(Date, primary_key=True)
+    value = Column(Float, nullable=False)
+    created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class MarketIndex(Base):
+    """Major market indices (SPY, QQQ, DIA)."""
+    __tablename__ = "market_indices"
+    __table_args__ = {'schema': 'analytics'}
+
+    date = Column(Date, primary_key=True)
+    code = Column(String(10), primary_key=True)
+    name = Column(String(50), nullable=False)
+    open = Column(Float)
+    high = Column(Float)
+    low = Column(Float)
+    close = Column(Float)
+    volume = Column(BigInteger)
+    prev_close = Column(Float)
+    change = Column(Float)
+    change_pct = Column(Float)
+    created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class MarketIndexChart(Base):
+    """Market index daily chart data (sparkline)."""
+    __tablename__ = "market_index_chart"
+    __table_args__ = {'schema': 'analytics'}
+
+    code = Column(String(10), primary_key=True)
+    date = Column(Date, primary_key=True)
+    close = Column(Float, nullable=False)
+    created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class TickerCalendar(Base):
+    """Ticker calendar events (earnings date, dividends)."""
+    __tablename__ = "ticker_calendar"
+    __table_args__ = {'schema': 'analytics'}
+
+    ticker = Column(String(10), primary_key=True, index=True)
+    date = Column(Date, primary_key=True, index=True)
+    next_earnings_date = Column(Date)
+    next_earnings_date_end = Column(Date)
+    earnings_confirmed = Column(Boolean, default=False)
+    d_day = Column(Integer)
+    ex_dividend_date = Column(Date)
+    dividend_date = Column(Date)
+    earnings_high = Column(Float)
+    earnings_low = Column(Float)
+    earnings_avg = Column(Float)
+    revenue_high = Column(Float)
+    revenue_low = Column(Float)
+    revenue_avg = Column(Float)
+    updated_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class TickerEarningsHistory(Base):
+    """Ticker earnings history (EPS estimate vs reported)."""
+    __tablename__ = "ticker_earnings_history"
+    __table_args__ = {'schema': 'analytics'}
+
+    ticker = Column(String(10), primary_key=True, index=True)
+    earnings_date = Column(Date, primary_key=True)
+    eps_estimate = Column(Float)
+    reported_eps = Column(Float)
+    surprise_pct = Column(Float)
+    updated_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class TickerDefenseLine(Base):
+    """이동평균 방어선 (period별 MA 가격)."""
+    __tablename__ = "ticker_defense_lines"
+    __table_args__ = {'schema': 'analytics'}
+
+    ticker = Column(String(10), primary_key=True, index=True)
+    date = Column(Date, primary_key=True, index=True)
+    period = Column(Integer, primary_key=True)  # 20, 50, 200 etc.
+    price = Column(Float, nullable=False)
+    label = Column(String(200))
+    distance_pct = Column(Float)
+    created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class TickerRecommendation(Base):
+    """애널리스트 의견분포 (strong_buy ~ strong_sell)."""
+    __tablename__ = "ticker_recommendations"
+    __table_args__ = {'schema': 'analytics'}
+
+    ticker = Column(String(10), primary_key=True, index=True)
+    date = Column(Date, primary_key=True, index=True)
+    strong_buy = Column(Integer, default=0)
+    buy = Column(Integer, default=0)
+    hold = Column(Integer, default=0)
+    sell = Column(Integer, default=0)
+    strong_sell = Column(Integer, default=0)
+    consensus_score = Column(Float)
+    created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class TickerInstitutionalHolder(Base):
+    """개별 기관투자자 보유 현황."""
+    __tablename__ = "ticker_institutional_holders"
+    __table_args__ = {'schema': 'analytics'}
+
+    ticker = Column(String(10), primary_key=True, index=True)
+    date = Column(Date, primary_key=True, index=True)
+    holder = Column(String(100), primary_key=True)
+    pct_held = Column(Float)
+    pct_change = Column(Float)
+    created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class StockMembership(Base):
+    """Stock index membership (SP500, DOW30, NASDAQ100)."""
+    __tablename__ = "stock_membership"
+    __table_args__ = {'schema': 'analytics'}
+
+    ticker = Column(String(10), primary_key=True)
+    index_code = Column(String(20), primary_key=True)
+
+
+class TickerNews(Base):
+    """Ticker news with AI summary and sentiment analysis."""
+    __tablename__ = "ticker_news"
+    __table_args__ = {'schema': 'analytics'}
+
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    date = Column(Date, nullable=False, index=True)
+    ticker = Column(String(10), nullable=False, index=True)
+    title = Column(String(1000), nullable=False)
+    title_hash = Column(String(32), nullable=False)
+    source = Column(String(100))
+    source_url = Column(String(2048))
+    published_at = Column(TIMESTAMP, nullable=False)
+    ai_summary = Column(String(4000), nullable=False)
+    sentiment_score = Column(Integer, nullable=False)
+    sentiment_grade = Column(String(10), nullable=False)
+    sentiment_label = Column(String(500), nullable=False)
+    future_event = Column(JSONB)
+    is_breaking = Column(Boolean, default=False)
+    is_hot_topic = Column(Boolean, default=False)
+    hot_topic_category = Column(String(30))    # GLOBAL_CRISIS, TRADE_WAR, GEOPOLITICAL, FED_EMERGENCY, MARKET_CRASH, REGULATORY, EARNINGS_SHOCK, SECTOR_SHIFT
+    hot_topic_priority = Column(Integer)       # 1=critical, 2=high, 3=medium
+    created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+    updated_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class EarningsWeekEvent(Base):
+    """이번 주 실적 발표 일정 (Flutter 캘린더용)."""
+    __tablename__ = "earnings_week_events"
+    __table_args__ = {'schema': 'analytics'}
+
+    ticker = Column(String(10), primary_key=True, index=True)
+    earnings_date = Column(Date, primary_key=True)
+    week = Column(String(10))                  # "this" | "next"
+    name_ko = Column(String(100))
+    name_en = Column(String(100))
+    earnings_date_end = Column(Date)
+    earnings_confirmed = Column(Boolean, server_default=text('FALSE'))
+    d_day = Column(Integer)
+    eps_estimate_high = Column(Float)
+    eps_estimate_low = Column(Float)
+    eps_estimate_avg = Column(Float)
+    revenue_estimate = Column(Float)
+    prev_surprise_pct = Column(Float)
+    score = Column(Float)
+    updated_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class AccountWithdrawal(Base):
+    """Account withdrawal reasons (Flutter app → FastAPI)."""
+    __tablename__ = "account_withdrawals"
+    __table_args__ = {'schema': 'analytics'}
+
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    user_email = Column(String(255), nullable=False)
+    user_nickname = Column(String(100))
+    reason = Column(Text)
+    created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class MarketCalendarEvent(Base):
+    """월별 이벤트 캘린더 (FOMC, 실적, 경제지표 등)."""
+    __tablename__ = "market_calendar"
+    __table_args__ = {'schema': 'analytics'}
+
+    id = Column(String(16), primary_key=True)
+    event_date = Column(Date, nullable=False, index=True)
+    event_type = Column(String(30), nullable=False)
+    title = Column(String(2000), nullable=False)       # "ko|||en|||zh|||ja|||es"
+    description = Column(Text)                         # "ko|||en|||zh|||ja|||es"
+    ticker = Column(String(10))
+    importance = Column(String(10), server_default=text("'medium'"))
+    source = Column(String(50))
+    result_url = Column(Text)                          # 큐레이션 URL — 과거 이벤트 "결과 보기"용. NULL이면 읽기 시 Google 폴백
+    created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+# ============================================================
+# Phase 1: AI 투자 브레인 — Portfolio & Advisory Tables
+# ============================================================
+
+class UserPortfolio(Base):
+    """
+    유저 보유/관심 종목 (서버 저장).
+
+    type = HOLDING: 실제 매수 종목 (avg_price, shares 포함)
+    type = WATCHLIST: 관심 종목 (기존 SharedPreferences → 서버 마이그레이션)
+    """
+    __tablename__ = "user_portfolios"
+    __table_args__ = {'schema': 'analytics'}
+
+    user_id = Column(Integer, primary_key=True, index=True)
+    ticker = Column(String(10), primary_key=True, index=True)
+    type = Column(String(10), nullable=False, default='WATCHLIST')  # HOLDING | WATCHLIST
+    shares = Column(Float)           # 보유 수량 (HOLDING only)
+    avg_price = Column(Float)        # 평균 매수가 (HOLDING only)
+    notes = Column(String(500))      # 메모
+    created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+    updated_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class UserTransaction(Base):
+    """
+    매수/매도 거래 이력.
+
+    유저가 Flutter에서 기록한 거래 내역.
+    세금 계산, P&L 추적, 맥미니 AI 분석의 기초 데이터.
+    """
+    __tablename__ = "user_transactions"
+    __table_args__ = {'schema': 'analytics'}
+
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, nullable=False, index=True)
+    ticker = Column(String(10), nullable=False, index=True)
+    type = Column(String(4), nullable=False)  # BUY | SELL
+    shares = Column(Float, nullable=False)
+    price = Column(Float, nullable=False)     # 거래 단가 (USD)
+    date = Column(Date, nullable=False)       # 거래일
+    realized_pnl = Column(Float, nullable=True)  # SELL 시 (sell_price - avg_price) * shares
+    notes = Column(String(500))
+    created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class PortfolioAdvice(Base):
+    """
+    맥미니가 생성한 종목별 AI 의견.
+
+    맥미니 스케줄러 → POST /ingest/portfolio-advice → 이 테이블에 저장.
+    Flutter가 GET /portfolio/advice 로 조회.
+    """
+    __tablename__ = "portfolio_advice"
+    __table_args__ = {'schema': 'analytics'}
+
+    user_id = Column(Integer, primary_key=True, index=True)
+    ticker = Column(String(10), primary_key=True, index=True)
+    date = Column(Date, primary_key=True, index=True)
+    signal = Column(String(10))              # BUY / SELL / HOLD
+    confidence = Column(Float)               # 0.0 ~ 1.0
+    summary = Column(String(4000))           # 다국어 ||| 패킹
+    reasons = Column(JSONB)                  # {"bullish": [...], "bearish": [...]}
+    target_action = Column(String(2000))      # 권고 행동 (다국어 ||| 패킹)
+    created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class PortfolioSummary(Base):
+    """
+    유저별 일일 P&L 요약.
+
+    맥미니가 매일 장 마감 후 계산 → POST /ingest/portfolio-summary.
+    Flutter가 GET /portfolio/summary 로 조회.
+    """
+    __tablename__ = "portfolio_summary"
+    __table_args__ = {'schema': 'analytics'}
+
+    user_id = Column(Integer, primary_key=True, index=True)
+    date = Column(Date, primary_key=True, index=True)
+    total_value = Column(Float)              # 총 평가액 (USD)
+    total_cost = Column(Float)               # 총 투자원금 (USD)
+    total_pnl = Column(Float)                # 총 손익 (USD)
+    total_pnl_pct = Column(Float)            # 총 수익률 (%)
+    day_pnl = Column(Float)                  # 일간 손익 (USD)
+    day_pnl_pct = Column(Float)              # 일간 수익률 (%)
+    holdings_detail = Column(JSONB)          # [{ticker, shares, avg_price, current_price, pnl, pnl_pct}]
+    ai_summary = Column(String(4000), nullable=True)  # 전체 포트폴리오 AI 텍스트
+    ai_recommendations = Column(JSONB, nullable=True)  # 추천사항 리스트 [{type, message, priority}]
+    realized_pnl = Column(Float, nullable=True)        # 실현손익 (USD)
+    periods = Column(JSONB, nullable=True)             # 기간별 P&L 원본 {today, 1week, 1month, ...}
+    trade_history = Column(JSONB, nullable=True)       # 매매 이력 [{ticker, buy_date, sell_date, ...}]
+    created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class UserAlert(Base):
+    """
+    맥미니가 생성한 유저 알림.
+
+    급등/급락, 목표가 도달, 실적 발표 임박 등 개인화된 알림.
+    FCM push도 서버에서 동시 발송.
+    """
+    __tablename__ = "user_alerts"
+    __table_args__ = {'schema': 'analytics'}
+
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, nullable=False, index=True)
+    ticker = Column(String(10), index=True)
+    alert_type = Column(String(30), nullable=False)  # PRICE_SURGE, TARGET_HIT, EARNINGS_NEAR, SIGNAL_CHANGE, etc.
+    title = Column(String(2000), nullable=False)       # 다국어 ||| 패킹
+    message = Column(String(4000))                    # 다국어 ||| 패킹
+    priority = Column(String(10), nullable=True)     # HIGH / MEDIUM / LOW
+    data = Column(JSONB)                              # 추가 데이터 (가격, 변동률 등)
+    is_read = Column(Boolean, server_default=text('FALSE'))
+    created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class ExchangeRate(Base):
+    """
+    일별 환율 (USD/KRW).
+
+    맥미니가 무료 API(exchangerate-api.com)에서 수집 → POST /ingest/exchange-rate.
+    Flutter 세금 계산기에서 사용.
+    """
+    __tablename__ = "exchange_rates"
+    __table_args__ = {'schema': 'analytics'}
+
+    date = Column(Date, primary_key=True)
+    usd_krw = Column(Float, nullable=False)
+    source = Column(String(50))  # exchangerate-api.com
+    created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class AISignal(Base):
+    """
+    맥미니가 생성한 종목별 AI 시그널.
+
+    맥미니 스케줄러 → POST /ingest/ai-signals → 이 테이블에 저장.
+    Flutter가 GET /portfolio/signals 로 조회 (추후).
+    """
+    __tablename__ = "ai_signals"
+    __table_args__ = {'schema': 'analytics'}
+
+    ticker = Column(String(10), primary_key=True, index=True)
+    date = Column(Date, primary_key=True, index=True)
+    signal = Column(String(15), nullable=False)  # STRONG_BUY/BUY/HOLD/SELL/STRONG_SELL
+    confidence = Column(Float)
+    price_at_signal = Column(Float)
+    target_price = Column(Float)
+    stop_loss_price = Column(Float)
+    reasoning = Column(Text)
+    created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class AIMessage(Base):
+    """
+    맥미니가 생성한 AI 메시지 (브리핑, 리뷰, Q&A).
+
+    맥미니 스케줄러 → POST /ingest/ai-messages → 이 테이블에 저장.
+    Flutter가 GET /portfolio/messages 로 조회 (추후).
+    """
+    __tablename__ = "ai_messages"
+    __table_args__ = {'schema': 'analytics'}
+
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    type = Column(String(30), nullable=False)  # daily_briefing / portfolio_review / stock_qa
+    date = Column(Date, nullable=False, index=True)
+    user_id = Column(Integer, index=True)       # NULL = 전체 브리핑
+    messages = Column(JSONB, nullable=False)     # [{role, content}]
+    created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class AnalysisRequest(Base):
+    """
+    실시간 포트폴리오 AI 분석 요청 큐.
+
+    Flutter가 포트폴리오 변경 시 INSERT (PENDING),
+    맥미니가 10초 폴링으로 PENDING 감지 → PROCESSING → COMPLETED/FAILED.
+    """
+    __tablename__ = "analysis_requests"
+    __table_args__ = {'schema': 'analytics'}
+
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, nullable=False, index=True)
+    request_type = Column(String(30), nullable=False)  # PORTFOLIO_CHANGE / DAILY_BATCH
+    status = Column(String(20), server_default=text("'PENDING'"))  # PENDING / PROCESSING / COMPLETED / FAILED
+    trigger_data = Column(JSONB)  # {"ticker":"AAPL","action":"ADD_HOLDING","shares":10,"avg_price":178.5}
+    result_summary = Column(String(500))
+    created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+    updated_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+    started_at = Column(TIMESTAMP)
+    completed_at = Column(TIMESTAMP)
+
+
+class Conversation(Base):
+    """
+    AI 멀티턴 채팅 대화 스레드 (SoT=서버).
+
+    id 는 앱이 생성(c_...), 서버가 그대로 정본 저장.
+    """
+    __tablename__ = "conversations"
+    __table_args__ = {'schema': 'analytics'}
+
+    id = Column(String(64), primary_key=True)
+    user_id = Column(Integer, nullable=False, index=True)
+    title = Column(String(200))
+    created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+    updated_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class ChatMessage(Base):
+    """대화 메시지 (user / assistant 턴). 시간순 = turn_index."""
+    __tablename__ = "chat_messages"
+    __table_args__ = {'schema': 'analytics'}
+
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    conversation_id = Column(String(64), nullable=False, index=True)
+    user_id = Column(Integer, nullable=False, index=True)
+    role = Column(String(16), nullable=False)  # user / assistant
+    content = Column(Text, nullable=False)
+    turn_index = Column(Integer)
+    is_error = Column(Boolean, nullable=False, server_default=text('FALSE'))  # 맥미니 폴백 시 TRUE
+    created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class StockClassification(Base):
+    """Peter Lynch 6-category stock classification."""
+    __tablename__ = "stock_classifications"
+    __table_args__ = {'schema': 'analytics'}
+
+    date = Column(Date, primary_key=True, index=True)
+    ticker = Column(String(10), primary_key=True, index=True)
+    category = Column(String(20), nullable=False, index=True)
+    category_ko = Column(String(20), nullable=False)
+    category_en = Column(String(20), nullable=False)
+    confidence = Column(Float, default=0.0)
+    reason_ko = Column(Text)
+    reason_en = Column(Text)
+    metrics_json = Column(Text)  # JSON string for metrics dict
+    created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
+class NotificationLog(Base):
+    """FCM 알림 발송 로그 (중복 방지 + 감사)"""
+    __tablename__ = "notification_log"
+    __table_args__ = {'schema': 'analytics'}
+
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    date = Column(Date, nullable=False, index=True)
+    ticker = Column(String(50), nullable=False, index=True)
+    signal_type = Column(String(30), nullable=False)
+    score = Column(Float)
+    recipients_count = Column(Integer, server_default=text('0'))
+    success_count = Column(Integer, server_default=text('0'))
+    failure_count = Column(Integer, server_default=text('0'))
+    error_detail = Column(Text)
+    created_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
