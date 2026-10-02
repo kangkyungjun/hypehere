@@ -523,6 +523,27 @@ class ClassificationResponse(BaseModel):
     metrics: Optional[dict] = None
 
 
+class FreshnessResponse(BaseModel):
+    """
+    How current this ticker's analysis is (S2).
+
+    The server decides, not the app. The app does not know the market's latest
+    trading date, and the thing it could compare against -- another ticker's
+    date -- goes wrong the moment a supply outage leaves part of the universe
+    a day behind (2026-10-01). It would then badge healthy tickers as stale,
+    which is worse than saying nothing.
+
+    Absent when either date is unknown: with nothing to compare, omitting the
+    field is honest, whereas `stale: false` would be a claim the server cannot
+    make.
+    """
+    as_of: Date = Field(..., description="Latest analysis date for THIS ticker")
+    market_as_of: Date = Field(..., description="Latest analysis date across all tickers")
+    trading_days_behind: int = Field(..., description="Trading days this ticker lags the market")
+    stale: bool = Field(..., description="Whether the client should warn the user")
+    stale_threshold: int = Field(..., description="trading_days_behind at which stale turns true")
+
+
 class CompleteChartResponse(BaseModel):
     """
     Complete chart data for Flutter app (1 API call gets everything).
@@ -541,6 +562,9 @@ class CompleteChartResponse(BaseModel):
     """
     ticker: str = Field(..., description="Ticker symbol")
     data: List[ChartDataPoint] = Field(..., description="Time series data")
+
+    # Data freshness (S2) — absent when it cannot be determined
+    freshness: Optional[FreshnessResponse] = Field(None, description="How current this ticker's analysis is")
 
     # Trendlines (latest calculation)
     high_slope: Optional[float] = Field(None, description="High trendline slope")

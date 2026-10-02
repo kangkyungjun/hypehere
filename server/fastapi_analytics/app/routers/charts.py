@@ -6,6 +6,7 @@ from sqlalchemy import func
 from datetime import date, timedelta
 from app.database import get_db
 from app.utils.data_quality import data_quality_dict
+from app.utils.freshness import freshness_payload
 from app.models import (
     TickerPrice, TickerIntraday, TickerScore, TickerIndicator, TickerTarget,
     TickerTrendline, TickerInstitution, TickerShort, TickerAIAnalysis,
@@ -145,6 +146,23 @@ def get_complete_chart_data(
     ticker = ticker.upper()
 
     # ========================================
+    # Data freshness (S2)
+    # ========================================
+    # Computed before the no-prices early return on purpose: a renamed or
+    # delisted ticker (BK, HOLX) lands in that branch, and "this ticker's data
+    # stops 63 trading days before the market's" is exactly what the app needs
+    # there instead of a bare empty chart.
+    #
+    # Deliberately NOT `to_date`: the caller may pass a narrow window, and the
+    # reference for "how current is this" has to be the market, not the
+    # request.
+    market_latest = db.query(func.max(TickerScore.date)).scalar()
+    ticker_latest = db.query(func.max(TickerScore.date)).filter(
+        TickerScore.ticker == ticker
+    ).scalar()
+    freshness = freshness_payload(ticker_latest, market_latest)
+
+    # ========================================
     # Query all data sources
     # ========================================
 
@@ -157,9 +175,12 @@ def get_complete_chart_data(
 
     if not prices:
         # 특정 티커에 데이터 없으면 빈 구조 반환 (404 금지)
+        # freshness는 넣어서 보낸다 — 개명·상장폐지 종목이 떨어지는 분기이고,
+        # 앱이 "준비 중"이 아니라 "며칠 전까지의 데이터"임을 말할 수 있게 된다.
         return CompleteChartResponse(
             ticker=ticker,
             data=[],
+            freshness=freshness,
             high_slope=None,
             high_intercept=None,
             high_r_squared=None,
@@ -460,6 +481,7 @@ def get_complete_chart_data(
     return CompleteChartResponse(
         ticker=ticker,
         data=chart_data,
+        freshness=freshness,
 
         # Trendlines (latest calculation)
         high_slope=trendline.high_slope if trendline else None,

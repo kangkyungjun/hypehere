@@ -73,6 +73,33 @@ def is_trading_day(check_date: date) -> bool:
     return True
 
 
+def trading_days_between(start: date, end: date) -> int:
+    """Count trading days strictly after `start` up to and including `end`.
+
+    Returns 0 when `end` is not after `start`. Weekends and the holidays in
+    US_MARKET_HOLIDAYS are skipped.
+
+    Calendar days are the wrong unit for "how far behind is this data": a
+    Friday close read on Monday is 3 calendar days old but 1 trading day
+    behind, and flagging that would put a warning on healthy tickers every
+    weekend.
+
+    Capped at 400 iterations so a bad date can never spin the request.
+    """
+    if end <= start:
+        return 0
+
+    count = 0
+    cursor = start
+    guard = 0
+    while cursor < end and guard < 400:
+        cursor += timedelta(days=1)
+        guard += 1
+        if is_trading_day(cursor):
+            count += 1
+    return count
+
+
 def get_latest_trading_date(db: Session, check_all_tables: bool = False) -> Optional[date]:
     """
     Get the most recent trading day from the database.

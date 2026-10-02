@@ -1,12 +1,63 @@
+import re
+
 from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy.orm import Session
-from sqlalchemy import or_, distinct
+from sqlalchemy import func, or_, distinct
 from typing import List
 from app.database import get_db
 from app.models import Ticker, TickerScore, TickerChange
 from app.schemas import TickerMetadata, TickerChangesResponse
 
 router = APIRouter()
+
+# `.`, `-` and whitespace, for class-share symbol normalization (S3).
+_SEPARATORS = re.compile(r"[.\-\s]")
+
+
+def _strip_separators(value: str) -> str:
+    """`BRK.B` / `BRK-B` / `brk b` -> `BRKB`."""
+    return _SEPARATORS.sub("", value).upper()
+
+
+def _ticker_without_separators(column):
+    """SQL-side equivalent of :func:`_strip_separators` for a ticker column.
+
+    Done in SQL rather than in Python so the match stays inside the query --
+    pulling every ticker out to normalize in the app would turn one indexed
+    lookup into a full scan plus transfer.
+    """
+    return func.replace(
+        func.replace(func.replace(column, ".", ""), "-", ""), " ", ""
+    )
+
+
+def _search_clauses(q: str):
+    """Build the OR-clauses for a search query.
+
+    Ticker, English name and Korean name as before, plus a separator-stripped
+    ticker match so class shares are found however the user types them.
+
+    The normalized clause is why this exists (S3). The app can turn `BRK.B`
+    into `BRK-B` on its own, but it **cannot** resolve a separator-less
+    `BRKB`: four-letter tickers like `NVDA` and `TSLA` are indistinguishable
+    from a contracted class symbol by string shape alone, and guessing
+    produced junk queries (`NVD-A`). The database knows which symbols exist,
+    so the normalization belongs here.
+    """
+    clauses = [
+        TickerScore.ticker.ilike(f"%{q}%"),
+        Ticker.name.ilike(f"%{q}%"),
+        Ticker.extra_data['name_ko'].astext.ilike(f"%{q}%"),  # Korean name
+    ]
+
+    normalized = _strip_separators(q)
+    # Empty after stripping (the user typed only separators): a `%%` pattern
+    # would match every ticker, so the clause is left out.
+    if normalized:
+        clauses.append(
+            _ticker_without_separators(TickerScore.ticker).ilike(f"%{normalized}%")
+        )
+    return clauses
 
 
 @router.get("/search", response_model=List[TickerMetadata])
@@ -22,6 +73,7 @@ def search_tickers(
     - 심볼 또는 이름으로 검색
     - **실제 분석 대상 종목 기준** (TickerScore 테이블)
     - 메타데이터는 Ticker 테이블과 LEFT JOIN
+    - 클래스주 표기 정규화: `BRKB`·`BRK.B`·`brk b` 모두 `BRK-B`를 찾는다 (S3)
 
     Example:
     ```
@@ -51,11 +103,7 @@ def search_tickers(
         Ticker,
         TickerScore.ticker == Ticker.ticker
     ).filter(
-        or_(
-            TickerScore.ticker.ilike(f"%{q}%"),
-            Ticker.name.ilike(f"%{q}%"),
-            Ticker.extra_data['name_ko'].astext.ilike(f"%{q}%")  # Korean name search
-        )
+        or_(*_search_clauses(q))
     ).distinct(
         TickerScore.ticker
     ).limit(limit).all()
