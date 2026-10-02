@@ -762,7 +762,24 @@ class TickerChangeIngest(BaseModel):
     new_ticker: Optional[str] = Field(None, alias="new", max_length=50, description="Successor symbol; null when delisted")
     reason: str = Field(..., max_length=20, description="renamed | delisted")
     last_traded_date: Optional[Date] = Field(None, description="Last date the old symbol traded")
-    detected_at: Optional[DateTime] = Field(None, description="When the pipeline detected it")
+    detected_at: Optional[DateTime] = Field(None, description="When the pipeline detected it (date-only also accepted)")
+
+    @field_validator("detected_at", mode="before")
+    @classmethod
+    def _accept_date_only(cls, v):
+        """Widen `detected_at` to accept a bare date.
+
+        The pipeline's own spec described this as a date ("2026-10-01") while
+        the column is a timestamp, and pydantic rejected the whole batch with
+        a 422 on the first send. The batch is all-or-nothing, so one
+        over-strict field costs the entire upload.
+
+        A date-only value becomes midnight. Precision we never had is not
+        worth a failed batch.
+        """
+        if isinstance(v, str) and len(v.strip()) == 10:
+            return v.strip() + "T00:00:00"
+        return v
 
     @model_validator(mode="after")
     def _renamed_needs_successor(self):
