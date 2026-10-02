@@ -23,6 +23,14 @@ class TickerScore(Base):
     date = Column(Date, primary_key=True, index=True)
     score = Column(Float, nullable=False)
     signal = Column(String(20))  # BUY, SELL, HOLD (supports Korean signals)
+
+    # data_quality (2026-10-02~). Mac mini sends these at the item top level.
+    # NULL = rows written before this column existed. Query responses convert
+    # NULL to 'full' so the app never has to branch on it.
+    analysis_mode = Column(String(10))   # 'full' | 'limited'
+    history_days = Column(Integer)       # trading days the analysis used
+    ai_available = Column(Boolean)       # same as analysis_mode == 'full'
+
     calculated_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
 
 

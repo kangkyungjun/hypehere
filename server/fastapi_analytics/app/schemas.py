@@ -7,11 +7,31 @@ from typing import Optional, List, Union, Dict, Literal
 # Ticker Score Schemas (⭐⭐⭐ MVP 핵심)
 # ============================================================
 
+class DataQualityResponse(BaseModel):
+    """
+    How much the score could be trusted as an AI prediction.
+
+    `limited` means the ticker has only 40-119 trading days of history
+    (recent IPO or spin-off), so the AI head was skipped and the score comes
+    from technicals, flows, analysts and news alone. The pipeline still sends
+    `probability = 0.5` for those, which is a placeholder, NOT a 50% forecast.
+    Clients must hide the AI block when `ai_available` is false instead of
+    drawing that 0.5.
+
+    Rows written before these columns existed come back as `full` -- the
+    conversion happens server-side so clients never see NULL here.
+    """
+    analysis_mode: str = Field("full", description="full | limited")
+    history_days: Optional[int] = Field(None, description="Trading days the analysis used")
+    ai_available: bool = Field(True, description="Whether the AI prediction head ran")
+
+
 class TickerScoreResponse(BaseModel):
     """Single ticker score data point"""
     date: Date = Field(..., description="Score calculation date")
     score: float = Field(..., description="Calculated score value")
     signal: Optional[str] = Field(None, description="Trading signal: BUY/SELL/HOLD")
+    data_quality: Optional[DataQualityResponse] = Field(None, description="Analysis quality meta")
 
     class Config:
         from_attributes = True
@@ -120,6 +140,7 @@ class ChartDataPoint(BaseModel):
     # Score data
     score: Optional[float] = Field(None, description="AI score")
     signal: Optional[str] = Field(None, description="BUY/SELL/HOLD signal")
+    data_quality: Optional[DataQualityResponse] = Field(None, description="Analysis quality meta (absent when there is no score for this date)")
 
     # Target levels
     target_price: Optional[float] = Field(None, description="Target price")
@@ -729,6 +750,18 @@ class ClassificationData(BaseModel):
     metrics: Optional[dict] = None
 
 
+class DataQualityIngest(BaseModel):
+    """
+    Analysis-quality meta from the Mac mini pipeline (2026-10-01 onward).
+
+    Absent means `full` -- the pipeline asked us to treat a missing field that
+    way rather than have it backfill every historical item.
+    """
+    analysis_mode: Optional[str] = Field(None, description="full | limited")
+    history_days: Optional[int] = Field(None, description="Trading days the analysis used")
+    ai_available: Optional[bool] = Field(None, description="analysis_mode == 'full'")
+
+
 class ExtendedItemIngest(BaseModel):
     """
     Extended payload format from Mac mini (nested structure).
@@ -756,6 +789,7 @@ class ExtendedItemIngest(BaseModel):
     membership: Optional[List[str]] = Field(None, description="Index membership list (e.g., ['SP500', 'DOW30'])")
     expert_analysis: Optional[ExpertAnalysisData] = Field(None, description="LLM expert comment (5-lang)")
     classification: Optional[ClassificationData] = Field(None, description="Peter Lynch classification")
+    data_quality: Optional[DataQualityIngest] = Field(None, description="Analysis quality meta (absent = full)")
 
 
 class SimpleItemIngest(BaseModel):

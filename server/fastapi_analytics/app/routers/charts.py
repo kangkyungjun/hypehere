@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 from datetime import date, timedelta
 from app.database import get_db
+from app.utils.data_quality import data_quality_dict
 from app.models import (
     TickerPrice, TickerIntraday, TickerScore, TickerIndicator, TickerTarget,
     TickerTrendline, TickerInstitution, TickerShort, TickerAIAnalysis,
@@ -374,6 +375,7 @@ def get_complete_chart_data(
             # Score
             score=score_obj.score if score_obj else None,
             signal=score_obj.signal if score_obj else None,
+            data_quality=data_quality_dict(score_obj),
 
             # Target
             target_price=target_obj.target_price if target_obj else None,

@@ -7,6 +7,7 @@ from app.database import get_db
 from app.models import TickerScore, Ticker, StockMembership, TickerPrice
 from app.schemas import TickerScoreListResponse, TopTickerResponse
 from app.utils.trading_calendar import get_latest_trading_date
+from app.utils.data_quality import data_quality_dict
 
 router = APIRouter()
 
@@ -364,7 +365,18 @@ def get_ticker_scores(
             f"No scores found for ticker '{ticker}' in date range {from_date} to {to_date}"
         )
 
+    # Built explicitly rather than handing the ORM rows straight to
+    # from_attributes: data_quality is a nested object derived from three flat
+    # columns, so it has to be composed here.
     return {
         "ticker": ticker.upper(),
-        "scores": scores
+        "scores": [
+            {
+                "date": s.date,
+                "score": s.score,
+                "signal": s.signal,
+                "data_quality": data_quality_dict(s),
+            }
+            for s in scores
+        ],
     }

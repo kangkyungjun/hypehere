@@ -371,6 +371,16 @@ def ingest_scores(payload: IngestPayload, db: Session = Depends(get_db)):
             score_value = item.score
             signal = item.signal
 
+        # data_quality lives on the extended payload only. Absent means full
+        # -- the pipeline's own spec says to read a missing field that way.
+        dq = getattr(item, 'data_quality', None) if is_extended else None
+        analysis_mode = (dq.analysis_mode if dq and dq.analysis_mode else 'full')
+        history_days = dq.history_days if dq else None
+        ai_available = (
+            dq.ai_available if dq and dq.ai_available is not None
+            else analysis_mode == 'full'
+        )
+
         # Process score (always present in both formats)
         score_obj = (
             db.query(TickerScore)
@@ -385,6 +395,9 @@ def ingest_scores(payload: IngestPayload, db: Session = Depends(get_db)):
             # Update existing score record
             score_obj.score = score_value
             score_obj.signal = signal
+            score_obj.analysis_mode = analysis_mode
+            score_obj.history_days = history_days
+            score_obj.ai_available = ai_available
         else:
             # Insert new score record
             score_obj = TickerScore(
@@ -392,6 +405,9 @@ def ingest_scores(payload: IngestPayload, db: Session = Depends(get_db)):
                 date=score_date,
                 score=score_value,
                 signal=signal,
+                analysis_mode=analysis_mode,
+                history_days=history_days,
+                ai_available=ai_available,
             )
             db.add(score_obj)
 

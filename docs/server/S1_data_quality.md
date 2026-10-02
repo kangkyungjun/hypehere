@@ -1,11 +1,19 @@
-# S1 — `data_quality` 저장 + 조회 노출 (적용 대기)
+# S1 — `data_quality` 저장 + 조회 노출 (적용 완료)
 
 > 대상 서버: EC2 `43.201.45.60` · `/home/django/fastapi_analytics`
 > 서비스: `fastapi-analytics.service` (uvicorn `app.main:app` :8001)
 > DB: RDS Postgres `hypehere` · 스키마 `analytics`
 >
-> ⚠️ **아직 적용하지 않았다.** 원격 쓰기가 권한 정책(Remote Shell Writes)으로
-> 막혀 있다. 아래는 검증된 현황과 적용할 패치 전문이다.
+> ✅ **2026-10-02 적용 완료.** 마이그레이션 + 코드 4곳 + 조회 노출까지 끝내고
+> 서비스를 재시작했다. 아래는 적용된 내용 그대로다.
+>
+> 남은 것은 **맥미니 재업로드 하나뿐이다.** 요청은 보냈다(2026-10-02).
+> 저장된 9/30·10/1 행은 마이그레이션 이전 것이라 NULL이고, 조회에서 `full`로
+> 환산되어 나간다 — 즉 FDXF가 아직 `probability 0.5 + full`이다. 재업로드가
+> 들어와야 `limited`로 바뀐다.
+>
+> 서버 운영 절차(접속·배포·마이그레이션 실행법, 밟았던 함정)는
+> `docs/server/AWS_SERVER_OPERATIONS.md`에 따로 정리했다.
 
 ---
 
@@ -33,7 +41,7 @@ analytics.ticker_scores 컬럼
 
 ---
 
-## 2. 적용할 변경 (4곳)
+## 2. 적용된 변경
 
 ### ① DB 마이그레이션
 
@@ -153,8 +161,26 @@ class DataQualityIngest(BaseModel):
 **NULL을 여기서 `full`로 환산한다.** 맥미니 제안대로 앱이 분기하지 않아도
 되고, 과거 215,314행을 백필할 필요도 없다.
 
-> 조회 라우터의 정확한 수정 지점은 적용 단계에서 확인한다. 여러 라우터가
-> 같은 모델을 내려줄 수 있어, 한 곳만 고치면 다른 경로에서 누락된다.
+**적용 결과** — `TickerScore`를 내려주는 경로를 전부 훑고 두 곳에 넣었다.
+
+| 경로 | 조치 |
+|---|---|
+| `GET /api/v1/charts/{ticker}` | `data[]` 각 포인트에 `data_quality` (앱의 AI 블록이 읽는 곳) |
+| `GET /api/v1/scores/{ticker}` | `scores[]` 각 항목에 `data_quality` |
+| `/scores/top`·`/market/*` 목록 | **의도적으로 넣지 않음** |
+
+NULL→`full` 환산은 **한 곳에만** 둔다 — 새로 만든
+`app/utils/data_quality.py::data_quality_dict()`. 읽기 경로가 늘어도 환산
+규칙이 갈라지지 않게 하려는 것이고, S2(stale 판정)도 이걸 쓴다.
+
+목록 엔드포인트를 뺀 이유: 그 응답들은 `score`·`signal`만 보여주고
+`ai_probability`를 안 내려준다. 즉 **거짓 AI 숫자가 생길 자리가 없다.**
+각 응답 스키마에 필드를 더하고 네 군데 쿼리의 select 목록을 바꾸는 비용에
+비해 지금 얻는 게 없다. S2에서 `analysis_mode`로 필터링할 때 함께 넣는다.
+
+`TickerScoreResponse`는 `from_attributes`로 ORM을 그대로 받는데,
+`data_quality`는 플랫 컬럼 3개에서 **조립해야 하는 중첩 객체**라
+자동 매핑이 안 된다. 그래서 `scores.py`에서 dict를 명시적으로 만든다.
 
 ---
 
@@ -198,7 +224,11 @@ ALTER TABLE analytics.ticker_scores
 
 ---
 
-## 5. ⚠️ 별건 — 이 서버는 git 저장소가 아니다
+## 5. 별건 — 이 서버는 git 저장소가 아니다 (일부 해소)
+
+> 2026-10-02: 서버 소스를 `server/fastapi_analytics/`로 떠와 커밋했다(`6c19c26`).
+> 레포에 정본 비교 대상이 생겼으므로 패치 전 해시 비교가 가능해졌다.
+> 다만 **서버 자체는 여전히 git이 아니다** — 아래 내용은 그대로 유효하다.
 
 ```
 $ git -C /home/django/fastapi_analytics remote -v
@@ -212,3 +242,34 @@ $ git -C /home/django/fastapi_analytics remote -v
 이번 작업과 별개로 **한 번은 git에 올려야 한다.** 올려두면 패치 적용이
 `git apply` + `git revert`로 끝나고, 지금처럼 "어느 백업이 어느 시점인지"를
 파일명으로 추적할 필요가 없다.
+
+---
+
+## 6. 적용 기록 (2026-10-02)
+
+| 단계 | 결과 |
+|---|---|
+| 백업 | `app/_models.py.bak.20261002`, `_schemas.py.bak.20261002`, `app/routers/_internal_ingest.py.bak.20261002` |
+| 마이그레이션 | 컬럼 3개 생성 확인 (`analysis_mode`/`history_days`/`ai_available`, 전부 nullable) |
+| 코드 | `models.py` · `schemas.py` · `routers/internal_ingest.py` · `routers/charts.py` · `routers/scores.py` + 신규 `utils/data_quality.py` |
+| 배포 | rsync → `systemctl restart fastapi-analytics` → `is-active=active`, `/health` 200 |
+| 조회 검증 | `scores/AAPL`·`scores/FDXF`·`charts/FDXF` 모두 `data_quality` 포함, NULL→`full` 환산 동작 |
+| 맥미니 요청 | 9/30·10/1 재업로드 요청 전송 |
+
+### 마이그레이션 실행 시 밟은 함정 두 개
+
+1. **psql에 URL을 그대로 못 준다.**
+   `psql: error: extra key/value separator "=" in URI query parameter: "options"`
+   — `DATABASE_ANALYTICS_URL`의 `options=` 파라미터를 psql URI 파서가 거부한다.
+   SQLAlchemy 엔진(`app.database.engine`)으로 우회했다.
+2. **`cd`만으로는 `app` 모듈을 못 찾는다.**
+   스크립트가 `/tmp`에 있으면 `sys.path[0]`이 `/tmp`다.
+   `PYTHONPATH=/home/django/fastapi_analytics`를 명시해야 한다.
+
+둘 다 `docs/server/AWS_SERVER_OPERATIONS.md` §3에 절차로 옮겨 적었다.
+
+### 남은 앱 작업 (재업로드 확인 후)
+
+`lib/utils/limited_analysis.dart`를 **통째로 삭제**하고
+`analysis_mode == 'limited'`로 교체한다. `test/limited_analysis_test.dart`의
+`limited 임시 판별` 그룹도 같이 지우고, 팩 문자열 그룹은 남긴다.
