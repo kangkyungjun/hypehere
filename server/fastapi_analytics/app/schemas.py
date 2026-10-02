@@ -1213,6 +1213,14 @@ class PortfolioHoldingCreate(BaseModel):
 class PortfolioHoldingResponse(BaseModel):
     """보유 종목 응답"""
     ticker: str
+    # 티커 개명 해소 (S6). 안 바뀐 종목에서는 둘 다 null이다.
+    resolved_ticker: Optional[str] = Field(
+        None,
+        description="현재 유효한 심볼. 저장된 ticker와 다를 때만 채워진다",
+    )
+    change_reason: Optional[str] = Field(
+        None, description="renamed | delisted"
+    )
     shares: Optional[float] = None
     avg_price: Optional[float] = None
     notes: Optional[str] = None
@@ -1246,6 +1254,14 @@ class WatchlistItemCreate(BaseModel):
 class WatchlistItemResponse(BaseModel):
     """관심 종목 응답"""
     ticker: str
+    # 티커 개명 해소 (S6). 안 바뀐 종목에서는 둘 다 null이다.
+    resolved_ticker: Optional[str] = Field(
+        None,
+        description="현재 유효한 심볼. 저장된 ticker와 다를 때만 채워진다",
+    )
+    change_reason: Optional[str] = Field(
+        None, description="renamed | delisted"
+    )
     notes: Optional[str] = None
     created_at: Optional[DateTime] = None
     name: Optional[str] = None

@@ -2982,4 +2982,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String staleDataExplain(String date, String marketDate) {
     return '$date以降、この銘柄の分析は更新されていません。市場の基準日は$marketDateです。';
   }
+
+  @override
+  String get delistedShort => '上場廃止';
 }

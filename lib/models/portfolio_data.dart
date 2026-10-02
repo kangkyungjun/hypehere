@@ -4,6 +4,24 @@
 
 class PortfolioHolding {
   final String ticker;
+
+  /// 현재 유효한 심볼. **저장된 [ticker]와 다를 때만** 채워진다 (서버 S6).
+  ///
+  /// 서버가 가격·점수를 이쪽으로 조인해서 내려준다. 즉 이 값이 있으면
+  /// 아래 숫자들은 **새 심볼의 것**이고, 저장된 티커의 것이 아니다.
+  /// 화면에서 그 사실을 말해 주지 않으면 사용자는 BK의 가격이라고 믿는다.
+  final String? resolvedTicker;
+
+  /// `renamed` | `delisted`. 안 바뀐 종목에서는 null.
+  ///
+  /// `delisted`는 [resolvedTicker]가 null인 채로 올 수 있다 — 옮겨 갈 곳이
+  /// 없고 심볼도 그대로이기 때문이다.
+  final String? changeReason;
+
+  /// 사용자에게 "바뀌었다"고 말해야 하는가.
+  bool get hasIdentityChange => resolvedTicker != null || changeReason != null;
+
+  bool get isDelisted => changeReason == 'delisted';
   final double? shares;
   final double? avgPrice;
   final String? notes;
@@ -21,6 +39,8 @@ class PortfolioHolding {
 
   PortfolioHolding({
     required this.ticker,
+    this.resolvedTicker,
+    this.changeReason,
     this.shares,
     this.avgPrice,
     this.notes,
@@ -38,6 +58,8 @@ class PortfolioHolding {
   factory PortfolioHolding.fromJson(Map<String, dynamic> json) {
     return PortfolioHolding(
       ticker: json['ticker'] as String,
+      resolvedTicker: json['resolved_ticker'] as String?,
+      changeReason: json['change_reason'] as String?,
       shares: (json['shares'] as num?)?.toDouble(),
       avgPrice: (json['avg_price'] as num?)?.toDouble(),
       notes: json['notes'] as String?,
@@ -77,6 +99,24 @@ class PortfolioHolding {
 
 class WatchlistItem {
   final String ticker;
+
+  /// 현재 유효한 심볼. **저장된 [ticker]와 다를 때만** 채워진다 (서버 S6).
+  ///
+  /// 서버가 가격·점수를 이쪽으로 조인해서 내려준다. 즉 이 값이 있으면
+  /// 아래 숫자들은 **새 심볼의 것**이고, 저장된 티커의 것이 아니다.
+  /// 화면에서 그 사실을 말해 주지 않으면 사용자는 BK의 가격이라고 믿는다.
+  final String? resolvedTicker;
+
+  /// `renamed` | `delisted`. 안 바뀐 종목에서는 null.
+  ///
+  /// `delisted`는 [resolvedTicker]가 null인 채로 올 수 있다 — 옮겨 갈 곳이
+  /// 없고 심볼도 그대로이기 때문이다.
+  final String? changeReason;
+
+  /// 사용자에게 "바뀌었다"고 말해야 하는가.
+  bool get hasIdentityChange => resolvedTicker != null || changeReason != null;
+
+  bool get isDelisted => changeReason == 'delisted';
   final String? notes;
   final DateTime? createdAt;
   final String? name;
@@ -88,6 +128,8 @@ class WatchlistItem {
 
   WatchlistItem({
     required this.ticker,
+    this.resolvedTicker,
+    this.changeReason,
     this.notes,
     this.createdAt,
     this.name,
@@ -101,6 +143,8 @@ class WatchlistItem {
   factory WatchlistItem.fromJson(Map<String, dynamic> json) {
     return WatchlistItem(
       ticker: json['ticker'] as String,
+      resolvedTicker: json['resolved_ticker'] as String?,
+      changeReason: json['change_reason'] as String?,
       notes: json['notes'] as String?,
       createdAt: json['created_at'] != null
           ? DateTime.tryParse(json['created_at'].toString())

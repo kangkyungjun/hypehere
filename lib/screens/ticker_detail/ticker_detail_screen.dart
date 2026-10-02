@@ -7,6 +7,7 @@ import '../../utils/error_localizer.dart';
 import '../../widgets/common/data_unavailable_view.dart';
 import '../../models/chart_data.dart';
 import '../../models/ticker_change.dart';
+import '../../widgets/common/stale_data_banner.dart';
 import '../../models/ticker_info.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/portfolio_provider.dart';
@@ -560,6 +561,21 @@ class _TickerDetailScreenState extends State<TickerDetailScreen> {
               tickerInfo: _tickerInfo,
               onScrollToAIInsight: _scrollToAIInsight,
             ),
+
+            // 데이터가 시장보다 뒤처졌을 때만 뜬다 (S2).
+            //
+            // 헤더 **바로 아래**에 둔다. 가격을 본 직후에 "그 숫자가 며칠
+            // 전 것"임을 알아야 의미가 있다. 아래로 내리면 이미 읽고 지나간
+            // 뒤에 알려주는 꼴이 된다.
+            //
+            // 배너 자체는 `stale`이 아니면 스스로 아무것도 안 그린다.
+            // 여기 조건문이 있는 건 **간격** 때문이다 — 조건 없이 두면
+            // 배너가 안 보이는 종목에도 cardGap이 한 번 더 들어가서
+            // 헤더와 밸류에이션 카드 사이가 벌어진다.
+            if (_chartData!.freshness?.stale == true) ...[
+              const SizedBox(height: AppDensity.cardGap),
+              StaleDataBanner(freshness: _chartData!.freshness),
+            ],
 
             // 카드 사이(12) > 카드 안쪽 블록 간격(≤8). 개편 전엔 8이라
             // 카드 안이 밖보다 넓어 경계가 읽히지 않았다.

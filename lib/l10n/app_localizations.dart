@@ -5711,6 +5711,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This stock’s analysis has not updated since {date}. The market is current through {marketDate}.'**
   String staleDataExplain(String date, String marketDate);
+
+  /// No description provided for @delistedShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Delisted'**
+  String get delistedShort;
 }
 
 class _AppLocalizationsDelegate

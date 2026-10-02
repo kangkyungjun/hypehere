@@ -1193,5 +1193,6 @@
         "type": "String"
       }
     }
-  }
+  },
+  "delistedShort": "上場廃止"
 }

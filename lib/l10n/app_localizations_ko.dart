@@ -2983,4 +2983,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String staleDataExplain(String date, String marketDate) {
     return '$date 이후 이 종목의 분석이 갱신되지 않았습니다. 시장 기준일은 $marketDate입니다.';
   }
+
+  @override
+  String get delistedShort => '거래종료';
 }

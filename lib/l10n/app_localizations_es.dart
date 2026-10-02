@@ -3081,4 +3081,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String staleDataExplain(String date, String marketDate) {
     return 'El análisis de esta acción no se actualiza desde el $date. El mercado está al $marketDate.';
   }
+
+  @override
+  String get delistedShort => 'Excluida';
 }

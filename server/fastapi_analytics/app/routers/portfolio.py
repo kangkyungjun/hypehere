@@ -62,6 +62,33 @@ _INSTANT_ADVICE_TEMPLATES = {
 
 logger = logging.getLogger(__name__)
 
+# 저장된 티커를 **현재 유효한 심볼**로 바꿔 주는 조인 (S6).
+#
+# 보유·관심종목은 티커 문자열로 저장된다. 개명되면 파이프라인이 옛 심볼
+# 전송을 멈추므로, 그대로 조인하면 BK를 들고 있는 사용자가 2026-07-02
+# 가격으로 평가되고 포트폴리오 합계가 그만큼 틀어진다.
+#
+# FROM 없는 SELECT는 **항상 한 행**을 돌려주므로 eff.ticker는 null이 될 수
+# 없다 — ticker_changes에 해당 행이 없으면 p.ticker가 그대로 나온다.
+#
+# ⚠️ 한 홉만 따라간다. 체인(A→B 후 B→C)은 지금 데이터에 없고, 재귀 CTE는
+# 순환 데이터가 들어왔을 때 질의가 돌아 버린다. 체인이 실제로 생기면
+# 그때 홉 수를 명시적으로 늘린다.
+_EFFECTIVE_TICKER_JOIN = """
+        LEFT JOIN LATERAL (
+            SELECT
+                COALESCE(
+                    (SELECT tc.new_ticker FROM analytics.ticker_changes tc
+                      WHERE tc.old_ticker = p.ticker
+                        AND tc.reason = 'renamed'
+                        AND tc.new_ticker IS NOT NULL),
+                    p.ticker
+                ) AS ticker,
+                (SELECT tc.reason FROM analytics.ticker_changes tc
+                  WHERE tc.old_ticker = p.ticker) AS reason
+        ) eff ON true
+"""
+
 router = APIRouter()
 
 
@@ -193,30 +220,48 @@ def get_holdings(
     user_id: int = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """내 보유 종목 목록 (최신 가격/점수 포함)"""
-    rows = db.execute(text("""
+    """내 보유 종목 목록 (최신 가격/점수 포함)
+
+    티커가 개명된 보유 종목은 **후속 심볼로 가격을 붙인다**(S6). 저장된
+    문자열 그대로 조인하면 BK를 들고 있는 사용자가 2026-07-02 가격으로
+    평가되고, 포트폴리오 합계가 그만큼 틀어진다.
+
+    저장된 값은 건드리지 않는다. 사용자 데이터를 조용히 고쳐 쓰는 것보다
+    읽을 때 해소하는 쪽이 되돌리기 쉽고, 앱이 `resolved_ticker`로 "BNY로
+    바뀌었다"를 말해 줄 수도 있다.
+    """
+    rows = db.execute(text(f"""
         SELECT
-            p.ticker, p.shares, p.avg_price, p.notes,
+            p.ticker, eff.ticker AS resolved_ticker, eff.reason AS change_reason,
+            p.shares, p.avg_price, p.notes,
             p.created_at, p.updated_at,
             t.name, t.metadata->>'name_ko' AS name_ko,
             tp.close AS current_price, tp.change_pct,
             ts.score, ts.signal
         FROM analytics.user_portfolios p
-        LEFT JOIN analytics.tickers t ON t.ticker = p.ticker
+        {_EFFECTIVE_TICKER_JOIN}
+        LEFT JOIN analytics.tickers t ON t.ticker = eff.ticker
         LEFT JOIN LATERAL (
             SELECT close, change_pct FROM analytics.ticker_prices
-            WHERE ticker = p.ticker ORDER BY date DESC LIMIT 1
+            WHERE ticker = eff.ticker ORDER BY date DESC LIMIT 1
         ) tp ON true
         LEFT JOIN LATERAL (
             SELECT score, signal FROM analytics.ticker_scores
-            WHERE ticker = p.ticker ORDER BY date DESC LIMIT 1
+            WHERE ticker = eff.ticker ORDER BY date DESC LIMIT 1
         ) ts ON true
         WHERE p.user_id = :uid AND p.type = 'HOLDING'
         ORDER BY p.created_at DESC
     """), {"uid": user_id}).fetchall()
 
     return [PortfolioHoldingResponse(
-        ticker=r.ticker, shares=r.shares, avg_price=r.avg_price,
+        ticker=r.ticker,
+        # 안 바뀐 종목에는 null을 준다 — 앱이 "같은 값"을 비교하지 않아도
+        # 되게. 대부분의 행이 이 경우다.
+        resolved_ticker=(
+            r.resolved_ticker if r.resolved_ticker != r.ticker else None
+        ),
+        change_reason=r.change_reason,
+        shares=r.shares, avg_price=r.avg_price,
         notes=r.notes, created_at=r.created_at, updated_at=r.updated_at,
         name=r.name, name_ko=r.name_ko,
         current_price=r.current_price, change_pct=r.change_pct,
@@ -381,29 +426,36 @@ def get_watchlist(
     user_id: int = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """내 관심 종목 목록 (최신 가격/점수 포함)"""
-    rows = db.execute(text("""
+    """내 관심 종목 목록 (최신 가격/점수 포함) — 개명 해소는 보유 종목과 동일"""
+    rows = db.execute(text(f"""
         SELECT
-            p.ticker, p.notes, p.created_at,
+            p.ticker, eff.ticker AS resolved_ticker, eff.reason AS change_reason,
+            p.notes, p.created_at,
             t.name, t.metadata->>'name_ko' AS name_ko,
             tp.close AS current_price, tp.change_pct,
             ts.score, ts.signal
         FROM analytics.user_portfolios p
-        LEFT JOIN analytics.tickers t ON t.ticker = p.ticker
+        {_EFFECTIVE_TICKER_JOIN}
+        LEFT JOIN analytics.tickers t ON t.ticker = eff.ticker
         LEFT JOIN LATERAL (
             SELECT close, change_pct FROM analytics.ticker_prices
-            WHERE ticker = p.ticker ORDER BY date DESC LIMIT 1
+            WHERE ticker = eff.ticker ORDER BY date DESC LIMIT 1
         ) tp ON true
         LEFT JOIN LATERAL (
             SELECT score, signal FROM analytics.ticker_scores
-            WHERE ticker = p.ticker ORDER BY date DESC LIMIT 1
+            WHERE ticker = eff.ticker ORDER BY date DESC LIMIT 1
         ) ts ON true
         WHERE p.user_id = :uid AND p.type = 'WATCHLIST'
         ORDER BY p.created_at DESC
     """), {"uid": user_id}).fetchall()
 
     return [WatchlistItemResponse(
-        ticker=r.ticker, notes=r.notes, created_at=r.created_at,
+        ticker=r.ticker,
+        resolved_ticker=(
+            r.resolved_ticker if r.resolved_ticker != r.ticker else None
+        ),
+        change_reason=r.change_reason,
+        notes=r.notes, created_at=r.created_at,
         name=r.name, name_ko=r.name_ko,
         current_price=r.current_price, change_pct=r.change_pct,
         score=r.score, signal=r.signal,
@@ -668,13 +720,16 @@ def get_summary(
         # ── 실시간 계산 (target_date 없을 때) ──
 
         # 1) 보유 종목 + 최신 가격 조회
-        holdings_rows = db.execute(text("""
+        # 개명 해소는 /holdings 와 같아야 한다. 다르면 목록의 합과 요약의
+        # 합이 어긋나서, 어느 쪽이 맞는지 사용자가 알 수 없게 된다.
+        holdings_rows = db.execute(text(f"""
             SELECT p.ticker, p.shares, p.avg_price,
                    tp.close AS current_price, tp.change_pct
             FROM analytics.user_portfolios p
+            {_EFFECTIVE_TICKER_JOIN}
             LEFT JOIN LATERAL (
                 SELECT close, change_pct FROM analytics.ticker_prices
-                WHERE ticker = p.ticker ORDER BY date DESC LIMIT 1
+                WHERE ticker = eff.ticker ORDER BY date DESC LIMIT 1
             ) tp ON true
             WHERE p.user_id = :uid AND p.type = 'HOLDING'
               AND COALESCE(p.shares, 0) > 0

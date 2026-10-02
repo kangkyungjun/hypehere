@@ -38,7 +38,9 @@ import 'package:marketlens/screens/watchlist/widgets/portfolio_summary_card.dart
 import 'package:marketlens/screens/watchlist/widgets/watchlist_tab.dart';
 import 'package:marketlens/exceptions/api_error_codes.dart';
 import 'package:marketlens/exceptions/api_exception.dart';
+import 'package:marketlens/models/chart_data.dart';
 import 'package:marketlens/models/ticker_change.dart';
+import 'package:marketlens/widgets/common/stale_data_banner.dart';
 import 'package:marketlens/widgets/common/data_unavailable_view.dart';
 import 'package:marketlens/widgets/news/mention_bubble_card.dart';
 import 'package:marketlens/widgets/news/news_article_row.dart';
@@ -340,9 +342,12 @@ class ScreenHarness {
 
   // ── 보유종목 ─────────────────────────────────────────────────────────
   PortfolioHolding hold(String t, String ko, double shares, double avg,
-          double cur, double pct, double sc, String sig) =>
+          double cur, double pct, double sc, String sig,
+          {String? resolved, String? reason}) =>
       PortfolioHolding(
         ticker: t,
+        resolvedTicker: resolved,
+        changeReason: reason,
         shares: shares,
         avgPrice: avg,
         name: ko,
@@ -357,6 +362,12 @@ class ScreenHarness {
     hold('NVDA', '엔비디아', 12, 142.10, 184.22, 1.84, 78, 'BUY'),
     hold('AAPL', '애플', 30, 254.80, 271.40, -0.52, 66, 'HOLD'),
     hold('TSLA', '테슬라', 5, 448.90, 412.05, -2.31, 54, 'SELL'),
+    // 개명 — 티커 줄에 `→ BNY`가 붙는다. 가격은 서버가 BNY로 조인해 준 값.
+    hold('BK', '뱅크오브뉴욕멜론', 20, 98.40, 143.92, 0.63, 61, 'HOLD',
+        resolved: 'BNY', reason: 'renamed'),
+    // 상장폐지 — 후속이 없으므로 resolved는 없고 칩만 붙는다.
+    hold('HOLX', '홀로직', 15, 81.20, 76.01, 0.0, 48, 'HOLD',
+        reason: 'delisted'),
   ];
 
   Widget portfolio() => ListView(
@@ -505,6 +516,47 @@ class ScreenHarness {
     );
   }
 
+  /// stale 배너. 서버 실측값 그대로 — 자릿수가 다른 두 경우를 같이 본다.
+  ///
+  /// 설명문이 두 날짜를 모두 끼우는 긴 문장이라 1.3배에서 넘칠 자리다.
+  Widget staleBanners() => ListView(
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
+        children: [
+          // EA — 상장폐지, 두 자리
+          StaleDataBanner(
+            freshness: Freshness(
+              asOf: DateTime(2026, 8, 4),
+              marketAsOf: DateTime(2026, 10, 1),
+              tradingDaysBehind: 41,
+              stale: true,
+              staleThreshold: 2,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          // HOLX — 세 자리. 숫자가 길어져도 줄이 안 깨져야 한다.
+          StaleDataBanner(
+            freshness: Freshness(
+              asOf: DateTime(2026, 4, 6),
+              marketAsOf: DateTime(2026, 10, 1),
+              tradingDaysBehind: 125,
+              stale: true,
+              staleThreshold: 2,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          // 경계값 — 임계값에 막 걸린 경우.
+          StaleDataBanner(
+            freshness: Freshness(
+              asOf: DateTime(2026, 9, 29),
+              marketAsOf: DateTime(2026, 10, 1),
+              tradingDaysBehind: 2,
+              stale: true,
+              staleThreshold: 2,
+            ),
+          ),
+        ],
+      );
+
   Map<String, Widget Function()> get screens => {
         'home': homeToday,
         'news': newsTimeline,
@@ -513,6 +565,7 @@ class ScreenHarness {
         'portfolio': portfolio,
         'failure': failureStates,
         'tickerchange': tickerChangeStates,
+        'stale': staleBanners,
       };
 }
 

@@ -33,16 +33,27 @@ void main() {
     harness = ScreenHarness();
   });
 
-  /// 숫자만 검사한다. 종목명·섹터명의 ellipsis는 **의도된 동작**이다.
-  List<String> truncatedNumbers() {
+  /// 잘리면 **안 되는** 텍스트를 찾는다. 종목명·섹터명의 ellipsis는
+  /// 의도된 동작이므로 제외한다.
+  ///
+  /// 두 종류를 본다:
+  ///
+  /// 1. **숫자** — `43,5…`처럼 잘리면 틀린 값이 표시된다.
+  /// 2. **티커·정체성 변경 표시** — 숫자 검사만 있을 때 이게 빠져나갔다.
+  ///    보유종목 행에 `→ BNY`를 붙였더니 `→ …`로 잘려 화살표가 아무것도
+  ///    가리키지 않았고, 상장폐지 행은 `거래종료`에 밀려 **티커가 통째로
+  ///    사라졌다**. 어느 종목인지 못 읽는 건 틀린 숫자만큼 나쁘다.
+  ///    캡쳐를 눈으로 보고서야 발견했다 — 그래서 검사에 넣는다.
+  List<String> truncatedCritical() {
     final numeric = RegExp(r'^[▲▼─+\-]?\$?[\d,.]+%?$');
+    // 티커(`BRK-B`)와 변경 표시(`→ BNY`). 한글 회사명은 안 걸린다.
+    final symbol = RegExp(r'^(→\s*)?[A-Z][A-Z0-9.\-]{0,7}$');
     final out = <String>[];
     for (final e in find.byType(Text).evaluate()) {
       final r = e.renderObject;
       final t = (e.widget as Text).data ?? '';
-      if (r is RenderParagraph && r.didExceedMaxLines && numeric.hasMatch(t)) {
-        out.add(t);
-      }
+      if (r is! RenderParagraph || !r.didExceedMaxLines) continue;
+      if (numeric.hasMatch(t) || symbol.hasMatch(t)) out.add(t);
     }
     return out;
   }
@@ -80,8 +91,8 @@ void main() {
               .toList();
           expect(overflow, isEmpty, reason: '$label\n${overflow.join("\n")}');
 
-          final cut = truncatedNumbers();
-          expect(cut, isEmpty, reason: '$label 잘린 숫자: $cut');
+          final cut = truncatedCritical();
+          expect(cut, isEmpty, reason: '$label 잘리면 안 되는 텍스트: $cut');
         });
       }
     }

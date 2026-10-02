@@ -151,6 +151,13 @@ class HoldingListItem extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // 티커. **절대 줄이지 않는다.**
+                  //
+                  // 처음엔 변경 표시를 같은 Row에 Flexible로 넣었다가
+                  // `BK → ...`로 새 티커가 잘리고, 상장폐지 행에서는
+                  // `거래종료`에 밀려 **티커가 통째로 사라졌다**. 어느
+                  // 종목인지 못 읽는 건 원래 버그보다 나쁘다.
+                  // 좁은 칼럼에서 둘을 경쟁시키면 안 된다 — 줄을 나눈다.
                   Text(
                     holding.ticker,
                     style: TextStyle(
@@ -159,6 +166,37 @@ class HoldingListItem extends StatelessWidget {
                       color: mlc.textPrimary,
                     ),
                   ),
+
+                  // 정체성 변경 표시 (S6). 서버가 개명 종목의 가격·점수를
+                  // **새 심볼로 조인해서** 내려준다. 여기서 말해 주지
+                  // 않으면 사용자는 아래 숫자가 저장된 티커의 것이라고 믿는다.
+                  // caption(11) + 2줄 허용. bodySmall(13)로 뒀더니 좁은
+                  // 기기(320px) × 최대 배율(1.3)에서 `→ ...`로 잘렸다.
+                  // 화살표가 아무것도 가리키지 않는 표시는 없느니만 못하다.
+                  // 2줄까지 흘러가게 두면 최악의 경우에도 읽을 수 있다.
+                  if (holding.resolvedTicker != null)
+                    Text(
+                      '→ ${holding.resolvedTicker}',
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: AppTypography.caption,
+                        fontWeight: AppTypography.bold,
+                        color: mlc.accentBlue,
+                      ),
+                    )
+                  else if (holding.isDelisted)
+                    Text(
+                      l10n.delistedShort,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: AppTypography.caption,
+                        fontWeight: AppTypography.semiBold,
+                        color: mlc.textTertiary,
+                      ),
+                    ),
+
                   Text(
                     displayName,
                     style: TextStyle(

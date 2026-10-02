@@ -1312,5 +1312,6 @@
         "type": "String"
       }
     }
-  }
+  },
+  "delistedShort": "거래종료"
 }

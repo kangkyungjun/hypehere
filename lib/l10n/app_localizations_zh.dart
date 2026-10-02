@@ -2972,4 +2972,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String staleDataExplain(String date, String marketDate) {
     return '自 $date 起，该股票的分析未再更新。市场基准日为 $marketDate。';
   }
+
+  @override
+  String get delistedShort => '已退市';
 }
