@@ -10,7 +10,7 @@ from app.database import get_db
 from app.models import (
     TickerScore, TickerPrice, TickerIntraday, TickerIndicator, TickerTarget,
     TickerTrendline, TickerInstitution, TickerShort, TickerAIAnalysis,
-    TickerAnalystRating, Ticker,
+    TickerAnalystRating, Ticker, TickerChange,
     CompanyProfile, TickerKeyMetrics, TickerFinancials, TickerDividend,
     MacroIndicator, MacroChartData, TickerCalendar, TickerEarningsHistory,
     TickerDefenseLine, TickerRecommendation, TickerInstitutionalHolder,
@@ -27,6 +27,7 @@ from app.models import (
 )
 from app.schemas import (
     IngestPayload, ExtendedItemIngest, MacroIngestPayload,
+    TickerChangesIngestPayload,
     EarningsWeekIngestPayload, MarketIndicesIngestPayload,
     NewsIngestPayload, NewsIngestResponse,
     WithdrawalRequest, WithdrawalResponse,
@@ -1237,6 +1238,80 @@ def ingest_scores(payload: IngestPayload, db: Session = Depends(get_db)):
 # ============================
 # 이번 주 실적 일정 Ingest 엔드포인트
 # ============================
+@router.post("/ticker-changes", dependencies=[Depends(verify_api_key)])
+def ingest_ticker_changes(
+    payload: TickerChangesIngestPayload,
+    db: Session = Depends(get_db),
+):
+    """
+    Ingest ticker identity changes (renames and delistings) from Mac mini.
+
+    **Internal API** - Not for mobile app use.
+
+    ```json
+    {
+      "items": [
+        {"old": "BK",   "new": "BNY",   "reason": "renamed",
+         "last_traded_date": "2026-09-15", "detected_at": "2026-09-16T06:35:00"},
+        {"old": "ANSS", "new": null,    "reason": "delisted",
+         "last_traded_date": "2026-08-28", "detected_at": "2026-09-11T06:35:00"}
+      ]
+    }
+    ```
+
+    UPSERT on `old` -- re-sending the same symbol updates the row instead of
+    duplicating it, so the pipeline can replay its full history safely.
+
+    `reason: "renamed"` with no `new` is rejected at validation: the app would
+    have nothing to migrate the holding to.
+    """
+    inserted = 0
+    updated = 0
+
+    for item in payload.items:
+        old_ticker = item.old_ticker.strip().upper()
+        new_ticker = item.new_ticker.strip().upper() if item.new_ticker else None
+
+        if not old_ticker:
+            continue
+
+        row = (
+            db.query(TickerChange)
+            .filter(TickerChange.old_ticker == old_ticker)
+            .first()
+        )
+
+        if row:
+            row.new_ticker = new_ticker
+            row.reason = item.reason
+            row.last_traded_date = item.last_traded_date
+            row.detected_at = item.detected_at
+            row.updated_at = datetime.utcnow()
+            updated += 1
+        else:
+            db.add(TickerChange(
+                old_ticker=old_ticker,
+                new_ticker=new_ticker,
+                reason=item.reason,
+                last_traded_date=item.last_traded_date,
+                detected_at=item.detected_at,
+            ))
+            inserted += 1
+
+    db.commit()
+
+    logger.info(
+        "ticker-changes ingest: %d inserted, %d updated (%d received)",
+        inserted, updated, len(payload.items),
+    )
+    return {
+        "status": "ok",
+        "received": len(payload.items),
+        "inserted": inserted,
+        "updated": updated,
+    }
+
+
 @router.post("/earnings-week", dependencies=[Depends(verify_api_key)])
 def ingest_earnings_week(payload: EarningsWeekIngestPayload, db: Session = Depends(get_db)):
     """

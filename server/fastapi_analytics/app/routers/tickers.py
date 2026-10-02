@@ -3,8 +3,8 @@ from sqlalchemy.orm import Session
 from sqlalchemy import or_, distinct
 from typing import List
 from app.database import get_db
-from app.models import Ticker, TickerScore
-from app.schemas import TickerMetadata
+from app.models import Ticker, TickerScore, TickerChange
+from app.schemas import TickerMetadata, TickerChangesResponse
 
 router = APIRouter()
 
@@ -70,6 +70,35 @@ def search_tickers(
         }
         for r in results
     ]
+
+
+# ⚠️ `/{ticker}` **앞에** 둬야 한다. 뒤에 두면 경로 파라미터가
+# `/changes` 요청까지 먹어서 ticker="changes" 로 404가 난다.
+@router.get("/changes", response_model=TickerChangesResponse)
+def get_ticker_changes(db: Session = Depends(get_db)):
+    """
+    Ticker identity changes — renames and delistings.
+
+    The app stores holdings and watchlists as ticker strings, so when a symbol
+    is renamed the position silently stops resolving. This endpoint lets the
+    app migrate `old` -> `new` and tell the user why.
+
+    Returns the whole map in one response (tens of rows): the app has to check
+    every holding at once, so a per-ticker lookup would mean N requests.
+
+    - `reason: "renamed"` -> `new` is always present; migrate to it.
+    - `reason: "delisted"` -> `new` is null; the position has no successor.
+
+    A chain (A -> B, later B -> C) is stored as two rows. Resolve by following
+    `new` until the symbol no longer appears as an `old`.
+    """
+    rows = (
+        db.query(TickerChange)
+        .order_by(TickerChange.detected_at.desc().nullslast(),
+                  TickerChange.old_ticker.asc())
+        .all()
+    )
+    return {"count": len(rows), "changes": rows}
 
 
 @router.get("/{ticker}", response_model=TickerMetadata)

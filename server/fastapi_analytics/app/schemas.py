@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 from datetime import date as Date, datetime as DateTime
 from typing import Optional, List, Union, Dict, Literal
 
@@ -748,6 +748,67 @@ class ClassificationData(BaseModel):
     reason_ko: str = ""
     reason_en: str = ""
     metrics: Optional[dict] = None
+
+
+class TickerChangeIngest(BaseModel):
+    """
+    One ticker identity change from the pipeline (S6).
+
+    Field names match what the pipeline already sends: `old` / `new`.
+    """
+    model_config = ConfigDict(populate_by_name=True)
+
+    old_ticker: str = Field(..., alias="old", max_length=50, description="Previous symbol")
+    new_ticker: Optional[str] = Field(None, alias="new", max_length=50, description="Successor symbol; null when delisted")
+    reason: str = Field(..., max_length=20, description="renamed | delisted")
+    last_traded_date: Optional[Date] = Field(None, description="Last date the old symbol traded")
+    detected_at: Optional[DateTime] = Field(None, description="When the pipeline detected it")
+
+    @model_validator(mode="after")
+    def _renamed_needs_successor(self):
+        """`renamed` without a successor is unusable.
+
+        The whole point of a rename row is to tell the app where the holding
+        moved. Storing one with no target would make the app report "this
+        changed" and then have nothing to migrate to -- worse than silence.
+        `delisted` legitimately has no successor, so it is not checked.
+
+        This has to be a model_validator, not a field_validator on
+        `new_ticker`: a field validator's `info.data` holds only the fields
+        declared BEFORE it, and `reason` is declared after, so the check
+        silently never fired. Caught by the 422 case in the endpoint test.
+        """
+        if self.reason == "renamed" and not (self.new_ticker or "").strip():
+            raise ValueError("reason='renamed' requires a non-empty 'new' ticker")
+        return self
+
+
+class TickerChangesIngestPayload(BaseModel):
+    """Batch of ticker identity changes."""
+    items: List[TickerChangeIngest] = Field(..., description="Changes to upsert")
+
+
+class TickerChangeResponse(BaseModel):
+    """One ticker identity change, as the app reads it."""
+    old: str = Field(..., validation_alias="old_ticker", serialization_alias="old")
+    new: Optional[str] = Field(None, validation_alias="new_ticker", serialization_alias="new")
+    reason: str = Field(..., description="renamed | delisted")
+    last_traded_date: Optional[Date] = Field(None)
+    detected_at: Optional[DateTime] = Field(None)
+
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
+
+class TickerChangesResponse(BaseModel):
+    """
+    The whole change map.
+
+    Returned as one list rather than a per-ticker lookup: the app has to check
+    every holding and watchlist entry at once, and the table is tens of rows.
+    One request beats N.
+    """
+    count: int = Field(..., description="Number of changes")
+    changes: List[TickerChangeResponse] = Field(..., description="All known changes")
 
 
 class DataQualityIngest(BaseModel):

@@ -34,6 +34,40 @@ class TickerScore(Base):
     calculated_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
 
 
+class TickerChange(Base):
+    """
+    Ticker identity changes — renames and delistings (S6, 2026-10-02).
+
+    Why this table exists: the app stores holdings and watchlists as **ticker
+    strings**. When a ticker's identity changes the pipeline stops sending the
+    old symbol, so the app shows "preparing data" for a holding that is
+    actually alive under a new name, and the portfolio total silently drops
+    that position.
+
+    The app cannot fix this alone — only the pipeline knows that BK became BNY.
+
+    `old_ticker` is the primary key: a symbol is renamed away from its own
+    identity at most once. A later rename of the successor is its own row
+    (BK -> BNY, then BNY -> X would be two rows), so resolving a chain means
+    following `new_ticker` until it is absent from this table.
+    """
+    __tablename__ = "ticker_changes"
+    __table_args__ = {'schema': 'analytics'}
+
+    old_ticker = Column(String(50), primary_key=True, index=True)
+
+    # NULL for delisted — there is no successor to migrate to.
+    new_ticker = Column(String(50), index=True)
+
+    # 'renamed' | 'delisted'. Kept as a plain string rather than an enum so a
+    # new pipeline reason does not need a migration before it can be stored.
+    reason = Column(String(20), nullable=False)
+
+    last_traded_date = Column(Date)
+    detected_at = Column(TIMESTAMP)
+    updated_at = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
+
+
 class Ticker(Base):
     """
     Ticker metadata (symbol, name, category).
