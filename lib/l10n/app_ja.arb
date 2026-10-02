@@ -4,7 +4,9 @@
   "blockUserConfirm": "{nickname} さんをブロックしますか？今後このユーザーの投稿やコメントは表示されません。",
   "@blockUserConfirm": {
     "placeholders": {
-      "nickname": { "type": "String" }
+      "nickname": {
+        "type": "String"
+      }
     }
   },
   "userBlocked": "ユーザーをブロックしました。",
@@ -17,9 +19,7 @@
   "eulaAgreePrefix": "",
   "eulaAgreeAnd": "および",
   "eulaAgreeSuffix": "に同意します。",
-
   "appTitle": "MarketLens",
-
   "tabDashboard": "ダッシュボード",
   "tabDashboardTooltip": "マーケットダッシュボード",
   "tabSearch": "検索",
@@ -35,10 +35,8 @@
   "tabWatchlist": "ウォッチリスト",
   "tabWatchlistTooltip": "マイウォッチリスト",
   "tabHoldingsTooltip": "保有銘柄",
-
   "settings": "設定",
   "settingsTooltip": "設定",
-
   "account": "アカウント",
   "login": "ログイン",
   "loginSubtitle": "コミュニティ機能を利用する",
@@ -52,7 +50,6 @@
   "logoutConfirmMessage": "ログアウトしてもよろしいですか？",
   "welcome": "ようこそ！",
   "accountCreated": "アカウントが作成されました！",
-
   "email": "メールアドレス",
   "emailHint": "example@email.com",
   "emailRequired": "メールアドレスを入力してください",
@@ -78,7 +75,6 @@
   "passwordConfirmRequired": "パスワードの確認を入力してください",
   "passwordMismatch": "パスワードが一致しません",
   "passwordPolicyFailed": "パスワードがセキュリティ要件を満たしていません。別のパスワードをご利用ください。",
-
   "changePassword": "パスワード変更",
   "changePasswordGuide": "パスワード変更ガイド",
   "oldPassword": "現在のパスワード",
@@ -93,10 +89,8 @@
   "newPasswordMustDiffer": "新しいパスワードは現在のパスワードと異なる必要があります",
   "passwordChanged": "パスワードが正常に変更されました",
   "passwordChangeFailed": "パスワード変更失敗：{error}",
-
   "loginRequired": "ログインが必要です",
   "loginPromptMessage": "ログインしてコミュニティに参加しましょう！",
-
   "searchHint": "ティッカーまたは企業名で検索（例：AAPL、Apple）",
   "searchFailed": "検索失敗",
   "noSearchResults": "検索結果なし",
@@ -107,9 +101,8 @@
   "clearAll": "すべて削除",
   "retry": "再試行",
   "tryAgain": "もう一度",
-
   "sectorMarketOverview": "セクター別市場概況",
-  "filterAll": "全体",
+  "filterAll": "すべて",
   "filterNasdaq": "NASDAQ",
   "filterDow": "ダウ",
   "marketLensAIScore": "AIスコア",
@@ -126,7 +119,6 @@
   "noData": "データなし",
   "signalLoadFailed": "シグナルの読み込みに失敗しました",
   "dashboardLoadFailed": "ダッシュボードの読み込みに失敗しました：{error}",
-
   "allSignals": "全シグナル",
   "sp500Signals": "S&P 500 シグナル",
   "dow30Signals": "ダウ30 シグナル",
@@ -139,14 +131,12 @@
   "noAdditionalSignals": "追加シグナルなし",
   "showMore": "もっと見る（残り {remaining} 件）",
   "nItems": "{count} 件",
-
   "scoreStrongBuy": "強いポジティブ",
   "scoreBuy": "ポジティブ",
   "scoreHold": "中立",
   "scoreSell": "ネガティブ",
   "scoreStrongSell": "強いネガティブ",
   "score": "スコア",
-
   "myWatchlist": "マイウォッチリスト",
   "nTickers": "{count} 銘柄",
   "watchlistEmpty": "ウォッチリストが空です",
@@ -165,7 +155,6 @@
   "topTradingVolume": "本日の出来高トップ",
   "addWatchlistSearch": "銘柄を検索して追加",
   "bookmarkGuide": "ブックマークをタップしてウォッチリストに追加",
-
   "communitySearchHint": "タイトルや内容で検索...",
   "writePost": "投稿する",
   "deletePost": "投稿を削除",
@@ -205,7 +194,6 @@
   "freePost": "自由",
   "checkNetwork": "ネットワーク接続を確認してください",
   "tryAgainLater": "しばらくしてから再試行してください",
-
   "newPost": "新規投稿",
   "editPostTitle": "投稿を編集",
   "tickerOnlyBoard": "銘柄別掲示板",
@@ -226,7 +214,6 @@
   "postUpdated": "投稿が更新されました",
   "submitPost": "投稿する",
   "updatePostButton": "更新する",
-
   "deleteComment": "コメントを削除",
   "deleteCommentConfirm": "このコメントを削除してもよろしいですか？",
   "editComment": "コメントを編集",
@@ -244,7 +231,6 @@
   "cannotLoadPosts": "投稿を読み込めません",
   "noPostsInTicker": "この掲示板にはまだ投稿がありません",
   "writeFirstPostInTicker": "最初の投稿を書いてみましょう！",
-
   "dataManagement": "データ管理",
   "clearRecentSearches": "検索履歴を削除",
   "nSearchRecords": "{count} 件の検索履歴",
@@ -258,7 +244,6 @@
   "deleteAllButton": "すべて削除",
   "allDataDeleted": "すべてのデータが削除されました",
   "removeAllLocalData": "すべてのローカルデータを削除",
-
   "info": "情報",
   "aboutMarketLens": "アプリについて",
   "version": "バージョン {version}",
@@ -266,7 +251,6 @@
   "aiStockAnalysis": "AI株式分析",
   "privacyPolicy": "プライバシーポリシー",
   "termsOfService": "利用規約",
-
   "admin": "管理",
   "adminPanel": "管理パネル",
   "adminPanelSubtitle": "ユーザー管理と権限設定",
@@ -283,7 +267,6 @@
   "promoteToGold": "Goldに昇格",
   "promoteToManager": "Managerに昇格",
   "demoteToRegular": "一般ユーザーに降格",
-
   "profile": "プロフィール",
   "editProfile": "プロフィール編集",
   "myPosts": "自分の投稿",
@@ -300,7 +283,6 @@
   "deactivateAccount": "アカウント無効化",
   "profileUpdated": "プロフィールが更新されました",
   "imagePickerFailed": "画像の選択に失敗しました",
-
   "language": "言語",
   "languageSystem": "システムのデフォルト",
   "languageKorean": "한국어",
@@ -311,18 +293,15 @@
   "languageSettings": "言語設定",
   "systemDefault": "システムのデフォルト",
   "languageChanged": "言語が変更されました",
-
   "timeJustNow": "たった今",
   "timeMinutesAgo": "{n}分前",
   "timeHoursAgo": "{n}時間前",
   "timeYesterday": "昨日",
   "timeDaysAgo": "{n}日前",
-
   "companyOverview": "企業概要",
   "companyDetails": "企業詳細",
   "companyIntro": "企業紹介",
   "employeeCount": "従業員 {count} 名",
-
   "valuation": "バリュエーション",
   "forwardPE": "予想PER",
   "beta": "ベータ",
@@ -334,11 +313,9 @@
   "financialHealth": "財務健全性",
   "debtRatio": "負債比率",
   "liquidityRatio": "流動比率",
-
   "dividends": "配当",
   "dividendYield": "配当利回り ",
   "annualDividend": "年間 ",
-
   "shortInterest": "空売り",
   "shortInterestRatio": "空売り比率",
   "shortPercentFloat": "浮動株空売り比率",
@@ -346,13 +323,11 @@
   "shortInterestLow": "空売り低水準（安定）",
   "shortInterestModerate": "空売り中水準（注意）",
   "shortInterestHigh": "空売り高水準（警告）",
-
   "institutionalInsiderFlow": "機関投資家 / インサイダー動向",
   "institutional": "機関",
   "insider": "インサイダー",
   "oneDay": "1日",
   "fiveDay": "5日",
-
   "tickerNews": "{ticker} ニュース",
   "newsCount": "{count}件",
   "oneWeek": "1週",
@@ -366,7 +341,6 @@
   "aiSummaryNews": "AI要約ニュース",
   "aiSummary": "AI要約",
   "noNewsAvailable": "ニュースはありません",
-
   "earningsHistory": "過去の業績",
   "earningsHistoryEPS": "業績履歴（EPS）",
   "earningsEstimate": "予想",
@@ -384,7 +358,6 @@
   "noEarningsThisWeek": "今週予定されている決算発表はありません",
   "nextEarningsDate": "次回決算発表日",
   "earningsConfirmed": "確定",
-
   "keyEvents": "主要イベント",
   "eventDetails": "イベント詳細",
   "upcomingEvents": "今後のイベント",
@@ -392,7 +365,6 @@
   "dividendPayDate": "配当支払日",
   "recentEarningsQuarters": "直近決算（{count}四半期）",
   "earningsHistoryChart": "業績履歴（チャート）",
-
   "weekdayMon": "月",
   "weekdayTue": "火",
   "weekdayWed": "水",
@@ -400,7 +372,6 @@
   "weekdayFri": "金",
   "weekdaySat": "土",
   "weekdaySun": "日",
-
   "macroFedFunds": "政策金利",
   "macroDGS10": "長期金利",
   "macroDGS2": "短期金利",
@@ -426,7 +397,6 @@
   "macroYieldCurve": "イールドカーブ",
   "macroLiquidity": "流動性",
   "macroOverall": "マクロ全体",
-
   "macroCurrentValue": "現在値：{value}",
   "macroChange": "変動：{value}",
   "epsEstimateValue": "予想 ${value}",
@@ -435,7 +405,6 @@
   "bbUpperApproach": "・上限バンド接近：買われ過ぎの可能性",
   "bbLowerApproach": "・下限バンド接近：売られ過ぎの可能性",
   "bbMiddleLine": "・中間線：20日移動平均線",
-
   "cannotLoadData": "データを読み込めません",
   "marketlensAI": "MarketLens AI",
   "marketlensAIOpinion": "MarketLens AI の見解",
@@ -458,7 +427,6 @@
   "volume": "出来高",
   "priceChartTitle": "株価チャート",
   "legend": "凡例",
-
   "ratingBuy": "買い",
   "ratingStrongBuy": "強い買い",
   "ratingOutperform": "アウトパフォーム",
@@ -472,13 +440,11 @@
   "ratingActionDowngrade": "格下げ",
   "ratingActionReiterated": "据え置き",
   "ratingActionInitiated": "新規",
-
   "roleMaster": "Master",
   "roleManager": "Manager",
   "roleGold": "Gold",
   "roleRegular": "一般",
   "roleGuest": "ゲスト",
-
   "errInvalidCredentials": "メールアドレスまたはパスワードが正しくありません",
   "errLoginRequired": "ログインが必要です",
   "errSessionExpired": "セッションの有効期限が切れました。再度ログインしてください。",
@@ -506,7 +472,6 @@
   "today": "今日",
   "yesterday": "昨日",
   "dayBeforeYesterday": "一昨日",
-
   "expertCount": "アナリスト目標株価（{count}社）",
   "scorePoints": "{score}点",
   "averageVolume": "平均：{volume}",
@@ -522,7 +487,6 @@
   "shareThoughtsPrompt": "注目銘柄について意見を共有し\n他の投資家と交流しましょう",
   "writeFirstCommentPrompt": "投稿に最初のコメントを書いてみましょう",
   "startConversationPrompt": "他の投資家の投稿にコメントして\n会話を始めましょう",
-
   "ratingOverweight": "オーバーウェイト",
   "ratingUnderweight": "アンダーウェイト",
   "ratingSectorOutperform": "セクターアウトパフォーム",
@@ -531,27 +495,22 @@
   "ratingPositive": "ポジティブ",
   "ratingNegative": "ネガティブ",
   "ratingEqualWeight": "イコールウェイト",
-
   "keyMetricsComparison": "主要指標比較",
   "metric": "指標",
   "serverCalculatedNote": "※ すべての指標はサーバーで計算された値です",
   "priceTrendComparison": "株価推移比較",
   "rsiComparison": "RSI比較（サーバー計算値）",
   "rsiInterpretation": "※ RSI > 70：買われ過ぎ / RSI < 30：売られ過ぎ",
-
   "passwordChangeInstructions": "・新しいパスワードは8文字以上必要です\n・英字、数字、記号を組み合わせてください\n・変更後は新しいパスワードで再ログインしてください",
-
   "notifications": "通知",
   "markAllAsRead": "すべて既読",
   "noNotifications": "通知はありません",
   "notificationsRetentionHint": "過去7日間の通知が表示されます。",
-
   "bioLabel": "自己紹介",
   "bioHint": "自己紹介を入力してください",
   "profileEditGuide": "プロフィール編集ガイド",
   "profileEditGuideDetails": "• ニックネーム: 2〜30文字、他ユーザーと重複可\n• 自己紹介: 最大200文字（任意）\n• プロフィール写真: 推奨サイズ 800×800px",
   "updatedDate": "更新日：",
-
   "tabCalendar": "カレンダー",
   "tabCalendarTooltip": "イベントカレンダー",
   "eventTypeFomc": "FOMC",
@@ -566,7 +525,9 @@
   "nEvents": "{count}件のイベント",
   "@nEvents": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "noEventsThisMonth": "今月のイベントはありません",
@@ -574,8 +535,6 @@
   "calendarNewsAnnouncements": "ニュース·発表",
   "calendarEconomicIndicators": "米国経済指標",
   "calendarViewResult": "結果を見る",
-  "today": "今日",
-
   "forgotPassword": "パスワードを忘れた",
   "forgotPasswordSubtitle": "登録したメールアドレスを入力してください。認証コードをお送りします。",
   "sendVerificationCode": "認証コード送信",
@@ -583,13 +542,17 @@
   "verificationSubtitle": "{email}に送信された6桁の認証コードを入力してください。",
   "@verificationSubtitle": {
     "placeholders": {
-      "email": { "type": "String" }
+      "email": {
+        "type": "String"
+      }
     }
   },
   "verificationExpiry": "有効期限: {time}",
   "@verificationExpiry": {
     "placeholders": {
-      "time": { "type": "String" }
+      "time": {
+        "type": "String"
+      }
     }
   },
   "verificationCode": "認証コード",
@@ -599,7 +562,9 @@
   "resendCodeCooldown": "再送信可能 ({seconds}秒)",
   "@resendCodeCooldown": {
     "placeholders": {
-      "seconds": { "type": "int" }
+      "seconds": {
+        "type": "int"
+      }
     }
   },
   "verificationCodeResent": "認証コードが再送信されました。",
@@ -608,12 +573,13 @@
   "resetPasswordSuccess": "パスワードが再設定されました。新しいパスワードでログインしてください。",
   "errEmailNotVerified": "メール認証が必要です。",
   "errRateLimited": "しばらくしてから再度お試しください。",
-
   "myHoldings": "保有銘柄",
   "nHoldings": "{count}銘柄保有",
   "@nHoldings": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "portfolioSummary": "ポートフォリオ概要",
@@ -630,19 +596,25 @@
   "holdingAdded": "{ticker} を保有銘柄に追加しました",
   "@holdingAdded": {
     "placeholders": {
-      "ticker": { "type": "String" }
+      "ticker": {
+        "type": "String"
+      }
     }
   },
   "holdingRemoved": "{ticker} を保有銘柄から削除しました",
   "@holdingRemoved": {
     "placeholders": {
-      "ticker": { "type": "String" }
+      "ticker": {
+        "type": "String"
+      }
     }
   },
   "removeHoldingConfirm": "{ticker} を保有銘柄から削除しますか？",
   "@removeHoldingConfirm": {
     "placeholders": {
-      "ticker": { "type": "String" }
+      "ticker": {
+        "type": "String"
+      }
     }
   },
   "aiAdvice": "AIアドバイス",
@@ -655,8 +627,12 @@
   "sharesAtPrice": "{shares}株 @ ${price}",
   "@sharesAtPrice": {
     "placeholders": {
-      "shares": { "type": "String" },
-      "price": { "type": "String" }
+      "shares": {
+        "type": "String"
+      },
+      "price": {
+        "type": "String"
+      }
     }
   },
   "noHoldingsYet": "保有銘柄がありません",
@@ -664,8 +640,6 @@
   "invalidShares": "有効な株数を入力してください",
   "invalidPrice": "有効な価格を入力してください",
   "confidence": "信頼度",
-
-  "tabWatchlist": "ウォッチリスト",
   "tabHoldings": "保有銘柄",
   "purchaseDate": "購入日",
   "sellDate": "売却日",
@@ -723,7 +697,9 @@
   "aiChatSelectedCount": "{count}件選択",
   "@aiChatSelectedCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "aiChatHide": "非表示",
@@ -738,7 +714,9 @@
   "aiChatNConversations": "{count}件",
   "@aiChatNConversations": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "aiChatClearLocal": "このスマホの会話キャッシュを削除",
@@ -792,7 +770,9 @@
   "lastUpdateTime": "最終更新: {time}",
   "@lastUpdateTime": {
     "placeholders": {
-      "time": { "type": "String" }
+      "time": {
+        "type": "String"
+      }
     }
   },
   "viewAIAdvice": "AI意見を見る",
@@ -801,13 +781,13 @@
   "viewAllTransactions": "すべて表示 ({count}件)",
   "@viewAllTransactions": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
-
   "newsFilter": "フィルター",
   "filterSource": "ソース",
-  "filterAll": "すべて",
   "filterMyWatchlist": "ウォッチリスト",
   "filterNoWatchlist": "先にウォッチリストを追加してください",
   "filterMarketOnly": "市場ニュース",
@@ -819,7 +799,9 @@
   "hotTopicMore": "+{count} もっと見る",
   "@hotTopicMore": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "sectorTechnology": "テクノロジー",
@@ -833,7 +815,6 @@
   "sectorUtilities": "公益事業",
   "sectorRealEstate": "不動産",
   "sectorMaterials": "素材",
-
   "newsBubbleTitle": "24時間 Hot ニュース",
   "newsBubbleLegendBullish": "強気多数",
   "newsBubbleLegendBearish": "弱気多数",
@@ -841,10 +822,11 @@
   "newsBubbleMentions": "{count}件",
   "@newsBubbleMentions": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
-
   "newsSentiment24hTitle": "過去24時間",
   "newsBullish": "強気ニュース",
   "newsNeutral": "中立ニュース",
@@ -854,10 +836,11 @@
   "newsCountUnit": "{count}件",
   "@newsCountUnit": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
-
   "taxEstimateTitle": "税金見積もり",
   "totalGains": "総利益",
   "annualExemption": "年間控除額",
@@ -881,7 +864,6 @@
   "otherSectors": "その他セクター",
   "otherTickers": "その他銘柄",
   "nDaysAgo": "{count}日前",
-
   "tabHome": "ホーム",
   "tabHomeTooltip": "ホーム",
   "tabAIAnalysis": "AIシグナル",
@@ -903,7 +885,6 @@
   "noIntradayData": "時間足データはまだありません",
   "noDailyData": "日足データがありません",
   "closePriceUnavailable": "終値を取得できません。手動で入力してください。",
-
   "gaugeStrongNegativeDesc": "強いネガティブ：株価下落の確率が非常に高い",
   "gaugeNegativeDesc": "ネガティブ：株価下落の確率が高い",
   "gaugePositiveDesc": "ポジティブ：株価上昇の確率が高い",
@@ -911,28 +892,29 @@
   "aiRecommended20": "AI分析推奨 {count} 銘柄",
   "@aiRecommended20": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "aiCaution20": "AI分析注意 {count} 銘柄",
   "@aiCaution20": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "seeMore": "もっと見る",
-
   "holdingsSummary": "保有状況",
   "investmentReturn": "投資収益率",
   "returnRate": "収益率",
   "purchaseAmount": "取得金額",
   "profitAmount": "損益額",
   "evaluationAmount": "評価額",
-
   "watchAdToUnlock": "短い広告を見てAI分析を確認",
   "watchAd": "広告を見る",
   "adNotReady": "広告を準備中です。しばらくしてから再試行してください",
-
   "holdingsLimitTitle": "保有銘柄の制限",
   "holdingsLimitMessage": "無料会員は最大3銘柄まで保有できます。Goldにアップグレードすると無制限の銘柄管理と広告なしのAI分析をご利用いただけます。",
   "upgradeToGold": "Goldにアップグレード",
@@ -943,11 +925,12 @@
   "viewingPreviousAnalysis": "前回の分析を表示",
   "goldUpgradeComingSoon": "Goldメンバーシップがまもなく登場！お楽しみに。",
   "close": "閉じる",
-
   "goldMonthlyPrice": "月額 {price}",
   "@goldMonthlyPrice": {
     "placeholders": {
-      "price": { "type": "String" }
+      "price": {
+        "type": "String"
+      }
     }
   },
   "subscribeNow": "今すぐ登録",
@@ -960,7 +943,9 @@
   "subscriptionExpires": "{date} に期限切れ",
   "@subscriptionExpires": {
     "placeholders": {
-      "date": { "type": "String" }
+      "date": {
+        "type": "String"
+      }
     }
   },
   "subscriptionManage": "サブスクリプション管理",
@@ -969,41 +954,45 @@
   "goldMembershipTitle": "Goldメンバーシップ",
   "goldComingSoon": "Goldメンバーシップは近日公開予定です！",
   "subscription": "サブスクリプション",
-
   "freeTrialStart": "7日間無料体験を始める",
   "freeTrialInfo": "7日間無料、その後{price}/月。いつでもキャンセル可能。",
   "@freeTrialInfo": {
     "placeholders": {
-      "price": { "type": "String" }
+      "price": {
+        "type": "String"
+      }
     }
   },
   "onFreeTrial": "無料体験中",
   "trialEndsOn": "体験終了: {date}",
   "@trialEndsOn": {
     "placeholders": {
-      "date": { "type": "String" }
+      "date": {
+        "type": "String"
+      }
     }
   },
   "trialExpired": "無料体験が終了しました",
-
   "manageSubscription": "サブスクリプション管理",
   "restorePurchaseTitle": "以前の購入を復元",
   "restorePurchaseDescription": "デバイスの変更やアプリの再インストール後にサブスクリプションが反映されない場合にご利用ください。",
-
   "calendarPremiumEvents": "{count}件のプレミアムイベント",
   "@calendarPremiumEvents": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "calendarUnlockWithAd": "広告視聴で6時間利用",
   "calendarUnlockedUntil": "{time}までロック解除",
   "@calendarUnlockedUntil": {
     "placeholders": {
-      "time": { "type": "String" }
+      "time": {
+        "type": "String"
+      }
     }
   },
-
   "treemapLegend": "サイズ = 出来高  |  緑 = 上昇  |  赤 = 下落",
   "aiScoreSubtitle": "AIスコア (0: 売りシグナル ~ 100: 買いシグナル)",
   "aiSignalStrongBuyDesc": "強い買い (80-100): テクニカル・ファンダメンタル指標が強い買いシグナル",
@@ -1023,7 +1012,9 @@
   "totalPosts": "{count}件の投稿",
   "@totalPosts": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "recentComments": "最近のコメント",
@@ -1037,15 +1028,12 @@
   "resetTutorials": "チュートリアルを再表示",
   "resetTutorialsDesc": "すべてのチュートリアルが再表示されます",
   "tutorialsReset": "チュートリアルがリセットされました",
-
   "purchaseStoreUnavailable": "App Storeに接続できません",
   "purchaseStoreProblem": "App Storeに接続できません。Apple ID設定を確認し、支払いが有効になっていることを確認してから再試行してください。",
   "purchaseTemporarilyUnavailable": "サブスクリプションは一時的に利用できません",
   "purchaseRetry": "再試行",
   "purchaseInitializing": "App Storeに接続中...",
-
   "loginRequiredForPurchase": "Goldメンバーシップの購入にはログインが必要です。サブスクリプションはアカウントに同期されます。",
-
   "aiScoreGuideTitle": "AIスコアガイド",
   "aiScoreGuideDescription": "AIスコアは中長期（3〜12ヶ月）の投資観点に基づいて算出されます。",
   "aiScoreGuideStrongPositive": "80–100: 強い買い – 上昇の可能性が非常に高い",
@@ -1054,7 +1042,6 @@
   "aiScoreGuideNegative": "20–39: 売り – 下落の可能性が高い",
   "aiScoreGuideStrongNegative": "0–19: 強い売り – 下落の可能性が非常に高い",
   "subscriptionPaymentAccountWarning": "お支払いは、この端末にサインインしているApp Store / Google Playアカウントを通じて処理されます。他の方の端末で購入された場合、端末所有者のアカウントに請求される場合があります。",
-
   "investmentProfileTitle": "投資プロフィール",
   "investmentProfileSection": "投資プロフィール",
   "investmentProfileEditSubtitle": "投資の傾向を確認・編集します",
@@ -1067,7 +1054,6 @@
   "recommendationFit": "適合度",
   "skip": "スキップ",
   "next": "次へ",
-
   "investmentStyleTitle": "投資スタイル",
   "investmentStyleSubtitle": "あなたの投資アプローチは？",
   "investmentStyleConservative": "保守的",
@@ -1076,7 +1062,6 @@
   "investmentStyleBalancedDesc": "成長と安定のバランスを追求します",
   "investmentStyleAggressive": "積極的",
   "investmentStyleAggressiveDesc": "高リスクを許容し高リターンを追求します",
-
   "timeHorizonTitle": "投資期間",
   "timeHorizonSubtitle": "どのくらいの期間投資を計画していますか？",
   "timeHorizonShort": "短期",
@@ -1085,7 +1070,6 @@
   "timeHorizonMediumDesc": "1〜5年",
   "timeHorizonLong": "長期",
   "timeHorizonLongDesc": "5年以上",
-
   "riskToleranceTitle": "リスク許容度",
   "riskToleranceSubtitle": "どの程度のリスクに耐えられますか？",
   "riskLevel1": "非常に低い",
@@ -1095,7 +1079,6 @@
   "riskLevel5": "非常に高い",
   "riskLow": "低い",
   "riskHigh": "高い",
-
   "targetReturnTitle": "目標年間収益率",
   "targetReturnSubtitle": "どの程度の収益率を目指していますか？",
   "targetReturn5Desc": "安定的な低リスク投資",
@@ -1103,7 +1086,6 @@
   "targetReturn20Desc": "積極的な成長戦略",
   "targetReturnFlexible": "柔軟",
   "targetReturnFlexibleDesc": "特定の目標なし、市場状況に合わせて対応",
-
   "maxLossTitle": "最大許容損失",
   "maxLossSubtitle": "最大どの程度の下落まで耐えられますか？",
   "maxLoss5Desc": "非常に保守的、最小限の下落のみ許容",
@@ -1126,6 +1108,90 @@
   "unavailableReport": "知らせる",
   "unavailableGoBack": "前の画面へ",
   "unavailableReportSent": "お知らせありがとうございます。確認いたします。",
-  "@unavailableNotReadyTitleFor": { "placeholders": { "subject": { "type": "String" } } },
-  "viewAiOpinion": "AI 意見を見る"
+  "@unavailableNotReadyTitleFor": {
+    "placeholders": {
+      "subject": {
+        "type": "String"
+      }
+    }
+  },
+  "viewAiOpinion": "AI 意見を見る",
+  "unavailableRenamedTitle": "{oldTicker}は{newTicker}に変更されました",
+  "@unavailableRenamedTitle": {
+    "placeholders": {
+      "oldTicker": {
+        "type": "String"
+      },
+      "newTicker": {
+        "type": "String"
+      }
+    }
+  },
+  "unavailableRenamedBody": "ティッカーが変更されました。同じ会社であり、新しいティッカーで引き続き確認できます。",
+  "unavailableRenamedBodyWithDate": "{date}までは{oldTicker}として取引され、その後{newTicker}に変更されました。同じ会社です。",
+  "@unavailableRenamedBodyWithDate": {
+    "placeholders": {
+      "oldTicker": {
+        "type": "String"
+      },
+      "newTicker": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "unavailableRenamedAction": "{newTicker}を見る",
+  "@unavailableRenamedAction": {
+    "placeholders": {
+      "newTicker": {
+        "type": "String"
+      }
+    }
+  },
+  "unavailableDelistedTitle": "{ticker}の取引は終了しました",
+  "@unavailableDelistedTitle": {
+    "placeholders": {
+      "ticker": {
+        "type": "String"
+      }
+    }
+  },
+  "unavailableDelistedBody": "この銘柄は上場廃止となり、株価は更新されません。",
+  "unavailableDelistedBodyWithDate": "{date}が最終取引日で、以降は株価が更新されません。",
+  "@unavailableDelistedBodyWithDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "dataAsOf": "{date}時点",
+  "@dataAsOf": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "staleDataBadge": "{days}営業日前のデータ",
+  "@staleDataBadge": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "staleDataExplain": "{date}以降、この銘柄の分析は更新されていません。市場の基準日は{marketDate}です。",
+  "@staleDataExplain": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "marketDate": {
+        "type": "String"
+      }
+    }
+  }
 }

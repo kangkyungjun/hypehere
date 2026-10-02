@@ -6,6 +6,7 @@ import '../../services/analytics_api_client.dart';
 import '../../utils/error_localizer.dart';
 import '../../widgets/common/data_unavailable_view.dart';
 import '../../models/chart_data.dart';
+import '../../models/ticker_change.dart';
 import '../../models/ticker_info.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/portfolio_provider.dart';
@@ -65,6 +66,12 @@ class _TickerDetailScreenState extends State<TickerDetailScreen> {
 
   CompleteChartData? _chartData;
   TickerInfo? _tickerInfo;
+
+  /// 티커 변경 해소 결과. **차트가 비었을 때만** 채운다.
+  ///
+  /// 정상 경로에서는 받지 않는다 — 변경 맵은 데이터가 없을 때만 쓸모가
+  /// 있고, 매 상세 화면마다 요청을 하나 더 붙일 이유가 없다.
+  TickerResolution? _resolution;
   bool _isLoading = true;
   /// 원본 예외를 들고 있는다. 문자열로 바꿔 버리면 **네트워크 끊김인지
   /// 종목 데이터 부재인지 구분할 수 없어** 모두 같은 빨간 화면이 된다.
@@ -121,6 +128,27 @@ class _TickerDetailScreenState extends State<TickerDetailScreen> {
     };
   }
 
+  /// 새 티커 화면으로 **교체** 이동.
+  ///
+  /// push가 아니라 pushReplacement다. 뒤로 가기를 눌렀을 때 방금 "이름이
+  /// 바뀌었습니다"라고 알려준 화면으로 돌아가는 건 막다른 길이다.
+  void _goToSuccessor(String newTicker) {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (_) => TickerDetailScreen(ticker: newTicker),
+      ),
+    );
+  }
+
+  /// 길게 눌렀을 때 보여줄 개발자용 상세. 데이터가 언제까지 있었는지.
+  String? _freshnessDetail() {
+    final f = _chartData?.freshness;
+    if (f == null) return null;
+    final d = f.asOf.toIso8601String().split('T').first;
+    final m = f.marketAsOf.toIso8601String().split('T').first;
+    return 'as_of $d / market $m / ${f.tradingDaysBehind} trading days behind';
+  }
+
   Future<void> _loadChartData() async {
     setState(() {
       _isLoading = true;
@@ -162,10 +190,23 @@ class _TickerDetailScreenState extends State<TickerDetailScreen> {
       final chart = await chartFuture;
       final info = await infoFuture;
 
+      // 차트가 비었다 — 개명·상장폐지일 수 있다. 그때만 변경 맵을 받는다.
+      //
+      // 이 분기가 전에는 "아직 데이터를 준비 중입니다"였다. BK를 들고 있던
+      // 사용자에게 **틀린 설명**이다 — 준비 중이 아니라 BNY로 이름이 바뀐
+      // 것이고, 데이터는 이미 다 있다.
+      TickerResolution? resolution;
+      if (chart.data.isEmpty) {
+        final changes = await _apiClient.fetchTickerChanges();
+        final r = changes.resolve(widget.ticker);
+        if (r.shouldNotify) resolution = r;
+      }
+
       if (!mounted) return;
       setState(() {
         _chartData = chart;
         _tickerInfo = info;
+        _resolution = resolution;
         _isLoading = false;
       });
 
@@ -484,9 +525,22 @@ class _TickerDetailScreenState extends State<TickerDetailScreen> {
     // 개편 전 문구는 `다른 티커를 검색해보세요`였다. 추천 카드를 탭해
     // 들어온 사용자에게 검색 맥락의 안내가 뜨고 있었다.
     if (_chartData == null || _chartData!.data.isEmpty) {
+      // 개명·상장폐지면 그 사실을 말한다. 아니면 기존 "준비 중" 화면.
+      final r = _resolution;
+      if (r != null) {
+        final view = DataUnavailableView.fromResolution(
+          r,
+          onReport: _reportDataIssue(context),
+          onBack: () => Navigator.of(context).maybePop(),
+          onGoToSuccessor: _goToSuccessor,
+        );
+        if (view != null) return view;
+      }
+
       return DataUnavailableView(
         kind: UnavailableKind.notReady,
         subject: widget.ticker,
+        detail: _freshnessDetail(),
         onReport: _reportDataIssue(context),
         onBack: () => Navigator.of(context).maybePop(),
       );

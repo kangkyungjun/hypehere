@@ -2922,4 +2922,54 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get viewAiOpinion => '查看 AI 观点';
+
+  @override
+  String unavailableRenamedTitle(String oldTicker, String newTicker) {
+    return '$oldTicker 已变更为 $newTicker';
+  }
+
+  @override
+  String get unavailableRenamedBody => '股票代码已变更。公司未变，可在新代码下继续查看。';
+
+  @override
+  String unavailableRenamedBodyWithDate(
+    String oldTicker,
+    String newTicker,
+    String date,
+  ) {
+    return '该股票在 $date 之前以 $oldTicker 交易，此后变更为 $newTicker。公司未变。';
+  }
+
+  @override
+  String unavailableRenamedAction(String newTicker) {
+    return '查看 $newTicker';
+  }
+
+  @override
+  String unavailableDelistedTitle(String ticker) {
+    return '$ticker 已终止交易';
+  }
+
+  @override
+  String get unavailableDelistedBody => '该股票已退市，行情不再更新。';
+
+  @override
+  String unavailableDelistedBodyWithDate(String date) {
+    return '$date 为最后交易日，此后行情不再更新。';
+  }
+
+  @override
+  String dataAsOf(String date) {
+    return '截至 $date';
+  }
+
+  @override
+  String staleDataBadge(int days) {
+    return '$days 个交易日前的数据';
+  }
+
+  @override
+  String staleDataExplain(String date, String marketDate) {
+    return '自 $date 起，该股票的分析未再更新。市场基准日为 $marketDate。';
+  }
 }

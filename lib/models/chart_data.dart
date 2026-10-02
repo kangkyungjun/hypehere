@@ -3,10 +3,67 @@ import 'stock_classification.dart';
 
 /// Chart data models for MarketLens analytics API
 ///
+/// 이 종목 데이터가 얼마나 최신인가 (서버 `freshness`, S2).
+///
+/// **판정은 서버가 한다.** 앱은 시장의 최신 거래일을 모르고, 앱이 쓸 수 있는
+/// 유일한 비교 대상(다른 종목의 날짜)은 공급원 장애로 일부 종목만 하루
+/// 늦으면 무너진다 — 2026-10-01이 그런 날이었다. 그때 앱이 추측하면 멀쩡한
+/// 종목에 경고가 붙는데, 그건 아무 말도 안 하는 것보다 나쁘다.
+///
+/// 서버가 판정을 못 하면(두 날짜 중 하나라도 모르면) 필드 자체가 없다.
+/// 그래서 이 객체가 null인 것과 `stale == false`는 **다른 뜻**이다.
+class Freshness {
+  /// 이 종목의 최신 분석일.
+  final DateTime asOf;
+
+  /// 전 종목 기준 최신 분석일.
+  final DateTime marketAsOf;
+
+  /// 시장 대비 몇 거래일 뒤인가. 달력일이 아니다 — 금요일 종가를 월요일에
+  /// 보는 건 1거래일 뒤다.
+  final int tradingDaysBehind;
+
+  /// 사용자에게 경고할 것인가. 임계값 판단도 서버가 한다.
+  final bool stale;
+
+  /// `stale`이 켜지는 경계. 서버가 정책을 바꾸면 앱 배포 없이 따라간다.
+  final int staleThreshold;
+
+  const Freshness({
+    required this.asOf,
+    required this.marketAsOf,
+    required this.tradingDaysBehind,
+    required this.stale,
+    required this.staleThreshold,
+  });
+
+  factory Freshness.fromJson(Map<String, dynamic> json) => Freshness(
+        asOf: DateTime.parse(json['as_of'] as String),
+        marketAsOf: DateTime.parse(json['market_as_of'] as String),
+        tradingDaysBehind: (json['trading_days_behind'] as num?)?.toInt() ?? 0,
+        stale: (json['stale'] as bool?) ?? false,
+        staleThreshold: (json['stale_threshold'] as num?)?.toInt() ?? 2,
+      );
+
+  Map<String, dynamic> toJson() => {
+        'as_of': asOf.toIso8601String().split('T').first,
+        'market_as_of': marketAsOf.toIso8601String().split('T').first,
+        'trading_days_behind': tradingDaysBehind,
+        'stale': stale,
+        'stale_threshold': staleThreshold,
+      };
+}
+
 /// Matches the server's CompleteChartResponse and ChartDataPoint schemas
 class CompleteChartData {
   final String ticker;
   final List<ChartDataPoint> data;
+
+  /// 데이터 최신성 (S2). 서버가 판정을 못 하면 null — `stale == false`와 다르다.
+  ///
+  /// ⚠️ `data`가 **비어 있을 때도 온다.** 개명·상장폐지 종목이 그 경우인데,
+  /// 거기서 "며칠 전까지의 데이터인가"가 제일 쓸모 있다.
+  final Freshness? freshness;
 
   // Trendline coefficients (latest calculation)
   final double? highSlope;
@@ -40,6 +97,7 @@ class CompleteChartData {
   CompleteChartData({
     required this.ticker,
     required this.data,
+    this.freshness,
     this.highSlope,
     this.highIntercept,
     this.highRSquared,
@@ -68,6 +126,9 @@ class CompleteChartData {
       data: (json['data'] as List)
           .map((item) => ChartDataPoint.fromJson(item))
           .toList(),
+      freshness: json['freshness'] != null
+          ? Freshness.fromJson(json['freshness'] as Map<String, dynamic>)
+          : null,
       highSlope: json['high_slope'] as double?,
       highIntercept: json['high_intercept'] as double?,
       highRSquared: json['high_r_squared'] as double?,

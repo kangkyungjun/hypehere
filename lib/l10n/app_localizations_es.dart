@@ -3029,4 +3029,56 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get viewAiOpinion => 'Ver opinión de IA';
+
+  @override
+  String unavailableRenamedTitle(String oldTicker, String newTicker) {
+    return '$oldTicker ahora es $newTicker';
+  }
+
+  @override
+  String get unavailableRenamedBody =>
+      'El símbolo cambió. Es la misma empresa y puedes seguirla con el nuevo símbolo.';
+
+  @override
+  String unavailableRenamedBodyWithDate(
+    String oldTicker,
+    String newTicker,
+    String date,
+  ) {
+    return 'Cotizó como $oldTicker hasta el $date y luego pasó a $newTicker. Es la misma empresa.';
+  }
+
+  @override
+  String unavailableRenamedAction(String newTicker) {
+    return 'Ver $newTicker';
+  }
+
+  @override
+  String unavailableDelistedTitle(String ticker) {
+    return '$ticker dejó de cotizar';
+  }
+
+  @override
+  String get unavailableDelistedBody =>
+      'Esta acción fue excluida de bolsa, por lo que sus precios ya no se actualizan.';
+
+  @override
+  String unavailableDelistedBodyWithDate(String date) {
+    return 'El $date fue su último día de cotización; los precios ya no se actualizan.';
+  }
+
+  @override
+  String dataAsOf(String date) {
+    return 'Al $date';
+  }
+
+  @override
+  String staleDataBadge(int days) {
+    return '$days días hábiles de retraso';
+  }
+
+  @override
+  String staleDataExplain(String date, String marketDate) {
+    return 'El análisis de esta acción no se actualiza desde el $date. El mercado está al $marketDate.';
+  }
 }

@@ -4,7 +4,9 @@
   "blockUserConfirm": "Block {nickname}? You will no longer see their posts or comments.",
   "@blockUserConfirm": {
     "placeholders": {
-      "nickname": { "type": "String" }
+      "nickname": {
+        "type": "String"
+      }
     }
   },
   "userBlocked": "User blocked.",
@@ -17,10 +19,10 @@
   "eulaAgreePrefix": "I agree to the ",
   "eulaAgreeAnd": " and ",
   "eulaAgreeSuffix": ".",
-
   "appTitle": "MarketLens",
-  "@appTitle": { "description": "App title" },
-
+  "@appTitle": {
+    "description": "App title"
+  },
   "tabDashboard": "Dashboard",
   "tabDashboardTooltip": "Market Dashboard",
   "tabSearch": "Search",
@@ -36,10 +38,8 @@
   "tabWatchlist": "Watchlist",
   "tabWatchlistTooltip": "My Watchlist",
   "tabHoldingsTooltip": "My Holdings",
-
   "settings": "Settings",
   "settingsTooltip": "Settings",
-
   "account": "Account",
   "login": "Login",
   "loginSubtitle": "Access community features",
@@ -53,7 +53,6 @@
   "logoutConfirmMessage": "Are you sure you want to log out?",
   "welcome": "Welcome!",
   "accountCreated": "Account created!",
-
   "email": "Email",
   "emailHint": "example@email.com",
   "emailRequired": "Please enter your email",
@@ -79,7 +78,6 @@
   "passwordConfirmRequired": "Please confirm your password",
   "passwordMismatch": "Passwords do not match",
   "passwordPolicyFailed": "This password doesn't meet security requirements. Please choose another.",
-
   "changePassword": "Change Password",
   "changePasswordGuide": "Password Change Guide",
   "oldPassword": "Current Password",
@@ -96,13 +94,13 @@
   "passwordChangeFailed": "Password change failed: {error}",
   "@passwordChangeFailed": {
     "placeholders": {
-      "error": { "type": "String" }
+      "error": {
+        "type": "String"
+      }
     }
   },
-
   "loginRequired": "Login Required",
   "loginPromptMessage": "Login and join the community!",
-
   "searchHint": "Search by ticker or company (e.g. AAPL, Apple)",
   "searchFailed": "Search Failed",
   "noSearchResults": "No Results",
@@ -113,7 +111,6 @@
   "clearAll": "Clear All",
   "retry": "Retry",
   "tryAgain": "Try Again",
-
   "sectorMarketOverview": "Sector Overview",
   "filterAll": "All",
   "filterNasdaq": "NASDAQ",
@@ -130,13 +127,17 @@
   "topN": "▲ Top {n}",
   "@topN": {
     "placeholders": {
-      "n": { "type": "int" }
+      "n": {
+        "type": "int"
+      }
     }
   },
   "bottomN": "▼ Bottom {n}",
   "@bottomN": {
     "placeholders": {
-      "n": { "type": "int" }
+      "n": {
+        "type": "int"
+      }
     }
   },
   "noData": "No data",
@@ -144,10 +145,11 @@
   "dashboardLoadFailed": "Dashboard loading failed: {error}",
   "@dashboardLoadFailed": {
     "placeholders": {
-      "error": { "type": "String" }
+      "error": {
+        "type": "String"
+      }
     }
   },
-
   "allSignals": "All Signals",
   "sp500Signals": "S&P 500 Signals",
   "dow30Signals": "Dow 30 Signals",
@@ -161,28 +163,32 @@
   "showMore": "Show More ({remaining} left)",
   "@showMore": {
     "placeholders": {
-      "remaining": { "type": "int" }
+      "remaining": {
+        "type": "int"
+      }
     }
   },
   "nItems": "{count} items",
   "@nItems": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
-
   "scoreStrongBuy": "Strong Positive",
   "scoreBuy": "Positive",
   "scoreHold": "Neutral",
   "scoreSell": "Negative",
   "scoreStrongSell": "Strong Negative",
   "score": "Score",
-
   "myWatchlist": "My Watchlist",
   "nTickers": "{count} tickers",
   "@nTickers": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "watchlistEmpty": "Watchlist is empty",
@@ -192,7 +198,9 @@
   "tickerRemovedFromWatchlist": "{ticker} removed from watchlist",
   "@tickerRemovedFromWatchlist": {
     "placeholders": {
-      "ticker": { "type": "String" }
+      "ticker": {
+        "type": "String"
+      }
     }
   },
   "undo": "Undo",
@@ -206,7 +214,6 @@
   "topTradingVolume": "Top Trading Volume Today",
   "addWatchlistSearch": "Search & add to watchlist",
   "bookmarkGuide": "Tap the bookmark icon to add to your watchlist",
-
   "communitySearchHint": "Search by title or content...",
   "writePost": "Write Post",
   "deletePost": "Delete Post",
@@ -231,7 +238,9 @@
   "postDeleteFailed": "Failed to delete post: {error}",
   "@postDeleteFailed": {
     "placeholders": {
-      "error": { "type": "String" }
+      "error": {
+        "type": "String"
+      }
     }
   },
   "noPostsYet": "No posts yet",
@@ -248,7 +257,9 @@
   "tickerBoard": "{ticker} Board",
   "@tickerBoard": {
     "placeholders": {
-      "ticker": { "type": "String" }
+      "ticker": {
+        "type": "String"
+      }
     }
   },
   "tickerSearchHint": "Search ticker... (e.g. AAPL, TSLA)",
@@ -256,7 +267,6 @@
   "freePost": "Free",
   "checkNetwork": "Please check your network connection",
   "tryAgainLater": "Please try again later",
-
   "newPost": "New Post",
   "editPostTitle": "Edit Post",
   "tickerOnlyBoard": "Ticker-specific Board",
@@ -277,7 +287,6 @@
   "postUpdated": "Post updated",
   "submitPost": "Post",
   "updatePostButton": "Update",
-
   "deleteComment": "Delete Comment",
   "deleteCommentConfirm": "Are you sure you want to delete this comment?",
   "editComment": "Edit Comment",
@@ -295,13 +304,14 @@
   "cannotLoadPosts": "Cannot load posts",
   "noPostsInTicker": "No posts in this board yet",
   "writeFirstPostInTicker": "Write the first post!",
-
   "dataManagement": "Data Management",
   "clearRecentSearches": "Clear Recent Searches",
   "nSearchRecords": "{count} search records",
   "@nSearchRecords": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "clearRecentSearchesConfirm": "Clear all recent search records?",
@@ -314,20 +324,20 @@
   "deleteAllButton": "Delete All",
   "allDataDeleted": "All data deleted",
   "removeAllLocalData": "Remove all local data",
-
   "info": "Info",
   "aboutMarketLens": "About",
   "version": "Version {version}",
   "@version": {
     "placeholders": {
-      "version": { "type": "String" }
+      "version": {
+        "type": "String"
+      }
     }
   },
   "appDescription": "AI-powered stock analysis tool for data-driven investment decisions",
   "aiStockAnalysis": "AI Stock Analysis",
   "privacyPolicy": "Privacy Policy",
   "termsOfService": "Terms of Service",
-
   "admin": "Admin",
   "adminPanel": "Admin Panel",
   "adminPanelSubtitle": "User management and permissions",
@@ -342,14 +352,15 @@
   "pushSentResult": "Push sent to {count} devices",
   "@pushSentResult": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "pushSendFailed": "Failed to send push notification",
   "promoteToGold": "Promote to Gold",
   "promoteToManager": "Promote to Manager",
   "demoteToRegular": "Demote to Regular",
-
   "profile": "Profile",
   "editProfile": "Edit Profile",
   "myPosts": "My Posts",
@@ -360,7 +371,9 @@
   "joinDate": "Joined: {date}",
   "@joinDate": {
     "placeholders": {
-      "date": { "type": "String" }
+      "date": {
+        "type": "String"
+      }
     }
   },
   "deleteAccount": "Withdraw Account",
@@ -371,7 +384,6 @@
   "deactivateAccount": "Deactivate Account",
   "profileUpdated": "Profile updated",
   "imagePickerFailed": "Failed to select image",
-
   "language": "Language",
   "languageSystem": "System Default",
   "languageKorean": "한국어",
@@ -382,38 +394,43 @@
   "languageSettings": "Language",
   "systemDefault": "System Default",
   "languageChanged": "Language changed",
-
   "timeJustNow": "Just now",
   "timeMinutesAgo": "{n}m ago",
   "@timeMinutesAgo": {
     "placeholders": {
-      "n": { "type": "int" }
+      "n": {
+        "type": "int"
+      }
     }
   },
   "timeHoursAgo": "{n}h ago",
   "@timeHoursAgo": {
     "placeholders": {
-      "n": { "type": "int" }
+      "n": {
+        "type": "int"
+      }
     }
   },
   "timeYesterday": "Yesterday",
   "timeDaysAgo": "{n}d ago",
   "@timeDaysAgo": {
     "placeholders": {
-      "n": { "type": "int" }
+      "n": {
+        "type": "int"
+      }
     }
   },
-
   "companyOverview": "Company Overview",
   "companyDetails": "Company Details",
   "companyIntro": "About",
   "employeeCount": "{count} employees",
   "@employeeCount": {
     "placeholders": {
-      "count": { "type": "String" }
+      "count": {
+        "type": "String"
+      }
     }
   },
-
   "valuation": "Valuation",
   "forwardPE": "Forward PE",
   "beta": "Beta",
@@ -425,40 +442,42 @@
   "financialHealth": "Financial Health",
   "debtRatio": "D/E Ratio",
   "liquidityRatio": "Current Ratio",
-
   "dividends": "Dividends",
   "dividendYield": "Yield ",
   "annualDividend": "Annual ",
-
   "shortInterest": "Short Interest",
   "shortInterestRatio": "Short Ratio",
   "shortPercentFloat": "Short % Float",
   "shortDays": "{days} days",
   "@shortDays": {
     "placeholders": {
-      "days": { "type": "String" }
+      "days": {
+        "type": "String"
+      }
     }
   },
   "shortInterestLow": "Short interest low (stable)",
   "shortInterestModerate": "Short interest moderate (caution)",
   "shortInterestHigh": "Short interest high (warning)",
-
   "institutionalInsiderFlow": "Institutional / Insider Flow",
   "institutional": "Institutional",
   "insider": "Insider",
   "oneDay": "1D",
   "fiveDay": "5D",
-
   "tickerNews": "{ticker} News",
   "@tickerNews": {
     "placeholders": {
-      "ticker": { "type": "String" }
+      "ticker": {
+        "type": "String"
+      }
     }
   },
   "newsCount": "{count}",
   "@newsCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "oneWeek": "1W",
@@ -472,7 +491,6 @@
   "aiSummaryNews": "AI Summary News",
   "aiSummary": "AI Summary",
   "noNewsAvailable": "No news available",
-
   "earningsHistory": "Earnings History",
   "earningsHistoryEPS": "Earnings History (EPS)",
   "earningsEstimate": "Estimate",
@@ -489,13 +507,14 @@
   "earningsCount": "{count}",
   "@earningsCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "noEarningsThisWeek": "No earnings scheduled this week",
   "nextEarningsDate": "Next Earnings",
   "earningsConfirmed": "Confirmed",
-
   "keyEvents": "Key Events",
   "eventDetails": "Event Details",
   "upcomingEvents": "Upcoming Events",
@@ -504,11 +523,12 @@
   "recentEarningsQuarters": "Recent Earnings ({count}Q)",
   "@recentEarningsQuarters": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "earningsHistoryChart": "Earnings History (Chart)",
-
   "weekdayMon": "Mon",
   "weekdayTue": "Tue",
   "weekdayWed": "Wed",
@@ -516,7 +536,6 @@
   "weekdayFri": "Fri",
   "weekdaySat": "Sat",
   "weekdaySun": "Sun",
-
   "macroFedFunds": "Fed Rate",
   "macroDGS10": "10Y Yield",
   "macroDGS2": "2Y Yield",
@@ -542,23 +561,28 @@
   "macroYieldCurve": "Yield Curve",
   "macroLiquidity": "Liquidity",
   "macroOverall": "Macro Overall",
-
   "macroCurrentValue": "Current: {value}",
   "@macroCurrentValue": {
     "placeholders": {
-      "value": { "type": "String" }
+      "value": {
+        "type": "String"
+      }
     }
   },
   "macroChange": "Change: {value}",
   "@macroChange": {
     "placeholders": {
-      "value": { "type": "String" }
+      "value": {
+        "type": "String"
+      }
     }
   },
   "epsEstimateValue": "Est. ${value}",
   "@epsEstimateValue": {
     "placeholders": {
-      "value": { "type": "String" }
+      "value": {
+        "type": "String"
+      }
     }
   },
   "bbInterpretation": "Bollinger Bands Interpretation",
@@ -566,7 +590,6 @@
   "bbUpperApproach": "• Upper band approach: potential overbought",
   "bbLowerApproach": "• Lower band approach: potential oversold",
   "bbMiddleLine": "• Middle line: 20-day moving average",
-
   "cannotLoadData": "Cannot load data",
   "marketlensAI": "MarketLens AI",
   "marketlensAIOpinion": "MarketLens AI Opinion",
@@ -589,7 +612,6 @@
   "volume": "Volume",
   "priceChartTitle": "Price Chart",
   "legend": "Legend",
-
   "ratingBuy": "Buy",
   "ratingStrongBuy": "Strong Buy",
   "ratingOutperform": "Outperform",
@@ -603,13 +625,11 @@
   "ratingActionDowngrade": "Downgrade",
   "ratingActionReiterated": "Reiterated",
   "ratingActionInitiated": "Initiated",
-
   "roleMaster": "Master",
   "roleManager": "Manager",
   "roleGold": "Gold",
   "roleRegular": "Regular",
   "roleGuest": "Guest",
-
   "errInvalidCredentials": "Invalid email or password",
   "errLoginRequired": "Login required",
   "errSessionExpired": "Session expired. Please login again.",
@@ -621,7 +641,9 @@
   "errTimeout": "Server timeout ({seconds}s)",
   "@errTimeout": {
     "placeholders": {
-      "seconds": { "type": "int" }
+      "seconds": {
+        "type": "int"
+      }
     }
   },
   "errBadRequest": "Please check your input",
@@ -642,23 +664,28 @@
   "today": "Today",
   "yesterday": "Yesterday",
   "dayBeforeYesterday": "2 days ago",
-
   "expertCount": "Analyst Targets ({count})",
   "@expertCount": {
     "placeholders": {
-      "count": { "type": "String" }
+      "count": {
+        "type": "String"
+      }
     }
   },
   "scorePoints": "{score} pts",
   "@scorePoints": {
     "placeholders": {
-      "score": { "type": "String" }
+      "score": {
+        "type": "String"
+      }
     }
   },
   "averageVolume": "Avg: {volume}",
   "@averageVolume": {
     "placeholders": {
-      "volume": { "type": "String" }
+      "volume": {
+        "type": "String"
+      }
     }
   },
   "showBullBearFactors": "Show factors",
@@ -666,26 +693,34 @@
   "analystConsensus": "Analyst Targets ({count} firms)",
   "@analystConsensus": {
     "placeholders": {
-      "count": { "type": "String" }
+      "count": {
+        "type": "String"
+      }
     }
   },
   "lowestPrice": "Low ${price}",
   "@lowestPrice": {
     "placeholders": {
-      "price": { "type": "String" }
+      "price": {
+        "type": "String"
+      }
     }
   },
   "highestPrice": "High ${price}",
   "@highestPrice": {
     "placeholders": {
-      "price": { "type": "String" }
+      "price": {
+        "type": "String"
+      }
     }
   },
   "liveTalk": "💬 Live Talk",
   "commentsCount": "{count} comments",
   "@commentsCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "browsePosts": "Browse Posts",
@@ -693,7 +728,6 @@
   "shareThoughtsPrompt": "Share your thoughts on tickers\nand connect with other investors",
   "writeFirstCommentPrompt": "Leave the first comment on a post",
   "startConversationPrompt": "Start a conversation by commenting\non other investors' posts",
-
   "ratingOverweight": "Overweight",
   "ratingUnderweight": "Underweight",
   "ratingSectorOutperform": "Sector Outperform",
@@ -702,27 +736,22 @@
   "ratingPositive": "Positive",
   "ratingNegative": "Negative",
   "ratingEqualWeight": "Equal Weight",
-
   "keyMetricsComparison": "Key Metrics Comparison",
   "metric": "Metric",
   "serverCalculatedNote": "※ All metrics are server-calculated values",
   "priceTrendComparison": "Price Trend Comparison",
   "rsiComparison": "RSI Comparison (Server Values)",
   "rsiInterpretation": "※ RSI > 70: Overbought / RSI < 30: Oversold",
-
   "passwordChangeInstructions": "• New password must be at least 8 characters\n• Use a combination of letters, numbers, and symbols\n• You will need to login again with the new password",
-
   "notifications": "Notifications",
   "markAllAsRead": "Mark all read",
   "noNotifications": "No notifications yet",
   "notificationsRetentionHint": "Notifications from the last 7 days appear here.",
-
   "bioLabel": "Bio",
   "bioHint": "Tell us about yourself",
   "profileEditGuide": "Profile Edit Guide",
   "profileEditGuideDetails": "• Nickname: 2–30 characters, duplicates allowed\n• Bio: up to 200 characters (optional)\n• Profile photo: 800×800px recommended",
   "updatedDate": "Updated:",
-
   "tabCalendar": "Calendar",
   "tabCalendarTooltip": "Event Calendar",
   "eventTypeFomc": "FOMC",
@@ -737,7 +766,9 @@
   "nEvents": "{count} events",
   "@nEvents": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "noEventsThisMonth": "No events this month",
@@ -745,8 +776,6 @@
   "calendarNewsAnnouncements": "News · Announcements",
   "calendarEconomicIndicators": "US Economic",
   "calendarViewResult": "View result",
-  "today": "Today",
-
   "forgotPassword": "Forgot Password",
   "forgotPasswordSubtitle": "Enter your email and we'll send you a verification code.",
   "sendVerificationCode": "Send Code",
@@ -754,13 +783,17 @@
   "verificationSubtitle": "Enter the 6-digit code sent to {email}.",
   "@verificationSubtitle": {
     "placeholders": {
-      "email": { "type": "String" }
+      "email": {
+        "type": "String"
+      }
     }
   },
   "verificationExpiry": "Expires in: {time}",
   "@verificationExpiry": {
     "placeholders": {
-      "time": { "type": "String" }
+      "time": {
+        "type": "String"
+      }
     }
   },
   "verificationCode": "Verification Code",
@@ -770,7 +803,9 @@
   "resendCodeCooldown": "Resend in ({seconds}s)",
   "@resendCodeCooldown": {
     "placeholders": {
-      "seconds": { "type": "int" }
+      "seconds": {
+        "type": "int"
+      }
     }
   },
   "verificationCodeResent": "Verification code has been resent.",
@@ -779,12 +814,13 @@
   "resetPasswordSuccess": "Password has been reset. Please login with your new password.",
   "errEmailNotVerified": "Email verification required.",
   "errRateLimited": "Please try again later.",
-
   "myHoldings": "My Holdings",
   "nHoldings": "{count} holdings",
   "@nHoldings": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "portfolioSummary": "Portfolio Summary",
@@ -801,19 +837,25 @@
   "holdingAdded": "{ticker} added to holdings",
   "@holdingAdded": {
     "placeholders": {
-      "ticker": { "type": "String" }
+      "ticker": {
+        "type": "String"
+      }
     }
   },
   "holdingRemoved": "{ticker} removed from holdings",
   "@holdingRemoved": {
     "placeholders": {
-      "ticker": { "type": "String" }
+      "ticker": {
+        "type": "String"
+      }
     }
   },
   "removeHoldingConfirm": "Remove {ticker} from holdings?",
   "@removeHoldingConfirm": {
     "placeholders": {
-      "ticker": { "type": "String" }
+      "ticker": {
+        "type": "String"
+      }
     }
   },
   "aiAdvice": "AI Advice",
@@ -826,8 +868,12 @@
   "sharesAtPrice": "{shares} shares @ ${price}",
   "@sharesAtPrice": {
     "placeholders": {
-      "shares": { "type": "String" },
-      "price": { "type": "String" }
+      "shares": {
+        "type": "String"
+      },
+      "price": {
+        "type": "String"
+      }
     }
   },
   "noHoldingsYet": "No holdings yet",
@@ -835,8 +881,6 @@
   "invalidShares": "Please enter a valid number of shares",
   "invalidPrice": "Please enter a valid price",
   "confidence": "Confidence",
-
-  "tabWatchlist": "Watchlist",
   "tabHoldings": "Holdings",
   "purchaseDate": "Purchase Date",
   "sellDate": "Sell Date",
@@ -856,7 +900,9 @@
   "holdingUpdated": "{ticker} holding updated",
   "@holdingUpdated": {
     "placeholders": {
-      "ticker": { "type": "String" }
+      "ticker": {
+        "type": "String"
+      }
     }
   },
   "portfolioAIAnalysis": "Portfolio AI Analysis",
@@ -899,7 +945,9 @@
   "aiChatSelectedCount": "{count} selected",
   "@aiChatSelectedCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "aiChatHide": "Hide",
@@ -914,7 +962,9 @@
   "aiChatNConversations": "{count} chats",
   "@aiChatNConversations": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "aiChatClearLocal": "Clear all chats on this phone",
@@ -949,7 +999,9 @@
   "holidayPriceNotice": "Closing price from {date} (prior trading day)",
   "@holidayPriceNotice": {
     "placeholders": {
-      "date": { "type": "String" }
+      "date": {
+        "type": "String"
+      }
     }
   },
   "addToHoldings": "Add to Holdings",
@@ -958,25 +1010,33 @@
   "addHoldingTitle": "{ticker} Add Holding",
   "@addHoldingTitle": {
     "placeholders": {
-      "ticker": { "type": "String" }
+      "ticker": {
+        "type": "String"
+      }
     }
   },
   "sellHoldingTitle": "{ticker} Sell",
   "@sellHoldingTitle": {
     "placeholders": {
-      "ticker": { "type": "String" }
+      "ticker": {
+        "type": "String"
+      }
     }
   },
   "editHoldingTitle": "{ticker} Edit Holding",
   "@editHoldingTitle": {
     "placeholders": {
-      "ticker": { "type": "String" }
+      "ticker": {
+        "type": "String"
+      }
     }
   },
   "holdingSold": "{ticker} sold successfully",
   "@holdingSold": {
     "placeholders": {
-      "ticker": { "type": "String" }
+      "ticker": {
+        "type": "String"
+      }
     }
   },
   "deleteHolding": "Delete Holding",
@@ -993,7 +1053,9 @@
   "lastUpdateTime": "Last updated: {time}",
   "@lastUpdateTime": {
     "placeholders": {
-      "time": { "type": "String" }
+      "time": {
+        "type": "String"
+      }
     }
   },
   "viewAIAdvice": "View AI Advice",
@@ -1002,13 +1064,13 @@
   "viewAllTransactions": "View all ({count})",
   "@viewAllTransactions": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
-
   "newsFilter": "Filter",
   "filterSource": "Source",
-  "filterAll": "All",
   "filterMyWatchlist": "My Watchlist",
   "filterNoWatchlist": "Add watchlist items first",
   "filterMarketOnly": "Market News",
@@ -1020,7 +1082,9 @@
   "hotTopicMore": "+{count} more",
   "@hotTopicMore": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "sectorTechnology": "Technology",
@@ -1034,7 +1098,6 @@
   "sectorUtilities": "Utilities",
   "sectorRealEstate": "Real Estate",
   "sectorMaterials": "Materials",
-
   "newsBubbleTitle": "24h Hot News",
   "newsBubbleLegendBullish": "Mostly Bullish",
   "newsBubbleLegendBearish": "Mostly Bearish",
@@ -1042,10 +1105,11 @@
   "newsBubbleMentions": "{count} mentions",
   "@newsBubbleMentions": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
-
   "newsSentiment24hTitle": "Last 24 Hours",
   "newsBullish": "Bullish",
   "newsNeutral": "Neutral",
@@ -1055,10 +1119,11 @@
   "newsCountUnit": "{count}",
   "@newsCountUnit": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
-
   "taxEstimateTitle": "Tax Estimate",
   "totalGains": "Total Gains",
   "annualExemption": "Annual Exemption",
@@ -1084,10 +1149,11 @@
   "nDaysAgo": "{count}D ago",
   "@nDaysAgo": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
-
   "tabHome": "Home",
   "tabHomeTooltip": "Home",
   "tabAIAnalysis": "AI Signal",
@@ -1109,7 +1175,6 @@
   "noIntradayData": "No intraday data yet",
   "noDailyData": "No daily data",
   "closePriceUnavailable": "Could not load the closing price. Please enter it manually.",
-
   "gaugeStrongNegativeDesc": "Strong Negative: Very high probability of decline",
   "gaugeNegativeDesc": "Negative: High probability of decline",
   "gaugePositiveDesc": "Positive: High probability of rise",
@@ -1117,28 +1182,29 @@
   "aiRecommended20": "AI Top {count} Recommended",
   "@aiRecommended20": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "aiCaution20": "AI Top {count} Caution",
   "@aiCaution20": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "seeMore": "See More",
-
   "holdingsSummary": "Holdings Summary",
   "investmentReturn": "Investment Return",
   "returnRate": "Return",
   "purchaseAmount": "Cost Basis",
   "profitAmount": "Profit/Loss",
   "evaluationAmount": "Market Value",
-
   "watchAdToUnlock": "Watch a short ad to view AI analysis",
   "watchAd": "Watch Ad",
   "adNotReady": "Ad is loading, please try again",
-
   "holdingsLimitTitle": "Holdings Limit",
   "holdingsLimitMessage": "Free users can track up to 3 holdings. Upgrade to Gold for unlimited holdings and ad-free AI analysis.",
   "upgradeToGold": "Upgrade to Gold",
@@ -1149,11 +1215,12 @@
   "viewingPreviousAnalysis": "View previous analysis",
   "goldUpgradeComingSoon": "Gold membership coming soon! Stay tuned.",
   "close": "Close",
-
   "goldMonthlyPrice": "{price}/month",
   "@goldMonthlyPrice": {
     "placeholders": {
-      "price": { "type": "String" }
+      "price": {
+        "type": "String"
+      }
     }
   },
   "subscribeNow": "Subscribe Now",
@@ -1166,7 +1233,9 @@
   "subscriptionExpires": "Expires {date}",
   "@subscriptionExpires": {
     "placeholders": {
-      "date": { "type": "String" }
+      "date": {
+        "type": "String"
+      }
     }
   },
   "subscriptionManage": "Manage Subscription",
@@ -1175,41 +1244,45 @@
   "goldMembershipTitle": "Gold Membership",
   "goldComingSoon": "Gold membership is coming soon!",
   "subscription": "Subscription",
-
   "freeTrialStart": "Start 7-Day Free Trial",
   "freeTrialInfo": "Free for 7 days, then {price}/month. Cancel anytime.",
   "@freeTrialInfo": {
     "placeholders": {
-      "price": { "type": "String" }
+      "price": {
+        "type": "String"
+      }
     }
   },
   "onFreeTrial": "Free Trial",
   "trialEndsOn": "Trial ends: {date}",
   "@trialEndsOn": {
     "placeholders": {
-      "date": { "type": "String" }
+      "date": {
+        "type": "String"
+      }
     }
   },
   "trialExpired": "Your free trial has ended",
-
   "manageSubscription": "Manage Subscription",
   "restorePurchaseTitle": "Restore Previous Purchase",
   "restorePurchaseDescription": "Use this if your subscription is not reflected after changing devices or reinstalling the app.",
-
   "calendarPremiumEvents": "{count} premium events",
   "@calendarPremiumEvents": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "calendarUnlockWithAd": "Watch ad for 6h access",
   "calendarUnlockedUntil": "Unlocked until {time}",
   "@calendarUnlockedUntil": {
     "placeholders": {
-      "time": { "type": "String" }
+      "time": {
+        "type": "String"
+      }
     }
   },
-
   "treemapLegend": "Size = Volume  |  Green = Up  |  Red = Down",
   "aiScoreSubtitle": "AI Score (0: Sell Signal ~ 100: Buy Signal)",
   "aiSignalStrongBuyDesc": "Strong Buy (80-100): Technical and financial indicators show strong buy signals",
@@ -1229,7 +1302,9 @@
   "totalPosts": "{count} posts",
   "@totalPosts": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "recentComments": "Recent Comments",
@@ -1243,15 +1318,12 @@
   "resetTutorials": "Reset Tutorials",
   "resetTutorialsDesc": "All tutorials will be shown again",
   "tutorialsReset": "Tutorials have been reset",
-
   "purchaseStoreUnavailable": "App Store Unavailable",
   "purchaseTemporarilyUnavailable": "Subscription Temporarily Unavailable",
   "purchaseStoreProblem": "Unable to connect to the App Store. Please check your Apple ID settings, ensure payments are enabled, and try again.",
   "purchaseRetry": "Try Again",
   "purchaseInitializing": "Connecting to App Store...",
-
   "loginRequiredForPurchase": "Please log in to purchase Gold membership. Your subscription will be synced to your account.",
-
   "aiScoreGuideTitle": "AI Score Guide",
   "aiScoreGuideDescription": "AI scores are calculated based on a mid-to-long-term (3–12 month) investment perspective.",
   "aiScoreGuideStrongPositive": "80–100: Strong Positive – Very high probability of rise",
@@ -1260,7 +1332,6 @@
   "aiScoreGuideNegative": "20–39: Negative – High probability of decline",
   "aiScoreGuideStrongNegative": "0–19: Strong Negative – Very high probability of decline",
   "subscriptionPaymentAccountWarning": "Payment is processed through the App Store / Google Play account signed in on this device. If you purchase on someone else's device, the device owner's account may be charged.",
-
   "investmentProfileTitle": "Investment Profile",
   "investmentProfileSection": "Investment Profile",
   "investmentProfileEditSubtitle": "View or edit your investment preferences",
@@ -1273,7 +1344,6 @@
   "recommendationFit": "Fit",
   "skip": "Skip",
   "next": "Next",
-
   "investmentStyleTitle": "Investment Style",
   "investmentStyleSubtitle": "What describes your investment approach?",
   "investmentStyleConservative": "Conservative",
@@ -1282,7 +1352,6 @@
   "investmentStyleBalancedDesc": "Balance between growth and stability",
   "investmentStyleAggressive": "Aggressive",
   "investmentStyleAggressiveDesc": "Pursue high returns with higher risk tolerance",
-
   "timeHorizonTitle": "Investment Horizon",
   "timeHorizonSubtitle": "How long do you plan to invest?",
   "timeHorizonShort": "Short-term",
@@ -1291,7 +1360,6 @@
   "timeHorizonMediumDesc": "1 to 5 years",
   "timeHorizonLong": "Long-term",
   "timeHorizonLongDesc": "5+ years",
-
   "riskToleranceTitle": "Risk Tolerance",
   "riskToleranceSubtitle": "How much risk can you handle?",
   "riskLevel1": "Very Low",
@@ -1301,7 +1369,6 @@
   "riskLevel5": "Very High",
   "riskLow": "Low",
   "riskHigh": "High",
-
   "targetReturnTitle": "Target Annual Return",
   "targetReturnSubtitle": "What return are you aiming for?",
   "targetReturn5Desc": "Stable, low-risk investments",
@@ -1309,7 +1376,6 @@
   "targetReturn20Desc": "Aggressive growth strategy",
   "targetReturnFlexible": "Flexible",
   "targetReturnFlexibleDesc": "No specific target, adapt to market conditions",
-
   "maxLossTitle": "Maximum Acceptable Loss",
   "maxLossSubtitle": "What is the maximum drawdown you can tolerate?",
   "maxLoss5Desc": "Very conservative, minimal drawdown",
@@ -1332,6 +1398,90 @@
   "unavailableReport": "Let us know",
   "unavailableGoBack": "Go back",
   "unavailableReportSent": "Thanks for letting us know. We'll look into it.",
-  "@unavailableNotReadyTitleFor": { "placeholders": { "subject": { "type": "String" } } },
-  "viewAiOpinion": "View AI opinion"
+  "@unavailableNotReadyTitleFor": {
+    "placeholders": {
+      "subject": {
+        "type": "String"
+      }
+    }
+  },
+  "viewAiOpinion": "View AI opinion",
+  "unavailableRenamedTitle": "{oldTicker} is now {newTicker}",
+  "@unavailableRenamedTitle": {
+    "placeholders": {
+      "oldTicker": {
+        "type": "String"
+      },
+      "newTicker": {
+        "type": "String"
+      }
+    }
+  },
+  "unavailableRenamedBody": "The ticker symbol changed. It is the same company, and you can keep following it under the new symbol.",
+  "unavailableRenamedBodyWithDate": "It traded as {oldTicker} through {date}, then became {newTicker}. Same company.",
+  "@unavailableRenamedBodyWithDate": {
+    "placeholders": {
+      "oldTicker": {
+        "type": "String"
+      },
+      "newTicker": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "unavailableRenamedAction": "View {newTicker}",
+  "@unavailableRenamedAction": {
+    "placeholders": {
+      "newTicker": {
+        "type": "String"
+      }
+    }
+  },
+  "unavailableDelistedTitle": "{ticker} has stopped trading",
+  "@unavailableDelistedTitle": {
+    "placeholders": {
+      "ticker": {
+        "type": "String"
+      }
+    }
+  },
+  "unavailableDelistedBody": "This stock was delisted, so its prices are no longer updated.",
+  "unavailableDelistedBodyWithDate": "{date} was its last trading day; prices are no longer updated.",
+  "@unavailableDelistedBodyWithDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "dataAsOf": "As of {date}",
+  "@dataAsOf": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "staleDataBadge": "{days} trading days behind",
+  "@staleDataBadge": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "staleDataExplain": "This stock’s analysis has not updated since {date}. The market is current through {marketDate}.",
+  "@staleDataExplain": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "marketDate": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -2931,4 +2931,55 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get viewAiOpinion => 'AI 意見を見る';
+
+  @override
+  String unavailableRenamedTitle(String oldTicker, String newTicker) {
+    return '$oldTickerは$newTickerに変更されました';
+  }
+
+  @override
+  String get unavailableRenamedBody =>
+      'ティッカーが変更されました。同じ会社であり、新しいティッカーで引き続き確認できます。';
+
+  @override
+  String unavailableRenamedBodyWithDate(
+    String oldTicker,
+    String newTicker,
+    String date,
+  ) {
+    return '$dateまでは$oldTickerとして取引され、その後$newTickerに変更されました。同じ会社です。';
+  }
+
+  @override
+  String unavailableRenamedAction(String newTicker) {
+    return '$newTickerを見る';
+  }
+
+  @override
+  String unavailableDelistedTitle(String ticker) {
+    return '$tickerの取引は終了しました';
+  }
+
+  @override
+  String get unavailableDelistedBody => 'この銘柄は上場廃止となり、株価は更新されません。';
+
+  @override
+  String unavailableDelistedBodyWithDate(String date) {
+    return '$dateが最終取引日で、以降は株価が更新されません。';
+  }
+
+  @override
+  String dataAsOf(String date) {
+    return '$date時点';
+  }
+
+  @override
+  String staleDataBadge(int days) {
+    return '$days営業日前のデータ';
+  }
+
+  @override
+  String staleDataExplain(String date, String marketDate) {
+    return '$date以降、この銘柄の分析は更新されていません。市場の基準日は$marketDateです。';
+  }
 }

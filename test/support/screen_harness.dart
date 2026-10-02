@@ -38,6 +38,7 @@ import 'package:marketlens/screens/watchlist/widgets/portfolio_summary_card.dart
 import 'package:marketlens/screens/watchlist/widgets/watchlist_tab.dart';
 import 'package:marketlens/exceptions/api_error_codes.dart';
 import 'package:marketlens/exceptions/api_exception.dart';
+import 'package:marketlens/models/ticker_change.dart';
 import 'package:marketlens/widgets/common/data_unavailable_view.dart';
 import 'package:marketlens/widgets/news/mention_bubble_card.dart';
 import 'package:marketlens/widgets/news/news_article_row.dart';
@@ -458,6 +459,52 @@ class ScreenHarness {
 
 
   /// 이름 → 화면. 스윕 테스트가 전수 순회한다.
+  /// 개명·상장폐지 화면. 2026-10-02 서버 실데이터 그대로.
+  ///
+  /// 제목이 `{old}는 {new}로 변경되었습니다` + 버튼이 `{new} 보기`라서
+  /// 티커 길이가 그대로 폭에 들어간다 — 1.3배에서 넘칠 자리다.
+  Widget tickerChangeStates() {
+    final map = TickerChangeMap.fromJson({
+      'changes': [
+        {
+          'old': 'BK',
+          'new': 'BNY',
+          'reason': 'renamed',
+          'last_traded_date': '2026-07-02',
+          'detected_at': '2026-10-01T06:52:58',
+        },
+        {
+          'old': 'HOLX',
+          'new': null,
+          'reason': 'delisted',
+          'last_traded_date': '2026-04-07',
+          'detected_at': '2026-10-01T06:52:58',
+        },
+      ],
+    });
+
+    return Column(
+      children: [
+        Expanded(
+          child: DataUnavailableView.fromResolution(
+            map.resolve('BK'),
+            onReport: () {},
+            onBack: () {},
+            onGoToSuccessor: (_) {},
+          )!,
+        ),
+        const Divider(height: 1),
+        Expanded(
+          child: DataUnavailableView.fromResolution(
+            map.resolve('HOLX'),
+            onReport: () {},
+            onBack: () {},
+          )!,
+        ),
+      ],
+    );
+  }
+
   Map<String, Widget Function()> get screens => {
         'home': homeToday,
         'news': newsTimeline,
@@ -465,6 +512,7 @@ class ScreenHarness {
         'watchlist': watchlist,
         'portfolio': portfolio,
         'failure': failureStates,
+        'tickerchange': tickerChangeStates,
       };
 }
 

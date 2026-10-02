@@ -3003,4 +3003,56 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get viewAiOpinion => 'View AI opinion';
+
+  @override
+  String unavailableRenamedTitle(String oldTicker, String newTicker) {
+    return '$oldTicker is now $newTicker';
+  }
+
+  @override
+  String get unavailableRenamedBody =>
+      'The ticker symbol changed. It is the same company, and you can keep following it under the new symbol.';
+
+  @override
+  String unavailableRenamedBodyWithDate(
+    String oldTicker,
+    String newTicker,
+    String date,
+  ) {
+    return 'It traded as $oldTicker through $date, then became $newTicker. Same company.';
+  }
+
+  @override
+  String unavailableRenamedAction(String newTicker) {
+    return 'View $newTicker';
+  }
+
+  @override
+  String unavailableDelistedTitle(String ticker) {
+    return '$ticker has stopped trading';
+  }
+
+  @override
+  String get unavailableDelistedBody =>
+      'This stock was delisted, so its prices are no longer updated.';
+
+  @override
+  String unavailableDelistedBodyWithDate(String date) {
+    return '$date was its last trading day; prices are no longer updated.';
+  }
+
+  @override
+  String dataAsOf(String date) {
+    return 'As of $date';
+  }
+
+  @override
+  String staleDataBadge(int days) {
+    return '$days trading days behind';
+  }
+
+  @override
+  String staleDataExplain(String date, String marketDate) {
+    return 'This stock’s analysis has not updated since $date. The market is current through $marketDate.';
+  }
 }

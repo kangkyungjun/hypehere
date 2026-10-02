@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../exceptions/api_error_codes.dart';
 import '../../exceptions/api_exception.dart';
+import '../../models/ticker_change.dart';
 import '../../l10n/app_localizations.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_spacing.dart';
@@ -21,6 +22,17 @@ enum UnavailableKind {
   /// ⚠️ 이 경우를 "오류"라고 쓰면 안 된다. 멀쩡한 앱을 고장난 것으로
   /// 오해시키는 손해가, 솔직하게 "준비 중"이라 쓰는 것보다 크다.
   notReady,
+
+  /// **종목 코드가 바뀌었다.** 데이터가 없는 게 아니라 다른 이름으로 있다.
+  ///
+  /// `notReady`로 뭉개면 "준비 중"이라는 **틀린 설명**이 뜬다. 준비 중이
+  /// 아니라 이미 다 있고, 사용자는 한 번만 탭하면 갈 수 있다.
+  renamed,
+
+  /// **상장폐지.** 데이터가 더 늘지 않는다. 옮겨 갈 곳도 없다.
+  ///
+  /// 이것도 "준비 중"이 아니다 — 기다려도 오지 않는다고 말해야 한다.
+  delisted,
 }
 
 /// 실패 상태 단일 컴포넌트.
@@ -40,7 +52,40 @@ class DataUnavailableView extends StatelessWidget {
     this.onRetry,
     this.onReport,
     this.onBack,
+    this.successorTicker,
+    this.lastTradedDate,
+    this.onGoToSuccessor,
   });
+
+  /// 티커 변경 결과로부터 화면을 만든다.
+  ///
+  /// [resolution]이 알릴 만한 변경이 아니면(표기 변경·변경 없음) null을
+  /// 돌려준다 — 호출부가 평소 분기를 그대로 쓰라는 뜻이다.
+  static DataUnavailableView? fromResolution(
+    TickerResolution resolution, {
+    String? detail,
+    VoidCallback? onReport,
+    VoidCallback? onBack,
+    void Function(String newTicker)? onGoToSuccessor,
+  }) {
+    if (!resolution.shouldNotify) return null;
+
+    final successor = resolution.ticker;
+    return DataUnavailableView(
+      kind: resolution.isDelisted
+          ? UnavailableKind.delisted
+          : UnavailableKind.renamed,
+      subject: resolution.chain.first,
+      detail: detail,
+      // 둘 다 다시 눌러도 결과가 같다. 재시도를 주면 헛되이 반복한다.
+      onRetry: null,
+      onReport: onReport,
+      onBack: onBack,
+      successorTicker: resolution.isDelisted ? null : successor,
+      lastTradedDate: resolution.change?.lastTradedDate,
+      onGoToSuccessor: resolution.isDelisted ? null : onGoToSuccessor,
+    );
+  }
 
   /// 예외로부터 상황을 판정한다. 분기 로직을 호출부마다 복사하지 않기 위함.
   factory DataUnavailableView.fromError(
@@ -98,6 +143,15 @@ class DataUnavailableView extends StatelessWidget {
   final VoidCallback? onReport;
   final VoidCallback? onBack;
 
+  /// 개명된 경우의 새 티커. `renamed`에서만 쓴다.
+  final String? successorTicker;
+
+  /// 옛 티커의 마지막 거래일. 있으면 문구에 날짜를 넣는다.
+  final DateTime? lastTradedDate;
+
+  /// 새 티커로 이동. 없으면 이동 버튼을 띄우지 않는다.
+  final void Function(String newTicker)? onGoToSuccessor;
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -123,6 +177,25 @@ class DataUnavailableView extends StatelessWidget {
               ? l10n.unavailableNotReadyTitle
               : l10n.unavailableNotReadyTitleFor(subject!),
           l10n.unavailableNotReadyBody,
+        ),
+      // 개명 — 잃어버린 게 아니라 이사했다. 아이콘도 "기다림"이 아니라
+      // "이동"이어야 한다.
+      UnavailableKind.renamed => (
+          Icons.swap_horiz_rounded,
+          mlc.accentBlue,
+          l10n.unavailableRenamedTitle(
+            subject ?? '',
+            successorTicker ?? '',
+          ),
+          _renamedBody(l10n),
+        ),
+      UnavailableKind.delisted => (
+          Icons.do_not_disturb_on_outlined,
+          mlc.textTertiary,
+          l10n.unavailableDelistedTitle(subject ?? ''),
+          lastTradedDate == null
+              ? l10n.unavailableDelistedBody
+              : l10n.unavailableDelistedBodyWithDate(_fmt(lastTradedDate!)),
         ),
     };
 
@@ -165,8 +238,35 @@ class DataUnavailableView extends StatelessWidget {
     );
   }
 
+  /// 날짜가 있으면 "{date}까지 {old}로 거래되었고…"로, 없으면 일반 문구로.
+  ///
+  /// 표기 변경(`BRKB → BRK-B`)은 마지막 거래일이 null로 오므로 자연히
+  /// 일반 문구가 된다. 다만 그 경우는 `shouldNotify`가 false라서 이 화면에
+  /// 도달하지 않는다.
+  String _renamedBody(AppLocalizations l10n) {
+    final d = lastTradedDate;
+    if (d == null) return l10n.unavailableRenamedBody;
+    return l10n.unavailableRenamedBodyWithDate(
+      subject ?? '',
+      successorTicker ?? '',
+      _fmt(d),
+    );
+  }
+
+  static String _fmt(DateTime d) =>
+      '${d.year}-${d.month.toString().padLeft(2, '0')}-'
+      '${d.day.toString().padLeft(2, '0')}';
+
   Widget _actions(BuildContext context, AppLocalizations l10n) {
     final buttons = <Widget>[
+      // 새 티커로 이동이 **첫 번째**다. 개명 화면에서 사용자가 원하는 건
+      // 사실상 이것 하나다.
+      if (successorTicker != null && onGoToSuccessor != null)
+        FilledButton.icon(
+          onPressed: () => onGoToSuccessor!(successorTicker!),
+          icon: const Icon(Icons.arrow_forward_rounded, size: 16),
+          label: Text(l10n.unavailableRenamedAction(successorTicker!)),
+        ),
       if (onRetry != null)
         FilledButton(onPressed: onRetry, child: Text(l10n.tryAgain)),
       if (onReport != null)

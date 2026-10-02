@@ -2932,4 +2932,55 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get viewAiOpinion => 'AI 의견 보기';
+
+  @override
+  String unavailableRenamedTitle(String oldTicker, String newTicker) {
+    return '$oldTicker는 $newTicker로 변경되었습니다';
+  }
+
+  @override
+  String get unavailableRenamedBody =>
+      '종목 코드가 바뀌었습니다. 같은 회사이며, 새 코드에서 계속 확인할 수 있습니다.';
+
+  @override
+  String unavailableRenamedBodyWithDate(
+    String oldTicker,
+    String newTicker,
+    String date,
+  ) {
+    return '$date까지 $oldTicker로 거래되었고, 이후 $newTicker로 바뀌었습니다. 같은 회사입니다.';
+  }
+
+  @override
+  String unavailableRenamedAction(String newTicker) {
+    return '$newTicker 보기';
+  }
+
+  @override
+  String unavailableDelistedTitle(String ticker) {
+    return '$ticker 거래가 종료되었습니다';
+  }
+
+  @override
+  String get unavailableDelistedBody => '이 종목은 상장폐지되어 더 이상 시세가 갱신되지 않습니다.';
+
+  @override
+  String unavailableDelistedBodyWithDate(String date) {
+    return '$date이 마지막 거래일이며, 이후 시세가 갱신되지 않습니다.';
+  }
+
+  @override
+  String dataAsOf(String date) {
+    return '$date 기준';
+  }
+
+  @override
+  String staleDataBadge(int days) {
+    return '$days거래일 전 데이터';
+  }
+
+  @override
+  String staleDataExplain(String date, String marketDate) {
+    return '$date 이후 이 종목의 분석이 갱신되지 않았습니다. 시장 기준일은 $marketDate입니다.';
+  }
 }

@@ -5647,6 +5647,70 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'View AI opinion'**
   String get viewAiOpinion;
+
+  /// No description provided for @unavailableRenamedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{oldTicker} is now {newTicker}'**
+  String unavailableRenamedTitle(String oldTicker, String newTicker);
+
+  /// No description provided for @unavailableRenamedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The ticker symbol changed. It is the same company, and you can keep following it under the new symbol.'**
+  String get unavailableRenamedBody;
+
+  /// No description provided for @unavailableRenamedBodyWithDate.
+  ///
+  /// In en, this message translates to:
+  /// **'It traded as {oldTicker} through {date}, then became {newTicker}. Same company.'**
+  String unavailableRenamedBodyWithDate(
+    String oldTicker,
+    String newTicker,
+    String date,
+  );
+
+  /// No description provided for @unavailableRenamedAction.
+  ///
+  /// In en, this message translates to:
+  /// **'View {newTicker}'**
+  String unavailableRenamedAction(String newTicker);
+
+  /// No description provided for @unavailableDelistedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{ticker} has stopped trading'**
+  String unavailableDelistedTitle(String ticker);
+
+  /// No description provided for @unavailableDelistedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This stock was delisted, so its prices are no longer updated.'**
+  String get unavailableDelistedBody;
+
+  /// No description provided for @unavailableDelistedBodyWithDate.
+  ///
+  /// In en, this message translates to:
+  /// **'{date} was its last trading day; prices are no longer updated.'**
+  String unavailableDelistedBodyWithDate(String date);
+
+  /// No description provided for @dataAsOf.
+  ///
+  /// In en, this message translates to:
+  /// **'As of {date}'**
+  String dataAsOf(String date);
+
+  /// No description provided for @staleDataBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} trading days behind'**
+  String staleDataBadge(int days);
+
+  /// No description provided for @staleDataExplain.
+  ///
+  /// In en, this message translates to:
+  /// **'This stock’s analysis has not updated since {date}. The market is current through {marketDate}.'**
+  String staleDataExplain(String date, String marketDate);
 }
 
 class _AppLocalizationsDelegate

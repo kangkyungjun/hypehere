@@ -4,7 +4,9 @@
   "blockUserConfirm": "{nickname}님을 차단할까요? 이 사용자의 게시글과 댓글이 더 이상 표시되지 않습니다.",
   "@blockUserConfirm": {
     "placeholders": {
-      "nickname": { "type": "String" }
+      "nickname": {
+        "type": "String"
+      }
     }
   },
   "userBlocked": "사용자를 차단했습니다.",
@@ -17,9 +19,7 @@
   "eulaAgreePrefix": "본인은 ",
   "eulaAgreeAnd": " 및 ",
   "eulaAgreeSuffix": "에 동의합니다.",
-
   "appTitle": "마켓렌즈",
-
   "tabDashboard": "대시보드",
   "tabDashboardTooltip": "마켓 대시보드",
   "tabSearch": "검색",
@@ -35,10 +35,8 @@
   "tabWatchlist": "관심종목",
   "tabWatchlistTooltip": "나의 관심목록",
   "tabHoldingsTooltip": "나의 보유종목",
-
   "settings": "설정",
   "settingsTooltip": "설정",
-
   "account": "계정",
   "login": "로그인",
   "loginSubtitle": "커뮤니티 기능 이용하기",
@@ -52,7 +50,6 @@
   "logoutConfirmMessage": "정말 로그아웃 하시겠습니까?",
   "welcome": "환영합니다!",
   "accountCreated": "계정이 생성되었습니다!",
-
   "email": "이메일",
   "emailHint": "example@email.com",
   "emailRequired": "이메일을 입력하세요",
@@ -78,7 +75,6 @@
   "passwordConfirmRequired": "비밀번호 확인을 입력하세요",
   "passwordMismatch": "비밀번호가 일치하지 않습니다",
   "passwordPolicyFailed": "비밀번호가 보안 규칙에 맞지 않습니다. 다른 비밀번호를 사용해 주세요.",
-
   "changePassword": "비밀번호 변경",
   "changePasswordGuide": "비밀번호 변경 안내",
   "oldPassword": "현재 비밀번호",
@@ -93,10 +89,8 @@
   "newPasswordMustDiffer": "새 비밀번호는 기존 비밀번호와 달라야 합니다",
   "passwordChanged": "비밀번호가 성공적으로 변경되었습니다",
   "passwordChangeFailed": "비밀번호 변경 실패: {error}",
-
   "loginRequired": "로그인이 필요합니다",
   "loginPromptMessage": "로그인하고 커뮤니티에 참여하세요!",
-
   "searchHint": "티커 또는 기업명 검색 (예: AAPL, 애플)",
   "searchFailed": "검색 실패",
   "noSearchResults": "검색 결과 없음",
@@ -107,7 +101,6 @@
   "clearAll": "전체 삭제",
   "retry": "재시도",
   "tryAgain": "다시 시도",
-
   "sectorMarketOverview": "섹터별 시장현황",
   "filterAll": "전체",
   "filterNasdaq": "나스닥",
@@ -126,7 +119,6 @@
   "noData": "데이터 없음",
   "signalLoadFailed": "시그널 로딩 실패",
   "dashboardLoadFailed": "대시보드 로딩 실패: {error}",
-
   "allSignals": "전체 시그널",
   "sp500Signals": "S&P 500 시그널",
   "dow30Signals": "Dow 30 시그널",
@@ -139,14 +131,12 @@
   "noAdditionalSignals": "추가 시그널 없음",
   "showMore": "더 보기 ({remaining}개 남음)",
   "nItems": "{count}개",
-
   "scoreStrongBuy": "강력긍정",
   "scoreBuy": "긍정",
   "scoreHold": "중립",
   "scoreSell": "부정",
   "scoreStrongSell": "강력부정",
   "score": "점수",
-
   "myWatchlist": "나의 관심종목",
   "nTickers": "{count}개 종목",
   "watchlistEmpty": "관심 목록이 비어있습니다",
@@ -165,7 +155,6 @@
   "topTradingVolume": "오늘의 거래량 TOP",
   "addWatchlistSearch": "종목 검색하고 추가하기",
   "bookmarkGuide": "북마크를 눌러 관심종목에 추가하세요",
-
   "communitySearchHint": "제목, 내용으로 검색...",
   "writePost": "글쓰기",
   "deletePost": "게시글 삭제",
@@ -205,7 +194,6 @@
   "freePost": "자유",
   "checkNetwork": "네트워크 연결을 확인해 주세요",
   "tryAgainLater": "잠시 후 다시 시도해 주세요",
-
   "newPost": "새 게시글",
   "editPostTitle": "게시글 수정",
   "tickerOnlyBoard": "종목 전용 게시판",
@@ -226,7 +214,6 @@
   "postUpdated": "게시글이 수정되었습니다",
   "submitPost": "게시하기",
   "updatePostButton": "수정하기",
-
   "deleteComment": "댓글 삭제",
   "deleteCommentConfirm": "정말 이 댓글을 삭제하시겠습니까?",
   "editComment": "댓글 수정",
@@ -244,7 +231,6 @@
   "cannotLoadPosts": "게시글을 불러올 수 없습니다",
   "noPostsInTicker": "아직 게시글이 없습니다",
   "writeFirstPostInTicker": "첫 번째 게시글을 작성해보세요!",
-
   "dataManagement": "데이터 관리",
   "clearRecentSearches": "최근 검색 기록 삭제",
   "nSearchRecords": "{count}개 검색 기록",
@@ -258,7 +244,6 @@
   "deleteAllButton": "모두 삭제",
   "allDataDeleted": "모든 데이터가 삭제되었습니다",
   "removeAllLocalData": "모든 로컬 데이터 제거",
-
   "info": "정보",
   "aboutMarketLens": "앱 정보",
   "version": "버전 {version}",
@@ -266,7 +251,6 @@
   "aiStockAnalysis": "AI 기반 주식 분석",
   "privacyPolicy": "개인정보 처리방침",
   "termsOfService": "서비스 이용약관",
-
   "admin": "관리",
   "adminPanel": "관리자 패널",
   "adminPanelSubtitle": "사용자 관리 및 권한 부여",
@@ -283,7 +267,6 @@
   "promoteToGold": "Gold 승급",
   "promoteToManager": "Manager 임명",
   "demoteToRegular": "일반 회원 강등",
-
   "profile": "프로필",
   "editProfile": "프로필 편집",
   "myPosts": "내 게시글",
@@ -300,7 +283,6 @@
   "deactivateAccount": "계정 비활성화",
   "profileUpdated": "프로필이 업데이트되었습니다",
   "imagePickerFailed": "이미지 선택 실패",
-
   "language": "언어",
   "languageSystem": "시스템 기본값",
   "languageKorean": "한국어",
@@ -311,18 +293,15 @@
   "languageSettings": "언어 설정",
   "systemDefault": "시스템 기본값",
   "languageChanged": "언어가 변경되었습니다",
-
   "timeJustNow": "방금 전",
   "timeMinutesAgo": "{n}분 전",
   "timeHoursAgo": "{n}시간 전",
   "timeYesterday": "어제",
   "timeDaysAgo": "{n}일 전",
-
   "companyOverview": "기업 개요",
   "companyDetails": "기업 상세",
   "companyIntro": "기업 소개",
   "employeeCount": "직원 {count}명",
-
   "valuation": "밸류에이션",
   "forwardPE": "선행 PER",
   "beta": "베타",
@@ -334,11 +313,9 @@
   "financialHealth": "재무 건전성",
   "debtRatio": "부채비율",
   "liquidityRatio": "유동비율",
-
   "dividends": "배당금",
   "dividendYield": "배당률 ",
   "annualDividend": "연간 ",
-
   "shortInterest": "공매도",
   "shortInterestRatio": "공매도 비율",
   "shortPercentFloat": "유통주식 대비 %",
@@ -346,13 +323,11 @@
   "shortInterestLow": "공매도 낮음 (안정)",
   "shortInterestModerate": "공매도 보통 (주의)",
   "shortInterestHigh": "공매도 높음 (경고)",
-
   "institutionalInsiderFlow": "기관/내부자 흐름",
   "institutional": "기관",
   "insider": "내부자",
   "oneDay": "1일",
   "fiveDay": "5일",
-
   "tickerNews": "{ticker} 뉴스",
   "newsCount": "{count}건",
   "oneWeek": "1주",
@@ -366,7 +341,6 @@
   "aiSummaryNews": "AI 요약 뉴스",
   "aiSummary": "AI 요약",
   "noNewsAvailable": "뉴스가 없습니다",
-
   "earningsHistory": "이전 실적",
   "earningsHistoryEPS": "실적 히스토리 (주당순이익)",
   "earningsEstimate": "예상",
@@ -383,13 +357,14 @@
   "earningsCount": "{count}건",
   "@earningsCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "noEarningsThisWeek": "이번 주 예정된 실적 발표가 없습니다",
   "nextEarningsDate": "다음 실적 발표",
   "earningsConfirmed": "확정",
-
   "keyEvents": "주요 일정",
   "eventDetails": "일정 상세",
   "upcomingEvents": "다음 일정",
@@ -397,7 +372,6 @@
   "dividendPayDate": "배당 지급일",
   "recentEarningsQuarters": "최근 실적 ({count}분기)",
   "earningsHistoryChart": "실적 히스토리 (차트)",
-
   "weekdayMon": "월",
   "weekdayTue": "화",
   "weekdayWed": "수",
@@ -405,7 +379,6 @@
   "weekdayFri": "금",
   "weekdaySat": "토",
   "weekdaySun": "일",
-
   "macroFedFunds": "기준금리",
   "macroDGS10": "장기금리",
   "macroDGS2": "단기금리",
@@ -431,23 +404,28 @@
   "macroYieldCurve": "수익률곡선",
   "macroLiquidity": "유동성",
   "macroOverall": "거시경제",
-
   "macroCurrentValue": "현재값: {value}",
   "@macroCurrentValue": {
     "placeholders": {
-      "value": { "type": "String" }
+      "value": {
+        "type": "String"
+      }
     }
   },
   "macroChange": "변동: {value}",
   "@macroChange": {
     "placeholders": {
-      "value": { "type": "String" }
+      "value": {
+        "type": "String"
+      }
     }
   },
   "epsEstimateValue": "예상 ${value}",
   "@epsEstimateValue": {
     "placeholders": {
-      "value": { "type": "String" }
+      "value": {
+        "type": "String"
+      }
     }
   },
   "bbInterpretation": "Bollinger Bands 해석",
@@ -455,7 +433,6 @@
   "bbUpperApproach": "• 상단 밴드 접근: 과매수 가능성",
   "bbLowerApproach": "• 하단 밴드 접근: 과매도 가능성",
   "bbMiddleLine": "• 중간선: 20일 이동평균선",
-
   "cannotLoadData": "데이터를 불러올 수 없습니다",
   "marketlensAI": "마켓랜즈 AI",
   "marketlensAIOpinion": "마켓랜즈 AI 의견",
@@ -478,7 +455,6 @@
   "volume": "거래량",
   "priceChartTitle": "주가 차트",
   "legend": "범례",
-
   "ratingBuy": "매수",
   "ratingStrongBuy": "적극 매수",
   "ratingOutperform": "시장 상회",
@@ -492,13 +468,11 @@
   "ratingActionDowngrade": "하향",
   "ratingActionReiterated": "유지",
   "ratingActionInitiated": "신규",
-
   "roleMaster": "Master",
   "roleManager": "Manager",
   "roleGold": "Gold",
   "roleRegular": "일반",
   "roleGuest": "게스트",
-
   "errInvalidCredentials": "이메일 또는 비밀번호가 올바르지 않습니다",
   "errLoginRequired": "로그인이 필요합니다",
   "errSessionExpired": "인증이 만료되었습니다. 다시 로그인해주세요.",
@@ -526,23 +500,28 @@
   "today": "오늘",
   "yesterday": "어제",
   "dayBeforeYesterday": "그저께",
-
   "expertCount": "기관 목표가 ({count}기관)",
   "@expertCount": {
     "placeholders": {
-      "count": { "type": "String" }
+      "count": {
+        "type": "String"
+      }
     }
   },
   "scorePoints": "{score}점",
   "@scorePoints": {
     "placeholders": {
-      "score": { "type": "String" }
+      "score": {
+        "type": "String"
+      }
     }
   },
   "averageVolume": "평균: {volume}",
   "@averageVolume": {
     "placeholders": {
-      "volume": { "type": "String" }
+      "volume": {
+        "type": "String"
+      }
     }
   },
   "showBullBearFactors": "강세/약세 요인 보기",
@@ -550,26 +529,34 @@
   "analystConsensus": "증권사 목표가 ({count} 기관)",
   "@analystConsensus": {
     "placeholders": {
-      "count": { "type": "String" }
+      "count": {
+        "type": "String"
+      }
     }
   },
   "lowestPrice": "최저 ${price}",
   "@lowestPrice": {
     "placeholders": {
-      "price": { "type": "String" }
+      "price": {
+        "type": "String"
+      }
     }
   },
   "highestPrice": "최고 ${price}",
   "@highestPrice": {
     "placeholders": {
-      "price": { "type": "String" }
+      "price": {
+        "type": "String"
+      }
     }
   },
   "liveTalk": "💬 실시간 토크",
   "commentsCount": "댓글 {count}개",
   "@commentsCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "browsePosts": "게시글 둘러보기",
@@ -577,7 +564,6 @@
   "shareThoughtsPrompt": "관심 종목에 대한 생각을 공유하고\n다른 투자자들과 소통해보세요",
   "writeFirstCommentPrompt": "게시글에 첫 댓글을 남겨보세요",
   "startConversationPrompt": "다른 투자자들의 의견에 댓글로\n대화를 시작해보세요",
-
   "ratingOverweight": "비중확대",
   "ratingUnderweight": "비중축소",
   "ratingSectorOutperform": "업종 상회",
@@ -586,27 +572,22 @@
   "ratingPositive": "긍정",
   "ratingNegative": "부정",
   "ratingEqualWeight": "중립",
-
   "keyMetricsComparison": "주요 지표 비교",
   "metric": "지표",
   "serverCalculatedNote": "※ 모든 지표는 서버에서 계산된 값입니다",
   "priceTrendComparison": "가격 추이 비교",
   "rsiComparison": "RSI 비교 (서버 계산 값)",
   "rsiInterpretation": "※ RSI > 70: 과매수 / RSI < 30: 과매도",
-
   "passwordChangeInstructions": "• 새 비밀번호는 최소 8자 이상이어야 합니다\n• 영문, 숫자, 특수문자를 조합하여 사용하세요\n• 변경 후 새 비밀번호로 다시 로그인해주세요",
-
   "notifications": "알림",
   "markAllAsRead": "모두 읽음",
   "noNotifications": "알림이 없습니다",
   "notificationsRetentionHint": "최근 7일간의 알림이 표시됩니다.",
-
   "bioLabel": "소개글",
   "bioHint": "자신을 소개해주세요",
   "profileEditGuide": "프로필 편집 안내",
   "profileEditGuideDetails": "• 닉네임: 2-30자, 다른 사용자와 중복 가능\n• 소개글: 최대 200자 (선택사항)\n• 프로필 사진: 권장 크기 800x800px",
   "updatedDate": "업데이트:",
-
   "tabCalendar": "캘린더",
   "tabCalendarTooltip": "이벤트 캘린더",
   "eventTypeFomc": "FOMC",
@@ -621,7 +602,9 @@
   "nEvents": "{count}개 이벤트",
   "@nEvents": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "noEventsThisMonth": "이번 달 이벤트가 없습니다",
@@ -629,8 +612,6 @@
   "calendarNewsAnnouncements": "뉴스·발표",
   "calendarEconomicIndicators": "미국 경제지표",
   "calendarViewResult": "결과 보기",
-  "today": "오늘",
-
   "forgotPassword": "비밀번호 찾기",
   "forgotPasswordSubtitle": "가입한 이메일을 입력하시면 인증코드를 보내드립니다.",
   "sendVerificationCode": "인증코드 발송",
@@ -638,13 +619,17 @@
   "verificationSubtitle": "{email}로 발송된 6자리 인증코드를 입력하세요.",
   "@verificationSubtitle": {
     "placeholders": {
-      "email": { "type": "String" }
+      "email": {
+        "type": "String"
+      }
     }
   },
   "verificationExpiry": "유효시간: {time}",
   "@verificationExpiry": {
     "placeholders": {
-      "time": { "type": "String" }
+      "time": {
+        "type": "String"
+      }
     }
   },
   "verificationCode": "인증코드",
@@ -654,7 +639,9 @@
   "resendCodeCooldown": "재발송 가능 ({seconds}초)",
   "@resendCodeCooldown": {
     "placeholders": {
-      "seconds": { "type": "int" }
+      "seconds": {
+        "type": "int"
+      }
     }
   },
   "verificationCodeResent": "인증코드가 재발송되었습니다.",
@@ -663,12 +650,13 @@
   "resetPasswordSuccess": "비밀번호가 재설정되었습니다. 새 비밀번호로 로그인하세요.",
   "errEmailNotVerified": "이메일 인증이 필요합니다.",
   "errRateLimited": "잠시 후 다시 시도해주세요.",
-
   "myHoldings": "나의 보유종목",
   "nHoldings": "{count}개 보유",
   "@nHoldings": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "portfolioSummary": "포트폴리오 요약",
@@ -685,19 +673,25 @@
   "holdingAdded": "{ticker} 보유종목에 추가됨",
   "@holdingAdded": {
     "placeholders": {
-      "ticker": { "type": "String" }
+      "ticker": {
+        "type": "String"
+      }
     }
   },
   "holdingRemoved": "{ticker} 보유종목에서 삭제됨",
   "@holdingRemoved": {
     "placeholders": {
-      "ticker": { "type": "String" }
+      "ticker": {
+        "type": "String"
+      }
     }
   },
   "removeHoldingConfirm": "{ticker}을(를) 보유종목에서 삭제하시겠습니까?",
   "@removeHoldingConfirm": {
     "placeholders": {
-      "ticker": { "type": "String" }
+      "ticker": {
+        "type": "String"
+      }
     }
   },
   "aiAdvice": "AI 자문",
@@ -710,8 +704,12 @@
   "sharesAtPrice": "{shares}주 @ ${price}",
   "@sharesAtPrice": {
     "placeholders": {
-      "shares": { "type": "String" },
-      "price": { "type": "String" }
+      "shares": {
+        "type": "String"
+      },
+      "price": {
+        "type": "String"
+      }
     }
   },
   "noHoldingsYet": "보유종목이 없습니다",
@@ -719,8 +717,6 @@
   "invalidShares": "유효한 주수를 입력하세요",
   "invalidPrice": "유효한 가격을 입력하세요",
   "confidence": "신뢰도",
-
-  "tabWatchlist": "관심종목",
   "tabHoldings": "보유종목",
   "purchaseDate": "매수일",
   "sellDate": "매도일",
@@ -740,7 +736,9 @@
   "holdingUpdated": "{ticker} 보유 정보가 수정되었습니다",
   "@holdingUpdated": {
     "placeholders": {
-      "ticker": { "type": "String" }
+      "ticker": {
+        "type": "String"
+      }
     }
   },
   "portfolioAIAnalysis": "포트폴리오 AI 분석",
@@ -783,7 +781,9 @@
   "aiChatSelectedCount": "{count}개 선택됨",
   "@aiChatSelectedCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "aiChatHide": "숨기기",
@@ -798,7 +798,9 @@
   "aiChatNConversations": "{count}건",
   "@aiChatNConversations": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "aiChatClearLocal": "이 폰의 모든 대화 캐시 삭제",
@@ -833,7 +835,9 @@
   "holidayPriceNotice": "{date} 종가 기준 (직전 거래일)",
   "@holidayPriceNotice": {
     "placeholders": {
-      "date": { "type": "String" }
+      "date": {
+        "type": "String"
+      }
     }
   },
   "addToHoldings": "보유에 추가",
@@ -842,25 +846,33 @@
   "addHoldingTitle": "{ticker} 보유 추가",
   "@addHoldingTitle": {
     "placeholders": {
-      "ticker": { "type": "String" }
+      "ticker": {
+        "type": "String"
+      }
     }
   },
   "sellHoldingTitle": "{ticker} 매도",
   "@sellHoldingTitle": {
     "placeholders": {
-      "ticker": { "type": "String" }
+      "ticker": {
+        "type": "String"
+      }
     }
   },
   "editHoldingTitle": "{ticker} 보유 정보 수정",
   "@editHoldingTitle": {
     "placeholders": {
-      "ticker": { "type": "String" }
+      "ticker": {
+        "type": "String"
+      }
     }
   },
   "holdingSold": "{ticker} 매도 완료",
   "@holdingSold": {
     "placeholders": {
-      "ticker": { "type": "String" }
+      "ticker": {
+        "type": "String"
+      }
     }
   },
   "deleteHolding": "보유 삭제",
@@ -877,7 +889,9 @@
   "lastUpdateTime": "마지막 업데이트: {time}",
   "@lastUpdateTime": {
     "placeholders": {
-      "time": { "type": "String" }
+      "time": {
+        "type": "String"
+      }
     }
   },
   "viewAIAdvice": "AI 의견 보기",
@@ -886,13 +900,13 @@
   "viewAllTransactions": "전체 보기 ({count}건)",
   "@viewAllTransactions": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
-
   "newsFilter": "필터",
   "filterSource": "소스",
-  "filterAll": "전체",
   "filterMyWatchlist": "관심종목",
   "filterNoWatchlist": "관심종목을 먼저 추가하세요",
   "filterMarketOnly": "시장뉴스",
@@ -904,7 +918,9 @@
   "hotTopicMore": "+{count} 더보기",
   "@hotTopicMore": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "sectorTechnology": "기술",
@@ -918,7 +934,6 @@
   "sectorUtilities": "유틸리티",
   "sectorRealEstate": "부동산",
   "sectorMaterials": "소재",
-
   "newsBubbleTitle": "24시간 Hot 뉴스",
   "newsBubbleLegendBullish": "강세 다수",
   "newsBubbleLegendBearish": "약세 다수",
@@ -926,10 +941,11 @@
   "newsBubbleMentions": "{count}건",
   "@newsBubbleMentions": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
-
   "newsSentiment24hTitle": "최근 24시간",
   "newsBullish": "강세뉴스",
   "newsNeutral": "중립뉴스",
@@ -939,10 +955,11 @@
   "newsCountUnit": "{count}건",
   "@newsCountUnit": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
-
   "taxEstimateTitle": "양도소득세 예상",
   "totalGains": "총 양도차익",
   "annualExemption": "기본공제 (250만원)",
@@ -966,7 +983,6 @@
   "otherSectors": "기타 섹터",
   "otherTickers": "기타 종목",
   "nDaysAgo": "{count}일전",
-
   "tabHome": "홈",
   "tabHomeTooltip": "홈",
   "tabAIAnalysis": "AI 신호",
@@ -988,7 +1004,6 @@
   "noIntradayData": "시간봉 정보가 아직 없어요",
   "noDailyData": "일봉 정보가 없어요",
   "closePriceUnavailable": "종가를 불러올 수 없습니다. 직접 입력해주세요.",
-
   "gaugeStrongNegativeDesc": "강력부정: 주가 하락 확률 매우 높음",
   "gaugeNegativeDesc": "부정: 주가 하락 확률 높음",
   "gaugePositiveDesc": "긍정: 주가 상승 확률 높음",
@@ -996,28 +1011,29 @@
   "aiRecommended20": "AI 분석 추천 {count} 종목",
   "@aiRecommended20": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "aiCaution20": "AI 분석 주의 {count} 종목",
   "@aiCaution20": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "seeMore": "더보기",
-
   "holdingsSummary": "보유현황",
   "investmentReturn": "투자 수익률",
   "returnRate": "수익률",
   "purchaseAmount": "매수금",
   "profitAmount": "수익금",
   "evaluationAmount": "평가금",
-
   "watchAdToUnlock": "짧은 광고를 보고 AI 분석을 확인하세요",
   "watchAd": "광고 보기",
   "adNotReady": "광고를 준비 중입니다. 잠시 후 다시 시도하세요",
-
   "holdingsLimitTitle": "보유종목 제한",
   "holdingsLimitMessage": "무료 회원은 최대 3개 종목까지 보유할 수 있습니다. Gold으로 업그레이드하면 무제한 종목 관리와 광고 없는 AI 분석을 이용하세요.",
   "upgradeToGold": "Gold 업그레이드",
@@ -1028,11 +1044,12 @@
   "viewingPreviousAnalysis": "이전 분석 보기",
   "goldUpgradeComingSoon": "Gold 멤버십이 곧 출시됩니다! 기대해주세요.",
   "close": "닫기",
-
   "goldMonthlyPrice": "월 {price}",
   "@goldMonthlyPrice": {
     "placeholders": {
-      "price": { "type": "String" }
+      "price": {
+        "type": "String"
+      }
     }
   },
   "subscribeNow": "구독하기",
@@ -1045,7 +1062,9 @@
   "subscriptionExpires": "{date} 만료",
   "@subscriptionExpires": {
     "placeholders": {
-      "date": { "type": "String" }
+      "date": {
+        "type": "String"
+      }
     }
   },
   "subscriptionManage": "구독 관리",
@@ -1054,41 +1073,45 @@
   "goldMembershipTitle": "Gold 멤버십",
   "goldComingSoon": "Gold 멤버십 준비 중입니다!",
   "subscription": "구독",
-
   "freeTrialStart": "7일 무료 체험 시작하기",
   "freeTrialInfo": "7일 무료, 이후 {price}/월. 언제든 취소 가능.",
   "@freeTrialInfo": {
     "placeholders": {
-      "price": { "type": "String" }
+      "price": {
+        "type": "String"
+      }
     }
   },
   "onFreeTrial": "무료 체험 중",
   "trialEndsOn": "체험 종료: {date}",
   "@trialEndsOn": {
     "placeholders": {
-      "date": { "type": "String" }
+      "date": {
+        "type": "String"
+      }
     }
   },
   "trialExpired": "무료 체험이 종료되었습니다",
-
   "manageSubscription": "구독 관리",
   "restorePurchaseTitle": "이전 구매 복원",
   "restorePurchaseDescription": "기기 변경이나 앱 재설치 후 구독이 반영되지 않을 때 사용하세요.",
-
   "calendarPremiumEvents": "{count}개 프리미엄 일정",
   "@calendarPremiumEvents": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "calendarUnlockWithAd": "광고 보고 6시간 이용",
   "calendarUnlockedUntil": "{time}까지 잠금 해제",
   "@calendarUnlockedUntil": {
     "placeholders": {
-      "time": { "type": "String" }
+      "time": {
+        "type": "String"
+      }
     }
   },
-
   "treemapLegend": "크기 = 거래대금  |  초록 = 상승  |  빨강 = 하락",
   "aiScoreSubtitle": "AI 점수 (0: 매도 신호 ~ 100: 매수 신호)",
   "aiSignalStrongBuyDesc": "강력 매수 (80-100): 기술적·재무적 지표가 모두 강한 매수 신호",
@@ -1108,7 +1131,9 @@
   "totalPosts": "{count}개 게시글",
   "@totalPosts": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "recentComments": "최근 댓글",
@@ -1122,15 +1147,12 @@
   "resetTutorials": "튜토리얼 다시 보기",
   "resetTutorialsDesc": "모든 튜토리얼이 다시 표시됩니다",
   "tutorialsReset": "튜토리얼이 초기화되었습니다",
-
   "purchaseStoreUnavailable": "App Store 연결 불가",
   "purchaseStoreProblem": "App Store에 연결할 수 없습니다. Apple ID 설정을 확인하고, 결제가 활성화되어 있는지 확인한 후 다시 시도해주세요.",
   "purchaseTemporarilyUnavailable": "구독을 일시적으로 이용할 수 없습니다",
   "purchaseRetry": "다시 시도",
   "purchaseInitializing": "App Store에 연결 중...",
-
   "loginRequiredForPurchase": "Gold 멤버십 구매를 위해 로그인이 필요합니다. 구독 정보가 계정에 동기화됩니다.",
-
   "aiScoreGuideTitle": "AI 점수 안내",
   "aiScoreGuideDescription": "AI 점수는 중장기(3~12개월) 투자 관점을 기반으로 산출됩니다.",
   "aiScoreGuideStrongPositive": "80–100: 강력 긍정 – 상승 가능성 매우 높음",
@@ -1139,7 +1161,6 @@
   "aiScoreGuideNegative": "20–39: 부정 – 하락 가능성 높음",
   "aiScoreGuideStrongNegative": "0–19: 강력 부정 – 하락 가능성 매우 높음",
   "subscriptionPaymentAccountWarning": "결제는 이 기기에 로그인된 App Store / Google Play 계정으로 처리됩니다. 다른 사람의 기기에서 구매 시, 기기 소유자의 계정으로 청구될 수 있습니다.",
-
   "investmentProfileTitle": "투자 프로필",
   "investmentProfileSection": "투자 프로필",
   "investmentProfileEditSubtitle": "투자 성향을 확인하거나 수정합니다",
@@ -1152,7 +1173,6 @@
   "recommendationFit": "적합도",
   "skip": "건너뛰기",
   "next": "다음",
-
   "investmentStyleTitle": "투자 성향",
   "investmentStyleSubtitle": "나의 투자 스타일은?",
   "investmentStyleConservative": "보수적",
@@ -1161,7 +1181,6 @@
   "investmentStyleBalancedDesc": "성장과 안정 사이의 균형을 추구합니다",
   "investmentStyleAggressive": "공격적",
   "investmentStyleAggressiveDesc": "높은 위험을 감수하고 높은 수익을 추구합니다",
-
   "timeHorizonTitle": "투자 기간",
   "timeHorizonSubtitle": "얼마나 오래 투자할 계획인가요?",
   "timeHorizonShort": "단기",
@@ -1170,7 +1189,6 @@
   "timeHorizonMediumDesc": "1~5년",
   "timeHorizonLong": "장기",
   "timeHorizonLongDesc": "5년 이상",
-
   "riskToleranceTitle": "리스크 허용도",
   "riskToleranceSubtitle": "어느 정도의 위험을 감수할 수 있나요?",
   "riskLevel1": "매우 낮음",
@@ -1180,7 +1198,6 @@
   "riskLevel5": "매우 높음",
   "riskLow": "낮음",
   "riskHigh": "높음",
-
   "targetReturnTitle": "목표 연간 수익률",
   "targetReturnSubtitle": "어느 정도의 수익률을 목표로 하나요?",
   "targetReturn5Desc": "안정적이고 저위험 투자",
@@ -1188,7 +1205,6 @@
   "targetReturn20Desc": "공격적 성장 전략",
   "targetReturnFlexible": "유연",
   "targetReturnFlexibleDesc": "특정 목표 없이, 시장 상황에 맞춰 대응",
-
   "maxLossTitle": "최대 허용 손실",
   "maxLossSubtitle": "최대 어느 정도의 하락까지 감수할 수 있나요?",
   "maxLoss5Desc": "매우 보수적, 최소한의 하락만 허용",
@@ -1211,6 +1227,90 @@
   "unavailableReport": "알려주기",
   "unavailableGoBack": "이전 화면으로",
   "unavailableReportSent": "알려주셔서 감사합니다. 빠르게 확인하겠습니다.",
-  "@unavailableNotReadyTitleFor": { "placeholders": { "subject": { "type": "String" } } },
-  "viewAiOpinion": "AI 의견 보기"
+  "@unavailableNotReadyTitleFor": {
+    "placeholders": {
+      "subject": {
+        "type": "String"
+      }
+    }
+  },
+  "viewAiOpinion": "AI 의견 보기",
+  "unavailableRenamedTitle": "{oldTicker}는 {newTicker}로 변경되었습니다",
+  "@unavailableRenamedTitle": {
+    "placeholders": {
+      "oldTicker": {
+        "type": "String"
+      },
+      "newTicker": {
+        "type": "String"
+      }
+    }
+  },
+  "unavailableRenamedBody": "종목 코드가 바뀌었습니다. 같은 회사이며, 새 코드에서 계속 확인할 수 있습니다.",
+  "unavailableRenamedBodyWithDate": "{date}까지 {oldTicker}로 거래되었고, 이후 {newTicker}로 바뀌었습니다. 같은 회사입니다.",
+  "@unavailableRenamedBodyWithDate": {
+    "placeholders": {
+      "oldTicker": {
+        "type": "String"
+      },
+      "newTicker": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "unavailableRenamedAction": "{newTicker} 보기",
+  "@unavailableRenamedAction": {
+    "placeholders": {
+      "newTicker": {
+        "type": "String"
+      }
+    }
+  },
+  "unavailableDelistedTitle": "{ticker} 거래가 종료되었습니다",
+  "@unavailableDelistedTitle": {
+    "placeholders": {
+      "ticker": {
+        "type": "String"
+      }
+    }
+  },
+  "unavailableDelistedBody": "이 종목은 상장폐지되어 더 이상 시세가 갱신되지 않습니다.",
+  "unavailableDelistedBodyWithDate": "{date}이 마지막 거래일이며, 이후 시세가 갱신되지 않습니다.",
+  "@unavailableDelistedBodyWithDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "dataAsOf": "{date} 기준",
+  "@dataAsOf": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "staleDataBadge": "{days}거래일 전 데이터",
+  "@staleDataBadge": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "staleDataExplain": "{date} 이후 이 종목의 분석이 갱신되지 않았습니다. 시장 기준일은 {marketDate}입니다.",
+  "@staleDataExplain": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "marketDate": {
+        "type": "String"
+      }
+    }
+  }
 }

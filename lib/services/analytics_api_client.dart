@@ -19,6 +19,7 @@ import '../models/indices_data.dart';
 import '../models/news_data.dart';
 import '../models/mention_bubble_data.dart';
 import '../models/market_event.dart';
+import '../models/ticker_change.dart';
 
 class AnalyticsApiClient {
   // Base URL for analytics API
@@ -29,6 +30,14 @@ class AnalyticsApiClient {
       dotenv.env['API_BASE_URL'] ?? 'http://43.201.45.60:8001';
 
   final http.Client _httpClient;
+
+  /// 티커 변경 맵 캐시.
+  ///
+  /// 프로세스 수명 동안만 들고 있는다. 변경은 **멤버십 동기화 때**(봇 기동 +
+  /// 매주 월요일)만 생기므로 세션 중 재조회할 이유가 없고, 영속화할 만큼
+  /// 비싼 데이터도 아니다(현재 10행).
+  TickerChangeMap? _tickerChanges;
+  Future<TickerChangeMap>? _tickerChangesInFlight;
 
   AnalyticsApiClient({http.Client? httpClient})
       : _httpClient = httpClient ?? http.Client() {
@@ -382,6 +391,52 @@ class AnalyticsApiClient {
     } catch (e) {
       if (e is ApiException) rethrow;
       throw ApiException(ApiErrorCode.genericError, debugMessage: '$e');
+    }
+  }
+
+  /// 티커 변경 맵 (개명·상장폐지). 세션당 한 번만 받는다.
+  ///
+  /// 실패하면 **빈 맵을 돌려준다.** 호출부(보유종목·종목 상세)는 이걸 못
+  /// 받아도 평소대로 동작해야 한다 — 변경 안내가 안 뜨는 건 지금과 같고,
+  /// 여기서 예외를 던지면 멀쩡한 화면이 통째로 실패한다.
+  Future<TickerChangeMap> fetchTickerChanges({bool forceRefresh = false}) {
+    final cached = _tickerChanges;
+    if (!forceRefresh && cached != null) return Future.value(cached);
+
+    // 동시 호출을 하나로 묶는다. 보유종목과 관심종목이 같은 프레임에서
+    // 부르면 같은 요청이 두 번 나간다.
+    final inFlight = _tickerChangesInFlight;
+    if (!forceRefresh && inFlight != null) return inFlight;
+
+    final future = _fetchTickerChanges();
+    _tickerChangesInFlight = future;
+    return future.whenComplete(() => _tickerChangesInFlight = null);
+  }
+
+  Future<TickerChangeMap> _fetchTickerChanges() async {
+    try {
+      final uri = Uri.parse('$_baseUrl/api/v1/tickers/changes');
+      debugPrint('[API] 🔀 GET $uri');
+
+      final response =
+          await _httpClient.get(uri).timeout(const Duration(seconds: 10));
+
+      if (response.statusCode != 200) {
+        debugPrint('[API] ⚠️ ticker changes HTTP ${response.statusCode}');
+        return TickerChangeMap.empty;
+      }
+
+      final map = TickerChangeMap.fromJson(
+        json.decode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>,
+      );
+      _tickerChanges = map;
+      debugPrint('[API] ✅ ticker changes: ${map.length}건');
+      return map;
+    } catch (e) {
+      // 조용히 빈 맵. 변경 안내는 부가 기능이고, 이걸로 화면을 깨뜨리면
+      // 고치려던 것보다 큰 손해다.
+      debugPrint('[API] ⚠️ ticker changes 실패 — 빈 맵으로 진행: $e');
+      return TickerChangeMap.empty;
     }
   }
 
