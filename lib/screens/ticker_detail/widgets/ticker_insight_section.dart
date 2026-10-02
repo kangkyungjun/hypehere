@@ -6,7 +6,6 @@ import '../../../theme/app_spacing.dart';
 import '../../../theme/app_typography.dart';
 import '../../../widgets/common/section_header.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../../utils/limited_analysis.dart';
 import '../../../utils/multilingual.dart';
 import '../../../utils/score_mapper.dart';
 import '../../../widgets/common/ml_expandable_card.dart';
@@ -67,27 +66,18 @@ class _TickerInsightSectionState extends State<TickerInsightSection> {
 
     // AI 데이터가 없으면 fallback 표시.
     //
-    // ⚠️ `aiProbability`도 함께 본다. 확률이 null인데 아래에서 `?? 0.5`로
-    // 메우면 **"AI 상승 확률 50%" + 상승 아이콘**(0.5 >= 0.5)이 그려진다 —
-    // 서버가 아무 판단도 주지 않았는데 앱이 "중립 판정"을 지어내는 것이다.
-    //
-    // 파이프라인의 `limited` 종목(상장 40~119거래일)은 실제로 확률을 0.5로
-    // 보낸다. 그 경우도 같은 이유로 확률 블록을 그리면 안 된다
-    // (`docs/DATA_QUALITY_RESPONSE_2026-10.md` §1).
+    // ⚠️ 확률 블록을 그릴지는 `hasUsableAiProbability`가 결정한다 —
+    // **확률값 자체로는 판단할 수 없다.** 파이프라인은 AI 헤드를 돌리지
+    // 않은 `limited` 종목(상장 40~119거래일)에도 `probability`를 0.5로
+    // 채워 보낸다. 그걸 그대로 그리면 "AI 상승 확률 50% + 상승"이 되는데,
+    // 서버가 판단을 포기한 자리에 앱이 중립 판정을 지어내는 것이다.
+    // 정본 신호는 `data_quality.ai_available`이다
+    // (`docs/server/S1_data_quality.md`).
     final summaryText = latestData.aiSummary?.localize(langCode).trim();
-
-    // `limited` 종목은 `probability`를 **0.5로 명시해서** 보낸다. 그대로
-    // 그리면 "AI 상승 확률 50% + 상승"이 되는데, 서버가 판단을 포기한
-    // 자리에 앱이 중립 판정을 지어내는 것이다.
-    //
-    // ⚠️ 임시 판별이다. `data_quality.analysis_mode`가 조회 API에 나오면
-    // `limited_analysis.dart`를 지우고 그걸로 교체한다(서버 요청 S1).
-    final isLimited = looksLimited(latestData.aiSummary);
 
     if (summaryText == null ||
         summaryText.isEmpty ||
-        isLimited ||
-        latestData.aiProbability == null) {
+        !latestData.hasUsableAiProbability) {
       return Container(
         key: widget.aiInsightKey,
         margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
@@ -117,7 +107,7 @@ class _TickerInsightSectionState extends State<TickerInsightSection> {
       );
     }
 
-    // 위 가드를 통과했으므로 non-null이 보장된다.
+    // `hasUsableAiProbability` 가드를 통과했으므로 non-null이 보장된다.
     final probability = latestData.aiProbability!;
     final isUptrend = probability >= 0.5;
     final confidencePercent = (probability * 100).toStringAsFixed(0);

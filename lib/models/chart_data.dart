@@ -152,7 +152,54 @@ class CompleteChartData {
 }
 
 /// Single day complete chart data point
+/// 서버가 내려주는 분석 품질 메타 (`data_quality`).
 ///
+/// 왜 필요한가: 파이프라인은 상장 40~119거래일인 종목(신규상장·분사)에
+/// **AI 예측 헤드를 돌리지 않는다.** 그런데 `ai_probability`를 비워 보내는
+/// 대신 **0.5로 채워서** 보낸다. 앱이 그 숫자를 그대로 그리면
+/// "AI 상승 확률 50% + 상승"이 되는데, 서버가 판단을 포기한 자리에 앱이
+/// 중립 판정을 지어내는 것이다.
+///
+/// 그래서 **확률의 유효성은 확률값으로 판단할 수 없다.** `aiAvailable`이
+/// 정본이다.
+///
+/// 서버는 이 컬럼이 생기기 전(2026-10-02 이전) 행도 `full`로 환산해서
+/// 내려준다. 즉 앱은 NULL 분기를 하지 않는다.
+class DataQuality {
+  /// `full` | `limited`
+  final String analysisMode;
+
+  /// 분석에 쓴 거래일 수. `limited` 종목의 상장 경과일.
+  final int? historyDays;
+
+  /// AI 예측 헤드가 돌았는가. **`aiProbability`를 그릴지 결정하는 신호다.**
+  final bool aiAvailable;
+
+  const DataQuality({
+    required this.analysisMode,
+    this.historyDays,
+    required this.aiAvailable,
+  });
+
+  bool get isLimited => analysisMode == 'limited';
+
+  factory DataQuality.fromJson(Map<String, dynamic> json) {
+    final mode = (json['analysis_mode'] as String?) ?? 'full';
+    return DataQuality(
+      analysisMode: mode,
+      historyDays: (json['history_days'] as num?)?.toInt(),
+      // 서버는 항상 채워 보내지만, 빠진 응답에서도 모드와 어긋나지 않게 한다.
+      aiAvailable: (json['ai_available'] as bool?) ?? (mode == 'full'),
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'analysis_mode': analysisMode,
+        'history_days': historyDays,
+        'ai_available': aiAvailable,
+      };
+}
+
 /// Combines price, score, indicators, targets, institutions, and shorts
 class ChartDataPoint {
   final DateTime date;
@@ -167,6 +214,9 @@ class ChartDataPoint {
   // Score data
   final double? score;
   final String? signal;
+
+  /// 분석 품질 메타. 해당 날짜에 점수 행이 없으면 null이다.
+  final DataQuality? dataQuality;
 
   // Target levels
   final double? targetPrice;
@@ -221,6 +271,7 @@ class ChartDataPoint {
     this.volume,
     this.score,
     this.signal,
+    this.dataQuality,
     this.targetPrice,
     this.stopLoss,
     this.rsi,
@@ -265,6 +316,9 @@ class ChartDataPoint {
       volume: (json['volume'] as num?)?.toInt(),
       score: json['score'] as double?,
       signal: json['signal'] as String?,
+      dataQuality: json['data_quality'] != null
+          ? DataQuality.fromJson(json['data_quality'] as Map<String, dynamic>)
+          : null,
       targetPrice: json['target_price'] as double?,
       stopLoss: json['stop_loss'] as double?,
       rsi: json['rsi'] as double?,
@@ -316,6 +370,7 @@ class ChartDataPoint {
       'volume': volume,
       'score': score,
       'signal': signal,
+      'data_quality': dataQuality?.toJson(),
       'target_price': targetPrice,
       'stop_loss': stopLoss,
       'rsi': rsi,
@@ -350,6 +405,18 @@ class ChartDataPoint {
       'ai_expert_key_factors': aiExpertKeyFactors,
     };
   }
+
+  /// `aiProbability`를 숫자로 보여줘도 되는가.
+  ///
+  /// 두 가지를 다 본다:
+  /// - 서버가 AI 헤드를 돌렸는가 (`data_quality.ai_available`)
+  /// - 확률이 실제로 왔는가 (null이면 그릴 것이 없다)
+  ///
+  /// `data_quality`가 없는 응답은 **보여주는 쪽으로** 기울인다. 그 경우는
+  /// 점수 행이 없는 날짜이거나 구버전 서버 응답인데, 거기서 숨기는 쪽으로
+  /// 기울이면 정상 종목의 AI 블록이 통째로 사라진다.
+  bool get hasUsableAiProbability =>
+      aiProbability != null && (dataQuality?.aiAvailable ?? true);
 
   /// Calculate price change percentage
   double? get priceChangePercent {
