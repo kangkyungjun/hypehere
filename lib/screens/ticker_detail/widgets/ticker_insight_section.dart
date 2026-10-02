@@ -6,6 +6,7 @@ import '../../../theme/app_spacing.dart';
 import '../../../theme/app_typography.dart';
 import '../../../widgets/common/section_header.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../utils/limited_analysis.dart';
 import '../../../utils/multilingual.dart';
 import '../../../utils/score_mapper.dart';
 import '../../../widgets/common/ml_expandable_card.dart';
@@ -35,8 +36,23 @@ class _TickerInsightSectionState extends State<TickerInsightSection> {
   /// `expertAnalysisForLang`은 **언어별 필드**를 본다. 한국어만 채워진
   /// 종목을 영어 사용자가 보면 null이 나오므로, 이 대체 체인이 그 구멍도
   /// 같이 막는다. (`docs/DATA_QUALITY_RESPONSE_2026-10.md` §7)
-  String? _expertText(ChartDataPoint d, String langCode) =>
-      d.expertAnalysisForLang(langCode) ?? d.aiFinalComment ?? d.aiSummary;
+  String? _expertText(ChartDataPoint d, String langCode) {
+    // ⚠️ `aiFinalComment`·`aiSummary`는 `ko|||en|||zh|||ja|||es` 팩 문자열이다.
+    // 그대로 반환하면 구분자가 그대로 화면에 나온다 — 처음 쓴 버전의 버그였다.
+    //
+    // 빈 문자열도 null처럼 다룬다. 파이프라인 회신(2026-10-02): `final_comment`가
+    // null로 오지는 않지만 **summary와 ai_comment가 모두 비면 빈 문자열이 될 수
+    // 있다**. `??`는 빈 문자열을 거르지 못한다.
+    String? pick(String? raw) {
+      if (raw == null) return null;
+      final v = raw.localize(langCode).trim();
+      return v.isEmpty ? null : v;
+    }
+
+    return pick(d.expertAnalysisForLang(langCode)) ??
+        pick(d.aiFinalComment) ??
+        pick(d.aiSummary);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +74,20 @@ class _TickerInsightSectionState extends State<TickerInsightSection> {
     // 파이프라인의 `limited` 종목(상장 40~119거래일)은 실제로 확률을 0.5로
     // 보낸다. 그 경우도 같은 이유로 확률 블록을 그리면 안 된다
     // (`docs/DATA_QUALITY_RESPONSE_2026-10.md` §1).
-    if (latestData.aiSummary == null || latestData.aiProbability == null) {
+    final summaryText = latestData.aiSummary?.localize(langCode).trim();
+
+    // `limited` 종목은 `probability`를 **0.5로 명시해서** 보낸다. 그대로
+    // 그리면 "AI 상승 확률 50% + 상승"이 되는데, 서버가 판단을 포기한
+    // 자리에 앱이 중립 판정을 지어내는 것이다.
+    //
+    // ⚠️ 임시 판별이다. `data_quality.analysis_mode`가 조회 API에 나오면
+    // `limited_analysis.dart`를 지우고 그걸로 교체한다(서버 요청 S1).
+    final isLimited = looksLimited(latestData.aiSummary);
+
+    if (summaryText == null ||
+        summaryText.isEmpty ||
+        isLimited ||
+        latestData.aiProbability == null) {
       return Container(
         key: widget.aiInsightKey,
         margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
@@ -186,7 +215,7 @@ class _TickerInsightSectionState extends State<TickerInsightSection> {
 
           // AI Summary
           Text(
-            latestData.aiSummary!.localize(langCode),
+            summaryText,
             style: const TextStyle(
               // 본문 산문은 L4(15). 16은 제목(18)과 1.13배라
               // 산문이 제목 높이까지 올라오는 死단계였다.
