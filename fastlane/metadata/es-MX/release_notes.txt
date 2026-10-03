@@ -1,9 +1,9 @@
-Rediseño visual completo
+Información de acciones más precisa
 
-• Rehicimos la escala tipográfica y el contraste para que cifras y títulos se lean con claridad
-• Cifras clave como el precio actual y el valor de la cartera son ahora el foco
-• Ajustamos el espaciado entre tarjetas para distinguir mejor los grupos
-• Redibujamos los gráficos con líneas más gruesas y un marcador de posición actual
-• Las secciones plegables se animan con suavidad y las listas ampliadas vuelven a plegarse
-• Completamos en 5 idiomas los textos que antes solo aparecían en coreano o inglés
-• Ajustamos el contraste del color de ganancia según criterios de accesibilidad
+• Las acciones recién cotizadas ya no muestran una previsión de IA inventada. Si no hay suficiente historial, lo dejamos en blanco
+• Si cambia el símbolo de una acción, te avisamos y te llevamos directamente al nuevo
+• Las posiciones cuyo símbolo cambió ahora se valoran al precio actual
+• Las acciones cuyo análisis se detuvo hace días muestran la fecha de los datos
+• BRK.B, BRKB: escribas como escribas, encuentras la misma acción
+• Lee noticias completas sin salir de la app
+• Cuando los datos no se cargan, ahora ves qué ha pasado realmente
