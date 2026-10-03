@@ -167,6 +167,53 @@ cd ios && pod update PurchasesHybridCommon RevenueCat
 (deprecated). 기기 테스트 없이 결제 호출을 바꾸는 게 더 위험하다고 봤다.
 → 후속 작업: `purchase(PurchaseParams)`로 이관.
 
+## 5. GeneratedPluginRegistrant가 낡은 채 남는다
+
+```
+GeneratedPluginRegistrant.java:54: error:
+  package dev.flutter.plugins.integration_test does not exist
+```
+
+`integration_test`는 **dev_dependency**다(스크린샷 자동화용). Flutter는
+릴리스 빌드에서 dev 의존성을 걸러내지만(`flutter_plugins.dart:1260`),
+**이미 존재하는 등록기를 항상 다시 쓰지는 않는다.** 직전에 `flutter pub get`
+이나 디버그 빌드가 돌았으면 integration_test가 들어간 파일이 남아 있고,
+릴리스 빌드가 그걸 그대로 컴파일하다 죽는다.
+
+```bash
+rm -f android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java
+flutter build appbundle --release    # 지우면 릴리스 모드로 새로 생성한다
+```
+
+지운 뒤 생성된 파일에는 `integration_test` 참조가 0개다. 확인:
+
+```bash
+grep -c integration_test android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java
+```
+
+> 이 파일은 `android/.gitignore`로 제외돼 있고 **git에 추적되지 않는다.**
+> (처음엔 추적된 줄 알았는데 `git ls-files`가 미추적 경로에도 종료코드 0을
+> 돌려주는 걸 오독한 것이었다. `git ls-files <path>`의 **출력**을 봐야 한다.)
+
+## 6. NDK 버전 경고 (릴리스는 무해)
+
+```
+Your project is configured with Android NDK 27.0.12077973, but:
+- integration_test requires Android NDK 28.2.13676358
+```
+
+**릴리스 aab는 그대로 빌드된다.** `integration_test`가 dev_dependency라
+릴리스에서 빠지기 때문이다. 올리지 않았다 — 릴리스 당일에 NDK 2.5GB를
+더 받고 빌드 설정을 바꿀 이유가 없었다.
+
+단, `flutter drive`로 **스크린샷을 찍을 때**는 integration_test가 들어가므로
+그때 걸릴 수 있다. 그러면:
+
+```bash
+sdkmanager --sdk_root="$ANDROID_HOME" "ndk;28.2.13676358"
+# android/app/build.gradle.kts 의 ndkVersion 을 28.2.13676358 로
+```
+
 ## iOS 배포 — 여기서 사용자 손이 필요하다
 
 아카이브는 만들어진다:
