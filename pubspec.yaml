@@ -75,7 +75,7 @@ dependencies:
   share_plus: ^10.1.4
 
   # In-App Purchase (RevenueCat) — 9.x uses Google Play Billing Library 8 (required by 2026-08-31)
-  purchases_flutter: ^9.16.1
+  purchases_flutter: ^10.14.0
 
   # App update prompt (checks App Store / Play Store version)
   upgrader: ^13.1.0

@@ -39,5 +39,17 @@ end
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
+
+    # Xcode 27은 배포 타깃 15.0 미만을 거부한다. 일부 pod(Firebase,
+    # GoogleUserMessagingPlatform, package_info_plus)이 13.0으로 떨어져서
+    # "the range of supported deployment target versions is 15.0 to 27.0.x"로
+    # 빌드가 통째로 멈췄다.
+    #
+    # Podfile의 `platform :ios, '15.0'`은 **pod 타깃까지 내려가지 않는다** —
+    # flutter_additional_ios_build_settings가 Flutter 기본 최소값으로
+    # 덮어쓰기 때문이다. 그래서 여기서 다시 올린다.
+    target.build_configurations.each do |config|
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'
+    end
   end
 end
