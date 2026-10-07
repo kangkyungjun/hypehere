@@ -67,6 +67,14 @@ else
   ok "$CUR → $VERSION+$BUILD"
 fi
 
+# 빌드 타임 주입값.
+#
+# APP_VERSION이 비면 광고 실패 운영 알림에 "앱 버전: -"로 찍혀서 **어느
+# 빌드에서 난 문제인지 알 수 없다**. 2026-10-07 알림에서 실제로 그랬다.
+# 코드는 처음부터 이 값을 기대했지만(ad_failure_reporter.dart), 어떤 빌드
+# 명령에도 들어 있지 않았다.
+DEFINES="--dart-define=APP_VERSION=$VERSION+$BUILD"
+
 # ─────────────────────────────────────────────────────────────
 step "2. 의존성 + 테스트"
 # ─────────────────────────────────────────────────────────────
@@ -89,7 +97,7 @@ step "3. Android aab"
   # 존재하는 등록기를 항상 다시 쓰지는 않는다. (docs/DEPLOY.md §5)
   rm -f android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java
 
-  if flutter build appbundle --release 2>&1 | tail -40 | grep -q "Built build/app"; then
+  if flutter build appbundle --release $DEFINES 2>&1 | tail -40 | grep -q "Built build/app"; then
     AAB="build/app/outputs/bundle/release/app-release.aab"
     ok "$AAB ($(du -h "$AAB" | cut -f1))"
   else
@@ -108,7 +116,7 @@ step "4. iOS 아카이브"
   rm -rf build/ios/archive
   (cd ios && pod install >/dev/null 2>&1)
 
-  flutter build ipa --release --export-options-plist=ios/ExportOptions.plist > /tmp/ios_build.log 2>&1
+  flutter build ipa --release $DEFINES --export-options-plist=ios/ExportOptions.plist > /tmp/ios_build.log 2>&1
   ARCHIVE="build/ios/archive/Runner.xcarchive"
 
   if [ -d "$ARCHIVE" ]; then

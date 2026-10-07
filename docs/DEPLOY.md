@@ -214,6 +214,29 @@ sdkmanager --sdk_root="$ANDROID_HOME" "ndk;28.2.13676358"
 # android/app/build.gradle.kts 의 ndkVersion 을 28.2.13676358 로
 ```
 
+## 7. 빌드 타임 주입값 (APP_VERSION)
+
+광고 로드 실패 운영 알림에 **어느 버전에서 난 문제인지** 찍히게 하려면
+빌드할 때 주입해야 한다.
+
+```bash
+flutter build appbundle --release --dart-define=APP_VERSION=1.11.0+43
+```
+
+안 넣으면 알림이 `앱 버전: -`로 온다. `ad_failure_reporter.dart`는 처음부터
+이 값을 기대했지만 **어떤 빌드 명령에도 들어 있지 않았다**(2026-10-07에
+알림을 보고 발견). `tool/release.sh`는 이제 자동으로 넣는다.
+
+확인:
+
+```bash
+flutter test <테스트> --dart-define=APP_VERSION=x   # 들어가면 "x"
+flutter test <테스트>                                # 안 넣으면 ""
+```
+
+`SCREENSHOT_MODE`(banner_ad_widget.dart)도 같은 방식이다 — 스크린샷
+촬영 때만 `--dart-define=SCREENSHOT_MODE=true`로 배너를 숨긴다.
+
 ## iOS 배포 — 여기서 사용자 손이 필요하다
 
 아카이브는 만들어진다:
