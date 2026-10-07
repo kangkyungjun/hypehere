@@ -326,8 +326,7 @@ class _NewsListScreenState extends State<NewsListScreen> {
           AppSpacing.xl,
           // embedded(뉴스 탭)일 때만 플로팅 탭바 클리어런스, 단독은 자체 Scaffold
           widget.embedded
-              ? MediaQuery.of(context).viewPadding.bottom +
-                    AppLayout.bottomNavClearance
+              ? AppLayout.bottomNavClearanceOf(context)
               : AppSpacing.xl,
         ),
         itemCount: _buildListItemCount(),

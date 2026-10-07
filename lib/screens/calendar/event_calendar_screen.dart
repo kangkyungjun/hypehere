@@ -708,7 +708,7 @@ class _EventCalendarScreenState extends State<EventCalendarScreen>
         // ── '맨 위로' 버튼: 한참 내려가면 노출 ──
         Positioned(
           right: AppSpacing.lg,
-          bottom: MediaQuery.of(context).padding.bottom + 78,
+          bottom: AppLayout.bottomNavClearanceOf(context),
           child: IgnorePointer(
             ignoring: !_showScrollTop,
             child: AnimatedOpacity(
@@ -1317,7 +1317,10 @@ class _EventCalendarScreenState extends State<EventCalendarScreen>
     final isNews = _eventTabController.index == 0;
     final events = isNews ? newsEvents : econEvents;
     final locked = isNews ? newsLocked : econLocked;
-    final bottomPad = MediaQuery.of(context).padding.bottom + 70.0;
+    // 플로팅 탭바 클리어런스. 전에는 `padding.bottom + 70.0`이었는데 두 군데가
+    // 틀렸다 — `viewPadding`이 아니라 `padding`(extendBody가 이미 탭바 높이를
+    // 넣어주는 값이라 이중 계산)이었고, 70은 토큰과 무관한 리터럴이었다.
+    final bottomPad = AppLayout.bottomNavClearanceOf(context);
 
     final slivers = <Widget>[
       // Compact header: (selected date) + total count + unlock window — 함께 스크롤

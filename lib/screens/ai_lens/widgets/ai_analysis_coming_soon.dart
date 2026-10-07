@@ -19,7 +19,14 @@ class AiAnalysisComingSoon extends StatelessWidget {
 
     return Center(
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSpacing.xxxl),
+        // 탭 안에서 그려지므로 플로팅 탭바 클리어런스가 필요하다.
+        // 전에는 전방향 xxxl(24)뿐이라 바닥이 탭바에 가렸다.
+        padding: EdgeInsets.fromLTRB(
+          AppSpacing.xxxl,
+          AppSpacing.xxxl,
+          AppSpacing.xxxl,
+          AppLayout.bottomNavClearanceOf(context),
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

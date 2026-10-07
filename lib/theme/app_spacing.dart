@@ -2,6 +2,10 @@
 ///
 /// 전체 앱에서 일관된 간격 사용을 위한 시맨틱 토큰.
 /// SizedBox, EdgeInsets 등에 매직넘버 대신 이 상수를 사용.
+library;
+
+import 'package:flutter/material.dart';
+
 abstract final class AppSpacing {
   /// 2px — 아이콘-텍스트 미세 간격
   static const double xxs = 2.0;
@@ -79,19 +83,35 @@ abstract final class AppLayout {
   static const double bottomNavContentHeight =
       AppSpacing.xs + (AppSpacing.xs * 2) + bottomNavItemHeight;
 
+  /// 탭바 위로 띄우는 숨 공간.
+  ///
+  /// 전에는 4였다. 산술적으로는 "안 가려지는" 값이지만 마지막 카드가 탭바에
+  /// 딱 붙어 답답했다 — 탭바는 blur 8짜리 그림자를 가진 플로팅이라 더 그렇다.
+  static const double bottomNavBreathingRoom = AppSpacing.lg;
+
   /// 스크롤 화면이 플로팅 탭바를 피하려고 바닥에 비워야 하는 높이.
   ///
-  /// `MediaQuery.viewPadding.bottom`에 **더해서** 쓴다:
   /// ```dart
-  /// padding: EdgeInsets.only(
-  ///   bottom: MediaQuery.of(context).viewPadding.bottom
-  ///       + AppLayout.bottomNavClearance,
-  /// )
+  /// padding: EdgeInsets.only(bottom: AppLayout.bottomNavClearanceOf(context))
   /// ```
   ///
-  /// `bottomNavContentHeight`(60) + 여유 4. 개편 전에는 이 계산이 리터럴 `64`로
-  /// **9개 화면에 복붙**돼 있었고 토큰은 사용처 0이었다 — 탭바 높이를 건드리는
-  /// 순간 9곳이 동시에 어긋나는 상태였다.
-  static const double bottomNavClearance =
-      bottomNavContentHeight + AppSpacing.xs;
+  /// **호출부가 inset을 직접 더하지 않는다.** 전에는 상수 하나를 주고
+  /// `MediaQuery.viewPadding.bottom + AppLayout.bottomNavClearance`로 쓰게
+  /// 했는데, 그 계약이 두 가지를 동시에 틀리게 만들었다:
+  ///
+  /// 1. `SafeArea(minimum: bottom 8)`의 **하한을 반영할 수 없었다.** 호출부가
+  ///    쓰는 건 덧셈뿐이라 `max()`를 표현할 방법이 없다. 기기 inset이 0인
+  ///    환경(안드로이드 3버튼, 홈버튼 iPhone)에서 탭바는 68인데 클리어런스는
+  ///    64여서 **콘텐츠가 4px 잘렸다.**
+  /// 2. 더하는 걸 잊거나 `viewPadding.bottom` 대신 `padding.bottom`을 쓰기
+  ///    쉬웠다. 실제로 캘린더 화면이 `padding.bottom + 70`이었다.
+  ///
+  /// 함수로 바꿔 두 실수를 모두 불가능하게 한다.
+  static double bottomNavClearanceOf(BuildContext context) {
+    final inset = MediaQuery.of(context).viewPadding.bottom;
+    // SafeArea minimum(sm=8)이 바닥을 깐다. inset이 그보다 작아도 탭바는
+    // 8을 차지하므로 둘 중 큰 값을 써야 한다.
+    final safe = inset > AppSpacing.sm ? inset : AppSpacing.sm;
+    return safe + bottomNavContentHeight + bottomNavBreathingRoom;
+  }
 }

@@ -266,8 +266,7 @@ class _DashboardScreenState extends State<DashboardScreen>
           AppSpacing.md,
           AppSpacing.xl,
           // 플로팅 탭바(extendBody) 뒤로 마지막 콘텐츠가 가리지 않도록 하단 여백 확보
-          MediaQuery.of(context).viewPadding.bottom +
-              AppLayout.bottomNavClearance,
+          AppLayout.bottomNavClearanceOf(context),
         ),
         children: [
           // ===== Macro Banner Card =====

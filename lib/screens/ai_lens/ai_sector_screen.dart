@@ -208,8 +208,7 @@ class _AiSectorScreenState extends State<AiSectorScreen> {
       padding: EdgeInsets.only(
         top: AppSpacing.xs,
         bottom:
-            MediaQuery.of(context).viewPadding.bottom +
-            AppLayout.bottomNavClearance,
+            AppLayout.bottomNavClearanceOf(context),
       ),
       itemCount: rows.length,
       itemBuilder: (context, i) => rows[i],

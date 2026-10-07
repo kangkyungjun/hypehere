@@ -145,8 +145,7 @@ class _IndexesTabState extends State<IndexesTab> {
         AppSpacing.xl,
         AppSpacing.xl,
         AppSpacing.xl,
-        MediaQuery.of(context).viewPadding.bottom +
-            AppLayout.bottomNavClearance,
+        AppLayout.bottomNavClearanceOf(context),
       ),
       children: [_buildGaugeHeader(context, mlc, l10n), ...children],
     );

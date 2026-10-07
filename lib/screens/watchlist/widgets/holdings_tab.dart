@@ -588,8 +588,7 @@ class _HoldingsTabState extends State<HoldingsTab> {
           SliverToBoxAdapter(
             child: SizedBox(
               height:
-                  MediaQuery.of(context).viewPadding.bottom +
-                  AppLayout.bottomNavClearance,
+                  AppLayout.bottomNavClearanceOf(context),
             ),
           ),
         ],

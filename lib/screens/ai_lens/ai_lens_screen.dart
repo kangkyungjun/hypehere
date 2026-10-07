@@ -217,8 +217,7 @@ class _AILensScreenState extends State<AILensScreen>
         AppSpacing.xl,
         AppSpacing.xs,
         AppSpacing.xl,
-        MediaQuery.of(context).viewPadding.bottom +
-            AppLayout.bottomNavClearance,
+        AppLayout.bottomNavClearanceOf(context),
       ),
       children: [
         // AI Score Section (header + filter + distribution bar)
